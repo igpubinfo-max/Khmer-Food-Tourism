@@ -120,40 +120,24 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false,
     minify: true,
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         entryFileNames: 'assets/k-[hash].js',
         chunkFileNames: 'assets/c-[hash].js',
         assetFileNames: 'assets/a-[hash][extname]',
-        manualChunks(id) {
-          const norm = id.replace(/\\/g, '/');
-          if (norm.includes('/src/data/seedRacCambodiaTourDestinations')) {
-            return 'k0';
-          }
-          if (norm.includes('/src/data/seedHotels100')) {
-            return 'k1';
-          }
-          if (norm.includes('/src/data/seedDestinations') || norm.includes('/src/data/touristDestinationsList')) {
-            return 'k2';
-          }
-          if (norm.includes('/src/data/seedFoods') || norm.includes('/src/data/seedAdditional100Foods')) {
-            return 'k3';
-          }
-          if (norm.includes('/src/data/seedRestaurants')) {
-            return 'k4';
-          }
-          if (norm.includes('/src/data/zhCompleteTranslations') || norm.includes('/src/utils/zhDynamicTranslator')) {
-            return 'k5';
-          }
-          if (norm.includes('node_modules/react') || norm.includes('node_modules/scheduler')) {
-            return 'v0';
-          }
-          if (norm.includes('node_modules/firebase') || norm.includes('node_modules/@firebase')) {
-            return 'v1';
-          }
-          if (norm.includes('node_modules/tesseract.js')) return 'v2';
-          if (norm.includes('node_modules/lucide-react')) return 'v3';
+        // Rolldown code-splitting groups: every emitted chunk is capped (maxSize) so NO chunk exceeds 600 KB.
+        codeSplitting: {
+          groups: [
+            { name: 'd-seed', test: /src[\\/]data[\\/]seed(Rac|Hotels|Dest|Rest)Part\d+/, maxSize: 480 * 1024 },
+            { name: 'f-seed', test: /src[\\/]data[\\/]seed(Foods|Additional|Foodpanda|Vegetarian)/, maxSize: 480 * 1024 },
+            { name: 'v0', test: /node_modules[\\/](react|scheduler)/ },
+            { name: 'v1', test: /node_modules[\\/](firebase|@firebase)/, maxSize: 480 * 1024 },
+            { name: 'v2', test: /node_modules[\\/]tesseract\.js/, maxSize: 480 * 1024 },
+            { name: 'v3', test: /node_modules[\\/]lucide-react/, maxSize: 480 * 1024 },
+            { name: 'k5', test: /src[\\/](data[\\/]zhCompleteTranslations|utils[\\/]zhDynamicTranslator)/, maxSize: 480 * 1024 },
+            { name: 'svc', test: /src[\\/]services[\\/]/, maxSize: 480 * 1024 },
+          ],
         },
       },
     },

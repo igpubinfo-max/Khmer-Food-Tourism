@@ -23,7 +23,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { TripPlan, isUserVipActive, isAdminAccount, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
+import { TripPlan, isUserVipActive, isAdminAccount, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, openExternalUrlNativeSafe } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
 import { IconSmartAssistant } from './icons/HandcraftedIcons';
 import {
@@ -96,6 +96,7 @@ export const AiTripPlannerModal: React.FC = () => {
     currentUser,
     setSelectedFood,
     setSelectedRestaurant,
+  setSelectedDestination,
     setActiveTab,
     openUpgradeVipModal,
   } = useApp();
@@ -1371,18 +1372,21 @@ export const AiTripPlannerModal: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* 2. Duration Days (1 Day FREE Preview, 2-3 Days VIP) */}
+                  {/* 2. Duration Days (1 Day FREE Preview, 2-7 Days VIP) */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
                       <Calendar className="w-4 h-4 text-emerald-400" />
                       <span>{tr(language, '២. ចំនួនថ្ងៃធ្វើដំណើរ៖', '2. Duration:', '2. 行程天数：')}</span>
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[
-                        { days: 1, labelKh: '១ ថ្ងៃ (ឥតគិតថ្លៃ)', labelEn: '1 Day (FREE)', labelZh: '1日游 (免费)', vipOnly: false },
-                        { days: 2, labelKh: '២ ថ្ងៃ ១ យប់', labelEn: '2 Days 1 Night', labelZh: '2天1晚', vipOnly: true },
-                        { days: 3, labelKh: '៣ ថ្ងៃ ២ យប់', labelEn: '3 Days 2 Nights', labelZh: '3天2晚', vipOnly: true },
-                      ].map((d) => {
+                    <div className="grid grid-cols-4 gap-2">
+                      {[1, 2, 3, 4, 5, 6, 7]
+                        .map((n) => {
+                          const kn = (x: number) => String(x).replace(/\d/g, (c) => '០១២៣៤៥៦៧៨៩'[Number(c)]);
+                          return n === 1
+                            ? { days: 1, labelKh: '១ ថ្ងៃ (ឥតគិតថ្លៃ)', labelEn: '1 Day (FREE)', labelZh: '1日游 (免费)', vipOnly: false }
+                            : { days: n, labelKh: `${kn(n)} ថ្ងៃ ${kn(n - 1)} យប់`, labelEn: `${n} Days ${n - 1} Nights`, labelZh: `${n}天${n - 1}晚`, vipOnly: true };
+                        })
+                        .map((d) => {
                         const locked = d.vipOnly && !hasRealVip;
                         return (
                           <button
@@ -1583,7 +1587,11 @@ export const AiTripPlannerModal: React.FC = () => {
                             >
                               <div className="flex items-center justify-between">
                                 <span className="px-2 py-0.5 rounded-lg bg-emerald-100 text-[#064E3B] text-[10px] font-bold">
-                                  {act.timePeriod === 'morning'
+                                  {act.timePeriod === 'breakfast'
+                                    ? tr(language, '☕ អាហារពេលព្រឹក', '☕ Breakfast', '☕ 早餐')
+                                    : act.timePeriod === 'stay'
+                                    ? tr(language, '🏨 សណ្ឋាគារស្នាក់នៅ', '🏨 Hotel Stay', '🏨 住宿推荐')
+                                    : act.timePeriod === 'morning'
                                     ? tr(language, '🌅 ពេលព្រឹក', '🌅 Morning', '🌅 上午')
                                     : act.timePeriod === 'lunch'
                                     ? tr(language, '🍛 ពេលថ្ងៃត្រង់', '🍛 Lunch', '🍛 午餐')
@@ -1608,6 +1616,44 @@ export const AiTripPlannerModal: React.FC = () => {
                                   <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
                                     {actDesc}
                                   </p>
+                                  {act.placeId && (
+                                    <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                                      <button
+                                        type="button"
+                                        data-testid={`trip-open-${act.placeId}`}
+                                        onClick={() => {
+                                          if (act.placeKind === 'restaurant') {
+                                            const r = restaurants.find((x) => x.id === act.placeId);
+                                            if (r) setSelectedRestaurant(r);
+                                          } else {
+                                            const d = destinations.find((x) => x.id === act.placeId);
+                                            if (d) setSelectedDestination(d);
+                                            else {
+                                              const r = restaurants.find((x) => x.id === act.placeId);
+                                              if (r) setSelectedRestaurant(r);
+                                            }
+                                          }
+                                        }}
+                                        className="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-[#064E3B] text-[10.5px] font-bold cursor-pointer active:scale-95"
+                                      >
+                                        {tr(language, 'មើលព័ត៌មាន', 'View details', '查看详情')}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const hasGps = typeof act.latitude === 'number' && typeof act.longitude === 'number' && (act.latitude !== 0 || act.longitude !== 0);
+                                          openExternalUrlNativeSafe(
+                                            hasGps
+                                              ? `https://www.google.com/maps/dir/?api=1&destination=${act.latitude},${act.longitude}`
+                                              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.placeNameEn || act.placeNameKh || '')}`
+                                          );
+                                        }}
+                                        className="px-2.5 py-1 rounded-lg bg-[#064E3B] text-white text-[10.5px] font-bold cursor-pointer active:scale-95"
+                                      >
+                                        {tr(language, 'បង្ហាញផ្លូវ', 'Directions', '导航')}
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>

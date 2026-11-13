@@ -456,7 +456,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
         restaurantName: restaurantName.trim() || undefined,
       });
     } catch (err: any) {
-      showToast(err?.message || (isKm ? 'មានបញ្ហាក្នុងការចុះឈ្មោះ' : 'Registration error'), 'warning');
+      showToast(err?.message || (tr(language, 'មានបញ្ហាក្នុងការចុះឈ្មោះ', 'Registration error', '注册错误')), 'warning');
     } finally {
       setIsSubmitting(false);
     }

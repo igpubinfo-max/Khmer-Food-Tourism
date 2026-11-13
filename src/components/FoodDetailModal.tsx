@@ -138,15 +138,13 @@ export const FoodDetailModal: React.FC = () => {
       setOnlineCandidates(results);
       if (results.length > 0) {
         showToast(
-          language === 'km'
-            ? `✨ រកឃើញរូបភាពម្ហូបចំនួន ${results.length} សន្លឹក! សូមចុចលើរូបភាពខាងក្រោមដើម្បីជ្រើសរើស។`
-            : `✨ Found ${results.length} matching dish photos! Tap a photo below to apply.`,
+          tr(language, `✨ រកឃើញរូបភាពម្ហូបចំនួន ${results.length} សន្លឹក! សូមចុចលើរូបភាពខាងក្រោមដើម្បីជ្រើសរើស។`, `✨ Found ${results.length} matching dish photos! Tap a photo below to apply.`, `✨ 找到 ${results.length} 张匹配的菜品照片！点击下方照片即可应用。`),
           'success'
         );
       }
     } catch {
       showToast(
-        language === 'km' ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online photos',
+        tr(language, 'មិនអាចស្វែងរករូបភាពពី Online បានទេ', 'Failed to search online photos', '搜索在线照片失败'),
         'warning'
       );
     } finally {
@@ -168,9 +166,7 @@ export const FoodDetailModal: React.FC = () => {
     updateFood(updated);
     setSelectedFood(updated);
     showToast(
-      language === 'km'
-        ? '✅ បានរក្សាទុករូបភាពម្ហូបពី Online រួចរាល់!'
-        : '✅ Online food photo saved!',
+      tr(language, '✅ បានរក្សាទុករូបភាពម្ហូបពី Online រួចរាល់!', '✅ Online food photo saved!', '✅ 在线美食照片已保存！'),
       'success'
     );
   };
@@ -206,9 +202,7 @@ export const FoodDetailModal: React.FC = () => {
         updateFood(updated);
         setSelectedFood(updated);
         showToast(
-          language === 'km'
-            ? '✅ បានផ្លាស់ប្តូរ និងរក្សាទុករូបភាពពីទូរស័ព្ទរួចរាល់!'
-            : '✅ Photo from device saved permanently!',
+          tr(language, '✅ បានផ្លាស់ប្តូរ និងរក្សាទុករូបភាពពីទូរស័ព្ទរួចរាល់!', '✅ Photo from device saved permanently!', '✅ 设备照片已永久保存！'),
           'success'
         );
         return;
@@ -247,14 +241,12 @@ export const FoodDetailModal: React.FC = () => {
         setSelectedFood(updated);
       }
       showToast(
-        language === 'km'
-          ? '✅ បានផ្លាស់ប្តូរ និងរក្សាទុករូបភាពថ្មីរួចរាល់!'
-          : '✅ New food photo uploaded & saved permanently!',
+        tr(language, '✅ បានផ្លាស់ប្តូរ និងរក្សាទុករូបភាពថ្មីរួចរាល់!', '✅ New food photo uploaded & saved permanently!', '✅ 新美食照片已上传并永久保存！'),
         'success'
       );
     } catch (err: any) {
       showToast(
-        err?.message || (language === 'km' ? 'មិនអាចដំណើរការរូបភាពនេះបានទេ' : 'Failed to process image'),
+        err?.message || (tr(language, 'មិនអាចដំណើរការរូបភាពនេះបានទេ', 'Failed to process image', '处理图片失败')),
         'warning'
       );
     } finally {
@@ -563,7 +555,7 @@ export const FoodDetailModal: React.FC = () => {
                 <div>
                   <h3 className="font-bold text-xs text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
                     <Edit2 className="w-4 h-4 text-amber-600" />
-                    <span>{isKm ? 'កែប្រែព័ត៌មានមុខម្ហូប (Admin Edit)' : 'Admin Food Editor'}</span>
+                    <span>{tr(language, 'កែប្រែព័ត៌មានមុខម្ហូប (Admin Edit)', 'Admin Food Editor', '管理员美食编辑器')}</span>
                   </h3>
                   <p className="text-[10px] text-slate-500">ID: {selectedFood.id}</p>
                 </div>
@@ -572,14 +564,14 @@ export const FoodDetailModal: React.FC = () => {
                   onClick={() => setIsEditingAdminFood(false)}
                   className="px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold"
                 >
-                  {isKm ? 'បោះបង់' : 'Cancel'}
+                  {tr(language, 'បោះបង់', 'Cancel', '取消')}
                 </button>
               </div>
 
               {/* 1. Photo replacement */}
               <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
                 <label className="block font-bold text-xs text-slate-800 dark:text-slate-200">
-                  {isKm ? 'រូបភាពមុខម្ហូប (Photo URL / Upload)' : 'Dish Photo'}
+                  {tr(language, 'រូបភាពមុខម្ហូប (Photo URL / Upload)', 'Dish Photo', '菜品照片')}
                 </label>
                 <div
                   onClick={handlePickDevicePhoto}
@@ -614,7 +606,7 @@ export const FoodDetailModal: React.FC = () => {
                     className="py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Globe className="w-3.5 h-3.5" />
-                    <span>{isSearchingOnline ? (isKm ? 'កំពុងស្វែងរក...' : 'Searching...') : (isKm ? '🤖 ស្វែងរក Online' : 'Auto Online Search')}</span>
+                    <span>{isSearchingOnline ? (tr(language, 'កំពុងស្វែងរក...', 'Searching...', '正在搜索...')) : (tr(language, '🤖 ស្វែងរក Online', 'Auto Online Search', '自动在线搜索'))}</span>
                   </button>
                   <button
                     type="button"
@@ -644,14 +636,14 @@ export const FoodDetailModal: React.FC = () => {
                       updateFood(updated);
                       setSelectedFood(updated);
                       showToast(
-                        isKm ? '✅ បានរក្សាទុករូបភាពនេះភ្លាមៗរួចរាល់!' : '✅ Photo saved immediately!',
+                        tr(language, '✅ បានរក្សាទុករូបភាពនេះភ្លាមៗរួចរាល់!', '✅ Photo saved immediately!', '✅ 照片已立即保存！'),
                         'success'
                       );
                     }}
                     className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
                   >
                     <Save className="w-4 h-4" />
-                    <span>{isKm ? '💾 រក្សាទុករូបភាពនេះភ្លាម (Save Photo Now)' : '💾 Save Photo Now'}</span>
+                    <span>{tr(language, '💾 រក្សាទុករូបភាពនេះភ្លាម (Save Photo Now)', '💾 Save Photo Now', '💾 立即保存照片')}</span>
                   </button>
                 )}
                 {onlineCandidates.length > 0 && (
@@ -676,7 +668,7 @@ export const FoodDetailModal: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ឈ្មោះមុខម្ហូប (ភាសាខ្មែរ) *' : 'Name (Khmer) *'}
+                    {tr(language, 'ឈ្មោះមុខម្ហូប (ភាសាខ្មែរ) *', 'Name (Khmer) *', '名称（高棉语）*')}
                   </label>
                   <input
                     type="text"
@@ -688,7 +680,7 @@ export const FoodDetailModal: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ឈ្មោះមុខម្ហូប (English)' : 'Name (English)'}
+                    {tr(language, 'ឈ្មោះមុខម្ហូប (English)', 'Name (English)', '名称（英语）')}
                   </label>
                   <input
                     type="text"
@@ -703,7 +695,7 @@ export const FoodDetailModal: React.FC = () => {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ប្រភេទម្ហូប' : 'Category'}
+                    {tr(language, 'ប្រភេទម្ហូប', 'Category', '分类')}
                   </label>
                   <select
                     value={editCategorySlug}
@@ -725,7 +717,7 @@ export const FoodDetailModal: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'កម្រិតចម្អិន' : 'Difficulty'}
+                    {tr(language, 'កម្រិតចម្អិន', 'Difficulty', '难度')}
                   </label>
                   <select
                     value={editDifficulty}
@@ -743,7 +735,7 @@ export const FoodDetailModal: React.FC = () => {
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className="block font-bold text-[11px] text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ពេលចម្អិន' : 'Cook Time'}
+                    {tr(language, 'ពេលចម្អិន', 'Cook Time', '烹饪时间')}
                   </label>
                   <input
                     type="text"
@@ -755,7 +747,7 @@ export const FoodDetailModal: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-[11px] text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ចំណុះទទួលទាន' : 'Servings'}
+                    {tr(language, 'ចំណុះទទួលទាន', 'Servings', '份量')}
                   </label>
                   <input
                     type="text"
@@ -767,7 +759,7 @@ export const FoodDetailModal: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-[11px] text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'កាឡូរី (Cal)' : 'Calories'}
+                    {tr(language, 'កាឡូរី (Cal)', 'Calories', '卡路里')}
                   </label>
                   <input
                     type="number"
@@ -783,7 +775,7 @@ export const FoodDetailModal: React.FC = () => {
               <div className="space-y-2">
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ការពិពណ៌នា (ភាសាខ្មែរ)' : 'Description (Khmer)'}
+                    {tr(language, 'ការពិពណ៌នា (ភាសាខ្មែរ)', 'Description (Khmer)', '描述（高棉语）')}
                   </label>
                   <textarea
                     rows={3}
@@ -794,7 +786,7 @@ export const FoodDetailModal: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ការពិពណ៌នា (English)' : 'Description (English)'}
+                    {tr(language, 'ការពិពណ៌នា (English)', 'Description (English)', '描述（英语）')}
                   </label>
                   <textarea
                     rows={2}
@@ -809,7 +801,7 @@ export const FoodDetailModal: React.FC = () => {
               <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center justify-between">
                   <label className="font-bold text-xs text-slate-800 dark:text-slate-200">
-                    {isKm ? 'គ្រឿងផ្សំ (Ingredients)' : 'Ingredients'} ({editIngredients.length})
+                    {tr(language, 'គ្រឿងផ្សំ (Ingredients)', 'Ingredients', '食材配料')} ({editIngredients.length})
                   </label>
                   <button
                     type="button"
@@ -822,7 +814,7 @@ export const FoodDetailModal: React.FC = () => {
                     className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3 h-3" />
-                    <span>{isKm ? 'បន្ថែមគ្រឿងផ្សំ' : 'Add'}</span>
+                    <span>{tr(language, 'បន្ថែមគ្រឿងផ្សំ', 'Add', '添加')}</span>
                   </button>
                 </div>
                 <div className="space-y-2">
@@ -841,7 +833,7 @@ export const FoodDetailModal: React.FC = () => {
                               prev.map((item, i) => (i === idx ? { ...item, nameKh: val } : item))
                             );
                           }}
-                          placeholder={isKm ? 'ឈ្មោះគ្រឿងផ្សំ (ខ្មែរ)' : 'Ingredient (Khmer)'}
+                          placeholder={tr(language, 'ឈ្មោះគ្រឿងផ្សំ (ខ្មែរ)', 'Ingredient (Khmer)', '食材（高棉语）')}
                           className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
                         />
                         <input
@@ -853,7 +845,7 @@ export const FoodDetailModal: React.FC = () => {
                               prev.map((item, i) => (i === idx ? { ...item, amount: val } : item))
                             );
                           }}
-                          placeholder={isKm ? 'បរិមាណ' : 'Amount'}
+                          placeholder={tr(language, 'បរិមាណ', 'Amount', '用量')}
                           className="w-28 px-2 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white"
                         />
                         <button
@@ -862,7 +854,7 @@ export const FoodDetailModal: React.FC = () => {
                             setEditIngredients((prev) => prev.filter((_, i) => i !== idx))
                           }
                           className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
-                          title={isKm ? 'លុប' : 'Remove'}
+                          title={tr(language, 'លុប', 'Remove', '删除')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -888,7 +880,7 @@ export const FoodDetailModal: React.FC = () => {
               <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center justify-between">
                   <label className="font-bold text-xs text-slate-800 dark:text-slate-200">
-                    {isKm ? 'វិធីធ្វើម្ហូប (Cooking Steps)' : 'Cooking Steps'} ({editSteps.length})
+                    {tr(language, 'វិធីធ្វើម្ហូប (Cooking Steps)', 'Cooking Steps', '烹饪步骤')} ({editSteps.length})
                   </label>
                   <button
                     type="button"
@@ -901,7 +893,7 @@ export const FoodDetailModal: React.FC = () => {
                     className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3 h-3" />
-                    <span>{isKm ? 'បន្ថែមជំហាន' : 'Add Step'}</span>
+                    <span>{tr(language, 'បន្ថែមជំហាន', 'Add Step', '添加步骤')}</span>
                   </button>
                 </div>
                 <div className="space-y-2">
@@ -912,7 +904,7 @@ export const FoodDetailModal: React.FC = () => {
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
-                          {isKm ? `ជំហានទី ${idx + 1}` : `Step ${idx + 1}`}
+                          {tr(language, `ជំហានទី ${idx + 1}`, `Step ${idx + 1}`, `步骤 ${idx + 1}`)}
                         </span>
                         <button
                           type="button"
@@ -924,7 +916,7 @@ export const FoodDetailModal: React.FC = () => {
                             )
                           }
                           className="p-1 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
-                          title={isKm ? 'លុបជំហាននេះ' : 'Remove step'}
+                          title={tr(language, 'លុបជំហាននេះ', 'Remove step', '删除步骤')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -938,7 +930,7 @@ export const FoodDetailModal: React.FC = () => {
                             prev.map((item, i) => (i === idx ? { ...item, instructionKh: val } : item))
                           );
                         }}
-                        placeholder={isKm ? 'វិធីធ្វើជាភាសាខ្មែរ...' : 'Instruction in Khmer...'}
+                        placeholder={tr(language, 'វិធីធ្វើជាភាសាខ្មែរ...', 'Instruction in Khmer...', '高棉语制作说明...')}
                         className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white leading-relaxed"
                       />
                       <textarea
@@ -965,7 +957,7 @@ export const FoodDetailModal: React.FC = () => {
                   onClick={() => setIsEditingAdminFood(false)}
                   className="py-3 px-4 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs cursor-pointer"
                 >
-                  {isKm ? 'បោះបង់' : 'Cancel'}
+                  {tr(language, 'បោះបង់', 'Cancel', '取消')}
                 </button>
                 <button
                   type="submit"

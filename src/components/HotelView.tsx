@@ -48,6 +48,7 @@ import { rankBySearchRelevance, destinationSearchFields, analyzeSearchQuery } fr
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { DISH_PROVINCES } from '../utils/foodFilters';
 import { tr } from '../utils/i18n';
+import { CambodiaChoiceBadge, isCambodiaChoiceEligible } from './common/CambodiaChoiceAndRatings';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 
@@ -1332,6 +1333,11 @@ export const HotelView: React.FC = () => {
                         {/* Right Info Column */}
                         <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                           <div>
+                            {isCambodiaChoiceEligible(hotel) && (
+                              <div className="mb-1">
+                                <CambodiaChoiceBadge language={language} size="sm" />
+                              </div>
+                            )}
                             <div className="flex items-start justify-between gap-1.5">
                               <h4 className="font-extrabold text-sm sm:text-[15px] text-slate-900 leading-[1.6] line-clamp-2 break-words">
                                 {loc.name || hotel.nameKh}
@@ -1506,6 +1512,7 @@ export const HotelView: React.FC = () => {
                                 {distanceKm} {tr(language, 'km', 'km', '公里')}
                               </span>
                             </span>
+                            {isCambodiaChoiceEligible(hotel) && <CambodiaChoiceBadge language={language} size="sm" />}
                           </div>
                         </div>
 

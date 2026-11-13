@@ -205,7 +205,7 @@ export const NearMeModal: React.FC = () => {
 
   useEffect(() => {
     setVisibleNearbyCount(NEARBY_BATCH_SIZE);
-  }, [activeTab, quickFilterId, nearbyQuery, selectedRadiusMeters, manualProvince]);
+  }, [activeType, quickFilterId, nearbyQuery, selectedRadiusMeters, manualProvince]);
 
   // All 25 Cambodian Provinces & Capital City center coordinates
   const provinceCenters: Record<string, { lat: number; lng: number }> = {

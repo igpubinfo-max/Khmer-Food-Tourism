@@ -69,6 +69,7 @@ import {
   type UserDataIntegrityReport,
   getCanonicalUserId,
 } from '../../services/adminUserManagementService';
+import { tr } from '../../utils/i18n';
 
 export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: string) => void }> = ({ onNavigateToShop }) => {
   const {
@@ -459,7 +460,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
   const handleViewShopDetails = (shopId: string) => {
     const fullShop = restaurants.find((r) => r.id === shopId);
     if (!fullShop) {
-      showToast(isKm ? 'រកមិនឃើញទិន្នន័យហាងនេះទេ' : 'Shop record not found', 'error');
+      showToast(tr(language, 'រកមិនឃើញទិន្នន័យហាងនេះទេ', 'Shop record not found', '未找到店铺记录'), 'error');
       return;
     }
     setInspectedUserRecord(null);
@@ -470,7 +471,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
   const handleManageShop = (shopId: string) => {
     const fullShop = restaurants.find((r) => r.id === shopId);
     if (!fullShop) {
-      showToast(isKm ? 'រកមិនឃើញទិន្នន័យហាងនេះទេ' : 'Shop record not found', 'error');
+      showToast(tr(language, 'រកមិនឃើញទិន្នន័យហាងនេះទេ', 'Shop record not found', '未找到店铺记录'), 'error');
       return;
     }
     setInspectedUserRecord(null);
@@ -509,12 +510,8 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
     setActivityLogsVersion((v) => v + 1);
     showToast(
       isCurrentlySuspended
-        ? isKm
-          ? `✅ បានបើកដំណើរការហាង "${fullShop.nameKh}" ឡើងវិញដោយជោគជ័យ!`
-          : `✅ Reactivated shop "${fullShop.nameEn || fullShop.nameKh}"!`
-        : isKm
-        ? `⏸️ បានផ្អាកដំណើរការហាង "${fullShop.nameKh}" បណ្ដោះអាសន្ន!`
-        : `⏸️ Suspended shop "${fullShop.nameEn || fullShop.nameKh}"!`,
+        ? tr(language, `✅ បានបើកដំណើរការហាង "${fullShop.nameKh}" ឡើងវិញដោយជោគជ័យ!`, `✅ Reactivated shop "${fullShop.nameEn || fullShop.nameKh}"!`, `✅ 已重新激活店铺 "${fullShop.nameEn || fullShop.nameKh}"！`)
+        : tr(language, `⏸️ បានផ្អាកដំណើរការហាង "${fullShop.nameKh}" បណ្ដោះអាសន្ន!`, `⏸️ Suspended shop "${fullShop.nameEn || fullShop.nameKh}"!`, `⏸️ 已暂停店铺 "${fullShop.nameEn || fullShop.nameKh}"！`),
       'success'
     );
   };
@@ -562,9 +559,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
     setTransferTargetQuery('');
     setSelectedTransferUserId('');
     showToast(
-      isKm
-        ? `🔄 បានផ្ទេរកម្មសិទ្ធិហាង "${fullShop.nameKh}" ទៅគណនី "${targetUser.name}" (${targetUser.id}) ដោយជោគជ័យ!`
-        : `🔄 Transferred "${fullShop.nameEn || fullShop.nameKh}" to "${targetUser.name}" (${targetUser.id})!`,
+      tr(language, `🔄 បានផ្ទេរកម្មសិទ្ធិហាង "${fullShop.nameKh}" ទៅគណនី "${targetUser.name}" (${targetUser.id}) ដោយជោគជ័យ!`, `🔄 Transferred "${fullShop.nameEn || fullShop.nameKh}" to "${targetUser.name}" (${targetUser.id})!`, `🔄 已将 "${fullShop.nameEn || fullShop.nameKh}" 转让给 "${targetUser.name}" (${targetUser.id})！`),
       'success'
     );
   };
@@ -610,9 +605,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
         await syncUsersNow();
       }
       showToast(
-        isKm
-          ? `✅ បានផ្ទៀងផ្ទាត់ និងភ្ជាប់កម្មសិទ្ធិហាងទាំងអស់ជាមួយគណនីម្ចាស់ហាងរួចរាល់ (${directoryIndex.allOwnedShops.length} ហាង, កែតម្រូវ ${linkedShopsCount} ហាង)!`
-          : `✅ Verified & synchronized ${directoryIndex.allOwnedShops.length} shops with owner accounts (updated ${linkedShopsCount} link(s))!`,
+        tr(language, `✅ បានផ្ទៀងផ្ទាត់ និងភ្ជាប់កម្មសិទ្ធិហាងទាំងអស់ជាមួយគណនីម្ចាស់ហាងរួចរាល់ (${directoryIndex.allOwnedShops.length} ហាង, កែតម្រូវ ${linkedShopsCount} ហាង)!`, `✅ Verified & synchronized ${directoryIndex.allOwnedShops.length} shops with owner accounts (updated ${linkedShopsCount} link(s))!`, `✅ 已验证并同步 ${directoryIndex.allOwnedShops.length} 家店铺与店主账户的关联（更新了 ${linkedShopsCount} 条关联）！`),
         'success'
       );
     } finally {
@@ -690,9 +683,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     showToast(
-      isKm
-        ? `📊 បានទាញយកឯកសារ CSV (${targetRecords.length} គណនី) ដោយជោគជ័យ!`
-        : `📊 Exported ${targetRecords.length} users to CSV!`,
+      tr(language, `📊 បានទាញយកឯកសារ CSV (${targetRecords.length} គណនី) ដោយជោគជ័យ!`, `📊 Exported ${targetRecords.length} users to CSV!`, `📊 已成功导出 ${targetRecords.length} 位用户至 CSV！`),
       'success'
     );
   };
@@ -716,9 +707,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     showToast(
-      isKm
-        ? `💾 បានបង្កើត និងទាញយក Backup (${snap.usersCount} គណនី) ដោយជោគជ័យ!`
-        : `💾 Created and downloaded backup (${snap.usersCount} users)!`,
+      tr(language, `💾 បានបង្កើត និងទាញយក Backup (${snap.usersCount} គណនី) ដោយជោគជ័យ!`, `💾 Created and downloaded backup (${snap.usersCount} users)!`, `💾 已创建并下载备份（包含 ${snap.usersCount} 位用户）！`),
       'success'
     );
   };
@@ -737,7 +726,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
           : [];
         if (extractedUsers.length === 0) {
           showToast(
-            isKm ? '⚠️ ឯកសារ Backup មិនមានទិន្នន័យគណនីត្រឹមត្រូវទេ!' : '⚠️ Invalid backup file format!',
+            tr(language, '⚠️ ឯកសារ Backup មិនមានទិន្នន័យគណនីត្រឹមត្រូវទេ!', '⚠️ Invalid backup file format!', '⚠️ 无效的备份文件格式！'),
             'warning'
           );
           return;
@@ -746,7 +735,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
         setActivityLogsVersion((v) => v + 1);
       } catch {
         showToast(
-          isKm ? '⚠️ មិនអាចអានឯកសារ JSON Backup បានទេ!' : '⚠️ Failed to parse JSON backup file!',
+          tr(language, '⚠️ មិនអាចអានឯកសារ JSON Backup បានទេ!', '⚠️ Failed to parse JSON backup file!', '⚠️ 解析 JSON 备份文件失败！'),
           'warning'
         );
       } finally {
@@ -765,9 +754,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm sm:text-base flex items-center gap-2">
               <Users className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
               <span>
-                {isKm
-                  ? `ប្រព័ន្ធគ្រប់គ្រងអ្នកប្រើប្រាស់កម្រិតខ្ពស់ (${stats.totalUsers.toLocaleString()} គណនី)`
-                  : `Enterprise User Management (${stats.totalUsers.toLocaleString()} Users)`}
+                {tr(language, `ប្រព័ន្ធគ្រប់គ្រងអ្នកប្រើប្រាស់កម្រិតខ្ពស់ (${stats.totalUsers.toLocaleString()} គណនី)`, `Enterprise User Management (${stats.totalUsers.toLocaleString()} Users)`, `企业级用户管理 (${stats.totalUsers.toLocaleString()} 位用户)`)}
               </span>
             </h3>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
@@ -775,7 +762,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             </span>
             {isFetchingServerPage && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 animate-pulse">
-                {isKm ? 'កំពុងទាញទំព័រពី Server...' : 'Fetching page...'}
+                {tr(language, 'កំពុងទាញទំព័រពី Server...', 'Fetching page...', '正在获取页面...')}
               </span>
             )}
             {!isFetchingServerPage && paginationSource === 'supabase_postgrest' && serverTotalCount !== null && (
@@ -785,14 +772,12 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             )}
             {lastUsersSyncedAt && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                ✓ {isKm ? 'សមកាលកម្ម៖' : 'Synced:'} {new Date(lastUsersSyncedAt).toLocaleTimeString()}
+                ✓ {tr(language, 'សមកាលកម្ម៖', 'Synced:', '已同步：')} {new Date(lastUsersSyncedAt).toLocaleTimeString()}
               </span>
             )}
           </div>
           <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1">
-            {isKm
-              ? 'គាំទ្រគណនី 10,000–50,000+ ជាមួយការស្វែងរកល្បឿនលឿន O(1) Index, ការបែងចែកទំព័រ (Pagination), ការគ្រប់គ្រងជាក្រុម (Bulk Actions), កំណត់ហេតុសកម្មភាព និងប្រព័ន្ធ Backup/Restore។'
-              : 'Engineered for 10,000–50,000+ users with O(1) multi-indexing, server-grade pagination, atomic bulk operations, activity audit logs, and point-in-time backup & recovery.'}
+            {tr(language, 'គាំទ្រគណនី 10,000–50,000+ ជាមួយការស្វែងរកល្បឿនលឿន O(1) Index, ការបែងចែកទំព័រ (Pagination), ការគ្រប់គ្រងជាក្រុម (Bulk Actions), កំណត់ហេតុសកម្មភាព និងប្រព័ន្ធ Backup/Restore។', 'Engineered for 10,000–50,000+ users with O(1) multi-indexing, server-grade pagination, atomic bulk operations, activity audit logs, and point-in-time backup & recovery.', '专为 10,000–50,000+ 用户打造，具备 O(1) 多索引、服务器级分页、原子批量操作、活动审计日志及时间点备份与恢复能力。')}
           </p>
         </div>
 
@@ -807,7 +792,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             }`}
           >
             <Users className="w-3.5 h-3.5" />
-            <span>{isKm ? `បញ្ជីគណនី (${stats.totalUsers.toLocaleString()})` : `Directory (${stats.totalUsers.toLocaleString()})`}</span>
+            <span>{tr(language, `បញ្ជីគណនី (${stats.totalUsers.toLocaleString()})`, `Directory (${stats.totalUsers.toLocaleString()})`, `用户目录 (${stats.totalUsers.toLocaleString()})`)}</span>
           </button>
 
           <button
@@ -821,9 +806,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
           >
             <Store className="w-3.5 h-3.5" />
             <span>
-              {isKm
-                ? `🏪 ម្ចាស់ហាង & ហាងទាំងអស់ (${directoryIndex.allOwnedShops.length})`
-                : `🏪 Shop Ownership (${directoryIndex.allOwnedShops.length})`}
+              {tr(language, `🏪 ម្ចាស់ហាង & ហាងទាំងអស់ (${directoryIndex.allOwnedShops.length})`, `🏪 Shop Ownership (${directoryIndex.allOwnedShops.length})`, `🏪 店铺所有权 (${directoryIndex.allOwnedShops.length})`)}
             </span>
           </button>
 
@@ -837,7 +820,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             }`}
           >
             <Activity className="w-3.5 h-3.5" />
-            <span>{isKm ? 'ប្រវត្តិ & កំណត់ហេតុ' : 'Activity & Audit Logs'}</span>
+            <span>{tr(language, 'ប្រវត្តិ & កំណត់ហេតុ', 'Activity & Audit Logs', '活动与审计日志')}</span>
           </button>
 
           <button
@@ -850,7 +833,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             }`}
           >
             <Database className="w-3.5 h-3.5" />
-            <span>{isKm ? 'Backup & តេស្ត 50K' : 'Backup & 50K Test'}</span>
+            <span>{tr(language, 'Backup & តេស្ត 50K', 'Backup & 50K Test', '备份与 50K 压力测试')}</span>
           </button>
 
           <button
@@ -862,7 +845,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isSyncingUsers ? 'animate-spin' : ''}`} />
-            <span>{isSyncingUsers ? (isKm ? 'កំពុងទាញយក...' : 'Syncing...') : (isKm ? 'ធ្វើសមកាលកម្ម' : 'Sync Cloud')}</span>
+            <span>{isSyncingUsers ? (tr(language, 'កំពុងទាញយក...', 'Syncing...', '正在同步...')) : (tr(language, 'ធ្វើសមកាលកម្ម', 'Sync Cloud', '同步云端'))}</span>
           </button>
         </div>
       </div>
@@ -878,14 +861,14 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
           className="text-left p-3 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:border-emerald-500 transition cursor-pointer"
         >
           <div className="text-[11px] text-stone-500 dark:text-stone-400 flex items-center justify-between">
-            <span>{isKm ? 'គណនីសរុប' : 'Total Accounts'}</span>
+            <span>{tr(language, 'គណនីសរុប', 'Total Accounts', '账户总数')}</span>
             <Users className="w-3.5 h-3.5 text-stone-400" />
           </div>
           <div className="text-lg font-black text-stone-900 dark:text-stone-100 mt-0.5">
             {stats.totalUsers.toLocaleString()}
           </div>
           <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">
-            +{stats.registeredLast7DaysCount} {isKm ? 'ក្នុង 7 ថ្ងៃនេះ' : 'last 7d'}
+            +{stats.registeredLast7DaysCount} {tr(language, 'ក្នុង 7 ថ្ងៃនេះ', 'last 7d', '最近 7 天')}
           </div>
         </button>
 
@@ -902,14 +885,14 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
           }`}
         >
           <div className="text-[11px] text-amber-800 dark:text-amber-300 flex items-center justify-between">
-            <span>{isKm ? 'សមាជិក VIP សកម្ម' : 'Active VIP'}</span>
+            <span>{tr(language, 'សមាជិក VIP សកម្ម', 'Active VIP', '有效 VIP')}</span>
             <Crown className="w-3.5 h-3.5 text-amber-600" />
           </div>
           <div className="text-lg font-black text-amber-700 dark:text-amber-300 mt-0.5">
             👑 {stats.activeVipCount.toLocaleString()}
           </div>
           <div className="text-[10px] text-amber-700/80 dark:text-amber-400/80 mt-0.5">
-            {isKm ? `ផុតកំណត់៖ ${stats.expiredVipCount} • រង់ចាំ៖ ${stats.pendingVipCount}` : `Exp: ${stats.expiredVipCount} • Pend: ${stats.pendingVipCount}`}
+            {tr(language, `ផុតកំណត់៖ ${stats.expiredVipCount} • រង់ចាំ៖ ${stats.pendingVipCount}`, `Exp: ${stats.expiredVipCount} • Pend: ${stats.pendingVipCount}`, `已过期：${stats.expiredVipCount} • 待处理：${stats.pendingVipCount}`)}
           </div>
         </button>
 
@@ -926,14 +909,14 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
           }`}
         >
           <div className="text-[11px] text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
-            <span>{isKm ? 'ម្ចាស់ហាង/សណ្ឋាគារ' : 'Shop Owners'}</span>
+            <span>{tr(language, 'ម្ចាស់ហាង/សណ្ឋាគារ', 'Shop Owners', '店主数量')}</span>
             <span>🏪</span>
           </div>
           <div className="text-lg font-black text-emerald-700 dark:text-emerald-300 mt-0.5">
             {stats.shopOwnersCount.toLocaleString()}
           </div>
           <div className="text-[10px] text-emerald-700/80 dark:text-emerald-400/80 mt-0.5">
-            {isKm ? `អ្នកប្រើទូទៅ៖ ${stats.regularUsersCount.toLocaleString()}` : `Regular: ${stats.regularUsersCount.toLocaleString()}`}
+            {tr(language, `អ្នកប្រើទូទៅ៖ ${stats.regularUsersCount.toLocaleString()}`, `Regular: ${stats.regularUsersCount.toLocaleString()}`, `普通用户：${stats.regularUsersCount.toLocaleString()}`)}
           </div>
         </button>
 
@@ -950,14 +933,14 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
           }`}
         >
           <div className="text-[11px] text-stone-500 dark:text-stone-400 flex items-center justify-between">
-            <span>{isKm ? 'ស្ថានភាពគណនី' : 'Account Status'}</span>
+            <span>{tr(language, 'ស្ថានភាពគណនី', 'Account Status', '账户状态')}</span>
             <Shield className="w-3.5 h-3.5 text-emerald-600" />
           </div>
           <div className="text-lg font-black text-stone-900 dark:text-stone-100 mt-0.5">
-            {stats.activeAccountsCount.toLocaleString()} <span className="text-xs font-normal text-emerald-600">{isKm ? 'សកម្ម' : 'active'}</span>
+            {stats.activeAccountsCount.toLocaleString()} <span className="text-xs font-normal text-emerald-600">{tr(language, 'សកម្ម', 'active', '正常')}</span>
           </div>
           <div className="text-[10px] text-rose-600 dark:text-rose-400 font-bold mt-0.5">
-            {isKm ? `ផ្អាកដំណើរការ៖ ${stats.disabledAccountsCount}` : `Suspended: ${stats.disabledAccountsCount}`}
+            {tr(language, `ផ្អាកដំណើរការ៖ ${stats.disabledAccountsCount}`, `Suspended: ${stats.disabledAccountsCount}`, `已暂停：${stats.disabledAccountsCount}`)}
           </div>
         </button>
 
@@ -974,7 +957,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
           }`}
         >
           <div className="text-[11px] text-blue-800 dark:text-blue-300 flex items-center justify-between">
-            <span>{isKm ? 'ប្រភពចូលគណនី' : 'Auth Channels'}</span>
+            <span>{tr(language, 'ប្រភពចូលគណនី', 'Auth Channels', '登录渠道')}</span>
             <span className="font-mono font-bold text-xs">G</span>
           </div>
           <div className="text-lg font-black text-blue-700 dark:text-blue-300 mt-0.5">
@@ -998,14 +981,14 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
           }`}
         >
           <div className="text-[11px] text-purple-800 dark:text-purple-300 flex items-center justify-between">
-            <span>{isKm ? 'សកម្មភាពចូលប្រើ' : 'Active / New'}</span>
+            <span>{tr(language, 'សកម្មភាពចូលប្រើ', 'Active / New', '活跃 / 新增')}</span>
             <Clock className="w-3.5 h-3.5 text-purple-600" />
           </div>
           <div className="text-lg font-black text-purple-700 dark:text-purple-300 mt-0.5">
             {stats.activeLast7DaysCount.toLocaleString()} <span className="text-xs font-normal">7d</span>
           </div>
           <div className="text-[10px] text-purple-700/80 dark:text-purple-400/80 mt-0.5">
-            {isKm ? `ថ្ងៃនេះ៖ ${stats.activeLast24hCount} • ថ្មី 30d៖ ${stats.registeredLast30DaysCount}` : `24h: ${stats.activeLast24hCount} • New 30d: ${stats.registeredLast30DaysCount}`}
+            {tr(language, `ថ្ងៃនេះ៖ ${stats.activeLast24hCount} • ថ្មី 30d៖ ${stats.registeredLast30DaysCount}`, `24h: ${stats.activeLast24hCount} • New 30d: ${stats.registeredLast30DaysCount}`, `24小时：${stats.activeLast24hCount} • 30天新增：${stats.registeredLast30DaysCount}`)}
           </div>
         </button>
       </div>
@@ -1020,12 +1003,10 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             <div className="space-y-0.5">
               <h4 className="text-xs font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
                 <Unlock className="w-3.5 h-3.5 text-emerald-600" />
-                <span>{isKm ? 'ស្តារសិទ្ធិចូលប្រើប្រាស់គណនីឡើងវិញ (Restore User Access)' : 'Restore User Account Access'}</span>
+                <span>{tr(language, 'ស្តារសិទ្ធិចូលប្រើប្រាស់គណនីឡើងវិញ (Restore User Access)', 'Restore User Account Access', '恢复用户账户访问权限')}</span>
               </h4>
               <p className="text-[11px] text-emerald-800/80 dark:text-emerald-300/80">
-                {isKm
-                  ? 'វាយអ៊ីមែល ឬ User ID ដើម្បីដោះសោគណនីដែលត្រូវបានផ្អាក ឬលុបដោយចៃដន្យ។'
-                  : 'Enter an Email or User ID to immediately unblock or restore a suspended/deleted account.'}
+                {tr(language, 'វាយអ៊ីមែល ឬ User ID ដើម្បីដោះសោគណនីដែលត្រូវបានផ្អាក ឬលុបដោយចៃដន្យ។', 'Enter an Email or User ID to immediately unblock or restore a suspended/deleted account.', '输入邮箱或用户 ID，立即解封或恢复已暂停/已删除的账户。')}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1033,7 +1014,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 type="text"
                 value={restoreInput}
                 onChange={(e) => setRestoreInput(e.target.value)}
-                placeholder={isKm ? 'បញ្ចូល Email ឬ User ID...' : 'Enter Email or User ID...'}
+                placeholder={tr(language, 'បញ្ចូល Email ឬ User ID...', 'Enter Email or User ID...', '输入邮箱或用户 ID...')}
                 className="w-full sm:w-64 px-3 py-1.5 rounded-xl bg-white dark:bg-stone-900 border border-emerald-300 dark:border-emerald-700 text-xs text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               />
               <button
@@ -1055,7 +1036,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 }}
                 className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-bold transition whitespace-nowrap cursor-pointer"
               >
-                {isRestoringUser ? (isKm ? 'កំពុងស្តារ...' : 'Restoring...') : (isKm ? 'ស្តារគណនី' : 'Restore Access')}
+                {isRestoringUser ? (tr(language, 'កំពុងស្តារ...', 'Restoring...', '正在恢复...')) : (tr(language, 'ស្តារគណនី', 'Restore Access', '恢复访问权限'))}
               </button>
             </div>
           </div>
@@ -1071,9 +1052,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={
-                    isKm
-                      ? 'ស្វែងរកតាម ឈ្មោះហាង (Shop Name), Shop ID, ឈ្មោះម្ចាស់គណនី (Owner Name), User ID, អ៊ីមែល (Email), ឬលេខទូរស័ព្ទ (Phone)...'
-                      : 'Search by Shop Name, Shop ID, Owner Name, User ID, Email, or Phone Number...'
+                    tr(language, 'ស្វែងរកតាម ឈ្មោះហាង (Shop Name), Shop ID, ឈ្មោះម្ចាស់គណនី (Owner Name), User ID, អ៊ីមែល (Email), ឬលេខទូរស័ព្ទ (Phone)...', 'Search by Shop Name, Shop ID, Owner Name, User ID, Email, or Phone Number...', '按店铺名称、店铺 ID、店主姓名、用户 ID、邮箱或手机号搜索...')
                   }
                   className="w-full pl-9 pr-8 py-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                 />
@@ -1097,20 +1076,20 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                     onChange={(e) => setSortBy(e.target.value as UserSortField)}
                     className="bg-transparent text-xs font-bold text-stone-700 dark:text-stone-200 focus:outline-none cursor-pointer"
                   >
-                    <option value="default_priority">{isKm ? 'តម្រៀប៖ VIP & ចូលចុងក្រោយ' : 'Sort: VIP & Last Active'}</option>
-                    <option value="lastLoginAt">{isKm ? 'ពេលចូលចុងក្រោយ (Last Login)' : 'Last Login Date'}</option>
-                    <option value="registeredAt">{isKm ? 'ថ្ងៃចុះឈ្មោះ (Registration Date)' : 'Registration Date'}</option>
-                    <option value="name">{isKm ? 'ឈ្មោះគណនី (Name A-Z)' : 'User Name'}</option>
-                    <option value="email">{isKm ? 'អ៊ីមែល (Email A-Z)' : 'Email Address'}</option>
-                    <option value="vipExpiry">{isKm ? 'ថ្ងៃផុតកំណត់ VIP (VIP Expiry)' : 'VIP Expiry Date'}</option>
-                    <option value="shopsCount">{isKm ? 'ចំនួនហាង (Owned Shops)' : 'Owned Shops Count'}</option>
-                    <option value="txnsCount">{isKm ? 'ចំនួនប្រតិបត្តិការ (Transactions)' : 'Transactions Count'}</option>
+                    <option value="default_priority">{tr(language, 'តម្រៀប៖ VIP & ចូលចុងក្រោយ', 'Sort: VIP & Last Active', '排序：VIP 与最后活跃')}</option>
+                    <option value="lastLoginAt">{tr(language, 'ពេលចូលចុងក្រោយ (Last Login)', 'Last Login Date', '最后登录时间')}</option>
+                    <option value="registeredAt">{tr(language, 'ថ្ងៃចុះឈ្មោះ (Registration Date)', 'Registration Date', '注册日期')}</option>
+                    <option value="name">{tr(language, 'ឈ្មោះគណនី (Name A-Z)', 'User Name', '用户姓名')}</option>
+                    <option value="email">{tr(language, 'អ៊ីមែល (Email A-Z)', 'Email Address', '邮箱地址')}</option>
+                    <option value="vipExpiry">{tr(language, 'ថ្ងៃផុតកំណត់ VIP (VIP Expiry)', 'VIP Expiry Date', 'VIP 到期日期')}</option>
+                    <option value="shopsCount">{tr(language, 'ចំនួនហាង (Owned Shops)', 'Owned Shops Count', '拥有店铺数')}</option>
+                    <option value="txnsCount">{tr(language, 'ចំនួនប្រតិបត្តិការ (Transactions)', 'Transactions Count', '交易次数')}</option>
                   </select>
                   <button
                     type="button"
                     onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
                     className="px-1.5 py-0.5 rounded bg-stone-200/80 dark:bg-stone-800 text-[10px] font-bold text-stone-700 dark:text-stone-300 cursor-pointer"
-                    title={isKm ? 'ប្តូរទិសដៅតម្រៀប' : 'Toggle sort order'}
+                    title={tr(language, 'ប្តូរទិសដៅតម្រៀប', 'Toggle sort order', '切换排序方向')}
                   >
                     {sortOrder === 'desc' ? 'DESC ↓' : 'ASC ↑'}
                   </button>
@@ -1130,7 +1109,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   }`}
                 >
                   <Filter className="w-3.5 h-3.5" />
-                  <span>{isKm ? 'តម្រងកម្រិតខ្ពស់' : 'Advanced Filters'}</span>
+                  <span>{tr(language, 'តម្រងកម្រិតខ្ពស់', 'Advanced Filters', '高级筛选')}</span>
                 </button>
 
                 <button
@@ -1149,10 +1128,10 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                 {(
                   [
-                    { id: 'all', label: isKm ? `ទាំងអស់ (${stats.totalUsers.toLocaleString()})` : `All (${stats.totalUsers.toLocaleString()})` },
-                    { id: 'vip', label: isKm ? `👑 សមាជិក VIP (${stats.activeVipCount.toLocaleString()})` : `👑 Active VIP (${stats.activeVipCount.toLocaleString()})` },
-                    { id: 'owner', label: isKm ? `🏪 ម្ចាស់ហាង (${stats.shopOwnersCount.toLocaleString()})` : `🏪 Owners (${stats.shopOwnersCount.toLocaleString()})` },
-                    { id: 'regular', label: isKm ? `👤 ទូទៅ (${stats.regularUsersCount.toLocaleString()})` : `👤 Regular (${stats.regularUsersCount.toLocaleString()})` },
+                    { id: 'all', label: tr(language, `ទាំងអស់ (${stats.totalUsers.toLocaleString()})`, `All (${stats.totalUsers.toLocaleString()})`, `全部 (${stats.totalUsers.toLocaleString()})`) },
+                    { id: 'vip', label: tr(language, `👑 សមាជិក VIP (${stats.activeVipCount.toLocaleString()})`, `👑 Active VIP (${stats.activeVipCount.toLocaleString()})`, `👑 有效 VIP (${stats.activeVipCount.toLocaleString()})`) },
+                    { id: 'owner', label: tr(language, `🏪 ម្ចាស់ហាង (${stats.shopOwnersCount.toLocaleString()})`, `🏪 Owners (${stats.shopOwnersCount.toLocaleString()})`, `🏪 店主 (${stats.shopOwnersCount.toLocaleString()})`) },
+                    { id: 'regular', label: tr(language, `👤 ទូទៅ (${stats.regularUsersCount.toLocaleString()})`, `👤 Regular (${stats.regularUsersCount.toLocaleString()})`, `👤 普通用户 (${stats.regularUsersCount.toLocaleString()})`) },
                   ] as const
                 ).map((f) => (
                   <button
@@ -1172,9 +1151,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
 
               <div className="flex items-center gap-2 text-[11px] text-stone-500">
                 <span>
-                  {isKm
-                    ? `លទ្ធផល៖ ${queryResult.totalFilteredCount.toLocaleString()} គណនី`
-                    : `Showing ${queryResult.totalFilteredCount.toLocaleString()} matching users`}
+                  {tr(language, `លទ្ធផល៖ ${queryResult.totalFilteredCount.toLocaleString()} គណនី`, `Showing ${queryResult.totalFilteredCount.toLocaleString()} matching users`, `显示 ${queryResult.totalFilteredCount.toLocaleString()} 位匹配的用户`)}
                 </span>
                 {(searchQuery ||
                   accountTypeFilter !== 'all' ||
@@ -1187,7 +1164,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                     onClick={clearAllFilters}
                     className="text-rose-600 dark:text-rose-400 font-bold underline cursor-pointer"
                   >
-                    {isKm ? 'សម្អាតតម្រង' : 'Reset Filters'}
+                    {tr(language, 'សម្អាតតម្រង', 'Reset Filters', '重置筛选')}
                   </button>
                 )}
               </div>
@@ -1198,48 +1175,48 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2.5 border-t border-stone-200/80 dark:border-stone-700">
                 <div>
                   <label className="block text-[10px] font-bold text-stone-500 mb-1">
-                    {isKm ? 'ស្ថានភាព VIP (VIP Status)' : 'VIP Membership Status'}
+                    {tr(language, 'ស្ថានភាព VIP (VIP Status)', 'VIP Membership Status', 'VIP 会员状态')}
                   </label>
                   <select
                     value={vipStatusFilter}
                     onChange={(e) => setVipStatusFilter(e.target.value as UserVipStatusFilter)}
                     className="w-full px-2.5 py-1.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-100"
                   >
-                    <option value="all">{isKm ? 'គ្រប់ស្ថានភាព VIP ទាំងអស់' : 'All VIP Statuses'}</option>
-                    <option value="active_vip">{isKm ? '👑 សមាជិក VIP សកម្ម (Active VIP)' : '👑 Active VIP'}</option>
-                    <option value="expired_vip">{isKm ? '⌛ ផុតកំណត់ VIP (Expired VIP)' : '⌛ Expired VIP'}</option>
-                    <option value="pending_vip">{isKm ? '⏳ រង់ចាំផ្ទៀងផ្ទាត់ (Pending VIP)' : '⏳ Pending Verification'}</option>
-                    <option value="free">{isKm ? '👤 គណនីឥតគិតថ្លៃ (Free Tier)' : '👤 Free Tier'}</option>
+                    <option value="all">{tr(language, 'គ្រប់ស្ថានភាព VIP ទាំងអស់', 'All VIP Statuses', '所有 VIP 状态')}</option>
+                    <option value="active_vip">{tr(language, '👑 សមាជិក VIP សកម្ម (Active VIP)', '👑 Active VIP', '👑 有效 VIP')}</option>
+                    <option value="expired_vip">{tr(language, '⌛ ផុតកំណត់ VIP (Expired VIP)', '⌛ Expired VIP', '⌛ 已过期 VIP')}</option>
+                    <option value="pending_vip">{tr(language, '⏳ រង់ចាំផ្ទៀងផ្ទាត់ (Pending VIP)', '⏳ Pending Verification', '⏳ 待验证')}</option>
+                    <option value="free">{tr(language, '👤 គណនីឥតគិតថ្លៃ (Free Tier)', '👤 Free Tier', '👤 免费账户')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-[10px] font-bold text-stone-500 mb-1">
-                    {isKm ? 'ស្ថានភាពគណនី (Account Status)' : 'Account Status'}
+                    {tr(language, 'ស្ថានភាពគណនី (Account Status)', 'Account Status', '账户状态')}
                   </label>
                   <select
                     value={accountStatusFilter}
                     onChange={(e) => setAccountStatusFilter(e.target.value as UserAccountStatusFilter)}
                     className="w-full px-2.5 py-1.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-100"
                   >
-                    <option value="all">{isKm ? 'គ្រប់ស្ថានភាពគណនី' : 'All Account Statuses'}</option>
-                    <option value="active">{isKm ? '✅ គណនីដំណើរការធម្មតា (Active)' : '✅ Active Accounts'}</option>
-                    <option value="disabled">{isKm ? '⚠️ គណនីផ្អាកដំណើរការ (Suspended)' : '⚠️ Suspended / Disabled'}</option>
-                    <option value="verified">{isKm ? '✓ បានផ្ទៀងផ្ទាត់ (Verified)' : '✓ Verified Accounts'}</option>
-                    <option value="unverified">{isKm ? 'មិនទាន់ផ្ទៀងផ្ទាត់ (Unverified)' : 'Unverified Accounts'}</option>
+                    <option value="all">{tr(language, 'គ្រប់ស្ថានភាពគណនី', 'All Account Statuses', '所有账户状态')}</option>
+                    <option value="active">{tr(language, '✅ គណនីដំណើរការធម្មតា (Active)', '✅ Active Accounts', '✅ 正常账户')}</option>
+                    <option value="disabled">{tr(language, '⚠️ គណនីផ្អាកដំណើរការ (Suspended)', '⚠️ Suspended / Disabled', '⚠️ 已暂停 / 已禁用')}</option>
+                    <option value="verified">{tr(language, '✓ បានផ្ទៀងផ្ទាត់ (Verified)', '✓ Verified Accounts', '✓ 已验证账户')}</option>
+                    <option value="unverified">{tr(language, 'មិនទាន់ផ្ទៀងផ្ទាត់ (Unverified)', 'Unverified Accounts', '未验证账户')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-[10px] font-bold text-stone-500 mb-1">
-                    {isKm ? 'ប្រភេទការចូលគណនី (Auth Provider)' : 'Authentication Provider'}
+                    {tr(language, 'ប្រភេទការចូលគណនី (Auth Provider)', 'Authentication Provider', '登录方式')}
                   </label>
                   <select
                     value={authProviderFilter}
                     onChange={(e) => setAuthProviderFilter(e.target.value as UserAuthProviderFilter)}
                     className="w-full px-2.5 py-1.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-100"
                   >
-                    <option value="all">{isKm ? 'គ្រប់ប្រភពចូលគណនី' : 'All Auth Providers'}</option>
+                    <option value="all">{tr(language, 'គ្រប់ប្រភពចូលគណនី', 'All Auth Providers', '所有登录方式')}</option>
                     <option value="google">Google Sign-In ({stats.googleAuthCount})</option>
                     <option value="email">Email ({stats.emailAuthCount})</option>
                     <option value="phone">Phone ({stats.phoneAuthCount})</option>
@@ -1248,26 +1225,26 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
 
                 <div>
                   <label className="block text-[10px] font-bold text-stone-500 mb-1">
-                    {isKm ? 'កាលបរិច្ឆេទចុះឈ្មោះ (Registration Date)' : 'Registration Date'}
+                    {tr(language, 'កាលបរិច្ឆេទចុះឈ្មោះ (Registration Date)', 'Registration Date', '注册日期')}
                   </label>
                   <select
                     value={dateRangeFilter}
                     onChange={(e) => setDateRangeFilter(e.target.value as UserDateRangeFilter)}
                     className="w-full px-2.5 py-1.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-100"
                   >
-                    <option value="all">{isKm ? 'គ្រប់កាលបរិច្ឆេទទាំងអស់' : 'All Time'}</option>
-                    <option value="today">{isKm ? 'ថ្ងៃនេះ (Last 24h)' : 'Today (Last 24h)'}</option>
-                    <option value="7d">{isKm ? 'ក្នុងរយៈពេល 7 ថ្ងៃចុងក្រោយ' : 'Last 7 Days'}</option>
-                    <option value="30d">{isKm ? 'ក្នុងរយៈពេល 30 ថ្ងៃចុងក្រោយ' : 'Last 30 Days'}</option>
-                    <option value="90d">{isKm ? 'ក្នុងរយៈពេល 90 ថ្ងៃចុងក្រោយ' : 'Last 90 Days'}</option>
-                    <option value="custom">{isKm ? 'កំណត់ថ្ងៃចាប់ផ្តើម និងបញ្ចប់...' : 'Custom Date Range...'}</option>
+                    <option value="all">{tr(language, 'គ្រប់កាលបរិច្ឆេទទាំងអស់', 'All Time', '所有时间')}</option>
+                    <option value="today">{tr(language, 'ថ្ងៃនេះ (Last 24h)', 'Today (Last 24h)', '今天（最近 24 小时）')}</option>
+                    <option value="7d">{tr(language, 'ក្នុងរយៈពេល 7 ថ្ងៃចុងក្រោយ', 'Last 7 Days', '最近 7 天')}</option>
+                    <option value="30d">{tr(language, 'ក្នុងរយៈពេល 30 ថ្ងៃចុងក្រោយ', 'Last 30 Days', '最近 30 天')}</option>
+                    <option value="90d">{tr(language, 'ក្នុងរយៈពេល 90 ថ្ងៃចុងក្រោយ', 'Last 90 Days', '最近 90 天')}</option>
+                    <option value="custom">{tr(language, 'កំណត់ថ្ងៃចាប់ផ្តើម និងបញ្ចប់...', 'Custom Date Range...', '自定义日期范围...')}</option>
                   </select>
                 </div>
 
                 {dateRangeFilter === 'custom' && (
                   <div className="sm:col-span-2 lg:col-span-4 flex flex-wrap items-center gap-2 pt-1">
                     <span className="text-xs font-bold text-stone-600 dark:text-stone-300">
-                      {isKm ? 'ចាប់ពីថ្ងៃ៖' : 'From:'}
+                      {tr(language, 'ចាប់ពីថ្ងៃ៖', 'From:', '起始日期：')}
                     </span>
                     <input
                       type="date"
@@ -1276,7 +1253,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                       className="px-2.5 py-1 rounded-lg bg-stone-50 dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs"
                     />
                     <span className="text-xs font-bold text-stone-600 dark:text-stone-300">
-                      {isKm ? 'ដល់ថ្ងៃ៖' : 'To:'}
+                      {tr(language, 'ដល់ថ្ងៃ៖', 'To:', '截止日期：')}
                     </span>
                     <input
                       type="date"
@@ -1304,9 +1281,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   <Square className="w-3.5 h-3.5 text-stone-400" />
                 )}
                 <span>
-                  {isKm
-                    ? `ជ្រើសរើសទំព័រនេះ (${currentPageIds.length})`
-                    : `Select Page (${currentPageIds.length})`}
+                  {tr(language, `ជ្រើសរើសទំព័រនេះ (${currentPageIds.length})`, `Select Page (${currentPageIds.length})`, `选中本页 (${currentPageIds.length})`)}
                 </span>
               </button>
 
@@ -1317,18 +1292,14 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-xs font-bold text-emerald-700 dark:text-emerald-300 cursor-pointer"
                 >
                   {isAllFilteredSelected
-                    ? isKm
-                      ? 'ដកការជ្រើសរើសទាំងអស់'
-                      : 'Deselect All'
-                    : isKm
-                    ? `ជ្រើសរើសទាំងអស់ដែលត្រូវតម្រង (${queryResult.totalFilteredCount.toLocaleString()})`
-                    : `Select All Filtered (${queryResult.totalFilteredCount.toLocaleString()})`}
+                    ? tr(language, 'ដកការជ្រើសរើសទាំងអស់', 'Deselect All', '取消全选')
+                    : tr(language, `ជ្រើសរើសទាំងអស់ដែលត្រូវតម្រង (${queryResult.totalFilteredCount.toLocaleString()})`, `Select All Filtered (${queryResult.totalFilteredCount.toLocaleString()})`, `选中所有筛选结果 (${queryResult.totalFilteredCount.toLocaleString()})`)}
                 </button>
               )}
 
               {validSelectedIds.length > 0 && (
                 <span className="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold">
-                  {isKm ? `បានជ្រើសរើស ${validSelectedIds.length.toLocaleString()} គណនី` : `${validSelectedIds.length.toLocaleString()} Selected`}
+                  {tr(language, `បានជ្រើសរើស ${validSelectedIds.length.toLocaleString()} គណនី`, `${validSelectedIds.length.toLocaleString()} Selected`, `已选择 ${validSelectedIds.length.toLocaleString()} 项`)}
                 </span>
               )}
 
@@ -1338,7 +1309,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   onClick={() => setSelectedUserIds([])}
                   className="text-xs text-stone-500 hover:text-stone-800 underline cursor-pointer"
                 >
-                  {isKm ? 'បោះបង់ការជ្រើសរើស' : 'Clear'}
+                  {tr(language, 'បោះបង់ការជ្រើសរើស', 'Clear', '清除')}
                 </button>
               )}
             </div>
@@ -1353,11 +1324,11 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                     onChange={(e) => setBulkVipDaysInput(Number(e.target.value))}
                     className="px-2 py-1.5 bg-transparent text-xs font-bold text-amber-900 dark:text-amber-200 focus:outline-none"
                   >
-                    <option value={7}>7 {isKm ? 'ថ្ងៃ' : 'Days'}</option>
-                    <option value={30}>30 {isKm ? 'ថ្ងៃ' : 'Days'}</option>
-                    <option value={60}>60 {isKm ? 'ថ្ងៃ' : 'Days'}</option>
-                    <option value={90}>90 {isKm ? 'ថ្ងៃ' : 'Days'}</option>
-                    <option value={365}>365 {isKm ? 'ថ្ងៃ' : 'Days'}</option>
+                    <option value={7}>7 {tr(language, 'ថ្ងៃ', 'Days', '天数')}</option>
+                    <option value={30}>30 {tr(language, 'ថ្ងៃ', 'Days', '天数')}</option>
+                    <option value={60}>60 {tr(language, 'ថ្ងៃ', 'Days', '天数')}</option>
+                    <option value={90}>90 {tr(language, 'ថ្ងៃ', 'Days', '天数')}</option>
+                    <option value={365}>365 {tr(language, 'ថ្ងៃ', 'Days', '天数')}</option>
                   </select>
                   <button
                     type="button"
@@ -1373,7 +1344,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                     }}
                     className="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-stone-950 text-xs font-extrabold transition cursor-pointer"
                   >
-                    👑 {isKm ? 'ផ្តល់ VIP ជាក្រុម' : 'Grant VIP'}
+                    👑 {tr(language, 'ផ្តល់ VIP ជាក្រុម', 'Grant VIP', '授予 VIP')}
                   </button>
                 </div>
 
@@ -1391,7 +1362,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   }}
                   className="px-2.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 text-xs font-bold cursor-pointer"
                 >
-                  {isKm ? 'បិទ VIP' : 'Revoke VIP'}
+                  {tr(language, 'បិទ VIP', 'Revoke VIP', '取消 VIP')}
                 </button>
 
                 <button
@@ -1408,7 +1379,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   }}
                   className="px-2.5 py-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 text-xs font-bold cursor-pointer"
                 >
-                  ✅ {isKm ? 'បើកដំណើរការ' : 'Activate'}
+                  ✅ {tr(language, 'បើកដំណើរការ', 'Activate', '启用')}
                 </button>
 
                 <button
@@ -1425,7 +1396,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   }}
                   className="px-2.5 py-1.5 rounded-xl bg-orange-100 hover:bg-orange-200 dark:bg-orange-950/70 text-orange-900 dark:text-orange-200 border border-orange-300 dark:border-orange-700 text-xs font-bold cursor-pointer"
                 >
-                  ⏸️ {isKm ? 'ផ្អាកគណនី' : 'Deactivate'}
+                  ⏸️ {tr(language, 'ផ្អាកគណនី', 'Deactivate', '停用')}
                 </button>
 
                 <button
@@ -1444,7 +1415,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   className="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer shadow-xs"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>{isKm ? `លុប (${validSelectedIds.length})` : `Delete (${validSelectedIds.length})`}</span>
+                  <span>{tr(language, `លុប (${validSelectedIds.length})`, `Delete (${validSelectedIds.length})`, `删除 (${validSelectedIds.length})`)}</span>
                 </button>
               </div>
             )}
@@ -1458,12 +1429,10 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
               </div>
               <div>
                 <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                  {isKm ? 'រកមិនឃើញគណនីដែលត្រូវនឹងការស្វែងរកនេះទេ' : 'No matching user accounts found'}
+                  {tr(language, 'រកមិនឃើញគណនីដែលត្រូវនឹងការស្វែងរកនេះទេ', 'No matching user accounts found', '未找到匹配的用户账户')}
                 </h4>
                 <p className="text-xs text-stone-500 max-w-sm mx-auto mt-1">
-                  {isKm
-                    ? 'សូមសាកល្បងប្តូរពាក្យស្វែងរក ឬចុច «សម្អាតតម្រង» ដើម្បីមើលគណនីទាំងអស់។'
-                    : 'Try adjusting your search keywords or click "Reset Filters" to view all accounts.'}
+                  {tr(language, 'សូមសាកល្បងប្តូរពាក្យស្វែងរក ឬចុច «សម្អាតតម្រង» ដើម្បីមើលគណនីទាំងអស់។', 'Try adjusting your search keywords or click "Reset Filters" to view all accounts.', '请尝试调整搜索关键词，或点击“重置筛选”查看所有账户。')}
                 </p>
               </div>
             </div>
@@ -1530,7 +1499,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           )}
                           {rec.isDisabled && (
                             <span className="px-2 py-0.5 rounded-md bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-300 text-[10px] font-bold">
-                              ⚠️ {isKm ? 'បានផ្អាក' : 'Suspended'}
+                              ⚠️ {tr(language, 'បានផ្អាក', 'Suspended', '已暂停')}
                             </span>
                           )}
                           <code className="text-[10px] font-mono text-stone-400">({u.id})</code>
@@ -1543,20 +1512,20 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
 
                         <div className="flex items-center gap-1.5 flex-wrap mt-1 text-[10px] text-stone-500 dark:text-stone-400">
                           <span className="px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-900">
-                            📅 {isKm ? 'ចុះឈ្មោះ៖' : 'Reg:'}{' '}
+                            📅 {tr(language, 'ចុះឈ្មោះ៖', 'Reg:', '注册：')}{' '}
                             {u.registeredAtIso
                               ? new Date(u.registeredAtIso).toLocaleDateString()
                               : u.createdAt}
                           </span>
                           {u.lastLoginAt && (
                             <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300">
-                              🕒 {isKm ? 'ចូលចុងក្រោយ៖' : 'Last Login:'}{' '}
+                              🕒 {tr(language, 'ចូលចុងក្រោយ៖', 'Last Login:', '最后登录：')}{' '}
                               {new Date(u.lastLoginAt).toLocaleString()}
                             </span>
                           )}
                           {rec.shopsCount > 0 && (
                             <span className="px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 font-bold">
-                              🏪 {rec.shopsCount} {isKm ? 'ហាង' : 'Shops'}
+                              🏪 {rec.shopsCount} {tr(language, 'ហាង', 'Shops', '店铺')}
                             </span>
                           )}
                           {rec.txnsCount > 0 && (
@@ -1577,10 +1546,10 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                         type="button"
                         onClick={() => setInspectedUserRecord(rec)}
                         className="px-2.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 text-[11px] font-bold flex items-center gap-1 cursor-pointer"
-                        title={isKm ? 'មើលប្រវត្តិលម្អិត និងសកម្មភាព' : 'Inspect user history & logs'}
+                        title={tr(language, 'មើលប្រវត្តិលម្អិត និងសកម្មភាព', 'Inspect user history & logs', '查看用户历史记录与日志')}
                       >
                         <Eye className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>{isKm ? 'ប្រវត្តិ' : 'Inspect'}</span>
+                        <span>{tr(language, 'ប្រវត្តិ', 'Inspect', '查看详情')}</span>
                       </button>
 
                       <button
@@ -1602,8 +1571,8 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                         onChange={(e) => updateUserRole(u.id, e.target.value as UserRole)}
                         className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs font-bold text-stone-800 dark:text-stone-200 cursor-pointer"
                       >
-                        <option value="user">{isKm ? 'អ្នកប្រើទូទៅ' : 'Regular User'}</option>
-                        <option value="owner">{isKm ? 'ម្ចាស់ហាង' : 'Shop Owner'}</option>
+                        <option value="user">{tr(language, 'អ្នកប្រើទូទៅ', 'Regular User', '普通用户')}</option>
+                        <option value="owner">{tr(language, 'ម្ចាស់ហាង', 'Shop Owner', '店主')}</option>
                       </select>
 
                       <button
@@ -1614,7 +1583,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           setUserPendingDeletion(u);
                         }}
                         className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/70 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 transition cursor-pointer"
-                        title={isKm ? 'គ្រប់គ្រងស្ថានភាព ឬលុបគណនី' : 'Manage status or delete account'}
+                        title={tr(language, 'គ្រប់គ្រងស្ថានភាព ឬលុបគណនី', 'Manage status or delete account', '管理状态或删除账户')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -1629,9 +1598,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
           <div className="p-3.5 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-300">
               <span>
-                {isKm
-                  ? `ទំព័រទី ${queryResult.currentPage} នៃ ${queryResult.totalPages} (សរុប ${queryResult.totalFilteredCount.toLocaleString()} គណនី)`
-                  : `Page ${queryResult.currentPage} of ${queryResult.totalPages} (${queryResult.totalFilteredCount.toLocaleString()} total)`}
+                {tr(language, `ទំព័រទី ${queryResult.currentPage} នៃ ${queryResult.totalPages} (សរុប ${queryResult.totalFilteredCount.toLocaleString()} គណនី)`, `Page ${queryResult.currentPage} of ${queryResult.totalPages} (${queryResult.totalFilteredCount.toLocaleString()} total)`, `第 ${queryResult.currentPage} 页，共 ${queryResult.totalPages} 页（共 ${queryResult.totalFilteredCount.toLocaleString()} 项）`)}
               </span>
               <select
                 value={pageSize}
@@ -1653,7 +1620,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 onClick={() => setPage(1)}
                 className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 disabled:opacity-40 text-xs font-bold cursor-pointer"
               >
-                {isKm ? 'ដំបូង' : 'First'}
+                {tr(language, 'ដំបូង', 'First', '首页')}
               </button>
               <button
                 type="button"
@@ -1680,7 +1647,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 onClick={() => setPage(queryResult.totalPages)}
                 className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-900 disabled:opacity-40 text-xs font-bold cursor-pointer"
               >
-                {isKm ? 'ចុងក្រោយ' : 'Last'}
+                {tr(language, 'ចុងក្រោយ', 'Last', '末页')}
               </button>
             </div>
           </div>
@@ -1698,15 +1665,11 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 <h4 className="font-extrabold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
                   <Store className="w-4 h-4 text-emerald-600" />
                   <span>
-                    {isKm
-                      ? `តារាងម្ចាស់ហាង និងហាងទាំងអស់ (${directoryIndex.allOwnedShops.length} ហាង / ${stats.shopOwnersCount} គណនីម្ចាស់ហាង)`
-                      : `Complete Shop Ownership Directory (${directoryIndex.allOwnedShops.length} Shops / ${stats.shopOwnersCount} Owner Accounts)`}
+                    {tr(language, `តារាងម្ចាស់ហាង និងហាងទាំងអស់ (${directoryIndex.allOwnedShops.length} ហាង / ${stats.shopOwnersCount} គណនីម្ចាស់ហាង)`, `Complete Shop Ownership Directory (${directoryIndex.allOwnedShops.length} Shops / ${stats.shopOwnersCount} Owner Accounts)`, `完整店铺所有权目录 (${directoryIndex.allOwnedShops.length} 家店铺 / ${stats.shopOwnersCount} 个店主账户)`)}
                   </span>
                 </h4>
                 <p className="text-[11px] text-stone-500 mt-0.5">
-                  {isKm
-                    ? 'បង្ហាញយ៉ាងច្បាស់នូវ ឈ្មោះហាង, Shop ID, ឈ្មោះម្ចាស់គណនី, User ID, អ៊ីមែល, លេខទូរស័ព្ទ និងចំនួនហាងសរុប ព្រមទាំងប៊ូតុង មើលហាង គ្រប់គ្រង ផ្អាក និងផ្ទេរកម្មសិទ្ធិ។'
-                    : 'Clearly identifies which registered user account owns each shop with Shop Name, Shop ID, Owner Name, User ID, Email, Phone Number, and instant ownership actions.'}
+                  {tr(language, 'បង្ហាញយ៉ាងច្បាស់នូវ ឈ្មោះហាង, Shop ID, ឈ្មោះម្ចាស់គណនី, User ID, អ៊ីមែល, លេខទូរស័ព្ទ និងចំនួនហាងសរុប ព្រមទាំងប៊ូតុង មើលហាង គ្រប់គ្រង ផ្អាក និងផ្ទេរកម្មសិទ្ធិ។', 'Clearly identifies which registered user account owns each shop with Shop Name, Shop ID, Owner Name, User ID, Email, Phone Number, and instant ownership actions.', '清晰显示各店铺所属的注册用户账户，包含店铺名称、店铺 ID、店主姓名、用户 ID、邮箱、手机号及即时所有权管理操作。')}
                 </p>
               </div>
 
@@ -1719,12 +1682,8 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 <Link2 className={`w-3.5 h-3.5 ${isSyncingShopLinks ? 'animate-spin' : ''}`} />
                 <span>
                   {isSyncingShopLinks
-                    ? isKm
-                      ? 'កំពុងភ្ជាប់ទិន្នន័យ...'
-                      : 'Syncing Links...'
-                    : isKm
-                    ? '🔗 ផ្ទៀងផ្ទាត់ & ភ្ជាប់កម្មសិទ្ធិហាងជាមួយ Database'
-                    : '🔗 Verify & Sync Shop Ownership Links'}
+                    ? tr(language, 'កំពុងភ្ជាប់ទិន្នន័យ...', 'Syncing Links...', '正在同步关联...')
+                    : tr(language, '🔗 ផ្ទៀងផ្ទាត់ & ភ្ជាប់កម្មសិទ្ធិហាងជាមួយ Database', '🔗 Verify & Sync Shop Ownership Links', '🔗 验证并同步店铺所有权关联')}
                 </span>
               </button>
             </div>
@@ -1737,9 +1696,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   value={shopDirectorySearch}
                   onChange={(e) => setShopDirectorySearch(e.target.value)}
                   placeholder={
-                    isKm
-                      ? 'ស្វែងរកតាម ឈ្មោះហាង, Shop ID, ឈ្មោះម្ចាស់គណនី, User ID, អ៊ីមែល ឬលេខទូរស័ព្ទ...'
-                      : 'Search by Shop Name, Shop ID, Owner Name, User ID, Email, or Phone Number...'
+                    tr(language, 'ស្វែងរកតាម ឈ្មោះហាង, Shop ID, ឈ្មោះម្ចាស់គណនី, User ID, អ៊ីមែល ឬលេខទូរស័ព្ទ...', 'Search by Shop Name, Shop ID, Owner Name, User ID, Email, or Phone Number...', '按店铺名称、店铺 ID、店主姓名、用户 ID、邮箱或手机号搜索...')
                   }
                   className="w-full pl-9 pr-8 py-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs"
                 />
@@ -1757,10 +1714,10 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
               <div className="flex items-center gap-1.5 flex-wrap">
                 {(
                   [
-                    { id: 'all', label: isKm ? 'ទាំងអស់ (All)' : 'All Shops' },
-                    { id: 'active', label: isKm ? '✅ សកម្ម (Active)' : '✅ Active' },
-                    { id: 'pending', label: isKm ? '⏳ រង់ចាំអនុម័ត' : '⏳ Pending' },
-                    { id: 'suspended', label: isKm ? '⏸️ បានផ្អាក (Suspended)' : '⏸️ Suspended' },
+                    { id: 'all', label: tr(language, 'ទាំងអស់ (All)', 'All Shops', '所有店铺') },
+                    { id: 'active', label: tr(language, '✅ សកម្ម (Active)', '✅ Active', '✅ 营业中') },
+                    { id: 'pending', label: tr(language, '⏳ រង់ចាំអនុម័ត', '⏳ Pending', '⏳ 待审核') },
+                    { id: 'suspended', label: tr(language, '⏸️ បានផ្អាក (Suspended)', '⏸️ Suspended', '⏸️ 已暂停') },
                   ] as const
                 ).map((tab) => (
                   <button
@@ -1821,16 +1778,10 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                             }`}
                           >
                             {shop.isSuspended
-                              ? isKm
-                                ? '⏸️ ផ្អាកដំណើរការ (Suspended)'
-                                : '⏸️ Suspended'
+                              ? tr(language, '⏸️ ផ្អាកដំណើរការ (Suspended)', '⏸️ Suspended', '⏸️ 已暂停')
                               : shop.status === 'pending'
-                              ? isKm
-                                ? '⏳ រង់ចាំអនុម័ត (Pending)'
-                                : '⏳ Pending'
-                              : isKm
-                              ? '✅ កំពុងដំណើរការ (Active)'
-                              : '✅ Active'}
+                              ? tr(language, '⏳ រង់ចាំអនុម័ត (Pending)', '⏳ Pending', '⏳ 待审核')
+                              : tr(language, '✅ កំពុងដំណើរការ (Active)', '✅ Active', '✅ 营业中')}
                           </span>
                           {shop.province && (
                             <span className="px-2 py-0.5 rounded-lg bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[10px] font-bold">
@@ -1843,7 +1794,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 p-2.5 rounded-xl bg-white dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 text-xs">
                           <div>
                             <div className="text-[10px] text-stone-400 font-semibold">
-                              {isKm ? 'ឈ្មោះម្ចាស់គណនី (Owner Name)' : 'Owner Name'}
+                              {tr(language, 'ឈ្មោះម្ចាស់គណនី (Owner Name)', 'Owner Name', '店主姓名')}
                             </div>
                             <div className="font-bold text-stone-900 dark:text-white truncate">
                               👤 {ownerUser?.name || shop.ownerName || 'N/A'}
@@ -1851,7 +1802,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           </div>
                           <div>
                             <div className="text-[10px] text-stone-400 font-semibold">
-                              {isKm ? 'លេខសម្គាល់គណនី (User ID)' : 'User ID'}
+                              {tr(language, 'លេខសម្គាល់គណនី (User ID)', 'User ID', '用户 ID')}
                             </div>
                             <code className="font-mono font-bold text-emerald-700 dark:text-emerald-400 text-[11px] break-all">
                               {ownerUser?.id || shop.ownerId || 'N/A'}
@@ -1859,7 +1810,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           </div>
                           <div>
                             <div className="text-[10px] text-stone-400 font-semibold">
-                              {isKm ? 'អ៊ីមែលគណនី (Email)' : 'Account Email'}
+                              {tr(language, 'អ៊ីមែលគណនី (Email)', 'Account Email', '账户邮箱')}
                             </div>
                             <div className="font-semibold text-stone-800 dark:text-stone-200 truncate">
                               ✉️ {ownerUser?.email || shop.ownerEmail || 'N/A'}
@@ -1867,7 +1818,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           </div>
                           <div>
                             <div className="text-[10px] text-stone-400 font-semibold">
-                              {isKm ? 'លេខទូរស័ព្ទ (Phone Number)' : 'Phone Number'}
+                              {tr(language, 'លេខទូរស័ព្ទ (Phone Number)', 'Phone Number', '手机号码')}
                             </div>
                             <div className="font-semibold text-stone-800 dark:text-stone-200 truncate">
                               📱 {ownerUser?.phone || shop.ownerPhone || shop.phone || 'N/A'}
@@ -1884,9 +1835,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                             >
                               <Store className="w-3.5 h-3.5" />
                               <span>
-                                {isKm
-                                  ? `មើលហាងទាំង ${totalShopsForThisOwner} របស់គណនី "${ownerRec.user.name}" →`
-                                  : `View All ${totalShopsForThisOwner} Shop(s) Owned by "${ownerRec.user.name}" →`}
+                                {tr(language, `មើលហាងទាំង ${totalShopsForThisOwner} របស់គណនី "${ownerRec.user.name}" →`, `View All ${totalShopsForThisOwner} Shop(s) Owned by "${ownerRec.user.name}" →`, `查看 "${ownerRec.user.name}" 名下的全部 ${totalShopsForThisOwner} 家店铺 →`)}
                               </span>
                             </button>
                           </div>
@@ -1900,7 +1849,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           className="px-3 py-1.5 rounded-xl bg-stone-200/80 hover:bg-stone-300 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-bold flex items-center gap-1 cursor-pointer"
                         >
                           <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{isKm ? 'មើលហាង' : 'View Shop'}</span>
+                          <span>{tr(language, 'មើលហាង', 'View Shop', '查看店铺')}</span>
                         </button>
                         <button
                           type="button"
@@ -1908,7 +1857,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer shadow-xs"
                         >
                           <Settings className="w-3.5 h-3.5" />
-                          <span>{isKm ? 'គ្រប់គ្រងហាង' : 'Manage Shop'}</span>
+                          <span>{tr(language, 'គ្រប់គ្រងហាង', 'Manage Shop', '管理店铺')}</span>
                         </button>
                         <button
                           type="button"
@@ -1922,12 +1871,12 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           {shop.isSuspended ? (
                             <>
                               <PlayCircle className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'បើកហាងវិញ' : 'Reactivate'}</span>
+                              <span>{tr(language, 'បើកហាងវិញ', 'Reactivate', '重新激活')}</span>
                             </>
                           ) : (
                             <>
                               <PauseCircle className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'ផ្អាកហាង' : 'Suspend'}</span>
+                              <span>{tr(language, 'ផ្អាកហាង', 'Suspend', '暂停')}</span>
                             </>
                           )}
                         </button>
@@ -1941,7 +1890,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer shadow-xs"
                         >
                           <ArrowRightLeft className="w-3.5 h-3.5" />
-                          <span>{isKm ? 'ផ្ទេរកម្មសិទ្ធិ' : 'Transfer Ownership'}</span>
+                          <span>{tr(language, 'ផ្ទេរកម្មសិទ្ធិ', 'Transfer Ownership', '转让所有权')}</span>
                         </button>
                       </div>
                     </div>
@@ -1963,15 +1912,11 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
                   <History className="w-4 h-4 text-emerald-600" />
                   <span>
-                    {isKm
-                      ? `ប្រវត្តិសកម្មភាព ចូលប្រើប្រាស់ ចុះឈ្មោះ និងសកម្មភាព Admin (${filteredActivityLogs.length})`
-                      : `User Activity, Login History, Registration & Admin Action Logs (${filteredActivityLogs.length})`}
+                    {tr(language, `ប្រវត្តិសកម្មភាព ចូលប្រើប្រាស់ ចុះឈ្មោះ និងសកម្មភាព Admin (${filteredActivityLogs.length})`, `User Activity, Login History, Registration & Admin Action Logs (${filteredActivityLogs.length})`, `用户活动、登录历史、注册及管理员操作日志 (${filteredActivityLogs.length})`)}
                   </span>
                 </h4>
                 <p className="text-[11px] text-stone-500 mt-0.5">
-                  {isKm
-                    ? 'តាមដានរាល់ការចុះឈ្មោះថ្មី ការចូលគណនី ការផ្តល់/បិទ VIP ការប្តូរតួនាទី និងសកម្មភាពគ្រប់គ្រងរបស់ Admin។'
-                    : 'Real-time audit trail of user logins, registrations, VIP activations, role changes, and administrator actions.'}
+                  {tr(language, 'តាមដានរាល់ការចុះឈ្មោះថ្មី ការចូលគណនី ការផ្តល់/បិទ VIP ការប្តូរតួនាទី និងសកម្មភាពគ្រប់គ្រងរបស់ Admin។', 'Real-time audit trail of user logins, registrations, VIP activations, role changes, and administrator actions.', '实时审计追踪用户登录、注册、VIP 开通、角色变更及管理员操作。')}
                 </p>
               </div>
               <div className="relative w-full sm:w-72">
@@ -1983,7 +1928,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                     setLogSearchQuery(e.target.value);
                     setLogsPage(1);
                   }}
-                  placeholder={isKm ? 'ស្វែងរកក្នុងកំណត់ហេតុ...' : 'Search logs by user, email, action...'}
+                  placeholder={tr(language, 'ស្វែងរកក្នុងកំណត់ហេតុ...', 'Search logs by user, email, action...', '按用户、邮箱、操作搜索日志...')}
                   className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs"
                 />
               </div>
@@ -1992,14 +1937,14 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
               {(
                 [
-                  { id: 'all', label: isKm ? 'ទាំងអស់ (All)' : 'All Events' },
-                  { id: 'login', label: isKm ? '🔑 ប្រវត្តិចូលគណនី (Logins)' : '🔑 Login History' },
-                  { id: 'registration', label: isKm ? '🆕 ប្រវត្តិចុះឈ្មោះ (Registrations)' : '🆕 Registrations' },
-                  { id: 'vip_change', label: isKm ? '👑 សមាជិកភាព VIP & ទូទាត់' : '👑 VIP & Payments' },
-                  { id: 'account_status', label: isKm ? '🛡️ បើក/ផ្អាកគណនី' : '🛡️ Account Status' },
-                  { id: 'role_change', label: isKm ? '🏪 ប្តូរតួនាទី (Roles)' : '🏪 Role Changes' },
-                  { id: 'admin_action', label: isKm ? '⚡ សកម្មភាព Admin' : '⚡ Admin Actions' },
-                  { id: 'backup_restore', label: isKm ? '💾 Backup / Restore' : '💾 Backups' },
+                  { id: 'all', label: tr(language, 'ទាំងអស់ (All)', 'All Events', '所有事件') },
+                  { id: 'login', label: tr(language, '🔑 ប្រវត្តិចូលគណនី (Logins)', '🔑 Login History', '🔑 登录历史') },
+                  { id: 'registration', label: tr(language, '🆕 ប្រវត្តិចុះឈ្មោះ (Registrations)', '🆕 Registrations', '🆕 注册记录') },
+                  { id: 'vip_change', label: tr(language, '👑 សមាជិកភាព VIP & ទូទាត់', '👑 VIP & Payments', '👑 VIP 与支付') },
+                  { id: 'account_status', label: tr(language, '🛡️ បើក/ផ្អាកគណនី', '🛡️ Account Status', '🛡️ 账户状态') },
+                  { id: 'role_change', label: tr(language, '🏪 ប្តូរតួនាទី (Roles)', '🏪 Role Changes', '🏪 角色变更') },
+                  { id: 'admin_action', label: tr(language, '⚡ សកម្មភាព Admin', '⚡ Admin Actions', '⚡ 管理员操作') },
+                  { id: 'backup_restore', label: tr(language, '💾 Backup / Restore', '💾 Backups', '💾 备份记录') },
                 ] as const
               ).map((c) => (
                 <button
@@ -2065,7 +2010,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             {totalLogsPages > 1 && (
               <div className="flex items-center justify-between pt-2 border-t border-stone-200 dark:border-stone-700 text-xs">
                 <span>
-                  {isKm ? `ទំព័រ ${logsPage} / ${totalLogsPages}` : `Page ${logsPage} of ${totalLogsPages}`}
+                  {tr(language, `ទំព័រ ${logsPage} / ${totalLogsPages}`, `Page ${logsPage} of ${totalLogsPages}`, `第 ${logsPage} 页，共 ${totalLogsPages} 页`)}
                 </span>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -2105,15 +2050,11 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
               <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <Database className="w-4 h-4 text-emerald-600" />
                 <span>
-                  {isKm
-                    ? 'ប្រព័ន្ធការពារទិន្នន័យ Backup, ស្តារឡើងវិញ និងផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ'
-                    : 'Database Backup, Recovery & Data Integrity Protection'}
+                  {tr(language, 'ប្រព័ន្ធការពារទិន្នន័យ Backup, ស្តារឡើងវិញ និងផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ', 'Database Backup, Recovery & Data Integrity Protection', '数据库备份、恢复与数据完整性保护')}
                 </span>
               </h4>
               <p className="text-[11px] text-stone-500 mt-0.5">
-                {isKm
-                  ? `Checksum បច្ចុប្បន្ន៖ ${computeUsersChecksum(users.filter((u) => u.role !== 'admin'))}`
-                  : `Current Directory Checksum: ${computeUsersChecksum(users.filter((u) => u.role !== 'admin'))}`}
+                {tr(language, `Checksum បច្ចុប្បន្ន៖ ${computeUsersChecksum(users.filter((u) => u.role !== 'admin'))}`, `Current Directory Checksum: ${computeUsersChecksum(users.filter((u) => u.role !== 'admin'))}`, `当前目录校验和：${computeUsersChecksum(users.filter((u) => u.role !== 'admin'))}`)}
               </p>
             </div>
 
@@ -2122,7 +2063,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 type="text"
                 value={backupLabelInput}
                 onChange={(e) => setBackupLabelInput(e.target.value)}
-                placeholder={isKm ? 'ឈ្មោះសម្គាល់ Backup (ឧ. មុនពេលកែប្រែ)...' : 'Backup label (e.g., Pre-maintenance)...'}
+                placeholder={tr(language, 'ឈ្មោះសម្គាល់ Backup (ឧ. មុនពេលកែប្រែ)...', 'Backup label (e.g., Pre-maintenance)...', '备份备注（如：维护前备份）...')}
                 className="flex-1 px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs"
               />
               <button
@@ -2141,7 +2082,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                     setBackupLabelInput('');
                     setSavedBackupsMeta(getSavedBackupMetadataList());
                     showToast(
-                      isKm ? '✅ បានបង្កើត Snapshot Backup ក្នុងប្រព័ន្ធ!' : '✅ Created local recovery snapshot!',
+                      tr(language, '✅ បានបង្កើត Snapshot Backup ក្នុងប្រព័ន្ធ!', '✅ Created local recovery snapshot!', '✅ 已创建本地恢复快照！'),
                       'success'
                     );
                   } finally {
@@ -2150,7 +2091,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 }}
                 className="px-3.5 py-2 rounded-xl bg-[#064E3B] hover:bg-emerald-900 text-white text-xs font-bold cursor-pointer whitespace-nowrap"
               >
-                {isKm ? '+ បង្កើត Snapshot' : '+ Create Snapshot'}
+                {tr(language, '+ បង្កើត Snapshot', '+ Create Snapshot', '+ 创建快照')}
               </button>
             </div>
 
@@ -2161,7 +2102,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>{isKm ? 'ទាញយកឯកសារ Backup (.JSON)' : 'Download Full Backup (.JSON)'}</span>
+                <span>{tr(language, 'ទាញយកឯកសារ Backup (.JSON)', 'Download Full Backup (.JSON)', '下载完整备份 (.JSON)')}</span>
               </button>
 
               <input
@@ -2177,7 +2118,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
               >
                 <Upload className="w-3.5 h-3.5" />
-                <span>{isKm ? 'ស្តារពីឯកសារ Backup (.JSON)' : 'Restore from Backup File'}</span>
+                <span>{tr(language, 'ស្តារពីឯកសារ Backup (.JSON)', 'Restore from Backup File', '从备份文件恢复')}</span>
               </button>
 
               <button
@@ -2189,9 +2130,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                     const rep = await runUsersIntegrityCheckAndRepair();
                     setIntegrityReport(rep);
                     showToast(
-                      isKm
-                        ? `🛡️ ផ្ទៀងផ្ទាត់ទិន្នន័យរួចរាល់ (${rep.validUsersCount} គណនី)!`
-                        : `🛡️ Integrity check complete (${rep.validUsersCount} valid accounts)!`,
+                      tr(language, `🛡️ ផ្ទៀងផ្ទាត់ទិន្នន័យរួចរាល់ (${rep.validUsersCount} គណនី)!`, `🛡️ Integrity check complete (${rep.validUsersCount} valid accounts)!`, `🛡️ 完整性检查完成（${rep.validUsersCount} 个有效账户）！`),
                       'success'
                     );
                   } finally {
@@ -2201,7 +2140,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 className="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
               >
                 <Shield className="w-3.5 h-3.5 text-emerald-600" />
-                <span>{isKm ? 'ពិនិត្យ និងជួសជុលទិន្នន័យ' : 'Verify & Repair Integrity'}</span>
+                <span>{tr(language, 'ពិនិត្យ និងជួសជុលទិន្នន័យ', 'Verify & Repair Integrity', '验证并修复完整性')}</span>
               </button>
             </div>
 
@@ -2221,11 +2160,11 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             {/* Saved Snapshots List */}
             <div className="space-y-2 pt-2 border-t border-stone-200 dark:border-stone-700">
               <div className="text-xs font-bold text-stone-700 dark:text-stone-300">
-                {isKm ? `Snapshots ដែលបានរក្សាទុក (${savedBackupsMeta.length})` : `Saved Recovery Snapshots (${savedBackupsMeta.length})`}
+                {tr(language, `Snapshots ដែលបានរក្សាទុក (${savedBackupsMeta.length})`, `Saved Recovery Snapshots (${savedBackupsMeta.length})`, `已保存的恢复快照 (${savedBackupsMeta.length})`)}
               </div>
               {savedBackupsMeta.length === 0 ? (
                 <p className="text-[11px] text-stone-400">
-                  {isKm ? 'មិនទាន់មាន Snapshot នៅឡើយទេ។' : 'No snapshots saved yet.'}
+                  {tr(language, 'មិនទាន់មាន Snapshot នៅឡើយទេ។', 'No snapshots saved yet.', '暂无已保存的快照。')}
                 </p>
               ) : (
                 <div className="space-y-1.5 max-h-48 overflow-y-auto">
@@ -2247,14 +2186,14 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                         onClick={async () => {
                           const snap = await loadBackupSnapshotById(meta.id);
                           if (!snap || !Array.isArray(snap.users)) {
-                            showToast(isKm ? 'រកមិនឃើញទិន្នន័យ Snapshot នេះទេ' : 'Snapshot payload not found', 'warning');
+                            showToast(tr(language, 'រកមិនឃើញទិន្នន័យ Snapshot នេះទេ', 'Snapshot payload not found', '未找到快照数据'), 'warning');
                             return;
                           }
                           await restoreUsersFromBackup(snap.users, 'merge');
                         }}
                         className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shrink-0 cursor-pointer"
                       >
-                        {isKm ? 'ស្តារឡើងវិញ' : 'Restore'}
+                        {tr(language, 'ស្តារឡើងវិញ', 'Restore', '恢复')}
                       </button>
                     </div>
                   ))}
@@ -2269,15 +2208,11 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
               <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-500" />
                 <span>
-                  {isKm
-                    ? 'តេស្តសមត្ថភាព និងល្បឿនប្រព័ន្ធជាមួយគណនី 10,000 – 50,000+ (Stress Test)'
-                    : '10,000 – 50,000+ Users Performance & Scalability Benchmark'}
+                  {tr(language, 'តេស្តសមត្ថភាព និងល្បឿនប្រព័ន្ធជាមួយគណនី 10,000 – 50,000+ (Stress Test)', '10,000 – 50,000+ Users Performance & Scalability Benchmark', '10,000 – 50,000+ 用户性能与扩展性基准测试')}
                 </span>
               </h4>
               <p className="text-[11px] text-stone-500 mt-0.5">
-                {isKm
-                  ? 'ធ្វើតេស្តល្បឿនបង្កើត Index, ការបែងចែកទំព័រ, ការស្វែងរក និងការផ្តល់ VIP ជាក្រុមក្នុង Sandbox ដាច់ដោយឡែក (មិនប៉ះពាល់ទិន្នន័យគណនីពិតប្រាកដឡើយ)។'
-                  : 'Runs an isolated in-memory benchmark simulating 10,000 to 50,000+ users without touching production user data.'}
+                {tr(language, 'ធ្វើតេស្តល្បឿនបង្កើត Index, ការបែងចែកទំព័រ, ការស្វែងរក និងការផ្តល់ VIP ជាក្រុមក្នុង Sandbox ដាច់ដោយឡែក (មិនប៉ះពាល់ទិន្នន័យគណនីពិតប្រាកដឡើយ)។', 'Runs an isolated in-memory benchmark simulating 10,000 to 50,000+ users without touching production user data.', '运行隔离的内存基准测试，模拟 10,000 至 50,000+ 用户，不影响生产环境数据。')}
               </p>
             </div>
 
@@ -2293,7 +2228,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                       : 'bg-stone-50 dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700'
                   }`}
                 >
-                  {sz.toLocaleString()} {isKm ? 'គណនី' : 'Users'}
+                  {sz.toLocaleString()} {tr(language, 'គណនី', 'Users', '用户')}
                 </button>
               ))}
 
@@ -2314,12 +2249,8 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 className="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 text-xs font-extrabold cursor-pointer shadow-xs"
               >
                 {isRunningBenchmark
-                  ? isKm
-                    ? 'កំពុងធ្វើតេស្ត...'
-                    : 'Running Benchmark...'
-                  : isKm
-                  ? `⚡ ចាប់ផ្តើមតេស្ត (${benchmarkTargetSize.toLocaleString()})`
-                  : `⚡ Run ${benchmarkTargetSize.toLocaleString()} Users Test`}
+                  ? tr(language, 'កំពុងធ្វើតេស្ត...', 'Running Benchmark...', '正在运行基准测试...')
+                  : tr(language, `⚡ ចាប់ផ្តើមតេស្ត (${benchmarkTargetSize.toLocaleString()})`, `⚡ Run ${benchmarkTargetSize.toLocaleString()} Users Test`, `⚡ 运行 ${benchmarkTargetSize.toLocaleString()} 用户测试`)}
               </button>
             </div>
 
@@ -2327,9 +2258,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
               <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 space-y-2.5 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-stone-900 dark:text-stone-100">
-                    {isKm
-                      ? `លទ្ធផលតេស្ត៖ ${benchmarkResult.testedUserCount.toLocaleString()} គណនី`
-                      : `Benchmark Result (${benchmarkResult.testedUserCount.toLocaleString()} Users)`}
+                    {tr(language, `លទ្ធផលតេស្ត៖ ${benchmarkResult.testedUserCount.toLocaleString()} គណនី`, `Benchmark Result (${benchmarkResult.testedUserCount.toLocaleString()} Users)`, `基准测试结果 (${benchmarkResult.testedUserCount.toLocaleString()} 用户)`)}
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold text-[10px]">
                     ✓ PASSED ALL SLA TARGETS
@@ -2428,7 +2357,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
               <div className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800/70 border border-stone-200 dark:border-stone-700">
-                <div className="text-[10px] text-stone-500">{isKm ? 'ថ្ងៃចុះឈ្មោះ' : 'Registered At'}</div>
+                <div className="text-[10px] text-stone-500">{tr(language, 'ថ្ងៃចុះឈ្មោះ', 'Registered At', '注册时间')}</div>
                 <div className="font-bold text-stone-900 dark:text-white mt-0.5">
                   {inspectedUserRecord.user.registeredAtIso
                     ? new Date(inspectedUserRecord.user.registeredAtIso).toLocaleString()
@@ -2436,7 +2365,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 </div>
               </div>
               <div className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800/70 border border-stone-200 dark:border-stone-700">
-                <div className="text-[10px] text-stone-500">{isKm ? 'ចូលចុងក្រោយ' : 'Last Login'}</div>
+                <div className="text-[10px] text-stone-500">{tr(language, 'ចូលចុងក្រោយ', 'Last Login', '上次登录')}</div>
                 <div className="font-bold text-stone-900 dark:text-white mt-0.5">
                   {inspectedUserRecord.user.lastLoginAt
                     ? new Date(inspectedUserRecord.user.lastLoginAt).toLocaleString()
@@ -2444,13 +2373,13 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 </div>
               </div>
               <div className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800/70 border border-stone-200 dark:border-stone-700">
-                <div className="text-[10px] text-stone-500">{isKm ? 'ហាងកាន់កាប់' : 'Owned Shops'}</div>
+                <div className="text-[10px] text-stone-500">{tr(language, 'ហាងកាន់កាប់', 'Owned Shops', '名下店铺')}</div>
                 <div className="font-bold text-stone-900 dark:text-white mt-0.5">
                   🏪 {inspectedUserRecord.shopsCount}
                 </div>
               </div>
               <div className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800/70 border border-stone-200 dark:border-stone-700">
-                <div className="text-[10px] text-stone-500">{isKm ? 'ការទូទាត់សរុប' : 'Total Spent'}</div>
+                <div className="text-[10px] text-stone-500">{tr(language, 'ការទូទាត់សរុប', 'Total Spent', '消费总额')}</div>
                 <div className="font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">
                   &#36;{inspectedUserRecord.associations.totalSpentUsd.toFixed(2)} ({inspectedUserRecord.txnsCount} txns)
                 </div>
@@ -2462,16 +2391,14 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 <div className="font-extrabold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
                   <Store className="w-4 h-4 text-emerald-600" />
                   <span>
-                    {isKm
-                      ? `បញ្ជីហាងដែលគ្រប់គ្រងដោយគណនី "${inspectedUserRecord.user.name}" (${inspectedUserRecord.shopsCount} ហាង)៖`
-                      : `Shops Owned by "${inspectedUserRecord.user.name}" (${inspectedUserRecord.shopsCount}):`}
+                    {tr(language, `បញ្ជីហាងដែលគ្រប់គ្រងដោយគណនី "${inspectedUserRecord.user.name}" (${inspectedUserRecord.shopsCount} ហាង)៖`, `Shops Owned by "${inspectedUserRecord.user.name}" (${inspectedUserRecord.shopsCount}):`, `“${inspectedUserRecord.user.name}”名下店铺 (${inspectedUserRecord.shopsCount})：`)}
                   </span>
                 </div>
               </div>
 
               {inspectedUserRecord.associations.ownedShops.length === 0 ? (
                 <p className="text-[11px] text-stone-500">
-                  {isKm ? 'គណនីនេះមិនទាន់មានហាងនៅឡើយទេ (0 ហាង)។' : 'This account does not currently own any shops (0 shops).'}
+                  {tr(language, 'គណនីនេះមិនទាន់មានហាងនៅឡើយទេ (0 ហាង)។', 'This account does not currently own any shops (0 shops).', '该账户目前没有任何店铺（0 家）。')}
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -2514,21 +2441,21 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           onClick={() => handleViewShopDetails(shop.id)}
                           className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-bold text-[11px] cursor-pointer"
                         >
-                          {isKm ? '👁️ មើលហាង' : '👁️ View'}
+                          {tr(language, '👁️ មើលហាង', '👁️ View', '👁️ 查看')}
                         </button>
                         <button
                           type="button"
                           onClick={() => handleManageShop(shop.id)}
                           className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] cursor-pointer"
                         >
-                          {isKm ? '⚙️ គ្រប់គ្រង' : '⚙️ Manage'}
+                          {tr(language, '⚙️ គ្រប់គ្រង', '⚙️ Manage', '⚙️ 管理')}
                         </button>
                         <button
                           type="button"
                           onClick={() => handleToggleSuspendShop(shop.id)}
                           className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer"
                         >
-                          {shop.isSuspended ? (isKm ? '▶️ បើកវិញ' : '▶️ Reactivate') : (isKm ? '⏸️ ផ្អាក' : '⏸️ Suspend')}
+                          {shop.isSuspended ? (tr(language, '▶️ បើកវិញ', '▶️ Reactivate', '▶️ 重新激活')) : (tr(language, '⏸️ ផ្អាក', '⏸️ Suspend', '⏸️ 暂停'))}
                         </button>
                         <button
                           type="button"
@@ -2539,7 +2466,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           }}
                           className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] cursor-pointer"
                         >
-                          {isKm ? '🔄 ផ្ទេរកម្មសិទ្ធិ' : '🔄 Transfer'}
+                          {tr(language, '🔄 ផ្ទេរកម្មសិទ្ធិ', '🔄 Transfer', '🔄 转让')}
                         </button>
                       </div>
                     </div>
@@ -2551,7 +2478,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             {/* User Specific Activity & Login History */}
             <div className="space-y-2">
               <h4 className="font-bold text-xs text-stone-700 dark:text-stone-300">
-                {isKm ? 'ប្រវត្តិសកម្មភាព និងការចូលប្រើប្រាស់របស់គណនីនេះ' : 'Account Activity, Login & VIP History'}
+                {tr(language, 'ប្រវត្តិសកម្មភាព និងការចូលប្រើប្រាស់របស់គណនីនេះ', 'Account Activity, Login & VIP History', '账户活动、登录与 VIP 历史记录')}
               </h4>
               <div className="space-y-1.5 max-h-60 overflow-y-auto">
                 {allActivityLogs
@@ -2601,13 +2528,11 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 <h4 className="font-extrabold text-sm text-stone-900 dark:text-white flex items-center gap-2">
                   <ArrowRightLeft className="w-4 h-4 text-purple-600" />
                   <span>
-                    {isKm ? 'ផ្ទេរកម្មសិទ្ធិហាងទៅគណនីអ្នកប្រើប្រាស់ផ្សេង' : 'Transfer Shop Ownership to Registered Account'}
+                    {tr(language, 'ផ្ទេរកម្មសិទ្ធិហាងទៅគណនីអ្នកប្រើប្រាស់ផ្សេង', 'Transfer Shop Ownership to Registered Account', '将店铺所有权转让给已注册账户')}
                   </span>
                 </h4>
                 <p className="text-xs text-stone-500 mt-0.5">
-                  {isKm
-                    ? 'ជ្រើសរើសគណនីអ្នកប្រើប្រាស់ថ្មី ដើម្បីភ្ជាប់កម្មសិទ្ធិហាងនេះ និងធ្វើសមកាលកម្មជាមួយ Database ភ្លាមៗ។'
-                    : 'Select the new registered user account to own this shop and synchronize with the database.'}
+                  {tr(language, 'ជ្រើសរើសគណនីអ្នកប្រើប្រាស់ថ្មី ដើម្បីភ្ជាប់កម្មសិទ្ធិហាងនេះ និងធ្វើសមកាលកម្មជាមួយ Database ភ្លាមៗ។', 'Select the new registered user account to own this shop and synchronize with the database.', '选择新的已注册用户账户以接管此店铺并立即同步至数据库。')}
                 </p>
               </div>
               <button
@@ -2627,7 +2552,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 Shop ID: {shopTransferModalTarget.id}
               </div>
               <div className="text-[11px] text-stone-600 dark:text-stone-400">
-                {isKm ? 'ម្ចាស់បច្ចុប្បន្ន៖ ' : 'Current Owner: '}
+                {tr(language, 'ម្ចាស់បច្ចុប្បន្ន៖ ', 'Current Owner: ', '当前所有者：')}
                 <strong>{shopTransferModalTarget.ownerName || 'N/A'}</strong> ({shopTransferModalTarget.ownerId || 'N/A'}) •{' '}
                 {shopTransferModalTarget.ownerEmail || 'N/A'} • {shopTransferModalTarget.ownerPhone || 'N/A'}
               </div>
@@ -2635,13 +2560,13 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
 
             <div className="space-y-2">
               <label className="block text-xs font-bold text-stone-700 dark:text-stone-200">
-                {isKm ? 'ស្វែងរកគណនីម្ចាស់ថ្មី (តាមឈ្មោះ, User ID, អ៊ីមែល ឬលេខទូរស័ព្ទ)៖' : 'Search Target Account (by Name, User ID, Email, or Phone):'}
+                {tr(language, 'ស្វែងរកគណនីម្ចាស់ថ្មី (តាមឈ្មោះ, User ID, អ៊ីមែល ឬលេខទូរស័ព្ទ)៖', 'Search Target Account (by Name, User ID, Email, or Phone):', '搜索目标账户（通过姓名、用户 ID、邮箱或电话）：')}
               </label>
               <input
                 type="text"
                 value={transferTargetQuery}
                 onChange={(e) => setTransferTargetQuery(e.target.value)}
-                placeholder={isKm ? 'វាយឈ្មោះ, អ៊ីមែល, លេខទូរស័ព្ទ ឬ User ID...' : 'Type Name, Email, Phone, or User ID...'}
+                placeholder={tr(language, 'វាយឈ្មោះ, អ៊ីមែល, លេខទូរស័ព្ទ ឬ User ID...', 'Type Name, Email, Phone, or User ID...', '输入姓名、邮箱、电话或用户 ID...')}
                 className="w-full px-3.5 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs"
               />
 
@@ -2680,7 +2605,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           </div>
                         </div>
                         <span className="text-[10px] font-extrabold shrink-0">
-                          {isPicked ? (isKm ? '✓ បានជ្រើសរើស' : '✓ Selected') : (isKm ? 'ជ្រើសរើស' : 'Select')}
+                          {isPicked ? (tr(language, '✓ បានជ្រើសរើស', '✓ Selected', '✓ 已选择')) : (tr(language, 'ជ្រើសរើស', 'Select', '选择'))}
                         </span>
                       </button>
                     );
@@ -2694,7 +2619,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 onClick={() => setShopTransferModalTarget(null)}
                 className="px-4 py-2 rounded-xl bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-bold cursor-pointer"
               >
-                {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
+                {tr(language, 'បោះបង់ (Cancel)', 'Cancel', '取消')}
               </button>
               <button
                 type="button"
@@ -2707,7 +2632,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 }}
                 className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white text-xs font-extrabold cursor-pointer shadow-sm"
               >
-                {isKm ? '🔄 បញ្ជាក់ការផ្ទេរកម្មសិទ្ធិហាង' : '🔄 Confirm Ownership Transfer'}
+                {tr(language, '🔄 បញ្ជាក់ការផ្ទេរកម្មសិទ្ធិហាង', '🔄 Confirm Ownership Transfer', '🔄 确认转让所有权')}
               </button>
             </div>
           </div>
@@ -2739,17 +2664,11 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
               <div>
                 <h4 className="font-extrabold text-stone-900 dark:text-white text-sm">
                   {pendingDeleteTargets.length === 1
-                    ? isKm
-                      ? `គ្រប់គ្រង ឬលុបគណនី "${pendingDeleteTargets[0].name}"`
-                      : `Manage or Delete "${pendingDeleteTargets[0].name}"`
-                    : isKm
-                    ? `គ្រប់គ្រង ឬលុបគណនីចំនួន ${pendingDeleteTargets.length} ក្នុងពេលតែមួយ`
-                    : `Batch Manage or Delete ${pendingDeleteTargets.length} Accounts`}
+                    ? tr(language, `គ្រប់គ្រង ឬលុបគណនី "${pendingDeleteTargets[0].name}"`, `Manage or Delete "${pendingDeleteTargets[0].name}"`, `管理或删除“${pendingDeleteTargets[0].name}”`)
+                    : tr(language, `គ្រប់គ្រង ឬលុបគណនីចំនួន ${pendingDeleteTargets.length} ក្នុងពេលតែមួយ`, `Batch Manage or Delete ${pendingDeleteTargets.length} Accounts`, `批量管理或删除 ${pendingDeleteTargets.length} 个账户`)}
                 </h4>
                 <p className="text-xs text-stone-500 mt-0.5">
-                  {isKm
-                    ? 'សូមជ្រើសរើសជម្រើសណាមួយខាងក្រោមដោយប្រុងប្រយ័ត្ន (ប្រព័ន្ធនឹងបង្កើត Snapshot Backup ស្វ័យប្រវត្តិមុនពេលលុប)៖'
-                    : 'Choose one of the 3 safe options below (an automatic recovery snapshot is created before any action):'}
+                  {tr(language, 'សូមជ្រើសរើសជម្រើសណាមួយខាងក្រោមដោយប្រុងប្រយ័ត្ន (ប្រព័ន្ធនឹងបង្កើត Snapshot Backup ស្វ័យប្រវត្តិមុនពេលលុប)៖', 'Choose one of the 3 safe options below (an automatic recovery snapshot is created before any action):', '请在下方 3 个安全选项中选择一项（执行前会自动创建恢复快照）：')}
                 </p>
               </div>
             </div>
@@ -2757,7 +2676,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             {/* Option 1: Cancel VIP Only */}
             <div className="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/70 space-y-2">
               <h5 className="font-bold text-xs text-amber-900 dark:text-amber-200">
-                {isKm ? 'ជម្រើសទី ១៖ បិទតែសមាជិកភាព VIP ប៉ុណ្ណោះ' : 'Option 1: Cancel VIP Status Only'}
+                {tr(language, 'ជម្រើសទី ១៖ បិទតែសមាជិកភាព VIP ប៉ុណ្ណោះ', 'Option 1: Cancel VIP Status Only', '选项 1：仅取消 VIP 状态')}
               </h5>
               <button
                 type="button"
@@ -2778,14 +2697,14 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 }}
                 className="w-full py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-extrabold text-xs cursor-pointer"
               >
-                {isKm ? 'បិទតែសមាជិកភាព VIP (រក្សាទុកគណនី)' : 'Cancel VIP Only (Keep Account Active)'}
+                {tr(language, 'បិទតែសមាជិកភាព VIP (រក្សាទុកគណនី)', 'Cancel VIP Only (Keep Account Active)', '仅取消 VIP（保留账户正常激活）')}
               </button>
             </div>
 
             {/* Option 2: Temporarily Suspend / Reactivate */}
             <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/70 space-y-2">
               <h5 className="font-bold text-xs text-blue-900 dark:text-blue-200">
-                {isKm ? 'ជម្រើសទី ២៖ ផ្អាក ឬបើកដំណើរការគណនីបណ្តោះអាសន្ន' : 'Option 2: Temporarily Suspend or Reactivate'}
+                {tr(language, 'ជម្រើសទី ២៖ ផ្អាក ឬបើកដំណើរការគណនីបណ្តោះអាសន្ន', 'Option 2: Temporarily Suspend or Reactivate', '选项 2：临时暂停或重新激活')}
               </h5>
               <div className="flex gap-2">
                 <button
@@ -2810,7 +2729,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   }}
                   className="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs cursor-pointer"
                 >
-                  {isKm ? 'ផ្អាកគណនីបណ្តោះអាសន្ន' : 'Suspend Account(s)'}
+                  {tr(language, 'ផ្អាកគណនីបណ្តោះអាសន្ន', 'Suspend Account(s)', '暂停账户')}
                 </button>
                 <button
                   type="button"
@@ -2834,7 +2753,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   }}
                   className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer"
                 >
-                  {isKm ? 'បើកដំណើរការវិញ' : 'Reactivate'}
+                  {tr(language, 'បើកដំណើរការវិញ', 'Reactivate', '重新激活')}
                 </button>
               </div>
             </div>
@@ -2842,7 +2761,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
             {/* Option 3: Permanent Delete */}
             <div className="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/40 border-2 border-rose-300 dark:border-rose-800 space-y-2.5">
               <h5 className="font-bold text-xs text-rose-900 dark:text-rose-200">
-                {isKm ? 'ជម្រើសទី ៣៖ លុបគណនីជាអចិន្ត្រៃយ៍ (Delete Forever)' : 'Option 3: Delete Account Forever'}
+                {tr(language, 'ជម្រើសទី ៣៖ លុបគណនីជាអចិន្ត្រៃយ៍ (Delete Forever)', 'Option 3: Delete Account Forever', '选项 3：永久删除账户')}
               </h5>
               <label className="flex items-start gap-2 p-2 rounded-xl bg-white/80 dark:bg-stone-900/70 border border-rose-300 dark:border-rose-800 cursor-pointer select-none">
                 <input
@@ -2852,9 +2771,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                   className="w-4 h-4 mt-0.5 rounded accent-rose-600 cursor-pointer shrink-0"
                 />
                 <span className="text-[11px] font-bold text-rose-800 dark:text-rose-200 leading-snug">
-                  {isKm
-                    ? 'ខ្ញុំយល់ព្រម និងបញ្ជាក់ថាចង់លុបគណនីនេះចេញពីបញ្ជី'
-                    : 'I confirm that I want to permanently delete the selected account(s)'}
+                  {tr(language, 'ខ្ញុំយល់ព្រម និងបញ្ជាក់ថាចង់លុបគណនីនេះចេញពីបញ្ជី', 'I confirm that I want to permanently delete the selected account(s)', '我确认要永久删除所选账户')}
                 </span>
               </label>
 
@@ -2881,12 +2798,8 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                 className="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white font-bold text-xs transition cursor-pointer"
               >
                 {isDeletingUser
-                  ? isKm
-                    ? 'កំពុងលុប...'
-                    : 'Deleting...'
-                  : isKm
-                  ? `លុបគណនីជាអចិន្ត្រៃយ៍ (${pendingDeleteTargets.length})`
-                  : `Delete Forever (${pendingDeleteTargets.length})`}
+                  ? tr(language, 'កំពុងលុប...', 'Deleting...', '正在删除...')
+                  : tr(language, `លុបគណនីជាអចិន្ត្រៃយ៍ (${pendingDeleteTargets.length})`, `Delete Forever (${pendingDeleteTargets.length})`, `永久删除 (${pendingDeleteTargets.length})`)}
               </button>
             </div>
 
@@ -2900,7 +2813,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
               }}
               className="w-full py-2.5 px-4 rounded-xl bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold text-xs cursor-pointer"
             >
-              {isKm ? 'បោះបង់ / បិទផ្ទាំងនេះ (Cancel)' : 'Cancel'}
+              {tr(language, 'បោះបង់ / បិទផ្ទាំងនេះ (Cancel)', 'Cancel', '取消')}
             </button>
           </div>
         </div>

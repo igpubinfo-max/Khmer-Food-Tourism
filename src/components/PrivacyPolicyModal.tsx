@@ -76,7 +76,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
               onClick={() => setLanguage(language === 'km' ? 'en' : language === 'en' ? 'zh' : 'km')}
               className="px-2.5 py-1 rounded-xl bg-white/15 hover:bg-white/25 text-[10px] font-extrabold tracking-wide border border-white/25 transition cursor-pointer"
             >
-              <span className={language === 'km' ? 'text-amber-300' : 'text-white/75'}>ខ្មែរ</span>
+              <span className={tr(language, 'text-amber-300', 'text-white/75', 'text-white/75')}>ខ្មែរ</span>
               <span className="text-white/40 mx-0.5">/</span>
               <span className={language === 'en' ? 'text-amber-300' : 'text-white/75'}>EN</span>
               <span className="text-white/40 mx-0.5">/</span>

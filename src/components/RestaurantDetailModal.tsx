@@ -18,6 +18,9 @@ import {
 import { RestaurantImageModal } from './RestaurantImageModal';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
+import { isHotelBusinessRecord } from '../types';
+import { DetailedFourPartRatingsCard } from './common/CambodiaChoiceAndRatings';
+import { NearbyEcosystemSection } from './common/NearbyEcosystemSection';
 import { getLocalizedRestaurant, translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
   sanitizeDialablePhone,
@@ -108,9 +111,7 @@ export const RestaurantDetailModal: React.FC = () => {
       return;
     }
     showToast(
-      isKm
-        ? 'កំពុងស្វែងរកលេខទូរស័ព្ទហាងពី Google Maps...'
-        : 'Checking Google Maps for restaurant phone number...',
+      tr(language, 'កំពុងស្វែងរកលេខទូរស័ព្ទហាងពី Google Maps...', 'Checking Google Maps for restaurant phone number...', '正在 Google Maps 查询餐厅电话号码...'),
       'info'
     );
     const foundPhone = await resolveRestaurantPhoneOnDemand(
@@ -127,9 +128,7 @@ export const RestaurantDetailModal: React.FC = () => {
     }
     if (isPlaceLocationVerified(selectedRestaurant)) {
       showToast(
-        isKm
-          ? 'ហាងនេះមិនបានដាក់លេខទូរស័ព្ទលើផែនទីទេ — កំពុងបើកទីតាំងលើ Google Maps ជូនលោកអ្នក!'
-          : 'This shop has not listed a phone number on the map — opening Google Maps!',
+        tr(language, 'ហាងនេះមិនបានដាក់លេខទូរស័ព្ទលើផែនទីទេ — កំពុងបើកទីតាំងលើ Google Maps ជូនលោកអ្នក!', 'This shop has not listed a phone number on the map — opening Google Maps!', '该店铺在地图上未登记电话号码 — 正在打开 Google Maps！'),
         'warning'
       );
     }
@@ -159,9 +158,7 @@ export const RestaurantDetailModal: React.FC = () => {
     nameKh: selectedRestaurant.nameKh,
     nameEn: selectedRestaurant.nameEn,
     description: isKm ? selectedRestaurant.descriptionKh : selectedRestaurant.descriptionEn,
-    location: isKm
-      ? `${selectedRestaurant.addressKh} (${selectedRestaurant.provinceKh})`
-      : `${selectedRestaurant.addressEn} (${selectedRestaurant.provinceEn})`,
+    location: tr(language, `${selectedRestaurant.addressKh} (${selectedRestaurant.provinceKh})`, `${selectedRestaurant.addressEn} (${selectedRestaurant.provinceEn})`, `${selectedRestaurant.addressEn} (${selectedRestaurant.provinceEn})`),
     phone: displayPhone || selectedRestaurant.phone,
     signatureDishes: selectedRestaurant.signatureDishesKh,
     photoUrl: activePhoto || selectedRestaurant.photoUrl,
@@ -460,6 +457,14 @@ export const RestaurantDetailModal: React.FC = () => {
               </p>
             </div>
 
+            <DetailedFourPartRatingsCard
+              id={selectedRestaurant.id}
+              rating={selectedRestaurant.rating}
+              reviewCount={selectedRestaurant.reviewCount}
+              kind={isHotelBusinessRecord(selectedRestaurant) ? 'hotel' : 'restaurant'}
+              language={language}
+            />
+
             {/* Signature Dishes / Highlights List (matching Hotel Detail Modal) */}
             {loc.signatureDishes && loc.signatureDishes.length > 0 && (
               <div className="font-khmer">
@@ -479,6 +484,17 @@ export const RestaurantDetailModal: React.FC = () => {
                 </div>
               </div>
             )}
+
+            <NearbyEcosystemSection
+              language={language}
+              origin={{
+                id: selectedRestaurant.id,
+                latitude: selectedRestaurant.latitude,
+                longitude: selectedRestaurant.longitude,
+                provinceKh: selectedRestaurant.provinceKh,
+                provinceEn: selectedRestaurant.provinceEn,
+              }}
+            />
 
             {/* Shop Profile Photos + Edit Photos Button */}
             {(categorizedPhotos.length > 1 || isAdmin) && (
@@ -836,7 +852,7 @@ export const RestaurantDetailModal: React.FC = () => {
         onSave={(updated) => {
           updateRestaurant(updated);
           setActivePhoto(updated.photoUrl);
-          showToast(isKm ? 'បានផ្លាស់ប្តូររូបភាពហាងជោគជ័យ!' : 'Restaurant photo updated successfully!', 'success');
+          showToast(tr(language, 'បានផ្លាស់ប្តូររូបភាពហាងជោគជ័យ!', 'Restaurant photo updated successfully!', '餐厅照片更新成功！'), 'success');
         }}
         isKm={isKm}
       />

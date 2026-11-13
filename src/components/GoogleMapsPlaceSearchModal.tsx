@@ -298,9 +298,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
   const handleUseMyGpsLocation = () => {
     if (!navigator.geolocation) {
       showToast(
-        language === 'km'
-          ? 'ឧបករណ៍របស់អ្នកមិនគាំទ្រការចាប់ទីតាំង GPS ទេ'
-          : 'Geolocation is not supported on this device',
+        tr(language, 'ឧបករណ៍របស់អ្នកមិនគាំទ្រការចាប់ទីតាំង GPS ទេ', 'Geolocation is not supported on this device', '此设备不支持地理定位'),
         'warning'
       );
       return;
@@ -313,9 +311,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         setSearchScope('nearby');
         setGpsLoading(false);
         showToast(
-          language === 'km'
-            ? `📍 បានចាប់ទីតាំង GPS របស់អ្នក (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`
-            : `📍 GPS Location locked (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`,
+          tr(language, `📍 បានចាប់ទីតាំង GPS របស់អ្នក (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`, `📍 GPS Location locked (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`, `📍 GPS 定位已锁定 (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`),
           'success'
         );
         executeSearch({ loc: coords, scope: 'nearby' });
@@ -323,9 +319,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       () => {
         setGpsLoading(false);
         showToast(
-          language === 'km'
-            ? '⚠️ មិនអាចចាប់ទីតាំង GPS បានទេ។ សូមអនុញ្ញាតសិទ្ធិ Location លើឧបករណ៍របស់អ្នក។'
-            : '⚠️ Unable to get GPS location. Please enable Location permission.',
+          tr(language, '⚠️ មិនអាចចាប់ទីតាំង GPS បានទេ។ សូមអនុញ្ញាតសិទ្ធិ Location លើឧបករណ៍របស់អ្នក។', '⚠️ Unable to get GPS location. Please enable Location permission.', '⚠️ 无法获取 GPS 位置。请启用定位权限。'),
           'warning'
         );
       },
@@ -411,9 +405,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     }
     setSelectedPlaceIds(new Set());
     showToast(
-      language === 'km'
-        ? `📥 បាននាំចូលទីតាំងថ្មីចំនួន ${importedCount} ${duplicateCount > 0 ? `(រំលងទីតាំងស្ទួន ${duplicateCount})` : ''} ដោយជោគជ័យ!`
-        : `📥 Imported ${importedCount} new places ${duplicateCount > 0 ? `(${duplicateCount} duplicates synced)` : ''}!`,
+      tr(language, `📥 បាននាំចូលទីតាំងថ្មីចំនួន ${importedCount} ${duplicateCount > 0 ? `(រំលងទីតាំងស្ទួន ${duplicateCount})` : ''} ដោយជោគជ័យ!`, `📥 Imported ${importedCount} new places ${duplicateCount > 0 ? `(${duplicateCount} duplicates synced)` : ''}!`, `📥 成功导入 ${importedCount} 个新地点 ${duplicateCount > 0 ? `(${duplicateCount} duplicates synced)` : ''}！`),
       'success'
     );
   };
@@ -785,9 +777,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                       className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
                     />
                     <span>
-                      {language === 'km'
-                        ? `ជ្រើសរើសទាំងអស់ (${selectedPlaceIds.size})`
-                        : `Select page (${selectedPlaceIds.size})`}
+                      {tr(language, `ជ្រើសរើសទាំងអស់ (${selectedPlaceIds.size})`, `Select page (${selectedPlaceIds.size})`, `选择本页 (${selectedPlaceIds.size})`)}
                     </span>
                   </label>
                 )}

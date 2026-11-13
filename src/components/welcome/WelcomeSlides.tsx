@@ -3,6 +3,7 @@ import { WifiOff, CheckCircle2 } from 'lucide-react';
 import type { Language } from '../../types';
 import { WELCOME_SLIDES, WELCOME_LABELS, WELCOME_IMAGES } from './welcomeContent';
 import { WelcomeTopBar } from './WelcomeTopBar';
+import { tr } from '../../utils/i18n';
 
 interface Props {
   language: Language;
@@ -78,7 +79,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
                 {slide.tagline[language]}
               </p>
               <h2
-                className={`font-extrabold text-white leading-tight ${language === 'km' ? 'font-moul text-lg sm:text-xl' : 'text-xl sm:text-2xl'}`}
+                className={`font-extrabold text-white leading-tight ${tr(language, 'font-moul text-lg sm:text-xl', 'text-xl sm:text-2xl', 'text-xl sm:text-2xl')}`}
                 style={{ textShadow: '0 2px 10px rgba(0,0,0,0.9)' }}
               >
                 {slide.headline[language]}

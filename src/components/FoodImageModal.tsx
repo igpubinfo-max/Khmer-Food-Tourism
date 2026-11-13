@@ -11,6 +11,8 @@ import {
   pickImageUsingNativeAndroidGallery,
 } from '../utils/androidMediaHelper';
 import { applyFoodWatermarkOnce } from '../utils/foodWatermark';
+import { useApp } from '../context/AppContext';
+import { tr } from '../utils/i18n';
 
 interface FoodImageModalProps {
   food: FoodItem | null;
@@ -43,6 +45,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   onSave,
   isKm,
 }) => {
+  const { language } = useApp();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [photoUrl, setPhotoUrl] = useState('');
@@ -87,10 +90,10 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
         setUrlInput(results[0].url);
         setHasUnappliedUrlDraft(false);
         setAuditStatus('verified');
-        setAuditNote(isKm ? `រូបភាពស្វែងរកពី Online ដោយស្វ័យប្រវត្តិ (${results[0].source})` : `Auto-matched online photo (${results[0].source})`);
+        setAuditNote(tr(language, `រូបភាពស្វែងរកពី Online ដោយស្វ័យប្រវត្តិ (${results[0].source})`, `Auto-matched online photo (${results[0].source})`, `已自动匹配在线图片 (${results[0].source})`));
       }
     } catch (err: any) {
-      setErrorMsg(err.message || (isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food images'));
+      setErrorMsg(err.message || (tr(language, 'មិនអាចស្វែងរករូបភាពពី Online បានទេ', 'Failed to search online food images', '无法搜索在线美食图片')));
     } finally {
       setIsSearchingOnline(false);
     }
@@ -112,9 +115,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
       if (pick.dataUrl) {
         const wmRes = await applyFoodWatermarkOnce(pick.dataUrl, { maxWidth: 2400, maxHeight: 2400, quality: 0.94, outputMimeType: 'image/jpeg' });
         pick.dataUrl = wmRes.dataUrl;
-        const note = isKm
-          ? `រូបភាពបានបញ្ចូលដោយរដ្ឋបាលពីទូរស័ព្ទ (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`
-          : `Custom photo uploaded by admin (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`;
+        const note = tr(language, `រូបភាពបានបញ្ចូលដោយរដ្ឋបាលពីទូរស័ព្ទ (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`, `Custom photo uploaded by admin (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`, `管理员上传的自定义图片 (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`);
         setPhotoUrl(pick.dataUrl);
         setUrlInput('');
         setHasUnappliedUrlDraft(false);
@@ -148,13 +149,13 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
     // Validate type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type.toLowerCase())) {
-      setErrorMsg(isKm ? 'សូមជ្រើសរើសប្រភេទរូបភាព JPG, PNG ឬ WebP ប៉ុណ្ណោះ' : 'Please select a JPG, PNG, or WebP image');
+      setErrorMsg(tr(language, 'សូមជ្រើសរើសប្រភេទរូបភាព JPG, PNG ឬ WebP ប៉ុណ្ណោះ', 'Please select a JPG, PNG, or WebP image', '请选择 JPG、PNG 或 WebP 图片'));
       return;
     }
 
     // Validate size (max 12MB before compression)
     if (file.size > 12 * 1024 * 1024) {
-      setErrorMsg(isKm ? 'ទំហំរូបភាពធំពេក (អតិបរមា 12MB)' : 'File size is too large (max 12MB)');
+      setErrorMsg(tr(language, 'ទំហំរូបភាពធំពេក (អតិបរមា 12MB)', 'File size is too large (max 12MB)', '文件过大（最大 12MB）'));
       return;
     }
 
@@ -162,9 +163,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
     setIsProcessing(true);
     try {
       const compressedDataUrl = await compressImageFile(file);
-      const note = isKm 
-        ? `រូបភាពបានបញ្ចូលដោយរដ្ឋបាលពីទូរស័ព្ទ/កុំព្យូទ័រ (${(compressedDataUrl.length / 1024).toFixed(0)} KB)` 
-        : `Custom photo uploaded by admin (${(compressedDataUrl.length / 1024).toFixed(0)} KB)`;
+      const note = tr(language, `រូបភាពបានបញ្ចូលដោយរដ្ឋបាលពីទូរស័ព្ទ/កុំព្យូទ័រ (${(compressedDataUrl.length / 1024).toFixed(0)} KB)`, `Custom photo uploaded by admin (${(compressedDataUrl.length / 1024).toFixed(0)} KB)`, `管理员上传的自定义图片 (${(compressedDataUrl.length / 1024).toFixed(0)} KB)`);
       setPhotoUrl(compressedDataUrl);
       setUrlInput('');
       setHasUnappliedUrlDraft(false);
@@ -192,13 +191,13 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
   const handleApplyUrl = () => {
     const check = normalizeAndValidateImage(urlInput, isKm);
     if (!check.isValid) {
-      setErrorMsg(check.error || (isKm ? 'តំណភ្ជាប់រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image URL'));
+      setErrorMsg(check.error || (tr(language, 'តំណភ្ជាប់រូបភាពមិនត្រឹមត្រូវ', 'Invalid image URL', '图片链接无效')));
       return;
     }
     setPhotoUrl(check.normalizedUrl);
     setHasUnappliedUrlDraft(false);
     setAuditStatus('verified');
-    setAuditNote(isKm ? 'រូបភាពតំណភ្ជាប់ URL កំណត់ដោយរដ្ឋបាល' : 'Image URL set by administrator');
+    setAuditNote(tr(language, 'រូបភាពតំណភ្ជាប់ URL កំណត់ដោយរដ្ឋបាល', 'Image URL set by administrator', '管理员设置的图片链接'));
     setErrorMsg('');
   };
 
@@ -208,7 +207,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
     setUrlInput('');
     setHasUnappliedUrlDraft(false);
     setAuditStatus('verified');
-    setAuditNote(isKm ? 'បានកំណត់ទៅរូបភាពដើមពិតប្រាកដពី Magnific' : 'Reset to authentic food image');
+    setAuditNote(tr(language, 'បានកំណត់ទៅរូបភាពដើមពិតប្រាកដពី Magnific', 'Reset to authentic food image', '已重置为正宗美食原图'));
   };
 
   const handleSave = () => {
@@ -217,7 +216,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
     const check = normalizeAndValidateImage(candidate, isKm);
 
     if (!check.isValid) {
-      setErrorMsg(check.error || (isKm ? 'សូមបញ្ចូលរូបភាព ឬជ្រើសរើសឯកសារត្រឹមត្រូវ' : 'Please provide a valid image'));
+      setErrorMsg(check.error || (tr(language, 'សូមបញ្ចូលរូបភាព ឬជ្រើសរើសឯកសារត្រឹមត្រូវ', 'Please provide a valid image', '请提供有效的图片')));
       return;
     }
 
@@ -228,7 +227,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
       isCustomPhoto: check.normalizedUrl !== defaultStaticUrl,
       photoUpdatedAt: new Date().toISOString(),
       imageAuditStatus: auditStatus,
-      imageAuditNote: auditNote.trim() || (auditStatus === 'verified' ? (isKm ? 'បានផ្ទៀងផ្ទាត់ដោយរដ្ឋបាល' : 'Verified by admin') : (isKm ? 'រង់ចាំពិនិត្យ' : 'Pending review')),
+      imageAuditNote: auditNote.trim() || (auditStatus === 'verified' ? (tr(language, 'បានផ្ទៀងផ្ទាត់ដោយរដ្ឋបាល', 'Verified by admin', '已由管理员验证')) : (tr(language, 'រង់ចាំពិនិត្យ', 'Pending review', '等待审核'))),
     };
 
     try {
@@ -236,7 +235,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
       onClose();
     } catch (saveErr: any) {
       console.error('Failed to save food photo:', saveErr);
-      setErrorMsg(isKm ? 'បរាជ័យក្នុងការរក្សាទុករូបភាព' : 'Failed to save food photo');
+      setErrorMsg(tr(language, 'បរាជ័យក្នុងការរក្សាទុករូបភាព', 'Failed to save food photo', '美食图片保存失败'));
     }
   };
 
@@ -287,7 +286,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
             <div className="flex items-center justify-between">
               <span className="font-bold text-[#0F172A] dark:text-slate-300 flex items-center gap-1.5">
                 <Eye className="w-3.5 h-3.5 text-[#059669]" />
-                {isKm ? 'ការបង្ហាញរូបភាពក្នុងកម្មវិធី (Live App Preview)' : 'Live Mobile Card Preview'}
+                {tr(language, 'ការបង្ហាញរូបភាពក្នុងកម្មវិធី (Live App Preview)', 'Live Mobile Card Preview', '手机卡片实时预览')}
               </span>
               <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-[10px]">
                 <button
@@ -297,7 +296,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                     fitMode === 'cover' ? 'bg-[#064E3B] text-white' : 'text-slate-500'
                   }`}
                 >
-                  {isKm ? 'ពេញស៊ុម (Cover)' : 'Cover'}
+                  {tr(language, 'ពេញស៊ុម (Cover)', 'Cover', '填满')}
                 </button>
                 <button
                   type="button"
@@ -306,7 +305,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                     fitMode === 'contain' ? 'bg-[#064E3B] text-white' : 'text-slate-500'
                   }`}
                 >
-                  {isKm ? 'រូបពេញ (Contain)' : 'Fit'}
+                  {tr(language, 'រូបពេញ (Contain)', 'Fit', '完整显示')}
                 </button>
               </div>
             </div>
@@ -326,7 +325,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                 ) : (
                   <div className="text-center text-slate-400 p-4">
                     <ImageIcon className="w-8 h-8 mx-auto mb-1 opacity-50" />
-                    <span>{isKm ? 'មិនទាន់មានរូបភាព' : 'No photo selected'}</span>
+                    <span>{tr(language, 'មិនទាន់មានរូបភាព', 'No photo selected', '未选择图片')}</span>
                   </div>
                 )}
                 <div className="absolute top-2 left-2 bg-[#064E3B]/80 text-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
@@ -349,7 +348,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
             <div className="flex items-center justify-between">
               <span className="font-bold text-[#0F172A] dark:text-slate-200 flex items-center gap-1.5">
                 <Smartphone className="w-4 h-4 text-[#059669]" />
-                {isKm ? '១. ជ្រើសរើសពី រូបភាពរបស់ខ្ញុំ' : '1. Choose from My Photos'}
+                {tr(language, '១. ជ្រើសរើសពី រូបភាពរបស់ខ្ញុំ', '1. Choose from My Photos', '1. 从我的相册选择')}
               </span>
               <span className="text-[10px] text-slate-400">JPG, PNG, WebP</span>
             </div>
@@ -371,14 +370,12 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               <Upload className="w-4 h-4 text-emerald-300" />
               <span>
                 {isProcessing 
-                  ? (isKm ? 'កំពុងដំណើរការ និងបង្រួមរូបភាព...' : 'Optimizing image...') 
-                  : (isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos')}
+                  ? (tr(language, 'កំពុងដំណើរការ និងបង្រួមរូបភាព...', 'Optimizing image...', '正在优化图片...')) 
+                  : (tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册'))}
               </span>
             </button>
             <p className="text-[10px] text-slate-500 text-center">
-              {isKm 
-                ? 'ប្រព័ន្ធនឹងបង្រួមទំហំរូបភាពស្វ័យប្រវត្ត (WebP/JPEG) ដើម្បីឱ្យកម្មវិធីដំណើរការលឿននិងមិនគាំង' 
-                : 'Auto-compressed to high-performance WebP for fast offline loading'}
+              {tr(language, 'ប្រព័ន្ធនឹងបង្រួមទំហំរូបភាពស្វ័យប្រវត្ត (WebP/JPEG) ដើម្បីឱ្យកម្មវិធីដំណើរការលឿននិងមិនគាំង', 'Auto-compressed to high-performance WebP for fast offline loading', '已自动压缩为高性能 WebP，加载更快、支持离线')}
             </p>
           </div>
 
@@ -387,7 +384,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
             <div className="flex items-center justify-between gap-2">
               <span className="font-bold text-[#0F172A] dark:text-slate-200 flex items-center gap-1.5">
                 <Globe className="w-4 h-4 text-emerald-600" />
-                {isKm ? '២. ស្វែងរករូបភាពម្ហូបពី Online ឬបញ្ចូល URL' : '2. Auto Online Food Photo Search or Web URL'}
+                {tr(language, '២. ស្វែងរករូបភាពម្ហូបពី Online ឬបញ្ចូល URL', '2. Auto Online Food Photo Search or Web URL', '2. 自动在线搜索美食图片或输入网址')}
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold">
                 FREE API
@@ -403,17 +400,15 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               <Search className={`w-4 h-4 text-emerald-200 ${isSearchingOnline ? 'animate-spin' : ''}`} />
               <span>
                 {isSearchingOnline
-                  ? (isKm ? 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...' : 'Searching online food photos...')
-                  : (isKm ? 'ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ' : 'Auto-Search Matching Food Photos Online')}
+                  ? (tr(language, 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...', 'Searching online food photos...', '正在搜索在线美食图片...'))
+                  : (tr(language, 'ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ', 'Auto-Search Matching Food Photos Online', '自动在线搜索匹配的美食图片'))}
               </span>
             </button>
 
             {onlineCandidates.length > 0 && (
               <div className="space-y-1.5 pt-1">
                 <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block">
-                  {isKm
-                    ? `រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`
-                    : `Found ${onlineCandidates.length} matching online photos (tap to select):`}
+                  {tr(language, `រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`, `Found ${onlineCandidates.length} matching online photos (tap to select):`, `找到 ${onlineCandidates.length} 张匹配的在线图片（点击选择）：`)}
                 </span>
                 <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
                   {onlineCandidates.map((cand, idx) => {
@@ -428,9 +423,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                           setHasUnappliedUrlDraft(false);
                           setAuditStatus('verified');
                           setAuditNote(
-                            isKm
-                              ? `រូបភាពជ្រើសរើសពី Online (${cand.source})`
-                              : `Online photo selected (${cand.source})`
+                            tr(language, `រូបភាពជ្រើសរើសពី Online (${cand.source})`, `Online photo selected (${cand.source})`, `已选择在线图片 (${cand.source})`)
                           );
                         }}
                         className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition cursor-pointer group ${
@@ -482,7 +475,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                 onClick={handleApplyUrl}
                 className="px-3.5 py-2 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-bold transition shrink-0 active:scale-95 cursor-pointer"
               >
-                {isKm ? 'ដាក់រូប' : 'Apply'}
+                {tr(language, 'ដាក់រូប', 'Apply', '应用')}
               </button>
             </div>
           </div>
@@ -490,7 +483,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
           {/* Audit Status & Verification Note */}
           <div className="space-y-2 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
             <span className="font-bold text-[#0F172A] dark:text-slate-300 block">
-              {isKm ? 'ស្ថានភាពផ្ទៀងផ្ទាត់រូបភាព (Audit Status):' : 'Verification Status:'}
+              {tr(language, 'ស្ថានភាពផ្ទៀងផ្ទាត់រូបភាព (Audit Status):', 'Verification Status:', '验证状态：')}
             </span>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -503,7 +496,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4 text-[#059669]" />
-                <span>{isKm ? '✓ ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ' : '✓ Verified Authentic'}</span>
+                <span>{tr(language, '✓ ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ', '✓ Verified Authentic', '✓ 已验证为正宗')}</span>
               </button>
 
               <button
@@ -516,19 +509,19 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                 }`}
               >
                 <AlertTriangle className="w-4 h-4 text-amber-600" />
-                <span>{isKm ? '⚠️ រង់ចាំពិនិត្យ' : '⚠️ Pending Review'}</span>
+                <span>{tr(language, '⚠️ រង់ចាំពិនិត្យ', '⚠️ Pending Review', '⚠️ 待审核')}</span>
               </button>
             </div>
 
             <div className="pt-1">
               <label className="text-[11px] text-slate-500 block mb-1">
-                {isKm ? 'កំណត់ចំណាំសវនកម្ម (Audit Note):' : 'Audit Note / Source:'}
+                {tr(language, 'កំណត់ចំណាំសវនកម្ម (Audit Note):', 'Audit Note / Source:', '审核备注 / 来源：')}
               </label>
               <input 
                 type="text"
                 value={auditNote}
                 onChange={e => setAuditNote(e.target.value)}
-                placeholder={isKm ? 'ឧទាហរណ៍៖ រូបថតម្ហូបដើមពីហាង...' : 'e.g., Authentic traditional photo...'}
+                placeholder={tr(language, 'ឧទាហរណ៍៖ រូបថតម្ហូបដើមពីហាង...', 'e.g., Authentic traditional photo...', '例如：正宗传统美食图片...')}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] font-khmer"
               />
             </div>
@@ -544,7 +537,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
             title="កំណត់រូបភាពលំនាំដើមឡើងវិញ"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>{isKm ? 'កំណត់រូបដើម' : 'Reset'}</span>
+            <span>{tr(language, 'កំណត់រូបដើម', 'Reset', '重置')}</span>
           </button>
 
           <div className="flex gap-2">
@@ -553,7 +546,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-300 transition"
             >
-              {isKm ? 'បោះបង់' : 'Cancel'}
+              {tr(language, 'បោះបង់', 'Cancel', '取消')}
             </button>
             <button
               type="button"
@@ -561,7 +554,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               className="px-5 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold flex items-center gap-1.5 shadow-md shadow-emerald-950/20 transition active:scale-95"
             >
               <Check className="w-4 h-4 text-emerald-300" />
-              <span>{isKm ? 'រក្សាទុករូបភាព' : 'Save Photo'}</span>
+              <span>{tr(language, 'រក្សាទុករូបភាព', 'Save Photo', '保存图片')}</span>
             </button>
           </div>
         </div>

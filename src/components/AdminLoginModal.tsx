@@ -302,9 +302,7 @@ export const AdminLoginModal: React.FC = () => {
     if (!status.allowed) {
       setLockoutSeconds(status.remainingLockoutSeconds);
       setErrorMsg(
-        isKm 
-          ? `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!` 
-          : `Admin login locked out for brute-force protection. Try again in ${status.remainingLockoutSeconds}s!`
+        tr(language, `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!`, `Admin login locked out for brute-force protection. Try again in ${status.remainingLockoutSeconds}s!`, `管理员登录已被防暴力破解锁定。请在 ${status.remainingLockoutSeconds} 秒后重试！`)
       );
       return;
     }
@@ -323,15 +321,11 @@ export const AdminLoginModal: React.FC = () => {
             } catch {}
           }
           setErrorMsg(
-            isKm 
-              ? 'មិនទាន់បានចុះបញ្ជីស្នាមមេដៃក្នុង Keystore ទេ។ សូមវាយពាក្យសម្ងាត់ចូលលើកដំបូងសិន!' 
-              : 'Fingerprint not enrolled yet. Please login with password first to activate.'
+            tr(language, 'មិនទាន់បានចុះបញ្ជីស្នាមមេដៃក្នុង Keystore ទេ។ សូមវាយពាក្យសម្ងាត់ចូលលើកដំបូងសិន!', 'Fingerprint not enrolled yet. Please login with password first to activate.', '尚未注册指纹。请先使用密码登录以激活。')
           );
         } else if (!bioAuth.fallbackToPassword) {
           setErrorMsg(
-            isKm 
-              ? 'ការស្កេនស្នាមមេដៃមិនត្រូវគ្នាទេ! សូមសាកល្បងម្ដងទៀត ឬប្រើពាក្យសម្ងាត់។' 
-              : 'Biometric scan canceled or failed. Please use password.'
+            tr(language, 'ការស្កេនស្នាមមេដៃមិនត្រូវគ្នាទេ! សូមសាកល្បងម្ដងទៀត ឬប្រើពាក្យសម្ងាត់។', 'Biometric scan canceled or failed. Please use password.', '生物识别扫描已取消或失败。请使用密码登录。')
           );
         }
         return;
@@ -346,9 +340,7 @@ export const AdminLoginModal: React.FC = () => {
 
       if (typeof showToast === 'function') {
         showToast(
-          isKm 
-            ? 'ស្កេនស្នាមមេដៃជោគជ័យ! កំពុងចូលប្រព័ន្ធដោយស្វ័យប្រវត្តិ...' 
-            : 'Fingerprint verified! Logging in automatically...',
+          tr(language, 'ស្កេនស្នាមមេដៃជោគជ័យ! កំពុងចូលប្រព័ន្ធដោយស្វ័យប្រវត្តិ...', 'Fingerprint verified! Logging in automatically...', '指纹验证成功！正在自动登录...'),
           'success'
         );
       }
@@ -363,12 +355,12 @@ export const AdminLoginModal: React.FC = () => {
           setErrorMsg('');
           setIsAdminLoginModalOpen(false);
         } else {
-          setErrorMsg(isKm ? 'ព័ត៌មានផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវ' : 'Invalid admin credentials');
+          setErrorMsg(tr(language, 'ព័ត៌មានផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវ', 'Invalid admin credentials', '管理员凭据无效'));
         }
       }
     } catch (err: any) {
       console.warn('Biometric login exception:', err);
-      setErrorMsg(isKm ? 'បរាជ័យក្នុងការស្កេនស្នាមមេដៃ' : 'Biometric error occurred');
+      setErrorMsg(tr(language, 'បរាជ័យក្នុងការស្កេនស្នាមមេដៃ', 'Biometric error occurred', '发生生物识别错误'));
     } finally {
       setBiometricLoading(false);
     }
@@ -383,9 +375,7 @@ export const AdminLoginModal: React.FC = () => {
     if (!status.allowed) {
       setLockoutSeconds(status.remainingLockoutSeconds);
       setErrorMsg(
-        isKm 
-          ? `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!` 
-          : `Admin login locked out for brute-force protection. Try again in ${status.remainingLockoutSeconds}s!`
+        tr(language, `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!`, `Admin login locked out for brute-force protection. Try again in ${status.remainingLockoutSeconds}s!`, `管理员登录已被防暴力破解锁定。请在 ${status.remainingLockoutSeconds} 秒后重试！`)
       );
       return;
     }
@@ -400,16 +390,12 @@ export const AdminLoginModal: React.FC = () => {
         if (!postCheck.allowed) {
           setLockoutSeconds(postCheck.remainingLockoutSeconds);
           setErrorMsg(
-            isKm 
-              ? `ការប៉ុនប៉ងបរាជ័យលើសកំណត់! គណនីត្រូវបានចាក់សោរ ${Math.ceil(postCheck.remainingLockoutSeconds / 60)} នាទី។` 
-              : `Maximum failed attempts exceeded! Account locked for ${Math.ceil(postCheck.remainingLockoutSeconds / 60)} minutes.`
+            tr(language, `ការប៉ុនប៉ងបរាជ័យលើសកំណត់! គណនីត្រូវបានចាក់សោរ ${Math.ceil(postCheck.remainingLockoutSeconds / 60)} នាទី។`, `Maximum failed attempts exceeded! Account locked for ${Math.ceil(postCheck.remainingLockoutSeconds / 60)} minutes.`, `超出最大失败尝试次数！账户已锁定 ${Math.ceil(postCheck.remainingLockoutSeconds / 60)} 分钟。`)
           );
         } else {
           const rem = 5 - postCheck.failedAttempts;
           setErrorMsg(
-            isKm 
-              ? `ព័ត៌មានផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវ! (នៅសល់ ${rem} ដងទៀត)` 
-              : `Invalid admin credentials! (${rem} attempts remaining)`
+            tr(language, `ព័ត៌មានផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវ! (នៅសល់ ${rem} ដងទៀត)`, `Invalid admin credentials! (${rem} attempts remaining)`, `管理员凭据无效！（还剩 ${rem} 次尝试机会）`)
           );
         }
       } else {
@@ -426,7 +412,7 @@ export const AdminLoginModal: React.FC = () => {
         setIsAdminLoginModalOpen(false);
       }
     } catch {
-      setErrorMsg(isKm ? 'មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់សុវត្ថិភាព' : 'Authentication error occurred');
+      setErrorMsg(tr(language, 'មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់សុវត្ថិភាព', 'Authentication error occurred', '发生身份验证错误'));
     } finally {
       setLoading(false);
     }
@@ -438,12 +424,12 @@ export const AdminLoginModal: React.FC = () => {
     setErrorMsg('');
 
     if (newAdminPass.length < 8) {
-      setErrorMsg(isKm ? 'ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ!' : 'New password must be at least 8 characters!');
+      setErrorMsg(tr(language, 'ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ!', 'New password must be at least 8 characters!', '新密码长度必须至少为 8 个字符！'));
       return;
     }
 
     if (newAdminPass !== confirmAdminPass) {
-      setErrorMsg(isKm ? 'ការផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ!' : 'Passwords do not match!');
+      setErrorMsg(tr(language, 'ការផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ!', 'Passwords do not match!', '密码不匹配！'));
       return;
     }
 
@@ -455,15 +441,13 @@ export const AdminLoginModal: React.FC = () => {
           currentPassword: currentAdminPass,
         });
         if (srv.kind === 'invalid') {
-          setErrorMsg(isKm ? 'ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!' : 'Current password incorrect!');
+          setErrorMsg(tr(language, 'ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!', 'Current password incorrect!', '当前密码错误！'));
           setLoading(false);
           return;
         }
         if (srv.kind === 'pin_required') {
           setErrorMsg(
-            isKm
-              ? 'ការផ្ទៀងផ្ទាត់លេខកូដ PIN បានផុតកំណត់ សូមវាយលេខកូដ PIN ៦ ខ្ទង់ម្តងទៀត!'
-              : 'PIN verification expired. Please re-enter your 6-digit PIN first!'
+            tr(language, 'ការផ្ទៀងផ្ទាត់លេខកូដ PIN បានផុតកំណត់ សូមវាយលេខកូដ PIN ៦ ខ្ទង់ម្តងទៀត!', 'PIN verification expired. Please re-enter your 6-digit PIN first!', 'PIN 码验证已过期。请重新输入您的 6 位数 PIN 码！')
           );
           setAdminStep('pin');
           setLoading(false);
@@ -471,18 +455,14 @@ export const AdminLoginModal: React.FC = () => {
         }
         if (srv.kind === 'locked') {
           setErrorMsg(
-            isKm
-              ? `សូមរង់ចាំ ${srv.retryAfterSeconds || 60} វិនាទីមុនព្យាយាមម្តងទៀត!`
-              : `Too many attempts. Please wait ${srv.retryAfterSeconds || 60}s and retry!`
+            tr(language, `សូមរង់ចាំ ${srv.retryAfterSeconds || 60} វិនាទីមុនព្យាយាមម្តងទៀត!`, `Too many attempts. Please wait ${srv.retryAfterSeconds || 60}s and retry!`, `尝试次数过多。请等待 ${srv.retryAfterSeconds || 60} 秒后重试！`)
           );
           setLoading(false);
           return;
         }
         if (srv.kind !== 'ok') {
           setErrorMsg(
-            isKm
-              ? `មិនអាចធ្វើបច្ចុប្បន្នភាពលើ Server បានទេ (${srv.errorCode || 'UNAVAILABLE'})។`
-              : `Could not update password on server (${srv.errorCode || 'UNAVAILABLE'}).`
+            tr(language, `មិនអាចធ្វើបច្ចុប្បន្នភាពលើ Server បានទេ (${srv.errorCode || 'UNAVAILABLE'})។`, `Could not update password on server (${srv.errorCode || 'UNAVAILABLE'}).`, `无法在服务器上更新密码 (${srv.errorCode || 'UNAVAILABLE'})。`)
           );
           setLoading(false);
           return;
@@ -491,13 +471,13 @@ export const AdminLoginModal: React.FC = () => {
       } else {
         const isCurrentValid = await loginAdmin(username || 'admin', currentAdminPass);
         if (!isCurrentValid) {
-          setErrorMsg(isKm ? 'ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!' : 'Current password incorrect!');
+          setErrorMsg(tr(language, 'ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!', 'Current password incorrect!', '当前密码错误！'));
           setLoading(false);
           return;
         }
         const ok = await setAdminPassword(newAdminPass.trim(), currentAdminPass, true);
         if (!ok) {
-          setErrorMsg(isKm ? 'បរាជ័យក្នុងការផ្លាស់ប្តូរពាក្យសម្ងាត់' : 'Failed to update password');
+          setErrorMsg(tr(language, 'បរាជ័យក្នុងការផ្លាស់ប្តូរពាក្យសម្ងាត់', 'Failed to update password', '更新密码失败'));
           setLoading(false);
           return;
         }
@@ -507,11 +487,11 @@ export const AdminLoginModal: React.FC = () => {
       setConfirmAdminPass('');
       setActiveTab('login');
       showToast(
-        isKm ? '✅ ផ្លាស់ប្តូរពាក្យសម្ងាត់ជោគជ័យ' : '✅ Password updated successfully',
+        tr(language, '✅ ផ្លាស់ប្តូរពាក្យសម្ងាត់ជោគជ័យ', '✅ Password updated successfully', '✅ 密码更新成功'),
         'success'
       );
     } catch {
-      setErrorMsg(isKm ? 'បរាជ័យក្នុងការផ្លាស់ប្តូរពាក្យសម្ងាត់' : 'Failed to update password');
+      setErrorMsg(tr(language, 'បរាជ័យក្នុងការផ្លាស់ប្តូរពាក្យសម្ងាត់', 'Failed to update password', '更新密码失败'));
     } finally {
       setLoading(false);
     }
@@ -902,12 +882,10 @@ export const AdminLoginModal: React.FC = () => {
                   <Clock className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold block text-red-700 dark:text-red-300">
-                      {isKm ? 'គណនីត្រូវបានចាក់សោរបណ្តោះអាសន្ន!' : 'Account Temporarily Locked!'}
+                      {tr(language, 'គណនីត្រូវបានចាក់សោរបណ្តោះអាសន្ន!', 'Account Temporarily Locked!', '账户已被临时锁定！')}
                     </span>
                     <span>
-                      {isKm 
-                        ? `សូមរង់ចាំ ${lockoutSeconds} វិនាទី មុនពេលព្យាយាមម្តងទៀត ដើម្បីការពារការវាយប្រហារ Brute-force។` 
-                        : `Please wait ${lockoutSeconds}s before retrying (Brute-force mitigation active).`}
+                      {tr(language, `សូមរង់ចាំ ${lockoutSeconds} វិនាទី មុនពេលព្យាយាមម្តងទៀត ដើម្បីការពារការវាយប្រហារ Brute-force។`, `Please wait ${lockoutSeconds}s before retrying (Brute-force mitigation active).`, `请等待 ${lockoutSeconds} 秒后再试（防暴力破解保护已生效）。`)}
                     </span>
                   </div>
                 </div>
@@ -943,7 +921,7 @@ export const AdminLoginModal: React.FC = () => {
                           KEYSTORE ACTIVE • HARDWARE ENCRYPTED
                         </span>
                         <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                          {isKm ? 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth)' : 'Chea Savuth (System Admin)'}
+                          {tr(language, 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth)', 'Chea Savuth (System Admin)', 'Chea Savuth (系统管理员)')}
                         </h3>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                           Admin ID: {username || 'cheasavuth'}
@@ -961,15 +939,13 @@ export const AdminLoginModal: React.FC = () => {
                           <Fingerprint className="w-6 h-6 text-emerald-200" />
                           <span>
                             {biometricLoading
-                              ? (isKm ? 'កំពុងផ្ទៀងផ្ទាត់ស្នាមមេដៃ...' : 'Verifying Biometric...')
-                              : (isKm ? '👆 ស្កេនស្នាមមេដៃចូលរដ្ឋបាល' : '👆 Scan Fingerprint to Login')}
+                              ? (tr(language, 'កំពុងផ្ទៀងផ្ទាត់ស្នាមមេដៃ...', 'Verifying Biometric...', '正在验证生物识别...'))
+                              : (tr(language, '👆 ស្កេនស្នាមមេដៃចូលរដ្ឋបាល', '👆 Scan Fingerprint to Login', '👆 扫描指纹登录'))}
                           </span>
                         </button>
 
                         <p className="text-[10px] text-center text-emerald-700 dark:text-emerald-300">
-                          {isKm
-                            ? 'Android BiometricPrompt & Keystore • សុវត្ថិភាពខ្ពស់ ចូលរហ័សដោយស្វ័យប្រវត្តិ'
-                            : 'Protected by Android BiometricPrompt & Keystore • Fast auto-fill login'}
+                          {tr(language, 'Android BiometricPrompt & Keystore • សុវត្ថិភាពខ្ពស់ ចូលរហ័សដោយស្វ័យប្រវត្តិ', 'Protected by Android BiometricPrompt & Keystore • Fast auto-fill login', '受 Android BiometricPrompt 和 Keystore 保护 • 快速自动填充登录')}
                         </p>
                       </div>
 
@@ -984,7 +960,7 @@ export const AdminLoginModal: React.FC = () => {
                           className="text-[11px] font-bold text-emerald-800 dark:text-emerald-400 hover:underline flex items-center gap-1.5 mx-auto py-1.5 px-3 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition cursor-pointer"
                         >
                           <Lock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                          <span>{isKm ? '🔑 ចូលដោយប្រើពាក្យសម្ងាត់ (Password Login)' : '🔑 Login with Password'}</span>
+                          <span>{tr(language, '🔑 ចូលដោយប្រើពាក្យសម្ងាត់ (Password Login)', '🔑 Login with Password', '🔑 使用密码登录')}</span>
                         </button>
                       </div>
                     </div>
@@ -1001,13 +977,13 @@ export const AdminLoginModal: React.FC = () => {
                           className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-400 hover:underline flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 transition cursor-pointer"
                         >
                           <Fingerprint className="w-3.5 h-3.5" />
-                          <span>{isKm ? '← ត្រឡប់ទៅស្កេនស្នាមមេដៃ (Fingerprint Login)' : '← Switch to Fingerprint Login'}</span>
+                          <span>{tr(language, '← ត្រឡប់ទៅស្កេនស្នាមមេដៃ (Fingerprint Login)', '← Switch to Fingerprint Login', '← 切换到指纹登录')}</span>
                         </button>
                       )}
 
                       <div>
                         <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1.5">
-                          {isKm ? 'ឈ្មោះអ្នកគ្រប់គ្រង (Admin ID / Username)' : 'Admin ID / Username'}
+                          {tr(language, 'ឈ្មោះអ្នកគ្រប់គ្រង (Admin ID / Username)', 'Admin ID / Username', '管理员 ID / 用户名')}
                         </label>
                         <div className="relative">
                           <UserIcon className="w-5 h-5 text-emerald-600/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1018,7 +994,7 @@ export const AdminLoginModal: React.FC = () => {
                             required
                             disabled={lockoutSeconds > 0}
                             autoComplete="username" className={`w-full h-12 pl-11 pr-4 bg-slate-50 dark:bg-slate-800 border-2 rounded-2xl text-sm font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-4 focus:ring-[#059669]/15 focus:border-[#059669] disabled:opacity-50 transition-all ${errorMsg ? "border-red-300 dark:border-red-800" : "border-slate-200 dark:border-slate-700"}`}
-                            placeholder={isKm ? 'បញ្ចូលឈ្មោះអ្នកគ្រប់គ្រង' : 'Enter Admin ID'}
+                            placeholder={tr(language, 'បញ្ចូលឈ្មោះអ្នកគ្រប់គ្រង', 'Enter Admin ID', '输入管理员 ID')}
                           />
                         </div>
                         <div className="flex items-center justify-between mt-1.5 px-0.5">
@@ -1029,14 +1005,14 @@ export const AdminLoginModal: React.FC = () => {
                               onChange={e => setRememberUsername(e.target.checked)}
                               className="w-3.5 h-3.5 rounded text-[#059669] focus:ring-[#059669] border-slate-300 dark:border-slate-600 accent-[#059669]"
                             />
-                            <span>{isKm ? 'ចងចាំឈ្មោះអ្នកគ្រប់គ្រង (Remember Username)' : 'Remember Username'}</span>
+                            <span>{tr(language, 'ចងចាំឈ្មោះអ្នកគ្រប់គ្រង (Remember Username)', 'Remember Username', '记住用户名')}</span>
                           </label>
                         </div>
                       </div>
 
                       <div>
                         <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1.5">
-                          {isKm ? 'ពាក្យសម្ងាត់សុវត្ថិភាព (Password)' : 'Secure Password'}
+                          {tr(language, 'ពាក្យសម្ងាត់សុវត្ថិភាព (Password)', 'Secure Password', '安全密码')}
                         </label>
                         <div className="relative">
                           <Lock className="w-5 h-5 text-emerald-600/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1067,10 +1043,10 @@ export const AdminLoginModal: React.FC = () => {
                             <Fingerprint className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <div className="text-[11px] font-khmer text-emerald-900 dark:text-emerald-200">
                               <span className="font-bold block">
-                                {isKm ? 'បើកដំណើរការស្កេនស្នាមមេដៃលើទូរស័ព្ទនេះ' : 'Enable Fingerprint on this device'}
+                                {tr(language, 'បើកដំណើរការស្កេនស្នាមមេដៃលើទូរស័ព្ទនេះ', 'Enable Fingerprint on this device', '在此设备上启用指纹登录')}
                               </span>
                               <span className="text-[10px] text-emerald-700 dark:text-emerald-300">
-                                {isKm ? 'ចូលលឿនលើកក្រោយតាមរយៈ Android Keystore' : 'Fast 1-tap login next time'}
+                                {tr(language, 'ចូលលឿនលើកក្រោយតាមរយៈ Android Keystore', 'Fast 1-tap login next time', '下次即可一键快捷登录')}
                               </span>
                             </div>
                           </div>
@@ -1091,10 +1067,10 @@ export const AdminLoginModal: React.FC = () => {
                         <ShieldCheck className="w-5 h-5 text-amber-300" />
                         <span>
                           {loading 
-                            ? (isKm ? 'កំពុងផ្ទៀងផ្ទាត់សុវត្ថិភាព...' : 'Verifying...') 
+                            ? (tr(language, 'កំពុងផ្ទៀងផ្ទាត់សុវត្ថិភាព...', 'Verifying...', '正在验证...')) 
                             : lockoutSeconds > 0 
-                            ? (isKm ? `បានចាក់សោរ (${lockoutSeconds}s)` : `Locked (${lockoutSeconds}s)`)
-                            : (isKm ? 'ផ្ទៀងផ្ទាត់ និងចូលផ្ទាំងរដ្ឋបាល' : 'Authenticate & Unlock')}
+                            ? (tr(language, `បានចាក់សោរ (${lockoutSeconds}s)`, `Locked (${lockoutSeconds}s)`, `已锁定 (${lockoutSeconds}s)`))
+                            : (tr(language, 'ផ្ទៀងផ្ទាត់ និងចូលផ្ទាំងរដ្ឋបាល', 'Authenticate & Unlock', '验证并解锁'))}
                         </span>
                       </button>
                     </form>
@@ -1167,7 +1143,7 @@ export const AdminLoginModal: React.FC = () => {
                 <form onSubmit={handleChangePasswordSubmit} className="space-y-3.5">
                   <div>
                     <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1">
-                      {isKm ? 'ពាក្យសម្ងាត់បច្ចុប្បន្ន' : 'Current Password'}
+                      {tr(language, 'ពាក្យសម្ងាត់បច្ចុប្បន្ន', 'Current Password', '当前密码')}
                     </label>
                     <input
                       type="password"
@@ -1181,7 +1157,7 @@ export const AdminLoginModal: React.FC = () => {
 
                   <div>
                     <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1">
-                      {isKm ? 'ពាក្យសម្ងាត់ថ្មី (យ៉ាងហោច ៨ តួអក្សរ)' : 'New Password (min 8 characters)'}
+                      {tr(language, 'ពាក្យសម្ងាត់ថ្មី (យ៉ាងហោច ៨ តួអក្សរ)', 'New Password (min 8 characters)', '新密码（至少 8 个字符）')}
                     </label>
                     <input
                       type="password"
@@ -1195,7 +1171,7 @@ export const AdminLoginModal: React.FC = () => {
 
                   <div>
                     <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 font-khmer mb-1">
-                      {isKm ? 'ផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់ថ្មីម្តងទៀត' : 'Confirm New Password'}
+                      {tr(language, 'ផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់ថ្មីម្តងទៀត', 'Confirm New Password', '确认新密码')}
                     </label>
                     <input
                       type="password"
@@ -1213,7 +1189,7 @@ export const AdminLoginModal: React.FC = () => {
                     className="w-full h-14 px-4 bg-gradient-to-r from-[#064E3B] via-[#047857] to-[#059669] hover:brightness-110 text-white font-bold rounded-2xl shadow-lg shadow-emerald-900/30 border border-emerald-400/30 active:scale-[0.98] transition-all font-khmer text-base flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-                    <span>{loading ? (isKm ? 'កំពុងរក្សាទុក...' : 'Updating...') : (isKm ? 'ផ្លាស់ប្តូរ និង Hash PBKDF2 ថ្មី' : 'Hash PBKDF2 & Save Password')}</span>
+                    <span>{loading ? (tr(language, 'កំពុងរក្សាទុក...', 'Updating...', '正在更新...')) : (tr(language, 'ផ្លាស់ប្តូរ និង Hash PBKDF2 ថ្មី', 'Hash PBKDF2 & Save Password', 'PBKDF2 哈希并保存密码'))}</span>
                   </button>
                 </form>
               )}

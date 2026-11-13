@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1565;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1566;
 export const APP_RELEASE_DATE = '2026-11-13';
 
 /**
@@ -3897,7 +3897,7 @@ export interface Wishlist {
 
 // AI Trip Planner (ផែនការដើរលេង AI ដោយស្វ័យប្រវត្តិ)
 export interface TripPlanActivity {
-  timePeriod: 'morning' | 'lunch' | 'afternoon' | 'dinner';
+  timePeriod: 'breakfast' | 'morning' | 'lunch' | 'afternoon' | 'dinner' | 'stay';
   titleKh: string;
   titleEn: string;
   descKh: string;
@@ -3906,6 +3906,12 @@ export interface TripPlanActivity {
   dishNameKh?: string;
   photoUrl?: string;
   estimatedCostUsd: number;
+  /** Link to the real listing so the UI can open its detail card / GPS route. */
+  placeKind?: 'restaurant' | 'destination' | 'hotel';
+  placeId?: string;
+  placeNameEn?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface TripPlanDay {

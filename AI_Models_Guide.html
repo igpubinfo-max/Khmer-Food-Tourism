@@ -1,0 +1,357 @@
+﻿<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<title>ការណែនាំអំពីមុខងារនៃ Model នីមួយៗ</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 18mm 16mm;
+  }
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body {
+    font-family: 'Khmer OS Battambang', 'Battambang', 'Noto Sans Khmer', 'Segoe UI', Tahoma, sans-serif;
+    color: #1e293b;
+    background-color: #ffffff;
+    line-height: 1.65;
+    font-size: 13.5px;
+    margin: 0;
+    padding: 0;
+  }
+  .header {
+    border-bottom: 3px solid #0f766e;
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .header-title h1 {
+    font-family: 'Khmer OS Moul', 'KhmerMoul1', 'Moul', 'Khmer OS Battambang', sans-serif;
+    color: #0f766e;
+    font-size: 21px;
+    margin: 0 0 6px 0;
+    letter-spacing: 0.5px;
+  }
+  .header-title p {
+    color: #64748b;
+    font-size: 13px;
+    margin: 0;
+    font-weight: 500;
+  }
+  .header-meta {
+    text-align: right;
+    font-size: 11.5px;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  .intro-box {
+    background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
+    border-left: 4px solid #0d9488;
+    padding: 12px 16px;
+    border-radius: 0 10px 10px 0;
+    margin-bottom: 22px;
+    font-size: 13px;
+    color: #0f172a;
+  }
+  .model-card {
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    padding: 14px 16px;
+    background: #ffffff;
+    page-break-inside: avoid;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .model-card.active {
+    border: 2px solid #0284c7;
+    background: #f8fafc;
+  }
+  .model-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed #e2e8f0;
+    padding-bottom: 6px;
+  }
+  .model-name {
+    font-size: 15.5px;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: inline-block;
+  }
+  .badge-tag {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+  .badge-active {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+  }
+  .section-label {
+    font-weight: 700;
+    color: #047857;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    font-size: 13px;
+  }
+  .bullet-list {
+    margin: 4px 0 6px 18px;
+    padding: 0;
+  }
+  .bullet-list li {
+    margin-bottom: 3px;
+    color: #334155;
+  }
+  .use-case {
+    background: #f8fafc;
+    border-left: 3px solid #6366f1;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    margin-top: 6px;
+    color: #1e1b4b;
+  }
+  .summary-box {
+    margin-top: 24px;
+    background: #fafaf9;
+    border: 1.5px solid #d6d3d1;
+    border-radius: 10px;
+    padding: 14px 18px;
+    page-break-inside: avoid;
+  }
+  .summary-box h3 {
+    margin: 0 0 8px 0;
+    color: #b45309;
+    font-size: 15px;
+    font-family: 'Khmer OS Battambang', 'Battambang', sans-serif;
+  }
+  .footer {
+    margin-top: 25px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #94a3b8;
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-title">
+      <h1>ការណែនាំលម្អិតអំពីមុខងារនៃ Model នីមួយៗ</h1>
+      <p>AI Model Guide & Selection Strategy for Development & Daily Tasks</p>
+    </div>
+    <div class="header-meta">
+      កាលបរិច្ឆេទ៖ <strong>១៣ វិច្ឆិកា ២០២៦</strong><br>
+      គម្រោង៖ <strong>Khmer Food & Tourism</strong>
+    </div>
+  </div>
+
+  <div class="intro-box">
+    <strong>សេចក្តីផ្តើម៖</strong> ឯកសារនេះរៀបរាប់អំពីលក្ខណៈបច្ចេកទេស ចំណុចខ្លាំង មុខងារចម្បង និងករណីប្រើប្រាស់សមស្របរបស់ AI Models នីមួយៗ ដើម្បីជួយសម្រួលដល់ការសម្រេចចិត្តជ្រើសរើស Model ឱ្យត្រូវតាមតម្រូវការការងារជាក់ស្តែង។
+  </div>
+
+  <!-- 1. Gemini 4 Argon -->
+  <div class="model-card">
+    <div class="model-header">
+      <div class="model-name">
+        <span>១. Gemini 4 Argon (Medium)</span>
+      </div>
+      <div>
+        <span class="badge badge-tag">Deep Reasoning</span>
+        <span class="badge badge-tag">New</span>
+      </div>
+    </div>
+    <div class="section-label">មុខងារចម្បង៖</div>
+    <div>ជា Flagship Model កម្រិតខ្ពស់ជំនាន់ចុងក្រោយរបស់ Google DeepMind ដែលផ្តោតជាពិសេសលើសមត្ថភាពគិតស៊ីជម្រៅ (Deep Reasoning) និងការដោះស្រាយបញ្ហាស្មុគស្មាញបំផុត។</div>
+    <div class="section-label">ចំណុចខ្លាំងសំខាន់ៗ៖</div>
+    <ul class="bullet-list">
+      <li><strong>Complex Coding & Architecture:</strong> មានសមត្ថភាពខ្ពស់ក្នុងការសរសេរកូដធំៗ, Refactoring, ដោះស្រាយ Bug ពិបាកៗ និងរៀបចំ System Architecture។</li>
+      <li><strong>Logical Thinking:</strong> វិភាគលក្ខខណ្ឌលម្អិត ច្បាប់ (Rules) និងទំនាក់ទំនងពហុទិដ្ឋភាពបានយ៉ាងម៉ត់ចត់។</li>
+    </ul>
+    <div class="use-case">
+      <strong>ពេលណាគួរប្រើ៖</strong> ស័ក្តិសមសម្រាប់គម្រោងសរសេរកូដធំៗ ការដោះស្រាយកូដដែលមានកំហុសស្មុគស្មាញ ឬការងារដែលទាមទារភាពសុក្រឹតខ្ពស់បំផុត។
+    </div>
+  </div>
+
+  <!-- 2. Gemini 4 Hydrogen -->
+  <div class="model-card">
+    <div class="model-header">
+      <div class="model-name">
+        <span>២. Gemini 4 Hydrogen (Medium)</span>
+      </div>
+      <div>
+        <span class="badge badge-tag">Balanced Speed</span>
+        <span class="badge badge-tag">New</span>
+      </div>
+    </div>
+    <div class="section-label">មុខងារចម្បង៖</div>
+    <div>ជា Model ជំនាន់ថ្មីដែលបង្កើតឡើងដោយផ្តោតលើតុល្យភាពដ៏ប្រសើរបំផុតរវាង <strong>ល្បឿនលឿន (Speed)</strong> និង <strong>ភាពឆ្លាតវៃ (Intelligence)</strong>។</div>
+    <div class="section-label">ចំណុចខ្លាំងសំខាន់ៗ៖</div>
+    <ul class="bullet-list">
+      <li><strong>Fast Response:</strong> ដំណើរការឆ្លើយតបរហ័សទាន់ចិត្ត និងកាត់បន្ថយពេលវេលារង់ចាំ។</li>
+      <li><strong>Resource Efficiency:</strong> សន្សំសំចៃ Resource និងកម្រិតកូតា (Quota) សម្រាប់កិច្ចការប្រចាំថ្ងៃ។</li>
+      <li><strong>Code & Content Editing:</strong> កែសម្រួលកូដទូទៅ និងសរសេរអត្ថបទបានរលូន និងមានគុណភាពល្អ។</li>
+    </ul>
+    <div class="use-case">
+      <strong>ពេលណាគួរប្រើ៖</strong> ស័ក្តិសមសម្រាប់ការងារប្រចាំថ្ងៃ កិច្ចការដែលត្រូវការចម្លើយលឿនៗ ឬការសរសេរ Script តូចៗ។
+    </div>
+  </div>
+
+  <!-- 3. Orchestrator (Argon) -->
+  <div class="model-card">
+    <div class="model-header">
+      <div class="model-name">
+        <span>៣. Orchestrator (Argon)</span>
+      </div>
+      <div>
+        <span class="badge badge-tag">Multi-Agent Planner</span>
+        <span class="badge badge-tag">New</span>
+      </div>
+    </div>
+    <div class="section-label">មុខងារចម្បង៖</div>
+    <div>ជា Model ពិសេសដែលរចនាឡើងដើម្បីដើរតួជា <strong>អ្នកគ្រប់គ្រង និងដឹកនាំ (Coordinator / Planner)</strong> នៅក្នុងប្រព័ន្ធពហុភ្នាក់ងារ (Multi-Agent Swarm)។</div>
+    <div class="section-label">ចំណុចខ្លាំងសំខាន់ៗ៖</div>
+    <ul class="bullet-list">
+      <li><strong>Task Decomposition:</strong> បំបែកកិច្ចការធំៗ និងស្មុគស្មាញឱ្យក្លាយជាដំណាក់កាលតូចៗដែលអាចប្រតិបត្តិបានច្បាស់លាស់។</li>
+      <li><strong>Delegation & Synthesis:</strong> ចាត់ចែងភារកិច្ចឱ្យ Subagents ធ្វើការស្របគ្នា រួចប្រមូលផ្ដុំលទ្ធផលមកវិភាគបូកសរុប។</li>
+    </ul>
+    <div class="use-case">
+      <strong>ពេលណាគួរប្រើ៖</strong> ប្រើនៅពេលដំណើរការ Workflow ស្វ័យប្រវត្តិកម្រិតខ្ពស់ ឬប្រើប្រាស់ប្រព័ន្ធ Swarm Agents ធ្វើការស្របគ្នា។
+    </div>
+  </div>
+
+  <!-- 4. Gemini 3.8 Flash -->
+  <div class="model-card">
+    <div class="model-header">
+      <div class="model-name">
+        <span>៤. Gemini 3.8 Flash (Medium)</span>
+      </div>
+      <div>
+        <span class="badge badge-tag">Ultra-Fast & Lightweight</span>
+      </div>
+    </div>
+    <div class="section-label">មុខងារចម្បង៖</div>
+    <div>ជា Model ជំនាន់ស្រាល (Lightweight) ដែលល្បីល្បាញខាងល្បឿនឆ្លើយតបរហ័សបំផុត (Low Latency)។</div>
+    <div class="section-label">ចំណុចខ្លាំងសំខាន់ៗ៖</div>
+    <ul class="bullet-list">
+      <li><strong>Instant Output:</strong> ឆ្លើយតបភ្លាមៗ មិនបង្អង់យូរ។</li>
+      <li><strong>High Volume Handling:</strong> ល្អឥតខ្ចោះសម្រាប់ការងារដែលមានទំហំសំណើច្រើន (High-frequency requests)។</li>
+      <li><strong>Search & Summarization:</strong> ស្វែងរកឯកសារ សង្ខេបអត្ថបទ និងកែតម្រូវកូដកម្រិតមូលដ្ឋានបានរហ័ស។</li>
+    </ul>
+    <div class="use-case">
+      <strong>ពេលណាគួរប្រើ៖</strong> ពេលអ្នកចង់បានល្បឿនលឿនបំផុត សន្សំ Quota ឬធ្វើការងារស្រាលៗដូចជាសួរ-ឆ្លើយទូទៅ និងស្វែងរកទិន្នន័យ។
+    </div>
+  </div>
+
+  <!-- 5. Claude Opus 5.5 -->
+  <div class="model-card">
+    <div class="model-header">
+      <div class="model-name">
+        <span>៥. Claude Opus 5.5 (Medium)</span>
+      </div>
+      <div>
+        <span class="badge badge-tag">Deep Context & Reasoning</span>
+        <span class="badge badge-tag">New</span>
+      </div>
+    </div>
+    <div class="section-label">មុខងារចម្បង៖</div>
+    <div>ជា Model កំពូលធំបំផុតរបស់ Anthropic ដែលផ្តោតលើភាពស៊ីជម្រៅនៃការយល់ដឹង និងគុណភាពនៃការសរសេរភាសាកម្រិតខ្ពស់។</div>
+    <div class="section-label">ចំណុចខ្លាំងសំខាន់ៗ៖</div>
+    <ul class="bullet-list">
+      <li><strong>Massive Context Analysis:</strong> អាន និងវិភាគឯកសារ ឬកូដដែលមានទំហំធំៗរាប់ម៉ឺនជួរបានយ៉ាងច្បាស់លាស់។</li>
+      <li><strong>Technical Writing:</strong> សរសេរឯកសារបច្ចេកទេស និងខ្លឹមសារភាសាធម្មជាតិបានយ៉ាងរលូន មានរចនាសម្ព័ន្ធវិជ្ជាជីវៈ។</li>
+    </ul>
+    <div class="use-case">
+      <strong>ពេលណាគួរប្រើ៖</strong> គម្រោងស្រាវជ្រាវកម្រិតជ្រៅ ការវិភាគ System Architecture ធំៗ និងការរៀបចំឯកសារយុទ្ធសាស្ត្រ។
+    </div>
+  </div>
+
+  <!-- 6. Claude Sonnet 5.5 -->
+  <div class="model-card active">
+    <div class="model-header">
+      <div class="model-name">
+        <span>៦. Claude Sonnet 5.5 (Medium)</span>
+      </div>
+      <div>
+        <span class="badge badge-active">✓ កំពុងជ្រើសរើស (Selected)</span>
+        <span class="badge badge-tag">Top for Coding</span>
+      </div>
+    </div>
+    <div class="section-label">មុខងារចម្បង៖</div>
+    <div>ជា Model ដែលពេញនិយម និងមានតុល្យភាពល្អឥតខ្ចោះបំផុតសម្រាប់ការសរសេរកូដ (Software Development & Engineering) របស់ Anthropic។</div>
+    <div class="section-label">ចំណុចខ្លាំងសំខាន់ៗ៖</div>
+    <ul class="bullet-list">
+      <li><strong>Engineering & Coding Excellence:</strong> ឆ្លាតវៃខ្លាំងលើភាសា React, TypeScript, Java/Android, CSS និង UI Component Architecture។</li>
+      <li><strong>Clean Code & Precision:</strong> បង្កើតកូដស្អាត គ្មាន Error និងអនុវត្តតាម Best Practices បានយ៉ាងម៉ឺងម៉ាត់។</li>
+      <li><strong>Fast Iteration:</strong> ល្បឿនឆ្លើយតបលឿនជាង Opus ដោយរក្សាបាននូវភាពសុក្រឹតខ្ពស់។</li>
+    </ul>
+    <div class="use-case">
+      <strong>ពេលណាគួរប្រើ៖</strong> <strong>ជម្រើសល្អបំផុតសម្រាប់ App Development</strong> (រួមទាំងគម្រោង Khmer Food & Tourism)។
+    </div>
+  </div>
+
+  <!-- 7. GPT-OSS 120B -->
+  <div class="model-card">
+    <div class="model-header">
+      <div class="model-name">
+        <span>៧. GPT-OSS 120B (Medium)</span>
+      </div>
+      <div>
+        <span class="badge badge-tag">Open Weights</span>
+        <span class="badge badge-tag">120B Parameters</span>
+      </div>
+    </div>
+    <div class="section-label">មុខងារចម្បង៖</div>
+    <div>ជា Open-Source Model ខ្នាតធំ (120 Billion Parameters) ដែលបង្កើតឡើងលើស្ថាបត្យកម្មបើកទូលាយ (Open Architecture)។</div>
+    <div class="section-label">ចំណុចខ្លាំងសំខាន់ៗ៖</div>
+    <ul class="bullet-list">
+      <li><strong>Open-Weight Perspective:</strong> ផ្តល់ទស្សនវិស័យ និងដំណោះស្រាយបែប Open-source LLM ដោយមិនជាប់លក្ខខណ្ឌកម្មសិទ្ធិផ្តាច់មុខ។</li>
+      <li><strong>High Flexibility:</strong> មានភាពបត់បែន និងអាចប្រើជាជម្រើសជំនួសនៅពេលប្រព័ន្ធពាណិជ្ជកម្មផ្សេងៗមានបញ្ហា។</li>
+    </ul>
+    <div class="use-case">
+      <strong>ពេលណាគួរប្រើ៖</strong> ប្រើនៅពេលចង់សាកល្បង Open-weight reasoning ឬនៅពេល Model ពាណិជ្ជកម្មផ្សេងៗអស់ Quota។
+    </div>
+  </div>
+
+  <!-- Summary recommendation -->
+  <div class="summary-box">
+    <h3>💡 ការណែនាំជាយុទ្ធសាស្ត្រសម្រាប់ការងារអភិវឌ្ឍន៍ App របស់អ្នក</h3>
+    <ul style="margin: 6px 0 0 18px; padding: 0; line-height: 1.8;">
+      <li><strong>សម្រាប់ការសរសេរកូដ រចនា UI និងដោះស្រាយបញ្ហាកូដ (Coding, UI Design & Debugging):</strong><br>
+        សូមជ្រើសរើសយក <strong>Claude Sonnet 5.5</strong> ឬ <strong>Gemini 4 Argon</strong> ដែលជាជម្រើសខ្លាំង និងមានប្រសិទ្ធភាពខ្ពស់បំផុត។
+      </li>
+      <li><strong>សម្រាប់ការងារទូទៅដែលត្រូវការល្បឿនរហ័ស (Quick Queries & Lightweight Tasks):</strong><br>
+        សូមជ្រើសរើសយក <strong>Gemini 3.8 Flash</strong> ឬ <strong>Gemini 4 Hydrogen</strong> ដើម្បីទទួលបានចម្លើយលឿន និងសន្សំកូតា។
+      </li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <span>ឯកសារបច្ចេកទេស AI Model Reference Guide</span>
+    <span>Khmer Food & Tourism • Cambodia</span>
+  </div>
+
+</body>
+</html>

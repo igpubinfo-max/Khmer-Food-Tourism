@@ -57,6 +57,7 @@ import { testGeminiApiConnection } from '../services/conversationalAiAssistant';
 import { matchesSearchQuery, restaurantSearchFields, destinationSearchFields } from '../utils/searchEngine';
 import { AdminUsersDirectoryPanel } from './admin/AdminUsersDirectoryPanel';
 import { AdminAiAgentMonitorPanel } from './admin/AdminAiAgentMonitorPanel';
+import { tr } from '../utils/i18n';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -573,7 +574,7 @@ export const AdminDashboard: React.FC = () => {
     const trimmedKh = newFoodNameKh.trim() || newFoodNameEn.trim();
     if (!trimmedKh) {
       showToast(
-        isKm ? '⚠️ សូមបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន!' : '⚠️ Please enter the food name first!',
+        tr(language, '⚠️ សូមបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន!', '⚠️ Please enter the food name first!', '⚠️ 请先输入美食名称！'),
         'error'
       );
       return;
@@ -681,16 +682,12 @@ export const AdminDashboard: React.FC = () => {
           googlePlaceId: dest.googlePlaceId || match.matchedPlaceId,
         });
         showToast(
-          isKm
-            ? `បានទាញយករូបភាពពី Google Maps សម្រាប់ «${dest.nameKh}» ដោយជោគជ័យ!`
-            : `Fetched verified photo from Google Maps for "${dest.nameEn}"!`,
+          tr(language, `បានទាញយករូបភាពពី Google Maps សម្រាប់ «${dest.nameKh}» ដោយជោគជ័យ!`, `Fetched verified photo from Google Maps for "${dest.nameEn}"!`, `已成功从 Google Maps 获取“${dest.nameEn}”的已验证照片！`),
           'success'
         );
       } else {
         showToast(
-          isKm
-            ? `មិនរកឃើញរូបភាពដែលត្រូវគ្នា 100% សម្រាប់ «${dest.nameKh}» ទេ (រក្សាទុក Icon លំនាំដើម)`
-            : `No verified matching photo found for "${dest.nameEn}" (keeping default placeholder icon).`,
+          tr(language, `មិនរកឃើញរូបភាពដែលត្រូវគ្នា 100% សម្រាប់ «${dest.nameKh}» ទេ (រក្សាទុក Icon លំនាំដើម)`, `No verified matching photo found for "${dest.nameEn}" (keeping default placeholder icon).`, `未找到“${dest.nameEn}”的已验证匹配照片（保留默认占位图标）。`),
           'info'
         );
       }
@@ -712,9 +709,7 @@ export const AdminDashboard: React.FC = () => {
     );
     if (missingTargets.length === 0) {
       showToast(
-        isKm
-          ? 'តំបន់ទេសចរណ៍ក្នុងផ្នែកនេះមានរូបភាពគ្រប់អស់ហើយ!'
-          : 'All tourist attractions in this filter already have photos!',
+        tr(language, 'តំបន់ទេសចរណ៍ក្នុងផ្នែកនេះមានរូបភាពគ្រប់អស់ហើយ!', 'All tourist attractions in this filter already have photos!', '该筛选条件下的所有旅游景点均已有照片！'),
         'info'
       );
       return;
@@ -749,9 +744,7 @@ export const AdminDashboard: React.FC = () => {
         () => cancelDestBatchRef.current
       );
       showToast(
-        isKm
-          ? `បានផ្គូផ្គងរូបភាពពី Google Maps ចំនួន ${finalProgress.matched}/${finalProgress.processed} កន្លែង!`
-          : `Matched ${finalProgress.matched}/${finalProgress.processed} attraction photos from Google Maps!`,
+        tr(language, `បានផ្គូផ្គងរូបភាពពី Google Maps ចំនួន ${finalProgress.matched}/${finalProgress.processed} កន្លែង!`, `Matched ${finalProgress.matched}/${finalProgress.processed} attraction photos from Google Maps!`, `已从 Google Maps 匹配 ${finalProgress.matched}/${finalProgress.processed} 张景点照片！`),
         finalProgress.matched > 0 ? 'success' : 'info'
       );
     } finally {
@@ -771,38 +764,38 @@ export const AdminDashboard: React.FC = () => {
     const parsedFeaturedDays = parseInt(vipFeaturedDurationDaysInput.trim(), 10);
 
     if (!Number.isFinite(parsedFeaturedDays) || parsedFeaturedDays < 1 || parsedFeaturedDays > 365) {
-      const msg = isKm ? '⚠️ សូមបញ្ចូលរយៈពេលបង្វិលបង្ហាញហាង VIP ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥ ថ្ងៃ)!' : '⚠️ Please enter a valid VIP Featured Duration (1 to 365 days)!';
+      const msg = tr(language, '⚠️ សូមបញ្ចូលរយៈពេលបង្វិលបង្ហាញហាង VIP ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥ ថ្ងៃ)!', '⚠️ Please enter a valid VIP Featured Duration (1 to 365 days)!', '⚠️ 请输入有效的 VIP 精选展示时长（1 到 365 天）！');
       setVipSaveFeedback({ type: 'error', message: msg });
       showToast(msg, 'warning');
       return;
     }
 
     if (!Number.isFinite(parsedShortDays) || parsedShortDays < 1 || parsedShortDays > 3650) {
-      const msg = isKm ? '⚠️ សូមបញ្ចូលរយៈពេលកញ្ចប់ VIP ទី១ ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥០ ថ្ងៃ)!' : '⚠️ Please enter a valid duration for Plan #1 (1 to 3650 days)!';
+      const msg = tr(language, '⚠️ សូមបញ្ចូលរយៈពេលកញ្ចប់ VIP ទី១ ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥០ ថ្ងៃ)!', '⚠️ Please enter a valid duration for Plan #1 (1 to 3650 days)!', '⚠️ 请输入套餐 1 的有效时长（1 到 3650 天）！');
       setVipSaveFeedback({ type: 'error', message: msg });
       showToast(msg, 'warning');
       return;
     }
     if (!Number.isFinite(parsedShortPrice) || parsedShortPrice <= 0 || parsedShortPrice > 10000) {
-      const msg = isKm ? '⚠️ សូមបញ្ចូលតម្លៃកញ្ចប់ VIP ទី១ ឱ្យបានត្រឹមត្រូវ (ធំជាង $0.00)!' : '⚠️ Please enter a valid USD price for Plan #1 (greater than $0.00)!';
+      const msg = tr(language, '⚠️ សូមបញ្ចូលតម្លៃកញ្ចប់ VIP ទី១ ឱ្យបានត្រឹមត្រូវ (ធំជាង $0.00)!', '⚠️ Please enter a valid USD price for Plan #1 (greater than $0.00)!', '⚠️ 请输入套餐 1 的有效美元价格（大于 $0.00）！');
       setVipSaveFeedback({ type: 'error', message: msg });
       showToast(msg, 'warning');
       return;
     }
     if (!Number.isFinite(parsedLongDays) || parsedLongDays < 1 || parsedLongDays > 3650) {
-      const msg = isKm ? '⚠️ សូមបញ្ចូលរយៈពេលកញ្ចប់ VIP ទី២ ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥០ ថ្ងៃ)!' : '⚠️ Please enter a valid duration for Plan #2 (1 to 3650 days)!';
+      const msg = tr(language, '⚠️ សូមបញ្ចូលរយៈពេលកញ្ចប់ VIP ទី២ ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥០ ថ្ងៃ)!', '⚠️ Please enter a valid duration for Plan #2 (1 to 3650 days)!', '⚠️ 请输入套餐 2 的有效时长（1 到 3650 天）！');
       setVipSaveFeedback({ type: 'error', message: msg });
       showToast(msg, 'warning');
       return;
     }
     if (!Number.isFinite(parsedLongPrice) || parsedLongPrice <= 0 || parsedLongPrice > 10000) {
-      const msg = isKm ? '⚠️ សូមបញ្ចូលតម្លៃកញ្ចប់ VIP ទី២ ឱ្យបានត្រឹមត្រូវ (ធំជាង $0.00)!' : '⚠️ Please enter a valid USD price for Plan #2 (greater than $0.00)!';
+      const msg = tr(language, '⚠️ សូមបញ្ចូលតម្លៃកញ្ចប់ VIP ទី២ ឱ្យបានត្រឹមត្រូវ (ធំជាង $0.00)!', '⚠️ Please enter a valid USD price for Plan #2 (greater than $0.00)!', '⚠️ 请输入套餐 2 的有效美元价格（大于 $0.00）！');
       setVipSaveFeedback({ type: 'error', message: msg });
       showToast(msg, 'warning');
       return;
     }
     if (!Number.isFinite(parsedExtraFee) || parsedExtraFee < 0 || parsedExtraFee > 10000) {
-      const msg = isKm ? '⚠️ សូមបញ្ចូលតម្លៃបន្ថែមហាងឱ្យបានត្រឹមត្រូវ ($0 ឡើងទៅ)!' : '⚠️ Please enter a valid Additional Store Fee ($0 or more)!';
+      const msg = tr(language, '⚠️ សូមបញ្ចូលតម្លៃបន្ថែមហាងឱ្យបានត្រឹមត្រូវ ($0 ឡើងទៅ)!', '⚠️ Please enter a valid Additional Store Fee ($0 or more)!', '⚠️ 请输入有效的额外店铺费用（$0 或更多）！');
       setVipSaveFeedback({ type: 'error', message: msg });
       showToast(msg, 'warning');
       return;
@@ -895,18 +888,14 @@ export const AdminDashboard: React.FC = () => {
         hydrateVipFormFromSettings(res.settings);
         setVipSaveFeedback({
           type: 'success',
-          message: isKm
-            ? `✅ បានរក្សាទុកក្នុង Database ជោគជ័យ (v${res.settings.settingsVersion})៖ Plan #1 = ${res.settings.vipShortDurationDays} ថ្ងៃ (${res.settings.vipShortPriceUsd?.toFixed(2)}) • Plan #2 = ${res.settings.vipLongDurationDays} ថ្ងៃ (${res.settings.vipLongPriceUsd?.toFixed(2)}) • ហាងបន្ថែម = ${res.settings.additionalStoreFeeUsd?.toFixed(2)}`
-            : `✅ Confirmed saved to Database (v${res.settings.settingsVersion}): Plan #1 = ${res.settings.vipShortDurationDays}d (${res.settings.vipShortPriceUsd?.toFixed(2)}) • Plan #2 = ${res.settings.vipLongDurationDays}d (${res.settings.vipLongPriceUsd?.toFixed(2)}) • Extra Store = ${res.settings.additionalStoreFeeUsd?.toFixed(2)}`,
+          message: tr(language, `✅ បានរក្សាទុកក្នុង Database ជោគជ័យ (v${res.settings.settingsVersion})៖ Plan #1 = ${res.settings.vipShortDurationDays} ថ្ងៃ (${res.settings.vipShortPriceUsd?.toFixed(2)}) • Plan #2 = ${res.settings.vipLongDurationDays} ថ្ងៃ (${res.settings.vipLongPriceUsd?.toFixed(2)}) • ហាងបន្ថែម = ${res.settings.additionalStoreFeeUsd?.toFixed(2)}`, `✅ Confirmed saved to Database (v${res.settings.settingsVersion}): Plan #1 = ${res.settings.vipShortDurationDays}d (${res.settings.vipShortPriceUsd?.toFixed(2)}) • Plan #2 = ${res.settings.vipLongDurationDays}d (${res.settings.vipLongPriceUsd?.toFixed(2)}) • Extra Store = ${res.settings.additionalStoreFeeUsd?.toFixed(2)}`, `✅ 已确认保存至数据库 (v${res.settings.settingsVersion})：套餐 #1 = ${res.settings.vipShortDurationDays}天 (${res.settings.vipShortPriceUsd?.toFixed(2)}) • 套餐 #2 = ${res.settings.vipLongDurationDays}天 (${res.settings.vipLongPriceUsd?.toFixed(2)}) • 额外店铺 = ${res.settings.additionalStoreFeeUsd?.toFixed(2)}`),
         });
       } else {
         setVipSaveFeedback({
           type: 'error',
           message:
             res?.error ||
-            (isKm
-              ? '❌ ការរក្សាទុកទៅកាន់ Database បរាជ័យ។ សូមពិនិត្យអ៊ីនធឺណិតហើយព្យាយាមម្តងទៀត!'
-              : '❌ Failed to save to Database. Please check your internet connection and try again!'),
+            (tr(language, '❌ ការរក្សាទុកទៅកាន់ Database បរាជ័យ។ សូមពិនិត្យអ៊ីនធឺណិតហើយព្យាយាមម្តងទៀត!', '❌ Failed to save to Database. Please check your internet connection and try again!', '❌ 保存到数据库失败。请检查网络连接后重试！')),
         });
       }
     } finally {
@@ -918,11 +907,11 @@ export const AdminDashboard: React.FC = () => {
     e.preventDefault();
     const trimmed = newAdminPass.trim();
     if (!trimmed || trimmed.length < 8) {
-      showToast(isKm ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោច ៨ តួអក្សរ!' : 'Password must be at least 8 characters!', 'warning');
+      showToast(tr(language, 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោច ៨ តួអក្សរ!', 'Password must be at least 8 characters!', '密码长度必须至少为 8 个字符！'), 'warning');
       return;
     }
     if (trimmed !== confirmNewAdminPass.trim()) {
-      showToast(isKm ? 'ការផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ!' : 'Password confirmation does not match!', 'warning');
+      showToast(tr(language, 'ការផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ!', 'Password confirmation does not match!', '确认密码不匹配！'), 'warning');
       return;
     }
     if (isUpdatingAdminPass) return;
@@ -935,7 +924,7 @@ export const AdminDashboard: React.FC = () => {
       }
     } catch (err) {
       console.warn('Admin password update failed:', err);
-      showToast(isKm ? 'ផ្លាស់ប្តូរពាក្យសម្ងាត់មិនបានសម្រេច សូមព្យាយាមម្តងទៀត!' : 'Could not update the password. Please try again!', 'warning');
+      showToast(tr(language, 'ផ្លាស់ប្តូរពាក្យសម្ងាត់មិនបានសម្រេច សូមព្យាយាមម្តងទៀត!', 'Could not update the password. Please try again!', '无法更新密码，请重试！'), 'warning');
     } finally {
       setIsUpdatingAdminPass(false);
     }
@@ -956,7 +945,7 @@ export const AdminDashboard: React.FC = () => {
     e?.preventDefault();
     const url = playStoreUrl.trim();
     if (!/^https:\/\//i.test(url)) {
-      showToast(isKm ? '⚠️ តំណភ្ជាប់ត្រូវចាប់ផ្តើមដោយ https://' : '⚠️ The link must start with https://', 'warning');
+      showToast(tr(language, '⚠️ តំណភ្ជាប់ត្រូវចាប់ផ្តើមដោយ https://', '⚠️ The link must start with https://', '⚠️ 链接必须以 https:// 开头'), 'warning');
       return;
     }
     const res = await saveSettingsSubset({ apkDownloadUrl: '', playStoreUrl: url, appStoreUrl: appStoreUrl.trim() });
@@ -969,7 +958,7 @@ export const AdminDashboard: React.FC = () => {
   const handleSaveSupportKhqr = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!bankName.trim() || !accountName.trim()) {
-      showToast(isKm ? '⚠️ សូមបំពេញឈ្មោះធនាគារ និងឈ្មោះម្ចាស់គណនី!' : '⚠️ Please fill in the bank name and account name!', 'warning');
+      showToast(tr(language, '⚠️ សូមបំពេញឈ្មោះធនាគារ និងឈ្មោះម្ចាស់គណនី!', '⚠️ Please fill in the bank name and account name!', '⚠️ 请填写银行名称和账户姓名！'), 'warning');
       return;
     }
     const res = await saveSettingsSubset({
@@ -989,7 +978,7 @@ export const AdminDashboard: React.FC = () => {
   const handleSaveRotation = async () => {
     const days = parseInt(vipFeaturedDurationDaysInput.trim(), 10);
     if (!Number.isFinite(days) || days < 1 || days > 365) {
-      showToast(isKm ? '⚠️ សូមបញ្ចូលរយៈពេលបង្វិលបង្ហាញហាង VIP ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥ ថ្ងៃ)!' : '⚠️ Please enter a valid VIP Featured Duration (1 to 365 days)!', 'warning');
+      showToast(tr(language, '⚠️ សូមបញ្ចូលរយៈពេលបង្វិលបង្ហាញហាង VIP ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥ ថ្ងៃ)!', '⚠️ Please enter a valid VIP Featured Duration (1 to 365 days)!', '⚠️ 请输入有效的 VIP 精选展示时长（1 到 365 天）！'), 'warning');
       return;
     }
     const res = await saveSettingsSubset({
@@ -1006,12 +995,12 @@ export const AdminDashboard: React.FC = () => {
   const handleRevokeSessions = () => {
     revokeAdminSession();
     setIsAdminOpen(false);
-    showToast(isKm ? 'បានចាកចេញពីសម័យគ្រប់គ្រងដោយសុវត្ថិភាព!' : 'Admin session revoked securely!', 'info');
+    showToast(tr(language, 'បានចាកចេញពីសម័យគ្រប់គ្រងដោយសុវត្ថិភាព!', 'Admin session revoked securely!', '管理员会话已安全注销！'), 'info');
   };
 
   const handleRefreshAudit = () => {
     setAuditLogs(getSecurityAuditLogs());
-    showToast(isKm ? 'បានទាញយកកំណត់ហេតុសុវត្ថិភាពថ្មី!' : 'Security logs refreshed!', 'info');
+    showToast(tr(language, 'បានទាញយកកំណត់ហេតុសុវត្ថិភាពថ្មី!', 'Security logs refreshed!', '安全日志已刷新！'), 'info');
   };
 
   // Image Audit derived lists & handlers
@@ -1037,9 +1026,9 @@ export const AdminDashboard: React.FC = () => {
     updateFood({
       ...food,
       imageAuditStatus: 'verified',
-      imageAuditNote: isKm ? 'បានយល់ព្រមផ្ទៀងផ្ទាត់ដោយរដ្ឋបាលផ្លូវការ' : 'Officially verified and approved by administrator'
+      imageAuditNote: tr(language, 'បានយល់ព្រមផ្ទៀងផ្ទាត់ដោយរដ្ឋបាលផ្លូវការ', 'Officially verified and approved by administrator', '已获管理员官方验证和批准')
     });
-    showToast(isKm ? `បានយល់ព្រមរូបភាពសម្រាប់ "${food.nameKh}"!` : `Approved image for "${food.nameEn}"!`, 'success');
+    showToast(tr(language, `បានយល់ព្រមរូបភាពសម្រាប់ "${food.nameKh}"!`, `Approved image for "${food.nameEn}"!`, `已批准“${food.nameEn}”的图片！`), 'success');
   };
 
   const handleSaveCustomImage = (food: FoodItem, newUrl: string) => {
@@ -1048,11 +1037,11 @@ export const AdminDashboard: React.FC = () => {
       ...food,
       photoUrl: newUrl.trim(),
       imageAuditStatus: 'verified',
-      imageAuditNote: isKm ? 'បានផ្លាស់ប្តូររូបភាពថ្មីដោយរដ្ឋបាល' : 'Custom image URL provided by administrator'
+      imageAuditNote: tr(language, 'បានផ្លាស់ប្តូររូបភាពថ្មីដោយរដ្ឋបាល', 'Custom image URL provided by administrator', '管理员提供的自定义图片 URL')
     });
     setEditingFoodId(null);
     setEditingFoodUrl('');
-    showToast(isKm ? `បានផ្លាស់ប្តូររូបភាពថ្មីសម្រាប់ "${food.nameKh}" ជោគជ័យ!` : `Updated photo for "${food.nameEn}"!`, 'success');
+    showToast(tr(language, `បានផ្លាស់ប្តូររូបភាពថ្មីសម្រាប់ "${food.nameKh}" ជោគជ័យ!`, `Updated photo for "${food.nameEn}"!`, `已更新“${food.nameEn}”的照片！`), 'success');
   };
 
   return (
@@ -1080,16 +1069,14 @@ export const AdminDashboard: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg font-bold font-khmer text-white">
-                  {currentUser?.name || (isKm ? 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth)' : 'Chea Savuth (Admin)')}
+                  {currentUser?.name || (tr(language, 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth)', 'Chea Savuth (Admin)', 'Chea Savuth (管理员)'))}
                 </h2>
                 <span className="text-[10px] bg-[#059669] text-white font-bold px-2 py-0.5 rounded-full font-mono border border-emerald-400/40">
                   OFFICIAL ADMIN
                 </span>
               </div>
               <p className="text-xs text-emerald-200 font-khmer">
-                {isKm 
-                  ? `គ្រប់គ្រងហាងអាហារ (${shopOnlyRestaurants.length}) សណ្ឋាគារ (${hotelDestinationsCount}) មុខម្ហូប (${foods.length}) ទេសចរណ៍ (${destinations.length}) ការទូទាត់ VIP និងសន្តិសុខ` 
-                  : `Manage shops (${shopOnlyRestaurants.length}), hotels (${hotelDestinationsCount}), foods (${foods.length}), travel (${destinations.length}), VIP transactions, and security`}
+                {tr(language, `គ្រប់គ្រងហាងអាហារ (${shopOnlyRestaurants.length}) សណ្ឋាគារ (${hotelDestinationsCount}) មុខម្ហូប (${foods.length}) ទេសចរណ៍ (${destinations.length}) ការទូទាត់ VIP និងសន្តិសុខ`, `Manage shops (${shopOnlyRestaurants.length}), hotels (${hotelDestinationsCount}), foods (${foods.length}), travel (${destinations.length}), VIP transactions, and security`, `管理美食店铺 (${shopOnlyRestaurants.length})、酒店 (${hotelDestinationsCount})、美食 (${foods.length})、旅游景点 (${destinations.length})、VIP 交易和安全`)}
               </p>
             </div>
           </div>
@@ -1114,7 +1101,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Shield className="w-3.5 h-3.5 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? 'ទិដ្ឋភាពរួម' : 'Overview'}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, 'ទិដ្ឋភាពរួម', 'Overview', '总览')}</span>
           </button>
 
           <button
@@ -1127,7 +1114,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `សារជំនួយ (${supportTickets.length})` : `Support (${supportTickets.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, `សារជំនួយ (${supportTickets.length})`, `Support (${supportTickets.length})`, `客服工单 (${supportTickets.length})`)}</span>
             {(unreadAdminTickets.length > 0 || pendingSupportTickets.length > 0) && (
               <span className="px-1.5 py-0.2 bg-rose-600 text-white rounded-full text-[9px] font-bold shrink-0">
                 {unreadAdminTickets.length || pendingSupportTickets.length}
@@ -1145,7 +1132,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <CreditCard className="w-3.5 h-3.5 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `ការទូទាត់ (${transactions.length})` : `VIP Pay (${transactions.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, `ការទូទាត់ (${transactions.length})`, `VIP Pay (${transactions.length})`, `VIP 支付 (${transactions.length})`)}</span>
             {pendingTxns.length > 0 && (
               <span className="px-1.5 py-0.2 bg-red-600 text-white rounded-full text-[9px] font-bold shrink-0">
                 {pendingTxns.length}
@@ -1163,7 +1150,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Utensils className="w-3.5 h-3.5 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `មុខម្ហូប (${foods.length})` : `Foods (${foods.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, `មុខម្ហូប (${foods.length})`, `Foods (${foods.length})`, `美食 (${foods.length})`)}</span>
           </button>
 
           <button
@@ -1176,7 +1163,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? 'សវនកម្មរូបភាព' : 'Image Audit'}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, 'សវនកម្មរូបភាព', 'Image Audit', '图片审核')}</span>
             {flaggedFoods.length > 0 && (
               <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold shrink-0">
                 {flaggedFoods.length}
@@ -1194,7 +1181,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Store className="w-3.5 h-3.5 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `ហាងអាហារ (${shopOnlyRestaurants.length})` : `Shops (${shopOnlyRestaurants.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, `ហាងអាហារ (${shopOnlyRestaurants.length})`, `Shops (${shopOnlyRestaurants.length})`, `店铺 (${shopOnlyRestaurants.length})`)}</span>
             {totalPendingShopCount > 0 && (
               <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-bold shrink-0">
                 {totalPendingShopCount}
@@ -1212,7 +1199,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Camera className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `ឆែកអ៊ីនហាង (${aiCheckIns.length})` : `Check-ins (${aiCheckIns.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, `ឆែកអ៊ីនហាង (${aiCheckIns.length})`, `Check-ins (${aiCheckIns.length})`, `签到 (${aiCheckIns.length})`)}</span>
             {aiCheckIns.filter(c => c.status === 'pending').length > 0 && (
               <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold shrink-0">
                 {aiCheckIns.filter(c => c.status === 'pending').length}
@@ -1231,9 +1218,7 @@ export const AdminDashboard: React.FC = () => {
           >
             <BedDouble className="w-3.5 h-3.5 shrink-0" />
             <span className="min-w-0 break-words text-center leading-tight">
-              {isKm
-                ? `សណ្ឋាគារ (${hotelDestinationsCount})`
-                : `Hotels (${hotelDestinationsCount})`}
+              {tr(language, `សណ្ឋាគារ (${hotelDestinationsCount})`, `Hotels (${hotelDestinationsCount})`, `酒店 (${hotelDestinationsCount})`)}
             </span>
             {totalPendingHotelCount > 0 && (
               <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-bold shrink-0">
@@ -1252,7 +1237,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Compass className="w-3.5 h-3.5 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `ទេសចរណ៍ (${destinations.length})` : `Tourism (${destinations.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, `ទេសចរណ៍ (${destinations.length})`, `Tourism (${destinations.length})`, `旅游景点 (${destinations.length})`)}</span>
           </button>
 
           <button
@@ -1265,7 +1250,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Users className="w-3.5 h-3.5 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `អ្នកប្រើ (${users.length})` : `Users (${users.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, `អ្នកប្រើ (${users.length})`, `Users (${users.length})`, `用户 (${users.length})`)}</span>
           </button>
 
           <button
@@ -1278,7 +1263,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? '🤖 AI Agent' : '🤖 AI Agent'}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, '🤖 AI Agent', '🤖 AI Agent', '🤖 AI 助手')}</span>
           </button>
 
           <button
@@ -1291,7 +1276,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <ShieldAlert className="w-3.5 h-3.5 text-red-500 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? 'សន្តិសុខ & Logs' : 'Security'}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, 'សន្តិសុខ & Logs', 'Security', '安全与日志')}</span>
           </button>
 
           <button
@@ -1304,7 +1289,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Settings className="w-3.5 h-3.5 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? 'ការកំណត់' : 'Settings'}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{tr(language, 'ការកំណត់', 'Settings', '设置')}</span>
           </button>
         </div>
 
@@ -1317,19 +1302,19 @@ export const AdminDashboard: React.FC = () => {
                 {[
                   {
                     n: shopOnlyRestaurants.length,
-                    label: isKm ? 'ហាងអាហារសរុប' : 'Total Shops',
+                    label: tr(language, 'ហាងអាហារសរុប', 'Total Shops', '店铺总数'),
                     Icon: Store,
                     tab: 'restaurants' as const,
                   },
                   {
                     n: foods.length,
-                    label: isKm ? 'មុខម្ហូបសរុប' : 'Total Food',
+                    label: tr(language, 'មុខម្ហូបសរុប', 'Total Food', '美食总数'),
                     Icon: Utensils,
                     tab: 'food' as const,
                   },
                   {
                     n: destinations.length,
-                    label: isKm ? 'តំបន់ទេសចរណ៍សរុប' : 'Total Travel',
+                    label: tr(language, 'តំបន់ទេសចរណ៍សរុប', 'Total Travel', '景点总数'),
                     Icon: Compass,
                     tab: 'destinations' as const,
                   },
@@ -1360,16 +1345,14 @@ export const AdminDashboard: React.FC = () => {
                     <p className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2 font-khmer text-xs">
                       <BedDouble className="w-4 h-4 text-amber-600 shrink-0" />
                       <span>
-                        {isKm
-                          ? `🏨 មានសំណើសណ្ឋាគារ / ផ្ទះសំណាក់ថ្មីចំនួន ${totalPendingHotelCount} កំពុងរង់ចាំការត្រួតពិនិត្យ និងអនុម័តក្នុងផ្នែក «សណ្ឋាគារ»!`
-                          : `🏨 ${totalPendingHotelCount} Pending Hotel / Accommodation submission(s) awaiting Admin approval!`}
+                        {tr(language, `🏨 មានសំណើសណ្ឋាគារ / ផ្ទះសំណាក់ថ្មីចំនួន ${totalPendingHotelCount} កំពុងរង់ចាំការត្រួតពិនិត្យ និងអនុម័តក្នុងផ្នែក «សណ្ឋាគារ»!`, `🏨 ${totalPendingHotelCount} Pending Hotel / Accommodation submission(s) awaiting Admin approval!`, `🏨 有 ${totalPendingHotelCount} 个待审核的酒店/住宿提交正等待管理员批准！`)}
                       </span>
                     </p>
                     <button
                       onClick={() => setActiveTab('hotels')}
                       className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl font-khmer font-bold text-xs transition active:scale-95 cursor-pointer"
                     >
-                      {isKm ? '🏨 ពិនិត្យក្នុងផ្នែកសណ្ឋាគារឥឡូវនេះ' : '🏨 Review in Hotels Tab'}
+                      {tr(language, '🏨 ពិនិត្យក្នុងផ្នែកសណ្ឋាគារឥឡូវនេះ', '🏨 Review in Hotels Tab', '🏨 在酒店标签页中审核')}
                     </button>
                   </div>
                 </div>
@@ -1382,16 +1365,14 @@ export const AdminDashboard: React.FC = () => {
                     <p className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2 font-khmer text-xs">
                       <Store className="w-4 h-4 text-amber-600 shrink-0" />
                       <span>
-                        {isKm
-                          ? `🏪 មានសំណើហាងអាហារថ្មីចំនួន ${totalPendingShopCount} កំពុងរង់ចាំការត្រួតពិនិត្យ និងអនុម័តក្នុងផ្នែក «ហាងអាហារ»!`
-                          : `🏪 ${totalPendingShopCount} Pending Food / Restaurant submission(s) awaiting Admin approval!`}
+                        {tr(language, `🏪 មានសំណើហាងអាហារថ្មីចំនួន ${totalPendingShopCount} កំពុងរង់ចាំការត្រួតពិនិត្យ និងអនុម័តក្នុងផ្នែក «ហាងអាហារ»!`, `🏪 ${totalPendingShopCount} Pending Food / Restaurant submission(s) awaiting Admin approval!`, `🏪 有 ${totalPendingShopCount} 个待审核的美食/餐厅提交正等待管理员批准！`)}
                       </span>
                     </p>
                     <button
                       onClick={() => setActiveTab('restaurants')}
                       className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl font-khmer font-bold text-xs transition active:scale-95 cursor-pointer"
                     >
-                      {isKm ? '🏪 ពិនិត្យក្នុងផ្នែកហាងអាហារឥឡូវនេះ' : '🏪 Review in Shops Tab'}
+                      {tr(language, '🏪 ពិនិត្យក្នុងផ្នែកហាងអាហារឥឡូវនេះ', '🏪 Review in Shops Tab', '🏪 在店铺标签页中审核')}
                     </button>
                   </div>
                 </div>
@@ -1404,16 +1385,14 @@ export const AdminDashboard: React.FC = () => {
                     <p className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2 font-khmer text-xs">
                       <MessageSquare className="w-4 h-4 text-amber-600 shrink-0" />
                       <span>
-                        {isKm
-                          ? `🔔 មានសារជំនួយបញ្ហាការបង់ប្រាក់ VIP ថ្មីចំនួន ${unreadAdminTickets.length || pendingSupportTickets.length} កំពុងរង់ចាំការឆ្លើយតបពីរដ្ឋបាល!`
-                          : `🔔 ${unreadAdminTickets.length || pendingSupportTickets.length} New User Payment Support Messages awaiting Admin reply!`}
+                        {tr(language, `🔔 មានសារជំនួយបញ្ហាការបង់ប្រាក់ VIP ថ្មីចំនួន ${unreadAdminTickets.length || pendingSupportTickets.length} កំពុងរង់ចាំការឆ្លើយតបពីរដ្ឋបាល!`, `🔔 ${unreadAdminTickets.length || pendingSupportTickets.length} New User Payment Support Messages awaiting Admin reply!`, `🔔 有 ${unreadAdminTickets.length || pendingSupportTickets.length} 条新的用户支付客服消息等待管理员回复！`)}
                       </span>
                     </p>
                     <button
                       onClick={() => setActiveTab('support_tickets')}
                       className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl font-khmer font-bold text-xs transition active:scale-95 cursor-pointer"
                     >
-                      {isKm ? '💬 មើល & ឆ្លើយតបឥឡូវនេះ' : '💬 View & Reply Now'}
+                      {tr(language, '💬 មើល & ឆ្លើយតបឥឡូវនេះ', '💬 View & Reply Now', '💬 立即查看并回复')}
                     </button>
                   </div>
                 </div>
@@ -1425,13 +1404,13 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <p className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5 font-khmer">
                       <CreditCard className="w-4 h-4 text-[#059669]" />
-                      <span>{isKm ? `មានប្រតិបត្តិការចុះបញ្ជីថ្មី ${pendingTxns.length} រង់ចាំការផ្ទៀងផ្ទាត់ធនាគារ!` : `${pendingTxns.length} Pending VIP Registrations!`}</span>
+                      <span>{tr(language, `មានប្រតិបត្តិការចុះបញ្ជីថ្មី ${pendingTxns.length} រង់ចាំការផ្ទៀងផ្ទាត់ធនាគារ!`, `${pendingTxns.length} Pending VIP Registrations!`, `有 ${pendingTxns.length} 笔待处理的 VIP 注册！`)}</span>
                     </p>
                     <button
                       onClick={() => setActiveTab('transactions')}
                       className="px-3 py-1 bg-[#064E3B] hover:bg-[#047857] text-white rounded-lg font-khmer font-bold text-xs transition active:scale-95"
                     >
-                      {isKm ? 'ពិនិត្យឥឡូវនេះ' : 'Review Now'}
+                      {tr(language, 'ពិនិត្យឥឡូវនេះ', 'Review Now', '立即审核')}
                     </button>
                   </div>
                 </div>
@@ -1447,15 +1426,11 @@ export const AdminDashboard: React.FC = () => {
                   <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-base flex items-center gap-2">
                     <MessageSquare className="w-5 h-5 text-amber-500" />
                     <span>
-                      {isKm
-                        ? 'ប្រព័ន្ធទំនាក់ទំនងជំនួយបង់ប្រាក់ និងឆ្លើយតប ២ ទិស (User–Admin Payment Support & Reply)'
-                        : 'User–Admin Payment Support & Two-Way Reply System'}
+                      {tr(language, 'ប្រព័ន្ធទំនាក់ទំនងជំនួយបង់ប្រាក់ និងឆ្លើយតប ២ ទិស (User–Admin Payment Support & Reply)', 'User–Admin Payment Support & Two-Way Reply System', '用户与管理员支付客服双向回复系统')}
                     </span>
                   </h3>
                   <p className="text-stone-500 font-khmer text-xs">
-                    {isKm
-                      ? `ពិនិត្យសារបញ្ហាការបង់ប្រាក់ ABA រូបវិក្កយបត្រ ឆ្លើយតបទៅអ្នកប្រើប្រាស់ផ្ទាល់ និងអនុម័តបើក VIP (${appSettings.vipShortDurationDays ?? 30} ថ្ងៃ ${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} ឬ ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ ${Number(appSettings.vipLongPriceUsd ?? 6.99).toFixed(2)})`
-                      : `Inspect user ABA payment issues, receipts, reply in-app, and approve & activate VIP (${appSettings.vipShortDurationDays ?? 30} Days ${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} or ${appSettings.vipLongDurationDays ?? 90} Days ${Number(appSettings.vipLongPriceUsd ?? 6.99).toFixed(2)})`}
+                    {tr(language, `ពិនិត្យសារបញ្ហាការបង់ប្រាក់ ABA រូបវិក្កយបត្រ ឆ្លើយតបទៅអ្នកប្រើប្រាស់ផ្ទាល់ និងអនុម័តបើក VIP (${appSettings.vipShortDurationDays ?? 30} ថ្ងៃ ${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} ឬ ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ ${Number(appSettings.vipLongPriceUsd ?? 6.99).toFixed(2)})`, `Inspect user ABA payment issues, receipts, reply in-app, and approve & activate VIP (${appSettings.vipShortDurationDays ?? 30} Days ${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} or ${appSettings.vipLongDurationDays ?? 90} Days ${Number(appSettings.vipLongPriceUsd ?? 6.99).toFixed(2)})`, `审查用户 ABA 支付问题、收据，在应用内回复，并批准激活 VIP（${appSettings.vipShortDurationDays ?? 30} 天 ${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} 或 ${appSettings.vipLongDurationDays ?? 90} 天 ${Number(appSettings.vipLongPriceUsd ?? 6.99).toFixed(2)}）`)}
                   </p>
                 </div>
 
@@ -1464,20 +1439,12 @@ export const AdminDashboard: React.FC = () => {
                   {(['all', 'pending', 'replied', 'resolved'] as const).map((status) => {
                     const label =
                       status === 'all'
-                        ? isKm
-                          ? `ទាំងអស់ (${supportTickets.length})`
-                          : `All (${supportTickets.length})`
+                        ? tr(language, `ទាំងអស់ (${supportTickets.length})`, `All (${supportTickets.length})`, `全部 (${supportTickets.length})`)
                         : status === 'pending'
-                        ? isKm
-                          ? `រង់ចាំ (${pendingSupportTickets.length})`
-                          : `Pending (${pendingSupportTickets.length})`
+                        ? tr(language, `រង់ចាំ (${pendingSupportTickets.length})`, `Pending (${pendingSupportTickets.length})`, `待处理 (${pendingSupportTickets.length})`)
                         : status === 'replied'
-                        ? isKm
-                          ? 'បានឆ្លើយតប'
-                          : 'Replied'
-                        : isKm
-                        ? 'ដោះស្រាយរួច'
-                        : 'Resolved';
+                        ? tr(language, 'បានឆ្លើយតប', 'Replied', '已回复')
+                        : tr(language, 'ដោះស្រាយរួច', 'Resolved', '已解决');
                     return (
                       <button
                         key={status}
@@ -1497,7 +1464,7 @@ export const AdminDashboard: React.FC = () => {
 
               {filteredSupportTickets.length === 0 ? (
                 <div className="p-8 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-center text-stone-400 font-khmer">
-                  {isKm ? 'មិនទាន់មានសារជំនួយបង់ប្រាក់ក្នុងប្រភេទនេះឡើយ។' : 'No support messages found in this filter.'}
+                  {tr(language, 'មិនទាន់មានសារជំនួយបង់ប្រាក់ក្នុងប្រភេទនេះឡើយ។', 'No support messages found in this filter.', '该筛选条件下未找到客服消息。')}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -1538,25 +1505,19 @@ export const AdminDashboard: React.FC = () => {
                                 }`}
                               >
                                 {normStatus === 'pending'
-                                  ? isKm
-                                    ? '⏳ រង់ចាំពិនិត្យ'
-                                    : '⏳ Pending'
+                                  ? tr(language, '⏳ រង់ចាំពិនិត្យ', '⏳ Pending', '⏳ 待审核')
                                   : normStatus === 'replied'
-                                  ? isKm
-                                    ? '💬 បានឆ្លើយតប'
-                                    : '💬 Replied'
-                                  : isKm
-                                  ? '✅ ដោះស្រាយរួច'
-                                  : '✅ Resolved'}
+                                  ? tr(language, '💬 បានឆ្លើយតប', '💬 Replied', '💬 已回复')
+                                  : tr(language, '✅ ដោះស្រាយរួច', '✅ Resolved', '✅ 已解决')}
                               </span>
                               {ticket.unreadByAdmin && (
                                 <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[9px] font-bold">
-                                  {isKm ? 'សារថ្មី' : 'NEW MESSAGE'}
+                                  {tr(language, 'សារថ្មី', 'NEW MESSAGE', '新消息')}
                                 </span>
                               )}
                               {isVipTicketApproved && (
                                 <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 text-[10px] font-bold font-khmer">
-                                  👑 {isKm ? 'បានបើក VIP រួចរាល់' : 'VIP Activated'}
+                                  👑 {tr(language, 'បានបើក VIP រួចរាល់', 'VIP Activated', 'VIP 已激活')}
                                 </span>
                               )}
                             </div>
@@ -1603,9 +1564,9 @@ export const AdminDashboard: React.FC = () => {
                                 }
                                 className="px-2 py-1 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-xs font-bold text-stone-800 dark:text-stone-100"
                               >
-                                <option value="pending">{isKm ? 'រង់ចាំពិនិត្យ' : 'Pending'}</option>
-                                <option value="replied">{isKm ? 'បានឆ្លើយតប' : 'Replied'}</option>
-                                <option value="resolved">{isKm ? 'ដោះស្រាយរួច' : 'Resolved'}</option>
+                                <option value="pending">{tr(language, 'រង់ចាំពិនិត្យ', 'Pending', '待审核')}</option>
+                                <option value="replied">{tr(language, 'បានឆ្លើយតប', 'Replied', '已回复')}</option>
+                                <option value="resolved">{tr(language, 'ដោះស្រាយរួច', 'Resolved', '已解决')}</option>
                               </select>
                             </div>
 
@@ -1617,9 +1578,7 @@ export const AdminDashboard: React.FC = () => {
                               >
                                 <CheckCircle2 className="w-4 h-4" />
                                 <span>
-                                  {isKm
-                                    ? `✅ អនុម័ត & បើក VIP (${ticket.durationDays} ថ្ងៃ / $${Number(ticket.amountUsd || 0).toFixed(2)})`
-                                    : `✅ Approve & Activate VIP (${ticket.durationDays}d / $${Number(ticket.amountUsd || 0).toFixed(2)})`}
+                                  {tr(language, `✅ អនុម័ត & បើក VIP (${ticket.durationDays} ថ្ងៃ / $${Number(ticket.amountUsd || 0).toFixed(2)})`, `✅ Approve & Activate VIP (${ticket.durationDays}d / $${Number(ticket.amountUsd || 0).toFixed(2)})`, `✅ 批准并激活 VIP（${ticket.durationDays}天 / $${Number(ticket.amountUsd || 0).toFixed(2)}）`)}
                                 </span>
                               </button>
                             )}
@@ -1638,7 +1597,7 @@ export const AdminDashboard: React.FC = () => {
                               />
                               <div className="font-khmer text-xs">
                                 <p className="font-bold text-stone-900 dark:text-stone-100">
-                                  🧾 {isKm ? 'រូបភាពវិក្កយបត្របង់ប្រាក់ ABA ភ្ជាប់មកជាមួយ' : 'Attached ABA Payment Receipt'}
+                                  🧾 {tr(language, 'រូបភាពវិក្កយបត្របង់ប្រាក់ ABA ភ្ជាប់មកជាមួយ', 'Attached ABA Payment Receipt', '已附带 ABA 支付凭证')}
                                 </p>
                                 <p className="text-[10px] text-stone-500 font-mono">
                                   {(ticket as any).receiptFileName || 'aba_receipt.png'}
@@ -1650,7 +1609,7 @@ export const AdminDashboard: React.FC = () => {
                               onClick={() => setInspectingTicketReceipt(ticket.receiptUrl || (ticket as any).receiptImageUrl || null)}
                               className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-khmer font-bold text-xs cursor-pointer"
                             >
-                              {isKm ? '🔍 មើលរូបពេញ' : '🔍 View Receipt'}
+                              {tr(language, '🔍 មើលរូបពេញ', '🔍 View Receipt', '🔍 查看收据')}
                             </button>
                           </div>
                         )}
@@ -1668,12 +1627,8 @@ export const AdminDashboard: React.FC = () => {
                               <span>
                                 🤖{' '}
                                 {ticket.aiVerificationReport.canAutoApprove
-                                  ? isKm
-                                    ? 'របាយការណ៍ AI & Transaction៖ ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ 100%'
-                                    : 'AI & Transaction Report: 100% Verified'
-                                  : isKm
-                                  ? '🚩 របាយការណ៍ AI៖ រកឃើញព័ត៌មានមិនត្រូវគ្នា (ត្រូវការការត្រួតពិនិត្យផ្ទាល់ពី Admin)'
-                                  : '🚩 AI Report: Mismatch Detected (Flagged for Manual Admin Review)'}
+                                  ? tr(language, 'របាយការណ៍ AI & Transaction៖ ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ 100%', 'AI & Transaction Report: 100% Verified', 'AI 与交易报告：100% 验证通过')
+                                  : tr(language, '🚩 របាយការណ៍ AI៖ រកឃើញព័ត៌មានមិនត្រូវគ្នា (ត្រូវការការត្រួតពិនិត្យផ្ទាល់ពី Admin)', '🚩 AI Report: Mismatch Detected (Flagged for Manual Admin Review)', '🚩 AI 报告：检测到不匹配（已标记供管理员人工审核）')}
                               </span>
                               <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-white/80 dark:bg-stone-900 text-stone-800 dark:text-stone-200">
                                 Score: {ticket.aiVerificationReport.confidenceScore}%
@@ -1758,9 +1713,7 @@ export const AdminDashboard: React.FC = () => {
                               setAdminReplyDrafts((prev) => ({ ...prev, [ticket.id]: e.target.value }))
                             }
                             placeholder={
-                              isKm
-                                ? 'វាយសារឆ្លើយតបទៅកាន់អ្នកប្រើប្រាស់ផ្ទាល់នៅទីនេះ...'
-                                : 'Type your admin reply to the user here...'
+                              tr(language, 'វាយសារឆ្លើយតបទៅកាន់អ្នកប្រើប្រាស់ផ្ទាល់នៅទីនេះ...', 'Type your admin reply to the user here...', '在此输入向用户的管理员回复...')
                             }
                             className="flex-1 px-3.5 py-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 font-khmer text-xs"
                           />
@@ -1768,7 +1721,7 @@ export const AdminDashboard: React.FC = () => {
                             type="button"
                             onClick={() => {
                               if (!draftText.trim()) {
-                                showToast(isKm ? 'សូមសរសេរសារឆ្លើយតបជាមុនសិន!' : 'Please enter a reply!', 'warning');
+                                showToast(tr(language, 'សូមសរសេរសារឆ្លើយតបជាមុនសិន!', 'Please enter a reply!', '请输入回复内容！'), 'warning');
                                 return;
                               }
                               replyToSupportTicket(ticket.id, draftText.trim());
@@ -1776,7 +1729,7 @@ export const AdminDashboard: React.FC = () => {
                             }}
                             className="px-4 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs transition active:scale-95 cursor-pointer shrink-0"
                           >
-                            {isKm ? '📨 ផ្ញើការឆ្លើយតប' : '📨 Send Reply'}
+                            {tr(language, '📨 ផ្ញើការឆ្លើយតប', '📨 Send Reply', '📨 发送回复')}
                           </button>
                         </div>
                       </div>
@@ -1846,14 +1799,10 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                       <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-base">
-                        {isKm
-                          ? 'គ្រប់គ្រងការផ្ទៀងផ្ទាត់ការទូទាត់ប្រាក់ VIP (Payment Verification & Archive)'
-                          : 'VIP Payment Verification & Archive Management'}
+                        {tr(language, 'គ្រប់គ្រងការផ្ទៀងផ្ទាត់ការទូទាត់ប្រាក់ VIP (Payment Verification & Archive)', 'VIP Payment Verification & Archive Management', 'VIP 支付验证与归档管理')}
                       </h3>
                       <p className="text-stone-500 font-khmer text-xs mt-0.5">
-                        {isKm
-                          ? 'សំណើដែលបានអនុម័ត (Approved) នឹងត្រូវលាក់/បញ្ជូនទៅបណ្ណសារប្រវត្តិដោយស្វ័យប្រវត្តិ ដើម្បីរក្សាបញ្ជីរង់ចាំឱ្យស្អាត'
-                          : 'Approved requests automatically move to Archived History to keep the Pending Queue clean'}
+                        {tr(language, 'សំណើដែលបានអនុម័ត (Approved) នឹងត្រូវលាក់/បញ្ជូនទៅបណ្ណសារប្រវត្តិដោយស្វ័យប្រវត្តិ ដើម្បីរក្សាបញ្ជីរង់ចាំឱ្យស្អាត', 'Approved requests automatically move to Archived History to keep the Pending Queue clean', '已批准的请求会自动移至归档历史，以保持待处理队列整洁')}
                       </p>
                     </div>
 
@@ -1868,9 +1817,7 @@ export const AdminDashboard: React.FC = () => {
                             className="w-4 h-4 rounded accent-rose-600 cursor-pointer"
                           />
                           <span>
-                            {isKm
-                              ? `ជ្រើសរើសទាំងអស់ក្នុងទំព័រនេះ (${filteredTransactions.length})`
-                              : `Select All Visible (${filteredTransactions.length})`}
+                            {tr(language, `ជ្រើសរើសទាំងអស់ក្នុងទំព័រនេះ (${filteredTransactions.length})`, `Select All Visible (${filteredTransactions.length})`, `全选当前可见 (${filteredTransactions.length})`)}
                           </span>
                         </label>
                       )}
@@ -1890,9 +1837,7 @@ export const AdminDashboard: React.FC = () => {
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>
-                            {isKm
-                              ? `លុបកំណត់ត្រាទូទាត់ដែលបានជ្រើសរើស (${validSelectedTxnIds.length})`
-                              : `Delete Selected Records (${validSelectedTxnIds.length})`}
+                            {tr(language, `លុបកំណត់ត្រាទូទាត់ដែលបានជ្រើសរើស (${validSelectedTxnIds.length})`, `Delete Selected Records (${validSelectedTxnIds.length})`, `删除所选记录 (${validSelectedTxnIds.length})`)}
                           </span>
                         </button>
                       )}
@@ -1933,15 +1878,13 @@ export const AdminDashboard: React.FC = () => {
                             a.click();
                             URL.revokeObjectURL(url);
                             showToast(
-                              isKm
-                                ? '📥 បានទាញយកបណ្ណសារប្រវត្តិទូទាត់សម្រាប់សវនកម្មជោគជ័យ!'
-                                : '📥 Exported payment audit history successfully!',
+                              tr(language, '📥 បានទាញយកបណ្ណសារប្រវត្តិទូទាត់សម្រាប់សវនកម្មជោគជ័យ!', '📥 Exported payment audit history successfully!', '📥 成功导出支付审计历史！'),
                               'success'
                             );
                           }}
                           className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-stone-700 hover:bg-slate-200 text-slate-700 dark:text-stone-200 font-khmer text-xs font-bold border border-slate-300 dark:border-stone-600 transition flex items-center gap-1.5 cursor-pointer"
                         >
-                          <span>📥 {isKm ? 'រក្សាទុកប្រវត្តិសវនកម្ម' : 'Export Audit'}</span>
+                          <span>📥 {tr(language, 'រក្សាទុកប្រវត្តិសវនកម្ម', 'Export Audit', '导出审计')}</span>
                         </button>
                       )}
                     </div>
@@ -1958,7 +1901,7 @@ export const AdminDashboard: React.FC = () => {
                           : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-700'
                       }`}
                     >
-                      ⏳ {isKm ? 'រង់ចាំពិនិត្យ' : 'Pending Review'} ({pendingTxns.length})
+                      ⏳ {tr(language, 'រង់ចាំពិនិត្យ', 'Pending Review', '待审核')} ({pendingTxns.length})
                     </button>
 
                     <button
@@ -1970,7 +1913,7 @@ export const AdminDashboard: React.FC = () => {
                           : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-700'
                       }`}
                     >
-                      📦 {isKm ? 'បណ្ណសារប្រវត្តិ (អនុម័ត/បដិសេធ)' : 'Archived History'} ({archivedTxns.length})
+                      📦 {tr(language, 'បណ្ណសារប្រវត្តិ (អនុម័ត/បដិសេធ)', 'Archived History', '已归档历史')} ({archivedTxns.length})
                     </button>
 
                     <button
@@ -1982,7 +1925,7 @@ export const AdminDashboard: React.FC = () => {
                           : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-700'
                       }`}
                     >
-                      ✓ {isKm ? 'អនុម័តរួច' : 'Approved'} ({verifiedTxns.length})
+                      ✓ {tr(language, 'អនុម័តរួច', 'Approved', '已批准')} ({verifiedTxns.length})
                     </button>
 
                     <button
@@ -1994,7 +1937,7 @@ export const AdminDashboard: React.FC = () => {
                           : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-700'
                       }`}
                     >
-                      ✕ {isKm ? 'បដិសេធ/មិនត្រឹមត្រូវ' : 'Rejected/Invalid'} ({rejectedTxns.length})
+                      ✕ {tr(language, 'បដិសេធ/មិនត្រឹមត្រូវ', 'Rejected/Invalid', '已拒绝/无效')} ({rejectedTxns.length})
                     </button>
 
                     <button
@@ -2006,7 +1949,7 @@ export const AdminDashboard: React.FC = () => {
                           : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-700'
                       }`}
                     >
-                      📋 {isKm ? 'ទាំងអស់' : 'All'} ({transactions.length})
+                      📋 {tr(language, 'ទាំងអស់', 'All', '全部')} ({transactions.length})
                     </button>
                   </div>
                 </div>
@@ -2023,18 +1966,12 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100">
                         {txnFilter === 'pending'
-                          ? isKm
-                            ? '🎉 បញ្ជីរង់ចាំពិនិត្យស្អាតល្អ! គ្មានសំណើទូទាត់កំពុងរង់ចាំទេ'
-                            : '🎉 Pending Queue is Clean! No payment requests awaiting review'
-                          : isKm
-                          ? 'គ្មានកំណត់ត្រាទូទាត់ក្នុងផ្នែកនេះឡើយ'
-                          : 'No payment records in this view'}
+                          ? tr(language, '🎉 បញ្ជីរង់ចាំពិនិត្យស្អាតល្អ! គ្មានសំណើទូទាត់កំពុងរង់ចាំទេ', '🎉 Pending Queue is Clean! No payment requests awaiting review', '🎉 待处理队列很整洁！没有等待审核的支付请求')
+                          : tr(language, 'គ្មានកំណត់ត្រាទូទាត់ក្នុងផ្នែកនេះឡើយ', 'No payment records in this view', '此视图中没有支付记录')}
                       </h4>
                       {txnFilter === 'pending' && archivedTxns.length > 0 && (
                         <p className="text-xs text-stone-500">
-                          {isKm
-                            ? `សំណើដែលបានអនុម័ត ឬបដិសេធចំនួន ${archivedTxns.length} ត្រូវបានរក្សាទុកក្នុង "📦 បណ្ណសារប្រវត្តិ"។`
-                            : `${archivedTxns.length} reviewed record(s) are safely stored in "📦 Archived History".`}
+                          {tr(language, `សំណើដែលបានអនុម័ត ឬបដិសេធចំនួន ${archivedTxns.length} ត្រូវបានរក្សាទុកក្នុង "📦 បណ្ណសារប្រវត្តិ"។`, `${archivedTxns.length} reviewed record(s) are safely stored in "📦 Archived History".`, `${archivedTxns.length} 条已审核记录已安全存入“📦 归档历史”。`)}
                         </p>
                       )}
                     </div>
@@ -2063,9 +2000,7 @@ export const AdminDashboard: React.FC = () => {
                                   checked={isTxnSelected}
                                   onChange={() => toggleSelectTxn(t.id)}
                                   title={
-                                    isKm
-                                      ? 'ជ្រើសរើសកំណត់ត្រាទូទាត់នេះដើម្បីលុប'
-                                      : 'Select this payment record for deletion'
+                                    tr(language, 'ជ្រើសរើសកំណត់ត្រាទូទាត់នេះដើម្បីលុប', 'Select this payment record for deletion', '选择此支付记录进行删除')
                                   }
                                   className="w-4 h-4 rounded accent-rose-600 cursor-pointer shrink-0"
                                 />
@@ -2162,9 +2097,7 @@ export const AdminDashboard: React.FC = () => {
                                       <div className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1">
                                         <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
                                         <span>
-                                          {isKm
-                                            ? 'ភស្តុតាងបង់ប្រាក់ (Payment Proof)'
-                                            : 'Uploaded Payment Proof'}
+                                          {tr(language, 'ភស្តុតាងបង់ប្រាក់ (Payment Proof)', 'Uploaded Payment Proof', '已上传的支付凭据')}
                                         </span>
                                       </div>
                                       <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
@@ -2182,16 +2115,14 @@ export const AdminDashboard: React.FC = () => {
                                     className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-khmer font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0"
                                   >
                                     <Search className="w-3.5 h-3.5" />
-                                    <span>{isKm ? '🔍 មើលភស្តុតាងពេញ' : '🔍 View Proof'}</span>
+                                    <span>{tr(language, '🔍 មើលភស្តុតាងពេញ', '🔍 View Proof', '🔍 查看凭据')}</span>
                                   </button>
                                 </div>
                               ) : (
                                 <div className="p-2 rounded-xl bg-amber-50/60 dark:bg-slate-800/60 border border-amber-200 dark:border-slate-700 text-[11px] text-amber-800 dark:text-amber-300 font-khmer flex items-center justify-between">
                                   <span>
                                     ⚠️{' '}
-                                    {isKm
-                                      ? 'អ្នកប្រើប្រាស់មិនទាន់ភ្ជាប់រូបភាពវិក្កយបត្របង់ប្រាក់នៅឡើយទេ'
-                                      : 'No payment proof screenshot attached yet'}
+                                    {tr(language, 'អ្នកប្រើប្រាស់មិនទាន់ភ្ជាប់រូបភាពវិក្កយបត្របង់ប្រាក់នៅឡើយទេ', 'No payment proof screenshot attached yet', '尚未附加支付凭据截图')}
                                   </span>
                                 </div>
                               )}
@@ -2223,12 +2154,8 @@ export const AdminDashboard: React.FC = () => {
                                     <span>
                                       🤖{' '}
                                       {t.aiVerificationReport.canAutoApprove
-                                        ? isKm
-                                          ? 'AI & Transaction Verified (100%)'
-                                          : 'AI & Transaction Verified (100%)'
-                                        : isKm
-                                        ? '🚩 ដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យផ្ទាល់ (Flagged for Manual Review)'
-                                        : '🚩 Flagged for Manual Admin Review'}
+                                        ? tr(language, 'AI & Transaction Verified (100%)', 'AI & Transaction Verified (100%)', 'AI 与交易验证通过 (100%)')
+                                        : tr(language, '🚩 ដាក់សញ្ញាសម្រាប់ Admin ត្រួតពិនិត្យផ្ទាល់ (Flagged for Manual Review)', '🚩 Flagged for Manual Admin Review', '🚩 已标记供管理员人工审核')}
                                     </span>
                                     <span className="font-mono text-[10px]">
                                       Score: {t.aiVerificationReport.confidenceScore}%
@@ -2282,7 +2209,7 @@ export const AdminDashboard: React.FC = () => {
                                       className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
                                     >
                                       <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
-                                      <span>{isKm ? '🔍 មើលភស្តុតាងពេញ' : 'View Proof'}</span>
+                                      <span>{tr(language, '🔍 មើលភស្តុតាងពេញ', 'View Proof', '查看凭据')}</span>
                                     </button>
                                   )}
 
@@ -2309,12 +2236,8 @@ export const AdminDashboard: React.FC = () => {
                                   <button
                                     onClick={() => {
                                       const note = window.prompt(
-                                        isKm
-                                          ? 'បញ្ចូលសារស្នើសុំភស្តុតាងបន្ថែមពីអ្នកប្រើប្រាស់ (Request More Information)៖'
-                                          : 'Enter message requesting clearer payment proof from user:',
-                                        isKm
-                                          ? 'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់ (បង្ហាញចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងលេខប្រតិបត្តិការ)។'
-                                          : 'Please upload a clearer ABA receipt screenshot showing the amount, date, and transaction ID.'
+                                        tr(language, 'បញ្ចូលសារស្នើសុំភស្តុតាងបន្ថែមពីអ្នកប្រើប្រាស់ (Request More Information)៖', 'Enter message requesting clearer payment proof from user:', '输入要求用户提供更清晰支付凭据的消息：'),
+                                        tr(language, 'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់ (បង្ហាញចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងលេខប្រតិបត្តិការ)។', 'Please upload a clearer ABA receipt screenshot showing the amount, date, and transaction ID.', '请上传更清晰的 ABA 收据截图，显示金额、日期和交易编号。')
                                       );
                                       if (note !== null) {
                                         requestMorePaymentInfo(t.id, note.trim());
@@ -2322,18 +2245,14 @@ export const AdminDashboard: React.FC = () => {
                                     }}
                                     className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-500 hover:text-slate-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-khmer font-bold text-xs transition cursor-pointer"
                                   >
-                                    <span>{isKm ? '💬 ស្នើសុំភស្តុតាងបន្ថែម' : 'Request More Info'}</span>
+                                    <span>{tr(language, '💬 ស្នើសុំភស្តុតាងបន្ថែម', 'Request More Info', '要求补充信息')}</span>
                                   </button>
 
                                   <button
                                     onClick={() => {
                                       const customReason = window.prompt(
-                                        isKm
-                                          ? 'បញ្ចូលមូលហេតុនៃការបដិសេធ (Rejection Reason)៖'
-                                          : 'Enter rejection reason:',
-                                        isKm
-                                          ? 'មិនឃើញមានប្រតិបត្តិការទូទាត់ក្នុងរបាយការណ៍ធនាគារ ABA ឡើយ។'
-                                          : 'Transaction could not be verified on ABA bank statement.'
+                                        tr(language, 'បញ្ចូលមូលហេតុនៃការបដិសេធ (Rejection Reason)៖', 'Enter rejection reason:', '输入拒绝原因：'),
+                                        tr(language, 'មិនឃើញមានប្រតិបត្តិការទូទាត់ក្នុងរបាយការណ៍ធនាគារ ABA ឡើយ។', 'Transaction could not be verified on ABA bank statement.', '在 ABA 银行对账单上无法核实该笔交易。')
                                       );
                                       if (customReason !== null) {
                                         rejectTransaction(
@@ -2345,7 +2264,7 @@ export const AdminDashboard: React.FC = () => {
                                     }}
                                     className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-khmer font-bold text-xs transition cursor-pointer"
                                   >
-                                    <span>{isKm ? '❌ បដិសេធ' : 'Reject'}</span>
+                                    <span>{tr(language, '❌ បដិសេធ', 'Reject', '拒绝')}</span>
                                   </button>
                                 </>
                               )}
@@ -2357,7 +2276,7 @@ export const AdminDashboard: React.FC = () => {
                                   className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white border border-rose-700 font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
-                                  <span>{isKm ? 'លុបកំណត់ត្រានេះ' : 'Delete Record'}</span>
+                                  <span>{tr(language, 'លុបកំណត់ត្រានេះ', 'Delete Record', '删除记录')}</span>
                                 </button>
                               )}
                             </div>
@@ -2384,14 +2303,10 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                         <div>
                           <h3 className="font-bold text-base leading-snug">
-                            {isKm
-                              ? `បញ្ជាក់ការលុបកំណត់ត្រាទូទាត់ (${txnsPendingDeletion.length})`
-                              : `Confirm Payment Record Deletion (${txnsPendingDeletion.length})`}
+                            {tr(language, `បញ្ជាក់ការលុបកំណត់ត្រាទូទាត់ (${txnsPendingDeletion.length})`, `Confirm Payment Record Deletion (${txnsPendingDeletion.length})`, `确认删除支付记录 (${txnsPendingDeletion.length})`)}
                           </h3>
                           <p className="text-[11px] text-rose-100 mt-0.5">
-                            {isKm
-                              ? 'លុបតែកំណត់ត្រាទូទាត់ដែលបានជ្រើសរើសប៉ុណ្ណោះ'
-                              : 'Only the selected payment records will be removed'}
+                            {tr(language, 'លុបតែកំណត់ត្រាទូទាត់ដែលបានជ្រើសរើសប៉ុណ្ណោះ', 'Only the selected payment records will be removed', '仅会移除所选的支付记录')}
                           </p>
                         </div>
                       </div>
@@ -2420,15 +2335,11 @@ export const AdminDashboard: React.FC = () => {
                           <p className="font-bold text-emerald-900 dark:text-emerald-300 flex items-center gap-1.5">
                             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                             <span>
-                              {isKm
-                                ? 'សុវត្ថិភាពគណនី និងស្ថានភាព VIP ត្រូវបានការពារ ១០០%៖'
-                                : 'User Account & VIP Status 100% Protected:'}
+                              {tr(language, 'សុវត្ថិភាពគណនី និងស្ថានភាព VIP ត្រូវបានការពារ ១០០%៖', 'User Account & VIP Status 100% Protected:', '用户账户与 VIP 状态 100% 受保护：')}
                             </span>
                           </p>
                           <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
-                            {isKm
-                              ? 'ការលុបកំណត់ត្រាទូទាត់នេះ នឹងមិនលុបគណនីរបស់អ្នកប្រើប្រាស់ ហើយក៏មិនផ្លាស់ប្តូរ ឬបិទសមាជិកភាព VIP របស់គាត់ឡើយ។'
-                              : 'Deleting these payment records will NEVER delete the user account or change their active VIP status.'}
+                            {tr(language, 'ការលុបកំណត់ត្រាទូទាត់នេះ នឹងមិនលុបគណនីរបស់អ្នកប្រើប្រាស់ ហើយក៏មិនផ្លាស់ប្តូរ ឬបិទសមាជិកភាព VIP របស់គាត់ឡើយ។', 'Deleting these payment records will NEVER delete the user account or change their active VIP status.', '删除这些支付记录绝不会删除用户账户或更改其生效中的 VIP 状态。')}
                           </p>
                         </div>
 
@@ -2438,7 +2349,7 @@ export const AdminDashboard: React.FC = () => {
                             onClick={() => setTxnsPendingDeletion([])}
                             className="flex-1 py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-bold text-xs transition cursor-pointer"
                           >
-                            {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
+                            {tr(language, 'បោះបង់ (Cancel)', 'Cancel', '取消')}
                           </button>
                           <button
                             type="button"
@@ -2454,9 +2365,7 @@ export const AdminDashboard: React.FC = () => {
                           >
                             <Trash2 className="w-4 h-4" />
                             <span>
-                              {isKm
-                                ? `យល់ព្រមលុបកំណត់ត្រា (${txnsPendingDeletion.length})`
-                                : `Delete Records (${txnsPendingDeletion.length})`}
+                              {tr(language, `យល់ព្រមលុបកំណត់ត្រា (${txnsPendingDeletion.length})`, `Delete Records (${txnsPendingDeletion.length})`, `删除记录 (${txnsPendingDeletion.length})`)}
                             </span>
                           </button>
                         </div>
@@ -2480,9 +2389,7 @@ export const AdminDashboard: React.FC = () => {
                         <h4 className="font-bold text-sm flex items-center gap-2">
                           <ImageIcon className="w-4 h-4 text-emerald-400" />
                           <span>
-                            {isKm
-                              ? `ពិនិត្យភស្តុតាងបង់ប្រាក់ពេញលេញ (${inspectingProofTxn.id})`
-                              : `Full-Resolution Payment Proof (${inspectingProofTxn.id})`}
+                            {tr(language, `ពិនិត្យភស្តុតាងបង់ប្រាក់ពេញលេញ (${inspectingProofTxn.id})`, `Full-Resolution Payment Proof (${inspectingProofTxn.id})`, `高清支付凭据 (${inspectingProofTxn.id})`)}
                           </span>
                         </h4>
                         <p className="text-[11px] text-slate-300">
@@ -2510,9 +2417,7 @@ export const AdminDashboard: React.FC = () => {
 
                     <div className="p-4 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 font-khmer">
                       <span className="text-xs text-slate-600 dark:text-slate-300">
-                        {isKm
-                          ? 'សូមផ្ទៀងផ្ទាត់ចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងគណនីទទួល CHEA SAVUTH (000 056 833)'
-                          : 'Verify amount, date, and recipient CHEA SAVUTH (000 056 833)'}
+                        {tr(language, 'សូមផ្ទៀងផ្ទាត់ចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងគណនីទទួល CHEA SAVUTH (000 056 833)', 'Verify amount, date, and recipient CHEA SAVUTH (000 056 833)', '核实金额、日期以及收款人 CHEA SAVUTH (000 056 833)')}
                       </span>
                       <div className="flex items-center gap-2">
                         {(inspectingProofTxn.status === 'pending_verification' ||
@@ -2526,18 +2431,14 @@ export const AdminDashboard: React.FC = () => {
                               }}
                               className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer"
                             >
-                              {isKm ? '✅ អនុម័ត VIP ឥឡូវនេះ' : '✅ Approve VIP Now'}
+                              {tr(language, '✅ អនុម័ត VIP ឥឡូវនេះ', '✅ Approve VIP Now', '✅ 立即批准 VIP')}
                             </button>
                             <button
                               type="button"
                               onClick={() => {
                                 const note = window.prompt(
-                                  isKm
-                                    ? 'បញ្ចូលសារស្នើសុំភស្តុតាងបន្ថែម៖'
-                                    : 'Enter message requesting clearer proof:',
-                                  isKm
-                                    ? 'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់។'
-                                    : 'Please upload a clearer receipt screenshot.'
+                                  tr(language, 'បញ្ចូលសារស្នើសុំភស្តុតាងបន្ថែម៖', 'Enter message requesting clearer proof:', '输入要求提供更清晰凭据的消息：'),
+                                  tr(language, 'សូមអាប់ឡូតរូបភាពវិក្កយបត្របង់ប្រាក់ ABA ឱ្យបានច្បាស់លាស់។', 'Please upload a clearer receipt screenshot.', '请上传更清晰的收据截图。')
                                 );
                                 if (note !== null) {
                                   requestMorePaymentInfo(inspectingProofTxn.id, note.trim());
@@ -2546,7 +2447,7 @@ export const AdminDashboard: React.FC = () => {
                               }}
                               className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs cursor-pointer"
                             >
-                              {isKm ? '💬 ស្នើសុំភស្តុតាងបន្ថែម' : '💬 Request More Info'}
+                              {tr(language, '💬 ស្នើសុំភស្តុតាងបន្ថែម', '💬 Request More Info', '💬 要求补充信息')}
                             </button>
                           </>
                         )}
@@ -2555,7 +2456,7 @@ export const AdminDashboard: React.FC = () => {
                           onClick={() => setInspectingProofTxn(null)}
                           className="px-3 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs cursor-pointer"
                         >
-                          {isKm ? 'បិទ' : 'Close'}
+                          {tr(language, 'បិទ', 'Close', '关闭')}
                         </button>
                       </div>
                     </div>
@@ -2572,14 +2473,14 @@ export const AdminDashboard: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm">
-                  {isKm ? `គ្រប់គ្រងបញ្ជីមុខម្ហូបខ្មែរ (សរុប ${foods.length} មុខ - គ្មានតម្លៃលើរូបភាព)` : `Manage Khmer Foods (${foods.length} items - No Prices on Pictures)`}
+                  {tr(language, `គ្រប់គ្រងបញ្ជីមុខម្ហូបខ្មែរ (សរុប ${foods.length} មុខ - គ្មានតម្លៃលើរូបភាព)`, `Manage Khmer Foods (${foods.length} items - No Prices on Pictures)`, `管理高棉美食（共 ${foods.length} 项 - 图片上无价格）`)}
                 </h3>
                 <button
                   onClick={() => setShowAddFoodForm(!showAddFoodForm)}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#064E3B] text-white font-bold hover:bg-[#047857] font-khmer transition active:scale-95 shadow-xs"
                 >
                   <Plus className="w-3.5 h-3.5 text-emerald-200" />
-                  <span>{showAddFoodForm ? (isKm ? 'បិទ' : 'Close') : (isKm ? 'បញ្ចូលមុខម្ហូបថ្មី' : 'Add Food')}</span>
+                  <span>{showAddFoodForm ? (tr(language, 'បិទ', 'Close', '关闭')) : (tr(language, 'បញ្ចូលមុខម្ហូបថ្មី', 'Add Food', '添加美食'))}</span>
                 </button>
               </div>
 
@@ -2630,7 +2531,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <label className="block font-medium">
-                        {isKm ? 'រូបភាពមុខម្ហូប (Photo)' : 'Dish Photo'}
+                        {tr(language, 'រូបភាពមុខម្ហូប (Photo)', 'Dish Photo', '菜品照片')}
                       </label>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <input
@@ -2647,12 +2548,12 @@ export const AdminDashboard: React.FC = () => {
                               const dataUrl = await processAndCompressImageFile(file, 720, 0.76);
                               setNewFoodPhotoUrl(dataUrl);
                               showToast(
-                                isKm ? '✅ បានជ្រើសរើសរូបភាពមុខម្ហូបរួចរាល់!' : '✅ Dish photo selected!',
+                                tr(language, '✅ បានជ្រើសរើសរូបភាពមុខម្ហូបរួចរាល់!', '✅ Dish photo selected!', '✅ 已选择菜品照片！'),
                                 'success'
                               );
                             } catch {
                               showToast(
-                                isKm ? 'មិនអាចអានរូបភាពបានទេ' : 'Failed to process photo',
+                                tr(language, 'មិនអាចអានរូបភាពបានទេ', 'Failed to process photo', '处理照片失败'),
                                 'error'
                               );
                             } finally {
@@ -2675,7 +2576,7 @@ export const AdminDashboard: React.FC = () => {
                               if (pick.dataUrl) {
                                 setNewFoodPhotoUrl(pick.dataUrl);
                                 showToast(
-                                  isKm ? '✅ បានជ្រើសរើសរូបភាពមុខម្ហូបរួចរាល់!' : '✅ Dish photo selected!',
+                                  tr(language, '✅ បានជ្រើសរើសរូបភាពមុខម្ហូបរួចរាល់!', '✅ Dish photo selected!', '✅ 已选择菜品照片！'),
                                   'success'
                                 );
                                 return;
@@ -2692,8 +2593,8 @@ export const AdminDashboard: React.FC = () => {
                           <Upload className="w-3.5 h-3.5 text-emerald-300" />
                           <span>
                             {isUploadingNewFoodPhoto
-                              ? (isKm ? 'កំពុងផ្ទុក...' : 'Uploading...')
-                              : (isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos')}
+                              ? (tr(language, 'កំពុងផ្ទុក...', 'Uploading...', '正在上传...'))
+                              : (tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册'))}
                           </span>
                         </button>
 
@@ -2703,9 +2604,7 @@ export const AdminDashboard: React.FC = () => {
                           onClick={async () => {
                             if (!newFoodNameKh.trim() && !newFoodNameEn.trim()) {
                               showToast(
-                                isKm
-                                  ? 'សូមវាយបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន មុនពេលស្វែងរករូបភាព Online'
-                                  : 'Please enter the dish name first before searching online photos',
+                                tr(language, 'សូមវាយបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន មុនពេលស្វែងរករូបភាព Online', 'Please enter the dish name first before searching online photos', '在搜索在线照片之前，请先输入菜品名称'),
                                 'error'
                               );
                               return;
@@ -2722,15 +2621,13 @@ export const AdminDashboard: React.FC = () => {
                               if (results.length > 0) {
                                 setNewFoodPhotoUrl(results[0].url);
                                 showToast(
-                                  isKm
-                                    ? `រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹក!`
-                                    : `Found ${results.length} matching online food photos!`,
+                                  tr(language, `រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹក!`, `Found ${results.length} matching online food photos!`, `找到 ${results.length} 张匹配的在线美食照片！`),
                                   'success'
                                 );
                               }
                             } catch {
                               showToast(
-                                isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food photos',
+                                tr(language, 'មិនអាចស្វែងរករូបភាពពី Online បានទេ', 'Failed to search online food photos', '搜索在线美食照片失败'),
                                 'error'
                               );
                             } finally {
@@ -2742,8 +2639,8 @@ export const AdminDashboard: React.FC = () => {
                           <Search className={`w-3.5 h-3.5 text-amber-300 ${isSearchingNewFoodPhoto ? 'animate-spin' : ''}`} />
                           <span>
                             {isSearchingNewFoodPhoto
-                              ? (isKm ? 'កំពុងស្វែងរក...' : 'Searching...')
-                              : (isKm ? 'ស្វែងរករូបភាព Online' : 'Search Online Photo')}
+                              ? (tr(language, 'កំពុងស្វែងរក...', 'Searching...', '正在搜索...'))
+                              : (tr(language, 'ស្វែងរករូបភាព Online', 'Search Online Photo', '搜索在线照片'))}
                           </span>
                         </button>
                       </div>
@@ -2761,7 +2658,7 @@ export const AdminDashboard: React.FC = () => {
                         type="text"
                         value={newFoodPhotoUrl}
                         onChange={(e) => setNewFoodPhotoUrl(e.target.value)}
-                        placeholder={isKm ? 'https://... ឬ រូបភាពរបស់ខ្ញុំ' : 'https://... or My Photos'}
+                        placeholder={tr(language, 'https://... ឬ រូបភាពរបស់ខ្ញុំ', 'https://... or My Photos', 'https://... 或 我的相册')}
                         className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
                       />
                     </div>
@@ -2769,9 +2666,7 @@ export const AdminDashboard: React.FC = () => {
                     {newFoodPhotoCandidates.length > 0 && (
                       <div className="space-y-1.5 pt-1">
                         <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block">
-                          {isKm
-                            ? `✨ រូបភាពម្ហូបពី Online ដែលត្រូវគ្នា (${newFoodPhotoCandidates.length} សន្លឹក - ចុចជ្រើសរើស)៖`
-                            : `✨ Matching Online Food Photos (${newFoodPhotoCandidates.length} results - tap to select):`}
+                          {tr(language, `✨ រូបភាពម្ហូបពី Online ដែលត្រូវគ្នា (${newFoodPhotoCandidates.length} សន្លឹក - ចុចជ្រើសរើស)៖`, `✨ Matching Online Food Photos (${newFoodPhotoCandidates.length} results - tap to select):`, `✨ 匹配的在线美食照片（${newFoodPhotoCandidates.length} 个结果 - 点击选择）：`)}
                         </span>
                         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                           {newFoodPhotoCandidates.map((cand, idx) => {
@@ -2809,7 +2704,7 @@ export const AdminDashboard: React.FC = () => {
                     type="submit"
                     className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold hover:bg-[#047857] font-khmer transition active:scale-95 shadow-xs"
                   >
-                    {isKm ? 'រក្សាទុកមុខម្ហូប' : 'Save Food Item'}
+                    {tr(language, 'រក្សាទុកមុខម្ហូប', 'Save Food Item', '保存美食项目')}
                   </button>
                 </form>
               )}
@@ -2833,10 +2728,10 @@ export const AdminDashboard: React.FC = () => {
                         type="button"
                         onClick={() => setSelectedFoodForImageEdit(food)}
                         className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#064E3B] dark:bg-emerald-950/40 dark:text-emerald-400 font-bold text-[11px] font-khmer flex items-center gap-1 transition shadow-2xs border border-slate-200 dark:border-slate-700"
-                        title={isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos'}
+                        title={tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册')}
                       >
                         <Camera className="w-3.5 h-3.5 text-[#059669]" />
-                        <span>{isKm ? 'កែរូបថត' : 'Photo'}</span>
+                        <span>{tr(language, 'កែរូបថត', 'Photo', '照片')}</span>
                       </button>
 
                       <button
@@ -2854,11 +2749,11 @@ export const AdminDashboard: React.FC = () => {
                             ? 'bg-rose-600 text-white shadow-xs'
                             : 'text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30'
                         }`}
-                        title={isKm ? 'លុបមុខម្ហូប' : 'Delete food item'}
+                        title={tr(language, 'លុបមុខម្ហូប', 'Delete food item', '删除美食项目')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                         {confirmDeleteFoodId === food.id && (
-                          <span>{isKm ? 'បញ្ជាក់លុប?' : 'Confirm?'}</span>
+                          <span>{tr(language, 'បញ្ជាក់លុប?', 'Confirm?', '确认？')}</span>
                         )}
                       </button>
                     </div>
@@ -2870,9 +2765,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => setVisibleAdminFoodCount((c) => c + 60)}
                     className="w-full py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-khmer font-bold text-xs transition cursor-pointer"
                   >
-                    {isKm
-                      ? `បង្ហាញមុខម្ហូបបន្ថែម (${visibleAdminFoodCount}/${foods.length})`
-                      : `Show More Foods (${visibleAdminFoodCount}/${foods.length})`}
+                    {tr(language, `បង្ហាញមុខម្ហូបបន្ថែម (${visibleAdminFoodCount}/${foods.length})`, `Show More Foods (${visibleAdminFoodCount}/${foods.length})`, `显示更多美食 (${visibleAdminFoodCount}/${foods.length})`)}
                   </button>
                 )}
               </div>
@@ -2888,9 +2781,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-center gap-2 text-xs font-bold text-amber-950 dark:text-amber-200">
                     <BedDouble className="w-4 h-4 text-amber-600 shrink-0" />
                     <span>
-                      {isKm
-                        ? `🏨 មានសំណើសណ្ឋាគារ / ផ្ទះសំណាក់ចំនួន ${totalPendingHotelCount} កំពុងរង់ចាំការអនុម័តនៅក្នុងផ្នែក «សណ្ឋាគារ»`
-                        : `🏨 You have ${totalPendingHotelCount} pending Hotel / Accommodation submission(s) under the Hotels tab`}
+                      {tr(language, `🏨 មានសំណើសណ្ឋាគារ / ផ្ទះសំណាក់ចំនួន ${totalPendingHotelCount} កំពុងរង់ចាំការអនុម័តនៅក្នុងផ្នែក «សណ្ឋាគារ»`, `🏨 You have ${totalPendingHotelCount} pending Hotel / Accommodation submission(s) under the Hotels tab`, `🏨 您在酒店标签页下有 ${totalPendingHotelCount} 个待审核的酒店/住宿提交`)}
                     </span>
                   </div>
                   <button
@@ -2898,7 +2789,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => setActiveTab('hotels')}
                     className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition cursor-pointer shrink-0"
                   >
-                    {isKm ? '🏨 ទៅកាន់ផ្នែកសណ្ឋាគារឥឡូវនេះ →' : '🏨 Go to Hotels Tab →'}
+                    {tr(language, '🏨 ទៅកាន់ផ្នែកសណ្ឋាគារឥឡូវនេះ →', '🏨 Go to Hotels Tab →', '🏨 前往酒店标签页 →')}
                   </button>
                 </div>
               )}
@@ -2908,15 +2799,13 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div>
                     <h3 className="font-bold text-white font-khmer text-sm flex items-center gap-2">
-                      <span>➕ {isKm ? `បន្ថែមហាងថ្មី & គ្រប់គ្រងហាង (សរុប ${shopOnlyRestaurants.length} ហាង)` : `Add New Shop & Manage (${shopOnlyRestaurants.length} shops)`}</span>
+                      <span>➕ {tr(language, `បន្ថែមហាងថ្មី & គ្រប់គ្រងហាង (សរុប ${shopOnlyRestaurants.length} ហាង)`, `Add New Shop & Manage (${shopOnlyRestaurants.length} shops)`, `添加新店铺与管理 (${shopOnlyRestaurants.length} 家店铺)`)}</span>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-200 text-[10px] font-bold">
                         ✅ Verified: {shopOnlyRestaurants.filter(r => r.isVerified).length}/{shopOnlyRestaurants.length}
                       </span>
                     </h3>
                     <p className="text-[10px] text-emerald-100/80 font-khmer mt-0.5">
-                      {isKm
-                        ? `ចុចប៊ូតុង «+ បន្ថែមហាងថ្មី» ដើម្បីបំពេញព័ត៌មានហាង ជ្រើសរើសទីតាំងលើផែនទី Google Maps និងដាក់ស្នើ • ហាងមានរូបភាព ${shopOnlyRestaurants.filter(r => Boolean(r.photoUrl || r.profileImage)).length}/${shopOnlyRestaurants.length}`
-                        : `Tap "+ Add New Shop" to enter shop details, select location on Google Maps, and submit`}
+                      {tr(language, `ចុចប៊ូតុង «+ បន្ថែមហាងថ្មី» ដើម្បីបំពេញព័ត៌មានហាង ជ្រើសរើសទីតាំងលើផែនទី Google Maps និងដាក់ស្នើ • ហាងមានរូបភាព ${shopOnlyRestaurants.filter(r => Boolean(r.photoUrl || r.profileImage)).length}/${shopOnlyRestaurants.length}`, `Tap "+ Add New Shop" to enter shop details, select location on Google Maps, and submit`, '点击“+ 添加新店铺”以输入店铺详情，在 Google Maps 上选择位置并提交')}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
@@ -2929,7 +2818,7 @@ export const AdminDashboard: React.FC = () => {
                       className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 text-slate-950 font-khmer font-black text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
                     >
                       <Plus className="w-4 h-4 stroke-[3]" />
-                      <span>{isKm ? '+ បន្ថែមហាងថ្មី (+ Add New Shop)' : '+ Add New Shop'}</span>
+                      <span>{tr(language, '+ បន្ថែមហាងថ្មី (+ Add New Shop)', '+ Add New Shop', '+ 添加新店铺')}</span>
                     </button>
                     <button
                       type="button"
@@ -2937,7 +2826,7 @@ export const AdminDashboard: React.FC = () => {
                       className="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-khmer font-bold text-xs shadow-sm transition cursor-pointer flex items-center gap-1.5"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
-                      <span>{isKm ? 'ផ្ទៀងផ្ទាត់ទិន្នន័យទាំងអស់ (1-Click Verify All)' : '1-Click Verify All'}</span>
+                      <span>{tr(language, 'ផ្ទៀងផ្ទាត់ទិន្នន័យទាំងអស់ (1-Click Verify All)', '1-Click Verify All', '一键验证全部')}</span>
                     </button>
                   </div>
                 </div>
@@ -2947,7 +2836,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 space-y-3">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <h4 className="font-bold text-amber-900 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
-                      <span>⏳ {isKm ? `ហាងអាហាររង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin (${pendingRestaurants.length})` : `Pending Food / Restaurant Submissions for Admin Approval (${pendingRestaurants.length})`}</span>
+                      <span>⏳ {tr(language, `ហាងអាហាររង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin (${pendingRestaurants.length})`, `Pending Food / Restaurant Submissions for Admin Approval (${pendingRestaurants.length})`, `待管理员批准的美食/餐厅提交 (${pendingRestaurants.length})`)}</span>
                     </h4>
                     <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
                       ADMIN APPROVAL REQUIRED
@@ -2976,7 +2865,7 @@ export const AdminDashboard: React.FC = () => {
                                   {isKm ? catInfo.labelKh : catInfo.labelEn}
                                 </span>
                                 <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
-                                  {isKm ? 'រង់ចាំអនុម័ត' : 'Pending Approval'}
+                                  {tr(language, 'រង់ចាំអនុម័ត', 'Pending Approval', '待审核')}
                                 </span>
                               </div>
                               <p className="text-[11px] text-slate-600 dark:text-slate-300">
@@ -2995,21 +2884,21 @@ export const AdminDashboard: React.FC = () => {
                               className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-black shadow-xs flex items-center gap-1 transition cursor-pointer"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'កែប្រែ' : 'Edit'}</span>
+                              <span>{tr(language, 'កែប្រែ', 'Edit', '编辑')}</span>
                             </button>
                             <button
                               type="button"
                               onClick={() => approveRestaurant(rest.id)}
                               className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
                             >
-                              {isKm ? '✅ អនុម័ត (Approve)' : '✅ Approve'}
+                              {tr(language, '✅ អនុម័ត (Approve)', '✅ Approve', '✅ 批准')}
                             </button>
                             <button
                               type="button"
                               onClick={() => rejectRestaurant(rest.id)}
                               className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
                             >
-                              {isKm ? '🚫 បដិសេធ (Reject)' : '🚫 Reject'}
+                              {tr(language, '🚫 បដិសេធ (Reject)', '🚫 Reject', '🚫 拒绝')}
                             </button>
                             <button
                               type="button"
@@ -3017,7 +2906,7 @@ export const AdminDashboard: React.FC = () => {
                               className="px-2.5 py-1.5 rounded-xl bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'លុប' : 'Delete'}</span>
+                              <span>{tr(language, 'លុប', 'Delete', '删除')}</span>
                             </button>
                           </div>
                         </div>
@@ -3034,9 +2923,7 @@ export const AdminDashboard: React.FC = () => {
                     <h4 className="font-bold text-amber-950 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
                       <span>
                         ⬆️{' '}
-                        {isKm
-                          ? `សំណើដំឡើង និងកែប្រែហាងអាហារដែលមានស្រាប់ពីសមាជិក VIP (${pendingShopUpgradeRequests.length})`
-                          : `Pending Existing Shop Upgrade Requests (${pendingShopUpgradeRequests.length})`}
+                        {tr(language, `សំណើដំឡើង និងកែប្រែហាងអាហារដែលមានស្រាប់ពីសមាជិក VIP (${pendingShopUpgradeRequests.length})`, `Pending Existing Shop Upgrade Requests (${pendingShopUpgradeRequests.length})`, `待处理的已有店铺升级请求 (${pendingShopUpgradeRequests.length})`)}
                       </span>
                     </h4>
                     <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
@@ -3066,7 +2953,7 @@ export const AdminDashboard: React.FC = () => {
                                       {ch.nameKh || rest.nameKh} ({ch.nameEn || rest.nameEn})
                                     </h5>
                                     <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
-                                      {isKm ? 'សំណើដំឡើងហាងដែលមានស្រាប់' : 'Existing Listing Upgrade'}
+                                      {tr(language, 'សំណើដំឡើងហាងដែលមានស្រាប់', 'Existing Listing Upgrade', '现有商户升级')}
                                     </span>
                                   </div>
                                   <p className="text-[10px] text-slate-600 dark:text-slate-300">
@@ -3092,14 +2979,14 @@ export const AdminDashboard: React.FC = () => {
                                   onClick={() => approveListingUpgradeRequest(rest.id)}
                                   className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-xs transition cursor-pointer"
                                 >
-                                  {isKm ? '✅ អនុម័ត និងផ្សព្វផ្សាយ (Approve)' : '✅ Approve & Publish'}
+                                  {tr(language, '✅ អនុម័ត និងផ្សព្វផ្សាយ (Approve)', '✅ Approve & Publish', '✅ 批准并发布')}
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => rejectListingUpgradeRequest(rest.id)}
                                   className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-xs transition cursor-pointer"
                                 >
-                                  {isKm ? '🚫 បដិសេធ (Reject)' : '🚫 Reject'}
+                                  {tr(language, '🚫 បដិសេធ (Reject)', '🚫 Reject', '🚫 拒绝')}
                                 </button>
                               </div>
                             </div>
@@ -3123,9 +3010,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <ImageIcon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                       <h4 className="font-bold text-amber-900 dark:text-amber-300 font-khmer text-xs sm:text-sm">
-                        {isKm
-                          ? `📸 សំណើប្តូររូបភាពហាងថ្មី (${pendingPhotoReplacementRestaurants.length} រង់ចាំការអនុម័ត)`
-                          : `📸 Shop Photo Replacement Requests (${pendingPhotoReplacementRestaurants.length} Pending Approval)`}
+                        {tr(language, `📸 សំណើប្តូររូបភាពហាងថ្មី (${pendingPhotoReplacementRestaurants.length} រង់ចាំការអនុម័ត)`, `📸 Shop Photo Replacement Requests (${pendingPhotoReplacementRestaurants.length} Pending Approval)`, `📸 店铺照片更换请求（${pendingPhotoReplacementRestaurants.length} 个待审核）`)}
                       </h4>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -3138,14 +3023,12 @@ export const AdminDashboard: React.FC = () => {
                         >
                           <Check className="w-3.5 h-3.5" />
                           <span>
-                            {isKm
-                              ? `អនុម័តរូបភាពទាំងអស់ (${pendingPhotoReplacementRestaurants.length})`
-                              : `Approve All (${pendingPhotoReplacementRestaurants.length})`}
+                            {tr(language, `អនុម័តរូបភាពទាំងអស់ (${pendingPhotoReplacementRestaurants.length})`, `Approve All (${pendingPhotoReplacementRestaurants.length})`, `全部批准 (${pendingPhotoReplacementRestaurants.length})`)}
                           </span>
                         </button>
                       )}
                       <span className="px-2 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 text-[10px] font-bold font-khmer">
-                        {isKm ? 'រក្សារូបភាពចាស់រហូតដល់អនុម័ត' : 'Keeps Approved Photo Until Verified'}
+                        {tr(language, 'រក្សារូបភាពចាស់រហូតដល់អនុម័ត', 'Keeps Approved Photo Until Verified', '验证前保留已批准照片')}
                       </span>
                     </div>
                   </div>
@@ -3174,16 +3057,10 @@ export const AdminDashboard: React.FC = () => {
                                   }`}
                                 >
                                   {isPending
-                                    ? isKm
-                                      ? '⏳ រង់ចាំការអនុម័តពី Admin'
-                                      : '⏳ Pending Admin Approval'
+                                    ? tr(language, '⏳ រង់ចាំការអនុម័តពី Admin', '⏳ Pending Admin Approval', '⏳ 等待管理员批准')
                                     : isApproved
-                                    ? isKm
-                                      ? '✅ អនុម័តរួចរាល់'
-                                      : '✅ Approved'
-                                    : isKm
-                                    ? '🚫 បដិសេធ'
-                                    : '🚫 Rejected'}
+                                    ? tr(language, '✅ អនុម័តរួចរាល់', '✅ Approved', '✅ 已批准')
+                                    : tr(language, '🚫 បដិសេធ', '🚫 Rejected', '🚫 已拒绝')}
                                 </span>
                               </h5>
                               <p className="text-[11px] text-slate-500 dark:text-stone-400 font-khmer mt-0.5">
@@ -3201,7 +3078,7 @@ export const AdminDashboard: React.FC = () => {
                                   className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold font-khmer flex items-center gap-1 shadow-xs transition cursor-pointer"
                                 >
                                   <Check className="w-3.5 h-3.5" />
-                                  <span>{isKm ? 'អនុម័តរូបភាពថ្មី' : 'Approve New Photo'}</span>
+                                  <span>{tr(language, 'អនុម័តរូបភាពថ្មី', 'Approve New Photo', '批准新照片')}</span>
                                 </button>
                                 <button
                                   type="button"
@@ -3209,15 +3086,13 @@ export const AdminDashboard: React.FC = () => {
                                   onClick={() =>
                                     rejectShopPhotoReplacement(
                                       rest.id,
-                                      isKm
-                                        ? 'រូបភាពហាងថ្មីមិនត្រូវតាមស្តង់ដារ ត្រូវបានបដិសេធដោយ Admin (រក្សាទុករូបភាពចាស់ដដែល)'
-                                        : 'Rejected by Admin — original approved shop photo retained'
+                                      tr(language, 'រូបភាពហាងថ្មីមិនត្រូវតាមស្តង់ដារ ត្រូវបានបដិសេធដោយ Admin (រក្សាទុករូបភាពចាស់ដដែល)', 'Rejected by Admin — original approved shop photo retained', '已被管理员拒绝 — 保留原已批准的店铺照片')
                                     )
                                   }
                                   className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold font-khmer flex items-center gap-1 shadow-xs transition cursor-pointer"
                                 >
                                   <Ban className="w-3.5 h-3.5" />
-                                  <span>{isKm ? 'បដិសេធ' : 'Reject'}</span>
+                                  <span>{tr(language, 'បដិសេធ', 'Reject', '拒绝')}</span>
                                 </button>
                               </div>
                             )}
@@ -3228,12 +3103,8 @@ export const AdminDashboard: React.FC = () => {
                             <div className="p-2 rounded-xl bg-slate-50 dark:bg-stone-800/80 border border-slate-200 dark:border-stone-700">
                               <span className="block text-[10px] font-bold text-slate-600 dark:text-stone-300 font-khmer mb-1">
                                 {req.source === 'google_places_replacement_shop'
-                                  ? isKm
-                                    ? '១. ហាងគ្មានរូបភាពដែលត្រូវជំនួស'
-                                    : '1. Photo-less shop being replaced'
-                                  : isKm
-                                  ? '១. រូបភាពហាងកំពុងបង្ហាញ (Approved)'
-                                  : '1. Active Approved Shop Photo'}
+                                  ? tr(language, '១. ហាងគ្មានរូបភាពដែលត្រូវជំនួស', '1. Photo-less shop being replaced', '1. 待替换的无照片店铺')
+                                  : tr(language, '១. រូបភាពហាងកំពុងបង្ហាញ (Approved)', '1. Active Approved Shop Photo', '1. 当前已批准的店铺照片')}
                               </span>
                               {req.source === 'google_places_replacement_shop' ? (
                                 <div className="w-full h-24 rounded-lg border border-slate-200 dark:border-stone-700 flex flex-col items-center justify-center gap-1 p-1 text-center">
@@ -3255,7 +3126,7 @@ export const AdminDashboard: React.FC = () => {
                             </div>
                             <div className="p-2 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/70">
                               <span className="block text-[10px] font-bold text-amber-800 dark:text-amber-300 font-khmer mb-1">
-                                {isKm ? '២. រូបភាពហាងថ្មីដែលស្នើប្តូរ (Submitted)' : '2. Submitted Replacement Photo'}
+                                {tr(language, '២. រូបភាពហាងថ្មីដែលស្នើប្តូរ (Submitted)', '2. Submitted Replacement Photo', '2. 提交的替换照片')}
                               </span>
                               <img loading="lazy" decoding="async"
                                 src={resolveFoodPhotoUrl(req.newPhotoUrl)}
@@ -3270,35 +3141,31 @@ export const AdminDashboard: React.FC = () => {
                             <div className="p-2 rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/60 text-[10px] font-khmer space-y-0.5 text-slate-700 dark:text-stone-200">
                               <div className="font-bold text-sky-800 dark:text-sky-300">
                                 {req.source === 'google_places_match'
-                                  ? isKm
-                                    ? '🔍 រូបភាពពី Google Maps (ហាងដដែល)'
-                                    : '🔍 Google Maps photo (same shop match)'
-                                  : isKm
-                                  ? '🔄 ហាងថ្មីពី Google Maps (ជំនួសហាងគ្មានរូបភាព)'
-                                  : '🔄 New shop from Google Maps (replaces a photo-less shop)'}
+                                  ? tr(language, '🔍 រូបភាពពី Google Maps (ហាងដដែល)', '🔍 Google Maps photo (same shop match)', '🔍 Google Maps 照片（同一店铺匹配）')
+                                  : tr(language, '🔄 ហាងថ្មីពី Google Maps (ជំនួសហាងគ្មានរូបភាព)', '🔄 New shop from Google Maps (replaces a photo-less shop)', '🔄 来自 Google Maps 的新店铺（替换无照片店铺）')}
                               </div>
                               {req.matchedPlaceName && (
                                 <div>
-                                  <span className="text-slate-400">{isKm ? 'ឈ្មោះលើ Google៖ ' : 'Google name: '}</span>
+                                  <span className="text-slate-400">{tr(language, 'ឈ្មោះលើ Google៖ ', 'Google name: ', 'Google 名称：')}</span>
                                   <span className="font-bold">{req.matchedPlaceName}</span>
                                 </div>
                               )}
                               {req.matchedPlaceAddress && (
                                 <div>
-                                  <span className="text-slate-400">{isKm ? 'អាសយដ្ឋាន៖ ' : 'Address: '}</span>
+                                  <span className="text-slate-400">{tr(language, 'អាសយដ្ឋាន៖ ', 'Address: ', '地址：')}</span>
                                   {req.matchedPlaceAddress}
                                 </div>
                               )}
                               <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
                                 {typeof req.matchScore === 'number' && req.source === 'google_places_match' && (
                                   <span>
-                                    {isKm ? 'ឈ្មោះត្រូវគ្នា៖ ' : 'Name match: '}
+                                    {tr(language, 'ឈ្មោះត្រូវគ្នា៖ ', 'Name match: ', '名称匹配：')}
                                     <b>{req.matchScore}%</b>
                                   </span>
                                 )}
                                 {typeof req.matchDistanceMeters === 'number' && (
                                   <span>
-                                    {isKm ? 'ចម្ងាយពី GPS ហាង៖ ' : 'Distance from shop GPS: '}
+                                    {tr(language, 'ចម្ងាយពី GPS ហាង៖ ', 'Distance from shop GPS: ', '距店铺 GPS 距离：')}
                                     <b>{req.matchDistanceMeters} m</b>
                                   </span>
                                 )}
@@ -3310,7 +3177,7 @@ export const AdminDashboard: React.FC = () => {
                                     rel="noopener noreferrer"
                                     className="text-sky-700 dark:text-sky-300 font-bold underline"
                                   >
-                                    {isKm ? 'មើលលើ Google Maps' : 'Open in Google Maps'}
+                                    {tr(language, 'មើលលើ Google Maps', 'Open in Google Maps', '在 Google Maps 中打开')}
                                   </a>
                                 )}
                               </div>
@@ -3320,25 +3187,23 @@ export const AdminDashboard: React.FC = () => {
                           {/* Audit timestamps & Admin Decision */}
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-[10px] font-khmer bg-slate-50 dark:bg-stone-800/60 p-2 rounded-lg border border-slate-200/70 dark:border-stone-700">
                             <div>
-                              <span className="text-slate-400">{isKm ? 'កាលបរិច្ឆេទដាក់ស្នើ៖ ' : 'Submitted: '}</span>
+                              <span className="text-slate-400">{tr(language, 'កាលបរិច្ឆេទដាក់ស្នើ៖ ', 'Submitted: ', '提交时间：')}</span>
                               <span className="font-bold text-slate-700 dark:text-stone-200">
                                 {new Date(req.submittedAt).toLocaleString()}
                               </span>
                             </div>
                             <div>
-                              <span className="text-slate-400">{isKm ? 'កាលបរិច្ឆេទត្រួតពិនិត្យ៖ ' : 'Reviewed: '}</span>
+                              <span className="text-slate-400">{tr(language, 'កាលបរិច្ឆេទត្រួតពិនិត្យ៖ ', 'Reviewed: ', '审核时间：')}</span>
                               <span className="font-bold text-slate-700 dark:text-stone-200">
                                 {req.reviewedAt
                                   ? new Date(req.reviewedAt).toLocaleString()
-                                  : isKm
-                                  ? 'រង់ចាំ Admin ពិនិត្យ'
-                                  : 'Awaiting Review'}
+                                  : tr(language, 'រង់ចាំ Admin ពិនិត្យ', 'Awaiting Review', '等待审核')}
                               </span>
                             </div>
                             <div>
-                              <span className="text-slate-400">{isKm ? 'សេចក្តីសម្រេច Admin៖ ' : 'Admin Decision: '}</span>
+                              <span className="text-slate-400">{tr(language, 'សេចក្តីសម្រេច Admin៖ ', 'Admin Decision: ', '管理员决定：')}</span>
                               <span className="font-bold text-slate-700 dark:text-stone-200">
-                                {req.adminDecision || (isKm ? 'កំពុងរង់ចាំការពិនិត្យ' : 'Pending Review')}
+                                {req.adminDecision || (tr(language, 'កំពុងរង់ចាំការពិនិត្យ', 'Pending Review', '待审核'))}
                               </span>
                             </div>
                           </div>
@@ -3355,12 +3220,10 @@ export const AdminDashboard: React.FC = () => {
                   <div>
                     <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
                       <Search className="w-4 h-4 text-emerald-600" />
-                      <span>{isKm ? '🔍 ស្វែងរកហាង (Search Shops)' : '🔍 Search Shops'}</span>
+                      <span>{tr(language, '🔍 ស្វែងរកហាង (Search Shops)', '🔍 Search Shops', '🔍 搜索店铺')}</span>
                     </h4>
                     <p className="text-[10px] text-slate-500 dark:text-stone-400">
-                      {isKm
-                        ? 'ស្វែងរកហាងតាមឈ្មោះ លេខទូរស័ព្ទ ខេត្ត-រាជធានី ឬស្ថានភាពទីតាំង GPS'
-                        : 'Search shops by name, phone, province, or GPS verification status'}
+                      {tr(language, 'ស្វែងរកហាងតាមឈ្មោះ លេខទូរស័ព្ទ ខេត្ត-រាជធានី ឬស្ថានភាពទីតាំង GPS', 'Search shops by name, phone, province, or GPS verification status', '按名称、电话、省份或 GPS 验证状态搜索店铺')}
                     </p>
                   </div>
                   <button
@@ -3368,7 +3231,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => openGoogleMapsSearchModal('restaurant')}
                     className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold flex items-center gap-1.5 transition cursor-pointer"
                   >
-                    <span>📍 {isKm ? 'ស្វែងរកទីតាំងលើផែនទី Google Maps' : 'Locate on Google Maps'}</span>
+                    <span>📍 {tr(language, 'ស្វែងរកទីតាំងលើផែនទី Google Maps', 'Locate on Google Maps', '在 Google Maps 上定位')}</span>
                   </button>
                 </div>
 
@@ -3390,7 +3253,7 @@ export const AdminDashboard: React.FC = () => {
                               : 'bg-slate-50 dark:bg-stone-900 text-slate-700 dark:text-stone-300 border border-slate-200 dark:border-stone-700'
                           }`}
                         >
-                          {isKm ? `ហាងទាំងអស់ (${shopOnlyRestaurants.length})` : `All Shops (${shopOnlyRestaurants.length})`}
+                          {tr(language, `ហាងទាំងអស់ (${shopOnlyRestaurants.length})`, `All Shops (${shopOnlyRestaurants.length})`, `全部店铺 (${shopOnlyRestaurants.length})`)}
                         </button>
                         <button
                           type="button"
@@ -3401,7 +3264,7 @@ export const AdminDashboard: React.FC = () => {
                               : 'bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
                           }`}
                         >
-                          {isKm ? `👤 ហាងមានម្ចាស់គណនី (${ownedCount})` : `👤 Owned Shops (${ownedCount})`}
+                          {tr(language, `👤 ហាងមានម្ចាស់គណនី (${ownedCount})`, `👤 Owned Shops (${ownedCount})`, `👤 有主店铺 (${ownedCount})`)}
                         </button>
                         {suspendedCount > 0 && (
                           <button
@@ -3413,7 +3276,7 @@ export const AdminDashboard: React.FC = () => {
                                 : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-700'
                             }`}
                           >
-                            {isKm ? `⏸️ ផ្អាក (${suspendedCount})` : `⏸️ Suspended (${suspendedCount})`}
+                            {tr(language, `⏸️ ផ្អាក (${suspendedCount})`, `⏸️ Suspended (${suspendedCount})`, `⏸️ 已暂停 (${suspendedCount})`)}
                           </button>
                         )}
                         <button
@@ -3425,7 +3288,7 @@ export const AdminDashboard: React.FC = () => {
                               : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                           }`}
                         >
-                          {isKm ? `✅ ទីតាំង GPS ត្រឹមត្រូវ (${verifiedCount})` : `✅ Verified GPS (${verifiedCount})`}
+                          {tr(language, `✅ ទីតាំង GPS ត្រឹមត្រូវ (${verifiedCount})`, `✅ Verified GPS (${verifiedCount})`, `✅ GPS 已验证 (${verifiedCount})`)}
                         </button>
                         <button
                           type="button"
@@ -3436,7 +3299,7 @@ export const AdminDashboard: React.FC = () => {
                               : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
                           }`}
                         >
-                          {isKm ? `📍 ត្រូវផ្ទៀងផ្ទាត់ GPS (${reviewCount})` : `📍 Needs GPS Review (${reviewCount})`}
+                          {tr(language, `📍 ត្រូវផ្ទៀងផ្ទាត់ GPS (${reviewCount})`, `📍 Needs GPS Review (${reviewCount})`, `📍 需审核 GPS (${reviewCount})`)}
                         </button>
                       </>
                     );
@@ -3451,9 +3314,7 @@ export const AdminDashboard: React.FC = () => {
                     value={adminRestSearchQuery}
                     onChange={(e) => setAdminRestSearchQuery(e.target.value)}
                     placeholder={
-                      isKm
-                        ? 'ស្វែងរកហាងតាមឈ្មោះ លេខទូរស័ព្ទ ខេត្ត ម្ចាស់ហាង ឬ ID...'
-                        : 'Search shops by name, phone, province, owner, or ID...'
+                      tr(language, 'ស្វែងរកហាងតាមឈ្មោះ លេខទូរស័ព្ទ ខេត្ត ម្ចាស់ហាង ឬ ID...', 'Search shops by name, phone, province, owner, or ID...', '按名称、电话、省份、店主或 ID 搜索店铺...')
                     }
                     className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-50 dark:bg-stone-900 border border-slate-200 dark:border-stone-700 text-xs font-khmer text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
@@ -3495,7 +3356,7 @@ export const AdminDashboard: React.FC = () => {
                             </span>
                           ) : (
                             <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 text-[9px] font-bold font-khmer">
-                              📍 {isKm ? 'ត្រូវផ្ទៀងផ្ទាត់ GPS' : 'Needs GPS Review'}
+                              📍 {tr(language, 'ត្រូវផ្ទៀងផ្ទាត់ GPS', 'Needs GPS Review', '需审核 GPS')}
                             </span>
                           )}
                           {rest.status === 'pending' && (
@@ -3540,9 +3401,9 @@ export const AdminDashboard: React.FC = () => {
                               setActiveTab('users');
                             }}
                             className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 cursor-pointer"
-                            title={isKm ? 'មើលគណនីម្ចាស់ហាងក្នុងផ្នែកអ្នកប្រើប្រាស់' : 'View Owner Account in Users Tab'}
+                            title={tr(language, 'មើលគណនីម្ចាស់ហាងក្នុងផ្នែកអ្នកប្រើប្រាស់', 'View Owner Account in Users Tab', '在用户标签页中查看店主账户')}
                           >
-                            👤 {isKm ? 'មើលម្ចាស់' : 'Owner'}
+                            👤 {tr(language, 'មើលម្ចាស់', 'Owner', '店主')}
                           </button>
                         );
                       })()}
@@ -3558,8 +3419,8 @@ export const AdminDashboard: React.FC = () => {
                           } as any);
                           showToast(
                             nextSusp
-                              ? (isKm ? `⏸️ បានផ្អាកហាង "${rest.nameKh}"` : `⏸️ Suspended "${rest.nameEn || rest.nameKh}"`)
-                              : (isKm ? `▶️ បានបើកហាង "${rest.nameKh}" ឡើងវិញ` : `▶️ Reactivated "${rest.nameEn || rest.nameKh}"`),
+                              ? (tr(language, `⏸️ បានផ្អាកហាង "${rest.nameKh}"`, `⏸️ Suspended "${rest.nameEn || rest.nameKh}"`, `⏸️ 已暂停 "${rest.nameEn || rest.nameKh}"`))
+                              : (tr(language, `▶️ បានបើកហាង "${rest.nameKh}" ឡើងវិញ`, `▶️ Reactivated "${rest.nameEn || rest.nameKh}"`, `▶️ 已重新激活 "${rest.nameEn || rest.nameKh}"`)),
                             'info'
                           );
                         }}
@@ -3569,14 +3430,14 @@ export const AdminDashboard: React.FC = () => {
                             : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
                         }`}
                       >
-                        {(rest as any).isSuspended ? (isKm ? '▶️ បើកវិញ' : '▶️ Activate') : (isKm ? '⏸️ ផ្អាក' : '⏸️ Suspend')}
+                        {(rest as any).isSuspended ? (tr(language, '▶️ បើកវិញ', '▶️ Activate', '▶️ 激活')) : (tr(language, '⏸️ ផ្អាក', '⏸️ Suspend', '⏸️ 暂停'))}
                       </button>
                       {rest.status !== 'approved' && (
                         <button
                           onClick={() => approveRestaurant(rest.id)}
                           className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
                         >
-                          {isKm ? 'អនុម័ត' : 'Approve'}
+                          {tr(language, 'អនុម័ត', 'Approve', '批准')}
                         </button>
                       )}
                       <button
@@ -3594,19 +3455,19 @@ export const AdminDashboard: React.FC = () => {
                           openManageMyVipStore(rest.id);
                         }}
                         className="px-2.5 py-1 rounded-lg text-[10px] font-black font-khmer bg-amber-400 hover:bg-amber-500 text-slate-950 flex items-center gap-1 shadow-xs transition cursor-pointer"
-                        title={isKm ? 'កែប្រែហាង' : 'Edit Shop'}
+                        title={tr(language, 'កែប្រែហាង', 'Edit Shop', '编辑店铺')}
                       >
                         <Edit2 className="w-3.5 h-3.5" />
-                        <span>{isKm ? 'កែប្រែ' : 'Edit'}</span>
+                        <span>{tr(language, 'កែប្រែ', 'Edit', '编辑')}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => deleteRestaurant(rest.id)}
                         className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer bg-rose-600 hover:bg-rose-700 text-white flex items-center gap-1 shadow-xs transition cursor-pointer"
-                        title={isKm ? 'លុបហាង' : 'Delete Shop'}
+                        title={tr(language, 'លុបហាង', 'Delete Shop', '删除店铺')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        <span>{isKm ? 'លុប' : 'Delete'}</span>
+                        <span>{tr(language, 'លុប', 'Delete', '删除')}</span>
                       </button>
                     </div>
                   </div>
@@ -3617,9 +3478,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => setVisibleAdminRestCount((c) => c + 60)}
                     className="w-full py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-khmer font-bold text-xs transition cursor-pointer"
                   >
-                    {isKm
-                      ? `បង្ហាញហាងបន្ថែម (${visibleAdminRestCount}/${filteredAdminRestaurants.length})`
-                      : `Show More Shops (${visibleAdminRestCount}/${filteredAdminRestaurants.length})`}
+                    {tr(language, `បង្ហាញហាងបន្ថែម (${visibleAdminRestCount}/${filteredAdminRestaurants.length})`, `Show More Shops (${visibleAdminRestCount}/${filteredAdminRestaurants.length})`, `显示更多店铺 (${visibleAdminRestCount}/${filteredAdminRestaurants.length})`)}
                   </button>
                 )}
               </div>
@@ -3633,10 +3492,10 @@ export const AdminDashboard: React.FC = () => {
                 <div>
                   <h3 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm flex items-center gap-2">
                     <Camera className="w-4 h-4 text-emerald-500" />
-                    <span>{isKm ? `ការឆែកអ៊ីន & បន្ថែមហាងដោយ AI (${aiCheckIns.length})` : `AI Check-in Submissions (${aiCheckIns.length})`}</span>
+                    <span>{tr(language, `ការឆែកអ៊ីន & បន្ថែមហាងដោយ AI (${aiCheckIns.length})`, `AI Check-in Submissions (${aiCheckIns.length})`, `AI 打卡提交 (${aiCheckIns.length})`)}</span>
                   </h3>
                   <p className="text-[11px] text-stone-500 font-khmer">
-                    {isKm ? 'ពិនិត្យ អនុម័ត ឬច្របាច់បញ្ចូលគ្នា (Merge) ហាងដែលបានឆែកអ៊ីនដោយ Administrator' : 'Review, approve, or merge restaurant check-ins contributed by Administrator'}
+                    {tr(language, 'ពិនិត្យ អនុម័ត ឬច្របាច់បញ្ចូលគ្នា (Merge) ហាងដែលបានឆែកអ៊ីនដោយ Administrator', 'Review, approve, or merge restaurant check-ins contributed by Administrator', '审核、批准或合并管理员提交的餐厅打卡')}
                   </p>
                 </div>
                 <button
@@ -3644,14 +3503,14 @@ export const AdminDashboard: React.FC = () => {
                   className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 text-white font-bold text-xs shadow-xs font-khmer transition active:scale-95"
                 >
                   <Camera className="w-4 h-4 text-emerald-200" />
-                  <span>{isKm ? '+ ឆែកអ៊ីន & បន្ថែមហាងដោយ AI ថ្មី' : '+ New AI Check-in & Add'}</span>
+                  <span>{tr(language, '+ ឆែកអ៊ីន & បន្ថែមហាងដោយ AI ថ្មី', '+ New AI Check-in & Add', '+ 新建 AI 打卡并添加')}</span>
                 </button>
               </div>
 
               {aiCheckIns.length === 0 ? (
                 <div className="py-12 text-center text-stone-400 space-y-2">
                   <Camera className="w-10 h-10 mx-auto text-stone-300 dark:text-stone-600" />
-                  <p className="font-khmer">{isKm ? 'មិនទាន់មានការឆែកអ៊ីនពីសមាជិកនៅឡើយទេ' : 'No AI check-in submissions yet'}</p>
+                  <p className="font-khmer">{tr(language, 'មិនទាន់មានការឆែកអ៊ីនពីសមាជិកនៅឡើយទេ', 'No AI check-in submissions yet', '暂无 AI 打卡提交')}</p>
                 </div>
               ) : (
                 <div className="space-y-3 font-khmer">
@@ -3710,27 +3569,27 @@ export const AdminDashboard: React.FC = () => {
                                 className="px-3 py-1.5 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-bold transition flex items-center gap-1"
                               >
                                 <Check className="w-3.5 h-3.5" />
-                                <span>{isKm ? 'អនុម័ត & បន្ថែម' : 'Approve'}</span>
+                                <span>{tr(language, 'អនុម័ត & បន្ថែម', 'Approve', '批准')}</span>
                               </button>
                               <button
                                 onClick={() => rejectAiCheckIn(checkIn.id, 'Unverified details')}
                                 className="px-2.5 py-1.5 bg-rose-50 text-rose-600 dark:bg-rose-950/40 rounded-xl text-xs font-bold hover:bg-rose-100 transition"
                               >
                                 <Ban className="w-3.5 h-3.5" />
-                                <span>{isKm ? 'បដិសេធ' : 'Reject'}</span>
+                                <span>{tr(language, 'បដិសេធ', 'Reject', '拒绝')}</span>
                               </button>
                             </>
                           )}
                           {checkIn.status === 'approved' && (
                             <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
                               <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'បានចុះផ្សាយ' : 'Published'}</span>
+                              <span>{tr(language, 'បានចុះផ្សាយ', 'Published', '已发布')}</span>
                             </span>
                           )}
                           {checkIn.status === 'merged' && (
                             <span className="text-[11px] font-bold text-blue-600 flex items-center gap-1">
                               <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>{isKm ? 'បានច្របាច់បញ្ចូល' : 'Merged'}</span>
+                              <span>{tr(language, 'បានច្របាច់បញ្ចូល', 'Merged', '已合并')}</span>
                             </span>
                           )}
                         </div>
@@ -3768,10 +3627,10 @@ export const AdminDashboard: React.FC = () => {
                 <div>
                   <h3 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm flex items-center gap-2">
                     <Compass className="w-4 h-4 text-[#059669]" />
-                    <span>{isKm ? `តំបន់ទេសចរណ៍ខ្មែរ (${destinations.length} កន្លែង)` : `Tourist Destinations (${destinations.length})`}</span>
+                    <span>{tr(language, `តំបន់ទេសចរណ៍ខ្មែរ (${destinations.length} កន្លែង)`, `Tourist Destinations (${destinations.length})`, `旅游景点 (${destinations.length})`)}</span>
                   </h3>
                   <p className="text-[11px] text-stone-500 font-khmer">
-                    {isKm ? 'គ្រប់គ្រងព័ត៌មាន និងផ្លាស់ប្តូររូបភាពតំបន់ទេសចរណ៍ពីទូរស័ព្ទ ឬកុំព្យូទ័រ' : 'Manage destinations and replace photos from phone or computer'}
+                    {tr(language, 'គ្រប់គ្រងព័ត៌មាន និងផ្លាស់ប្តូររូបភាពតំបន់ទេសចរណ៍ពីទូរស័ព្ទ ឬកុំព្យូទ័រ', 'Manage destinations and replace photos from phone or computer', '管理景点并从手机或电脑替换照片')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
@@ -3787,12 +3646,8 @@ export const AdminDashboard: React.FC = () => {
                     <RefreshCw className={`w-3.5 h-3.5 ${isBatchFetchingDestPhotos ? 'animate-spin' : ''}`} strokeWidth={1.75} />
                     <span>
                       {isBatchFetchingDestPhotos
-                        ? isKm
-                          ? 'បញ្ឈប់ការទាញយក'
-                          : 'Stop Auto-Fetch'
-                        : isKm
-                        ? 'ទាញរូបពី Google Maps ស្វ័យប្រវត្តិ'
-                        : 'Auto-Fetch Google Maps Photos'}
+                        ? tr(language, 'បញ្ឈប់ការទាញយក', 'Stop Auto-Fetch', '停止自动抓取')
+                        : tr(language, 'ទាញរូបពី Google Maps ស្វ័យប្រវត្តិ', 'Auto-Fetch Google Maps Photos', '自动抓取 Google Maps 照片')}
                     </span>
                   </button>
                   <button
@@ -3801,7 +3656,7 @@ export const AdminDashboard: React.FC = () => {
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold font-khmer text-xs shadow-xs transition active:scale-95 cursor-pointer"
                   >
                     <Compass className="w-3.5 h-3.5" strokeWidth={1.75} />
-                    <span>{isKm ? 'នាំចូលពី Google Maps' : 'Import from Google Maps'}</span>
+                    <span>{tr(language, 'នាំចូលពី Google Maps', 'Import from Google Maps', '从 Google Maps 导入')}</span>
                   </button>
                   <button
                     onClick={() => setShowAddDestForm(!showAddDestForm)}
@@ -3818,15 +3673,11 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-center justify-between text-xs font-bold text-[#064E3B] dark:text-emerald-300">
                     <span>
                       {isBatchFetchingDestPhotos
-                        ? isKm
-                          ? `កំពុងផ្គូផ្គងរូបភាពតាមឈ្មោះ & GPS៖ «${destBatchProgress.currentName}»...`
-                          : `Matching photo by Name & GPS: "${destBatchProgress.currentName}"...`
-                        : isKm
-                        ? 'ការទាញយករូបភាពពី Google Maps បានបញ្ចប់'
-                        : 'Google Maps Photo Auto-Fetch Completed'}
+                        ? tr(language, `កំពុងផ្គូផ្គងរូបភាពតាមឈ្មោះ & GPS៖ «${destBatchProgress.currentName}»...`, `Matching photo by Name & GPS: "${destBatchProgress.currentName}"...`, `正在按名称和 GPS 匹配照片："${destBatchProgress.currentName}"...`)
+                        : tr(language, 'ការទាញយករូបភាពពី Google Maps បានបញ្ចប់', 'Google Maps Photo Auto-Fetch Completed', 'Google Maps 照片自动抓取完成')}
                     </span>
                     <span>
-                      {destBatchProgress.processed}/{destBatchProgress.total} ({isKm ? 'បានផ្គូផ្គង' : 'Matched'}: {destBatchProgress.matched})
+                      {destBatchProgress.processed}/{destBatchProgress.total} ({tr(language, 'បានផ្គូផ្គង', 'Matched', '已匹配')}: {destBatchProgress.matched})
                     </span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-emerald-200/70 dark:bg-slate-700 overflow-hidden">
@@ -3848,7 +3699,7 @@ export const AdminDashboard: React.FC = () => {
                     type="text"
                     value={destSearchQuery}
                     onChange={(e) => setDestSearchQuery(e.target.value)}
-                    placeholder={isKm ? "ស្វែងរកតាមឈ្មោះកន្លែង ខេត្ត ឬលេខសម្គាល់..." : "Search by destination name, province, or ID..."}
+                    placeholder={tr(language, "ស្វែងរកតាមឈ្មោះកន្លែង ខេត្ត ឬលេខសម្គាល់...", "Search by destination name, province, or ID...", '按景点名称、省份或 ID 搜索...')}
                     className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-xs font-khmer focus:outline-none focus:border-[#059669]"
                   />
                   {destSearchQuery && (
@@ -3871,7 +3722,7 @@ export const AdminDashboard: React.FC = () => {
                         : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200'
                     }`}
                   >
-                    {isKm ? `ទាំងអស់ (${destinations.length})` : `All (${destinations.length})`}
+                    {tr(language, `ទាំងអស់ (${destinations.length})`, `All (${destinations.length})`, `全部 (${destinations.length})`)}
                   </button>
                   {Array.from(new Set(destinations.map(d => d.provinceKh))).filter(Boolean).slice(0, 10).map((prov) => {
                     const count = destinations.filter(d => d.provinceKh === prov).length;
@@ -3948,9 +3799,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <p className="text-[11px] text-emerald-700 dark:text-emerald-300">
-                      {isKm
-                        ? 'ប្រព័ន្ធនឹងទាញយករូបភាពពី Google Maps ដោយស្វ័យប្រវត្តិតាមឈ្មោះ និងនិយាមកា GPS (ឬប្រើ Icon លំនាំដើមប្រសិនបើមិនមានរូបត្រូវគ្នា)'
-                        : 'Photos are automatically fetched from Google Maps by Place Name & GPS coordinates (or fall back to default placeholder icon).'}
+                      {tr(language, 'ប្រព័ន្ធនឹងទាញយករូបភាពពី Google Maps ដោយស្វ័យប្រវត្តិតាមឈ្មោះ និងនិយាមកា GPS (ឬប្រើ Icon លំនាំដើមប្រសិនបើមិនមានរូបត្រូវគ្នា)', 'Photos are automatically fetched from Google Maps by Place Name & GPS coordinates (or fall back to default placeholder icon).', '系统会根据地点名称和 GPS 坐标自动从 Google Maps 抓取照片（或回退到默认占位图标）。')}
                     </p>
                     <button
                       type="submit"
@@ -3980,7 +3829,7 @@ export const AdminDashboard: React.FC = () => {
                             : 'bg-white dark:bg-stone-800 text-slate-700 dark:text-stone-300 border border-slate-200 dark:border-stone-700'
                         }`}
                       >
-                        {isKm ? `តំបន់ទាំងអស់ (${destinations.length})` : `All Attractions (${destinations.length})`}
+                        {tr(language, `តំបន់ទាំងអស់ (${destinations.length})`, `All Attractions (${destinations.length})`, `所有景点 (${destinations.length})`)}
                       </button>
                       <button
                         type="button"
@@ -3991,7 +3840,7 @@ export const AdminDashboard: React.FC = () => {
                             : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                         }`}
                       >
-                        {isKm ? `🖼️ មានរូបច្បាស់ (បង្ហាញ ${withPhotoCount})` : `🖼️ With HD Photo (${withPhotoCount})`}
+                        {tr(language, `🖼️ មានរូបច្បាស់ (បង្ហាញ ${withPhotoCount})`, `🖼️ With HD Photo (${withPhotoCount})`, `🖼️ 含高清照片 (${withPhotoCount})`)}
                       </button>
                       <button
                         type="button"
@@ -4002,7 +3851,7 @@ export const AdminDashboard: React.FC = () => {
                             : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
                         }`}
                       >
-                        {isKm ? `📷 រង់ចាំដាក់រូបច្បាស់ (លាក់ ${noPhotoCount})` : `📷 Waiting for Photo (${noPhotoCount})`}
+                        {tr(language, `📷 រង់ចាំដាក់រូបច្បាស់ (លាក់ ${noPhotoCount})`, `📷 Waiting for Photo (${noPhotoCount})`, `📷 等待添加照片 (${noPhotoCount})`)}
                       </button>
                       <button
                         type="button"
@@ -4013,7 +3862,7 @@ export const AdminDashboard: React.FC = () => {
                             : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                         }`}
                       >
-                        {isKm ? `✅ GPS ត្រឹមត្រូវ (${verifiedDestCount})` : `✅ Verified GPS (${verifiedDestCount})`}
+                        {tr(language, `✅ GPS ត្រឹមត្រូវ (${verifiedDestCount})`, `✅ Verified GPS (${verifiedDestCount})`, `✅ GPS 已验证 (${verifiedDestCount})`)}
                       </button>
                       <button
                         type="button"
@@ -4024,7 +3873,7 @@ export const AdminDashboard: React.FC = () => {
                             : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
                         }`}
                       >
-                        {isKm ? `📍 ត្រូវផ្ទៀងផ្ទាត់ GPS (${reviewDestCount})` : `📍 Needs GPS Review (${reviewDestCount})`}
+                        {tr(language, `📍 ត្រូវផ្ទៀងផ្ទាត់ GPS (${reviewDestCount})`, `📍 Needs GPS Review (${reviewDestCount})`, `📍 需审核 GPS (${reviewDestCount})`)}
                       </button>
                     </>
                   );
@@ -4045,7 +3894,7 @@ export const AdminDashboard: React.FC = () => {
                         <div 
                           onClick={() => setSelectedDestForImageEdit(d)}
                           className="relative w-14 h-14 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-700 shrink-0 cursor-pointer group border border-slate-200 dark:border-slate-700"
-                          title={isKm ? 'ចុចដើម្បីប្តូររូបភាព' : 'Click to change photo'}
+                          title={tr(language, 'ចុចដើម្បីប្តូររូបភាព', 'Click to change photo', '点击更换照片')}
                         >
                           {hasRealRowPhoto ? (
                             <img 
@@ -4080,7 +3929,7 @@ export const AdminDashboard: React.FC = () => {
                               </span>
                             ) : (
                               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 font-khmer">
-                                📍 {isKm ? 'ត្រូវផ្ទៀងផ្ទាត់ GPS' : 'Needs GPS Review'}
+                                📍 {tr(language, 'ត្រូវផ្ទៀងផ្ទាត់ GPS', 'Needs GPS Review', '需审核 GPS')}
                               </span>
                             )}
                           </div>
@@ -4100,10 +3949,10 @@ export const AdminDashboard: React.FC = () => {
                             disabled={fetchingSingleDestId === d.id}
                             onClick={() => handleAutoFetchSingleDestPhoto(d)}
                             className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-khmer font-bold text-xs flex items-center gap-1 transition active:scale-95 shadow-2xs cursor-pointer"
-                            title={isKm ? 'ទាញយករូបភាពពី Google Maps តាមឈ្មោះ និង GPS' : 'Auto-fetch photo from Google Maps by Name & GPS'}
+                            title={tr(language, 'ទាញយករូបភាពពី Google Maps តាមឈ្មោះ និង GPS', 'Auto-fetch photo from Google Maps by Name & GPS', '按名称和 GPS 自动从 Google Maps 抓取照片')}
                           >
                             <RefreshCw className={`w-3.5 h-3.5 ${fetchingSingleDestId === d.id ? 'animate-spin' : ''}`} strokeWidth={1.75} />
-                            <span>{isKm ? 'ទាញរូប Google' : 'Auto Photo'}</span>
+                            <span>{tr(language, 'ទាញរូប Google', 'Auto Photo', '自动照片')}</span>
                           </button>
                         )}
                         <button
@@ -4116,7 +3965,7 @@ export const AdminDashboard: React.FC = () => {
                           className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-khmer font-bold text-xs flex items-center gap-1 transition active:scale-95 shadow-2xs cursor-pointer"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
-                          <span>{isKm ? 'កែ GPS' : 'Edit GPS'}</span>
+                          <span>{tr(language, 'កែ GPS', 'Edit GPS', '编辑 GPS')}</span>
                         </button>
                         {/* Change Photo Button */}
                         <button
@@ -4125,7 +3974,7 @@ export const AdminDashboard: React.FC = () => {
                           className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-[#064E3B] dark:text-emerald-400 border border-slate-200 dark:border-slate-700 font-khmer font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
                         >
                           <Camera className="w-3.5 h-3.5 text-[#059669]" />
-                          <span>{isKm ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
+                          <span>{tr(language, 'ប្តូររូបភាព', 'Change Photo', '更换照片')}</span>
                         </button>
 
                         <button
@@ -4146,9 +3995,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => setVisibleAdminDestCount((c) => c + 60)}
                     className="w-full py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-khmer font-bold text-xs transition cursor-pointer"
                   >
-                    {isKm
-                      ? `បង្ហាញតំបន់ទេសចរណ៍បន្ថែម (${visibleAdminDestCount}/${filteredAdminDestinations.length})`
-                      : `Show More Attractions (${visibleAdminDestCount}/${filteredAdminDestinations.length})`}
+                    {tr(language, `បង្ហាញតំបន់ទេសចរណ៍បន្ថែម (${visibleAdminDestCount}/${filteredAdminDestinations.length})`, `Show More Attractions (${visibleAdminDestCount}/${filteredAdminDestinations.length})`, `显示更多景点 (${visibleAdminDestCount}/${filteredAdminDestinations.length})`)}
                   </button>
                 )}
               </div>
@@ -4183,10 +4030,10 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-base">
-                    {isKm ? 'សុវត្ថិភាពប្រព័ន្ធ និងកំណត់ហេតុសវនកម្ម (Security & Audit Logs)' : 'Security Controls & Audit Trail'}
+                    {tr(language, 'សុវត្ថិភាពប្រព័ន្ធ និងកំណត់ហេតុសវនកម្ម (Security & Audit Logs)', 'Security Controls & Audit Trail', '安全控制与审计日志')}
                   </h3>
                   <p className="text-stone-500 font-khmer text-xs">
-                    {isKm ? 'តាមដានសកម្មភាពសន្តិសុខ និងកម្រិតការពារ PBKDF2-HMAC-SHA256' : 'Real-time security auditing and enterprise cryptographic protection'}
+                    {tr(language, 'តាមដានសកម្មភាពសន្តិសុខ និងកម្រិតការពារ PBKDF2-HMAC-SHA256', 'Real-time security auditing and enterprise cryptographic protection', '实时安全审计与企业级加密保护')}
                   </p>
                 </div>
                 <button
@@ -4194,7 +4041,7 @@ export const AdminDashboard: React.FC = () => {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200 font-khmer text-xs"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span>{isKm ? 'ផ្ទុកកំណត់ហេតុឡើងវិញ' : 'Refresh Logs'}</span>
+                  <span>{tr(language, 'ផ្ទុកកំណត់ហេតុឡើងវិញ', 'Refresh Logs', '刷新日志')}</span>
                 </button>
               </div>
 
@@ -4241,9 +4088,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0" />
                         <h4 className="font-bold text-xs sm:text-sm text-amber-300">
-                          {isKm
-                            ? '🛡️ ត្រាកម្មសិទ្ធិបញ្ញា និងប្រព័ន្ធការពារការលួចចម្លង (Anti-Clone & IP Seal)'
-                            : '🛡️ Intellectual Property & Anti-Clone Protection Seal'}
+                          {tr(language, '🛡️ ត្រាកម្មសិទ្ធិបញ្ញា និងប្រព័ន្ធការពារការលួចចម្លង (Anti-Clone & IP Seal)', '🛡️ Intellectual Property & Anti-Clone Protection Seal', '🛡️ 知识产权与防克隆保护印章')}
                         </h4>
                       </div>
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
@@ -4279,13 +4124,13 @@ export const AdminDashboard: React.FC = () => {
               {/* Audit Log Table */}
               <div className="bg-white dark:bg-stone-800 rounded-3xl border border-stone-200 dark:border-stone-700 overflow-hidden shadow-sm">
                 <div className="px-5 py-3 border-b border-stone-200 dark:border-stone-700 font-bold font-khmer text-xs flex justify-between items-center">
-                  <span>{isKm ? 'កំណត់ហេតុសវនកម្មសុវត្ថិភាពថ្មីៗ (គ្មានការកត់ត្រា Password/Token)' : 'Recent Security Audit Events (Sanitized)'}</span>
+                  <span>{tr(language, 'កំណត់ហេតុសវនកម្មសុវត្ថិភាពថ្មីៗ (គ្មានការកត់ត្រា Password/Token)', 'Recent Security Audit Events (Sanitized)', '近期安全审计事件（已脱敏）')}</span>
                   <span className="text-[10px] text-stone-400 font-mono">{auditLogs.length} events</span>
                 </div>
                 <div className="max-h-[35vh] overflow-y-auto no-scrollbar divide-y divide-stone-100 dark:divide-stone-700 font-mono text-[11px]">
                   {auditLogs.length === 0 ? (
                     <div className="p-6 text-center text-stone-400 font-khmer">
-                      {isKm ? 'មិនទាន់មានព្រឹត្តិការណ៍សន្តិសុខត្រូវបានកត់ត្រា' : 'No audit records logged yet.'}
+                      {tr(language, 'មិនទាន់មានព្រឹត្តិការណ៍សន្តិសុខត្រូវបានកត់ត្រា', 'No audit records logged yet.', '暂无审计记录日志。')}
                     </div>
                   ) : (
                     auditLogs.map(log => (
@@ -4313,17 +4158,17 @@ export const AdminDashboard: React.FC = () => {
               <div className="p-4 bg-stone-100 dark:bg-stone-800 rounded-2xl flex items-center justify-between">
                 <div>
                   <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-xs">
-                    {isKm ? 'ចាកចេញពីសម័យគ្រប់គ្រងរដ្ឋបាល' : 'Revoke Active Administrator Session'}
+                    {tr(language, 'ចាកចេញពីសម័យគ្រប់គ្រងរដ្ឋបាល', 'Revoke Active Administrator Session', '撤销当前管理员会话')}
                   </h4>
                   <p className="text-[10px] text-stone-500 font-khmer">
-                    {isKm ? 'បិទសម័យរដ្ឋបាលបច្ចុប្បន្នភ្លាមៗ ដើម្បីធានាសុវត្ថិភាព' : 'Invalidates current HMAC session token and locks dashboard.'}
+                    {tr(language, 'បិទសម័យរដ្ឋបាលបច្ចុប្បន្នភ្លាមៗ ដើម្បីធានាសុវត្ថិភាព', 'Invalidates current HMAC session token and locks dashboard.', '使当前 HMAC 会话令牌失效并锁定控制面板。')}
                   </p>
                 </div>
                 <button
                   onClick={handleRevokeSessions}
                   className="px-4 py-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-xl text-xs font-khmer"
                 >
-                  {isKm ? 'ចាកចេញភ្លាមៗ' : 'Revoke & Lock'}
+                  {tr(language, 'ចាកចេញភ្លាមៗ', 'Revoke & Lock', '撤销并锁定')}
                 </button>
               </div>
             </div>
@@ -4354,7 +4199,7 @@ export const AdminDashboard: React.FC = () => {
             };
             const shopLabel = (id: string) => {
               const r = restaurants.find((x) => x.id === id);
-              return r ? (isKm ? r.nameKh || r.nameEn : r.nameEn || r.nameKh) : (isKm ? '(ហាងត្រូវបានលុប)' : '(deleted shop)');
+              return r ? (isKm ? r.nameKh || r.nameEn : r.nameEn || r.nameKh) : (tr(language, '(ហាងត្រូវបានលុប)', '(deleted shop)', '（已删除店铺）'));
             };
             const manualQuery = manualShopQuery.trim().toLowerCase();
             const manualShopOptions = restaurants
@@ -4384,16 +4229,16 @@ export const AdminDashboard: React.FC = () => {
             const handleAddManualSlot = async () => {
               const shop = restaurants.find((r) => r.id === manualShopId);
               if (!shop) {
-                showToast(isKm ? '⚠️ សូមជ្រើសរើសហាងមុនសិន!' : '⚠️ Please select a shop first!', 'warning');
+                showToast(tr(language, '⚠️ សូមជ្រើសរើសហាងមុនសិន!', '⚠️ Please select a shop first!', '⚠️ 请先选择一家店铺！'), 'warning');
                 return;
               }
               const startMs = manualStartLocal ? new Date(manualStartLocal).getTime() : Date.now();
               if (Number.isNaN(startMs)) {
-                showToast(isKm ? '⚠️ កាលបរិច្ឆេទចាប់ផ្តើមមិនត្រឹមត្រូវ!' : '⚠️ Invalid start date!', 'warning');
+                showToast(tr(language, '⚠️ កាលបរិច្ឆេទចាប់ផ្តើមមិនត្រឹមត្រូវ!', '⚠️ Invalid start date!', '⚠️ 开始日期无效！'), 'warning');
                 return;
               }
               if (!Number.isFinite(manualDaysNum) || manualDaysNum < 1 || manualDaysNum > 365) {
-                showToast(isKm ? '⚠️ រយៈពេលត្រូវតែចាប់ពី ១ ដល់ ៣៦៥ ថ្ងៃ!' : '⚠️ Duration must be 1–365 days!', 'warning');
+                showToast(tr(language, '⚠️ រយៈពេលត្រូវតែចាប់ពី ១ ដល់ ៣៦៥ ថ្ងៃ!', '⚠️ Duration must be 1–365 days!', '⚠️ 时长必须为 1–365 天！'), 'warning');
                 return;
               }
               const endMs = startMs + manualDaysNum * 86400000;
@@ -4402,15 +4247,13 @@ export const AdminDashboard: React.FC = () => {
               );
               if (overlap) {
                 showToast(
-                  isKm
-                    ? '⚠️ ហាងនេះមានកាលវិភាគស្ទួនគ្នាក្នុងចន្លោះពេលនេះរួចហើយ!'
-                    : '⚠️ This shop already has a schedule overlapping this period!',
+                  tr(language, '⚠️ ហាងនេះមានកាលវិភាគស្ទួនគ្នាក្នុងចន្លោះពេលនេះរួចហើយ!', '⚠️ This shop already has a schedule overlapping this period!', '⚠️ 该店铺在此时间段内已有重叠的排期！'),
                   'warning'
                 );
                 return;
               }
               if (manualSchedule.length >= MAX_MANUAL_FEATURED_SLOTS) {
-                showToast(isKm ? '⚠️ កាលវិភាគពេញហើយ សូមលុបកាលវិភាគចាស់ៗ!' : '⚠️ Schedule is full. Remove old entries first!', 'warning');
+                showToast(tr(language, '⚠️ កាលវិភាគពេញហើយ សូមលុបកាលវិភាគចាស់ៗ!', '⚠️ Schedule is full. Remove old entries first!', '⚠️ 排期已满。请先移除旧条目！'), 'warning');
                 return;
               }
               const nowIso = new Date().toISOString();
@@ -4425,9 +4268,7 @@ export const AdminDashboard: React.FC = () => {
               if (res && res.ok) {
                 setManualShopId('');
                 showToast(
-                  isKm
-                    ? `📌 បានកំណត់កាលវិភាគ Top Listing សម្រាប់ «${shop.nameKh || shop.nameEn}» (${manualDaysNum} ថ្ងៃ)`
-                    : `📌 Top Listing scheduled for "${shop.nameEn || shop.nameKh}" (${manualDaysNum} day(s))`,
+                  tr(language, `📌 បានកំណត់កាលវិភាគ Top Listing សម្រាប់ «${shop.nameKh || shop.nameEn}» (${manualDaysNum} ថ្ងៃ)`, `📌 Top Listing scheduled for "${shop.nameEn || shop.nameKh}" (${manualDaysNum} day(s))`, `📌 已为 "${shop.nameEn || shop.nameKh}" 安排置顶推广 (${manualDaysNum} 天)`),
                   'success'
                 );
               }
@@ -4453,16 +4294,14 @@ export const AdminDashboard: React.FC = () => {
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-moul text-sm sm:text-base text-white">
-                          {isKm ? 'ការកំណត់ប្រព័ន្ធរដ្ឋបាលកម្រិតខ្ពស់ (Enterprise Admin Settings)' : 'Enterprise Admin Settings & Configuration'}
+                          {tr(language, 'ការកំណត់ប្រព័ន្ធរដ្ឋបាលកម្រិតខ្ពស់ (Enterprise Admin Settings)', 'Enterprise Admin Settings & Configuration', '企业级管理员设置与配置')}
                         </h3>
                         <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-[10px] font-mono font-bold">
                           RBAC VERIFIED
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-300 mt-0.5">
-                        {isKm
-                          ? 'គ្រប់គ្រងប្រព័ន្ធបង្វិលហាង VIP កញ្ចប់សមាជិកភាព ការទូទាត់ KHQR តំណភ្ជាប់កម្មវិធី Cloud Database និងសុវត្ថិភាពរដ្ឋបាល'
-                          : 'Centralized configuration for VIP Shop Rotation, Membership Pricing, KHQR Payments, App Distribution, Cloud DB, and Security'}
+                        {tr(language, 'គ្រប់គ្រងប្រព័ន្ធបង្វិលហាង VIP កញ្ចប់សមាជិកភាព ការទូទាត់ KHQR តំណភ្ជាប់កម្មវិធី Cloud Database និងសុវត្ថិភាពរដ្ឋបាល', 'Centralized configuration for VIP Shop Rotation, Membership Pricing, KHQR Payments, App Distribution, Cloud DB, and Security', '集中管理 VIP 店铺轮播、会员定价、KHQR 支付、应用分发、云端数据库及安全设置')}
                       </p>
                     </div>
                   </div>
@@ -4510,9 +4349,7 @@ export const AdminDashboard: React.FC = () => {
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                              {isKm
-                                ? 'ប្រព័ន្ធបង្វិលហាង VIP បង្ហាញលើគេ (VIP Shop Featured Rotation Settings)'
-                                : 'VIP Shop Featured Rotation Settings'}
+                              {tr(language, 'ប្រព័ន្ធបង្វិលហាង VIP បង្ហាញលើគេ (VIP Shop Featured Rotation Settings)', 'VIP Shop Featured Rotation Settings', 'VIP 店铺精选轮播设置')}
                             </h4>
                             <span
                               className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
@@ -4522,14 +4359,12 @@ export const AdminDashboard: React.FC = () => {
                               }`}
                             >
                               {vipFeaturedRotationEnabledInput
-                                ? isKm ? '● កំពុងបើកដំណើរការ (Active)' : '● Rotation Enabled'
-                                : isKm ? '○ បានបិទ (Disabled)' : '○ Rotation Disabled'}
+                                ? tr(language, '● កំពុងបើកដំណើរការ (Active)', '● Rotation Enabled', '● 轮播已启用')
+                                : tr(language, '○ បានបិទ (Disabled)', '○ Rotation Disabled', '○ 轮播已禁用')}
                             </span>
                           </div>
                           <p className="text-[11px] text-slate-500 dark:text-stone-400 mt-0.5">
-                            {isKm
-                              ? 'ហាង VIP ថ្មីដែលបានអនុម័តនឹងបង្ហាញនៅលើគេបង្អស់ (Top Listing: 1 ថ្ងៃ ជាលំនាំដើម) ហើយបន្ទាប់មកប្រព័ន្ធនឹងបង្វិលហាង VIP បន្ទាប់តាមលំដាប់ចុះឈ្មោះដោយស្វ័យប្រវត្តិ។'
-                              : 'Newly approved VIP shops appear at the top for 1 day by default, then automatically rotate through all eligible VIP shops in registration order.'}
+                            {tr(language, 'ហាង VIP ថ្មីដែលបានអនុម័តនឹងបង្ហាញនៅលើគេបង្អស់ (Top Listing: 1 ថ្ងៃ ជាលំនាំដើម) ហើយបន្ទាប់មកប្រព័ន្ធនឹងបង្វិលហាង VIP បន្ទាប់តាមលំដាប់ចុះឈ្មោះដោយស្វ័យប្រវត្តិ។', 'Newly approved VIP shops appear at the top for 1 day by default, then automatically rotate through all eligible VIP shops in registration order.', '新批准的 VIP 店铺默认在顶部展示 1 天，随后按注册顺序在所有符合条件的 VIP 店铺之间自动轮播。')}
                           </p>
                         </div>
                       </div>
@@ -4542,12 +4377,10 @@ export const AdminDashboard: React.FC = () => {
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <div className="text-xs font-bold text-slate-900 dark:text-white">
-                              {isKm ? 'បើក/បិទ ការបង្វិលហាង VIP ស្វ័យប្រវត្តិ' : 'Enable Automatic Featured Rotation'}
+                              {tr(language, 'បើក/បិទ ការបង្វិលហាង VIP ស្វ័យប្រវត្តិ', 'Enable Automatic Featured Rotation', '启用自动精选轮播')}
                             </div>
                             <div className="text-[10px] text-slate-500 dark:text-stone-400 mt-0.5">
-                              {isKm
-                                ? 'បើកដើម្បីផ្តល់អាទិភាពដល់ហាង VIP ថ្មី និងបង្វិលវេនគ្នាដោយស្មើភាព'
-                                : 'Fairly rotate top directory placement across all eligible VIP shops'}
+                              {tr(language, 'បើកដើម្បីផ្តល់អាទិភាពដល់ហាង VIP ថ្មី និងបង្វិលវេនគ្នាដោយស្មើភាព', 'Fairly rotate top directory placement across all eligible VIP shops', '在所有符合条件的 VIP 店铺间公平轮换顶部目录推荐位')}
                             </div>
                           </div>
                           <button
@@ -4573,7 +4406,7 @@ export const AdminDashboard: React.FC = () => {
                         <div className="pt-3 border-t border-slate-200/70 dark:border-stone-700 space-y-2">
                           <div className="flex items-center justify-between gap-2">
                             <label className="text-xs font-bold text-slate-800 dark:text-stone-200">
-                              {isKm ? 'រយៈពេលបង្ហាញលើគេក្នុង ១ ហាង (ថ្ងៃ / Days)៖' : 'Featured Duration (Days per Shop):'}
+                              {tr(language, 'រយៈពេលបង្ហាញលើគេក្នុង ១ ហាង (ថ្ងៃ / Days)៖', 'Featured Duration (Days per Shop):', '精选展示时长（每家店铺天数）：')}
                             </label>
                             <div className="flex items-center gap-1.5">
                               <input
@@ -4589,14 +4422,14 @@ export const AdminDashboard: React.FC = () => {
                                 className="w-20 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-slate-900 dark:text-white font-mono font-bold text-xs text-center"
                               />
                               <span className="text-xs font-bold text-slate-600 dark:text-stone-300">
-                                {isKm ? 'ថ្ងៃ' : 'Days'}
+                                {tr(language, 'ថ្ងៃ', 'Days', '天数')}
                               </span>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-1.5 flex-wrap pt-1">
                             <span className="text-[10px] text-slate-500 mr-1">
-                              {isKm ? 'ជ្រើសរើសរហ័ស៖' : 'Presets:'}
+                              {tr(language, 'ជ្រើសរើសរហ័ស៖', 'Presets:', '预设选项：')}
                             </span>
                             {[1, 2, 3, 5, 7, 14].map(d => (
                               <button
@@ -4625,10 +4458,10 @@ export const AdminDashboard: React.FC = () => {
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-emerald-950 dark:text-emerald-300">
-                              {isKm ? 'ស្ថានភាពហាង VIP កំពុងបង្ហាញលើគេផ្ទាល់' : 'Live Featured VIP Queue Status'}
+                              {tr(language, 'ស្ថានភាពហាង VIP កំពុងបង្ហាញលើគេផ្ទាល់', 'Live Featured VIP Queue Status', '实时精选 VIP 队列状态')}
                             </span>
                             <span className="px-2 py-0.5 rounded-md bg-white dark:bg-stone-800 border border-emerald-200 dark:border-emerald-800 text-[10px] font-mono font-bold text-emerald-700 dark:text-emerald-300">
-                              {rotationState.eligibleQueue.length} {isKm ? 'ហាងក្នុងជួរ' : 'Eligible Shops'}
+                              {rotationState.eligibleQueue.length} {tr(language, 'ហាងក្នុងជួរ', 'Eligible Shops', '符合条件的店铺')}
                             </span>
                           </div>
 
@@ -4640,36 +4473,28 @@ export const AdminDashboard: React.FC = () => {
                                 </span>
                                 <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 text-[9px] font-bold shrink-0">
                                   {rotationState.primaryFeaturedShop.reason === 'manual_schedule'
-                                    ? isKm ? '📌 កំណត់ដោយ Admin' : '📌 Admin Scheduled'
+                                    ? tr(language, '📌 កំណត់ដោយ Admin', '📌 Admin Scheduled', '📌 管理员排期')
                                     : rotationState.primaryFeaturedShop.reason === 'new_shop_boost'
-                                    ? isKm ? 'ហាងថ្មី (Top Slot)' : 'New Shop Boost'
-                                    : isKm ? 'វេនបង្វិលស្វ័យប្រវត្តិ' : 'Scheduled Rotation'}
+                                    ? tr(language, 'ហាងថ្មី (Top Slot)', 'New Shop Boost', '新店助推')
+                                    : tr(language, 'វេនបង្វិលស្វ័យប្រវត្តិ', 'Scheduled Rotation', '排期轮播')}
                                 </span>
                               </div>
                               <div className="text-[10px] text-slate-500 dark:text-stone-400">
-                                {isKm
-                                  ? `សល់ប្រហែល ${rotationState.primaryFeaturedShop.remainingHours} ម៉ោងទៀត • ហាងបន្ទាប់៖ ${rotationState.nextRotatingShop?.nameKh || rotationState.nextRotatingShop?.nameEn || '—'}`
-                                  : `~${rotationState.primaryFeaturedShop.remainingHours}h remaining • Next in line: ${rotationState.nextRotatingShop?.nameEn || rotationState.nextRotatingShop?.nameKh || '—'}`}
+                                {tr(language, `សល់ប្រហែល ${rotationState.primaryFeaturedShop.remainingHours} ម៉ោងទៀត • ហាងបន្ទាប់៖ ${rotationState.nextRotatingShop?.nameKh || rotationState.nextRotatingShop?.nameEn || '—'}`, `~${rotationState.primaryFeaturedShop.remainingHours}h remaining • Next in line: ${rotationState.nextRotatingShop?.nameEn || rotationState.nextRotatingShop?.nameKh || '—'}`, `~${rotationState.primaryFeaturedShop.remainingHours}h 剩余 • 下一个：${rotationState.nextRotatingShop?.nameEn || rotationState.nextRotatingShop?.nameKh || '—'}`)}
                               </div>
                             </div>
                           ) : (
                             <div className="p-3 rounded-xl bg-white/80 dark:bg-stone-800/80 border border-slate-200 dark:border-stone-700 text-[11px] text-slate-500 dark:text-stone-400">
                               {vipFeaturedRotationEnabledInput
-                                ? isKm
-                                  ? 'មិនទាន់មានហាង VIP ក្នុងជួរបង្វិលនៅឡើយទេ។ នៅពេលសមាជិក VIP បន្ថែមហាងថ្មី វានឹងបង្ហាញលើគេដោយស្វ័យប្រវត្តិ។'
-                                  : 'No custom VIP shops in the rotation queue yet. Newly approved VIP shops will automatically take the top slot.'
-                                : isKm
-                                ? 'ប្រព័ន្ធបង្វិលហាង VIP កំពុងត្រូវបានបិទ។'
-                                : 'VIP Featured Rotation is currently disabled.'}
+                                ? tr(language, 'មិនទាន់មានហាង VIP ក្នុងជួរបង្វិលនៅឡើយទេ។ នៅពេលសមាជិក VIP បន្ថែមហាងថ្មី វានឹងបង្ហាញលើគេដោយស្វ័យប្រវត្តិ។', 'No custom VIP shops in the rotation queue yet. Newly approved VIP shops will automatically take the top slot.', '轮播队列中暂无自定义 VIP 店铺。新批准的 VIP 店铺将自动占据顶部推荐位。')
+                                : tr(language, 'ប្រព័ន្ធបង្វិលហាង VIP កំពុងត្រូវបានបិទ។', 'VIP Featured Rotation is currently disabled.', 'VIP 精选轮播当前已禁用。')}
                             </div>
                           )}
                         </div>
 
                         <div className="flex items-center justify-between gap-2 pt-2 border-t border-emerald-200/60 dark:border-emerald-800/40">
                           <span className="text-[10px] text-slate-600 dark:text-stone-400">
-                            {isKm
-                              ? `ប៊ូតុងចុះឈ្មោះហាងបង្ហាញ៖ "Top Listing: ${vipFeaturedDurationDaysInput || 1} Day(s)"`
-                              : `Register button label: "Top Listing: ${vipFeaturedDurationDaysInput || 1} Day(s)"`}
+                            {tr(language, `ប៊ូតុងចុះឈ្មោះហាងបង្ហាញ៖ "Top Listing: ${vipFeaturedDurationDaysInput || 1} Day(s)"`, `Register button label: "Top Listing: ${vipFeaturedDurationDaysInput || 1} Day(s)"`, `注册按钮标签："Top Listing: ${vipFeaturedDurationDaysInput || 1} Day(s)"`)}
                           </span>
                           <button
                             type="button"
@@ -4678,8 +4503,8 @@ export const AdminDashboard: React.FC = () => {
                             className="px-4 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold text-xs shadow-2xs transition cursor-pointer shrink-0"
                           >
                             {isSavingVipSettings
-                              ? isKm ? 'កំពុងរក្សាទុក...' : 'Saving...'
-                              : isKm ? '💾 រក្សាទុកការបង្វិលហាង' : '💾 Save Rotation'}
+                              ? tr(language, 'កំពុងរក្សាទុក...', 'Saving...', '正在保存...')
+                              : tr(language, '💾 រក្សាទុកការបង្វិលហាង', '💾 Save Rotation', '💾 保存轮播设置')}
                           </button>
                         </div>
                       </div>
@@ -4689,25 +4514,23 @@ export const AdminDashboard: React.FC = () => {
                     <div className="p-4 rounded-xl bg-amber-50/60 dark:bg-amber-950/10 border border-amber-300/70 dark:border-amber-800/40 space-y-3">
                       <div>
                         <div className="text-xs font-extrabold text-amber-950 dark:text-amber-300">
-                          {isKm ? '📌 កំណត់ហាងបង្ហាញលើគេដោយដៃ (Manual Top Listing Schedule)' : '📌 Manual Top Listing Schedule'}
+                          {tr(language, '📌 កំណត់ហាងបង្ហាញលើគេដោយដៃ (Manual Top Listing Schedule)', '📌 Manual Top Listing Schedule', '📌 手动置顶推广排期')}
                         </div>
                         <p className="text-[10px] text-slate-600 dark:text-stone-400 mt-0.5 leading-snug">
-                          {isKm
-                            ? 'ជ្រើសរើសហាង កាលបរិច្ឆេទចាប់ផ្តើម និងរយៈពេល។ ហាងដែលបានកំណត់នឹងបង្ហាញនៅលើគេបង្អស់តាមពេលវេលានោះ មុនការបង្វិលស្វ័យប្រវត្តិ។'
-                            : 'Pick a shop, its start date/time and duration. Scheduled shops take the very top spot during that window, ahead of automatic rotation.'}
+                          {tr(language, 'ជ្រើសរើសហាង កាលបរិច្ឆេទចាប់ផ្តើម និងរយៈពេល។ ហាងដែលបានកំណត់នឹងបង្ហាញនៅលើគេបង្អស់តាមពេលវេលានោះ មុនការបង្វិលស្វ័យប្រវត្តិ។', 'Pick a shop, its start date/time and duration. Scheduled shops take the very top spot during that window, ahead of automatic rotation.', '选择店铺、开始日期/时间及展示时长。排期的店铺将在该时段优先于自动轮播占据最顶部展示位。')}
                         </p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1.5">
                           <label className="text-[11px] font-bold text-slate-800 dark:text-stone-200">
-                            {isKm ? '១. ជ្រើសរើសហាង' : '1. Select Shop'}
+                            {tr(language, '១. ជ្រើសរើសហាង', '1. Select Shop', '1. 选择店铺')}
                           </label>
                           <input
                             type="text"
                             value={manualShopQuery}
                             onChange={(e) => setManualShopQuery(e.target.value)}
-                            placeholder={isKm ? 'ស្វែងរកឈ្មោះហាង...' : 'Search shop name...'}
+                            placeholder={tr(language, 'ស្វែងរកឈ្មោះហាង...', 'Search shop name...', '搜索店铺名称...')}
                             className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-xs text-slate-900 dark:text-white"
                           />
                           <select
@@ -4715,7 +4538,7 @@ export const AdminDashboard: React.FC = () => {
                             onChange={(e) => setManualShopId(e.target.value)}
                             className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-xs text-slate-900 dark:text-white"
                           >
-                            <option value="">{isKm ? '— ជ្រើសរើសហាង —' : '— Choose a shop —'}</option>
+                            <option value="">{tr(language, '— ជ្រើសរើសហាង —', '— Choose a shop —', '— 选择店铺 —')}</option>
                             {manualShopOptions.map((r) => (
                               <option key={r.id} value={r.id}>
                                 {(isKm ? r.nameKh || r.nameEn : r.nameEn || r.nameKh)}
@@ -4724,14 +4547,14 @@ export const AdminDashboard: React.FC = () => {
                           </select>
                           {manualShopOptions.length >= 60 && (
                             <div className="text-[10px] text-slate-500">
-                              {isKm ? 'បង្ហាញ ៦០ ហាងដំបូង — សូមវាយឈ្មោះដើម្បីរកឱ្យចំ' : 'Showing first 60 — type to narrow down'}
+                              {tr(language, 'បង្ហាញ ៦០ ហាងដំបូង — សូមវាយឈ្មោះដើម្បីរកឱ្យចំ', 'Showing first 60 — type to narrow down', '显示前 60 家 — 输入文字以缩小范围')}
                             </div>
                           )}
                         </div>
 
                         <div className="space-y-1.5">
                           <label className="text-[11px] font-bold text-slate-800 dark:text-stone-200">
-                            {isKm ? '២. កាលបរិច្ឆេទ & ម៉ោងចាប់ផ្តើម' : '2. Start Date & Time'}
+                            {tr(language, '២. កាលបរិច្ឆេទ & ម៉ោងចាប់ផ្តើម', '2. Start Date & Time', '2. 开始日期与时间')}
                           </label>
                           <div className="flex items-center gap-1.5">
                             <input
@@ -4745,12 +4568,12 @@ export const AdminDashboard: React.FC = () => {
                               onClick={() => setManualStartLocal(toLocalDateTimeInput(new Date()))}
                               className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-stone-800 border border-slate-300 dark:border-stone-600 text-[11px] font-bold text-slate-700 dark:text-stone-200 hover:bg-amber-50 cursor-pointer shrink-0"
                             >
-                              {isKm ? 'ឥឡូវនេះ' : 'Now'}
+                              {tr(language, 'ឥឡូវនេះ', 'Now', '现在')}
                             </button>
                           </div>
 
                           <label className="text-[11px] font-bold text-slate-800 dark:text-stone-200 block pt-1">
-                            {isKm ? '៣. រយៈពេលបង្ហាញ (ថ្ងៃ)' : '3. Display Duration (Days)'}
+                            {tr(language, '៣. រយៈពេលបង្ហាញ (ថ្ងៃ)', '3. Display Duration (Days)', '3. 展示时长（天）')}
                           </label>
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <input
@@ -4771,7 +4594,7 @@ export const AdminDashboard: React.FC = () => {
                                     : 'bg-white dark:bg-stone-800 text-slate-700 dark:text-stone-300 border-slate-200 dark:border-stone-700 hover:bg-amber-50'
                                 }`}
                               >
-                                {d}{isKm ? ' ថ្ងៃ' : 'd'}
+                                {d}{tr(language, ' ថ្ងៃ', 'd', '天')}
                               </button>
                             ))}
                           </div>
@@ -4781,10 +4604,8 @@ export const AdminDashboard: React.FC = () => {
                       <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
                         <span className="text-[10px] text-slate-600 dark:text-stone-400">
                           {manualEndPreview
-                            ? isKm
-                              ? `ចាប់ពី ${fmtDateTime(manualStartMsPreview)} → បញ្ចប់ ${fmtDateTime(manualEndPreview)}`
-                              : `From ${fmtDateTime(manualStartMsPreview)} → ends ${fmtDateTime(manualEndPreview)}`
-                            : isKm ? 'សូមបញ្ចូលកាលបរិច្ឆេទ និងរយៈពេលឱ្យត្រឹមត្រូវ' : 'Enter a valid start date and duration'}
+                            ? tr(language, `ចាប់ពី ${fmtDateTime(manualStartMsPreview)} → បញ្ចប់ ${fmtDateTime(manualEndPreview)}`, `From ${fmtDateTime(manualStartMsPreview)} → ends ${fmtDateTime(manualEndPreview)}`, `从 ${fmtDateTime(manualStartMsPreview)} → 至 ${fmtDateTime(manualEndPreview)} 结束`)
+                            : tr(language, 'សូមបញ្ចូលកាលបរិច្ឆេទ និងរយៈពេលឱ្យត្រឹមត្រូវ', 'Enter a valid start date and duration', '请输入有效的开始日期和时长')}
                         </span>
                         <button
                           type="button"
@@ -4793,8 +4614,8 @@ export const AdminDashboard: React.FC = () => {
                           className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs shadow-2xs transition cursor-pointer"
                         >
                           {isSavingManualSlot
-                            ? isKm ? 'កំពុងរក្សាទុក...' : 'Saving...'
-                            : isKm ? '➕ កំណត់ពេលបង្ហាញ' : '➕ Schedule Top Listing'}
+                            ? tr(language, 'កំពុងរក្សាទុក...', 'Saving...', '正在保存...')
+                            : tr(language, '➕ កំណត់ពេលបង្ហាញ', '➕ Schedule Top Listing', '➕ 安排置顶推广')}
                         </button>
                       </div>
 
@@ -4802,7 +4623,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="pt-2 border-t border-amber-200/70 dark:border-amber-800/40 space-y-1.5">
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-[11px] font-bold text-slate-800 dark:text-stone-200">
-                            {isKm ? `កាលវិភាគដែលបានកំណត់ (${manualSchedule.length})` : `Scheduled Slots (${manualSchedule.length})`}
+                            {tr(language, `កាលវិភាគដែលបានកំណត់ (${manualSchedule.length})`, `Scheduled Slots (${manualSchedule.length})`, `已排期时段 (${manualSchedule.length})`)}
                           </span>
                           {manualSchedule.some((s) => getManualFeaturedSlotEndMs(s) <= Date.now()) && (
                             <button
@@ -4811,14 +4632,14 @@ export const AdminDashboard: React.FC = () => {
                               disabled={isSavingManualSlot}
                               className="px-2 py-1 rounded-lg text-[10px] font-bold bg-white dark:bg-stone-800 border border-slate-300 dark:border-stone-600 text-slate-700 dark:text-stone-200 hover:bg-slate-50 cursor-pointer"
                             >
-                              {isKm ? 'សម្អាតដែលផុតកំណត់' : 'Clear ended'}
+                              {tr(language, 'សម្អាតដែលផុតកំណត់', 'Clear ended', '清理已结束项')}
                             </button>
                           )}
                         </div>
 
                         {manualSchedule.length === 0 ? (
                           <div className="text-[11px] text-slate-500 dark:text-stone-400 p-2.5 rounded-lg bg-white/70 dark:bg-stone-800/60 border border-slate-200 dark:border-stone-700">
-                            {isKm ? 'មិនទាន់មានកាលវិភាគដោយដៃទេ — ប្រព័ន្ធប្រើការបង្វិលស្វ័យប្រវត្តិ។' : 'No manual schedule yet — automatic rotation is in effect.'}
+                            {tr(language, 'មិនទាន់មានកាលវិភាគដោយដៃទេ — ប្រព័ន្ធប្រើការបង្វិលស្វ័យប្រវត្តិ។', 'No manual schedule yet — automatic rotation is in effect.', '暂无手动排期 — 当前生效的是自动轮播。')}
                           </div>
                         ) : (
                           manualSchedule.map((slot) => {
@@ -4846,14 +4667,14 @@ export const AdminDashboard: React.FC = () => {
                                       }`}
                                     >
                                       {status === 'active'
-                                        ? isKm ? '● កំពុងបង្ហាញ' : '● Active'
+                                        ? tr(language, '● កំពុងបង្ហាញ', '● Active', '● 进行中')
                                         : status === 'upcoming'
-                                        ? isKm ? '⏳ នឹងមកដល់' : '⏳ Upcoming'
-                                        : isKm ? 'ផុតកំណត់' : 'Ended'}
+                                        ? tr(language, '⏳ នឹងមកដល់', '⏳ Upcoming', '⏳ 即将开始')
+                                        : tr(language, 'ផុតកំណត់', 'Ended', '已结束')}
                                     </span>
                                   </div>
                                   <div className="text-[10px] text-slate-500 dark:text-stone-400 font-mono">
-                                    {fmtDateTime(startMs)} → {fmtDateTime(endMs)} ({slot.durationDays}{isKm ? ' ថ្ងៃ' : 'd'})
+                                    {fmtDateTime(startMs)} → {fmtDateTime(endMs)} ({slot.durationDays}{tr(language, ' ថ្ងៃ', 'd', '天')})
                                   </div>
                                 </div>
                                 <button
@@ -4861,7 +4682,7 @@ export const AdminDashboard: React.FC = () => {
                                   onClick={() => handleRemoveManualSlot(slot.id)}
                                   disabled={isSavingManualSlot}
                                   className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white dark:bg-rose-950/50 transition cursor-pointer shrink-0"
-                                  title={isKm ? 'លុបកាលវិភាគនេះ' : 'Remove this schedule'}
+                                  title={tr(language, 'លុបកាលវិភាគនេះ', 'Remove this schedule', '移除此排期')}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -4884,14 +4705,10 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <div>
                       <h4 className="font-moul text-stone-900 dark:text-stone-100 text-sm">
-                        {isKm
-                          ? 'ការកំណត់កញ្ចប់សមាជិកភាព VIP និងតម្លៃបន្ថែមហាង (Global Sync)'
-                          : 'Admin VIP Packages, Durations, Benefits & Store Fee Management'}
+                        {tr(language, 'ការកំណត់កញ្ចប់សមាជិកភាព VIP និងតម្លៃបន្ថែមហាង (Global Sync)', 'Admin VIP Packages, Durations, Benefits & Store Fee Management', '管理员 VIP 套餐、时长、权益及分店费用管理')}
                       </h4>
                       <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
-                        {isKm
-                          ? 'កែប្រែរយៈពេលកញ្ចប់ VIP (10 ថ្ងៃ និង 90 ថ្ងៃ) តម្លៃកញ្ចប់ អត្ថប្រយោជន៍ និងតម្លៃបន្ថែមហាង ($10/ហាង)។ ការកែប្រែនឹងធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិទូទាំងកម្មវិធី និង Server ដោយមិនប៉ះពាល់សមាជិកភាពដែលកំពុងសកម្មឡើយ។'
-                          : 'Modify VIP package durations (10 days & 90 days), prices, benefits, and additional store fee ($10/store). Changes synchronize globally without affecting active memberships.'}
+                        {tr(language, 'កែប្រែរយៈពេលកញ្ចប់ VIP (10 ថ្ងៃ និង 90 ថ្ងៃ) តម្លៃកញ្ចប់ អត្ថប្រយោជន៍ និងតម្លៃបន្ថែមហាង ($10/ហាង)។ ការកែប្រែនឹងធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិទូទាំងកម្មវិធី និង Server ដោយមិនប៉ះពាល់សមាជិកភាពដែលកំពុងសកម្មឡើយ។', 'Modify VIP package durations (10 days & 90 days), prices, benefits, and additional store fee ($10/store). Changes synchronize globally without affecting active memberships.', '修改 VIP 套餐时长（10 天和 90 天）、价格、权益及额外分店费用（$10/店）。修改将全局同步，不影响当前有效会员。')}
                       </p>
                     </div>
                   </div>
@@ -4910,14 +4727,10 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
                         <h5 className="font-bold text-xs text-emerald-950 dark:text-emerald-200">
-                          {isKm
-                            ? '👑 កញ្ចប់អ្នកប្រើទូទៅ (Consumer VIP — Android & Web; iOS FREE 100%)'
-                            : '👑 Consumer VIP Plans & AI Daily Quotas (Android & Web)'}
+                          {tr(language, '👑 កញ្ចប់អ្នកប្រើទូទៅ (Consumer VIP — Android & Web; iOS FREE 100%)', '👑 Consumer VIP Plans & AI Daily Quotas (Android & Web)', '👑 个人 VIP 方案与 AI 每日配额（Android & Web）')}
                         </h5>
                         <p className="text-[10.5px] text-stone-600 dark:text-stone-400">
-                          {isKm
-                            ? 'កែតម្លៃកញ្ចប់អ្នកប្រើ ថ្ងៃសាកល្បង និងចំនួនសួរ AI ក្នុងមួយថ្ងៃ (ការមើលម្ហូប ហាង សណ្ឋាគារ តំបន់ទេសចរណ៍ និងផែនទី គឺ FREE ជារៀងរហូត)'
-                            : 'Configure trial days, AI daily quotas, and 30d / 90d / 365d consumer pricing'}
+                          {tr(language, 'កែតម្លៃកញ្ចប់អ្នកប្រើ ថ្ងៃសាកល្បង និងចំនួនសួរ AI ក្នុងមួយថ្ងៃ (ការមើលម្ហូប ហាង សណ្ឋាគារ តំបន់ទេសចរណ៍ និងផែនទី គឺ FREE ជារៀងរហូត)', 'Configure trial days, AI daily quotas, and 30d / 90d / 365d consumer pricing', '配置试用天数、AI 每日配额以及 30天 / 90天 / 365天 个人定价')}
                         </p>
                       </div>
                       <label className="inline-flex items-center gap-2 text-xs font-bold text-emerald-900 dark:text-emerald-300 cursor-pointer">
@@ -4930,14 +4743,14 @@ export const AdminDashboard: React.FC = () => {
                           }}
                           className="rounded border-emerald-400"
                         />
-                        <span>{isKm ? 'បើកលក់ VIP អ្នកប្រើ' : 'Enable Consumer VIP'}</span>
+                        <span>{tr(language, 'បើកលក់ VIP អ្នកប្រើ', 'Enable Consumer VIP', '启用个人 VIP')}</span>
                       </label>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                       <div>
                         <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          {isKm ? 'Trial ឥតគិតថ្លៃ (ថ្ងៃ)' : 'Free Trial (Days)'}
+                          {tr(language, 'Trial ឥតគិតថ្លៃ (ថ្ងៃ)', 'Free Trial (Days)', '免费试用（天）')}
                         </label>
                         <input
                           type="number"
@@ -4953,7 +4766,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          {isKm ? 'កូតា AI ពេល Trial (/ថ្ងៃ)' : 'Trial AI Quota (/day)'}
+                          {tr(language, 'កូតា AI ពេល Trial (/ថ្ងៃ)', 'Trial AI Quota (/day)', '试用期 AI 配额（/天）')}
                         </label>
                         <input
                           type="number"
@@ -4969,7 +4782,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          {isKm ? 'កូតា AI អ្នកបង់ប្រាក់ (/ថ្ងៃ)' : 'Paid VIP AI Quota (/day)'}
+                          {tr(language, 'កូតា AI អ្នកបង់ប្រាក់ (/ថ្ងៃ)', 'Paid VIP AI Quota (/day)', '付费 VIP AI 配额（/天）')}
                         </label>
                         <input
                           type="number"
@@ -4985,7 +4798,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          {isKm ? 'Win-Back ក្រោយ Trial ($)' : 'Win-Back 30d ($)'}
+                          {tr(language, 'Win-Back ក្រោយ Trial ($)', 'Win-Back 30d ($)', '召回优惠 30天 ($)')}
                         </label>
                         <input
                           type="text"
@@ -5003,7 +4816,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                       <div>
                         <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          {isKm ? 'ប្រចាំខែ 30 ថ្ងៃ ($ USD)' : 'Monthly 30 Days ($ USD)'}
+                          {tr(language, 'ប្រចាំខែ 30 ថ្ងៃ ($ USD)', 'Monthly 30 Days ($ USD)', '月度 30 天 ($ USD)')}
                         </label>
                         <input
                           type="text"
@@ -5019,7 +4832,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          {isKm ? 'ត្រីមាស 90 ថ្ងៃ ($ USD)' : 'Quarterly 90 Days ($ USD)'}
+                          {tr(language, 'ត្រីមាស 90 ថ្ងៃ ($ USD)', 'Quarterly 90 Days ($ USD)', '季度 90 天 ($ USD)')}
                         </label>
                         <input
                           type="text"
@@ -5035,7 +4848,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          {isKm ? 'ប្រចាំឆ្នាំ 365 ថ្ងៃ ($ USD)' : 'Yearly 365 Days ($ USD)'}
+                          {tr(language, 'ប្រចាំឆ្នាំ 365 ថ្ងៃ ($ USD)', 'Yearly 365 Days ($ USD)', '年度 365 天 ($ USD)')}
                         </label>
                         <input
                           type="text"
@@ -5055,14 +4868,10 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
                         <h5 className="font-bold text-xs text-amber-950 dark:text-amber-200">
-                          {isKm
-                            ? '🏪 កញ្ចប់ដាក់ហាង (All-Inclusive Shop Package — រួមបញ្ចូលអត្ថប្រយោជន៍ទាំង ៥ គ្មាន Lifetime)'
-                            : '🏪 All-Inclusive Shop Subscription (30d / 365d / Early-Bird 50 — No Lifetime)'}
+                          {tr(language, '🏪 កញ្ចប់ដាក់ហាង (All-Inclusive Shop Package — រួមបញ្ចូលអត្ថប្រយោជន៍ទាំង ៥ គ្មាន Lifetime)', '🏪 All-Inclusive Shop Subscription (30d / 365d / Early-Bird 50 — No Lifetime)', '🏪 全包商户订阅（30天 / 365天 / 早鸟50名 — 无终身制）')}
                         </h5>
                         <p className="text-[10.5px] text-stone-600 dark:text-stone-400">
-                          {isKm
-                            ? `ប្រើរួច Early-Bird៖ ${appSettings.shopEarlyBirdClaimedCount ?? 0} / ${shopEarlyBirdMaxInput || 50} ហាង (ប្តូរទៅតម្លៃពេញស្វ័យប្រវត្តិពេលគ្រប់ចំនួន)`
-                            : `Early-Bird claimed: ${appSettings.shopEarlyBirdClaimedCount ?? 0} / ${shopEarlyBirdMaxInput || 50} shops`}
+                          {tr(language, `ប្រើរួច Early-Bird៖ ${appSettings.shopEarlyBirdClaimedCount ?? 0} / ${shopEarlyBirdMaxInput || 50} ហាង (ប្តូរទៅតម្លៃពេញស្វ័យប្រវត្តិពេលគ្រប់ចំនួន)`, `Early-Bird claimed: ${appSettings.shopEarlyBirdClaimedCount ?? 0} / ${shopEarlyBirdMaxInput || 50} shops`, `早鸟已认领：${appSettings.shopEarlyBirdClaimedCount ?? 0} / ${shopEarlyBirdMaxInput || 50} 家店铺`)}
                         </p>
                       </div>
                       <label className="inline-flex items-center gap-2 text-xs font-bold text-amber-900 dark:text-amber-300 cursor-pointer">
@@ -5075,14 +4884,14 @@ export const AdminDashboard: React.FC = () => {
                           }}
                           className="rounded border-amber-400"
                         />
-                        <span>{isKm ? 'បង់ប្រាក់ក្រោយ Admin អនុម័តហាង' : 'Pay After Admin Approval'}</span>
+                        <span>{tr(language, 'បង់ប្រាក់ក្រោយ Admin អនុម័តហាង', 'Pay After Admin Approval', '管理员批准后付款')}</span>
                       </label>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                       <div>
                         <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          {isKm ? 'ហាងប្រចាំខែ 30d ($)' : 'Shop 30 Days ($)'}
+                          {tr(language, 'ហាងប្រចាំខែ 30d ($)', 'Shop 30 Days ($)', '商户 30 天 ($)')}
                         </label>
                         <input
                           type="text"
@@ -5098,7 +4907,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          {isKm ? 'ហាងប្រចាំឆ្នាំ 365d ($)' : 'Shop 365 Days ($)'}
+                          {tr(language, 'ហាងប្រចាំឆ្នាំ 365d ($)', 'Shop 365 Days ($)', '商户 365 天 ($)')}
                         </label>
                         <input
                           type="text"
@@ -5113,7 +4922,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          {isKm ? 'Early-Bird ឆ្នាំ ($)' : 'Early-Bird Yr ($)'}
+                          {tr(language, 'Early-Bird ឆ្នាំ ($)', 'Early-Bird Yr ($)', '早鸟年费 ($)')}
                         </label>
                         <input
                           type="text"
@@ -5128,7 +4937,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div>
                         <label className="flex items-center justify-between text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                          <span>{isKm ? 'ចំនួនហាង Early-Bird' : 'Early-Bird Cap'}</span>
+                          <span>{tr(language, 'ចំនួនហាង Early-Bird', 'Early-Bird Cap', '早鸟名额上限')}</span>
                           <input
                             type="checkbox"
                             checked={shopEarlyBirdEnabledInput}
@@ -5161,7 +4970,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-stone-900/80 border border-amber-300 dark:border-amber-800/60 space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-xs text-amber-900 dark:text-amber-300">
-                          {isKm ? '📦 កញ្ចប់ VIP រយៈពេលខ្លី (ឧ. 10 ថ្ងៃ)' : '📦 Short VIP Package (e.g. 10 Days)'}
+                          {tr(language, '📦 កញ្ចប់ VIP រយៈពេលខ្លី (ឧ. 10 ថ្ងៃ)', '📦 Short VIP Package (e.g. 10 Days)', '📦 短期 VIP 套餐（如 10 天）')}
                         </span>
                         <span className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[10px]">
                           Plan #1
@@ -5171,7 +4980,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="grid grid-cols-2 gap-2.5">
                         <div>
                           <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                            {isKm ? 'រយៈពេល (ថ្ងៃ / Days) *' : 'Duration (Days) *'}
+                            {tr(language, 'រយៈពេល (ថ្ងៃ / Days) *', 'Duration (Days) *', '时长（天） *')}
                           </label>
                           <input
                             type="text"
@@ -5194,7 +5003,7 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                         <div>
                           <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                            {isKm ? 'តម្លៃកញ្ចប់ ($ USD) *' : 'Package Price ($ USD) *'}
+                            {tr(language, 'តម្លៃកញ្ចប់ ($ USD) *', 'Package Price ($ USD) *', '套餐价格 ($ USD) *')}
                           </label>
                           <input
                             type="text"
@@ -5216,7 +5025,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="grid grid-cols-2 gap-2.5">
                         <div>
                           <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                            {isKm ? 'ឈ្មោះកញ្ចប់ (ខ្មែរ)' : 'Plan Name (Khmer)'}
+                            {tr(language, 'ឈ្មោះកញ្ចប់ (ខ្មែរ)', 'Plan Name (Khmer)', '方案名称（高棉语）')}
                           </label>
                           <input
                             type="text"
@@ -5231,7 +5040,7 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                         <div>
                           <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                            {isKm ? 'ឈ្មោះកញ្ចប់ (English)' : 'Plan Name (English)'}
+                            {tr(language, 'ឈ្មោះកញ្ចប់ (English)', 'Plan Name (English)', '方案名称（英语）')}
                           </label>
                           <input
                             type="text"
@@ -5251,7 +5060,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-stone-900/80 border border-emerald-300 dark:border-emerald-800/60 space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-xs text-emerald-900 dark:text-emerald-300">
-                          {isKm ? '📦 កញ្ចប់ VIP រយៈពេលវែង (ឧ. 90 ថ្ងៃ)' : '📦 Long VIP Package (e.g. 90 Days)'}
+                          {tr(language, '📦 កញ្ចប់ VIP រយៈពេលវែង (ឧ. 90 ថ្ងៃ)', '📦 Long VIP Package (e.g. 90 Days)', '📦 长期 VIP 套餐（如 90 天）')}
                         </span>
                         <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-black text-[10px]">
                           Plan #2
@@ -5261,7 +5070,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="grid grid-cols-2 gap-2.5">
                         <div>
                           <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                            {isKm ? 'រយៈពេល (ថ្ងៃ / Days) *' : 'Duration (Days) *'}
+                            {tr(language, 'រយៈពេល (ថ្ងៃ / Days) *', 'Duration (Days) *', '时长（天） *')}
                           </label>
                           <input
                             type="text"
@@ -5284,7 +5093,7 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                         <div>
                           <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                            {isKm ? 'តម្លៃកញ្ចប់ ($ USD) *' : 'Package Price ($ USD) *'}
+                            {tr(language, 'តម្លៃកញ្ចប់ ($ USD) *', 'Package Price ($ USD) *', '套餐价格 ($ USD) *')}
                           </label>
                           <input
                             type="text"
@@ -5306,7 +5115,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="grid grid-cols-2 gap-2.5">
                         <div>
                           <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                            {isKm ? 'ឈ្មោះកញ្ចប់ (ខ្មែរ)' : 'Plan Name (Khmer)'}
+                            {tr(language, 'ឈ្មោះកញ្ចប់ (ខ្មែរ)', 'Plan Name (Khmer)', '方案名称（高棉语）')}
                           </label>
                           <input
                             type="text"
@@ -5321,7 +5130,7 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                         <div>
                           <label className="block text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                            {isKm ? 'ឈ្មោះកញ្ចប់ (English)' : 'Plan Name (English)'}
+                            {tr(language, 'ឈ្មោះកញ្ចប់ (English)', 'Plan Name (English)', '方案名称（英语）')}
                           </label>
                           <input
                             type="text"
@@ -5345,15 +5154,11 @@ export const AdminDashboard: React.FC = () => {
                         <h5 className="font-bold text-xs text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
                           <Store className="w-4 h-4 text-purple-600" />
                           <span>
-                            {isKm
-                              ? '🏪 តម្លៃបន្ថែមហាងថ្មីលើសពីហាងទី ១ (Additional Store Fee USD)'
-                              : '🏪 Additional Store Fee (Per Store Beyond First)'}
+                            {tr(language, '🏪 តម្លៃបន្ថែមហាងថ្មីលើសពីហាងទី ១ (Additional Store Fee USD)', '🏪 Additional Store Fee (Per Store Beyond First)', '🏪 额外分店费用（超出首家店铺后每家）')}
                           </span>
                         </h5>
                         <p className="text-[11px] text-stone-600 dark:text-stone-400">
-                          {isKm
-                            ? 'ហាងទី ១ រួមបញ្ចូលឥតគិតថ្លៃ ($0) • ការកែប្រែ ឬប្តូរហាងចាស់ដាក់ហាងថ្មីគឺឥតគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់គិតថ្លៃតាមការកំណត់ខាងក្រោម៖'
-                            : '1st store is included free ($0) • Editing or replacing an existing store is free ($0) • Each additional store requires verified payment of:'}
+                          {tr(language, 'ហាងទី ១ រួមបញ្ចូលឥតគិតថ្លៃ ($0) • ការកែប្រែ ឬប្តូរហាងចាស់ដាក់ហាងថ្មីគឺឥតគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់គិតថ្លៃតាមការកំណត់ខាងក្រោម៖', '1st store is included free ($0) • Editing or replacing an existing store is free ($0) • Each additional store requires verified payment of:', '首家店铺免费包含（$0）• 编辑或更换现有店铺免费（$0）• 之后每增加一家店铺需支付经核实的费用：')}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -5381,14 +5186,10 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
                         <h5 className="font-bold text-xs text-stone-900 dark:text-stone-100">
-                          {isKm
-                            ? `✨ បញ្ជីអត្ថប្រយោជន៍សមាជិកភាព VIP (${vipBenefitsDraft.length} ចំណុច)`
-                            : `✨ VIP Membership Benefits (${vipBenefitsDraft.length} Items)`}
+                          {tr(language, `✨ បញ្ជីអត្ថប្រយោជន៍សមាជិកភាព VIP (${vipBenefitsDraft.length} ចំណុច)`, `✨ VIP Membership Benefits (${vipBenefitsDraft.length} Items)`, `✨ VIP 会员权益 (${vipBenefitsDraft.length} 项)`)}
                         </h5>
                         <p className="text-[10px] text-stone-500">
-                          {isKm
-                            ? 'កែប្រែចំណងជើង ឬបន្ថែម/លុបអត្ថប្រយោជន៍ VIP ដែលបង្ហាញក្នុងទំព័រដំឡើង VIP និងទំព័រគ្រប់គ្រងហាង'
-                            : 'Edit, add, or remove VIP benefits shown across the app'}
+                          {tr(language, 'កែប្រែចំណងជើង ឬបន្ថែម/លុបអត្ថប្រយោជន៍ VIP ដែលបង្ហាញក្នុងទំព័រដំឡើង VIP និងទំព័រគ្រប់គ្រងហាង', 'Edit, add, or remove VIP benefits shown across the app', '编辑、添加或删除在应用各处展示的 VIP 权益')}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -5411,14 +5212,14 @@ export const AdminDashboard: React.FC = () => {
                           className="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 cursor-pointer"
                         >
                           <Plus className="w-3.5 h-3.5" />
-                          <span>{isKm ? 'បន្ថែមអត្ថប្រយោជន៍' : 'Add Benefit'}</span>
+                          <span>{tr(language, 'បន្ថែមអត្ថប្រយោជន៍', 'Add Benefit', '添加权益')}</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setVipBenefitsDraft(TEN_VIP_BENEFITS)}
                           className="px-2.5 py-1 rounded-xl bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 text-stone-700 dark:text-stone-200 font-bold text-[11px] cursor-pointer"
                         >
-                          {isKm ? 'កំណត់លំនាំដើម (10)' : 'Reset Default (10)'}
+                          {tr(language, 'កំណត់លំនាំដើម (10)', 'Reset Default (10)', '恢复默认 (10)')}
                         </button>
                       </div>
                     </div>
@@ -5465,7 +5266,7 @@ export const AdminDashboard: React.FC = () => {
                                 setVipBenefitsDraft(prev => prev.filter((_, idx) => idx !== index))
                               }
                               className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 hover:bg-rose-100 transition cursor-pointer shrink-0"
-                              title={isKm ? 'លុបចំណុចនេះ' : 'Remove benefit'}
+                              title={tr(language, 'លុបចំណុចនេះ', 'Remove benefit', '移除权益')}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -5489,9 +5290,7 @@ export const AdminDashboard: React.FC = () => {
 
                   <div className="flex items-center justify-between gap-3 pt-1 flex-wrap">
                     <p className="text-[11px] text-stone-500">
-                      {isKm
-                        ? '🔒 ការផ្លាស់ប្តូរតម្លៃ និងរយៈពេល នឹងអនុវត្តចំពោះការទិញថ្មីៗប៉ុណ្ណោះ ដោយរក្សាទុកសុពលភាពសមាជិកចាស់ និងប្រវត្តិទូទាត់ទាំងអស់។'
-                        : '🔒 Updated prices and durations apply to future purchases while preserving existing memberships and payment history.'}
+                      {tr(language, '🔒 ការផ្លាស់ប្តូរតម្លៃ និងរយៈពេល នឹងអនុវត្តចំពោះការទិញថ្មីៗប៉ុណ្ណោះ ដោយរក្សាទុកសុពលភាពសមាជិកចាស់ និងប្រវត្តិទូទាត់ទាំងអស់។', '🔒 Updated prices and durations apply to future purchases while preserving existing memberships and payment history.', '🔒 更新后的价格与时长仅适用于后续购买，现有会员资格及付款历史记录将予以保留。')}
                     </p>
                     <button
                       type="submit"
@@ -5505,12 +5304,8 @@ export const AdminDashboard: React.FC = () => {
                       )}
                       <span>
                         {isSavingVipSettings
-                          ? isKm
-                            ? '⏳ កំពុងរក្សាទុកទៅកាន់ Database...'
-                            : '⏳ Saving to Database...'
-                          : isKm
-                          ? '💾 រក្សាទុក & ធ្វើបច្ចុប្បន្នភាពការកំណត់ VIP ទូទាំងកម្មវិធី'
-                          : '💾 Save & Synchronize VIP Settings Globally'}
+                          ? tr(language, '⏳ កំពុងរក្សាទុកទៅកាន់ Database...', '⏳ Saving to Database...', '⏳ 正在保存至数据库...')
+                          : tr(language, '💾 រក្សាទុក & ធ្វើបច្ចុប្បន្នភាពការកំណត់ VIP ទូទាំងកម្មវិធី', '💾 Save & Synchronize VIP Settings Globally', '💾 保存并全局同步 VIP 设置')}
                       </span>
                     </button>
                   </div>
@@ -5525,10 +5320,10 @@ export const AdminDashboard: React.FC = () => {
                   <QrCode className="w-5 h-5 text-emerald-600" />
                   <div>
                     <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
-                      {isKm ? 'តំណភ្ជាប់ផ្លូវការ Google Play Store' : 'Official Google Play Store Link'}
+                      {tr(language, 'តំណភ្ជាប់ផ្លូវការ Google Play Store', 'Official Google Play Store Link', '官方 Google Play Store 链接')}
                     </h4>
                     <p className="text-[11px] text-stone-500 font-khmer">
-                      {isKm ? 'កម្មវិធីត្រូវបានដំឡើងជាផ្លូវការតាមរយៈ Google Play Store ប៉ុណ្ណោះ' : 'Official installation is exclusively via Google Play Store'}
+                      {tr(language, 'កម្មវិធីត្រូវបានដំឡើងជាផ្លូវការតាមរយៈ Google Play Store ប៉ុណ្ណោះ', 'Official installation is exclusively via Google Play Store', '官方安装仅限通过 Google Play Store 进行')}
                     </p>
                   </div>
                 </div>
@@ -5536,7 +5331,7 @@ export const AdminDashboard: React.FC = () => {
                 <form onSubmit={handleSavePlayStore} className="space-y-3 font-khmer">
                   <div>
                     <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                      {isKm ? 'តំណភ្ជាប់ផ្លូវការ Google Play Store' : 'Official Google Play Store URL'}
+                      {tr(language, 'តំណភ្ជាប់ផ្លូវការ Google Play Store', 'Official Google Play Store URL', '官方 Google Play Store URL')}
                     </label>
                     <input
                       type="text"
@@ -5550,7 +5345,7 @@ export const AdminDashboard: React.FC = () => {
                     type="submit"
                     className="px-5 py-2.5 bg-gradient-to-r bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs active:scale-95"
                   >
-                    {isKm ? 'រក្សាទុកតំណភ្ជាប់ Google Play Store' : 'Save Google Play Store Link'}
+                    {tr(language, 'រក្សាទុកតំណភ្ជាប់ Google Play Store', 'Save Google Play Store Link', '保存 Google Play Store 链接')}
                   </button>
                 </form>
               </div>
@@ -5563,10 +5358,10 @@ export const AdminDashboard: React.FC = () => {
                   <Heart className="w-5 h-5 text-rose-600 fill-rose-600" />
                   <div>
                     <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
-                      {isKm ? 'ការកំណត់ QR Code ឧបត្ថម្ភ (Support / KHQR)' : 'Support / KHQR Configuration'}
+                      {tr(language, 'ការកំណត់ QR Code ឧបត្ថម្ភ (Support / KHQR)', 'Support / KHQR Configuration', '支持 / KHQR 配置')}
                     </h4>
                     <p className="text-[11px] text-stone-500 font-khmer">
-                      {isKm ? 'កែប្រែព័ត៌មានគណនី និងរូបភាព KHQR សម្រាប់ទទួលការឧបត្ថម្ភគាំទ្រ' : 'Update verified KHQR image and bank details'}
+                      {tr(language, 'កែប្រែព័ត៌មានគណនី និងរូបភាព KHQR សម្រាប់ទទួលការឧបត្ថម្ភគាំទ្រ', 'Update verified KHQR image and bank details', '更新已验证的 KHQR 二维码图片及银行信息')}
                     </p>
                   </div>
                 </div>
@@ -5586,7 +5381,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="sm:col-span-2 space-y-3 font-khmer">
                     <div>
                       <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                        {isKm ? 'ទីតាំងរូបភាព QR Code (Image URL)' : 'KHQR Image URL'}
+                        {tr(language, 'ទីតាំងរូបភាព QR Code (Image URL)', 'KHQR Image URL', 'KHQR 图片 URL')}
                       </label>
                       <input
                         type="text"
@@ -5599,7 +5394,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                          {isKm ? 'ឈ្មោះធនាគារ' : 'Bank Name'}
+                          {tr(language, 'ឈ្មោះធនាគារ', 'Bank Name', '银行名称')}
                         </label>
                         <input
                           type="text"
@@ -5610,7 +5405,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div>
                         <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                          {isKm ? 'ឈ្មោះម្ចាស់គណនី' : 'Account Name'}
+                          {tr(language, 'ឈ្មោះម្ចាស់គណនី', 'Account Name', '账户名称')}
                         </label>
                         <input
                           type="text"
@@ -5627,7 +5422,7 @@ export const AdminDashboard: React.FC = () => {
                       disabled={isSavingVipSettings}
                       className="px-5 py-2.5 bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs active:scale-95"
                     >
-                      {isKm ? 'រក្សាទុកព័ត៌មាន KHQR' : 'Save KHQR Configuration'}
+                      {tr(language, 'រក្សាទុកព័ត៌មាន KHQR', 'Save KHQR Configuration', '保存 KHQR 配置')}
                     </button>
                   </div>
                 </div>
@@ -5641,10 +5436,10 @@ export const AdminDashboard: React.FC = () => {
                   <KeyRound className="w-5 h-5 text-[#059669]" />
                   <div>
                     <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm">
-                      {isKm ? 'ផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាល' : 'Update Admin Credentials'}
+                      {tr(language, 'ផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាល', 'Update Admin Credentials', '更新管理员凭据')}
                     </h4>
                     <p className="text-[11px] text-stone-500">
-                      {isKm ? 'ផ្លាស់ប្តូរពាក្យសម្ងាត់ដោយប្រើប្រាស់ PBKDF2-HMAC-SHA256 (100,000 Iterations)' : 'Hash & update admin credentials securely'}
+                      {tr(language, 'ផ្លាស់ប្តូរពាក្យសម្ងាត់ដោយប្រើប្រាស់ PBKDF2-HMAC-SHA256 (100,000 Iterations)', 'Hash & update admin credentials securely', '安全哈希并更新管理员凭据')}
                     </p>
                   </div>
                 </div>
@@ -5652,7 +5447,7 @@ export const AdminDashboard: React.FC = () => {
                 <form onSubmit={handleChangeAdminPassword} className="space-y-3 max-w-md">
                   <div>
                     <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                      {isKm ? 'ពាក្យសម្ងាត់ថ្មី (New Password - យ៉ាងហោច ៨ តួ)' : 'New Admin Password (min 8 chars)'}
+                      {tr(language, 'ពាក្យសម្ងាត់ថ្មី (New Password - យ៉ាងហោច ៨ តួ)', 'New Admin Password (min 8 chars)', '新管理员密码（至少 8 位）')}
                     </label>
                     <div className="relative">
                       <input
@@ -5676,7 +5471,7 @@ export const AdminDashboard: React.FC = () => {
 
                   <div>
                     <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                      {isKm ? 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី (Confirm New Password)' : 'Confirm New Admin Password'}
+                      {tr(language, 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី (Confirm New Password)', 'Confirm New Admin Password', '确认新管理员密码')}
                     </label>
                     <input
                       type={showNewAdminPass ? 'text' : 'password'}
@@ -5700,8 +5495,8 @@ export const AdminDashboard: React.FC = () => {
                     )}
                     <span>
                       {isUpdatingAdminPass
-                        ? (isKm ? 'កំពុងរក្សាទុកដោយសុវត្ថិភាព...' : 'Updating securely...')
-                        : (isKm ? 'Hash PBKDF2 និងផ្លាស់ប្តូរ' : 'Hash PBKDF2 & Update')}
+                        ? (tr(language, 'កំពុងរក្សាទុកដោយសុវត្ថិភាព...', 'Updating securely...', '正在安全更新...'))
+                        : (tr(language, 'Hash PBKDF2 និងផ្លាស់ប្តូរ', 'Hash PBKDF2 & Update', 'PBKDF2 哈希并更新'))}
                     </span>
                   </button>
                 </form>
@@ -6118,12 +5913,10 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-moul text-base text-white">
-                      {isKm ? 'សវនកម្មរូបភាពម្ហូបខ្មែរ AI & ការផ្ទៀងផ្ទាត់' : 'AI Food Image Audit & Verification'}
+                      {tr(language, 'សវនកម្មរូបភាពម្ហូបខ្មែរ AI & ការផ្ទៀងផ្ទាត់', 'AI Food Image Audit & Verification', 'AI 美食图片审计与核验')}
                     </h3>
                     <p className="text-xs text-emerald-200 font-khmer">
-                      {isKm 
-                        ? 'ការត្រួតពិនិត្យរូបភាពមុខម្ហូបខ្មែរទាំង ១០០ មុខ ដើម្បីធានាភាពត្រឹមត្រូវតាមឈ្មោះមុខម្ហូបពិតប្រាកដ និងដកភាពជាន់គ្នាចេញ ១០០%'
-                        : 'Audit and replacement of 100 Cambodian dish images ensuring authentic culinary representation and 0% duplicates.'}
+                      {tr(language, 'ការត្រួតពិនិត្យរូបភាពមុខម្ហូបខ្មែរទាំង ១០០ មុខ ដើម្បីធានាភាពត្រឹមត្រូវតាមឈ្មោះមុខម្ហូបពិតប្រាកដ និងដកភាពជាន់គ្នាចេញ ១០០%', 'Audit and replacement of 100 Cambodian dish images ensuring authentic culinary representation and 0% duplicates.', '审计并替换 100 道柬埔寨美食图片，确保正宗美食呈现且 0% 重复。')}
                     </p>
                   </div>
                 </div>
@@ -6131,25 +5924,25 @@ export const AdminDashboard: React.FC = () => {
                 {/* Metric Summary Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
                   <div className="bg-white/10 p-3.5 rounded-2xl border border-white/10">
-                    <div className="text-[10px] text-emerald-200 font-khmer">{isKm ? 'មុខម្ហូបសរុបបាន Audit' : 'Total Dishes Audited'}</div>
+                    <div className="text-[10px] text-emerald-200 font-khmer">{tr(language, 'មុខម្ហូបសរុបបាន Audit', 'Total Dishes Audited', '已审计美食总数')}</div>
                     <div className="text-2xl font-bold font-mono text-white mt-1">{foods.length}</div>
                     <div className="text-[9px] text-emerald-200 font-khmer mt-0.5">✓ គ្រប់មុខម្ហូបទាំងអស់</div>
                   </div>
 
                   <div className="bg-white/10 p-3.5 rounded-2xl border border-white/10">
-                    <div className="text-[10px] text-emerald-200 font-khmer">{isKm ? 'ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ ១០០%' : 'Verified & Accurate'}</div>
+                    <div className="text-[10px] text-emerald-200 font-khmer">{tr(language, 'ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ ១០០%', 'Verified & Accurate', '已核验且准确')}</div>
                     <div className="text-2xl font-bold font-mono text-emerald-200 mt-1">{verifiedFoods.length}</div>
                     <div className="text-[9px] text-emerald-200 font-khmer mt-0.5">✓ រូបភាពច្បាស់តាមមុខម្ហូប</div>
                   </div>
 
                   <div className="bg-white/10 p-3.5 rounded-2xl border border-white/10">
-                    <div className="text-[10px] text-emerald-200 font-khmer">{isKm ? 'ដកភាពជាន់គ្នាចេញ' : 'Duplicates Resolved'}</div>
+                    <div className="text-[10px] text-emerald-200 font-khmer">{tr(language, 'ដកភាពជាន់គ្នាចេញ', 'Duplicates Resolved', '已解决重复项')}</div>
                     <div className="text-2xl font-bold font-mono text-white mt-1">228</div>
                     <div className="text-[9px] text-emerald-200 font-khmer mt-0.5">0% Duplication rate</div>
                   </div>
 
                   <div className="bg-white/10 p-3.5 rounded-2xl border border-white/10">
-                    <div className="text-[10px] text-emerald-200 font-khmer">{isKm ? 'រង់ចាំរដ្ឋបាលពិនិត្យ' : 'Pending Admin Review'}</div>
+                    <div className="text-[10px] text-emerald-200 font-khmer">{tr(language, 'រង់ចាំរដ្ឋបាលពិនិត្យ', 'Pending Admin Review', '待管理员审核')}</div>
                     <div className="text-2xl font-bold font-mono text-white mt-1">{flaggedFoods.length}</div>
                     <div className="text-[9px] text-emerald-200 font-khmer mt-0.5">{flaggedFoods.length > 0 ? 'ទាមទារការសម្រេច' : 'រួចរាល់ទាំងអស់'}</div>
                   </div>
@@ -6163,10 +5956,10 @@ export const AdminDashboard: React.FC = () => {
                     <AlertTriangle className="w-5 h-5 text-amber-500" />
                     <div>
                       <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer text-sm">
-                        {isKm ? 'ផ្ទាំងត្រួតពិនិត្យរូបភាពរង់ចាំការសម្រេច (Review Queue)' : 'Image Audit Review Queue'}
+                        {tr(language, 'ផ្ទាំងត្រួតពិនិត្យរូបភាពរង់ចាំការសម្រេច (Review Queue)', 'Image Audit Review Queue', '图片审计审核队列')}
                       </h4>
                       <p className="text-[11px] text-stone-500 font-khmer">
-                        {isKm ? 'មុខម្ហូបពិសេសក្នុងតំបន់ ឬអាហារប្លែកៗដែលទាមទារការត្រួតពិនិត្យផ្ទៀងផ្ទាត់ពីរដ្ឋបាល' : 'Specialty regional dishes flagged for manual administrator confirmation'}
+                        {tr(language, 'មុខម្ហូបពិសេសក្នុងតំបន់ ឬអាហារប្លែកៗដែលទាមទារការត្រួតពិនិត្យផ្ទៀងផ្ទាត់ពីរដ្ឋបាល', 'Specialty regional dishes flagged for manual administrator confirmation', '标记需管理员人工确认的特色地方美食')}
                       </p>
                     </div>
                   </div>
@@ -6179,10 +5972,10 @@ export const AdminDashboard: React.FC = () => {
                   <div className="p-8 text-center text-stone-500 font-khmer space-y-2">
                     <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
                     <p className="font-bold text-stone-800 dark:text-stone-200">
-                      {isKm ? 'អបអរសាទរ! មុខម្ហូបទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ត្រឹមត្រូវ ១០០%' : 'All food images are officially verified! No pending reviews.'}
+                      {tr(language, 'អបអរសាទរ! មុខម្ហូបទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ត្រឹមត្រូវ ១០០%', 'All food images are officially verified! No pending reviews.', '所有美食图片均已正式核验！无待审核项。')}
                     </p>
                     <p className="text-[11px]">
-                      {isKm ? 'គ្មានមុខម្ហូបណាមួយស្ថិតក្នុងបញ្ជីរង់ចាំការពិនិត្យឡើយ។' : 'The review queue is currently clear.'}
+                      {tr(language, 'គ្មានមុខម្ហូបណាមួយស្ថិតក្នុងបញ្ជីរង់ចាំការពិនិត្យឡើយ។', 'The review queue is currently clear.', '审核队列当前已清空。')}
                     </p>
                   </div>
                 ) : (
@@ -6224,7 +6017,7 @@ export const AdminDashboard: React.FC = () => {
                         {editingFoodId === food.id ? (
                           <div className="space-y-2 pt-1 border-t border-amber-200 dark:border-amber-800">
                             <label className="text-[10px] font-bold text-stone-700 dark:text-stone-300 font-khmer block">
-                              {isKm ? 'តំណភ្ជាប់រូបភាពថ្មី (New Image URL):' : 'Enter New Image URL:'}
+                              {tr(language, 'តំណភ្ជាប់រូបភាពថ្មី (New Image URL):', 'Enter New Image URL:', '输入新图片 URL：')}
                             </label>
                             <div className="flex gap-2">
                               <input 
@@ -6238,13 +6031,13 @@ export const AdminDashboard: React.FC = () => {
                                 onClick={() => handleSaveCustomImage(food, editingFoodUrl)}
                                 className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold font-khmer transition"
                               >
-                                {isKm ? 'រក្សាទុក' : 'Save'}
+                                {tr(language, 'រក្សាទុក', 'Save', '保存')}
                               </button>
                               <button
                                 onClick={() => setEditingFoodId(null)}
                                 className="px-2.5 py-1.5 bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-lg text-xs font-khmer"
                               >
-                                {isKm ? 'បោះបង់' : 'Cancel'}
+                                {tr(language, 'បោះបង់', 'Cancel', '取消')}
                               </button>
                             </div>
                           </div>
@@ -6255,7 +6048,7 @@ export const AdminDashboard: React.FC = () => {
                               className="flex-1 py-2 px-3 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-xs font-khmer flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95"
                             >
                               <Check className="w-3.5 h-3.5 text-emerald-200" />
-                              <span>{isKm ? 'យល់ព្រមរូបភាពនេះ' : 'Approve Photo'}</span>
+                              <span>{tr(language, 'យល់ព្រមរូបភាពនេះ', 'Approve Photo', '批准照片')}</span>
                             </button>
                             <button
                               type="button"
@@ -6263,7 +6056,7 @@ export const AdminDashboard: React.FC = () => {
                               className="py-2 px-3 bg-[#059669] hover:bg-[#047857] text-white font-bold rounded-xl text-xs font-khmer flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95"
                             >
                               <Camera className="w-3.5 h-3.5 text-emerald-200" />
-                              <span>{isKm ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}</span>
+                              <span>{tr(language, 'ផ្លាស់ប្តូររូបភាព', 'Change Photo', '更换照片')}</span>
                             </button>
                           </div>
                         )}
@@ -6280,10 +6073,10 @@ export const AdminDashboard: React.FC = () => {
                     <ImageIcon className="w-5 h-5 text-[#059669]" />
                     <div>
                       <h4 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-sm">
-                        {isKm ? `កាតាឡុកមុខម្ហូបទាំងអស់ (${foods.length})` : `Full Catalog Image Browser (${foods.length})`}
+                        {tr(language, `កាតាឡុកមុខម្ហូបទាំងអស់ (${foods.length})`, `Full Catalog Image Browser (${foods.length})`, `完整图库浏览 (${foods.length})`)}
                       </h4>
                       <p className="text-[11px] text-stone-500 font-khmer">
-                        {isKm ? 'ស្វែងរក និងត្រួតពិនិត្យរូបភាពមុខម្ហូបទាំងអស់ក្នុងប្រព័ន្ធ' : 'Search and audit all dish images'}
+                        {tr(language, 'ស្វែងរក និងត្រួតពិនិត្យរូបភាពមុខម្ហូបទាំងអស់ក្នុងប្រព័ន្ធ', 'Search and audit all dish images', '搜索并审计所有菜品图片')}
                       </p>
                     </div>
                   </div>
@@ -6297,7 +6090,7 @@ export const AdminDashboard: React.FC = () => {
                           auditFilter === 'all' ? 'bg-white dark:bg-stone-800 text-[#064E3B] shadow-xs' : 'text-stone-500'
                         }`}
                       >
-                        {isKm ? `ទាំងអស់ (${foods.length})` : `All (${foods.length})`}
+                        {tr(language, `ទាំងអស់ (${foods.length})`, `All (${foods.length})`, `全部 (${foods.length})`)}
                       </button>
                       <button
                         onClick={() => setAuditFilter('verified')}
@@ -6305,7 +6098,7 @@ export const AdminDashboard: React.FC = () => {
                           auditFilter === 'verified' ? 'bg-white dark:bg-stone-800 text-[#059669] shadow-xs' : 'text-stone-500'
                         }`}
                       >
-                        {isKm ? `ផ្ទៀងផ្ទាត់ (${verifiedFoods.length})` : `Verified (${verifiedFoods.length})`}
+                        {tr(language, `ផ្ទៀងផ្ទាត់ (${verifiedFoods.length})`, `Verified (${verifiedFoods.length})`, `已核验 (${verifiedFoods.length})`)}
                       </button>
                       <button
                         onClick={() => setAuditFilter('flagged')}
@@ -6313,7 +6106,7 @@ export const AdminDashboard: React.FC = () => {
                           auditFilter === 'flagged' ? 'bg-white dark:bg-stone-800 text-amber-600 shadow-xs' : 'text-stone-500'
                         }`}
                       >
-                        {isKm ? `រង់ចាំពិនិត្យ (${flaggedFoods.length})` : `Flagged (${flaggedFoods.length})`}
+                        {tr(language, `រង់ចាំពិនិត្យ (${flaggedFoods.length})`, `Flagged (${flaggedFoods.length})`, `已标记 (${flaggedFoods.length})`)}
                       </button>
                     </div>
                   </div>
@@ -6326,7 +6119,7 @@ export const AdminDashboard: React.FC = () => {
                     type="text"
                     value={auditSearchQuery}
                     onChange={e => setAuditSearchQuery(e.target.value)}
-                    placeholder={isKm ? "ស្វែងរកឈ្មោះម្ហូបខ្មែរ អង់គ្លេស ឬលេខសម្គាល់..." : "Search by Khmer, English name, or ID..."}
+                    placeholder={tr(language, "ស្វែងរកឈ្មោះម្ហូបខ្មែរ អង់គ្លេស ឬលេខសម្គាល់...", "Search by Khmer, English name, or ID...", '按高棉语、英语名称或 ID 搜索...')}
                     className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 text-xs font-khmer focus:outline-none focus:border-[#059669]"
                   />
                 </div>
@@ -6363,12 +6156,12 @@ export const AdminDashboard: React.FC = () => {
                           {food.imageAuditStatus === 'flagged_review' ? (
                             <span className="text-[9px] font-bold text-amber-600 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.2 rounded font-khmer flex items-center gap-1">
                               <AlertTriangle className="w-2.5 h-2.5" />
-                              {isKm ? 'រង់ចាំពិនិត្យ' : 'Review'}
+                              {tr(language, 'រង់ចាំពិនិត្យ', 'Review', '审核')}
                             </span>
                           ) : (
                             <span className="text-[9px] font-bold text-[#059669] bg-slate-100 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded font-khmer flex items-center gap-1">
                               <CheckCircle2 className="w-2.5 h-2.5" />
-                              {isKm ? 'ផ្ទៀងផ្ទាត់ហើយ' : 'Verified'}
+                              {tr(language, 'ផ្ទៀងផ្ទាត់ហើយ', 'Verified', '已验证')}
                             </span>
                           )}
 
@@ -6378,7 +6171,7 @@ export const AdminDashboard: React.FC = () => {
                             className="text-[10px] font-bold text-[#064E3B] dark:text-emerald-400 hover:text-[#059669] hover:underline font-khmer flex items-center gap-0.5"
                           >
                             <Camera className="w-3 h-3" />
-                            <span>{isKm ? 'កែរូបភាព' : 'Edit Photo'}</span>
+                            <span>{tr(language, 'កែរូបភាព', 'Edit Photo', '编辑照片')}</span>
                           </button>
                         </div>
                       </div>
@@ -6398,7 +6191,7 @@ export const AdminDashboard: React.FC = () => {
         onClose={() => setSelectedFoodForImageEdit(null)}
         onSave={(updatedFood) => {
           updateFood(updatedFood);
-          showToast(isKm ? `បានរក្សាទុករូបភាពសម្រាប់ "${updatedFood.nameKh}" ជោគជ័យ!` : `Updated photo for "${updatedFood.nameEn}"!`, 'success');
+          showToast(tr(language, `បានរក្សាទុករូបភាពសម្រាប់ "${updatedFood.nameKh}" ជោគជ័យ!`, `Updated photo for "${updatedFood.nameEn}"!`, `已更新“${updatedFood.nameEn}”的照片！`), 'success');
         }}
         isKm={isKm}
       />
@@ -6421,7 +6214,7 @@ export const AdminDashboard: React.FC = () => {
             });
           }
           updateDestination(updatedDest);
-          showToast(isKm ? `បានរក្សាទុករូបភាពសម្រាប់ "${updatedDest.nameKh}" ជោគជ័យ!` : `Updated photo for "${updatedDest.nameEn}"!`, 'success');
+          showToast(tr(language, `បានរក្សាទុករូបភាពសម្រាប់ "${updatedDest.nameKh}" ជោគជ័យ!`, `Updated photo for "${updatedDest.nameEn}"!`, `已更新“${updatedDest.nameEn}”的照片！`), 'success');
         }}
         isKm={isKm}
       />

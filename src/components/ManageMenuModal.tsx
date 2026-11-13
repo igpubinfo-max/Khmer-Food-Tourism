@@ -398,9 +398,7 @@ export const ManageMenuModal: React.FC = () => {
     if (trimmedMapUrl && !isValidGoogleMapsUrl(trimmedMapUrl)) {
       setStatusBanner({
         type: 'error',
-        text: isKm
-          ? '⚠️ សូមបញ្ចូលលីង Google Maps ឱ្យបានត្រឹមត្រូវ (ឧ. https://maps.app.goo.gl/... ឬ https://www.google.com/maps/...)'
-          : '⚠️ Please enter a valid Google Maps link (e.g., https://maps.app.goo.gl/... or https://www.google.com/maps/...)',
+        text: tr(language, '⚠️ សូមបញ្ចូលលីង Google Maps ឱ្យបានត្រឹមត្រូវ (ឧ. https://maps.app.goo.gl/... ឬ https://www.google.com/maps/...)', '⚠️ Please enter a valid Google Maps link (e.g., https://maps.app.goo.gl/... or https://www.google.com/maps/...)', '⚠️ 请输入有效的 Google Maps 链接（例如：https://maps.app.goo.gl/... 或 https://www.google.com/maps/...）'),
       });
       modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
       return;
@@ -512,7 +510,7 @@ export const ManageMenuModal: React.FC = () => {
   const handleAddGalleryPhoto = (url: string) => {
     if (!url.trim()) return;
     if (storeGalleryPhotos.length >= 30) {
-      showToast(isKm ? 'អាចបន្ថែម រូបភាពរបស់ខ្ញុំ អតិបរមា ៣០ សន្លឹក!' : 'Max 30 photos allowed!', 'warning');
+      showToast(tr(language, 'អាចបន្ថែម រូបភាពរបស់ខ្ញុំ អតិបរមា ៣០ សន្លឹក!', 'Max 30 photos allowed!', '最多允许上传 30 张照片！'), 'warning');
       return;
     }
     if (!storeGalleryPhotos.includes(url.trim())) {
@@ -529,14 +527,14 @@ export const ManageMenuModal: React.FC = () => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(shareableUrl).then(() => {
         setCopiedLink(true);
-        showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied!', 'success');
+        showToast(tr(language, 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!', 'Restaurant link copied!', '餐馆链接已复制！'), 'success');
         setTimeout(() => setCopiedLink(false), 2000);
       }).catch(() => {
-        showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied!', 'success');
+        showToast(tr(language, 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!', 'Restaurant link copied!', '餐馆链接已复制！'), 'success');
       });
     } else {
       setCopiedLink(true);
-      showToast(isKm ? 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!' : 'Restaurant link copied!', 'success');
+      showToast(tr(language, 'បានចម្លងតំណភ្ជាប់ហាងជោគជ័យ!', 'Restaurant link copied!', '餐馆链接已复制！'), 'success');
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };
@@ -545,9 +543,7 @@ export const ManageMenuModal: React.FC = () => {
     if (navigator.share) {
       navigator.share({
         title: isKm ? managingRestaurant.nameKh : managingRestaurant.nameEn,
-        text: isKm 
-          ? `សូមណែនាំហាងអាហារឆ្ងាញ់៖ ${managingRestaurant.nameKh} 📍 ${managingRestaurant.addressKh} 📞 ${managingRestaurant.phone}`
-          : `Check out ${managingRestaurant.nameEn}!`,
+        text: tr(language, `សូមណែនាំហាងអាហារឆ្ងាញ់៖ ${managingRestaurant.nameKh} 📍 ${managingRestaurant.addressKh} 📞 ${managingRestaurant.phone}`, `Check out ${managingRestaurant.nameEn}!`, `快来看看 ${managingRestaurant.nameEn}！`),
         url: shareableUrl,
       }).catch(() => {});
     } else {
@@ -559,7 +555,7 @@ export const ManageMenuModal: React.FC = () => {
     e.preventDefault();
     if (!transactionRef.trim()) {
       showToast(
-        isKm ? 'សូមបញ្ចូលលេខកូដប្រតិបត្តិការធនាគារ (Transaction Ref)!' : 'Please enter bank transaction reference!',
+        tr(language, 'សូមបញ្ចូលលេខកូដប្រតិបត្តិការធនាគារ (Transaction Ref)!', 'Please enter bank transaction reference!', '请输入银行交易参考号！'),
         'warning'
       );
       return;
@@ -596,8 +592,8 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <h2 className="font-moul text-xs sm:text-sm text-white leading-snug truncate">
                     {storeBusinessType === 'hotel' || isHotelBusinessRecord(currentRest)
-                      ? (isKm ? 'គ្រប់គ្រងសណ្ឋាគារ / ផ្ទះសំណាក់ VIP របស់ខ្ញុំ' : 'Manage My VIP Hotel / Stay')
-                      : (isKm ? 'គ្រប់គ្រងហាង VIP របស់ខ្ញុំ' : 'Manage My VIP Store')}
+                      ? (tr(language, 'គ្រប់គ្រងសណ្ឋាគារ / ផ្ទះសំណាក់ VIP របស់ខ្ញុំ', 'Manage My VIP Hotel / Stay', '管理我的 VIP 酒店/住宿'))
+                      : (tr(language, 'គ្រប់គ្រងហាង VIP របស់ខ្ញុំ', 'Manage My VIP Store', '管理我的 VIP 店铺'))}
                   </h2>
                   <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[9px]">
                     ID: {managingRestaurant.id.length > 14 ? managingRestaurant.id.slice(-10) : managingRestaurant.id}
@@ -622,9 +618,7 @@ export const ManageMenuModal: React.FC = () => {
             <div className="pt-2 border-t border-emerald-700/70 flex flex-col gap-1.5 font-khmer">
               <div className="flex items-center justify-between text-[10px] text-emerald-200 flex-wrap gap-1">
                 <span>
-                  {isKm
-                    ? `ជ្រើសរើសហាង (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores === 999 ? '∞' : storeQuota.totalAllowedStores} ហាង)៖`
-                    : `Select store (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores === 999 ? '∞' : storeQuota.totalAllowedStores} stores):`}
+                  {tr(language, `ជ្រើសរើសហាង (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores === 999 ? '∞' : storeQuota.totalAllowedStores} ហាង)៖`, `Select store (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores === 999 ? '∞' : storeQuota.totalAllowedStores} stores):`, `选择店铺 (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores === 999 ? '∞' : storeQuota.totalAllowedStores} 家店铺)：`)}
                 </span>
                 <div className="flex items-center gap-1">
                   <button
@@ -636,7 +630,7 @@ export const ManageMenuModal: React.FC = () => {
                     }}
                     className="px-2 py-0.5 rounded-lg bg-emerald-400/20 hover:bg-emerald-400/30 border border-emerald-300/40 text-emerald-100 font-bold text-[10px] transition cursor-pointer"
                   >
-                    {isKm ? '🔄 ប្តូរហាងថ្មី ($0)' : '🔄 Replace ($0)'}
+                    {tr(language, '🔄 ប្តូរហាងថ្មី ($0)', '🔄 Replace ($0)', '🔄 更换 ($0)')}
                   </button>
                   <button
                     type="button"
@@ -647,7 +641,7 @@ export const ManageMenuModal: React.FC = () => {
                     }}
                     className="px-2 py-0.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 border border-amber-300/40 text-amber-200 font-bold text-[10px] transition cursor-pointer"
                   >
-                    {isKm ? '+ បន្ថែមហាងថ្មី' : '+ Add New Shop'}
+                    {tr(language, '+ បន្ថែមហាងថ្មី', '+ Add New Shop', '+ 添加新店铺')}
                   </button>
                 </div>
               </div>
@@ -696,12 +690,10 @@ export const ManageMenuModal: React.FC = () => {
                   <Lock className="w-8 h-8" />
                 </div>
                 <h3 className="font-moul text-sm text-slate-900 dark:text-white">
-                  {isKm ? 'សូមចូលគណនីជាមុនសិន' : 'Please Sign In First'}
+                  {tr(language, 'សូមចូលគណនីជាមុនសិន', 'Please Sign In First', '请先登录')}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xs mx-auto leading-relaxed">
-                  {isKm
-                    ? 'លោកអ្នកត្រូវចូលគណនីដែលមានសិទ្ធិ VIP ដើម្បីគ្រប់គ្រងព័ត៌មានហាងរបស់អ្នក។'
-                    : 'Please sign in to your approved VIP account to manage your restaurant.'}
+                  {tr(language, 'លោកអ្នកត្រូវចូលគណនីដែលមានសិទ្ធិ VIP ដើម្បីគ្រប់គ្រងព័ត៌មានហាងរបស់អ្នក។', 'Please sign in to your approved VIP account to manage your restaurant.', '请登录您已获批的 VIP 账户以管理您的餐馆。')}
                 </p>
                 <div className="pt-2">
                   <button
@@ -712,7 +704,7 @@ export const ManageMenuModal: React.FC = () => {
                     }}
                     className="px-6 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md transition cursor-pointer"
                   >
-                    {isKm ? 'ចូលគណនីឥឡូវនេះ' : 'Sign In Now'}
+                    {tr(language, 'ចូលគណនីឥឡូវនេះ', 'Sign In Now', '立即登录')}
                   </button>
                 </div>
               </div>
@@ -725,12 +717,10 @@ export const ManageMenuModal: React.FC = () => {
                   PENDING_ADMIN_APPROVAL
                 </span>
                 <h3 className="font-moul text-sm text-slate-900 dark:text-white">
-                  {isKm ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យ និងអនុម័ត' : '⏳ Awaiting Admin Approval'}
+                  {tr(language, '⏳ កំពុងរង់ចាំ Admin ពិនិត្យ និងអនុម័ត', '⏳ Awaiting Admin Approval', '⏳ 等待管理员审批')}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
-                  {isKm
-                    ? 'ការស្នើសុំសមាជិកភាព VIP របស់អ្នកត្រូវបានកត់ត្រា និងកំពុងស្ថិតក្នុងការពិនិត្យផ្ទៀងផ្ទាត់ដោយ Administrator។ មុខងារគ្រប់គ្រងហាងនឹងបើកដំណើរការភ្លាមៗក្រោយពេលទទួលបានការអនុម័ត!'
-                    : 'Your VIP subscription request is currently pending Admin verification. Restaurant management will unlock immediately upon approval!'}
+                  {tr(language, 'ការស្នើសុំសមាជិកភាព VIP របស់អ្នកត្រូវបានកត់ត្រា និងកំពុងស្ថិតក្នុងការពិនិត្យផ្ទៀងផ្ទាត់ដោយ Administrator។ មុខងារគ្រប់គ្រងហាងនឹងបើកដំណើរការភ្លាមៗក្រោយពេលទទួលបានការអនុម័ត!', 'Your VIP subscription request is currently pending Admin verification. Restaurant management will unlock immediately upon approval!', '您的 VIP 订阅申请目前正在等待管理员核验。审核通过后将立即解锁餐馆管理功能！')}
                 </p>
                 <div className="pt-2">
                   <button
@@ -738,7 +728,7 @@ export const ManageMenuModal: React.FC = () => {
                     onClick={handleCloseModal}
                     className="px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
                   >
-                    {isKm ? 'យល់ព្រម (បិទ)' : 'Close'}
+                    {tr(language, 'យល់ព្រម (បិទ)', 'Close', '关闭')}
                   </button>
                 </div>
               </div>
@@ -751,12 +741,10 @@ export const ManageMenuModal: React.FC = () => {
                   VIP_EXPIRED
                 </span>
                 <h3 className="font-moul text-sm text-slate-900 dark:text-white">
-                  {isKm ? '⚠️ សមាជិកភាព VIP បានផុតកំណត់' : '⚠️ VIP Membership Expired'}
+                  {tr(language, '⚠️ សមាជិកភាព VIP បានផុតកំណត់', '⚠️ VIP Membership Expired', '⚠️ VIP 会员已过期')}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
-                  {isKm
-                    ? `សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់កាលបរិច្ឆេទហើយ។ សូមបន្តកញ្ចប់ VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ) ដើម្បីបន្តគ្រប់គ្រងហាង VIP របស់អ្នក។`
-                    : `Your VIP membership has expired. Please renew your VIP membership ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} days or $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} days) to continue managing your VIP restaurant.`}
+                  {tr(language, `សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់កាលបរិច្ឆេទហើយ។ សូមបន្តកញ្ចប់ VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ) ដើម្បីបន្តគ្រប់គ្រងហាង VIP របស់អ្នក។`, `Your VIP membership has expired. Please renew your VIP membership ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} days or $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} days) to continue managing your VIP restaurant.`, `您的 VIP 会员已过期。请续订 VIP 会员（$${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} 天 或 $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} 天）以继续管理您的 VIP 餐馆。`)}
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
                   <button
@@ -767,14 +755,14 @@ export const ManageMenuModal: React.FC = () => {
                     }}
                     className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-black text-xs shadow-md transition cursor-pointer"
                   >
-                    {isKm ? '✨ បន្តកញ្ចប់ VIP ឥឡូវនេះ' : '✨ Renew VIP Now'}
+                    {tr(language, '✨ បន្តកញ្ចប់ VIP ឥឡូវនេះ', '✨ Renew VIP Now', '✨ 立即续订 VIP')}
                   </button>
                   <button
                     type="button"
                     onClick={handleCloseModal}
                     className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
                   >
-                    {isKm ? 'បិទ' : 'Close'}
+                    {tr(language, 'បិទ', 'Close', '关闭')}
                   </button>
                 </div>
               </div>
@@ -784,12 +772,10 @@ export const ManageMenuModal: React.FC = () => {
                   <ShieldAlert className="w-8 h-8" />
                 </div>
                 <h3 className="font-moul text-sm text-slate-900 dark:text-white">
-                  {isKm ? '⛔ គ្មានសិទ្ធិគ្រប់គ្រងហាងនេះទេ' : '⛔ Unauthorized Restaurant'}
+                  {tr(language, '⛔ គ្មានសិទ្ធិគ្រប់គ្រងហាងនេះទេ', '⛔ Unauthorized Restaurant', '⛔ 无权管理此餐馆')}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
-                  {isKm
-                    ? 'មានតែម្ចាស់ហាងផ្ទាល់ដែលមានសមាជិកភាព VIP សកម្ម ឬ Admin ប៉ុណ្ណោះដែលអាចគ្រប់គ្រងហាងនេះបាន។'
-                    : 'Only the approved VIP owner or Admin can manage this restaurant.'}
+                  {tr(language, 'មានតែម្ចាស់ហាងផ្ទាល់ដែលមានសមាជិកភាព VIP សកម្ម ឬ Admin ប៉ុណ្ណោះដែលអាចគ្រប់គ្រងហាងនេះបាន។', 'Only the approved VIP owner or Admin can manage this restaurant.', '仅经批准的 VIP 店主或管理员可以管理此餐馆。')}
                 </p>
                 <div className="pt-2">
                   <button
@@ -797,7 +783,7 @@ export const ManageMenuModal: React.FC = () => {
                     onClick={handleCloseModal}
                     className="px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
                   >
-                    {isKm ? 'បិទ' : 'Close'}
+                    {tr(language, 'បិទ', 'Close', '关闭')}
                   </button>
                 </div>
               </div>
@@ -807,12 +793,10 @@ export const ManageMenuModal: React.FC = () => {
                   <Lock className="w-8 h-8" />
                 </div>
                 <h3 className="font-moul text-sm text-slate-900 dark:text-white">
-                  {isKm ? '🔒 សម្រាប់តែសមាជិក VIP ដែលបានអនុម័ត' : '🔒 Approved VIP Only'}
+                  {tr(language, '🔒 សម្រាប់តែសមាជិក VIP ដែលបានអនុម័ត', '🔒 Approved VIP Only', '🔒 仅限已批准的 VIP 会员')}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
-                  {isKm
-                    ? `ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង VIP គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Admin ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ) ដើម្បីទទួលបានអត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length}!`
-                    : `Owner management is reserved exclusively for admin-approved VIP subscribers. Upgrade to VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} days or $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} days) to manage your VIP restaurant!`}
+                  {tr(language, `ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង VIP គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Admin ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ) ដើម្បីទទួលបានអត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length}!`, `Owner management is reserved exclusively for admin-approved VIP subscribers. Upgrade to VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} days or $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} days) to manage your VIP restaurant!`, `店主管理功能仅对经管理员批准的 VIP 订阅用户开放。升级至 VIP（$${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} 天 或 $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} 天）即可管理您的 VIP 餐馆！`)}
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
                   <button
@@ -823,14 +807,14 @@ export const ManageMenuModal: React.FC = () => {
                     }}
                     className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-md transition cursor-pointer"
                   >
-                    {isKm ? '👑 ដំឡើងទៅកញ្ចប់ VIP ឥឡូវនេះ' : '👑 Upgrade to VIP Now'}
+                    {tr(language, '👑 ដំឡើងទៅកញ្ចប់ VIP ឥឡូវនេះ', '👑 Upgrade to VIP Now', '👑 立即升级至 VIP')}
                   </button>
                   <button
                     type="button"
                     onClick={handleCloseModal}
                     className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
                   >
-                    {isKm ? 'បិទ' : 'Close'}
+                    {tr(language, 'បិទ', 'Close', '关闭')}
                   </button>
                 </div>
               </div>
@@ -856,32 +840,20 @@ export const ManageMenuModal: React.FC = () => {
               <p className="font-bold">
                 {currentRest.status === 'pending'
                   ? storeBusinessType === 'hotel' || isHotelBusinessRecord(currentRest)
-                    ? isKm
-                      ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យសណ្ឋាគារ / កន្លែងស្នាក់នៅ (Pending Admin Hotel Review)'
-                      : '⏳ Pending Admin Hotel / Accommodation Review'
-                    : isKm
-                      ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារ (Pending Admin Review)'
-                      : '⏳ Pending Admin Food-Category Review'
+                    ? tr(language, '⏳ កំពុងរង់ចាំ Admin ពិនិត្យសណ្ឋាគារ / កន្លែងស្នាក់នៅ (Pending Admin Hotel Review)', '⏳ Pending Admin Hotel / Accommodation Review', '⏳ 等待管理员审核酒店/住宿')
+                    : tr(language, '⏳ កំពុងរង់ចាំ Admin ពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារ (Pending Admin Review)', '⏳ Pending Admin Food-Category Review', '⏳ 等待管理员审核美食分类')
                   : storeBusinessType === 'hotel' || isHotelBusinessRecord(currentRest)
-                    ? isKm
-                      ? '🚫 សំណើសណ្ឋាគារ / ផ្ទះសំណាក់ត្រូវបានបដិសេធ'
-                      : '🚫 Hotel / Accommodation Submission Rejected'
-                    : isKm
-                      ? '🚫 សំណើហាងត្រូវបានបដិសេធ (មិនមែនជាហាងលក់ម្ហូបអាហារចម្អិនស្រាប់)'
-                      : '🚫 Store Rejected (Non-Food Business)'}
+                    ? tr(language, '🚫 សំណើសណ្ឋាគារ / ផ្ទះសំណាក់ត្រូវបានបដិសេធ', '🚫 Hotel / Accommodation Submission Rejected', '🚫 酒店/住宿提交已被拒绝')
+                    : tr(language, '🚫 សំណើហាងត្រូវបានបដិសេធ (មិនមែនជាហាងលក់ម្ហូបអាហារចម្អិនស្រាប់)', '🚫 Store Rejected (Non-Food Business)', '🚫 店铺已被拒绝（非餐饮业务）')}
               </p>
               <p className="text-[11px] leading-relaxed">
                 {storeBusinessType === 'hotel' || isHotelBusinessRecord(currentRest)
-                  ? isKm
-                    ? `ប្រភេទអាជីវកម្ម៖ ${inferBusinessTypeAndCategory(currentRest).labelKh} • សូមបំពេញព័ត៌មានសណ្ឋាគារ រូបភាព ១ សន្លឹក និងលីង Google Maps ឱ្យបានច្បាស់លាស់ ដើម្បីឱ្យ Admin ត្រួតពិនិត្យ និងអនុម័តដាក់បង្ហាញក្នុងផ្នែកសណ្ឋាគារ។`
-                    : `Category: ${inferBusinessTypeAndCategory(currentRest).labelEn} • Please provide clear hotel details, 1 photo, and Google Maps link for Admin review.`
+                  ? tr(language, `ប្រភេទអាជីវកម្ម៖ ${inferBusinessTypeAndCategory(currentRest).labelKh} • សូមបំពេញព័ត៌មានសណ្ឋាគារ រូបភាព ១ សន្លឹក និងលីង Google Maps ឱ្យបានច្បាស់លាស់ ដើម្បីឱ្យ Admin ត្រួតពិនិត្យ និងអនុម័តដាក់បង្ហាញក្នុងផ្នែកសណ្ឋាគារ។`, `Category: ${inferBusinessTypeAndCategory(currentRest).labelEn} • Please provide clear hotel details, 1 photo, and Google Maps link for Admin review.`, `分类：${inferBusinessTypeAndCategory(currentRest).labelEn} • 请提供清晰的酒店详细信息、1 张照片和 Google Maps 链接供管理员审核。`)
                   : currentRest.aiCategoryVerification
                     ? isKm
                       ? currentRest.aiCategoryVerification.reasonKh
                       : currentRest.aiCategoryVerification.reasonEn
-                    : isKm
-                      ? 'សូមបំពេញព័ត៌មានហាង រូបភាពហាង ១ សន្លឹក និងលីង Google Maps ឱ្យបានច្បាស់លាស់ ដើម្បីឱ្យ Admin ត្រួតពិនិត្យ និងអនុម័តដាក់បង្ហាញជាសាធារណៈ។'
-                      : 'Please provide clear store info, single shop photo, and Google Maps link for Admin approval.'}
+                    : tr(language, 'សូមបំពេញព័ត៌មានហាង រូបភាពហាង ១ សន្លឹក និងលីង Google Maps ឱ្យបានច្បាស់លាស់ ដើម្បីឱ្យ Admin ត្រួតពិនិត្យ និងអនុម័តដាក់បង្ហាញជាសាធារណៈ។', 'Please provide clear store info, single shop photo, and Google Maps link for Admin approval.', '请提供清晰的店铺信息、单张店铺照片和 Google Maps 链接供管理员审批。')}
               </p>
             </div>
           </div>
@@ -898,7 +870,7 @@ export const ManageMenuModal: React.FC = () => {
             }`}
           >
             <Store className="w-3.5 h-3.5" />
-            <span className="leading-tight">{isKm ? '១. ព័ត៌មានហាង' : '1. Info'}</span>
+            <span className="leading-tight">{tr(language, '១. ព័ត៌មានហាង', '1. Info', '1. 基本信息')}</span>
           </button>
 
           <button
@@ -922,7 +894,7 @@ export const ManageMenuModal: React.FC = () => {
             }`}
           >
             <BarChart3 className="w-3.5 h-3.5" />
-            <span className="leading-tight">{isKm ? '៣. ស្ថិតិ & ផ្កាយ' : '3. Stats'}</span>
+            <span className="leading-tight">{tr(language, '៣. ស្ថិតិ & ផ្កាយ', '3. Stats', '3. 统计与评分')}</span>
           </button>
 
           {!isIosAppStore && (
@@ -935,7 +907,7 @@ export const ManageMenuModal: React.FC = () => {
               }`}
             >
               <Award className="w-3.5 h-3.5 text-amber-500" />
-              <span className="leading-tight">{isKm ? '៤. កញ្ចប់ហាង' : '4. Shop Plan'}</span>
+              <span className="leading-tight">{tr(language, '៤. កញ្ចប់ហាង', '4. Shop Plan', '4. 店铺方案')}</span>
             </button>
           )}
         </div>
@@ -946,16 +918,16 @@ export const ManageMenuModal: React.FC = () => {
             {isPremiumActive ? (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B] text-white flex items-center gap-1 shadow-xs">
                 <Award className="w-3 h-3 text-amber-300" />
-                <span>{isKm ? 'សមាជិក VIP' : 'VIP Active'}</span>
+                <span>{tr(language, 'សមាជិក VIP', 'VIP Active', 'VIP 生效中')}</span>
               </span>
             ) : isExpired ? (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" />
-                <span>⏳ {isKm ? 'ផុតកំណត់ VIP' : 'VIP Expired'}</span>
+                <span>⏳ {tr(language, 'ផុតកំណត់ VIP', 'VIP Expired', 'VIP 已过期')}</span>
               </span>
             ) : (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-                🏷️ {isKm ? 'ហាងធម្មតា' : 'Standard'}
+                🏷️ {tr(language, 'ហាងធម្មតា', 'Standard', '标准版')}
               </span>
             )}
 
@@ -964,12 +936,12 @@ export const ManageMenuModal: React.FC = () => {
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/60 flex items-center gap-1">
                 <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
                 <span>
-                  {ratingSummary.averageRating.toFixed(1)} ({ratingSummary.reviewCount} {isKm ? 'ការវាយតម្លៃ' : 'reviews'})
+                  {ratingSummary.averageRating.toFixed(1)} ({ratingSummary.reviewCount} {tr(language, 'ការវាយតម្លៃ', 'reviews', '条评价')})
                 </span>
               </span>
             ) : (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                {isKm ? 'មិនទាន់មានការវាយតម្លៃ' : 'No ratings yet'}
+                {tr(language, 'មិនទាន់មានការវាយតម្លៃ', 'No ratings yet', '暂无评分')}
               </span>
             )}
           </div>
@@ -1013,30 +985,22 @@ export const ManageMenuModal: React.FC = () => {
                     <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400 shrink-0" />
                     <span className="text-[11px] text-[#064E3B] dark:text-emerald-300 leading-snug font-bold">
                       {storeBusinessType === 'hotel'
-                        ? isKm
-                          ? '🏨 កែប្រែព័ត៌មានសណ្ឋាគារ / ផ្ទះសំណាក់ ឬប្តូរអាជីវកម្មថ្មី (ឥតគិតថ្លៃ $0.00)'
-                          : '🏨 Edit Hotel / Stay Info or Replace Business (Free $0.00)'
-                        : isKm 
-                          ? '🏪 កែប្រែព័ត៌មានហាង ឬប្តូរហាងថ្មី (ឥតគិតថ្លៃ $0.00)' 
-                          : '🏪 Edit Store Info or Replace Store (Free $0.00)'}
+                        ? tr(language, '🏨 កែប្រែព័ត៌មានសណ្ឋាគារ / ផ្ទះសំណាក់ ឬប្តូរអាជីវកម្មថ្មី (ឥតគិតថ្លៃ $0.00)', '🏨 Edit Hotel / Stay Info or Replace Business (Free $0.00)', '🏨 编辑酒店/住宿信息或更换业务（免费 $0.00）')
+                        : tr(language, '🏪 កែប្រែព័ត៌មានហាង ឬប្តូរហាងថ្មី (ឥតគិតថ្លៃ $0.00)', '🏪 Edit Store Info or Replace Store (Free $0.00)', '🏪 编辑店铺信息或更换店铺（免费 $0.00）')}
                     </span>
                   </div>
                   <button
                     type="submit"
                     className="px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-[11px] shrink-0 shadow cursor-pointer"
                   >
-                    {isKm ? '💾 រក្សាទុក' : '💾 Save'}
+                    {tr(language, '💾 រក្សាទុក', '💾 Save', '💾 保存')}
                   </button>
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-emerald-200/70 dark:border-emerald-800/60 text-[10px] text-slate-600 dark:text-slate-300">
                   <span>
                     {storeBusinessType === 'hotel'
-                      ? isKm
-                        ? 'អ្នកអាចកែប្រែព័ត៌មានសណ្ឋាគារនេះ ឬប្តូរប្រភេទអាជីវកម្មដោយមិនបាច់បង់ប្រាក់បន្ថែមឡើយ ($0)។'
-                        : 'You can edit this hotel or replace it with another business at zero additional cost ($0).'
-                      : isKm
-                        ? 'អ្នកអាចកែប្រែព័ត៌មានហាងនេះ ឬប្តូរដាក់ហាងថ្មីជំនួសហាងនេះដោយមិនបាច់បង់ប្រាក់បន្ថែមឡើយ ($0)។'
-                        : 'You can edit this store or replace it with a brand-new store at zero additional cost ($0).'}
+                      ? tr(language, 'អ្នកអាចកែប្រែព័ត៌មានសណ្ឋាគារនេះ ឬប្តូរប្រភេទអាជីវកម្មដោយមិនបាច់បង់ប្រាក់បន្ថែមឡើយ ($0)។', 'You can edit this hotel or replace it with another business at zero additional cost ($0).', '您可以编辑此酒店或更换为其他业务，无需额外费用 ($0)。')
+                      : tr(language, 'អ្នកអាចកែប្រែព័ត៌មានហាងនេះ ឬប្តូរដាក់ហាងថ្មីជំនួសហាងនេះដោយមិនបាច់បង់ប្រាក់បន្ថែមឡើយ ($0)។', 'You can edit this store or replace it with a brand-new store at zero additional cost ($0).', '您可以编辑此店铺或更换为全新店铺，无需额外费用 ($0)。')}
                   </span>
                   <button
                     type="button"
@@ -1047,7 +1011,7 @@ export const ManageMenuModal: React.FC = () => {
                     }}
                     className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-emerald-400 text-[#064E3B] dark:text-emerald-300 font-bold text-[10px] shrink-0 hover:bg-emerald-100 transition cursor-pointer"
                   >
-                    {isKm ? '🔄 ប្តូរហាងថ្មីជំនួស ($0)' : '🔄 Replace Store ($0)'}
+                    {tr(language, '🔄 ប្តូរហាងថ្មីជំនួស ($0)', '🔄 Replace Store ($0)', '🔄 更换店铺 ($0)')}
                   </button>
                 </div>
               </div>
@@ -1055,7 +1019,7 @@ export const ManageMenuModal: React.FC = () => {
               {/* Business Type & Exact Sub-Category Selector */}
               <div className="p-3 bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2.5">
                 <label className="block font-bold text-[#0F172A] dark:text-slate-200 text-xs">
-                  {isKm ? '🏷️ ប្រភេទអាជីវកម្ម (ហាងអាហារ ឬ សណ្ឋាគារ / កន្លែងស្នាក់នៅ) *' : '🏷️ Business Type & Category *'}
+                  {tr(language, '🏷️ ប្រភេទអាជីវកម្ម (ហាងអាហារ ឬ សណ្ឋាគារ / កន្លែងស្នាក់នៅ) *', '🏷️ Business Type & Category *', '🏷️ 业务类型与分类 *')}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -1073,7 +1037,7 @@ export const ManageMenuModal: React.FC = () => {
                     }`}
                   >
                     <span>🍽️</span>
-                    <span>{isKm ? 'ហាងអាហារ / កាហ្វេ' : 'Food / Restaurant'}</span>
+                    <span>{tr(language, 'ហាងអាហារ / កាហ្វេ', 'Food / Restaurant', '美食 / 餐馆')}</span>
                   </button>
                   <button
                     type="button"
@@ -1090,7 +1054,7 @@ export const ManageMenuModal: React.FC = () => {
                     }`}
                   >
                     <span>🏨</span>
-                    <span>{isKm ? 'សណ្ឋាគារ / ផ្ទះសំណាក់' : 'Hotel / Stay'}</span>
+                    <span>{tr(language, 'សណ្ឋាគារ / ផ្ទះសំណាក់', 'Hotel / Stay', '酒店 / 住宿')}</span>
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-1.5 pt-1">
@@ -1118,8 +1082,8 @@ export const ManageMenuModal: React.FC = () => {
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                     {storeBusinessType === 'hotel'
-                      ? (isKm ? '១. ឈ្មោះសណ្ឋាគារ / ផ្ទះសំណាក់ (ជាភាសាខ្មែរ) *' : '1. Hotel / Stay Name (Khmer) *')
-                      : (isKm ? '១. ឈ្មោះហាង (ជាភាសាខ្មែរ) *' : '1. Restaurant Name (Khmer) *')}
+                      ? (tr(language, '១. ឈ្មោះសណ្ឋាគារ / ផ្ទះសំណាក់ (ជាភាសាខ្មែរ) *', '1. Hotel / Stay Name (Khmer) *', '1. 酒店/住宿名称（高棉语）*'))
+                      : (tr(language, '១. ឈ្មោះហាង (ជាភាសាខ្មែរ) *', '1. Restaurant Name (Khmer) *', '1. 餐馆名称（高棉语）*'))}
                   </label>
                   <input
                     type="text"
@@ -1133,8 +1097,8 @@ export const ManageMenuModal: React.FC = () => {
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                     {storeBusinessType === 'hotel'
-                      ? (isKm ? '២. ឈ្មោះសណ្ឋាគារ / ផ្ទះសំណាក់ (ជាភាសាអង់គ្លេស)' : '2. Hotel / Stay Name (English)')
-                      : (isKm ? '២. ឈ្មោះហាង (ជាភាសាអង់គ្លេស)' : '2. Restaurant Name (English)')}
+                      ? (tr(language, '២. ឈ្មោះសណ្ឋាគារ / ផ្ទះសំណាក់ (ជាភាសាអង់គ្លេស)', '2. Hotel / Stay Name (English)', '2. 酒店 / 住宿名称（英文）'))
+                      : (tr(language, '២. ឈ្មោះហាង (ជាភាសាអង់គ្លេស)', '2. Restaurant Name (English)', '2. 餐厅名称（英文）'))}
                   </label>
                   <input
                     type="text"
@@ -1148,7 +1112,7 @@ export const ManageMenuModal: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? '៣. លេខទូរស័ព្ទទំនាក់ទំនង *' : '3. Contact Phone *'}
+                    {tr(language, '៣. លេខទូរស័ព្ទទំនាក់ទំនង *', '3. Contact Phone *', '3. 联系电话 *')}
                   </label>
                   <input
                     type="tel"
@@ -1161,7 +1125,7 @@ export const ManageMenuModal: React.FC = () => {
 
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? '៤. ម៉ោងបើកដំណើរការ' : '4. Opening Hours'}
+                    {tr(language, '៤. ម៉ោងបើកដំណើរការ', '4. Opening Hours', '4. 营业时间')}
                   </label>
                   <input
                     type="text"
@@ -1176,7 +1140,7 @@ export const ManageMenuModal: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? '៥. ខេត្ត / រាជធានី' : '5. Province / City'}
+                    {tr(language, '៥. ខេត្ត / រាជធានី', '5. Province / City', '5. 省份 / 城市')}
                   </label>
                   <input
                     type="text"
@@ -1190,7 +1154,7 @@ export const ManageMenuModal: React.FC = () => {
 
               <div className="space-y-2">
                 <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                  {isKm ? '៧. អាសយដ្ឋានហាងលម្អិត *' : '7. Detailed Address *'}
+                  {tr(language, '៧. អាសយដ្ឋានហាងលម្អិត *', '7. Detailed Address *', '7. 详细地址 *')}
                 </label>
                 <input
                   type="text"
@@ -1254,7 +1218,7 @@ export const ManageMenuModal: React.FC = () => {
 
               <div>
                 <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                  {isKm ? '៨. ការពិពណ៌នាអំពីហាង និងមុខម្ហូបពិសេស' : '8. About Your Shop & Specialties'}
+                  {tr(language, '៨. ការពិពណ៌នាអំពីហាង និងមុខម្ហូបពិសេស', '8. About Your Shop & Specialties', '8. 关于您的店铺与招牌特色')}
                 </label>
                 <textarea
                   rows={2}
@@ -1267,7 +1231,7 @@ export const ManageMenuModal: React.FC = () => {
 
               <div>
                 <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                  {isKm ? '៩. លីង Google Maps (Google Maps Link)' : '9. Google Maps Link'}
+                  {tr(language, '៩. លីង Google Maps (Google Maps Link)', '9. Google Maps Link', '9. Google Maps 链接')}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -1293,7 +1257,7 @@ export const ManageMenuModal: React.FC = () => {
                       className="px-3 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 shrink-0"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      {isKm ? 'បើកផែនទី' : 'Open Map'}
+                      {tr(language, 'បើកផែនទី', 'Open Map', '打开地图')}
                     </a>
                   )}
                 </div>
@@ -1304,12 +1268,8 @@ export const ManageMenuModal: React.FC = () => {
                     }`}
                   >
                     {isValidGoogleMapsUrl(storeMapUrl.trim())
-                      ? isKm
-                        ? '✅ លីង Google Maps ត្រឹមត្រូវ (ត្រូវឆ្លងកាត់ការត្រួតពិនិត្យពី Admin)'
-                        : '✅ Valid Google Maps link (Subject to Admin verification)'
-                      : isKm
-                        ? '⚠️ សូមបញ្ចូលលីង Google Maps ឱ្យបានត្រឹមត្រូវ (ឧ. https://maps.app.goo.gl/...)'
-                        : '⚠️ Please enter a valid Google Maps link'}
+                      ? tr(language, '✅ លីង Google Maps ត្រឹមត្រូវ (ត្រូវឆ្លងកាត់ការត្រួតពិនិត្យពី Admin)', '✅ Valid Google Maps link (Subject to Admin verification)', '✅ 有效的 Google Maps 链接（需经管理员审核）')
+                      : tr(language, '⚠️ សូមបញ្ចូលលីង Google Maps ឱ្យបានត្រឹមត្រូវ (ឧ. https://maps.app.goo.gl/...)', '⚠️ Please enter a valid Google Maps link', '⚠️ 请输入有效的 Google Maps 链接')}
                   </p>
                 )}
               </div>
@@ -1319,7 +1279,7 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-xs text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
                     <span>🎥</span>
-                    <span>{isKm ? 'វីដេអូផ្សព្វផ្សាយហាង Video Reels (TikTok / Facebook / YouTube)' : 'Store Video Reels (TikTok / FB / YouTube)'}</span>
+                    <span>{tr(language, 'វីដេអូផ្សព្វផ្សាយហាង Video Reels (TikTok / Facebook / YouTube)', 'Store Video Reels (TikTok / FB / YouTube)', '店铺宣传短视频 (TikTok / FB / YouTube)')}</span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[9px]">
                     VIP UNLOCKED
@@ -1341,7 +1301,7 @@ export const ManageMenuModal: React.FC = () => {
                       className="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1 shrink-0"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      <span>{isKm ? 'មើលវីដេអូ' : 'Preview'}</span>
+                      <span>{tr(language, 'មើលវីដេអូ', 'Preview', '预览')}</span>
                     </a>
                   )}
                 </div>
@@ -1351,7 +1311,7 @@ export const ManageMenuModal: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? '💬 តំណភ្ជាប់ Telegram ហាង' : '💬 Store Telegram Link'}
+                    {tr(language, '💬 តំណភ្ជាប់ Telegram ហាង', '💬 Store Telegram Link', '💬 店铺 Telegram 链接')}
                   </label>
                   <input
                     type="text"
@@ -1363,7 +1323,7 @@ export const ManageMenuModal: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? '📘 តំណភ្ជាប់ Facebook Page ហាង' : '📘 Store Facebook Page Link'}
+                    {tr(language, '📘 តំណភ្ជាប់ Facebook Page ហាង', '📘 Store Facebook Page Link', '📘 店铺 Facebook 主页链接')}
                   </label>
                   <input
                     type="text"
@@ -1380,10 +1340,10 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
                     <span>🍽️</span>
-                    <span>{isKm ? 'ម៉ឺនុយម្ហូបប្រចាំហាង (Shop Menu Items)' : 'Shop Menu Items'}</span>
+                    <span>{tr(language, 'ម៉ឺនុយម្ហូបប្រចាំហាង (Shop Menu Items)', 'Shop Menu Items', '店铺菜单菜品')}</span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-mono font-bold text-[10px]">
-                    {(currentRest.menuItems || []).length} {isKm ? 'មុខ' : 'items'}
+                    {(currentRest.menuItems || []).length} {tr(language, 'មុខ', 'items', '项')}
                   </span>
                 </div>
 
@@ -1408,7 +1368,7 @@ export const ManageMenuModal: React.FC = () => {
                           type="button"
                           onClick={() => deleteRestaurantMenuItem(currentRest.id, mi.id)}
                           className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white transition cursor-pointer shrink-0"
-                          title={isKm ? 'លុបមុខម្ហូប' : 'Delete dish'}
+                          title={tr(language, 'លុបមុខម្ហូប', 'Delete dish', '删除菜品')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1422,14 +1382,14 @@ export const ManageMenuModal: React.FC = () => {
                     type="text"
                     value={dishNameKh}
                     onChange={(e) => setDishNameKh(e.target.value)}
-                    placeholder={isKm ? 'ឈ្មោះម្ហូប (ឧ. អាម៉ុកត្រី)' : 'Dish name (Khmer/EN)'}
+                    placeholder={tr(language, 'ឈ្មោះម្ហូប (ឧ. អាម៉ុកត្រី)', 'Dish name (Khmer/EN)', '菜品名称（高棉语/英文）')}
                     className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white"
                   />
                   <input
                     type="text"
                     value={dishNameEn}
                     onChange={(e) => setDishNameEn(e.target.value)}
-                    placeholder={isKm ? 'ឈ្មោះអង់គ្លេស (ស្រេចចិត្ត)' : 'English name (optional)'}
+                    placeholder={tr(language, 'ឈ្មោះអង់គ្លេស (ស្រេចចិត្ត)', 'English name (optional)', '英文名称（选填）')}
                     className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white"
                   />
                   <div className="flex gap-1.5">
@@ -1448,7 +1408,7 @@ export const ManageMenuModal: React.FC = () => {
                         const kh = dishNameKh.trim();
                         const en = dishNameEn.trim();
                         if (!kh && !en) {
-                          showToast(isKm ? 'សូមបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន!' : 'Please enter a dish name!', 'warning');
+                          showToast(tr(language, 'សូមបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន!', 'Please enter a dish name!', '请输入菜品名称！'), 'warning');
                           return;
                         }
                         const usd = Math.max(0, Number(dishPriceUsd) || 0);
@@ -1469,7 +1429,7 @@ export const ManageMenuModal: React.FC = () => {
                       className="px-3 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1 shrink-0 cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>{isKm ? 'បន្ថែម' : 'Add'}</span>
+                      <span>{tr(language, 'បន្ថែម', 'Add', '添加')}</span>
                     </button>
                   </div>
                 </div>
@@ -1480,7 +1440,7 @@ export const ManageMenuModal: React.FC = () => {
                   type="submit"
                   className="w-full py-3 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold shadow-md shadow-emerald-950/20 transition active:scale-[0.98] cursor-pointer"
                 >
-                  {isKm ? '💾 រក្សាទុកព័ត៌មានហាងទាំងអស់' : '💾 Save All Store Information'}
+                  {tr(language, '💾 រក្សាទុកព័ត៌មានហាងទាំងអស់', '💾 Save All Store Information', '💾 保存所有店铺信息')}
                 </button>
 
                 {/* Safe 2-Step Delete Store Confirmation */}
@@ -1488,12 +1448,10 @@ export const ManageMenuModal: React.FC = () => {
                   <div className="flex items-center justify-between gap-2">
                     <div className="text-[11px] text-red-800 dark:text-red-300">
                       <span className="font-bold block">
-                        {isKm ? `🗑️ លុបហាង "${managingRestaurant.nameKh}" នេះចេញ?` : `🗑️ Delete "${managingRestaurant.nameEn || managingRestaurant.nameKh}"?`}
+                        {tr(language, `🗑️ លុបហាង "${managingRestaurant.nameKh}" នេះចេញ?`, `🗑️ Delete "${managingRestaurant.nameEn || managingRestaurant.nameKh}"?`, `🗑️ 删除 "${managingRestaurant.nameEn || managingRestaurant.nameKh}"？`)}
                       </span>
                       <span className="text-[10px] opacity-85">
-                        {isKm
-                          ? 'ការលុបហាងនឹងដកហាងនេះចេញពីបញ្ជី។ សូមបញ្ជាក់មុនពេលលុប។'
-                          : 'Deleting removes this store listing permanently. Please confirm before deleting.'}
+                        {tr(language, 'ការលុបហាងនឹងដកហាងនេះចេញពីបញ្ជី។ សូមបញ្ជាក់មុនពេលលុប។', 'Deleting removes this store listing permanently. Please confirm before deleting.', '删除将永久移除此店铺信息。请在删除前确认。')}
                       </span>
                     </div>
                     <button
@@ -1502,7 +1460,7 @@ export const ManageMenuModal: React.FC = () => {
                       className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] shrink-0 flex items-center gap-1 transition cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      <span>{isKm ? 'លុបហាង' : 'Delete Shop'}</span>
+                      <span>{tr(language, 'លុបហាង', 'Delete Shop', '删除店铺')}</span>
                     </button>
                   </div>
                 </div>
@@ -1806,7 +1764,7 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-xs text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
                     <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                    <span>{isKm ? 'ការវាយតម្លៃពិតប្រាកដពីអតិថិជន (Customer Ratings)' : 'Genuine Customer Ratings'}</span>
+                    <span>{tr(language, 'ការវាយតម្លៃពិតប្រាកដពីអតិថិជន (Customer Ratings)', 'Genuine Customer Ratings', '真实顾客评分')}</span>
                   </span>
                   {ratingSummary.hasReviews ? (
                     <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-xs">
@@ -1814,14 +1772,12 @@ export const ManageMenuModal: React.FC = () => {
                     </span>
                   ) : (
                     <span className="px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px]">
-                      {isKm ? 'មិនទាន់មានការវាយតម្លៃ / No ratings yet' : 'No ratings yet'}
+                      {tr(language, 'មិនទាន់មានការវាយតម្លៃ / No ratings yet', 'No ratings yet', '暂无评分')}
                     </span>
                   )}
                 </div>
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {isKm
-                    ? 'ពិន្ទុផ្កាយត្រូវបានគណនាដោយស្វ័យប្រវត្តិពីការវាយតម្លៃពិតប្រាកដរបស់អតិថិជនតែប៉ុណ្ណោះ។ សមាជិកភាព VIP មិនបង្កើតពិន្ទុផ្កាយ 5 សិប្បនិម្មិតឡើយ។'
-                    : 'Star ratings are calculated strictly from genuine customer reviews. VIP status never auto-assigns a 5-star rating.'}
+                  {tr(language, 'ពិន្ទុផ្កាយត្រូវបានគណនាដោយស្វ័យប្រវត្តិពីការវាយតម្លៃពិតប្រាកដរបស់អតិថិជនតែប៉ុណ្ណោះ។ សមាជិកភាព VIP មិនបង្កើតពិន្ទុផ្កាយ 5 សិប្បនិម្មិតឡើយ។', 'Star ratings are calculated strictly from genuine customer reviews. VIP status never auto-assigns a 5-star rating.', '星级评分严格根据真实顾客评价计算。VIP 身份绝不会自动赋予 5 星好评。')}
                 </p>
               </div>
 
@@ -1830,16 +1786,14 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 flex items-center gap-1.5">
                     <BarChart3 className="w-4 h-4" />
-                    <span>{isKm ? 'ស្ថិតិដំណើរការហាងក្នុងកម្មវិធី' : 'In-App Performance Analytics'}</span>
+                    <span>{tr(language, 'ស្ថិតិដំណើរការហាងក្នុងកម្មវិធី', 'In-App Performance Analytics', '应用内表现分析')}</span>
                   </span>
                   <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60">
                     Live
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
-                  {isKm 
-                    ? 'ស្ថិតិជាក់ស្តែងរបស់អ្នកប្រើប្រាស់ដែលបានមើលទំព័រហាង ចុចហៅទូរស័ព្ទ និងចុចមើលទីតាំងលើ Google Maps។' 
-                    : 'Actual engagement tracking of page views, phone calls, and Google Maps clicks.'}
+                  {tr(language, 'ស្ថិតិជាក់ស្តែងរបស់អ្នកប្រើប្រាស់ដែលបានមើលទំព័រហាង ចុចហៅទូរស័ព្ទ និងចុចមើលទីតាំងលើ Google Maps។', 'Actual engagement tracking of page views, phone calls, and Google Maps clicks.', '追踪页面浏览量、电话拨打和 Google Maps 点击的真实互动数据。')}
                 </p>
               </div>
 
@@ -1848,14 +1802,10 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-slate-800 border-2 border-amber-400/80 text-center space-y-2.5">
                   <Lock className="w-6 h-6 text-amber-600 mx-auto" />
                   <div className="font-bold text-xs text-slate-900 dark:text-white">
-                    {isKm
-                      ? '🔒 ស្ថិតិអ្នកចូលមើលហាងលម្អិត (Store Analytics) រួមបញ្ចូលក្នុងកញ្ចប់ហាង VIP'
-                      : '🔒 Live Store Analytics is included in the VIP Shop Package'}
+                    {tr(language, '🔒 ស្ថិតិអ្នកចូលមើលហាងលម្អិត (Store Analytics) រួមបញ្ចូលក្នុងកញ្ចប់ហាង VIP', '🔒 Live Store Analytics is included in the VIP Shop Package', '🔒 实时店铺分析已包含在 VIP 店铺套餐中')}
                   </div>
                   <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                    {isKm
-                      ? 'ទិន្នន័យហាងរបស់អ្នកត្រូវបានរក្សាទុកជានិច្ច។ បើក ឬបន្តកញ្ចប់ហាង ដើម្បីមើលចំនួនអ្នកចូលមើល អ្នកចុចហៅទូរស័ព្ទ និងអ្នកចុចផែនទី!'
-                      : 'Your shop data is safely preserved. Activate or renew the Shop Package to view views, phone clicks, and map navigations!'}
+                    {tr(language, 'ទិន្នន័យហាងរបស់អ្នកត្រូវបានរក្សាទុកជានិច្ច។ បើក ឬបន្តកញ្ចប់ហាង ដើម្បីមើលចំនួនអ្នកចូលមើល អ្នកចុចហៅទូរស័ព្ទ និងអ្នកចុចផែនទី!', 'Your shop data is safely preserved. Activate or renew the Shop Package to view views, phone clicks, and map navigations!', '您的店铺数据已安全保存。开通或续费店铺套餐即可查看浏览量、电话点击量及地图导航量！')}
                   </p>
                   {!isIosAppStore && (
                     <button
@@ -1864,7 +1814,7 @@ export const ManageMenuModal: React.FC = () => {
                       className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <Award className="w-4 h-4" />
-                      <span>{isKm ? 'ទៅកាន់ផ្ទាំងកញ្ចប់ហាង' : 'Open Shop Package'}</span>
+                      <span>{tr(language, 'ទៅកាន់ផ្ទាំងកញ្ចប់ហាង', 'Open Shop Package', '前往店铺套餐')}</span>
                     </button>
                   )}
                 </div>
@@ -1873,49 +1823,49 @@ export const ManageMenuModal: React.FC = () => {
                 {/* Page Views */}
                 <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
                   <div className="flex items-center justify-between text-slate-500 mb-1">
-                    <span className="text-[11px] font-medium">{isKm ? 'អ្នកចូលមើល' : 'Page Views'}</span>
+                    <span className="text-[11px] font-medium">{tr(language, 'អ្នកចូលមើល', 'Page Views', '页面浏览量')}</span>
                     <Store className="w-4 h-4 text-emerald-600" />
                   </div>
                   <div className="text-xl font-black text-[#0F172A] dark:text-white font-mono">
                     {viewsCount}
                   </div>
-                  <span className="text-[9px] text-slate-400">{isKm ? 'ដងក្នុងកម្មវិធី' : 'total views'}</span>
+                  <span className="text-[9px] text-slate-400">{tr(language, 'ដងក្នុងកម្មវិធី', 'total views', '总浏览次数')}</span>
                 </div>
 
                 {/* Phone Clicks */}
                 <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
                   <div className="flex items-center justify-between text-slate-500 mb-1">
-                    <span className="text-[11px] font-medium">{isKm ? 'ចុចហៅទូរស័ព្ទ' : 'Call Clicks'}</span>
+                    <span className="text-[11px] font-medium">{tr(language, 'ចុចហៅទូរស័ព្ទ', 'Call Clicks', '电话点击量')}</span>
                     <Phone className="w-4 h-4 text-[#059669]" />
                   </div>
                   <div className="text-xl font-black text-[#0F172A] dark:text-white font-mono">
                     {callsCount}
                   </div>
-                  <span className="text-[9px] text-slate-400">{isKm ? 'ដង' : 'direct calls'}</span>
+                  <span className="text-[9px] text-slate-400">{tr(language, 'ដង', 'direct calls', '直接拨打电话')}</span>
                 </div>
 
                 {/* Google Maps Clicks */}
                 <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
                   <div className="flex items-center justify-between text-slate-500 mb-1">
-                    <span className="text-[11px] font-medium">{isKm ? 'ចុចមើល Maps' : 'Map Clicks'}</span>
+                    <span className="text-[11px] font-medium">{tr(language, 'ចុចមើល Maps', 'Map Clicks', '地图点击量')}</span>
                     <MapPin className="w-4 h-4 text-blue-600" />
                   </div>
                   <div className="text-xl font-black text-[#0F172A] dark:text-white font-mono">
                     {mapsCount}
                   </div>
-                  <span className="text-[9px] text-slate-400">{isKm ? 'ដង' : 'navigation clicks'}</span>
+                  <span className="text-[9px] text-slate-400">{tr(language, 'ដង', 'navigation clicks', '导航点击次数')}</span>
                 </div>
 
                 {/* Share Clicks */}
                 <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
                   <div className="flex items-center justify-between text-slate-500 mb-1">
-                    <span className="text-[11px] font-medium">{isKm ? 'ចុចចែករំលែក' : 'Share Clicks'}</span>
+                    <span className="text-[11px] font-medium">{tr(language, 'ចុចចែករំលែក', 'Share Clicks', '分享点击量')}</span>
                     <Share2 className="w-4 h-4 text-purple-600" />
                   </div>
                   <div className="text-xl font-black text-[#0F172A] dark:text-white font-mono">
                     {sharesCount}
                   </div>
-                  <span className="text-[9px] text-slate-400">{isKm ? 'ដង' : 'total shares'}</span>
+                  <span className="text-[9px] text-slate-400">{tr(language, 'ដង', 'total shares', '总分享次数')}</span>
                 </div>
               </div>
               )}
@@ -1925,7 +1875,7 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-xs text-[#0F172A] dark:text-white flex items-center gap-1.5">
                     <Share2 className="w-3.5 h-3.5 text-[#059669]" />
-                    <span>{isKm ? 'តំណភ្ជាប់ចែករំលែកទំព័រហាងផ្ទាល់' : 'Shareable Restaurant Page Link'}</span>
+                    <span>{tr(language, 'តំណភ្ជាប់ចែករំលែកទំព័រហាងផ្ទាល់', 'Shareable Restaurant Page Link', '可分享的餐厅专属链接')}</span>
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -1941,7 +1891,7 @@ export const ManageMenuModal: React.FC = () => {
                     className="px-3 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs flex items-center gap-1 shadow transition active:scale-95"
                   >
                     {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedLink ? (isKm ? 'បានចម្លង' : 'Copied') : (isKm ? 'ចម្លង' : 'Copy')}</span>
+                    <span>{copiedLink ? (tr(language, 'បានចម្លង', 'Copied', '已复制')) : (tr(language, 'ចម្លង', 'Copy', '复制'))}</span>
                   </button>
                   <button
                     type="button"
@@ -1957,12 +1907,10 @@ export const ManageMenuModal: React.FC = () => {
               {/* Honest Engagement Disclaimer */}
               <div className="p-3 bg-slate-100 dark:bg-slate-800/60 rounded-xl text-[10px] text-slate-500 space-y-1">
                 <span className="font-bold text-slate-700 dark:text-slate-300 block">
-                  {isKm ? '📌 ការបញ្ជាក់អំពីទិន្នន័យស្ថិតិ៖' : '📌 Analytics Transparency Notice:'}
+                  {tr(language, '📌 ការបញ្ជាក់អំពីទិន្នន័យស្ថិតិ៖', '📌 Analytics Transparency Notice:', '📌 数据分析透明度声明：')}
                 </span>
                 <p>
-                  {isKm 
-                    ? 'ស្ថិតិនេះឆ្លុះបញ្ចាំងពីសកម្មភាពជាក់ស្តែងរបស់អ្នកប្រើប្រាស់ក្នុងកម្មវិធី (ចំនួនមើលទំព័រ ចុចខល និងចុចផែនទី) ដោយមិនធានាចំនួនភ្ញៀវ ឬចំណូលលក់ជាក់ស្តែងឡើយ។' 
-                    : 'These statistics reflect authentic in-app user interactions (views, calls, maps). We do not guarantee foot traffic, sales volume, or customer numbers.'}
+                  {tr(language, 'ស្ថិតិនេះឆ្លុះបញ្ចាំងពីសកម្មភាពជាក់ស្តែងរបស់អ្នកប្រើប្រាស់ក្នុងកម្មវិធី (ចំនួនមើលទំព័រ ចុចខល និងចុចផែនទី) ដោយមិនធានាចំនួនភ្ញៀវ ឬចំណូលលក់ជាក់ស្តែងឡើយ។', 'These statistics reflect authentic in-app user interactions (views, calls, maps). We do not guarantee foot traffic, sales volume, or customer numbers.', '这些统计数据反映了应用内真实的用户互动（浏览、拨打电话、查看地图）。我们不保证实际到店客流、销售额或顾客数量。')}
                 </p>
               </div>
             </div>
@@ -1991,7 +1939,7 @@ export const ManageMenuModal: React.FC = () => {
                       fileName: picked.fileName || `aba_shop_receipt_${Date.now()}.jpg`,
                       mimeType: picked.mimeType || 'image/jpeg',
                     });
-                    showToast(isKm ? '✅ បានភ្ជាប់វិក្កយបត្រ ABA រួចរាល់!' : '✅ Attached ABA receipt!', 'success');
+                    showToast(tr(language, '✅ បានភ្ជាប់វិក្កយបត្រ ABA រួចរាល់!', '✅ Attached ABA receipt!', '✅ 已附上 ABA 付款凭证！'), 'success');
                     return;
                   }
                 } catch {}
@@ -2011,7 +1959,7 @@ export const ManageMenuModal: React.FC = () => {
                     fileName: file.name || 'aba_shop_receipt.png',
                     mimeType: file.type || 'image/png',
                   });
-                  showToast(isKm ? '✅ បានភ្ជាប់វិក្កយបត្រ ABA រួចរាល់!' : '✅ Attached ABA receipt!', 'success');
+                  showToast(tr(language, '✅ បានភ្ជាប់វិក្កយបត្រ ABA រួចរាល់!', '✅ Attached ABA receipt!', '✅ 已附上 ABA 付款凭证！'), 'success');
                 }
               };
               reader.readAsDataURL(file);
@@ -2021,7 +1969,7 @@ export const ManageMenuModal: React.FC = () => {
               if (isSubmittingShopPayment) return;
               if (!shopReceiptDraft?.dataUrl) {
                 showToast(
-                  isKm ? '⚠️ សូមភ្ជាប់រូបភាពវិក្កយបត្រ ABA ជាមុនសិន!' : '⚠️ Please attach your ABA payment receipt screenshot first!',
+                  tr(language, '⚠️ សូមភ្ជាប់រូបភាពវិក្កយបត្រ ABA ជាមុនសិន!', '⚠️ Please attach your ABA payment receipt screenshot first!', '⚠️ 请先上传您的 ABA 付款凭证截图！'),
                   'warning'
                 );
                 return;
@@ -2214,7 +2162,7 @@ export const ManageMenuModal: React.FC = () => {
                         onClick={async () => {
                           try {
                             await savePngDataUrlToGallery('/images/aba_qr_code_only.png', 'ABA-KHQR-CHEA-SAVUTH-000056833.png');
-                            showToast(isKm ? '✅ បានរក្សាទុក ABA QR ទៅក្នុង រូបភាពរបស់ខ្ញុំ!' : '✅ Saved ABA QR to Gallery!', 'success');
+                            showToast(tr(language, '✅ បានរក្សាទុក ABA QR ទៅក្នុង រូបភាពរបស់ខ្ញុំ!', '✅ Saved ABA QR to Gallery!', '✅ 已将 ABA QR 保存至相册！'), 'success');
                           } catch {}
                         }}
                         className="w-28 h-28 p-1.5 rounded-xl bg-white border-2 border-emerald-500/50 shrink-0 cursor-pointer"
@@ -2240,13 +2188,13 @@ export const ManageMenuModal: React.FC = () => {
                           onClick={async () => {
                             try {
                               await savePngDataUrlToGallery('/images/aba_qr_code_only.png', 'ABA-KHQR-CHEA-SAVUTH-000056833.png');
-                              showToast(isKm ? '✅ បានរក្សាទុក ABA QR!' : '✅ Saved ABA QR!', 'success');
+                              showToast(tr(language, '✅ បានរក្សាទុក ABA QR!', '✅ Saved ABA QR!', '✅ 已保存 ABA QR！'), 'success');
                             } catch {}
                           }}
                           className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer"
                         >
                           <Download className="w-3 h-3 text-emerald-600" />
-                          <span>{isKm ? 'រក្សាទុក QR' : 'Save QR'}</span>
+                          <span>{tr(language, 'រក្សាទុក QR', 'Save QR', '保存二维码')}</span>
                         </button>
                         <a
                           href="https://pay.ababank.com/oRF8/tyy7642t"
@@ -2254,7 +2202,7 @@ export const ManageMenuModal: React.FC = () => {
                           rel="noopener noreferrer"
                           className="ml-1.5 px-2.5 py-1.5 rounded-xl bg-[#004B87] text-white text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer"
                         >
-                          <span>{isKm ? 'បង់តាម ABA Link' : 'Pay via ABA Link'}</span>
+                          <span>{tr(language, 'បង់តាម ABA Link', 'Pay via ABA Link', '通过 ABA 链接支付')}</span>
                         </a>
                       </div>
                     </div>
@@ -2283,13 +2231,13 @@ export const ManageMenuModal: React.FC = () => {
                           className="py-2.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <Upload className="w-4 h-4" />
-                          <span>{isKm ? 'ភ្ជាប់វិក្កយបត្រ ABA' : 'Attach ABA Receipt'}</span>
+                          <span>{tr(language, 'ភ្ជាប់វិក្កយបត្រ ABA', 'Attach ABA Receipt', '附上 ABA 付款凭证')}</span>
                         </button>
                         <input
                           type="text"
                           value={shopTrxRef}
                           onChange={(e) => setShopTrxRef(e.target.value)}
-                          placeholder={isKm ? 'លេខ Trx ID (ស្រេចចិត្ត)' : 'ABA Trx ID (optional)'}
+                          placeholder={tr(language, 'លេខ Trx ID (ស្រេចចិត្ត)', 'ABA Trx ID (optional)', 'ABA 交易单号（选填）')}
                           className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white"
                         />
                       </div>
@@ -2328,7 +2276,7 @@ export const ManageMenuModal: React.FC = () => {
                 {/* Support Channel */}
                 <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2">
                   <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 block">
-                    {isKm ? 'ជំនួយម្ចាស់ហាង (Shop Owner Support)' : 'Shop Owner Support'}
+                    {tr(language, 'ជំនួយម្ចាស់ហាង (Shop Owner Support)', 'Shop Owner Support', '店主支持')}
                   </span>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <a
@@ -2361,16 +2309,14 @@ export const ManageMenuModal: React.FC = () => {
         <div className="p-3.5 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 font-khmer">
           <span>
             {isIosAppStore
-              ? (isKm ? 'គ្រប់គ្រងព័ត៌មានហាង ម៉ឺនុយ និងទីតាំងផែនទី' : 'Manage shop details, menu & map pin')
-              : (isKm
-                  ? `កញ្ចប់ហាង៖ $${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/ខែ • $${shopCatalog.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ`
-                  : `Shop Plans: $${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/mo • $${shopCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr`)}
+              ? (tr(language, 'គ្រប់គ្រងព័ត៌មានហាង ម៉ឺនុយ និងទីតាំងផែនទី', 'Manage shop details, menu & map pin', '管理店铺详情、菜单及地图定位'))
+              : (tr(language, `កញ្ចប់ហាង៖ $${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/ខែ • $${shopCatalog.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ`, `Shop Plans: $${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/mo • $${shopCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr`, `店铺套餐：$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/月 • $${shopCatalog.yearlyPlan.priceUsd.toFixed(2)}/年`))}
           </span>
           <button
             onClick={handleCloseModal}
             className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition font-medium cursor-pointer"
           >
-            {isKm ? 'បិទ' : 'Close'}
+            {tr(language, 'បិទ', 'Close', '关闭')}
           </button>
         </div>
         <ShopLocationCheckInPickerModal
@@ -2389,9 +2335,7 @@ export const ManageMenuModal: React.FC = () => {
             if (loc.formattedAddressKh) setStoreAddressKh(loc.formattedAddressKh);
             if (loc.provinceKh) setStoreProvinceKh(loc.provinceKh);
             showToast(
-              isKm
-                ? '📍 បានកំណត់ទីតាំងហាង (Check In) ដោយជោគជ័យ! សូមចុច «រក្សាទុក» ដើម្បីរក្សាទុកការកែប្រែ។'
-                : '📍 Shop location pinned! Tap Save to persist changes.',
+              tr(language, '📍 បានកំណត់ទីតាំងហាង (Check In) ដោយជោគជ័យ! សូមចុច «រក្សាទុក» ដើម្បីរក្សាទុកការកែប្រែ។', '📍 Shop location pinned! Tap Save to persist changes.', '📍 店铺位置已标记！点击保存以保存更改。'),
               'success'
             );
           }}

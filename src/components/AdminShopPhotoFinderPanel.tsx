@@ -9,6 +9,7 @@ import {
   ShopPhotoFinderProgress,
 } from '../services/shopPhotoFinderService';
 import { batchAutoFetchMissingShopPhotos } from '../services/shopGooglePhotoService';
+import { tr } from '../utils/i18n';
 
 /**
  * Admin tool: automatically finds REAL shop photos on Google Places / Cambodia Verified Directory
@@ -57,7 +58,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
   const runFindExactPhotos = async () => {
     const targets = getShopsMissingVerifiedPhoto(restaurants, 'match').slice(0, batchSize);
     if (targets.length === 0) {
-      showToast(isKm ? '✅ គ្មានហាងដែលខ្វះរូបភាពទៀតទេ' : '✅ No shops are missing photos', 'success');
+      showToast(tr(language, '✅ គ្មានហាងដែលខ្វះរូបភាពទៀតទេ', '✅ No shops are missing photos', '✅ 没有缺少照片的店铺'), 'success');
       return;
     }
     cancelRef.current = false;
@@ -73,13 +74,13 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
       );
       const { queuedPhotos } = queueShopPhotoCandidates(candidates, []);
       setSummary(
-        isKm
-          ? `🔍 បានពិនិត្យ ${targets.length} ហាង • រកឃើញរូបភាពត្រឹមត្រូវ ${queuedPhotos} ហាង (រង់ចាំ Admin អនុម័ត) • រកមិនឃើញ ${noMatch.length} ហាង${
+        tr(language, `🔍 បានពិនិត្យ ${targets.length} ហាង • រកឃើញរូបភាពត្រឹមត្រូវ ${queuedPhotos} ហាង (រង់ចាំ Admin អនុម័ត) • រកមិនឃើញ ${noMatch.length} ហាង${
               errors.length ? ` • កំហុស ${errors.length}` : ''
-            }`
-          : `🔍 Checked ${targets.length} shops • Found matching photos for ${queuedPhotos} (awaiting Admin approval) • No confident match for ${noMatch.length}${
+            }`, `🔍 Checked ${targets.length} shops • Found matching photos for ${queuedPhotos} (awaiting Admin approval) • No confident match for ${noMatch.length}${
               errors.length ? ` • ${errors.length} errors` : ''
-            }`
+            }`, `🔍 已检查 ${targets.length} 家店铺 • 为 ${queuedPhotos} 家找到匹配照片（等待管理员审批） • ${noMatch.length} 家无高可信匹配${
+              errors.length ? ` • ${errors.length} errors` : ''
+            }`)
       );
       if (errors.length) setErrorText(errors.slice(0, 3).join('\n'));
     } catch (err) {
@@ -93,7 +94,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
   const runReplaceShops = async () => {
     const targets = getShopsMissingVerifiedPhoto(restaurants, 'replace').slice(0, batchSize);
     if (targets.length === 0) {
-      showToast(isKm ? '✅ គ្មានហាងដែលត្រូវជំនួសទៀតទេ' : '✅ No shops need replacing', 'success');
+      showToast(tr(language, '✅ គ្មានហាងដែលត្រូវជំនួសទៀតទេ', '✅ No shops need replacing', '✅ 没有需要替换的店铺'), 'success');
       return;
     }
     cancelRef.current = false;
@@ -109,13 +110,13 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
       );
       const { addedShops } = queueShopPhotoCandidates([], newShops);
       setSummary(
-        isKm
-          ? `🔄 រកឃើញហាងថ្មីដែលមានរូបភាពពិត ${addedShops} ហាង ដើម្បីជំនួសហាងគ្មានរូបភាព (រង់ចាំ Admin អនុម័ត) • មិនទាន់មានហាងជំនួស ${unreplaced.length}${
+        tr(language, `🔄 រកឃើញហាងថ្មីដែលមានរូបភាពពិត ${addedShops} ហាង ដើម្បីជំនួសហាងគ្មានរូបភាព (រង់ចាំ Admin អនុម័ត) • មិនទាន់មានហាងជំនួស ${unreplaced.length}${
               errors.length ? ` • កំហុស ${errors.length}` : ''
-            }`
-          : `🔄 Found ${addedShops} new shops with real photos to replace photo-less shops (awaiting Admin approval) • ${unreplaced.length} not replaced yet${
+            }`, `🔄 Found ${addedShops} new shops with real photos to replace photo-less shops (awaiting Admin approval) • ${unreplaced.length} not replaced yet${
               errors.length ? ` • ${errors.length} errors` : ''
-            }`
+            }`, `🔄 已找到 ${addedShops} 家带有真实照片的新店铺以替换无照片店铺（等待管理员审批） • 尚有 ${unreplaced.length} 家未被替换${
+              errors.length ? ` • ${errors.length} errors` : ''
+            }`)
       );
       if (errors.length) setErrorText(errors.slice(0, 3).join('\n'));
     } catch (err) {
@@ -129,7 +130,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
   const runAutoFetchAndApplyPhotos = async () => {
     const targets = getShopsMissingVerifiedPhoto(restaurants, 'match').slice(0, batchSize);
     if (targets.length === 0) {
-      showToast(isKm ? 'គ្មានហាងដែលខ្វះរូបភាពទៀតទេ' : 'No shops are missing photos', 'success');
+      showToast(tr(language, 'គ្មានហាងដែលខ្វះរូបភាពទៀតទេ', 'No shops are missing photos', '没有缺少照片的店铺'), 'success');
       return;
     }
     cancelRef.current = false;
@@ -147,9 +148,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
         () => cancelRef.current
       );
       setSummary(
-        isKm
-          ? `បានទាញយក និងដាក់បង្ហាញរូបភាពពី Google Maps ដោយស្វ័យប្រវត្តិសម្រាប់ ${res.matched}/${res.processed} ហាង (ប្រើ Icon លំនាំដើមសម្រាប់ ${res.skippedCount} ហាងដែលមិនមានរូបត្រូវគ្នា)`
-          : `Auto-fetched and applied Google Maps photos for ${res.matched}/${res.processed} shops (${res.skippedCount} kept default placeholder icon)`
+        tr(language, `បានទាញយក និងដាក់បង្ហាញរូបភាពពី Google Maps ដោយស្វ័យប្រវត្តិសម្រាប់ ${res.matched}/${res.processed} ហាង (ប្រើ Icon លំនាំដើមសម្រាប់ ${res.skippedCount} ហាងដែលមិនមានរូបត្រូវគ្នា)`, `Auto-fetched and applied Google Maps photos for ${res.matched}/${res.processed} shops (${res.skippedCount} kept default placeholder icon)`, `已为 ${res.matched}/${res.processed} 家店铺自动获取并应用 Google Maps 照片（${res.skippedCount} 家保留默认占位图标）`)
       );
     } catch (err) {
       handleError(err);
@@ -170,7 +169,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
         <div className="flex items-center gap-2">
           <Camera className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
           <h4 className="font-bold text-emerald-900 dark:text-emerald-300 text-xs sm:text-sm">
-            {isKm ? '📸 ស្វែងរករូបភាពហាងពិតពី Google Maps & Cambodia Directory' : '📸 Google Places & Cambodia Shop Photo Finder'}
+            {tr(language, '📸 ស្វែងរករូបភាពហាងពិតពី Google Maps & Cambodia Directory', '📸 Google Places & Cambodia Shop Photo Finder', '📸 Google Places 与柬埔寨店铺照片查找器')}
           </h4>
         </div>
         {stats.pending > 0 && (
@@ -182,32 +181,28 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
           >
             <Check className="w-3.5 h-3.5" />
             <span>
-              {isKm
-                ? `អនុម័តរូបភាពទាំងអស់ (${stats.pending})`
-                : `Approve All (${stats.pending})`}
+              {tr(language, `អនុម័តរូបភាពទាំងអស់ (${stats.pending})`, `Approve All (${stats.pending})`, `全部批准 (${stats.pending})`)}
             </span>
           </button>
         )}
       </div>
 
       <p className="text-[11px] text-slate-600 dark:text-stone-300 leading-relaxed">
-        {isKm
-          ? 'ប្រើឧបករណ៍ខាងក្រោមដើម្បីស្វែងរករូបភាពពិត និងម្ហូបប្រចាំហាងរបស់ហាងដដែល ឬជំនួសដោយហាងថ្មីដែលមានរូបភាពពិត។ រូបភាពទាំងអស់ត្រូវរង់ចាំ Admin អនុម័តជាមុនសិន។'
-          : 'Use these tools to find verified photos & signature dish photos for existing shops, or replace photo-less shops with new verified shops. Every photo waits for Admin approval before publishing.'}
+        {tr(language, 'ប្រើឧបករណ៍ខាងក្រោមដើម្បីស្វែងរករូបភាពពិត និងម្ហូបប្រចាំហាងរបស់ហាងដដែល ឬជំនួសដោយហាងថ្មីដែលមានរូបភាពពិត។ រូបភាពទាំងអស់ត្រូវរង់ចាំ Admin អនុម័តជាមុនសិន។', 'Use these tools to find verified photos & signature dish photos for existing shops, or replace photo-less shops with new verified shops. Every photo waits for Admin approval before publishing.', '使用这些工具为现有店铺查找已验证的照片和招牌菜照片，或用新的已验证店铺替换无照片店铺。所有照片在发布前均需等待管理员审批。')}
       </p>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
         <div className="p-2 rounded-xl bg-white dark:bg-stone-900 border border-emerald-200 dark:border-emerald-800/60">
           <div className="text-base font-black text-emerald-700 dark:text-emerald-400">{stats.withPhoto}</div>
-          <div className="text-[10px] text-slate-500">{isKm ? 'មានរូបភាព (បង្ហាញ)' : 'With photo (visible)'}</div>
+          <div className="text-[10px] text-slate-500">{tr(language, 'មានរូបភាព (បង្ហាញ)', 'With photo (visible)', '有照片（显示）')}</div>
         </div>
         <div className="p-2 rounded-xl bg-white dark:bg-stone-900 border border-rose-200 dark:border-rose-800/60">
           <div className="text-base font-black text-rose-600 dark:text-rose-400">{stats.missingForReplace}</div>
-          <div className="text-[10px] text-slate-500">{isKm ? 'គ្មានរូបភាព (លាក់)' : 'No photo (hidden)'}</div>
+          <div className="text-[10px] text-slate-500">{tr(language, 'គ្មានរូបភាព (លាក់)', 'No photo (hidden)', '无照片（隐藏）')}</div>
         </div>
         <div className="p-2 rounded-xl bg-white dark:bg-stone-900 border border-amber-200 dark:border-amber-800/60">
           <div className="text-base font-black text-amber-600 dark:text-amber-400">{stats.pending}</div>
-          <div className="text-[10px] text-slate-500">{isKm ? 'រង់ចាំអនុម័ត' : 'Pending review'}</div>
+          <div className="text-[10px] text-slate-500">{tr(language, 'រង់ចាំអនុម័ត', 'Pending review', '等待审核')}</div>
         </div>
         <div className="p-2 rounded-xl bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-700">
           <select
@@ -222,7 +217,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
               </option>
             ))}
           </select>
-          <div className="text-[10px] text-slate-500">{isKm ? 'ចំនួនហាងក្នុងមួយដង' : 'Shops per run'}</div>
+          <div className="text-[10px] text-slate-500">{tr(language, 'ចំនួនហាងក្នុងមួយដង', 'Shops per run', '每次处理店铺数量')}</div>
         </div>
       </div>
 
@@ -236,9 +231,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
         >
           {running === 'auto_apply' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
           <span>
-            {isKm
-              ? `ទាញរូបពី Google Maps ស្វ័យប្រវត្តិ (${stats.missingForMatch})`
-              : `Auto-Fetch Google Maps Photos (${stats.missingForMatch})`}
+            {tr(language, `ទាញរូបពី Google Maps ស្វ័យប្រវត្តិ (${stats.missingForMatch})`, `Auto-Fetch Google Maps Photos (${stats.missingForMatch})`, `自动获取 Google Maps 照片 (${stats.missingForMatch})`)}
           </span>
         </button>
         <button
@@ -250,9 +243,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
         >
           {running === 'match' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
           <span>
-            {isKm
-              ? `១. ស្វែងរករូបភាពពិតរបស់ហាងដដែល (${stats.missingForMatch})`
-              : `1. Find real photos of the same shops (${stats.missingForMatch})`}
+            {tr(language, `១. ស្វែងរករូបភាពពិតរបស់ហាងដដែល (${stats.missingForMatch})`, `1. Find real photos of the same shops (${stats.missingForMatch})`, `1. 查找相同店铺的真实照片 (${stats.missingForMatch})`)}
           </span>
         </button>
         <button
@@ -264,9 +255,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
         >
           {running === 'replace' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
           <span>
-            {isKm
-              ? `២. ជំនួសដោយហាងថ្មីដែលមានរូបភាព (${stats.missingForReplace})`
-              : `2. Replace with new shops that have photos (${stats.missingForReplace})`}
+            {tr(language, `២. ជំនួសដោយហាងថ្មីដែលមានរូបភាព (${stats.missingForReplace})`, `2. Replace with new shops that have photos (${stats.missingForReplace})`, `2. 用带有照片的新店铺替换 (${stats.missingForReplace})`)}
           </span>
         </button>
       </div>
@@ -288,7 +277,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
               className="px-2 py-0.5 rounded-lg bg-rose-600 text-white font-bold flex items-center gap-1 cursor-pointer"
             >
               <StopCircle className="w-3 h-3" />
-              {isKm ? 'បញ្ឈប់' : 'Stop'}
+              {tr(language, 'បញ្ឈប់', 'Stop', '停止')}
             </button>
           </div>
         </div>
@@ -301,9 +290,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
             <span>
               {summary}
               {stats.pending > 0 &&
-                (isKm
-                  ? ' — សូមពិនិត្យ និងអនុម័តរូបភាពនៅក្នុងបញ្ជី «សំណើប្តូររូបភាពហាងថ្មី» ខាងក្រោម ឬចុច «អនុម័តរូបភាពទាំងអស់»។'
-                  : ' — Review and approve them in the "Shop Photo Replacement Requests" list below or click "Approve All".')}
+                (tr(language, ' — សូមពិនិត្យ និងអនុម័តរូបភាពនៅក្នុងបញ្ជី «សំណើប្តូររូបភាពហាងថ្មី» ខាងក្រោម ឬចុច «អនុម័តរូបភាពទាំងអស់»។', ' — Review and approve them in the "Shop Photo Replacement Requests" list below or click "Approve All".', ' — 请在下方的“店铺照片更换申请”列表中查看并批准它们，或点击“全部批准”。'))}
             </span>
           </div>
           {stats.pending > 0 && (
@@ -314,9 +301,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
             >
               <Check className="w-3.5 h-3.5" />
               <span>
-                {isKm
-                  ? `✅ អនុម័តរូបភាពទាំងអស់ (${stats.pending})`
-                  : `✅ Approve All (${stats.pending})`}
+                {tr(language, `✅ អនុម័តរូបភាពទាំងអស់ (${stats.pending})`, `✅ Approve All (${stats.pending})`, `✅ 全部批准 (${stats.pending})`)}
               </span>
             </button>
           )}

@@ -15,6 +15,8 @@ import {
   buildCanonicalGoogleMapsPinUrl,
 } from '../types';
 import { tr } from '../utils/i18n';
+import { DetailedFourPartRatingsCard } from './common/CambodiaChoiceAndRatings';
+import { NearbyEcosystemSection } from './common/NearbyEcosystemSection';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { resolveCoordinateVerifiedGooglePlace } from '../services/googlePlacesService';
 import {
@@ -166,9 +168,7 @@ export const TouristDetailModal: React.FC = () => {
     setSelectedDestination(updated);
     setIsEditingAdminDest(false);
     showToast(
-      language === 'km'
-        ? `✅ បានកែប្រែព័ត៌មានតំបន់ទេសចរណ៍ «${updated.nameKh}» រួចរាល់!`
-        : `✅ Updated destination details for "${updated.nameEn}"!`,
+      tr(language, `✅ បានកែប្រែព័ត៌មានតំបន់ទេសចរណ៍ «${updated.nameKh}» រួចរាល់!`, `✅ Updated destination details for "${updated.nameEn}"!`, `✅ 已更新“${updated.nameEn}”的景点详情！`),
       'success'
     );
   };
@@ -181,9 +181,7 @@ export const TouristDetailModal: React.FC = () => {
     nameKh: selectedDestination.nameKh,
     nameEn: selectedDestination.nameEn,
     description: isKm ? selectedDestination.descriptionKh : selectedDestination.descriptionEn,
-    location: isKm
-      ? `${selectedDestination.addressKh} (${selectedDestination.provinceKh})`
-      : `${selectedDestination.addressEn} (${selectedDestination.provinceEn})`,
+    location: tr(language, `${selectedDestination.addressKh} (${selectedDestination.provinceKh})`, `${selectedDestination.addressEn} (${selectedDestination.provinceEn})`, `${selectedDestination.addressEn} (${selectedDestination.provinceEn})`),
     signatureDishes: selectedDestination.highlightsKh,
     photoUrl: selectedDestination.photoUrl,
     mapUrl: verifiedDestMapUrl,
@@ -210,7 +208,7 @@ export const TouristDetailModal: React.FC = () => {
     const { fullText, title } = formatRichShareText(sharePayload);
     const ok = await copyTextNativeOrWeb(fullText, title);
     if (ok) {
-      showToast(language === 'km' ? 'បានចម្លងព័ត៌មានទីតាំងទេសចរណ៍!' : 'Destination details & link copied!', 'success');
+      showToast(tr(language, 'បានចម្លងព័ត៌មានទីតាំងទេសចរណ៍!', 'Destination details & link copied!', '已复制景点详情与链接！'), 'success');
     }
   };
 
@@ -243,10 +241,10 @@ export const TouristDetailModal: React.FC = () => {
                   type="button"
                   onClick={() => setIsEditingAdminDest(!isEditingAdminDest)}
                   className="py-1.5 px-3 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-lg transition active:scale-90 flex items-center gap-1.5 border border-white/60"
-                  title={isKm ? 'កែប្រែព័ត៌មាន & រូបភាព (Admin)' : 'Edit Details & Photos (Admin)'}
+                  title={tr(language, 'កែប្រែព័ត៌មាន & រូបភាព (Admin)', 'Edit Details & Photos (Admin)', '编辑详情与照片 (Admin)')}
                 >
                   <Edit2 className="w-3.5 h-3.5" />
-                  <span className="font-khmer">{isEditingAdminDest ? (isKm ? 'មើលធម្មតា' : 'View') : (isKm ? 'កែប្រែ (Admin)' : 'Edit')}</span>
+                  <span className="font-khmer">{isEditingAdminDest ? (tr(language, 'មើលធម្មតា', 'View', '查看')) : (tr(language, 'កែប្រែ (Admin)', 'Edit', '编辑'))}</span>
                 </button>
               </>
             )}
@@ -263,7 +261,7 @@ export const TouristDetailModal: React.FC = () => {
                 rating: selectedDestination.rating,
               })}
               className="kft-btn-modal-icon !text-amber-300"
-              title={language === 'km' ? 'ដាក់ក្នុងបញ្ជីចង់ទៅ' : 'Add to Wishlist'}
+              title={tr(language, 'ដាក់ក្នុងបញ្ជីចង់ទៅ', 'Add to Wishlist', '加入愿望单')}
             >
               <Bookmark className="w-4 h-4 fill-current" />
             </button>
@@ -289,7 +287,7 @@ export const TouristDetailModal: React.FC = () => {
                 <div>
                   <h3 className="font-bold text-xs text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
                     <Edit2 className="w-4 h-4 text-amber-600" />
-                    <span>{isKm ? 'កែប្រែព័ត៌មានតំបន់ទេសចរណ៍ (Admin Edit)' : 'Admin Destination Editor'}</span>
+                    <span>{tr(language, 'កែប្រែព័ត៌មានតំបន់ទេសចរណ៍ (Admin Edit)', 'Admin Destination Editor', '管理员景点编辑器')}</span>
                   </h3>
                   <p className="text-[10px] text-slate-500">ID: {selectedDestination.id}</p>
                 </div>
@@ -298,14 +296,14 @@ export const TouristDetailModal: React.FC = () => {
                   onClick={() => setIsEditingAdminDest(false)}
                   className="px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold"
                 >
-                  {isKm ? 'បោះបង់' : 'Cancel'}
+                  {tr(language, 'បោះបង់', 'Cancel', '取消')}
                 </button>
               </div>
 
               {/* Photo */}
               <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
                 <label className="block font-bold text-xs text-slate-800 dark:text-slate-200">
-                  {isKm ? 'រូបភាពតំបន់ទេសចរណ៍ (Photo URL / Upload)' : 'Destination Photo'}
+                  {tr(language, 'រូបភាពតំបន់ទេសចរណ៍ (Photo URL / Upload)', 'Destination Photo', '景点照片')}
                 </label>
                 <div className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50">
                   <img loading="lazy" decoding="async"
@@ -332,7 +330,7 @@ export const TouristDetailModal: React.FC = () => {
                     className="px-3.5 py-2 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
                   >
                     <Camera className="w-3.5 h-3.5" />
-                    <span>{isKm ? 'ប្តូររូបភាព' : 'Upload Photo'}</span>
+                    <span>{tr(language, 'ប្តូររូបភាព', 'Upload Photo', '上传照片')}</span>
                   </button>
                 </div>
               </div>
@@ -341,7 +339,7 @@ export const TouristDetailModal: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ឈ្មោះតំបន់ទេសចរណ៍ (ភាសាខ្មែរ) *' : 'Name (Khmer) *'}
+                    {tr(language, 'ឈ្មោះតំបន់ទេសចរណ៍ (ភាសាខ្មែរ) *', 'Name (Khmer) *', '名称（高棉语）*')}
                   </label>
                   <input
                     type="text"
@@ -353,7 +351,7 @@ export const TouristDetailModal: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ឈ្មោះតំបន់ទេសចរណ៍ (English)' : 'Name (English)'}
+                    {tr(language, 'ឈ្មោះតំបន់ទេសចរណ៍ (English)', 'Name (English)', '名称（英语）')}
                   </label>
                   <input
                     type="text"
@@ -368,7 +366,7 @@ export const TouristDetailModal: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'ប្រភេទតំបន់ទេសចរណ៍' : 'Category'}
+                    {tr(language, 'ប្រភេទតំបន់ទេសចរណ៍', 'Category', '分类')}
                   </label>
                   <input
                     type="text"
@@ -380,7 +378,7 @@ export const TouristDetailModal: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'រាជធានី-ខេត្ត (Province)' : 'Province'}
+                    {tr(language, 'រាជធានី-ខេត្ត (Province)', 'Province', '省份')}
                   </label>
                   <input
                     type="text"
@@ -396,7 +394,7 @@ export const TouristDetailModal: React.FC = () => {
               <div className="space-y-2">
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'អាសយដ្ឋាន / ទីតាំងជាក់ស្តែង' : 'Address / Location'}
+                    {tr(language, 'អាសយដ្ឋាន / ទីតាំងជាក់ស្តែង', 'Address / Location', '地址 / 位置')}
                   </label>
                   <input
                     type="text"
@@ -407,7 +405,7 @@ export const TouristDetailModal: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'តំណភ្ជាប់ផែនទី (Google Maps Link)' : 'Google Maps URL'}
+                    {tr(language, 'តំណភ្ជាប់ផែនទី (Google Maps Link)', 'Google Maps URL', 'Google Maps 链接')}
                   </label>
                   <input
                     type="text"
@@ -423,7 +421,7 @@ export const TouristDetailModal: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'រយៈទទឹង (Latitude)' : 'Latitude'}
+                    {tr(language, 'រយៈទទឹង (Latitude)', 'Latitude', '纬度')}
                   </label>
                   <input
                     type="text"
@@ -435,7 +433,7 @@ export const TouristDetailModal: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                    {isKm ? 'រយៈបណ្តោយ (Longitude)' : 'Longitude'}
+                    {tr(language, 'រយៈបណ្តោយ (Longitude)', 'Longitude', '经度')}
                   </label>
                   <input
                     type="text"
@@ -450,7 +448,7 @@ export const TouristDetailModal: React.FC = () => {
               {/* Best time to visit */}
               <div>
                 <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                  {isKm ? 'ពេលវេលាល្អសម្រាប់ដើរលេង' : 'Best Time to Visit'}
+                  {tr(language, 'ពេលវេលាល្អសម្រាប់ដើរលេង', 'Best Time to Visit', '最佳游览时间')}
                 </label>
                 <input
                   type="text"
@@ -464,7 +462,7 @@ export const TouristDetailModal: React.FC = () => {
               {/* Highlights */}
               <div>
                 <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                  {isKm ? 'ចំណុចពិសេស (បំបែកដោយក្បៀស ,)' : 'Highlights (comma separated)'}
+                  {tr(language, 'ចំណុចពិសេស (បំបែកដោយក្បៀស ,)', 'Highlights (comma separated)', '特色亮点 (逗号分隔)')}
                 </label>
                 <input
                   type="text"
@@ -478,7 +476,7 @@ export const TouristDetailModal: React.FC = () => {
               {/* Description */}
               <div>
                 <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
-                  {isKm ? 'ការពិពណ៌នាតំបន់ទេសចរណ៍' : 'Description'}
+                  {tr(language, 'ការពិពណ៌នាតំបន់ទេសចរណ៍', 'Description', '描述')}
                 </label>
                 <textarea
                   rows={3}
@@ -495,14 +493,14 @@ export const TouristDetailModal: React.FC = () => {
                   onClick={() => setIsEditingAdminDest(false)}
                   className="py-3 px-4 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs cursor-pointer"
                 >
-                  {isKm ? 'បោះបង់' : 'Cancel'}
+                  {tr(language, 'បោះបង់', 'Cancel', '取消')}
                 </button>
                 <button
                   type="submit"
                   className="py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
                 >
                   <Save className="w-4 h-4 text-emerald-300" />
-                  <span>{isKm ? 'រក្សាទុកការកែប្រែ' : 'Save Changes'}</span>
+                  <span>{tr(language, 'រក្សាទុកការកែប្រែ', 'Save Changes', '保存更改')}</span>
                 </button>
               </div>
             </form>
@@ -724,6 +722,15 @@ export const TouristDetailModal: React.FC = () => {
               </p>
             </div>
 
+            {/* 4-Part Detailed Rating + Cambodia's Choice badge */}
+            <DetailedFourPartRatingsCard
+              id={selectedDestination.id}
+              rating={selectedDestination.rating}
+              reviewCount={selectedDestination.reviewCount}
+              kind={selectedDestination.categorySlug === 'hotel' ? 'hotel' : 'tourism'}
+              language={language}
+            />
+
             {/* Highlights List */}
             {loc.highlights && loc.highlights.length > 0 && (
               <div>
@@ -743,6 +750,18 @@ export const TouristDetailModal: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Nearby Food, Stays & Attractions (GPS Haversine) */}
+            <NearbyEcosystemSection
+              language={language}
+              origin={{
+                id: selectedDestination.id,
+                latitude: selectedDestination.latitude,
+                longitude: selectedDestination.longitude,
+                provinceKh: selectedDestination.provinceKh,
+                provinceEn: selectedDestination.provinceEn,
+              }}
+            />
           </div>
           </>
           )}
@@ -759,9 +778,7 @@ export const TouristDetailModal: React.FC = () => {
           setSelectedDestination(updatedDest);
           setEditPhotoUrl(updatedDest.photoUrl);
           showToast(
-            language === 'km' 
-              ? `✅ បានផ្លាស់ប្តូររូបភាពសម្រាប់ «${updatedDest.nameKh}» ជោគជ័យ!` 
-              : `✅ Updated photo for "${updatedDest.nameEn}"!`, 
+            tr(language, `✅ បានផ្លាស់ប្តូររូបភាពសម្រាប់ «${updatedDest.nameKh}» ជោគជ័យ!`, `✅ Updated photo for "${updatedDest.nameEn}"!`, `✅ 已更新“${updatedDest.nameEn}”的照片！`), 
             'success'
           );
         }}

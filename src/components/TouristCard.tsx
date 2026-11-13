@@ -23,6 +23,7 @@ import {
   Navigation,
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
+import { CambodiaChoiceBadge, isCambodiaChoiceEligible } from './common/CambodiaChoiceAndRatings';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import type { Language } from '../types';
 
@@ -211,6 +212,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
                   • {loc.province}
                 </span>
               )}
+              {isCambodiaChoiceEligible(destination) && <CambodiaChoiceBadge language={language} size="sm" />}
             </div>
 
             <div className="mt-1 flex items-center gap-1.5 flex-wrap">
@@ -309,6 +311,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
                 {distanceStr} {tr(language, 'km', 'km', '公里')}
               </span>
             </span>
+            {isCambodiaChoiceEligible(destination) && <CambodiaChoiceBadge language={language} size="sm" />}
           </div>
 
           {/* Admin Edit Shortcut */}

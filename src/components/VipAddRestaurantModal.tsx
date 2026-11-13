@@ -1301,7 +1301,7 @@ export const VipAddRestaurantModal: React.FC = () => {
         mimeType: picked.mimeType || 'image/jpeg',
       });
       showToast(
-        isKm ? '📸 បានភ្ជាប់រូបភាពវិក្កយបត្រជោគជ័យ!' : '📸 Attached payment receipt!',
+        tr(language, '📸 បានភ្ជាប់រូបភាពវិក្កយបត្រជោគជ័យ!', '📸 Attached payment receipt!', '📸 已附加付款凭证！'),
         'success'
       );
       return;
@@ -1316,7 +1316,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     try {
       const modRes = await validateAndModerateShopImage(file, language);
       if (!modRes.valid || !modRes.dataUrl) {
-        showToast(modRes.reason || (isKm ? 'មិនអាចអានឯកសាររូបភាពបានទេ' : 'Failed to read image'), 'warning');
+        showToast(modRes.reason || (tr(language, 'មិនអាចអានឯកសាររូបភាពបានទេ', 'Failed to read image', '读取图片失败')), 'warning');
         return;
       }
       setSlotProofData({
@@ -1325,11 +1325,11 @@ export const VipAddRestaurantModal: React.FC = () => {
         mimeType: file.type || 'image/jpeg',
       });
       showToast(
-        isKm ? '📸 បានភ្ជាប់រូបភាពវិក្កយបត្រជោគជ័យ!' : '📸 Attached payment receipt!',
+        tr(language, '📸 បានភ្ជាប់រូបភាពវិក្កយបត្រជោគជ័យ!', '📸 Attached payment receipt!', '📸 已附加付款凭证！'),
         'success'
       );
     } catch {
-      showToast(isKm ? 'មិនអាចអានឯកសាររូបភាពបានទេ' : 'Failed to read image', 'warning');
+      showToast(tr(language, 'មិនអាចអានឯកសាររូបភាពបានទេ', 'Failed to read image', '读取图片失败'), 'warning');
     }
   };
 
@@ -1337,9 +1337,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     e.preventDefault();
     if (!slotProofData?.dataUrl && (!slotTrxRef || slotTrxRef.trim().length < 4)) {
       showToast(
-        isKm
-          ? 'សូមអាប់ឡូតរូបភាពវិក្កយបត្រ ABA ឬបញ្ចូលលេខប្រតិបត្តិការ (Trx ID)!'
-          : 'Please upload your ABA receipt screenshot or enter a Transaction ID!',
+        tr(language, 'សូមអាប់ឡូតរូបភាពវិក្កយបត្រ ABA ឬបញ្ចូលលេខប្រតិបត្តិការ (Trx ID)!', 'Please upload your ABA receipt screenshot or enter a Transaction ID!', '请上传您的 ABA 收据截图或输入交易单号 (Transaction ID)！'),
         'warning'
       );
       return;

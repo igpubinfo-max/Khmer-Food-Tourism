@@ -24,6 +24,7 @@ import {
   Store,
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
+import { CambodiaChoiceBadge, isCambodiaChoiceEligible } from './common/CambodiaChoiceAndRatings';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { ListingFeaturedCard, isVipOwnerListing } from './listing/ListingUI';
@@ -341,6 +342,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
                 <span className="text-slate-500 font-semibold leading-[1.5]">
                   ({reviewsNum} {tr(language, 'ការវាយតម្លៃ', 'reviews', '条评价')})
                 </span>
+                {isCambodiaChoiceEligible(restaurant) && <CambodiaChoiceBadge language={language} size="sm" />}
               </div>
 
               {/* Food & Drink Category Tags */}
@@ -430,6 +432,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
                 {distanceStr} {tr(language, 'km', 'km', '公里')}
               </span>
             </span>
+            {isCambodiaChoiceEligible(restaurant) && <CambodiaChoiceBadge language={language} size="sm" />}
           </div>
         </div>
 

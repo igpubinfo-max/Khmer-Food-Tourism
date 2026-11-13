@@ -114,9 +114,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
           <div className="min-w-0 flex-1 pt-0.5">
             <h1
               className={`${
-                language === 'km'
-                  ? 'font-moul text-[11px] min-[360px]:text-[11.5px] sm:text-[13px] leading-[1.65]'
-                  : 'font-khmer font-extrabold text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] leading-[1.28]'
+                tr(language, 'font-moul text-[11px] min-[360px]:text-[11.5px] sm:text-[13px] leading-[1.65]', 'font-khmer font-extrabold text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] leading-[1.28]', 'font-khmer font-extrabold text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] leading-[1.28]')
               } tracking-tight text-white pt-0.5 pb-0.5 line-clamp-2 break-words`}
             >
               {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}

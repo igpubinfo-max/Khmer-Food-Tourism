@@ -62,9 +62,7 @@ export const ProfileView: React.FC = () => {
 
   const handleSelfDeleteAccount = async () => {
     if (!currentUser || isAdmin) return;
-    const msg = language === 'km'
-      ? `តើអ្នកពិតជាចង់លុបគណនីរបស់អ្នក (${currentUser.email || currentUser.name}) ជាអចិន្ត្រៃយ៍មែនទេ? ទិន្នន័យគណនី រូបភាព និងការកំណត់ទាំងអស់នឹងត្រូវលុបចេញភ្លាមៗ។ ហាង សមាជិកភាព VIP និងកំណត់ត្រាទូទាត់ដែលភ្ជាប់នឹងគណនីនេះក៏នឹងត្រូវលុបផងដែរ ហើយមិនអាចយកមកវិញបានទេ។`
-      : `Are you sure you want to permanently delete your account (${currentUser.email || currentUser.name})? All your profile data, saved favorites, and account settings will be permanently deleted. Restaurants you listed, your VIP membership and related payment records will also be removed, and this cannot be undone.`;
+    const msg = tr(language, `តើអ្នកពិតជាចង់លុបគណនីរបស់អ្នក (${currentUser.email || currentUser.name}) ជាអចិន្ត្រៃយ៍មែនទេ? ទិន្នន័យគណនី រូបភាព និងការកំណត់ទាំងអស់នឹងត្រូវលុបចេញភ្លាមៗ។ ហាង សមាជិកភាព VIP និងកំណត់ត្រាទូទាត់ដែលភ្ជាប់នឹងគណនីនេះក៏នឹងត្រូវលុបផងដែរ ហើយមិនអាចយកមកវិញបានទេ។`, `Are you sure you want to permanently delete your account (${currentUser.email || currentUser.name})? All your profile data, saved favorites, and account settings will be permanently deleted. Restaurants you listed, your VIP membership and related payment records will also be removed, and this cannot be undone.`, `您确定要永久注销您的账户（${currentUser.email || currentUser.name}）吗？您的所有个人资料、收藏和账户设置将被永久删除。您发布的餐厅、VIP 会员资格及相关支付记录也将被移除，且此操作无法撤销。`);
     if (!window.confirm(msg)) return;
     await deleteUserAccount(currentUser.id);
   };
@@ -307,7 +305,7 @@ export const ProfileView: React.FC = () => {
               <div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-xs font-bold text-slate-900 dark:text-white">
-                    {isKm ? 'ស្ថានភាពគណនី៖' : 'Account Tier:'}
+                    {tr(language, 'ស្ថានភាពគណនី៖', 'Account Tier:', '账户等级：')}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-950 shadow-2xs">
                     {tr(language, '🎁 សាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ (Consumer Trial)', '🎁 7-Day Consumer Free Trial', '🎁 7 天个人版免费试用')}
@@ -316,9 +314,7 @@ export const ProfileView: React.FC = () => {
                 <p className="text-[11px] text-amber-800 dark:text-amber-300 font-bold mt-0.5 flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5" />
                   <span>
-                    {isKm
-                      ? `ថ្ងៃផុតកំណត់សាកល្បង៖ ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (សល់ ${remainingDays} ថ្ងៃ)`
-                      : `Trial Expires: ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (${remainingDays} days left)`}
+                    {tr(language, `ថ្ងៃផុតកំណត់សាកល្បង៖ ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (សល់ ${remainingDays} ថ្ងៃ)`, `Trial Expires: ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (${remainingDays} days left)`, `试用到期时间：${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''}（剩余 ${remainingDays} 天）`)}
                   </span>
                 </p>
               </div>
@@ -376,7 +372,7 @@ export const ProfileView: React.FC = () => {
               <div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-xs font-bold text-slate-900 dark:text-white">
-                    {isKm ? 'ស្ថានភាពសមាជិកភាព៖' : 'Membership:'}
+                    {tr(language, 'ស្ថានភាពសមាជិកភាព៖', 'Membership:', '会员资格：')}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-950 shadow-2xs">
                     {tr(language, 'សមាជិក VIP សកម្ម', 'Active VIP Member', 'VIP 会员（有效）')}
@@ -385,9 +381,7 @@ export const ProfileView: React.FC = () => {
                 <p className="text-[11px] text-amber-700 dark:text-amber-300 font-bold mt-0.5 flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5" />
                   <span>
-                    {isKm 
-                      ? `ថ្ងៃផុតកំណត់៖ ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (សល់ ${remainingDays} ថ្ងៃ)` 
-                      : `Expires: ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (${remainingDays} days left)`}
+                    {tr(language, `ថ្ងៃផុតកំណត់៖ ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (សល់ ${remainingDays} ថ្ងៃ)`, `Expires: ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (${remainingDays} days left)`, `到期时间：${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''}（剩余 ${remainingDays} 天）`)}
                   </span>
                 </p>
               </div>
@@ -427,7 +421,7 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">🚀</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{isKm ? 'ចំណាត់ថ្នាក់ស្វែងរកកំពូល' : 'Top Search Rank'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{tr(language, 'ចំណាត់ថ្នាក់ស្វែងរកកំពូល', 'Top Search Rank', '搜索排名优先')}</div>
                   <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{tr(language, '✓ អាទិភាពបង្ហាញមុខគេ', '✓ Priority Placement', '✓ 优先展示已开启')}</div>
                 </div>
               </button>
@@ -545,9 +539,7 @@ export const ProfileView: React.FC = () => {
                   <span className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
                     <span>📈</span>
                     <span>
-                      {isKm
-                        ? `ស្ថិតិផ្ទាល់ Live Analytics (${myRestaurants[0]?.nameKh || currentUser?.restaurantName || currentUser?.name})`
-                        : 'Real-Time VIP Live Analytics'}
+                      {tr(language, `ស្ថិតិផ្ទាល់ Live Analytics (${myRestaurants[0]?.nameKh || currentUser?.restaurantName || currentUser?.name})`, 'Real-Time VIP Live Analytics', '实时 VIP 数据分析')}
                     </span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold">
@@ -600,7 +592,7 @@ export const ProfileView: React.FC = () => {
                       className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#F59E0B] via-[#F97316] to-[#EA580C] hover:from-[#D97706] hover:to-[#C2410C] text-white font-black text-xs shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
                     >
                       <Crown className="w-4 h-4 fill-white shrink-0" />
-                      <span>{isKm ? '📊 បើកផ្ទាំងស្ថិតិលម្អិត & គ្រប់គ្រងហាង VIP (1/1 ហាង)' : '📊 Open Full Store Analytics & Hub (1/1 Store)'}</span>
+                      <span>{tr(language, '📊 បើកផ្ទាំងស្ថិតិលម្អិត & គ្រប់គ្រងហាង VIP (1/1 ហាង)', '📊 Open Full Store Analytics & Hub (1/1 Store)', '📊 打开完整店铺分析与管理中心（1/1 家店铺）')}</span>
                     </button>
                   ) : (
                     <button
@@ -609,7 +601,7 @@ export const ProfileView: React.FC = () => {
                       className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#10B981] via-[#059669] to-[#047857] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-md"
                     >
                       <Crown className="w-4 h-4 fill-white shrink-0" />
-                      <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក' : '+ Register Your VIP Restaurant'}</span>
+                      <span>{tr(language, '+ ចុះបញ្ជីហាង VIP របស់អ្នក', '+ Register Your VIP Restaurant', '+ 注册您的 VIP 餐厅')}</span>
                     </button>
                   )}
                 </div>
@@ -621,16 +613,14 @@ export const ProfileView: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
                     <span>🎥</span>
-                    <span>{isKm ? 'គ្រប់គ្រងវីដេអូម្ហូប Food Video Reels (TikTok & Facebook)' : 'Food Video Reels Manager'}</span>
+                    <span>{tr(language, 'គ្រប់គ្រងវីដេអូម្ហូប Food Video Reels (TikTok & Facebook)', 'Food Video Reels Manager', '美食短视频 Reels 管理')}</span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[9px] font-black">
                     ACTIVE
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-600 leading-relaxed">
-                  {isKm
-                    ? 'ភ្ជាប់វីដេអូម្ហូបពី TikTok, Facebook Reels ឬ YouTube ទៅលើទំព័រហាង VIP របស់អ្នក និងទស្សនាវីដេអូម្ហូបកំពុងល្បី។'
-                    : 'Attach TikTok, Facebook Reels, or YouTube food videos directly to your VIP store page.'}
+                  {tr(language, 'ភ្ជាប់វីដេអូម្ហូបពី TikTok, Facebook Reels ឬ YouTube ទៅលើទំព័រហាង VIP របស់អ្នក និងទស្សនាវីដេអូម្ហូបកំពុងល្បី។', 'Attach TikTok, Facebook Reels, or YouTube food videos directly to your VIP store page.', '将 TikTok、Facebook Reels 或 YouTube 美食视频直接关联至您的 VIP 店铺主页。')}
                 </p>
                 <div className="flex gap-2">
                   {myRestaurants[0] ? (
@@ -643,7 +633,7 @@ export const ProfileView: React.FC = () => {
                       }}
                       className="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[11px] transition cursor-pointer"
                     >
-                      {isKm ? '🎬 ដាក់/កែប្រែវីដេអូ Reels ហាងខ្ញុំ' : '🎬 Edit Store Video Reel'}
+                      {tr(language, '🎬 ដាក់/កែប្រែវីដេអូ Reels ហាងខ្ញុំ', '🎬 Edit Store Video Reel', '🎬 编辑店铺短视频 Reel')}
                     </button>
                   ) : (
                     <button
@@ -651,7 +641,7 @@ export const ProfileView: React.FC = () => {
                       onClick={() => setIsVipAddRestaurantModalOpen(true)}
                       className="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[11px] transition cursor-pointer"
                     >
-                      {isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក' : '+ Register Your VIP Store'}
+                      {tr(language, '+ ចុះបញ្ជីហាង VIP របស់អ្នក', '+ Register Your VIP Store', '+ 注册您的 VIP 店铺')}
                     </button>
                   )}
                   <button
@@ -659,7 +649,7 @@ export const ProfileView: React.FC = () => {
                     onClick={() => setIsTrendingSocialModalOpen(true)}
                     className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] transition cursor-pointer"
                   >
-                    {isKm ? '🔥 មើល Reels ល្បីៗ' : '🔥 Watch Trending Reels'}
+                    {tr(language, '🔥 មើល Reels ល្បីៗ', '🔥 Watch Trending Reels', '🔥 观看热门 Reels 短视频')}
                   </button>
                 </div>
               </div>
@@ -671,16 +661,14 @@ export const ProfileView: React.FC = () => {
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
                     <Crown className="w-4 h-4 fill-amber-500 text-amber-500 shrink-0" />
-                    <span>{isKm ? 'សិទ្ធិចុះបញ្ជីហាង VIP ពិសេស' : 'VIP Store Priority Registration'}</span>
+                    <span>{tr(language, 'សិទ្ធិចុះបញ្ជីហាង VIP ពិសេស', 'VIP Store Priority Registration', 'VIP 店铺优先入驻')}</span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[9px] font-black">
-                    {myRestaurants[0] ? (isKm ? '1/1 ហាង' : '1/1 Store') : (isKm ? '១ គណនី = ១ ហាង' : '1 Account = 1 Store')}
+                    {myRestaurants[0] ? (tr(language, '1/1 ហាង', '1/1 Store', '1/1 家店铺')) : (tr(language, '១ គណនី = ១ ហាង', '1 Account = 1 Store', '1 个账户 = 1 家店铺'))}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
-                  {isKm
-                    ? 'គ្រប់គ្រងរូបភាពហាង ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក។'
-                    : 'Manage your shop photo, map location, and contact details so diners can easily find your restaurant.'}
+                  {tr(language, 'គ្រប់គ្រងរូបភាពហាង ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក។', 'Manage your shop photo, map location, and contact details so diners can easily find your restaurant.', '管理您的店铺照片、地图位置和联系方式，方便食客轻松找到您的餐厅。')}
                 </p>
                 {myRestaurants[0] ? (
                   <button
@@ -693,7 +681,7 @@ export const ProfileView: React.FC = () => {
                     className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#10B981] via-[#059669] to-[#047857] text-white font-black text-xs shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
                   >
                     <Store className="w-4 h-4 shrink-0" />
-                    <span>{isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់អ្នក (1/1 ហាង)' : '✏️ Manage Your VIP Store (1/1)'}</span>
+                    <span>{tr(language, '✏️ គ្រប់គ្រងហាង VIP របស់អ្នក (1/1 ហាង)', '✏️ Manage Your VIP Store (1/1)', '✏️ 管理您的 VIP 店铺 (1/1)')}</span>
                   </button>
                 ) : (
                   <button
@@ -705,7 +693,7 @@ export const ProfileView: React.FC = () => {
                     className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#10B981] via-[#059669] to-[#047857] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-sm"
                   >
                     <Crown className="w-4 h-4 fill-white shrink-0" />
-                    <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
+                    <span>{tr(language, '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)', '+ Register Your VIP Restaurant (1 Store)', '+ 注册您的 VIP 餐厅 (1 家店铺)')}</span>
                   </button>
                 )}
               </div>
@@ -1532,12 +1520,10 @@ export const ProfileView: React.FC = () => {
               </div>
               <div className="space-y-1.5">
                 <h4 className="font-bold text-sm text-[#0F172A] dark:text-white">
-                  {isKm ? 'ចុះបញ្ជីហាង VIP របស់អ្នក' : 'Register Your VIP Restaurant'}
+                  {tr(language, 'ចុះបញ្ជីហាង VIP របស់អ្នក', 'Register Your VIP Restaurant', '注册您的 VIP 餐厅')}
                 </h4>
                 <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed max-w-md mx-auto bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300/60 dark:border-amber-500/40 rounded-2xl p-3 font-medium">
-                  {isKm
-                    ? 'គ្រប់គ្រងរូបភាពហាង ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក។'
-                    : 'Manage your shop photo, map location, and contact details so diners can easily find your restaurant.'}
+                  {tr(language, 'គ្រប់គ្រងរូបភាពហាង ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក។', 'Manage your shop photo, map location, and contact details so diners can easily find your restaurant.', '管理您的店铺照片、地图位置和联系方式，方便食客轻松找到您的餐厅。')}
                 </p>
               </div>
               <button
@@ -1549,7 +1535,7 @@ export const ProfileView: React.FC = () => {
               >
                 <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
                 <span>
-                  {isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក' : '+ Register Your VIP Restaurant'}
+                  {tr(language, '+ ចុះបញ្ជីហាង VIP របស់អ្នក', '+ Register Your VIP Restaurant', '+ 注册您的 VIP 餐厅')}
                 </span>
               </button>
             </div>
@@ -1557,7 +1543,7 @@ export const ProfileView: React.FC = () => {
             <>
               <div className="flex items-center justify-between pb-1 flex-wrap gap-2">
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  {isKm ? `ហាងរបស់ខ្ញុំ (${myRestaurants.length} ហាង)` : `My Shops (${myRestaurants.length})`}
+                  {tr(language, `ហាងរបស់ខ្ញុំ (${myRestaurants.length} ហាង)`, `My Shops (${myRestaurants.length})`, `我的店铺 (${myRestaurants.length})`)}
                 </span>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <button
@@ -1568,7 +1554,7 @@ export const ProfileView: React.FC = () => {
                     className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-[11px] shadow-xs flex items-center gap-1 transition cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>{isKm ? '+ បន្ថែមហាងថ្មី' : '+ Add New Shop'}</span>
+                    <span>{tr(language, '+ បន្ថែមហាងថ្មី', '+ Add New Shop', '+ 添加新店铺')}</span>
                   </button>
                 </div>
               </div>
@@ -1613,47 +1599,41 @@ export const ProfileView: React.FC = () => {
                         {isPremium ? (
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B] text-white flex items-center gap-1 font-khmer shadow-xs">
                             <ShieldCheck className="w-3 h-3 text-emerald-200" />
-                            <span>{isKm ? 'សមាជិកភាព VIP Premium (សកម្ម)' : 'Premium VIP Active'}</span>
+                            <span>{tr(language, 'សមាជិកភាព VIP Premium (សកម្ម)', 'Premium VIP Active', 'Premium VIP 生效中')}</span>
                           </span>
                         ) : isExpired ? (
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
-                            ⏳ {isKm ? 'Premium បានផុតកំណត់' : 'Premium Expired'}
+                            ⏳ {tr(language, 'Premium បានផុតកំណត់', 'Premium Expired', 'Premium 已过期')}
                           </span>
                         ) : (
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-200 text-slate-800">
-                            🏷️ {isKm ? 'ចុះបញ្ជីឥតគិតថ្លៃ ($0 Free Listing)' : 'Free Listing ($0)'}
+                            🏷️ {tr(language, 'ចុះបញ្ជីឥតគិតថ្លៃ ($0 Free Listing)', 'Free Listing ($0)', '免费入驻 ($0)')}
                           </span>
                         )}
                       </div>
 
                       <div className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
-                        👁️ {restaurant.analytics?.views ?? 0} {isKm ? 'ចូលមើល' : 'views'}
+                        👁️ {restaurant.analytics?.views ?? 0} {tr(language, 'ចូលមើល', 'views', '次浏览')}
                       </div>
                     </div>
 
                     {isPremium && shopExpRaw && (
                       <p className="text-[10px] text-slate-700 dark:text-slate-300">
-                        {isKm
-                          ? `📅 សុពលភាពកញ្ចប់ហាងដល់ថ្ងៃទី៖ ${new Date(shopExpRaw).toLocaleDateString()}`
-                          : `Shop Package valid until: ${new Date(shopExpRaw).toLocaleDateString()}`}
+                        {tr(language, `📅 សុពលភាពកញ្ចប់ហាងដល់ថ្ងៃទី៖ ${new Date(shopExpRaw).toLocaleDateString()}`, `Shop Package valid until: ${new Date(shopExpRaw).toLocaleDateString()}`, `店铺套餐有效期至：${new Date(shopExpRaw).toLocaleDateString()}`)}
                       </p>
                     )}
 
                     {!isIosAppStore && isFree && (
                       <p className="text-[10px] text-slate-600 dark:text-slate-300">
                         {restaurant.status === 'pending'
-                          ? (isKm ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យអនុម័តហាងជាមុនសិន មុនពេលបើកកញ្ចប់ហាង។' : '⏳ Waiting for Admin shop approval before activating Shop Package.')
-                          : (isKm
-                              ? `💳 ហាងត្រូវបានអនុម័ត! បើកកញ្ចប់ហាង ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/ខែ ឬ $${(shopCat.earlyBirdRemaining > 0 && shopCat.earlyBirdPlan.enabled ? shopCat.earlyBirdPlan.priceUsd : shopCat.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) ដើម្បីទទួលបានមុខងារទាំង ៥។`
-                              : `💳 Shop approved! Activate Shop Package ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/mo or $${(shopCat.earlyBirdRemaining > 0 && shopCat.earlyBirdPlan.enabled ? shopCat.earlyBirdPlan.priceUsd : shopCat.yearlyPlan.priceUsd).toFixed(2)}/yr) to unlock all 5 benefits.`)}
+                          ? (tr(language, '⏳ កំពុងរង់ចាំ Admin ពិនិត្យអនុម័តហាងជាមុនសិន មុនពេលបើកកញ្ចប់ហាង។', '⏳ Waiting for Admin shop approval before activating Shop Package.', '⏳ 正在等待管理员审核店铺，审核通过后方可开通店铺套餐。'))
+                          : (tr(language, `💳 ហាងត្រូវបានអនុម័ត! បើកកញ្ចប់ហាង ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/ខែ ឬ $${(shopCat.earlyBirdRemaining > 0 && shopCat.earlyBirdPlan.enabled ? shopCat.earlyBirdPlan.priceUsd : shopCat.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) ដើម្បីទទួលបានមុខងារទាំង ៥។`, `💳 Shop approved! Activate Shop Package ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/mo or $${(shopCat.earlyBirdRemaining > 0 && shopCat.earlyBirdPlan.enabled ? shopCat.earlyBirdPlan.priceUsd : shopCat.yearlyPlan.priceUsd).toFixed(2)}/yr) to unlock all 5 benefits.`, `💳 店铺已通过审核！开通店铺套餐（$${shopCat.monthlyPlan.priceUsd.toFixed(2)}/月 或 $${(shopCat.earlyBirdRemaining > 0 && shopCat.earlyBirdPlan.enabled ? shopCat.earlyBirdPlan.priceUsd : shopCat.yearlyPlan.priceUsd).toFixed(2)}/年）即可解锁全部 5 大权益。`))}
                       </p>
                     )}
 
                     {!isIosAppStore && isExpired && (
                       <p className="text-[10px] text-red-600">
-                        {isKm
-                          ? `កញ្ចប់ហាងបានផុតកំណត់ (ទិន្នន័យ និងម៉ឺនុយត្រូវបានរក្សាទុក 100%)។ សូមបន្តកញ្ចប់ហាង ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/ខែ ឬ $${shopCat.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ)។`
-                          : `Shop Package expired (all shop & menu data 100% preserved). Renew ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/mo or $${shopCat.yearlyPlan.priceUsd.toFixed(2)}/yr).`}
+                        {tr(language, `កញ្ចប់ហាងបានផុតកំណត់ (ទិន្នន័យ និងម៉ឺនុយត្រូវបានរក្សាទុក 100%)។ សូមបន្តកញ្ចប់ហាង ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/ខែ ឬ $${shopCat.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ)។`, `Shop Package expired (all shop & menu data 100% preserved). Renew ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/mo or $${shopCat.yearlyPlan.priceUsd.toFixed(2)}/yr).`, `店铺套餐已过期（店铺及菜单数据 100% 完整保留）。立即续费（$${shopCat.monthlyPlan.priceUsd.toFixed(2)}/月 或 $${shopCat.yearlyPlan.priceUsd.toFixed(2)}/年）。`)}
                       </p>
                     )}
 
@@ -1667,7 +1647,7 @@ export const ProfileView: React.FC = () => {
                         className="flex-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
                       >
                         <Edit2 className="w-3.5 h-3.5 text-emerald-200" />
-                        <span>{isKm ? 'គ្រប់គ្រងហាង & ម៉ឺនុយ' : 'Manage Shop & Menu'}</span>
+                        <span>{tr(language, 'គ្រប់គ្រងហាង & ម៉ឺនុយ', 'Manage Shop & Menu', '管理店铺与菜单')}</span>
                       </button>
 
                       {!isIosAppStore && (
@@ -1680,17 +1660,17 @@ export const ProfileView: React.FC = () => {
                           className="py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-xs flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
                         >
                           <Crown className="w-3.5 h-3.5" />
-                          <span>{isPremium ? (isKm ? 'បន្តកញ្ចប់ហាង' : 'Renew') : (isKm ? 'បើកកញ្ចប់ហាង' : 'Activate')}</span>
+                          <span>{isPremium ? (tr(language, 'បន្តកញ្ចប់ហាង', 'Renew', '续费')) : (tr(language, 'បើកកញ្ចប់ហាង', 'Activate', '启用'))}</span>
                         </button>
                       )}
 
                       <button
                         onClick={() => deleteRestaurant(restaurant.id)}
                         className="py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
-                        title={isKm ? 'លុបហាងដើម្បីបង្កើតហាងថ្មី' : 'Delete store'}
+                        title={tr(language, 'លុបហាងដើម្បីបង្កើតហាងថ្មី', 'Delete store', '删除店铺')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        <span>{isKm ? 'លុប' : 'Delete'}</span>
+                        <span>{tr(language, 'លុប', 'Delete', '删除')}</span>
                       </button>
                     </div>
                   </div>
@@ -2306,7 +2286,7 @@ export const ProfileView: React.FC = () => {
         <div className="space-y-3 font-khmer">
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-xs text-[#0F172A] dark:text-white">
-              {isKm ? `បញ្ជីផ្ទាល់ខ្លួនសរុប (${wishlists.length})` : `My Wishlists (${wishlists.length})`}
+              {tr(language, `បញ្ជីផ្ទាល់ខ្លួនសរុប (${wishlists.length})`, `My Wishlists (${wishlists.length})`, `我的收藏夹 (${wishlists.length})`)}
             </h4>
             <button
               data-testid="profile-open-wishlists-modal"
@@ -2314,7 +2294,7 @@ export const ProfileView: React.FC = () => {
               className="flex items-center gap-1 px-3 py-1.5 bg-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs hover:bg-[#047857] transition"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>{isKm ? 'គ្រប់គ្រងបញ្ជី' : 'Manage Lists'}</span>
+              <span>{tr(language, 'គ្រប់គ្រងបញ្ជី', 'Manage Lists', '管理清单')}</span>
             </button>
           </div>
 
@@ -2332,7 +2312,7 @@ export const ProfileView: React.FC = () => {
                       {isKm ? w.nameKh : w.nameEn}
                     </h5>
                     <p className="text-[10px] text-slate-500">
-                      {isKm ? `${w.items.length} ទីតាំង / មុខម្ហូបក្នុងបញ្ជី` : `${w.items.length} items`}
+                      {tr(language, `${w.items.length} ទីតាំង / មុខម្ហូបក្នុងបញ្ជី`, `${w.items.length} items`, `${w.items.length} 项`)}
                     </p>
                   </div>
                 </div>
@@ -2348,14 +2328,14 @@ export const ProfileView: React.FC = () => {
         <div className="space-y-3 font-khmer">
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-xs text-[#0F172A] dark:text-white">
-              {isKm ? `ផែនការដើរលេងដែលបានរក្សាទុក (${tripPlans.length})` : `Saved AI Trip Plans (${tripPlans.length})`}
+              {tr(language, `ផែនការដើរលេងដែលបានរក្សាទុក (${tripPlans.length})`, `Saved AI Trip Plans (${tripPlans.length})`, `已保存的 AI 旅行计划 (${tripPlans.length})`)}
             </h4>
             <button
               onClick={() => setIsAiTripPlannerModalOpen(true)}
               className="flex items-center gap-1 px-3 py-1.5 bg-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs hover:bg-[#047857] transition"
             >
               <Compass className="w-3.5 h-3.5" />
-              <span>{isKm ? '+ បង្កើតថ្មី' : '+ New Plan'}</span>
+              <span>{tr(language, '+ បង្កើតថ្មី', '+ New Plan', '+ 新建计划')}</span>
             </button>
           </div>
 
@@ -2364,17 +2344,17 @@ export const ProfileView: React.FC = () => {
               <Compass className="w-10 h-10 mx-auto text-[#059669]" />
               <div>
                 <h4 className="font-bold text-xs text-[#0F172A] dark:text-white">
-                  {isKm ? 'មិនទាន់មានផែនការដើរលេងនៅឡើយទេ' : 'No saved trip plans yet'}
+                  {tr(language, 'មិនទាន់មានផែនការដើរលេងនៅឡើយទេ', 'No saved trip plans yet', '暂无已保存的旅行计划')}
                 </h4>
                 <p className="text-[10px] text-slate-500 mt-1">
-                  {isKm ? 'ឱ្យ AI រៀបចំកាលវិភាគ ហាងញ៉ាំអាហារ និងកន្លែងដើរលេងដោយស្វ័យប្រវត្តិតាមថវិកា!' : 'Let AI automate your itinerary and food spots!'}
+                  {tr(language, 'ឱ្យ AI រៀបចំកាលវិភាគ ហាងញ៉ាំអាហារ និងកន្លែងដើរលេងដោយស្វ័យប្រវត្តិតាមថវិកា!', 'Let AI automate your itinerary and food spots!', '让 AI 自动为您规划行程与特色美食打卡点！')}
                 </p>
               </div>
               <button
                 onClick={() => setIsAiTripPlannerModalOpen(true)}
                 className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs shadow-xs hover:bg-[#047857] transition"
               >
-                {isKm ? 'បង្កើតផែនការដើរលេងឥឡូវនេះ' : 'Generate AI Plan'}
+                {tr(language, 'បង្កើតផែនការដើរលេងឥឡូវនេះ', 'Generate AI Plan', '生成 AI 旅行计划')}
               </button>
             </div>
           ) : (
@@ -2390,7 +2370,7 @@ export const ProfileView: React.FC = () => {
                   <button
                     onClick={() => deleteTripPlan(plan.id)}
                     className="p-1 text-slate-400 hover:text-rose-500 rounded-lg"
-                    title={isKm ? 'លុប' : 'Delete'}
+                    title={tr(language, 'លុប', 'Delete', '删除')}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -2409,7 +2389,7 @@ export const ProfileView: React.FC = () => {
                   onClick={() => setIsAiTripPlannerModalOpen(true)}
                   className="w-full py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200 transition"
                 >
-                  {isKm ? 'មើលកាលវិភាគលម្អិត' : 'View Full Schedule'}
+                  {tr(language, 'មើលកាលវិភាគលម្អិត', 'View Full Schedule', '查看完整日程')}
                 </button>
               </div>
             ))
@@ -2423,14 +2403,14 @@ export const ProfileView: React.FC = () => {
           {savedFoods.length === 0 && savedDestinations.length === 0 && savedRestaurants.length === 0 ? (
             <div className="text-center py-8 text-slate-300 text-xs space-y-1 font-khmer">
               <Heart className="w-8 h-8 mx-auto text-slate-300" />
-              <p>{isKm ? 'មិនទាន់មានមុខម្ហូប ឬកន្លែងកម្សាន្តដែលបានរក្សាទុកនៅឡើយទេ' : 'No saved items yet'}</p>
+              <p>{tr(language, 'មិនទាន់មានមុខម្ហូប ឬកន្លែងកម្សាន្តដែលបានរក្សាទុកនៅឡើយទេ', 'No saved items yet', '暂无收藏内容')}</p>
             </div>
           ) : (
             <>
               {savedFoods.length > 0 && (
                 <div className="space-y-2">
                   <h4 className="font-bold text-xs text-[#0F172A] dark:text-white font-khmer">
-                    {isKm ? 'មុខម្ហូបដែលបានរក្សាទុក' : 'Saved Recipes'}
+                    {tr(language, 'មុខម្ហូបដែលបានរក្សាទុក', 'Saved Recipes', '已收藏菜谱')}
                   </h4>
                   <div className="grid grid-cols-1 gap-4">
                     {savedFoods.map(f => <FoodCard key={f.id} food={f} />)}
@@ -2441,7 +2421,7 @@ export const ProfileView: React.FC = () => {
               {savedDestinations.length > 0 && (
                 <div className="space-y-2 pt-2">
                   <h4 className="font-bold text-xs text-[#0F172A] dark:text-white font-khmer">
-                    {isKm ? 'តំបន់ទេសចរណ៍ដែលបានរក្សាទុក' : 'Saved Travel Spots'}
+                    {tr(language, 'តំបន់ទេសចរណ៍ដែលបានរក្សាទុក', 'Saved Travel Spots', '已收藏景点')}
                   </h4>
                   <div className="space-y-3">
                     {savedDestinations.map(d => <TouristCard key={d.id} destination={d} />)}
@@ -2594,13 +2574,13 @@ export const ProfileView: React.FC = () => {
           <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
             <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-[#059669]" />
-              {isKm ? 'គោលការណ៍ឯកជនភាព & សុវត្ថិភាព' : 'Privacy Policy & Data Safety'}
+              {tr(language, 'គោលការណ៍ឯកជនភាព & សុវត្ថិភាព', 'Privacy Policy & Data Safety', '隐私政策与数据安全')}
             </span>
             <button
               onClick={() => setIsPrivacyModalOpen(true)}
               className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-700 text-[#0F172A] dark:text-slate-200 font-bold hover:bg-slate-200 transition border border-slate-200 dark:border-slate-600"
             >
-              {isKm ? 'មើល' : 'View'}
+              {tr(language, 'មើល', 'View', '查看')}
             </button>
           </div>
 

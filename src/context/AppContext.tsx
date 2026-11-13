@@ -80,7 +80,7 @@ import {
 } from '../services/paymentService';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { buildDynamicNotificationsList } from '../services/dailyDiscoveryAndNotificationService';
-import { findDuplicateRestaurant, mergeRestaurantRecords } from '../utils/duplicateDetector';
+import { findDuplicateRestaurant, mergeRestaurantRecords, calculateDistanceMeters } from '../utils/duplicateDetector';
 import { recordSubmissionTimestamp, checkSubmissionRateLimit } from '../services/aiCheckInService';
 
 import { 
@@ -2443,9 +2443,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setIsRestaurantCheckInModalOpen = (open: boolean) => {
     if (open && currentUser?.role !== 'admin') {
       showToast(
-        language === 'km'
-          ? '🔒 មុខងារឆែកអ៊ីន & បញ្ជាក់ទីតាំង GPS Live អនុញ្ញាតសម្រាប់តែ Admin ប៉ុណ្ណោះ!'
-          : '🔒 Check-in & GPS Live verification is restricted to Admin only!',
+        tr(language, '🔒 មុខងារឆែកអ៊ីន & បញ្ជាក់ទីតាំង GPS Live អនុញ្ញាតសម្រាប់តែ Admin ប៉ុណ្ណោះ!', '🔒 Check-in & GPS Live verification is restricted to Admin only!', '🔒 签到与 GPS 实时验证仅限管理员使用！'),
         'warning'
       );
       return;
@@ -2810,9 +2808,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setIsAiCheckInModalOpen = (open: boolean) => {
     if (open && currentUser?.role !== 'admin') {
       showToast(
-        language === 'km'
-          ? '🔒 មុខងារ AI ឆែកអ៊ីន & បន្ថែមហាងតាម GPS អនុញ្ញាតសម្រាប់តែ Admin ប៉ុណ្ណោះ!'
-          : '🔒 AI Check-in & GPS restaurant verification is restricted to Admin only!',
+        tr(language, '🔒 មុខងារ AI ឆែកអ៊ីន & បន្ថែមហាងតាម GPS អនុញ្ញាតសម្រាប់តែ Admin ប៉ុណ្ណោះ!', '🔒 AI Check-in & GPS restaurant verification is restricted to Admin only!', '🔒 AI 签到与 GPS 餐厅验证仅限管理员使用！'),
         'warning'
       );
       return;
@@ -3434,9 +3430,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (res.tampered) {
           console.error('[Anti-Clone Guard] Tampered/repackaged app detected:', res.reason, res.packageName);
           showToast(
-            language === 'km'
-              ? '⚠️ កម្មវិធីនេះជាច្បាប់ចម្លងមិនផ្លូវការ (Cloned/Modified App) — មុខងារ Cloud និង AI ត្រូវបានបិទការពារសុវត្ថិភាព!'
-              : '⚠️ Unauthorized cloned/modified app detected — Cloud & AI features are locked for security!',
+            tr(language, '⚠️ កម្មវិធីនេះជាច្បាប់ចម្លងមិនផ្លូវការ (Cloned/Modified App) — មុខងារ Cloud និង AI ត្រូវបានបិទការពារសុវត្ថិភាព!', '⚠️ Unauthorized cloned/modified app detected — Cloud & AI features are locked for security!', '⚠️ 检测到未经授权的克隆/修改版应用 — 出于安全考虑已锁定云端与 AI 功能！'),
             'warning'
           );
         }
@@ -4377,9 +4371,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
           if (currentUser?.id === u.id) {
             showToast(
-              language === 'km'
-                ? '⚠️ ការបង់ប្រាក់បន្តសុពលភាព VIP មិនទាន់ជោគជ័យ / រង់ចាំការបង់ប្រាក់! សូមចុចបង់ប្រាក់បន្តដោយដៃនៅក្នុងផ្ទាំង សមាជិកភាព (Membership)។'
-                : '⚠️ Automatic VIP renewal payment not confirmed! Please renew manually in the Membership section.',
+              tr(language, '⚠️ ការបង់ប្រាក់បន្តសុពលភាព VIP មិនទាន់ជោគជ័យ / រង់ចាំការបង់ប្រាក់! សូមចុចបង់ប្រាក់បន្តដោយដៃនៅក្នុងផ្ទាំង សមាជិកភាព (Membership)។', '⚠️ Automatic VIP renewal payment not confirmed! Please renew manually in the Membership section.', '⚠️ 自动 VIP 续费付款未确认！请在“会员”专区手动续费。'),
               'warning'
             );
           }
@@ -4461,9 +4453,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         if (currentUser?.id === u.id) {
           showToast(
-            language === 'km'
-              ? `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${verifiedDays} ថ្ងៃ) ដោយជោគជ័យ រហូតដល់ ${expDateFormatted}!`
-              : `VIP membership (${verifiedDays} days) automatically renewed until ${expDateFormatted}!`,
+            tr(language, `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${verifiedDays} ថ្ងៃ) ដោយជោគជ័យ រហូតដល់ ${expDateFormatted}!`, `VIP membership (${verifiedDays} days) automatically renewed until ${expDateFormatted}!`, `VIP 会员资格 (${verifiedDays} 天) 已自动续费至 ${expDateFormatted}！`),
             'success'
           );
         }
@@ -4580,9 +4570,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             });
             if (currentUser?.id === u.id) {
               showToast(
-                language === 'km'
-                  ? `⚠️ គណនី VIP របស់អ្នកបានផុតកំណត់ (${expFormatted})! សូមបង់ប្រាក់បន្តនៅក្នុងផ្ទាំង សមាជិកភាព។`
-                  : `⚠️ Your VIP membership expired (${expFormatted})! Please renew in the Membership section.`,
+                tr(language, `⚠️ គណនី VIP របស់អ្នកបានផុតកំណត់ (${expFormatted})! សូមបង់ប្រាក់បន្តនៅក្នុងផ្ទាំង សមាជិកភាព។`, `⚠️ Your VIP membership expired (${expFormatted})! Please renew in the Membership section.`, `⚠️ 您的 VIP 会员已过期 (${expFormatted})！请在“会员”专区续费。`),
                 'warning'
               );
             }
@@ -4622,9 +4610,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               });
               if (currentUser?.id === u.id) {
                 showToast(
-                  language === 'km'
-                    ? `⏰ រំលឹក៖ គណនី VIP របស់អ្នកនៅសល់ ${remainingDays} ថ្ងៃទៀត (${expFormatted})។ អ្នកអាចគ្រប់គ្រង Auto-Renewal នៅក្នុងផ្ទាំង សមាជិកភាព។`
-                    : `⏰ Reminder: Your VIP membership has ${remainingDays} day(s) left (${expFormatted}). Manage Auto-Renewal in the Membership tab.`,
+                  tr(language, `⏰ រំលឹក៖ គណនី VIP របស់អ្នកនៅសល់ ${remainingDays} ថ្ងៃទៀត (${expFormatted})។ អ្នកអាចគ្រប់គ្រង Auto-Renewal នៅក្នុងផ្ទាំង សមាជិកភាព។`, `⏰ Reminder: Your VIP membership has ${remainingDays} day(s) left (${expFormatted}). Manage Auto-Renewal in the Membership tab.`, `⏰ 提醒：您的 VIP 会员还剩 ${remainingDays} 天 (${expFormatted})。可在“会员”专区管理自动续费。`),
                   'info'
                 );
               }
@@ -5270,9 +5256,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               localStorage.removeItem('kft_current_user_v5');
             } catch {}
             showToast(
-              language === 'km'
-                ? '🚫 គណនីរបស់អ្នកត្រូវបានលុបជាអចិន្ត្រៃយ៍ដោយរដ្ឋបាល (Admin)។'
-                : '🚫 Your account has been permanently deleted by the Administrator.',
+              tr(language, '🚫 គណនីរបស់អ្នកត្រូវបានលុបជាអចិន្ត្រៃយ៍ដោយរដ្ឋបាល (Admin)។', '🚫 Your account has been permanently deleted by the Administrator.', '🚫 您的账号已被管理员永久删除。'),
               'warning'
             );
           } else if (!isAdminAccount) {
@@ -6094,8 +6078,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } catch {}
       showToast(
         exists 
-          ? (language === 'km' ? 'បានដកចេញពីបញ្ជីចំណូលចិត្ត' : 'Removed from saved items') 
-          : (language === 'km' ? 'បានរក្សាទុកក្នុងបញ្ជីចំណូលចិត្ត ❤️' : 'Saved to favorites ❤️'),
+          ? (tr(language, 'បានដកចេញពីបញ្ជីចំណូលចិត្ត', 'Removed from saved items', '已从收藏中移除')) 
+          : (tr(language, 'បានរក្សាទុកក្នុងបញ្ជីចំណូលចិត្ត ❤️', 'Saved to favorites ❤️', '已保存至收藏夹 ❤️')),
         'info'
       );
       return updated;
@@ -6268,15 +6252,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     if (existing) {
       if (existing.role === 'admin') {
-        showToast(language === 'km' ? 'សូមប្រើប្រាស់ច្រកចូលរដ្ឋបាលជាមួយពាក្យសម្ងាត់សុវត្ថិភាព' : 'Please use Admin Portal with secure password', 'info');
+        showToast(tr(language, 'សូមប្រើប្រាស់ច្រកចូលរដ្ឋបាលជាមួយពាក្យសម្ងាត់សុវត្ថិភាព', 'Please use Admin Portal with secure password', '请使用安全密码登录管理后台'), 'info');
         setIsAdminLoginModalOpen(true);
         return false;
       }
       if (existing.isDisabled) {
         showToast(
-          language === 'km'
-            ? '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin ដើម្បីស្តារសិទ្ធិចូលប្រើប្រាស់ឡើងវិញ (Restore User Access)។'
-            : '⚠️ This account has been disabled. Please contact Admin to Restore User Access.',
+          tr(language, '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin ដើម្បីស្តារសិទ្ធិចូលប្រើប្រាស់ឡើងវិញ (Restore User Access)។', '⚠️ This account has been disabled. Please contact Admin to Restore User Access.', '⚠️ 该账号已被停用。请联系管理员以恢复用户访问权限。'),
           'warning'
         );
         return false;
@@ -6327,7 +6309,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       setCurrentUser(updatedExisting);
       latestSyncStateRef.current.currentUser = updatedExisting;
-      showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updatedExisting.name}!` : `Welcome back, ${updatedExisting.name}!`, 'success');
+      showToast(tr(language, `សូមស្វាគមន៍មកវិញ ${updatedExisting.name}!`, `Welcome back, ${updatedExisting.name}!`, `欢迎回来，${updatedExisting.name}！`), 'success');
       if (!completePendingVipRedirectAfterEmailAuth(updatedExisting)) {
         setIsAuthModalOpen(false);
       }
@@ -6367,7 +6349,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     setCurrentUser(candidateUser);
     latestSyncStateRef.current.currentUser = candidateUser;
-    showToast(language === 'km' ? `ចូលគណនីបានជោគជ័យ!` : `Logged in successfully!`, 'success');
+    showToast(tr(language, `ចូលគណនីបានជោគជ័យ!`, `Logged in successfully!`, '登录成功！'), 'success');
     if (!completePendingVipRedirectAfterEmailAuth(candidateUser)) {
       setIsAuthModalOpen(false);
     }
@@ -6381,9 +6363,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!status.allowed) {
       recordSecurityAudit('ADMIN_LOGIN_ATTEMPT', 'BLOCKED', 'AdminPortal', `Lockout active for ${status.remainingLockoutSeconds}s`);
       showToast(
-        language === 'km' 
-          ? `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!` 
-          : `Admin login locked out. Try again in ${status.remainingLockoutSeconds}s!`, 
+        tr(language, `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!`, `Admin login locked out. Try again in ${status.remainingLockoutSeconds}s!`, `管理员登录已锁定。请在 ${status.remainingLockoutSeconds} 秒后再试！`), 
         'warning'
       );
       return false;
@@ -6394,7 +6374,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!isAdminUser) {
       recordAdminLoginFailed();
       recordSecurityAudit('ADMIN_LOGIN_FAILED', 'FAILURE', 'AdminPortal', 'Unknown admin username');
-      showToast(language === 'km' ? 'ឈ្មោះគណនីរដ្ឋបាលមិនត្រឹមត្រូវទេ!' : 'Invalid admin username!', 'warning');
+      showToast(tr(language, 'ឈ្មោះគណនីរដ្ឋបាលមិនត្រឹមត្រូវទេ!', 'Invalid admin username!', '管理员用户名无效！'), 'warning');
       return false;
     }
 
@@ -6405,11 +6385,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (serverLogin.kind === 'ok') {
       isValid = true;
     } else if (serverLogin.kind === 'pin_required') {
-      showToast(language === 'km' ? 'សូមបញ្ចូលលេខកូដ PIN ៦ ខ្ទង់ជាមុនសិន' : 'Please enter the 6-digit PIN first', 'warning');
+      showToast(tr(language, 'សូមបញ្ចូលលេខកូដ PIN ៦ ខ្ទង់ជាមុនសិន', 'Please enter the 6-digit PIN first', '请先输入 6 位数 PIN 码'), 'warning');
       return false;
     } else if (serverLogin.kind === 'locked') {
       showToast(
-        language === 'km' ? 'ការព្យាយាមច្រើនពេក! Server បានចាក់សោរជាបណ្តោះអាសន្ន។' : 'Too many attempts! The server has locked admin login for a while.',
+        tr(language, 'ការព្យាយាមច្រើនពេក! Server បានចាក់សោរជាបណ្តោះអាសន្ន។', 'Too many attempts! The server has locked admin login for a while.', '尝试次数过多！服务器已暂时锁定管理员登录。'),
         'warning'
       );
       return false;
@@ -6437,17 +6417,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recordSecurityAudit('ADMIN_LOGIN_FAILED', 'FAILURE', 'AdminPortal', 'Invalid credentials');
       if (fail.lockedOut) {
         showToast(
-          language === 'km' 
-            ? 'ការប៉ុនប៉ងបរាជ័យលើសកំណត់! គណនីរដ្ឋបាលត្រូវបានចាក់សោរ ១៥ នាទី។' 
-            : 'Too many failed attempts! Admin portal locked for 15 minutes.', 
+          tr(language, 'ការប៉ុនប៉ងបរាជ័យលើសកំណត់! គណនីរដ្ឋបាលត្រូវបានចាក់សោរ ១៥ នាទី។', 'Too many failed attempts! Admin portal locked for 15 minutes.', '失败次数过多！管理后台已锁定 15 分钟。'), 
           'warning'
         );
       } else {
         const rem = 5 - fail.attempts;
         showToast(
-          language === 'km' 
-            ? `ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ! (នៅសល់ ${rem} ដងទៀត)` 
-            : `Invalid password! (${rem} attempts remaining)`, 
+          tr(language, `ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ! (នៅសល់ ${rem} ដងទៀត)`, `Invalid password! (${rem} attempts remaining)`, `密码错误！（还剩 ${rem} 次尝试机会）`), 
           'warning'
         );
       }
@@ -6495,7 +6471,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsAuthModalOpen(false);
     setIsAdminLoginModalOpen(false);
     setIsAdminOpen(true);
-    showToast(language === 'km' ? 'ចូលកាន់ផ្ទាំងគ្រប់គ្រងរដ្ឋបាលជោគជ័យ!' : 'Admin portal unlocked securely!', 'success');
+    showToast(tr(language, 'ចូលកាន់ផ្ទាំងគ្រប់គ្រងរដ្ឋបាលជោគជ័យ!', 'Admin portal unlocked securely!', '管理后台已安全解锁！'), 'success');
     return true;
   };
 
@@ -6507,9 +6483,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!status.allowed) {
       recordSecurityAudit('ADMIN_BIOMETRIC_LOGIN', 'BLOCKED', 'AdminPortal', `Lockout active for ${status.remainingLockoutSeconds}s`);
       showToast(
-        language === 'km' 
-          ? `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!` 
-          : `Admin login locked out. Try again in ${status.remainingLockoutSeconds}s!`, 
+        tr(language, `គណនីរដ្ឋបាលត្រូវបានចាក់សោរបណ្តោះអាសន្ន។ សូមរង់ចាំ ${status.remainingLockoutSeconds} វិនាទី!`, `Admin login locked out. Try again in ${status.remainingLockoutSeconds}s!`, `管理员登录已锁定。请在 ${status.remainingLockoutSeconds} 秒后再试！`), 
         'warning'
       );
       return false;
@@ -6521,9 +6495,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!bioAuth.success) {
           if (!bioAuth.fallbackToPassword) {
             showToast(
-              language === 'km' 
-                ? 'ការស្កេនស្នាមមេដៃមិនត្រូវគ្នាទេ! សូមព្យាយាមម្តងទៀត ឬប្រើពាក្យសម្ងាត់។' 
-                : 'Biometric verification failed. Please try again or use password.',
+              tr(language, 'ការស្កេនស្នាមមេដៃមិនត្រូវគ្នាទេ! សូមព្យាយាមម្តងទៀត ឬប្រើពាក្យសម្ងាត់។', 'Biometric verification failed. Please try again or use password.', '生物识别验证失败。请重试或使用密码。'),
               'warning'
             );
           }
@@ -6555,15 +6527,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsAdminLoginModalOpen(false);
       setIsAdminOpen(true);
       showToast(
-        language === 'km' 
-          ? 'ចូលផ្ទាំងគ្រប់គ្រងរដ្ឋបាលតាមរយៈស្កេនស្នាមមេដៃជោគជ័យ!' 
-          : 'Admin portal unlocked via Biometric Fingerprint (Android Keystore)!', 
+        tr(language, 'ចូលផ្ទាំងគ្រប់គ្រងរដ្ឋបាលតាមរយៈស្កេនស្នាមមេដៃជោគជ័យ!', 'Admin portal unlocked via Biometric Fingerprint (Android Keystore)!', '已通过指纹生物识别 (Android Keystore) 解锁管理后台！'), 
         'success'
       );
       return true;
     } catch (e: any) {
       console.warn('Biometric authentication error:', e);
-      showToast(language === 'km' ? 'សូមប្រើពាក្យសម្ងាត់សុវត្ថិភាពដើម្បីចូល' : 'Please use password to authenticate', 'info');
+      showToast(tr(language, 'សូមប្រើពាក្យសម្ងាត់សុវត្ថិភាពដើម្បីចូល', 'Please use password to authenticate', '请使用密码进行身份验证'), 'info');
       return false;
     }
   };
@@ -6893,9 +6863,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): Promise<{ success: boolean }> => {
     if (!currentUser || currentUser.role !== 'admin') {
       showToast(
-        language === 'km'
-          ? '⛔ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចអនុម័តបើកដំណើរការ VIP បាន!'
-          : '⛔ Only an Administrator can grant and activate VIP!',
+        tr(language, '⛔ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចអនុម័តបើកដំណើរការ VIP បាន!', '⛔ Only an Administrator can grant and activate VIP!', '⛔ 仅管理员可以授予并激活 VIP！'),
         'warning'
       );
       return { success: false };
@@ -6907,7 +6875,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       doesUserMatchTarget(u, { id: cleanTarget, email: cleanTarget })
     );
     if (!targetUser) {
-      showToast(language === 'km' ? 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់នេះទេ!' : 'User account not found!', 'warning');
+      showToast(tr(language, 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់នេះទេ!', 'User account not found!', '未找到用户账号！'), 'warning');
       return { success: false };
     }
 
@@ -6994,9 +6962,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, true);
 
     showToast(
-      language === 'km'
-        ? `👑 បានបើកដំណើរការ VIP (${validDays} ថ្ងៃ) ជូន "${approved.name}" ដោយជោគជ័យ!`
-        : `👑 Activated VIP (${validDays} days) for "${approved.name}" successfully!`,
+      tr(language, `👑 បានបើកដំណើរការ VIP (${validDays} ថ្ងៃ) ជូន "${approved.name}" ដោយជោគជ័យ!`, `👑 Activated VIP (${validDays} days) for "${approved.name}" successfully!`, `👑 成功为“${approved.name}”激活 VIP (${validDays} 天)！`),
       'success'
     );
     return { success: true };
@@ -7011,7 +6977,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const liveUsers = latestSyncStateRef.current.users || users;
     const targetUser = liveUsers.find(u => u.id === userId || doesUserMatchTarget(u, { id: userId, email: userId }));
     if (!targetUser) {
-      showToast(language === 'km' ? 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់នេះទេ!' : 'User account not found!', 'warning');
+      showToast(tr(language, 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់នេះទេ!', 'User account not found!', '未找到用户账号！'), 'warning');
       return { success: false };
     }
 
@@ -7021,7 +6987,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       targetUser.username === 'cheasavuth' ||
       targetUser.username === 'admin'
     ) {
-      showToast(language === 'km' ? 'មិនអាចបោះបង់សិទ្ធិ VIP របស់គណនីរដ្ឋបាលប្រព័ន្ធ (Admin) បានឡើយ!' : 'Cannot cancel VIP on System Administrator account!', 'warning');
+      showToast(tr(language, 'មិនអាចបោះបង់សិទ្ធិ VIP របស់គណនីរដ្ឋបាលប្រព័ន្ធ (Admin) បានឡើយ!', 'Cannot cancel VIP on System Administrator account!', '无法取消系统管理员账号的 VIP！'), 'warning');
       return { success: false };
     }
 
@@ -7225,9 +7191,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, true);
 
     showToast(
-      language === 'km'
-        ? `✅ បានបោះបង់ VIP របស់ "${targetUser.name}" មកជាគណនីធម្មតា (រក្សាទុកគណនី និងអ៊ីមែលដដែល)!`
-        : `✅ Cancelled VIP for "${targetUser.name}" and downgraded to normal user (account & login preserved)!`,
+      tr(language, `✅ បានបោះបង់ VIP របស់ "${targetUser.name}" មកជាគណនីធម្មតា (រក្សាទុកគណនី និងអ៊ីមែលដដែល)!`, `✅ Cancelled VIP for "${targetUser.name}" and downgraded to normal user (account & login preserved)!`, `✅ 已取消“${targetUser.name}”的 VIP 并降级为普通用户（账号和登录保持不变）！`),
       'success'
     );
 
@@ -7255,9 +7219,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Block restoration if permanently deleted via Option 3 (Delete Forever)
     if (matchedDeleted && matchedDeleted.permanentlyDeleted === true) {
       const errMsg =
-        language === 'km'
-          ? `🚫 គណនី "${matchedDeleted.name}" (${matchedDeleted.email}) ត្រូវបានលុបជាអចិន្ត្រៃយ៍ (Delete Forever) ហើយមិនអាចស្តារឡើងវិញបានទេ!`
-          : `🚫 Account "${matchedDeleted.name}" (${matchedDeleted.email}) was permanently deleted (Delete Forever) and cannot be restored!`;
+        tr(language, `🚫 គណនី "${matchedDeleted.name}" (${matchedDeleted.email}) ត្រូវបានលុបជាអចិន្ត្រៃយ៍ (Delete Forever) ហើយមិនអាចស្តារឡើងវិញបានទេ!`, `🚫 Account "${matchedDeleted.name}" (${matchedDeleted.email}) was permanently deleted (Delete Forever) and cannot be restored!`, `🚫 账号“${matchedDeleted.name}”(${matchedDeleted.email}) 已被永久删除，无法恢复！`);
       showToast(errMsg, 'warning');
       return { success: false, error: errMsg };
     }
@@ -7303,9 +7265,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     } else {
       const errMsg =
-        language === 'km'
-          ? 'រកមិនឃើញគណនីដែលត្រូវស្តារឡើងវិញទេ!'
-          : 'User account not found to restore!';
+        tr(language, 'រកមិនឃើញគណនីដែលត្រូវស្តារឡើងវិញទេ!', 'User account not found to restore!', '未找到要恢复的用户账号！');
       showToast(errMsg, 'warning');
       return { success: false, error: errMsg };
     }
@@ -7371,9 +7331,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, true);
 
     showToast(
-      language === 'km'
-        ? `✅ បានស្តារសិទ្ធិចូលប្រើប្រាស់គណនី "${restoredUser.name}" (${restoredUser.email}) ឡើងវិញដោយជោគជ័យ!`
-        : `✅ Successfully restored user access for "${restoredUser.name}" (${restoredUser.email})!`,
+      tr(language, `✅ បានស្តារសិទ្ធិចូលប្រើប្រាស់គណនី "${restoredUser.name}" (${restoredUser.email}) ឡើងវិញដោយជោគជ័យ!`, `✅ Successfully restored user access for "${restoredUser.name}" (${restoredUser.email})!`, `✅ 已成功恢复“${restoredUser.name}”(${restoredUser.email}) 的用户访问权限！`),
       'success'
     );
 
@@ -7436,9 +7394,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       details: 'Temporarily deactivated/suspended user account',
     }, true);
     showToast(
-      language === 'km'
-        ? `⚠️ បានផ្អាកគណនី "${targetUser.name}" បណ្តោះអាសន្ន (អាចស្តារឡើងវិញបានតាមរយៈ Restore User Access)`
-        : `⚠️ Temporarily disabled "${targetUser.name}" (can be reactivated via Restore User Access)`,
+      tr(language, `⚠️ បានផ្អាកគណនី "${targetUser.name}" បណ្តោះអាសន្ន (អាចស្តារឡើងវិញបានតាមរយៈ Restore User Access)`, `⚠️ Temporarily disabled "${targetUser.name}" (can be reactivated via Restore User Access)`, `⚠️ 已暂时停用“${targetUser.name}”（可通过“恢复用户访问”重新激活）`),
       'info'
     );
     return { success: true };
@@ -7464,7 +7420,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       u => u.id === userId || (Array.isArray(u.legacyIds) && u.legacyIds.includes(userId))
     );
     if (!targetUser) {
-      showToast(language === 'km' ? 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់នេះទេ!' : 'User account not found!', 'warning');
+      showToast(tr(language, 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់នេះទេ!', 'User account not found!', '未找到用户账号！'), 'warning');
       return { success: false };
     }
 
@@ -7475,7 +7431,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       targetUser.username === 'cheasavuth' ||
       targetUser.username === 'admin'
     ) {
-      showToast(language === 'km' ? 'មិនអនុញ្ញាតឱ្យលុបគណនីរដ្ឋបាលប្រព័ន្ធ (Admin) ឡើយ!' : 'Cannot delete the System Administrator account!', 'warning');
+      showToast(tr(language, 'មិនអនុញ្ញាតឱ្យលុបគណនីរដ្ឋបាលប្រព័ន្ធ (Admin) ឡើយ!', 'Cannot delete the System Administrator account!', '无法删除系统管理员账号！'), 'warning');
       return { success: false };
     }
 
@@ -7692,9 +7648,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, true);
 
     showToast(
-      language === 'km'
-        ? `✅ បានលុបគណនី "${targetUser.name}" និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍!`
-        : `✅ Permanently deleted account "${targetUser.name}" and all associated data!`,
+      tr(language, `✅ បានលុបគណនី "${targetUser.name}" និងទិន្នន័យពាក់ព័ន្ធទាំងអស់ជាអចិន្ត្រៃយ៍!`, `✅ Permanently deleted account "${targetUser.name}" and all associated data!`, `✅ 已永久删除账号“${targetUser.name}”及所有关联数据！`),
       'success'
     );
 
@@ -7803,9 +7757,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       details: `Purged ${count} registered user accounts from active directory`,
     }, true);
     showToast(
-      language === 'km' 
-        ? `បានសម្អាតគណនីអ្នកប្រើប្រាស់ ${count} នាក់ចេញពី Database ដោយជោគជ័យ!` 
-        : `Successfully purged ${count} registered users from database!`, 
+      tr(language, `បានសម្អាតគណនីអ្នកប្រើប្រាស់ ${count} នាក់ចេញពី Database ដោយជោគជ័យ!`, `Successfully purged ${count} registered users from database!`, `已成功从数据库中清除 ${count} 名注册用户！`), 
       'success'
     );
     return { success: true, count };
@@ -7820,7 +7772,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): Promise<{ success: boolean; count: number }> => {
     const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.manage_vip', `Bulk VIP grant (${userIds.length} users)`);
     if (!rbac.allowed) {
-      showToast(language === 'km' ? '⛔ អ្នកគ្មានសិទ្ធិផ្តល់ VIP ជាក្រុមទេ!' : '⛔ Unauthorized for Bulk VIP management!', 'warning');
+      showToast(tr(language, '⛔ អ្នកគ្មានសិទ្ធិផ្តល់ VIP ជាក្រុមទេ!', '⛔ Unauthorized for Bulk VIP management!', '⛔ 无权进行批量 VIP 管理！'), 'warning');
       return { success: false, count: 0 };
     }
     const targetSet = new Set(userIds.filter(Boolean));
@@ -7910,9 +7862,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, true);
 
     showToast(
-      language === 'km'
-        ? `👑 បានបើកដំណើរការ VIP (${validDays} ថ្ងៃ) ជូនគណនីចំនួន ${updatedCount} ដោយជោគជ័យ!`
-        : `👑 Activated ${validDays}-day VIP for ${updatedCount} accounts!`,
+      tr(language, `👑 បានបើកដំណើរការ VIP (${validDays} ថ្ងៃ) ជូនគណនីចំនួន ${updatedCount} ដោយជោគជ័យ!`, `👑 Activated ${validDays}-day VIP for ${updatedCount} accounts!`, `👑 成功为 ${updatedCount} 个账号激活 ${validDays} 天 VIP！`),
       'success'
     );
     return { success: true, count: updatedCount };
@@ -7926,7 +7876,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): Promise<{ success: boolean; count: number }> => {
     const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.manage_vip', `Bulk VIP cancel (${userIds.length} users)`);
     if (!rbac.allowed) {
-      showToast(language === 'km' ? '⛔ គ្មានសិទ្ធិបិទ VIP ជាក្រុមទេ!' : '⛔ Unauthorized for Bulk VIP cancellation!', 'warning');
+      showToast(tr(language, '⛔ គ្មានសិទ្ធិបិទ VIP ជាក្រុមទេ!', '⛔ Unauthorized for Bulk VIP cancellation!', '⛔ 无权批量取消 VIP！'), 'warning');
       return { success: false, count: 0 };
     }
     const targetSet = new Set(userIds.filter(Boolean));
@@ -8011,9 +7961,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, true);
 
     showToast(
-      language === 'km'
-        ? `បានបញ្ឈប់សមាជិកភាព VIP ចំនួន ${updatedCount} គណនីដោយជោគជ័យ!`
-        : `Cancelled VIP membership for ${updatedCount} accounts!`,
+      tr(language, `បានបញ្ឈប់សមាជិកភាព VIP ចំនួន ${updatedCount} គណនីដោយជោគជ័យ!`, `Cancelled VIP membership for ${updatedCount} accounts!`, `已取消 ${updatedCount} 个账号的 VIP 会员资格！`),
       'info'
     );
     return { success: true, count: updatedCount };
@@ -8028,7 +7976,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): Promise<{ success: boolean; count: number }> => {
     const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.activate_deactivate', `Bulk account status ${status}`);
     if (!rbac.allowed) {
-      showToast(language === 'km' ? '⛔ គ្មានសិទ្ធិបើក/បិទគណនីជាក្រុមទេ!' : '⛔ Unauthorized for Bulk status change!', 'warning');
+      showToast(tr(language, '⛔ គ្មានសិទ្ធិបើក/បិទគណនីជាក្រុមទេ!', '⛔ Unauthorized for Bulk status change!', '⛔ 无权批量更改状态！'), 'warning');
       return { success: false, count: 0 };
     }
     const targetSet = new Set(userIds.filter(Boolean));
@@ -8094,7 +8042,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): Promise<{ success: boolean; count: number }> => {
     const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.edit_role', `Bulk role update to ${newRole}`);
     if (!rbac.allowed || newRole === 'admin') {
-      showToast(language === 'km' ? '⛔ មិនអនុញ្ញាតឱ្យកែប្រែតួនាទីនេះទេ!' : '⛔ Role update not permitted!', 'warning');
+      showToast(tr(language, '⛔ មិនអនុញ្ញាតឱ្យកែប្រែតួនាទីនេះទេ!', '⛔ Role update not permitted!', '⛔ 不允许更改角色！'), 'warning');
       return { success: false, count: 0 };
     }
     const targetSet = new Set(userIds.filter(Boolean));
@@ -8130,9 +8078,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, true);
 
     showToast(
-      language === 'km'
-        ? `បានប្តូរតួនាទីគណនីចំនួន ${updatedCount} ទៅជា "${newRole === 'owner' ? 'ម្ចាស់ហាង' : 'អ្នកប្រើប្រាស់ទូទៅ'}" ដោយជោគជ័យ!`
-        : `Updated ${updatedCount} accounts to "${newRole}"!`,
+      tr(language, `បានប្តូរតួនាទីគណនីចំនួន ${updatedCount} ទៅជា "${newRole === 'owner' ? 'ម្ចាស់ហាង' : 'អ្នកប្រើប្រាស់ទូទៅ'}" ដោយជោគជ័យ!`, `Updated ${updatedCount} accounts to "${newRole}"!`, `已将 ${updatedCount} 个账号更新为“${newRole}”！`),
       'success'
     );
     return { success: true, count: updatedCount };
@@ -8146,7 +8092,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): Promise<{ success: boolean; count: number }> => {
     const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.delete', `Bulk delete (${userIds.length} users)`);
     if (!rbac.allowed) {
-      showToast(language === 'km' ? '⛔ គ្មានសិទ្ធិលុបគណនីជាក្រុមទេ!' : '⛔ Unauthorized for Bulk User Deletion!', 'warning');
+      showToast(tr(language, '⛔ គ្មានសិទ្ធិលុបគណនីជាក្រុមទេ!', '⛔ Unauthorized for Bulk User Deletion!', '⛔ 无权批量删除用户！'), 'warning');
       return { success: false, count: 0 };
     }
     const targetIdSet = new Set(userIds.filter(Boolean));
@@ -8224,9 +8170,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, true);
 
     showToast(
-      language === 'km'
-        ? `🗑️ បានលុបគណនីចំនួន ${newTombstones.length} ចេញពីប្រព័ន្ធដោយជោគជ័យ!`
-        : `🗑️ Deleted ${newTombstones.length} user accounts!`,
+      tr(language, `🗑️ បានលុបគណនីចំនួន ${newTombstones.length} ចេញពីប្រព័ន្ធដោយជោគជ័យ!`, `🗑️ Deleted ${newTombstones.length} user accounts!`, `🗑️ 已删除 ${newTombstones.length} 个用户账号！`),
       'success'
     );
     return { success: true, count: newTombstones.length };
@@ -8241,7 +8185,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): Promise<{ success: boolean; count: number }> => {
     const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.backup_restore', `Restore users (${mode})`);
     if (!rbac.allowed) {
-      showToast(language === 'km' ? '⛔ គ្មានសិទ្ធិស្តារទិន្នន័យ Backup ទេ!' : '⛔ Unauthorized for Database Restore!', 'warning');
+      showToast(tr(language, '⛔ គ្មានសិទ្ធិស្តារទិន្នន័យ Backup ទេ!', '⛔ Unauthorized for Database Restore!', '⛔ 无权还原数据库！'), 'warning');
       return { success: false, count: 0 };
     }
     if (!Array.isArray(snapshotUsers) || snapshotUsers.length === 0) {
@@ -8295,9 +8239,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, true);
 
     showToast(
-      language === 'km'
-        ? `✅ បានស្តារទិន្នន័យគណនីចំនួន ${snapshotUsers.length} ពី Backup ដោយជោគជ័យ!`
-        : `✅ Successfully restored ${snapshotUsers.length} user accounts from backup!`,
+      tr(language, `✅ បានស្តារទិន្នន័យគណនីចំនួន ${snapshotUsers.length} ពី Backup ដោយជោគជ័យ!`, `✅ Successfully restored ${snapshotUsers.length} user accounts from backup!`, `✅ 已成功从备份中恢复 ${snapshotUsers.length} 个用户账号！`),
       'success'
     );
     return { success: true, count: repairedUsers.length };
@@ -8339,7 +8281,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): Promise<boolean> => {
     const trimmedPassword = (newPassword || '').trim();
     if (!trimmedPassword || trimmedPassword.length < 8) {
-      showToast(language === 'km' ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ!' : 'Password must be at least 8 characters!', 'warning');
+      showToast(tr(language, 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ!', 'Password must be at least 8 characters!', '密码长度必须至少为 8 个字符！'), 'warning');
       return false;
     }
 
@@ -8350,36 +8292,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       if (srv.kind === 'pin_required') {
         showToast(
-          language === 'km'
-            ? '⚠️ សម័យកាលផ្ទៀងផ្ទាត់ Server បានផុតកំណត់ សូមចេញហើយផ្ទៀងផ្ទាត់លេខ PIN ៦ ខ្ទង់ម្តងទៀត!'
-            : '⚠️ Server admin session expired. Please sign out, verify your 6-digit PIN again, and retry.',
+          tr(language, '⚠️ សម័យកាលផ្ទៀងផ្ទាត់ Server បានផុតកំណត់ សូមចេញហើយផ្ទៀងផ្ទាត់លេខ PIN ៦ ខ្ទង់ម្តងទៀត!', '⚠️ Server admin session expired. Please sign out, verify your 6-digit PIN again, and retry.', '⚠️ 服务器管理员会话已过期。请退出登录，重新验证 6 位数 PIN 码后再试。'),
           'warning'
         );
         return false;
       }
       if (srv.kind === 'invalid') {
         showToast(
-          language === 'km'
-            ? '❌ ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!'
-            : '❌ Current admin password is incorrect!',
+          tr(language, '❌ ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!', '❌ Current admin password is incorrect!', '❌ 当前管理员密码错误！'),
           'warning'
         );
         return false;
       }
       if (srv.kind === 'locked') {
         showToast(
-          language === 'km'
-            ? `⏳ សូមរង់ចាំ ${srv.retryAfterSeconds || 60} វិនាទីមុនព្យាយាមម្តងទៀត។`
-            : `⏳ Too many attempts. Please wait ${srv.retryAfterSeconds || 60}s and retry.`,
+          tr(language, `⏳ សូមរង់ចាំ ${srv.retryAfterSeconds || 60} វិនាទីមុនព្យាយាមម្តងទៀត។`, `⏳ Too many attempts. Please wait ${srv.retryAfterSeconds || 60}s and retry.`, `⏳ 尝试次数过多。请等待 ${srv.retryAfterSeconds || 60} 秒后再试。`),
           'warning'
         );
         return false;
       }
       if (srv.kind === 'unavailable' && srv.errorCode) {
         showToast(
-          language === 'km'
-            ? `⚠️ Server admin-auth ត្រូវការដាក់ឱ្យដំណើរការកំណែថ្មី (${srv.errorCode}) ដើម្បីរក្សាទុកលើ Server។`
-            : `⚠️ Server admin-auth function needs deployment update (${srv.errorCode}) to persist on server.`,
+          tr(language, `⚠️ Server admin-auth ត្រូវការដាក់ឱ្យដំណើរការកំណែថ្មី (${srv.errorCode}) ដើម្បីរក្សាទុកលើ Server។`, `⚠️ Server admin-auth function needs deployment update (${srv.errorCode}) to persist on server.`, `⚠️ 服务器 admin-auth 功能需要部署更新 (${srv.errorCode}) 才能持久保存至服务器。`),
           'warning'
         );
         return false;
@@ -8420,7 +8354,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .catch(() => {});
 
     recordSecurityAudit('ADMIN_CREDENTIALS_UPDATE', 'SUCCESS', 'AdminPortal', 'Admin password updated with PBKDF2');
-    showToast(language === 'km' ? '✅ បានផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាលដោយសុវត្ថិភាព!' : '✅ Admin password updated securely!', 'success');
+    showToast(tr(language, '✅ បានផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាលដោយសុវត្ថិភាព!', '✅ Admin password updated securely!', '✅ 管理员密码已安全更新！'), 'success');
     return true;
   };
 
@@ -8442,9 +8376,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         `Unauthorized attempt to modify AppSettings by ${currentUser?.id || 'guest'}`
       );
       const unauthErr =
-        language === 'km'
-          ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចកែប្រែការកំណត់ប្រព័ន្ធបាន!'
-          : '⛔ Unauthorized: Only an authorized Administrator can modify system settings!';
+        tr(language, '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចកែប្រែការកំណត់ប្រព័ន្ធបាន!', '⛔ Unauthorized: Only an authorized Administrator can modify system settings!', '⛔ 未授权：仅授权管理员可修改系统设置！');
       showToast(unauthErr, 'warning');
       return { ok: false, error: unauthErr };
     }
@@ -8453,7 +8385,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (sanitized.vipShortDurationDays !== undefined) {
       const val = Number(sanitized.vipShortDurationDays);
       if (!Number.isFinite(val) || val < 1 || val > 3650) {
-        const err = language === 'km' ? '⚠️ រយៈពេលកញ្ចប់ទី១ ត្រូវតែចាប់ពី ១ ថ្ងៃឡើងទៅ!' : '⚠️ Plan #1 duration must be at least 1 day!';
+        const err = tr(language, '⚠️ រយៈពេលកញ្ចប់ទី១ ត្រូវតែចាប់ពី ១ ថ្ងៃឡើងទៅ!', '⚠️ Plan #1 duration must be at least 1 day!', '⚠️ 方案 1 的时长必须至少为 1 天！');
         showToast(err, 'warning');
         return { ok: false, error: err };
       }
@@ -8462,7 +8394,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (sanitized.vipShortPriceUsd !== undefined) {
       const val = Number(sanitized.vipShortPriceUsd);
       if (!Number.isFinite(val) || val <= 0 || val > 10000) {
-        const err = language === 'km' ? '⚠️ តម្លៃកញ្ចប់ទី១ ត្រូវតែធំជាង $0.00!' : '⚠️ Plan #1 price must be greater than $0.00!';
+        const err = tr(language, '⚠️ តម្លៃកញ្ចប់ទី១ ត្រូវតែធំជាង $0.00!', '⚠️ Plan #1 price must be greater than $0.00!', '⚠️ 方案 1 的价格必须大于 $0.00！');
         showToast(err, 'warning');
         return { ok: false, error: err };
       }
@@ -8471,7 +8403,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (sanitized.vipLongDurationDays !== undefined) {
       const val = Number(sanitized.vipLongDurationDays);
       if (!Number.isFinite(val) || val < 1 || val > 3650) {
-        const err = language === 'km' ? '⚠️ រយៈពេលកញ្ចប់ទី២ ត្រូវតែចាប់ពី ១ ថ្ងៃឡើងទៅ!' : '⚠️ Plan #2 duration must be at least 1 day!';
+        const err = tr(language, '⚠️ រយៈពេលកញ្ចប់ទី២ ត្រូវតែចាប់ពី ១ ថ្ងៃឡើងទៅ!', '⚠️ Plan #2 duration must be at least 1 day!', '⚠️ 方案 2 的时长必须至少为 1 天！');
         showToast(err, 'warning');
         return { ok: false, error: err };
       }
@@ -8480,7 +8412,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (sanitized.vipLongPriceUsd !== undefined) {
       const val = Number(sanitized.vipLongPriceUsd);
       if (!Number.isFinite(val) || val <= 0 || val > 10000) {
-        const err = language === 'km' ? '⚠️ តម្លៃកញ្ចប់ទី២ ត្រូវតែធំជាង $0.00!' : '⚠️ Plan #2 price must be greater than $0.00!';
+        const err = tr(language, '⚠️ តម្លៃកញ្ចប់ទី២ ត្រូវតែធំជាង $0.00!', '⚠️ Plan #2 price must be greater than $0.00!', '⚠️ 方案 2 的价格必须大于 $0.00！');
         showToast(err, 'warning');
         return { ok: false, error: err };
       }
@@ -8489,7 +8421,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (sanitized.additionalStoreFeeUsd !== undefined) {
       const val = Number(sanitized.additionalStoreFeeUsd);
       if (!Number.isFinite(val) || val < 0 || val > 10000) {
-        const err = language === 'km' ? '⚠️ តម្លៃបន្ថែមហាងមិនត្រឹមត្រូវ!' : '⚠️ Invalid additional store fee!';
+        const err = tr(language, '⚠️ តម្លៃបន្ថែមហាងមិនត្រឹមត្រូវ!', '⚠️ Invalid additional store fee!', '⚠️ 附加店铺费用无效！');
         showToast(err, 'warning');
         return { ok: false, error: err };
       }
@@ -8505,9 +8437,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const val = Number(sanitized.vipFeaturedDurationDays);
       if (!Number.isFinite(val) || val < 1 || val > 365) {
         const err =
-          language === 'km'
-            ? '⚠️ រយៈពេលបង្ហាញហាង VIP មុខគេ (Featured Duration) ត្រូវតែចាប់ពី ១ ដល់ ៣៦៥ ថ្ងៃ!'
-            : '⚠️ VIP Featured Duration must be between 1 and 365 days!';
+          tr(language, '⚠️ រយៈពេលបង្ហាញហាង VIP មុខគេ (Featured Duration) ត្រូវតែចាប់ពី ១ ដល់ ៣៦៥ ថ្ងៃ!', '⚠️ VIP Featured Duration must be between 1 and 365 days!', '⚠️ VIP 精选推荐时长必须在 1 到 365 天之间！');
         showToast(err, 'warning');
         return { ok: false, error: err };
       }
@@ -8590,17 +8520,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         /^(vipShort|vipLong|additionalStoreFee|promotional)/.test(k)
       );
       const savedWhere = cloudSaved
-        ? language === 'km' ? 'ទៅកាន់ Database' : 'to the database'
+        ? tr(language, 'ទៅកាន់ Database', 'to the database', '至数据库')
         : cloudConfigured
-          ? language === 'km' ? 'លើឧបករណ៍នេះ (Cloud មិនទាន់ភ្ជាប់)' : 'on this device (cloud unreachable)'
-          : language === 'km' ? 'លើឧបករណ៍នេះ' : 'on this device';
+          ? tr(language, 'លើឧបករណ៍នេះ (Cloud មិនទាន់ភ្ជាប់)', 'on this device (cloud unreachable)', '在此设备上（云端无法连接）')
+          : tr(language, 'លើឧបករណ៍នេះ', 'on this device', '在此设备上');
       const planSummary = touchedPlanFields
-        ? ` ${confirmedSettings.vipShortDurationDays}${language === 'km' ? ' ថ្ងៃ' : 'd'} ($${confirmedSettings.vipShortPriceUsd?.toFixed(2)}) & ${confirmedSettings.vipLongDurationDays}${language === 'km' ? ' ថ្ងៃ' : 'd'} ($${confirmedSettings.vipLongPriceUsd?.toFixed(2)})`
+        ? ` ${confirmedSettings.vipShortDurationDays}${tr(language, ' ថ្ងៃ', 'd', '天')} ($${confirmedSettings.vipShortPriceUsd?.toFixed(2)}) & ${confirmedSettings.vipLongDurationDays}${tr(language, ' ថ្ងៃ', 'd', '天')} ($${confirmedSettings.vipLongPriceUsd?.toFixed(2)})`
         : '';
       showToast(
-        language === 'km'
-          ? `${cloudSaved || !cloudConfigured ? '✅' : '⚠️'} បានរក្សាទុកការកំណត់ ${savedWhere} ជោគជ័យ!${planSummary}`
-          : `${cloudSaved || !cloudConfigured ? '✅' : '⚠️'} Settings saved ${savedWhere}.${planSummary}`,
+        tr(language, `${cloudSaved || !cloudConfigured ? '✅' : '⚠️'} បានរក្សាទុកការកំណត់ ${savedWhere} ជោគជ័យ!${planSummary}`, `${cloudSaved || !cloudConfigured ? '✅' : '⚠️'} Settings saved ${savedWhere}.${planSummary}`, `${cloudSaved || !cloudConfigured ? '✅' : '⚠️'} 设置已保存${savedWhere}。${planSummary}`),
         cloudSaved || !cloudConfigured ? 'success' : 'warning'
       );
       return { ok: true, settings: confirmedSettings };
@@ -8715,7 +8643,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     setCurrentUser(newUser);
     latestSyncStateRef.current.currentUser = newUser;
-    showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${displayName}!` : `Welcome to the app, ${displayName}!`, 'success');
+    showToast(tr(language, `សូមស្វាគមន៍មកកាន់កម្មវិធី ${displayName}!`, `Welcome to the app, ${displayName}!`, `欢迎使用本应用，${displayName}！`), 'success');
     if (!completePendingVipRedirectAfterEmailAuth(newUser)) {
       setIsAuthModalOpen(false);
     }
@@ -9393,9 +9321,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (existing) {
       if (existing.isDisabled) {
         showToast(
-          language === 'km'
-            ? '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin ដើម្បីស្តារសិទ្ធិចូលប្រើប្រាស់ឡើងវិញ (Restore User Access)។'
-            : '⚠️ This account has been disabled. Please contact Admin to Restore User Access.',
+          tr(language, '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin ដើម្បីស្តារសិទ្ធិចូលប្រើប្រាស់ឡើងវិញ (Restore User Access)។', '⚠️ This account has been disabled. Please contact Admin to Restore User Access.', '⚠️ 该账号已被停用。请联系管理员以恢复用户访问权限。'),
           'warning'
         );
         return false;
@@ -9446,7 +9372,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       setCurrentUser(updated);
       latestSyncStateRef.current.currentUser = updated;
-      showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updated.name}!` : `Welcome back, ${updated.name}!`, 'success');
+      showToast(tr(language, `សូមស្វាគមន៍មកវិញ ${updated.name}!`, `Welcome back, ${updated.name}!`, `欢迎回来，${updated.name}！`), 'success');
       if (!completePendingVipRedirectAfterEmailAuth(updated)) {
         setIsAuthModalOpen(false);
       }
@@ -9491,7 +9417,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     setCurrentUser(newUser);
     latestSyncStateRef.current.currentUser = newUser;
-    showToast(language === 'km' ? `សូមស្វាគមន៍មកកាន់កម្មវិធី ${newUser.name}!` : `Welcome to the app, ${newUser.name}!`, 'success');
+    showToast(tr(language, `សូមស្វាគមន៍មកកាន់កម្មវិធី ${newUser.name}!`, `Welcome to the app, ${newUser.name}!`, `欢迎使用本应用，${newUser.name}！`), 'success');
     if (!completePendingVipRedirectAfterEmailAuth(newUser)) {
       setIsAuthModalOpen(false);
     }
@@ -9521,7 +9447,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(null);
     latestSyncStateRef.current.currentUser = null;
     setIsAdminOpen(false);
-    showToast(language === 'km' ? 'បានចាកចេញពីគណនីដោយសុវត្ថិភាព' : 'Logged out securely', 'info');
+    showToast(tr(language, 'បានចាកចេញពីគណនីដោយសុវត្ថិភាព', 'Logged out securely', '已安全退出登录'), 'info');
   };
 
   const updateCurrentUserProfile = (newName: string, newAvatar?: string) => {
@@ -9616,8 +9542,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       hasNewAvatar
         ? language === 'km' ? 'បានប្តូររូបភាពប្រូហ្វាល់ជោគជ័យ!' : language === 'zh' ? '头像已更新！' : 'Profile photo updated!'
         : isExplicitReset
-          ? language === 'km' ? 'បានកំណត់រូបភាពប្រូហ្វាល់ដើមឡើងវិញ!' : 'Profile photo reset!'
-          : language === 'km' ? 'បានកែប្រែឈ្មោះជោគជ័យ!' : 'Name updated successfully!',
+          ? tr(language, 'បានកំណត់រូបភាពប្រូហ្វាល់ដើមឡើងវិញ!', 'Profile photo reset!', '个人头像已重置！')
+          : tr(language, 'បានកែប្រែឈ្មោះជោគជ័យ!', 'Name updated successfully!', '姓名更新成功！'),
       'success'
     );
   };
@@ -9815,11 +9741,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateUserRole = (userId: string, newRole: UserRole) => {
     const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.edit_role', `Update role of ${userId} to ${newRole}`);
     if (!rbac.allowed) {
-      showToast(language === 'km' ? '⛔ អ្នកគ្មានសិទ្ធិកែប្រែតួនាទីអ្នកប្រើប្រាស់ទេ!' : '⛔ Unauthorized: Missing users.edit_role permission!', 'warning');
+      showToast(tr(language, '⛔ អ្នកគ្មានសិទ្ធិកែប្រែតួនាទីអ្នកប្រើប្រាស់ទេ!', '⛔ Unauthorized: Missing users.edit_role permission!', '⛔ 未授权：缺少 users.edit_role 权限！'), 'warning');
       return;
     }
     if (newRole === 'admin') {
-      showToast(language === 'km' ? 'មិនអនុញ្ញាតឱ្យបង្កើតគណនីរដ្ឋបាលស្ទួនឡើយ!' : 'Duplicate admin accounts are strictly prohibited!', 'warning');
+      showToast(tr(language, 'មិនអនុញ្ញាតឱ្យបង្កើតគណនីរដ្ឋបាលស្ទួនឡើយ!', 'Duplicate admin accounts are strictly prohibited!', '严禁创建重复的管理员账号！'), 'warning');
       recordSecurityAudit('ROLE_PROMOTION_BLOCKED', 'BLOCKED', 'UserManagement', `Attempted promotion of ${userId} to admin`);
       return;
     }
@@ -9853,7 +9779,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'SUCCESS',
       details: `Changed account role to "${newRole}"`,
     }, true);
-    showToast(language === 'km' ? 'បានកែប្រែសិទ្ធិអ្នកប្រើប្រាស់' : 'Updated user role', 'success');
+    showToast(tr(language, 'បានកែប្រែសិទ្ធិអ្នកប្រើប្រាស់', 'Updated user role', '已更新用户角色'), 'success');
   };
 
   const isCurrentUserAdmin = (): boolean =>
@@ -9919,7 +9845,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_foods_200_v10', next, 400);
       return next;
     });
-    showToast(language === 'km' ? 'បានបញ្ចូលមុខម្ហូបថ្មីដោយជោគជ័យ' : 'Food item added successfully!', 'success');
+    showToast(tr(language, 'បានបញ្ចូលមុខម្ហូបថ្មីដោយជោគជ័យ', 'Food item added successfully!', '美食添加成功！'), 'success');
   };
 
   const updateFood = async (updated: FoodItem): Promise<FoodItem> => {
@@ -10046,7 +9972,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return next;
     });
     if (selectedFood?.id === id) setSelectedFood(null);
-    showToast(language === 'km' ? 'បានលុបមុខម្ហូបជាអចិន្ត្រៃយ៍' : 'Food item deleted permanently', 'info');
+    showToast(tr(language, 'បានលុបមុខម្ហូបជាអចិន្ត្រៃយ៍', 'Food item deleted permanently', '美食项目已永久删除'), 'info');
   };
 
   const getCurrentUserStoreQuota = (targetUser: User | null = currentUser): UserStoreQuotaSummary => {
@@ -10181,9 +10107,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): Restaurant | null => {
     if (!currentUser) {
       showToast(
-        language === 'km'
-          ? 'សូមចូលគណនីជាមុនសិន ដើម្បីចុះបញ្ជីហាងអាហារ!'
-          : 'Please sign in first to register a restaurant!',
+        tr(language, 'សូមចូលគណនីជាមុនសិន ដើម្បីចុះបញ្ជីហាងអាហារ!', 'Please sign in first to register a restaurant!', '请先登录以注册餐厅！'),
         'warning'
       );
       setIsAuthModalOpen(true);
@@ -10198,9 +10122,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!isAdmin && !hasAuthenticatedAccount(currentUser)) {
       showToast(
-        language === 'km'
-          ? 'សូមចុះឈ្មោះ ឬចូលគណនី (លេខទូរស័ព្ទ ឬ Google) ជាមុនសិន ដើម្បីដាក់ស្នើហាង!'
-          : 'Please sign in with Phone or Google first to submit your shop!',
+        tr(language, 'សូមចុះឈ្មោះ ឬចូលគណនី (លេខទូរស័ព្ទ ឬ Google) ជាមុនសិន ដើម្បីដាក់ស្នើហាង!', 'Please sign in with Phone or Google first to submit your shop!', '请先使用手机号或 Google 登录以提交您的店铺！'),
         'warning'
       );
       setIsAuthModalOpen(true);
@@ -10239,9 +10161,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       if (exactMatch) {
         showToast(
-          language === 'km'
-            ? `⚠️ «${exactMatch.nameKh || exactMatch.nameEn}» មានក្នុងប្រព័ន្ធរួចហើយ! សូមជ្រើសរើសហាង/សណ្ឋាគារដែលមានស្រាប់នេះ ហើយដាក់ស្នើដំឡើង (Upgrade Existing Shop / Hotel) ជំនួសការបង្កើតស្ទួន។`
-            : `⚠️ "${exactMatch.nameEn || exactMatch.nameKh}" already exists! Please select the existing listing and submit an Upgrade Request instead of creating a duplicate.`,
+          tr(language, `⚠️ «${exactMatch.nameKh || exactMatch.nameEn}» មានក្នុងប្រព័ន្ធរួចហើយ! សូមជ្រើសរើសហាង/សណ្ឋាគារដែលមានស្រាប់នេះ ហើយដាក់ស្នើដំឡើង (Upgrade Existing Shop / Hotel) ជំនួសការបង្កើតស្ទួន។`, `⚠️ "${exactMatch.nameEn || exactMatch.nameKh}" already exists! Please select the existing listing and submit an Upgrade Request instead of creating a duplicate.`, `⚠️ “${exactMatch.nameEn || exactMatch.nameKh}”已存在！请选择现有列表并提交升级申请，而非重复创建。`),
           'warning'
         );
         return null;
@@ -10258,9 +10178,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       if (!targetToReplace || !isTargetOwner) {
         showToast(
-          language === 'km'
-            ? '⚠️ រកមិនឃើញហាងចាស់ដែលត្រូវប្តូរ ឬអ្នកគ្មានសិទ្ធិប្តូរហាងនេះទេ!'
-            : '⚠️ Target store to replace was not found or you do not have permission!',
+          tr(language, '⚠️ រកមិនឃើញហាងចាស់ដែលត្រូវប្តូរ ឬអ្នកគ្មានសិទ្ធិប្តូរហាងនេះទេ!', '⚠️ Target store to replace was not found or you do not have permission!', '⚠️ 未找到要替换的目标店铺，或您没有相应权限！'),
           'warning'
         );
         return null;
@@ -10402,23 +10320,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (isPendingManualReview) {
       showToast(
-        language === 'km'
-          ? '✅ សំណើបង្កើតហាងរបស់អ្នកត្រូវបានបញ្ជូនជោគជ័យ! សូមរង់ចាំការត្រួតពិនិត្យ និងអនុម័ត (Approve) ពីរដ្ឋបាល (Admin)។'
-          : '✅ Your shop submission has been received! Please wait for Admin approval.',
+        tr(language, '✅ សំណើបង្កើតហាងរបស់អ្នកត្រូវបានបញ្ជូនជោគជ័យ! សូមរង់ចាំការត្រួតពិនិត្យ និងអនុម័ត (Approve) ពីរដ្ឋបាល (Admin)។', '✅ Your shop submission has been received! Please wait for Admin approval.', '✅ 您的店铺提交已收到！请等待管理员审核批准。'),
         'success'
       );
     } else if (targetToReplace) {
       showToast(
-        language === 'km'
-          ? `🔄 បានប្តូរហាងចាស់ដាក់ហាងថ្មី "${newRest.nameKh}" ជោគជ័យ (ដោយឥតគិតថ្លៃបន្ថែម $0)!`
-          : `🔄 Replaced existing store with "${newRest.nameEn || newRest.nameKh}" for free ($0)!`,
+        tr(language, `🔄 បានប្តូរហាងចាស់ដាក់ហាងថ្មី "${newRest.nameKh}" ជោគជ័យ (ដោយឥតគិតថ្លៃបន្ថែម $0)!`, `🔄 Replaced existing store with "${newRest.nameEn || newRest.nameKh}" for free ($0)!`, `🔄 已免费 ($0) 将现有店铺替换为“${newRest.nameEn || newRest.nameKh}”！`),
         'success'
       );
     } else {
       showToast(
-        language === 'km'
-          ? `🎉 ចុះបញ្ជីហាងអាហារ VIP ទី ${slotNumber} របស់អ្នកបានជោគជ័យ!`
-          : `🎉 Registered your VIP Store #${slotNumber} successfully!`,
+        tr(language, `🎉 ចុះបញ្ជីហាងអាហារ VIP ទី ${slotNumber} របស់អ្នកបានជោគជ័យ!`, `🎉 Registered your VIP Store #${slotNumber} successfully!`, `🎉 成功注册您的第 #${slotNumber} 家 VIP 店铺！`),
         'success'
       );
     }
@@ -10734,7 +10646,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         'info'
       );
     } else {
-      showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាង និងរក្សាទុករូបភាពជាអចិន្ត្រៃយ៍រួចរាល់!' : 'Restaurant details and photos permanently saved!', 'success');
+      showToast(tr(language, 'បានកែប្រែព័ត៌មានហាង និងរក្សាទុករូបភាពជាអចិន្ត្រៃយ៍រួចរាល់!', 'Restaurant details and photos permanently saved!', '餐厅详情与照片已永久保存！'), 'success');
     }
   };
 
@@ -10745,7 +10657,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): boolean => {
     const targetRest = restaurants.find(r => r.id === restaurantId);
     if (!targetRest) {
-      showToast(language === 'km' ? 'រកមិនឃើញហាងអាហារទេ!' : 'Restaurant not found!', 'warning');
+      showToast(tr(language, 'រកមិនឃើញហាងអាហារទេ!', 'Restaurant not found!', '未找到餐厅！'), 'warning');
       return false;
     }
     const isOwnerOfTarget = Boolean(currentUser && isUserOwnerOfRestaurantRecord(currentUser, targetRest));
@@ -10861,7 +10773,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setManagingRestaurant(updatedRest);
     }
 
-    showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានមុខម្ហូបជោគជ័យ!' : 'Menu item updated!', 'success');
+    showToast(tr(language, 'បានកែប្រែព័ត៌មានមុខម្ហូបជោគជ័យ!', 'Menu item updated!', '菜单项已更新！'), 'success');
     return true;
   };
 
@@ -10912,7 +10824,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setManagingRestaurant(updatedRest);
     }
 
-    showToast(language === 'km' ? 'បានលុបមុខម្ហូបដោយជោគជ័យ!' : 'Menu item removed successfully!', 'info');
+    showToast(tr(language, 'បានលុបមុខម្ហូបដោយជោគជ័យ!', 'Menu item removed successfully!', '菜单项已成功移除！'), 'info');
     return true;
   };
 
@@ -10921,9 +10833,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!currentUser) {
       setIsAuthModalOpen(true);
       showToast(
-        language === 'km'
-          ? 'សូមចូលគណនីជាមុនសិន ដើម្បីដាក់ផ្កាយវាយតម្លៃហាងអាហារ!'
-          : 'Please sign in first to submit a restaurant rating!',
+        tr(language, 'សូមចូលគណនីជាមុនសិន ដើម្បីដាក់ផ្កាយវាយតម្លៃហាងអាហារ!', 'Please sign in first to submit a restaurant rating!', '请先登录以提交餐厅评分！'),
         'warning'
       );
       return false;
@@ -10989,9 +10899,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     showToast(
-      language === 'km'
-        ? `⭐ អរគុណសម្រាប់ការវាយតម្លៃ ${clampedRating} ផ្កាយ! (មធ្យមភាគ៖ ${summary.averageRating.toFixed(1)} ★ ពី ${summary.reviewCount} ការវាយតម្លៃ)`
-        : `⭐ Thank you for your ${clampedRating}-star review! (Average: ${summary.averageRating.toFixed(1)} ★ from ${summary.reviewCount} reviews)`,
+      tr(language, `⭐ អរគុណសម្រាប់ការវាយតម្លៃ ${clampedRating} ផ្កាយ! (មធ្យមភាគ៖ ${summary.averageRating.toFixed(1)} ★ ពី ${summary.reviewCount} ការវាយតម្លៃ)`, `⭐ Thank you for your ${clampedRating}-star review! (Average: ${summary.averageRating.toFixed(1)} ★ from ${summary.reviewCount} reviews)`, `⭐ 感谢您的 ${clampedRating} 星评价！（平均分：${summary.averageRating.toFixed(1)} ★，共 ${summary.reviewCount} 条评价）`),
       'success'
     );
     return true;
@@ -11032,9 +10940,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     showToast(
-      language === 'km' 
-        ? 'បានផ្ញើសំណើដំឡើង VIP រួចរាល់! រដ្ឋបាលនឹងត្រួតពិនិត្យ និងបើកដំណើរការជូន។' 
-        : 'Submitted VIP upgrade request! Admin will verify and activate access.',
+      tr(language, 'បានផ្ញើសំណើដំឡើង VIP រួចរាល់! រដ្ឋបាលនឹងត្រួតពិនិត្យ និងបើកដំណើរការជូន។', 'Submitted VIP upgrade request! Admin will verify and activate access.', '已提交 VIP 升级申请！管理员将核实并激活权限。'),
       'success'
     );
   };
@@ -11106,9 +11012,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const { allowed } = checkCanDeleteRestaurant(target);
     if (!allowed) {
       showToast(
-        language === 'km'
-          ? '⛔ គ្មានសិទ្ធិលុបហាងនេះទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចលុបបាន។'
-          : '⛔ Unauthorized! Only approved VIP shop owners or Admin can delete this restaurant.',
+        tr(language, '⛔ គ្មានសិទ្ធិលុបហាងនេះទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចលុបបាន។', '⛔ Unauthorized! Only approved VIP shop owners or Admin can delete this restaurant.', '⛔ 未授权！仅已获批的 VIP 店主或管理员可以删除此餐厅。'),
         'warning'
       );
       return;
@@ -11217,9 +11121,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     showToast(
-      language === 'km'
-        ? '🗑️ បានលុបហាងអាហាររួចរាល់ជាអចិន្ត្រៃយ៍!'
-        : '🗑️ Shop permanently deleted!',
+      tr(language, '🗑️ បានលុបហាងអាហាររួចរាល់ជាអចិន្ត្រៃយ៍!', '🗑️ Shop permanently deleted!', '🗑️ 店铺已永久删除！'),
       'info'
     );
   };
@@ -11230,9 +11132,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const { allowed } = checkCanDeleteRestaurant(target);
     if (!allowed) {
       showToast(
-        language === 'km'
-          ? '⛔ គ្មានសិទ្ធិលុបហាងនេះទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចលុបបាន។'
-          : '⛔ Unauthorized! Only approved VIP shop owners or Admin can delete this restaurant.',
+        tr(language, '⛔ គ្មានសិទ្ធិលុបហាងនេះទេ! មានតែម្ចាស់ហាង VIP ដែលបានអនុម័ត ឬ Admin ប៉ុណ្ណោះដែលអាចលុបបាន។', '⛔ Unauthorized! Only approved VIP shop owners or Admin can delete this restaurant.', '⛔ 未授权！仅已获批的 VIP 店主或管理员可以删除此餐厅。'),
         'warning'
       );
       return;
@@ -11520,8 +11420,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (managingRestaurant?.id === id) setManagingRestaurant(updatedRest);
         showToast(
           nextVerified
-            ? (language === 'km' ? `✅ បានផ្ទៀងផ្ទាត់ហាង "${r.nameKh}" ត្រឹមត្រូវផ្លូវការ` : `✅ Verified ${r.nameEn}!`)
-            : (language === 'km' ? `បានដាក់ហាង "${r.nameKh}" ក្នុងស្ថានភាពមិនទាន់ផ្ទៀងផ្ទាត់` : `Set ${r.nameEn} to unverified`),
+            ? (tr(language, `✅ បានផ្ទៀងផ្ទាត់ហាង "${r.nameKh}" ត្រឹមត្រូវផ្លូវការ`, `✅ Verified ${r.nameEn}!`, `✅ 已验证 ${r.nameEn}！`))
+            : (tr(language, `បានដាក់ហាង "${r.nameKh}" ក្នុងស្ថានភាពមិនទាន់ផ្ទៀងផ្ទាត់`, `Set ${r.nameEn} to unverified`, `已将 ${r.nameEn} 设为未验证`)),
           'info'
         );
         return updatedRest;
@@ -11603,9 +11503,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     showToast(
-      language === 'km'
-        ? `✅ បានផ្ទៀងផ្ទាត់ និងបំពេញទិន្នន័យហាងទាំងអស់ជោគជ័យ (${restaurants.length} ហាង Verified 100%)!`
-        : `✅ Verified and enriched all ${restaurants.length} restaurants (100% Verified)!`,
+      tr(language, `✅ បានផ្ទៀងផ្ទាត់ និងបំពេញទិន្នន័យហាងទាំងអស់ជោគជ័យ (${restaurants.length} ហាង Verified 100%)!`, `✅ Verified and enriched all ${restaurants.length} restaurants (100% Verified)!`, `✅ 已验证并完善所有 ${restaurants.length} 家餐厅（100% 已验证）！`),
       'success'
     );
     return { verifiedCount, enrichedCount };
@@ -11680,9 +11578,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (selectedRestaurant?.id === restaurantId) setSelectedRestaurant(adminUpdated);
       if (managingRestaurant?.id === restaurantId) setManagingRestaurant(adminUpdated);
       showToast(
-        language === 'km'
-          ? '✅ បានប្តូរ និងអនុម័តរូបភាពហាងថ្មីជោគជ័យ (Admin)!'
-          : '✅ Replaced and approved shop photo immediately (Admin)!',
+        tr(language, '✅ បានប្តូរ និងអនុម័តរូបភាពហាងថ្មីជោគជ័យ (Admin)!', '✅ Replaced and approved shop photo immediately (Admin)!', '✅ 已立即替换并批准店铺照片 (Admin)！'),
         'success'
       );
       return true;
@@ -11915,9 +11811,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isGooglePlacesSource) {
       void makeShopPhotoPermanent(restaurantId, approvedRest.photoUrl);
       showToast(
-        language === 'km'
-          ? `✅ បានអនុម័តរូបភាព Google Maps សម្រាប់ «${targetRest.nameKh}» — ហាងនេះឥឡូវបង្ហាញក្នុងបញ្ជីហាង!`
-          : `✅ Approved Google Maps photo for "${targetRest.nameEn || targetRest.nameKh}" — now visible in the Shop List!`,
+        tr(language, `✅ បានអនុម័តរូបភាព Google Maps សម្រាប់ «${targetRest.nameKh}» — ហាងនេះឥឡូវបង្ហាញក្នុងបញ្ជីហាង!`, `✅ Approved Google Maps photo for "${targetRest.nameEn || targetRest.nameKh}" — now visible in the Shop List!`, `✅ 已批准“${targetRest.nameEn || targetRest.nameKh}”的 Google Maps 照片 — 现已在店铺列表中显示！`),
         'success'
       );
       return;
@@ -11941,9 +11835,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
 
     showToast(
-      language === 'km'
-        ? `✅ បានអនុម័តរូបភាពថ្មីសម្រាប់ហាង «${targetRest.nameKh}» ជោគជ័យ!`
-        : `✅ Approved new shop photo for "${targetRest.nameEn || targetRest.nameKh}"!`,
+      tr(language, `✅ បានអនុម័តរូបភាពថ្មីសម្រាប់ហាង «${targetRest.nameKh}» ជោគជ័យ!`, `✅ Approved new shop photo for "${targetRest.nameEn || targetRest.nameKh}"!`, `✅ 已批准“${targetRest.nameEn || targetRest.nameKh}”的新店铺照片！`),
       'success'
     );
   };
@@ -12003,9 +11895,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     showToast(
-      language === 'km'
-        ? `✅ បានអនុម័តរូបភាពហាងទាំង ${updatedMap.size} ដោយជោគជ័យ — ហាងទាំងនោះឥឡូវបង្ហាញក្នុងបញ្ជីហាងអាហារ!`
-        : `✅ Approved all ${updatedMap.size} shop photos — those shops are now visible in the Shop List!`,
+      tr(language, `✅ បានអនុម័តរូបភាពហាងទាំង ${updatedMap.size} ដោយជោគជ័យ — ហាងទាំងនោះឥឡូវបង្ហាញក្នុងបញ្ជីហាងអាហារ!`, `✅ Approved all ${updatedMap.size} shop photos — those shops are now visible in the Shop List!`, `✅ 已批准所有 ${updatedMap.size} 张店铺照片 — 这些店铺现已在店铺列表中显示！`),
       'success'
     );
     return updatedMap.size;
@@ -12019,9 +11909,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const req = targetRest.pendingPhotoReplacement;
     const rejectionNote =
       reason?.trim() ||
-      (language === 'km'
-        ? 'រូបភាពមិនសមស្របតាមគោលការណ៍រូបភាពហាងអាហារ — រក្សារូបភាពដើមដដែល។'
-        : 'Photo does not meet shop image guidelines — original photo kept.');
+      (tr(language, 'រូបភាពមិនសមស្របតាមគោលការណ៍រូបភាពហាងអាហារ — រក្សារូបភាពដើមដដែល។', 'Photo does not meet shop image guidelines — original photo kept.', '照片不符合店铺图片规范 — 已保留原照片。'));
 
     // Keep original approved photoUrl and profileImage untouched
     const isGooglePlacesSource =
@@ -12059,9 +11947,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (isGooglePlacesSource) {
       showToast(
-        language === 'km'
-          ? `🚫 បានបដិសេធរូបភាព Google Maps សម្រាប់ «${targetRest.nameKh}» — មិនបង្ហាញជូនអ្នកប្រើប្រាស់ទេ។`
-          : `🚫 Rejected Google Maps photo for "${targetRest.nameEn || targetRest.nameKh}" — it will not be shown to users.`,
+        tr(language, `🚫 បានបដិសេធរូបភាព Google Maps សម្រាប់ «${targetRest.nameKh}» — មិនបង្ហាញជូនអ្នកប្រើប្រាស់ទេ។`, `🚫 Rejected Google Maps photo for "${targetRest.nameEn || targetRest.nameKh}" — it will not be shown to users.`, `🚫 已拒绝“${targetRest.nameEn || targetRest.nameKh}”的 Google Maps 照片 — 将不会向用户展示。`),
         'info'
       );
       return;
@@ -12085,9 +11971,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
 
     showToast(
-      language === 'km'
-        ? `🚫 បានបដិសេធរូបភាពថ្មី និងរក្សារូបភាពដើមរបស់ហាង «${targetRest.nameKh}» ដដែល!`
-        : `🚫 Rejected replacement photo and kept original photo for "${targetRest.nameEn || targetRest.nameKh}"!`,
+      tr(language, `🚫 បានបដិសេធរូបភាពថ្មី និងរក្សារូបភាពដើមរបស់ហាង «${targetRest.nameKh}» ដដែល!`, `🚫 Rejected replacement photo and kept original photo for "${targetRest.nameEn || targetRest.nameKh}"!`, `🚫 已拒绝替换照片并保留“${targetRest.nameEn || targetRest.nameKh}”的原照片！`),
       'info'
     );
   };
@@ -12113,9 +11997,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!isAdmin && !isApprovedVip) {
       showToast(
-        language === 'km'
-          ? '🔒 មានតែសមាជិក VIP សកម្មប៉ុណ្ណោះដែលអាចស្នើដំឡើង និងកែប្រែហាង/សណ្ឋាគារដែលមានស្រាប់បាន!'
-          : '🔒 Only active VIP members can submit an upgrade request for an existing shop or hotel!',
+        tr(language, '🔒 មានតែសមាជិក VIP សកម្មប៉ុណ្ណោះដែលអាចស្នើដំឡើង និងកែប្រែហាង/សណ្ឋាគារដែលមានស្រាប់បាន!', '🔒 Only active VIP members can submit an upgrade request for an existing shop or hotel!', '🔒 仅有效 VIP 会员可以提交现有店铺或酒店的升级申请！'),
         'warning'
       );
       openUpgradeVipModal();
@@ -12125,9 +12007,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetRest = restaurants.find((r) => r.id === targetRestaurantId);
     if (!targetRest) {
       showToast(
-        language === 'km'
-          ? '⚠️ រកមិនឃើញហាង ឬសណ្ឋាគារដែលអ្នកបានជ្រើសរើសទេ!'
-          : '⚠️ Could not find the selected shop or hotel!',
+        tr(language, '⚠️ រកមិនឃើញហាង ឬសណ្ឋាគារដែលអ្នកបានជ្រើសរើសទេ!', '⚠️ Could not find the selected shop or hotel!', '⚠️ 未找到所选的店铺或酒店！'),
         'warning'
       );
       return null;
@@ -12177,9 +12057,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (selectedRestaurant?.id === targetRest.id) setSelectedRestaurant(updatedAdminRest);
       if (managingRestaurant?.id === targetRest.id) setManagingRestaurant(updatedAdminRest);
       showToast(
-        language === 'km'
-          ? `✅ បានដំឡើង និងផ្សព្វផ្សាយព័ត៌មានថ្មីសម្រាប់ «${updatedAdminRest.nameKh}» រួចរាល់!`
-          : `✅ Upgraded and published changes for "${updatedAdminRest.nameEn || updatedAdminRest.nameKh}"!`,
+        tr(language, `✅ បានដំឡើង និងផ្សព្វផ្សាយព័ត៌មានថ្មីសម្រាប់ «${updatedAdminRest.nameKh}» រួចរាល់!`, `✅ Upgraded and published changes for "${updatedAdminRest.nameEn || updatedAdminRest.nameKh}"!`, `✅ 已升级并发布“${updatedAdminRest.nameEn || updatedAdminRest.nameKh}”的更改！`),
         'success'
       );
       return updatedAdminRest;
@@ -12253,9 +12131,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
 
     showToast(
-      language === 'km'
-        ? `✅ សំណើដំឡើង «${listingLabel}» ត្រូវបានបញ្ជូនជោគជ័យ! រង់ចាំការអនុម័តពីរដ្ឋបាល (Admin) មុនពេលផ្សព្វផ្សាយជាសាធារណៈ។`
-        : `✅ Upgrade request for "${targetRest.nameEn || targetRest.nameKh}" submitted! Changes will be published after Admin approval.`,
+      tr(language, `✅ សំណើដំឡើង «${listingLabel}» ត្រូវបានបញ្ជូនជោគជ័យ! រង់ចាំការអនុម័តពីរដ្ឋបាល (Admin) មុនពេលផ្សព្វផ្សាយជាសាធារណៈ។`, `✅ Upgrade request for "${targetRest.nameEn || targetRest.nameKh}" submitted! Changes will be published after Admin approval.`, `✅ 已提交“${targetRest.nameEn || targetRest.nameKh}”的升级申请！更改将在管理员审核后发布。`),
       'success'
     );
     return updatedRestWithPendingUpgrade;
@@ -12387,9 +12263,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
 
     showToast(
-      language === 'km'
-        ? `✅ បានអនុម័តការដំឡើង និងផ្សព្វផ្សាយព័ត៌មានថ្មីសម្រាប់ «${approvedRest.nameKh}» ជោគជ័យ!`
-        : `✅ Approved and published upgrade for "${approvedRest.nameEn || approvedRest.nameKh}"!`,
+      tr(language, `✅ បានអនុម័តការដំឡើង និងផ្សព្វផ្សាយព័ត៌មានថ្មីសម្រាប់ «${approvedRest.nameKh}» ជោគជ័យ!`, `✅ Approved and published upgrade for "${approvedRest.nameEn || approvedRest.nameKh}"!`, `✅ 已批准并发布“${approvedRest.nameEn || approvedRest.nameKh}”的升级！`),
       'success'
     );
   };
@@ -12403,9 +12277,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const req = targetRest.pendingUpgradeRequest;
     const rejectionNote =
       reason?.trim() ||
-      (language === 'km'
-        ? 'ព័ត៌មានដែលស្នើកែប្រែមិនគ្រប់គ្រាន់ ឬមិនត្រឹមត្រូវតាមគោលការណ៍ — រក្សាព័ត៌មានដើមដដែល។'
-        : 'Submitted changes did not meet verification requirements — original listing preserved.');
+      (tr(language, 'ព័ត៌មានដែលស្នើកែប្រែមិនគ្រប់គ្រាន់ ឬមិនត្រឹមត្រូវតាមគោលការណ៍ — រក្សាព័ត៌មានដើមដដែល។', 'Submitted changes did not meet verification requirements — original listing preserved.', '提交的更改不符合验证要求 — 已保留原列表。'));
 
     const rejectedRest: Restaurant = normalizeRestaurant({
       ...targetRest,
@@ -12453,9 +12325,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
 
     showToast(
-      language === 'km'
-        ? `🚫 បានបដិសេធសំណើដំឡើងសម្រាប់ «${targetRest.nameKh}» — រក្សាព័ត៌មានដើមដដែល។`
-        : `🚫 Rejected upgrade request for "${targetRest.nameEn || targetRest.nameKh}" — original listing preserved.`,
+      tr(language, `🚫 បានបដិសេធសំណើដំឡើងសម្រាប់ «${targetRest.nameKh}» — រក្សាព័ត៌មានដើមដដែល។`, `🚫 Rejected upgrade request for "${targetRest.nameEn || targetRest.nameKh}" — original listing preserved.`, `🚫 已拒绝“${targetRest.nameEn || targetRest.nameKh}”的升级申请 — 已保留原列表。`),
       'info'
     );
   };
@@ -12507,9 +12377,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const dup = checkDuplicateDestination(destData);
     if (dup.isDuplicate && dup.duplicate) {
       showToast(
-        language === 'km'
-          ? `⚠️ ទីតាំងនេះមានរួចហើយ៖ «${dup.duplicate.nameKh}» (${dup.duplicate.provinceKh})`
-          : `⚠️ Duplicate destination detected: "${dup.duplicate.nameEn}" (${dup.duplicate.provinceEn})`,
+        tr(language, `⚠️ ទីតាំងនេះមានរួចហើយ៖ «${dup.duplicate.nameKh}» (${dup.duplicate.provinceKh})`, `⚠️ Duplicate destination detected: "${dup.duplicate.nameEn}" (${dup.duplicate.provinceEn})`, `⚠️ 检测到重复景点：“${dup.duplicate.nameEn}” (${dup.duplicate.provinceEn})`),
         'warning'
       );
       return false;
@@ -12545,7 +12413,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_destinations_real_v9', next, 400);
       return next;
     });
-    showToast(language === 'km' ? 'បានបញ្ចូលតំបន់ទេសចរណ៍ថ្មីដោយជោគជ័យ' : 'Destination added!', 'success');
+    showToast(tr(language, 'បានបញ្ចូលតំបន់ទេសចរណ៍ថ្មីដោយជោគជ័យ', 'Destination added!', '景点添加成功！'), 'success');
 
     // Automatically retrieve corresponding place photo from Google Maps if none was provided
     if (!hasProvidedRealPhoto && newDest.categorySlug !== 'hotel') {
@@ -12641,9 +12509,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): { imported: boolean; duplicate: boolean; type: 'restaurant' | 'tourism'; id: string; item?: Restaurant | TouristDestination } => {
     if (!isAdminAccount(currentUser)) {
       showToast(
-        language === 'km'
-          ? '⚠️ សិទ្ធិបន្ថែម ឬនាំចូលហាងចូលកម្មវិធី អនុញ្ញាតសម្រាប់តែគណនីរដ្ឋបាល (Admin) ប៉ុណ្ណោះ!'
-          : '⚠️ Only Admin is permitted to add or import shops into the app!',
+        tr(language, '⚠️ សិទ្ធិបន្ថែម ឬនាំចូលហាងចូលកម្មវិធី អនុញ្ញាតសម្រាប់តែគណនីរដ្ឋបាល (Admin) ប៉ុណ្ណោះ!', '⚠️ Only Admin is permitted to add or import shops into the app!', '⚠️ 仅管理员有权向应用中添加或导入店铺！'),
         'warning'
       );
       return { imported: false, duplicate: false, type: 'restaurant', id: '' };
@@ -12679,9 +12545,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return next;
         });
         showToast(
-          language === 'km'
-            ? `ℹ️ តំបន់ទេសចរណ៍ «${refreshedDest.nameKh}» មានក្នុងប្រព័ន្ធរួចហើយ (បានធ្វើបច្ចុប្បន្នភាពទិន្នន័យ Google Maps)`
-            : `ℹ️ "${refreshedDest.nameEn}" is already in the database (Google Maps metadata synced).`,
+          tr(language, `ℹ️ តំបន់ទេសចរណ៍ «${refreshedDest.nameKh}» មានក្នុងប្រព័ន្ធរួចហើយ (បានធ្វើបច្ចុប្បន្នភាពទិន្នន័យ Google Maps)`, `ℹ️ "${refreshedDest.nameEn}" is already in the database (Google Maps metadata synced).`, `ℹ️ “${refreshedDest.nameEn}”已在数据库中（已同步 Google Maps 元数据）。`),
           'info'
         );
         return { imported: false, duplicate: true, type: 'tourism', id: existingDest.id, item: refreshedDest };
@@ -12710,9 +12574,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return next;
       });
       showToast(
-        language === 'km'
-          ? `✅ បាននាំចូលតំបន់ទេសចរណ៍ «${finalDest.nameKh}» ពី Google Maps ជោគជ័យ!`
-          : `✅ Imported tourist attraction "${finalDest.nameEn}" from Google Maps!`,
+        tr(language, `✅ បាននាំចូលតំបន់ទេសចរណ៍ «${finalDest.nameKh}» ពី Google Maps ជោគជ័យ!`, `✅ Imported tourist attraction "${finalDest.nameEn}" from Google Maps!`, `✅ 已从 Google Maps 成功导入旅游景点“${finalDest.nameEn}”！`),
         'success'
       );
 
@@ -12773,9 +12635,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return next;
       });
       showToast(
-        language === 'km'
-          ? `ℹ️ ហាង «${finalMerged.nameKh}» មានក្នុងប្រព័ន្ធរួចហើយ (រក្សាទុកព័ត៌មាន Admin និងធ្វើបច្ចុប្បន្នភាព Google Maps)`
-          : `ℹ️ "${finalMerged.nameEn}" already exists (Admin data preserved & Google Maps synced).`,
+        tr(language, `ℹ️ ហាង «${finalMerged.nameKh}» មានក្នុងប្រព័ន្ធរួចហើយ (រក្សាទុកព័ត៌មាន Admin និងធ្វើបច្ចុប្បន្នភាព Google Maps)`, `ℹ️ "${finalMerged.nameEn}" already exists (Admin data preserved & Google Maps synced).`, `ℹ️ “${finalMerged.nameEn}”已存在（已保留管理员数据并同步 Google Maps）。`),
         'info'
       );
       return { imported: false, duplicate: true, type: 'restaurant', id: existingRest.id, item: finalMerged };
@@ -12831,9 +12691,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return next;
     });
     showToast(
-      language === 'km'
-        ? `✅ បាននាំចូលហាង «${finalRest.nameKh}» ពី Google Maps ចូលក្នុងបញ្ជីកម្មវិធីជោគជ័យ!`
-        : `✅ Imported "${finalRest.nameEn}" from Google Maps into the app directory!`,
+      tr(language, `✅ បាននាំចូលហាង «${finalRest.nameKh}» ពី Google Maps ចូលក្នុងបញ្ជីកម្មវិធីជោគជ័យ!`, `✅ Imported "${finalRest.nameEn}" from Google Maps into the app directory!`, `✅ 已从 Google Maps 导入“${finalRest.nameEn}”至应用名录！`),
       'success'
     );
 
@@ -12843,9 +12701,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteDestination = (id: string) => {
     if (!isCurrentUserAdmin()) {
       showToast(
-        language === 'km'
-          ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែ Administrator ប៉ុណ្ណោះដែលអាចលុបតំបន់ទេសចរណ៍បាន!'
-          : '⛔ Unauthorized: Only Administrator can delete tourist destinations!',
+        tr(language, '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែ Administrator ប៉ុណ្ណោះដែលអាចលុបតំបន់ទេសចរណ៍បាន!', '⛔ Unauthorized: Only Administrator can delete tourist destinations!', '⛔ 未授权：仅管理员可删除旅游景点！'),
         'warning'
       );
       return;
@@ -12868,7 +12724,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return next;
     });
     if (selectedDestination?.id === id) setSelectedDestination(null);
-    showToast(language === 'km' ? 'បានលុបតំបន់ទេសចរណ៍ជាអចិន្ត្រៃយ៍' : 'Destination permanently deleted', 'info');
+    showToast(tr(language, 'បានលុបតំបន់ទេសចរណ៍ជាអចិន្ត្រៃយ៍', 'Destination permanently deleted', '景点已永久删除'), 'info');
   };
 
   // Transactions & $2.99 Registration Payment
@@ -12906,9 +12762,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Security Safeguard: Only authenticated Administrator can approve payments
     if (!currentUser || currentUser.role !== 'admin') {
       showToast(
-        language === 'km' 
-          ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចអនុម័តការទូទាត់ប្រាក់បាន!' 
-          : '⛔ Unauthorized: Only an authenticated Administrator can approve payments!',
+        tr(language, '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចអនុម័តការទូទាត់ប្រាក់បាន!', '⛔ Unauthorized: Only an authenticated Administrator can approve payments!', '⛔ 未授权：仅已认证的管理员可批准付款！'),
         'warning'
       );
       return;
@@ -12920,9 +12774,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Prevent duplicate approvals and duplicate VIP extensions
     if (matchedTxn.status === 'verified') {
       showToast(
-        language === 'km' 
-          ? 'ប្រតិបត្តិការនេះត្រូវបានអនុម័តរួចហើយ!' 
-          : 'This transaction has already been approved!',
+        tr(language, 'ប្រតិបត្តិការនេះត្រូវបានអនុម័តរួចហើយ!', 'This transaction has already been approved!', '此交易已被批准！'),
         'info'
       );
       return;
@@ -12931,9 +12783,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Strict Guard A: Block modified, fake, or explicitly mismatched receipts from being approved
     if (matchedTxn.aiVerificationReport?.status === 'rejected_mismatch') {
       showToast(
-        language === 'km'
-          ? '\u26d4 \u1794\u178a\u17b7\u179f\u17c1\u1792\u1780\u17b6\u179a\u17a2\u1793\u17bb\u1798\u17d0\u178f\u17d6 \u179c\u17b7\u1780\u17d2\u1780\u1799\u1794\u178f\u17d2\u179a\u1793\u17c1\u17c7\u1798\u17b7\u1793\u1787\u17b6\u1794\u17cb\u1780\u17b6\u179a\u1795\u17d2\u1791\u17c0\u1784\u1795\u17d2\u1791\u17b6\u178f\u17cb (Rejected Mismatch)!'
-          : '\u26d4 Approval Blocked: Receipt failed verification checks (modified, fake, old, duplicate, or mismatched)!',
+        tr(language, '\u26d4 \u1794\u178a\u17b7\u179f\u17c1\u1792\u1780\u17b6\u179a\u17a2\u1793\u17bb\u1798\u17d0\u178f\u17d6 \u179c\u17b7\u1780\u17d2\u1780\u1799\u1794\u178f\u17d2\u179a\u1793\u17c1\u17c7\u1798\u17b7\u1793\u1787\u17b6\u1794\u17cb\u1780\u17b6\u179a\u1795\u17d2\u1791\u17c0\u1784\u1795\u17d2\u1791\u17b6\u178f\u17cb (Rejected Mismatch)!', '\u26d4 Approval Blocked: Receipt failed verification checks (modified, fake, old, duplicate, or mismatched)!', '⛔ 批准已被阻止：收据未通过验证检查（篡改、伪造、过期、重复或不匹配）！'),
         'warning'
       );
       return;
@@ -12951,9 +12801,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!normTrxKey || normTrxKey.length < 8) {
       showToast(
-        language === 'km'
-          ? '\u26d4 \u1798\u17b7\u1793\u17a2\u17b6\u1785\u17a2\u1793\u17bb\u1798\u17d0\u178f\u1794\u17b6\u1793\u1791\u17c1\u17d6 \u1782\u17d2\u1798\u17b6\u1793\u179b\u17c1\u1781\u1794\u17d2\u179a\u178f\u17b7\u1794\u178f\u17d2\u178f\u17b7\u1780\u17b6\u179a ABA \u1796\u17b7\u178f\u1794\u17d2\u179a\u17b6\u1780\u178a (Trx. ID)!'
-          : '\u26d4 Approval Blocked: Missing a valid ABA Transaction ID (Trx. ID)! Only verified transactions with a genuine ABA Trx. ID can be approved.',
+        tr(language, '\u26d4 \u1798\u17b7\u1793\u17a2\u17b6\u1785\u17a2\u1793\u17bb\u1798\u17d0\u178f\u1794\u17b6\u1793\u1791\u17c1\u17d6 \u1782\u17d2\u1798\u17b6\u1793\u179b\u17c1\u1781\u1794\u17d2\u179a\u178f\u17b7\u1794\u178f\u17d2\u178f\u17b7\u1780\u17b6\u179a ABA \u1796\u17b7\u178f\u1794\u17d2\u179a\u17b6\u1780\u178a (Trx. ID)!', '\u26d4 Approval Blocked: Missing a valid ABA Transaction ID (Trx. ID)! Only verified transactions with a genuine ABA Trx. ID can be approved.', '⛔ 批准已被阻止：缺少有效的 ABA 交易单号 (Trx. ID)！仅具有真实 ABA Trx. ID 的已核实交易可被批准。'),
         'warning'
       );
       return;
@@ -12991,9 +12839,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
       } catch {}
       showToast(
-        language === 'km'
-          ? `\u26d4 \u1794\u178a\u17b7\u179f\u17c1\u1792\u1780\u17b6\u179a\u17a2\u1793\u17bb\u1798\u17d0\u178f\u17d6 \u179b\u17c1\u1781\u1794\u17d2\u179a\u178f\u17b7\u1794\u178f\u17d2\u178f\u17b7\u1780\u17b6\u179a ABA (${normTrxKey}) \u178f\u17d2\u179a\u17bc\u179c\u1794\u17b6\u1793\u1794\u17d2\u179a\u17be\u1794\u17d2\u179a\u17b6\u179f\u17cb\u179a\u17bd\u1785\u1798\u17d2\u178f\u1784\u17a0\u17be\u1799\u178a\u17c4\u1799 (${priorOwner})!`
-          : `\u26d4 Approval Blocked: ABA Transaction ID (${normTrxKey}) has ALREADY been used by (${priorOwner})! One ABA transaction can only activate or renew VIP once.`,
+        tr(language, `\u26d4 \u1794\u178a\u17b7\u179f\u17c1\u1792\u1780\u17b6\u179a\u17a2\u1793\u17bb\u1798\u17d0\u178f\u17d6 \u179b\u17c1\u1781\u1794\u17d2\u179a\u178f\u17b7\u1794\u178f\u17d2\u178f\u17b7\u1780\u17b6\u179a ABA (${normTrxKey}) \u178f\u17d2\u179a\u17bc\u179c\u1794\u17b6\u1793\u1794\u17d2\u179a\u17be\u1794\u17d2\u179a\u17b6\u179f\u17cb\u179a\u17bd\u1785\u1798\u17d2\u178f\u1784\u17a0\u17be\u1799\u178a\u17c4\u1799 (${priorOwner})!`, `\u26d4 Approval Blocked: ABA Transaction ID (${normTrxKey}) has ALREADY been used by (${priorOwner})! One ABA transaction can only activate or renew VIP once.`, `⛔ 批准已被阻止：ABA 交易单号 (${normTrxKey}) 已被 (${priorOwner}) 使用！每笔 ABA 交易只能激活或续费一次 VIP。`),
         'warning'
       );
       return;
@@ -13143,9 +12989,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       showToast(
-        language === 'km'
-          ? `✅ បានផ្ទៀងផ្ទាត់ និងបើកសិទ្ធិបន្ថែមហាងថ្មី (+1 ហាង) ជូនអតិថិជនដោយជោគជ័យ!`
-          : `✅ Verified payment and unlocked +1 additional store slot for user!`,
+        tr(language, `✅ បានផ្ទៀងផ្ទាត់ និងបើកសិទ្ធិបន្ថែមហាងថ្មី (+1 ហាង) ជូនអតិថិជនដោយជោគជ័យ!`, `✅ Verified payment and unlocked +1 additional store slot for user!`, '✅ 已核实付款并为用户解锁 +1 个额外店铺名额！'),
         'success'
       );
       return;
@@ -13272,9 +13116,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ]);
 
       showToast(
-        language === 'km'
-          ? `✅ បានអនុម័ត និងបើកកញ្ចប់ហាង VIP (${shopDurationDays} ថ្ងៃ) ដោយជោគជ័យ!`
-          : `✅ Verified & activated VIP Shop Package (${shopDurationDays} days)!`,
+        tr(language, `✅ បានអនុម័ត និងបើកកញ្ចប់ហាង VIP (${shopDurationDays} ថ្ងៃ) ដោយជោគជ័យ!`, `✅ Verified & activated VIP Shop Package (${shopDurationDays} days)!`, `✅ 已核实并激活 VIP 店铺套餐 (${shopDurationDays} 天)！`),
         'success'
       );
       return;
@@ -13421,9 +13263,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     showToast(
-      language === 'km' 
-        ? 'បានផ្ទៀងផ្ទាត់ និងអនុម័តធ្វើឱ្យសមាជិកភាពសកម្មដោយជោគជ័យ!' 
-        : 'Payment verified: Membership activated successfully!',
+      tr(language, 'បានផ្ទៀងផ្ទាត់ និងអនុម័តធ្វើឱ្យសមាជិកភាពសកម្មដោយជោគជ័យ!', 'Payment verified: Membership activated successfully!', '付款已核实：会员资格已成功激活！'),
       'success'
     );
   };
@@ -13432,9 +13272,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Security Safeguard: Only authenticated Administrator can reject payments
     if (!currentUser || currentUser.role !== 'admin') {
       showToast(
-        language === 'km' 
-          ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចបដិសេធការទូទាត់ប្រាក់បាន!' 
-          : '⛔ Unauthorized: Only an authenticated Administrator can reject payments!',
+        tr(language, '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចបដិសេធការទូទាត់ប្រាក់បាន!', '⛔ Unauthorized: Only an authenticated Administrator can reject payments!', '⛔ 未授权：仅已认证的管理员可拒绝付款！'),
         'warning'
       );
       return;
@@ -13562,9 +13400,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     showToast(
-      language === 'km' 
-        ? 'បានបដិសេធប្រតិបត្តិការទូទាត់' 
-        : 'Transaction rejected',
+      tr(language, 'បានបដិសេធប្រតិបត្តិការទូទាត់', 'Transaction rejected', '交易已拒绝'),
       'info'
     );
   };
@@ -13573,9 +13409,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const requestMorePaymentInfo = (txnId: string, reason?: string) => {
     if (!currentUser || currentUser.role !== 'admin') {
       showToast(
-        language === 'km'
-          ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចស្នើសុំព័ត៌មានបន្ថែមបាន!'
-          : '⛔ Unauthorized: Only an authenticated Administrator can request more payment info!',
+        tr(language, '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចស្នើសុំព័ត៌មានបន្ថែមបាន!', '⛔ Unauthorized: Only an authenticated Administrator can request more payment info!', '⛔ 未授权：仅已认证的管理员可要求提供更多付款信息！'),
         'warning'
       );
       return;
@@ -13661,9 +13495,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     showToast(
-      language === 'km'
-        ? 'បានផ្ញើសំណើសុំភស្តុតាងបង់ប្រាក់បន្ថែមទៅកាន់អ្នកប្រើប្រាស់!'
-        : 'Sent request for clearer payment proof to user!',
+      tr(language, 'បានផ្ញើសំណើសុំភស្តុតាងបង់ប្រាក់បន្ថែមទៅកាន់អ្នកប្រើប្រាស់!', 'Sent request for clearer payment proof to user!', '已向用户发送要求提供更清晰付款凭证的请求！'),
       'info'
     );
   };
@@ -13673,9 +13505,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteTransactions = (txnIds: string[]): { success: boolean; deletedCount: number } => {
     if (!currentUser || currentUser.role !== 'admin') {
       showToast(
-        language === 'km'
-          ? '⛔ មានតែរដ្ឋបាលប្រព័ន្ធ (Admin) ប៉ុណ្ណោះដែលមានសិទ្ធិលុបកំណត់ត្រាទូទាត់!'
-          : '⛔ Only the Administrator can delete payment records!',
+        tr(language, '⛔ មានតែរដ្ឋបាលប្រព័ន្ធ (Admin) ប៉ុណ្ណោះដែលមានសិទ្ធិលុបកំណត់ត្រាទូទាត់!', '⛔ Only the Administrator can delete payment records!', '⛔ 仅管理员可以删除付款记录！'),
         'warning'
       );
       return { success: false, deletedCount: 0 };
@@ -13737,9 +13567,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     showToast(
-      language === 'km'
-        ? `🗑️ បានលុបកំណត់ត្រាទូទាត់ចំនួន ${toDelete.length} ដោយជោគជ័យ! (គណនីអ្នកប្រើប្រាស់ និងស្ថានភាព VIP រក្សាទុកដដែល)`
-        : `🗑️ Deleted ${toDelete.length} payment record(s) successfully! (User accounts and VIP status remain unchanged)`,
+      tr(language, `🗑️ បានលុបកំណត់ត្រាទូទាត់ចំនួន ${toDelete.length} ដោយជោគជ័យ! (គណនីអ្នកប្រើប្រាស់ និងស្ថានភាព VIP រក្សាទុកដដែល)`, `🗑️ Deleted ${toDelete.length} payment record(s) successfully! (User accounts and VIP status remain unchanged)`, `🗑️ 成功删除 ${toDelete.length} 条付款记录！（用户账号及 VIP 状态保持不变）`),
       'info'
     );
 
@@ -13819,9 +13647,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!proofDataUrl || !proofDataUrl.startsWith('data:image/')) {
       const msg =
-        language === 'km'
-          ? 'សូមជ្រើសរើសឯកសាររូបភាពឱ្យបានត្រឹមត្រូវ (JPG, JPEG, PNG)'
-          : 'Please select a valid image file (JPG, JPEG, PNG)';
+        tr(language, 'សូមជ្រើសរើសឯកសាររូបភាពឱ្យបានត្រឹមត្រូវ (JPG, JPEG, PNG)', 'Please select a valid image file (JPG, JPEG, PNG)', '请选择有效的图片文件 (JPG, JPEG, PNG)');
       showToast(msg, 'warning');
       return { success: false, error: msg };
     }
@@ -15259,9 +15085,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser.username === 'cheasavuth';
     if (!isAdmin && !isUserPaidVipActive(currentUser)) {
       const msg =
-        language === 'km'
-          ? '🔒 មានតែគណនី VIP សកម្មប៉ុណ្ណោះដែលអាចបន្ថែមហាងថ្មីបាន។ សូមដំឡើង ឬបន្តសមាជិកភាព VIP ជាមុនសិន!'
-          : '🔒 Only active VIP accounts can purchase additional store slots. Please upgrade or renew VIP first!';
+        tr(language, '🔒 មានតែគណនី VIP សកម្មប៉ុណ្ណោះដែលអាចបន្ថែមហាងថ្មីបាន។ សូមដំឡើង ឬបន្តសមាជិកភាព VIP ជាមុនសិន!', '🔒 Only active VIP accounts can purchase additional store slots. Please upgrade or renew VIP first!', '🔒 仅有效 VIP 账号可购买额外店铺名额。请先升级或续费 VIP！');
       showToast(msg, 'warning');
       return { success: false, transactionId: '', error: msg };
     }
@@ -15288,9 +15112,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
       }
       const pendingMsg =
-        language === 'km'
-          ? `⏳ អ្នកមានសំណើទូទាត់បន្ថែមហាង ($${requiredFee.toFixed(2)}) កំពុងរង់ចាំ Admin ពិនិត្យរួចហើយ (${quota.pendingAdditionalStoreTransaction.id})។ ប្រព័ន្ធការពារមិនឱ្យគិតប្រាក់ស្ទួនឡើយ!`
-          : `⏳ You already have a pending additional-store payment request (${quota.pendingAdditionalStoreTransaction.id}). Duplicate charges are prevented!`;
+        tr(language, `⏳ អ្នកមានសំណើទូទាត់បន្ថែមហាង ($${requiredFee.toFixed(2)}) កំពុងរង់ចាំ Admin ពិនិត្យរួចហើយ (${quota.pendingAdditionalStoreTransaction.id})។ ប្រព័ន្ធការពារមិនឱ្យគិតប្រាក់ស្ទួនឡើយ!`, `⏳ You already have a pending additional-store payment request (${quota.pendingAdditionalStoreTransaction.id}). Duplicate charges are prevented!`, `⏳ 您已有一个待处理的附加店铺付款请求 (${quota.pendingAdditionalStoreTransaction.id})。已防止重复收费！`);
       showToast(pendingMsg, 'info');
       return {
         success: true,
@@ -15322,9 +15144,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!backendCheck.success) {
       const errMsg = backendCheck.error || 'Additional store payment verification failed.';
       showToast(
-        language === 'km'
-          ? `ការផ្ទៀងផ្ទាត់ការបង់ប្រាក់បន្ថែមហាងបរាជ័យ៖ ${errMsg}`
-          : `Additional store payment invalid: ${errMsg}`,
+        tr(language, `ការផ្ទៀងផ្ទាត់ការបង់ប្រាក់បន្ថែមហាងបរាជ័យ៖ ${errMsg}`, `Additional store payment invalid: ${errMsg}`, `附加店铺付款无效：${errMsg}`),
         'warning'
       );
       return { success: false, transactionId: '', error: errMsg };
@@ -15437,9 +15257,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setUsers(prev => prev.map(u => (u.id === currentUser.id ? updatedUser : u)));
 
       showToast(
-        language === 'km'
-          ? `🎉 ផ្ទៀងផ្ទាត់ការបង់ប្រាក់បន្ថែមហាង ($${requiredFee.toFixed(2)} USD) ជោគជ័យ! ឥឡូវនេះអ្នកអាចបង្កើតហាងទី ${nextSlotNumber} បានភ្លាមៗ!`
-          : `🎉 Verified $${requiredFee.toFixed(2)} USD additional-store payment! You can now create Store #${nextSlotNumber} immediately!`,
+        tr(language, `🎉 ផ្ទៀងផ្ទាត់ការបង់ប្រាក់បន្ថែមហាង ($${requiredFee.toFixed(2)} USD) ជោគជ័យ! ឥឡូវនេះអ្នកអាចបង្កើតហាងទី ${nextSlotNumber} បានភ្លាមៗ!`, `🎉 Verified $${requiredFee.toFixed(2)} USD additional-store payment! You can now create Store #${nextSlotNumber} immediately!`, `🎉 已核实 $${requiredFee.toFixed(2)} USD 附加店铺付款！您现在可以立即创建第 #${nextSlotNumber} 家店铺！`),
         'success'
       );
       return { success: true, transactionId: txnId, autoVerified: true };
@@ -15458,9 +15276,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setNotifications(prev => [adminNotif, ...prev]);
 
     showToast(
-      language === 'km'
-        ? `⏳ បានបញ្ជូនភស្តុតាងបង់ប្រាក់បន្ថែមហាង ($${requiredFee.toFixed(2)}) រួចរាល់! កំពុងរង់ចាំ Admin ពិនិត្យ និងអនុម័ត។`
-        : `⏳ Additional store payment ($${requiredFee.toFixed(2)}) submitted! Awaiting Admin verification.`,
+      tr(language, `⏳ បានបញ្ជូនភស្តុតាងបង់ប្រាក់បន្ថែមហាង ($${requiredFee.toFixed(2)}) រួចរាល់! កំពុងរង់ចាំ Admin ពិនិត្យ និងអនុម័ត។`, `⏳ Additional store payment ($${requiredFee.toFixed(2)}) submitted! Awaiting Admin verification.`, `⏳ 已提交附加店铺付款 ($${requiredFee.toFixed(2)})！等待管理员核实。`),
       'info'
     );
     return { success: true, transactionId: txnId, autoVerified: false };
@@ -15753,7 +15569,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const isAdminSender = currentUser.role === 'admin';
     const isTicketOwner = currentUser.id === targetTicket.userId;
     if (!isAdminSender && !isTicketOwner) {
-      showToast(language === 'km' ? 'គ្មានសិទ្ធិឆ្លើយតបសារនេះទេ!' : 'Unauthorized!', 'warning');
+      showToast(tr(language, 'គ្មានសិទ្ធិឆ្លើយតបសារនេះទេ!', 'Unauthorized!', '未授权！'), 'warning');
       return false;
     }
 
@@ -15764,7 +15580,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       senderRole: isAdminSender ? 'admin' : 'user',
       senderId: currentUser.id,
       senderName: isAdminSender ? `${currentUser.name} (Admin)` : currentUser.name,
-      message: cleanText || (language === 'km' ? 'បានភ្ជាប់រូបភាពវិក្កយបត្របន្ថែម' : 'Attached payment receipt'),
+      message: cleanText || (tr(language, 'បានភ្ជាប់រូបភាពវិក្កយបត្របន្ថែម', 'Attached payment receipt', '已附加付款凭证')),
       attachmentUrl,
       createdAt: readableNow,
     };
@@ -15796,7 +15612,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isRead: false,
       };
       setNotifications(prev => [replyNotif, ...prev]);
-      showToast(language === 'km' ? '✅ បានផ្ញើការឆ្លើយតបទៅកាន់អ្នកប្រើប្រាស់!' : '✅ Reply sent to user!', 'success');
+      showToast(tr(language, '✅ បានផ្ញើការឆ្លើយតបទៅកាន់អ្នកប្រើប្រាស់!', '✅ Reply sent to user!', '✅ 已向用户发送回复！'), 'success');
     } else {
       const userReplyNotif: AppNotification = {
         id: `notif-sup-user-${Date.now()}`,
@@ -15809,7 +15625,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isRead: false,
       };
       setNotifications(prev => [userReplyNotif, ...prev]);
-      showToast(language === 'km' ? '✅ បានផ្ញើសារឆ្លើយតបទៅកាន់ Admin!' : '✅ Message sent to Admin!', 'success');
+      showToast(tr(language, '✅ បានផ្ញើសារឆ្លើយតបទៅកាន់ Admin!', '✅ Message sent to Admin!', '✅ 已向管理员发送消息！'), 'success');
     }
 
     return true;
@@ -15821,9 +15637,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       prev.map(t => (t.id === ticketId ? { ...t, status, updatedAt: readableNow } : t))
     );
     showToast(
-      language === 'km'
-        ? `បានប្តូរស្ថានភាពសំណើទៅជា "${status.toUpperCase()}"`
-        : `Updated ticket status to "${status.toUpperCase()}"`,
+      tr(language, `បានប្តូរស្ថានភាពសំណើទៅជា "${status.toUpperCase()}"`, `Updated ticket status to "${status.toUpperCase()}"`, `已将工单状态更新为“${status.toUpperCase()}”`),
       'info'
     );
   };
@@ -15846,9 +15660,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const approveVipFromSupportTicket = (ticketId: string, durationDays?: number, adminNote?: string) => {
     if (!currentUser || currentUser.role !== 'admin') {
       showToast(
-        language === 'km'
-          ? '⛔ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចអនុម័តបើកដំណើរការ VIP បាន!'
-          : '⛔ Only an Administrator can approve and activate VIP!',
+        tr(language, '⛔ មានតែគណនី Administrator ប៉ុណ្ណោះដែលអាចអនុម័តបើកដំណើរការ VIP បាន!', '⛔ Only an Administrator can approve and activate VIP!', '⛔ 仅管理员可以批准并激活 VIP！'),
         'warning'
       );
       return;
@@ -16004,9 +15816,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setNotifications(prev => [vipNotif, ...prev]);
 
     showToast(
-      language === 'km'
-        ? `🎉 បានអនុម័ត និងបើកដំណើរការ VIP (${finalDays} ថ្ងៃ / $${finalPrice.toFixed(2)}) ជូន ${ticket.username} ដោយជោគជ័យ!`
-        : `🎉 Approved & activated VIP (${finalDays} days / $${finalPrice.toFixed(2)}) for ${ticket.username}!`,
+      tr(language, `🎉 បានអនុម័ត និងបើកដំណើរការ VIP (${finalDays} ថ្ងៃ / $${finalPrice.toFixed(2)}) ជូន ${ticket.username} ដោយជោគជ័យ!`, `🎉 Approved & activated VIP (${finalDays} days / $${finalPrice.toFixed(2)}) for ${ticket.username}!`, `🎉 成功为 ${ticket.username} 批准并激活 VIP (${finalDays} 天 / $${finalPrice.toFixed(2)})！`),
       'success'
     );
   };
@@ -16066,15 +15876,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     data: Omit<AiCheckInSubmission, 'id' | 'checkInTime' | 'status'> & { id?: string; checkInTime?: string }
   ): Promise<{ success: boolean; isDuplicate?: boolean; isBranch?: boolean; status: 'approved' | 'pending' | 'rejected' | 'merged'; restaurantId?: string; message: string }> => {
     if (!currentUser) {
-      showToast(language === 'km' ? 'សូមចូលគណនី Administrator ដើម្បីឆែកអ៊ីន!' : 'Please sign in with an Administrator account!', 'warning');
+      showToast(tr(language, 'សូមចូលគណនី Administrator ដើម្បីឆែកអ៊ីន!', 'Please sign in with an Administrator account!', '请使用管理员账号登录！'), 'warning');
       setIsAuthModalOpen(true);
       return { success: false, status: 'pending', message: 'Authentication required' };
     }
 
     if (currentUser.role !== 'admin') {
-      const adminOnlyMsg = language === 'km'
-        ? 'មុខងារឆែកអ៊ីន & បន្ថែមហាងដោយ AI ត្រូវបានកំណត់សម្រាប់តែគណនី Administrator ប៉ុណ្ណោះ'
-        : 'AI Smart Check-in & Auto Add Restaurant is strictly restricted to Administrator accounts only.';
+      const adminOnlyMsg = tr(language, 'មុខងារឆែកអ៊ីន & បន្ថែមហាងដោយ AI ត្រូវបានកំណត់សម្រាប់តែគណនី Administrator ប៉ុណ្ណោះ', 'AI Smart Check-in & Auto Add Restaurant is strictly restricted to Administrator accounts only.', 'AI 智能签到与自动添加餐厅严格仅限管理员账号使用。');
       showToast(adminOnlyMsg, 'warning');
       return { success: false, status: 'rejected', message: adminOnlyMsg };
     }
@@ -16082,9 +15890,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Rate Limiting check (anti-spam, max 10/hour per user)
     const rateCheck = checkSubmissionRateLimit(currentUser.id);
     if (!rateCheck.allowed) {
-      const msg = language === 'km'
-        ? `អ្នកបានឆែកអ៊ីនលើសកម្រិតកំណត់ (អតិបរមា ១០ ដង/ម៉ោង)។ សូមរង់ចាំ ${rateCheck.waitMinutes} នាទីទៀត!`
-        : `Rate limit reached (max 10/hour). Please wait ${rateCheck.waitMinutes} minutes!`;
+      const msg = tr(language, `អ្នកបានឆែកអ៊ីនលើសកម្រិតកំណត់ (អតិបរមា ១០ ដង/ម៉ោង)។ សូមរង់ចាំ ${rateCheck.waitMinutes} នាទីទៀត!`, `Rate limit reached (max 10/hour). Please wait ${rateCheck.waitMinutes} minutes!`, `已达频率限制（最高 10 次/小时）。请等待 ${rateCheck.waitMinutes} 分钟！`);
       showToast(msg, 'warning');
       return { success: false, status: 'pending', message: msg };
     }
@@ -16130,9 +15936,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setAiCheckIns(prev => [mergedSubmission, ...prev]);
       recordSubmissionTimestamp(currentUser.id);
 
-      const successMsg = language === 'km'
-        ? `បានកត់ត្រាការឆែកអ៊ីន និងធ្វើបច្ចុប្បន្នភាពហាង «${matched.nameKh}» ដោយជោគជ័យ!`
-        : `Check-in recorded and updated for existing restaurant "${matched.nameEn || matched.nameKh}"!`;
+      const successMsg = tr(language, `បានកត់ត្រាការឆែកអ៊ីន និងធ្វើបច្ចុប្បន្នភាពហាង «${matched.nameKh}» ដោយជោគជ័យ!`, `Check-in recorded and updated for existing restaurant "${matched.nameEn || matched.nameKh}"!`, `已为现有餐厅“${matched.nameEn || matched.nameKh}”记录签到并更新！`);
       showToast(successMsg, 'success');
 
       return {
@@ -16196,9 +16000,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setAiCheckIns(prev => [approvedSubmission, ...prev]);
       recordSubmissionTimestamp(currentUser.id);
 
-      const msg = language === 'km'
-        ? `អបអរសាទរ! AI បានផ្ទៀងផ្ទាត់ និងបន្ថែមហាង «${data.restaurantNameKh}» ទៅក្នុងកម្មវិធីដោយស្វ័យប្រវត្តិ!`
-        : `Congratulations! AI verified and published "${data.restaurantNameKh}" automatically!`;
+      const msg = tr(language, `អបអរសាទរ! AI បានផ្ទៀងផ្ទាត់ និងបន្ថែមហាង «${data.restaurantNameKh}» ទៅក្នុងកម្មវិធីដោយស្វ័យប្រវត្តិ!`, `Congratulations! AI verified and published "${data.restaurantNameKh}" automatically!`, `恭喜！AI 已自动验证并发布“${data.restaurantNameKh}”！`);
       showToast(msg, 'success');
 
       return {
@@ -16220,9 +16022,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setAiCheckIns(prev => [pendingSubmission, ...prev]);
       recordSubmissionTimestamp(currentUser.id);
 
-      const msg = language === 'km'
-        ? 'ការឆែកអ៊ីនត្រូវបានកត់ត្រា និងបញ្ជូនទៅកាន់ក្រុមការងារ Admin ដើម្បីផ្ទៀងផ្ទាត់បន្ថែម!'
-        : 'Check-in recorded and submitted to Admin queue for further verification!';
+      const msg = tr(language, 'ការឆែកអ៊ីនត្រូវបានកត់ត្រា និងបញ្ជូនទៅកាន់ក្រុមការងារ Admin ដើម្បីផ្ទៀងផ្ទាត់បន្ថែម!', 'Check-in recorded and submitted to Admin queue for further verification!', '签到已记录并提交至管理员队列以待进一步验证！');
       showToast(msg, 'info');
 
       return {
@@ -16270,12 +16070,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setRestaurants(prev => sortRestaurantsChronologically([...prev, newRestaurant]));
     setAiCheckIns(prev => prev.map(c => c.id === id ? { ...c, status: 'approved', matchedExistingRestaurantId: newRestId } : c));
-    showToast(language === 'km' ? `បានអនុម័ត និងចុះផ្សាយហាង «${sub.restaurantNameKh}»!` : `Approved and published "${sub.restaurantNameKh}"!`, 'success');
+    showToast(tr(language, `បានអនុម័ត និងចុះផ្សាយហាង «${sub.restaurantNameKh}»!`, `Approved and published "${sub.restaurantNameKh}"!`, `已批准并发布“${sub.restaurantNameKh}”！`), 'success');
   };
 
   const rejectAiCheckIn = (id: string, reason?: string) => {
     setAiCheckIns(prev => prev.map(c => c.id === id ? { ...c, status: 'rejected', adminNotes: reason } : c));
-    showToast(language === 'km' ? 'បានបដិសេធការឆែកអ៊ីន!' : 'Rejected check-in submission!', 'info');
+    showToast(tr(language, 'បានបដិសេធការឆែកអ៊ីន!', 'Rejected check-in submission!', '已拒绝签到提交！'), 'info');
   };
 
   const mergeAiCheckIn = (checkInId: string, targetRestaurantId: string) => {
@@ -16292,7 +16092,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setRestaurants(prev => prev.map(r => r.id === target.id ? merged : r));
     setAiCheckIns(prev => prev.map(c => c.id === checkInId ? { ...c, status: 'merged', matchedExistingRestaurantId: target.id } : c));
-    showToast(language === 'km' ? `បានច្របាច់បញ្ចូលគ្នាជាមួយ «${target.nameKh}» រួចរាល់!` : `Merged with "${target.nameKh}" successfully!`, 'success');
+    showToast(tr(language, `បានច្របាច់បញ្ចូលគ្នាជាមួយ «${target.nameKh}» រួចរាល់!`, `Merged with "${target.nameKh}" successfully!`, `已成功与“${target.nameKh}”合并！`), 'success');
   };
 
   // Wishlist & Favorites methods (Available by default to all users without login/VIP blocking)
@@ -16307,12 +16107,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
     };
     setWishlists(prev => [newWl, ...prev]);
-    showToast(language === 'km' ? `បានបង្កើតបញ្ជី «${nameKh}»` : `Created list "${nameKh}"`, 'success');
+    showToast(tr(language, `បានបង្កើតបញ្ជី «${nameKh}»`, `Created list "${nameKh}"`, `已创建列表“${nameKh}”`), 'success');
   };
 
   const deleteWishlist = (id: string) => {
     setWishlists(prev => prev.filter(w => w.id !== id));
-    showToast(language === 'km' ? 'បានលុបបញ្ជីជោគជ័យ' : 'List deleted', 'info');
+    showToast(tr(language, 'បានលុបបញ្ជីជោគជ័យ', 'List deleted', '列表已删除'), 'info');
   };
 
   const addToWishlist = (wishlistId: string, item: Omit<WishlistItem, 'addedAt'>) => {
@@ -16327,7 +16127,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         items: [{ ...item, addedAt: new Date().toISOString() }, ...w.items],
       };
     }));
-    showToast(language === 'km' ? `បានបញ្ចូល «${item.nameKh}» ទៅក្នុងបញ្ជី!` : `Added "${item.nameEn || item.nameKh}" to list!`, 'success');
+    showToast(tr(language, `បានបញ្ចូល «${item.nameKh}» ទៅក្នុងបញ្ជី!`, `Added "${item.nameEn || item.nameKh}" to list!`, `已将“${item.nameEn || item.nameKh}”添加到列表中！`), 'success');
   };
 
   const removeFromWishlist = (wishlistId: string, itemId: string) => {
@@ -16338,7 +16138,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         items: w.items.filter(i => i.id !== itemId),
       };
     }));
-    showToast(language === 'km' ? 'បានដកចេញពីបញ្ជី' : 'Removed from list', 'info');
+    showToast(tr(language, 'បានដកចេញពីបញ្ជី', 'Removed from list', '已从列表中移除'), 'info');
   };
 
   const isItemInWishlist = (itemId: string, wishlistId?: string): boolean => {
@@ -16372,12 +16172,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const saveTripPlan = (plan: TripPlan) => {
     if (!verifyBackendVipFeatureAccess('ផែនការដើរលេង AI', 'AI Trip Planner')) return;
     setTripPlans(prev => [plan, ...prev.filter(p => p.id !== plan.id)]);
-    showToast(language === 'km' ? 'បានរក្សាទុកផែនការដើរលេង!' : 'Trip plan saved!', 'success');
+    showToast(tr(language, 'បានរក្សាទុកផែនការដើរលេង!', 'Trip plan saved!', '行程计划已保存！'), 'success');
   };
 
   const deleteTripPlan = (id: string) => {
     setTripPlans(prev => prev.filter(p => p.id !== id));
-    showToast(language === 'km' ? 'បានលុបផែនការដើរលេង' : 'Trip plan deleted', 'info');
+    showToast(tr(language, 'បានលុបផែនការដើរលេង', 'Trip plan deleted', '行程计划已删除'), 'info');
   };
 
   const generateAiTripPlan = (
@@ -16431,17 +16231,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       specialtyEn: 'Authentic Regional Khmer Cuisine',
     };
 
-    const provDestinations = destinations.filter(d => {
-      const dCore = normalizeProvKey(d.provinceKh);
-      return dCore === targetCore || dCore.includes(targetCore) || targetCore.includes(dCore);
-    });
-    const poolDest = provDestinations.length > 0 ? provDestinations : destinations;
-    
-    const provRestaurants = restaurants.filter(r => {
-      const rCore = normalizeProvKey(r.provinceKh);
-      return rCore === targetCore || rCore.includes(targetCore) || targetCore.includes(rCore);
-    });
-    const poolRest = provRestaurants.length > 0 ? provRestaurants : restaurants;
+    const isValidGps = (lat?: number, lon?: number) =>
+      typeof lat === 'number' && typeof lon === 'number' && Number.isFinite(lat) && Number.isFinite(lon) && (lat !== 0 || lon !== 0);
+    const inProvince = (pKh?: string) => {
+      const c = normalizeProvKey(pKh || '');
+      return c === targetCore || c.includes(targetCore) || targetCore.includes(c);
+    };
+    const distKm = (
+      a?: { latitude?: number; longitude?: number },
+      b?: { latitude?: number; longitude?: number }
+    ): number =>
+      a && b && isValidGps(a.latitude, a.longitude) && isValidGps(b.latitude, b.longitude)
+        ? calculateDistanceMeters(a.latitude, a.longitude, b.latitude, b.longitude) / 1000
+        : Number.POSITIVE_INFINITY;
+    const byRating = <T extends { rating?: number }>(a: T, b: T) => Number(b.rating || 0) - Number(a.rating || 0);
+
+    // Pools: real sightseeing places, real eateries and real hotels in the chosen province (graceful fallback to nationwide)
+    const allSights = destinations.filter((d) => d.categorySlug !== 'hotel');
+    const provSights = allSights.filter((d) => inProvince(d.provinceKh)).sort(byRating);
+    const poolDest = provSights.length > 0 ? provSights : [...allSights].sort(byRating);
+
+    const eateries = restaurants.filter((r) => r.status === 'approved' && !isHotelBusinessRecord(r));
+    const provEateries = eateries.filter((r) => inProvince(r.provinceKh)).sort(byRating);
+    const poolRest = provEateries.length > 0 ? provEateries : [...eateries].sort(byRating);
+
+    const hotelDests = destinations.filter((d) => d.categorySlug === 'hotel');
+    const provHotels = hotelDests.filter((d) => inProvince(d.provinceKh)).sort(byRating);
+    const hotelShops = restaurants.filter((r) => r.status === 'approved' && isHotelBusinessRecord(r) && inProvince(r.provinceKh));
 
     const companionLabelKh =
       companion === 'solo'
@@ -16463,63 +16279,169 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const days: any[] = [];
     const costPerDay = budgetLevel === 'budget' ? 35 : budgetLevel === 'medium' ? 75 : 160;
+    const usedSights = new Set<string>();
+    const usedEateries = new Set<string>();
+
+    // Budget filters the hotel tier (luxury = best rated, budget = cheapest-looking / lower rating tier)
+    const hotelPool: Array<{ id: string; nameKh: string; nameEn: string; photoUrl?: string; latitude?: number; longitude?: number; rating?: number; kind: 'destination' | 'restaurant' }> = [
+      ...provHotels.map((h) => ({ id: h.id, nameKh: h.nameKh, nameEn: h.nameEn, photoUrl: h.photoUrl, latitude: h.latitude, longitude: h.longitude, rating: h.rating, kind: 'destination' as const })),
+      ...hotelShops.map((h) => ({ id: h.id, nameKh: h.nameKh, nameEn: h.nameEn, photoUrl: h.photoUrl, latitude: h.latitude, longitude: h.longitude, rating: h.rating, kind: 'restaurant' as const })),
+    ].sort(byRating);
+    const hotelPick = (() => {
+      if (hotelPool.length === 0) return null;
+      if (budgetLevel === 'luxury') return hotelPool[0];
+      if (budgetLevel === 'budget') return hotelPool[Math.min(hotelPool.length - 1, Math.floor(hotelPool.length * 0.6))];
+      return hotelPool[Math.min(hotelPool.length - 1, Math.floor(hotelPool.length * 0.25))];
+    })();
+
+    const takeNearest = <T extends { id: string; latitude?: number; longitude?: number }>(
+      pool: T[],
+      used: Set<string>,
+      anchor?: { latitude?: number; longitude?: number }
+    ): T | undefined => {
+      const fresh = pool.filter((p) => !used.has(p.id));
+      const list = fresh.length > 0 ? fresh : pool;
+      if (list.length === 0) return undefined;
+      let best = list[0];
+      if (anchor && isValidGps(anchor.latitude, anchor.longitude)) {
+        let bestKm = Number.POSITIVE_INFINITY;
+        // Consider the top-rated candidates only, then pick the geographically closest
+        for (const c of list.slice(0, 40)) {
+          const k = distKm(anchor, c);
+          if (k < bestKm) {
+            bestKm = k;
+            best = c;
+          }
+        }
+      }
+      used.add(best.id);
+      return best;
+    };
 
     for (let i = 1; i <= durationDays; i++) {
-      const dest1 = poolDest[(i * 2 - 2) % poolDest.length];
-      const dest2 = poolDest[(i * 2 - 1) % poolDest.length];
-      const rest1 = poolRest[(i * 2 - 2) % poolRest.length];
-      const rest2 = poolRest[(i * 2 - 1) % poolRest.length];
-      const foodPick = foods[(i * 3) % foods.length];
+      const dest1 = takeNearest(poolDest, usedSights, hotelPick || undefined) || poolDest[0] || destinations[0];
+      const dest2 = takeNearest(poolDest, usedSights, dest1) || dest1;
+      const breakfastRest = takeNearest(poolRest, usedEateries, hotelPick || dest1) || poolRest[0] || restaurants[0];
+      const rest1 = takeNearest(poolRest, usedEateries, dest1) || breakfastRest;
+      const rest2 = takeNearest(poolRest, usedEateries, dest2) || rest1;
+      const foodPick = foods.length > 0 ? foods[(i * 3) % foods.length] : undefined;
+      const dishOf = (r: Restaurant | undefined) =>
+        r?.signatureDishesKh?.[0] || meta.specialtyKh || foodPick?.nameKh || '';
+      const costBf = budgetLevel === 'budget' ? 4 : budgetLevel === 'medium' ? 8 : 18;
+      const acts: any[] = [];
+
+      if (breakfastRest) {
+        acts.push({
+          timePeriod: 'breakfast',
+          titleKh: 'ពេលព្រឹកព្រហាម៖ អាហារពេលព្រឹកបែបខ្មែរ',
+          titleEn: 'Breakfast: Local Morning Meal',
+          descKh: `ញ៉ាំអាហារពេលព្រឹកនៅ «${breakfastRest.nameKh}» ជាមួយមុខម្ហូប ${dishOf(breakfastRest)} មុនចាប់ផ្តើមដំណើរ។`,
+          descEn: `Start your day with breakfast at ${breakfastRest.nameEn || breakfastRest.nameKh}.`,
+          placeNameKh: breakfastRest.nameKh,
+          placeNameEn: breakfastRest.nameEn,
+          dishNameKh: dishOf(breakfastRest),
+          photoUrl: breakfastRest.photoUrl,
+          estimatedCostUsd: costBf,
+          placeKind: 'restaurant',
+          placeId: breakfastRest.id,
+          latitude: breakfastRest.latitude,
+          longitude: breakfastRest.longitude,
+        });
+      }
+      if (dest1) {
+        acts.push({
+          timePeriod: 'morning',
+          titleKh: 'ពេលព្រឹក៖ ទស្សនាទីតាំងទេសចរណ៍ និងថតរូបអនុស្សាវរីយ៍',
+          titleEn: 'Morning: Scenic Sightseeing & Photography',
+          descKh: `ទស្សនាកម្សាន្តនៅ «${dest1.nameKh}» (${provinceKh}) រីករាយជាមួយទេសភាពស្រស់ត្រកាល និងខ្យល់អាកាសបរិសុទ្ធ។ ${dest1.descriptionKh ? dest1.descriptionKh.slice(0, 90) + '...' : ''}`,
+          descEn: `Visit ${dest1.nameEn || dest1.nameKh} in ${meta.en} and enjoy scenic panoramic views.`,
+          placeNameKh: dest1.nameKh,
+          placeNameEn: dest1.nameEn,
+          photoUrl: dest1.photoUrl,
+          estimatedCostUsd: budgetLevel === 'budget' ? 5 : budgetLevel === 'medium' ? 15 : 30,
+          placeKind: 'destination',
+          placeId: dest1.id,
+          latitude: dest1.latitude,
+          longitude: dest1.longitude,
+        });
+      }
+      if (rest1) {
+        acts.push({
+          timePeriod: 'lunch',
+          titleKh: 'ពេលថ្ងៃត្រង់៖ អាហារថ្ងៃត្រង់រសជាតិដើមខ្មែរឆ្ងាញ់ពិសា',
+          titleEn: 'Lunch: Authentic Local Cuisine',
+          descKh: `ពិសាអាហារថ្ងៃត្រង់នៅ «${rest1.nameKh}» (ជិត «${dest1?.nameKh || provinceKh}») ភ្លក្សម្ហូបពិសេសប្រចាំខេត្ត (${meta.specialtyKh} / ${dishOf(rest1)})។`,
+          descEn: `Enjoy lunch at ${rest1.nameEn || rest1.nameKh} featuring ${meta.specialtyEn}.`,
+          placeNameKh: rest1.nameKh,
+          placeNameEn: rest1.nameEn,
+          dishNameKh: dishOf(rest1),
+          photoUrl: rest1.photoUrl,
+          estimatedCostUsd: budgetLevel === 'budget' ? 10 : budgetLevel === 'medium' ? 25 : 50,
+          placeKind: 'restaurant',
+          placeId: rest1.id,
+          latitude: rest1.latitude,
+          longitude: rest1.longitude,
+        });
+      }
+      if (dest2) {
+        acts.push({
+          timePeriod: 'afternoon',
+          titleKh: 'ពេលរសៀល៖ ផ្សងព្រេង និងទស្សនាកន្លែងល្បីប្រចាំតំបន់',
+          titleEn: 'Afternoon: Adventure & Regional Highlights',
+          descKh: `បន្តដំណើរទៅកាន់ «${dest2.nameKh}» ស្វែងយល់ពីវប្បធម៌ ធម្មជាតិ និងថតរូប Review ស្អាតៗនៅ${provinceKh}។`,
+          descEn: `Explore ${dest2.nameEn || dest2.nameKh} in ${meta.en}.`,
+          placeNameKh: dest2.nameKh,
+          placeNameEn: dest2.nameEn,
+          photoUrl: dest2.photoUrl,
+          estimatedCostUsd: budgetLevel === 'budget' ? 5 : budgetLevel === 'medium' ? 15 : 30,
+          placeKind: 'destination',
+          placeId: dest2.id,
+          latitude: dest2.latitude,
+          longitude: dest2.longitude,
+        });
+      }
+      if (rest2) {
+        acts.push({
+          timePeriod: 'dinner',
+          titleKh: 'ពេលល្ងាច៖ អាហារពេលរាត្រី និងសម្រាកលម្ហែកាយ',
+          titleEn: 'Dinner: Evening Dining & Relaxation',
+          descKh: `អាហារពេលល្ងាចនៅ «${rest2.nameKh}» ជាមួយបរិយាកាសកក់ក្តៅសម្រាប់${companionLabelKh} និងភ្លក្សមុខម្ហូប ${dishOf(rest2)}។`,
+          descEn: `Dine at ${rest2.nameEn || rest2.nameKh} in ${meta.en}.`,
+          placeNameKh: rest2.nameKh,
+          placeNameEn: rest2.nameEn,
+          dishNameKh: dishOf(rest2),
+          photoUrl: rest2.photoUrl,
+          estimatedCostUsd: budgetLevel === 'budget' ? 15 : budgetLevel === 'medium' ? 20 : 50,
+          placeKind: 'restaurant',
+          placeId: rest2.id,
+          latitude: rest2.latitude,
+          longitude: rest2.longitude,
+        });
+      }
+      if (hotelPick && (i < durationDays || durationDays === 1)) {
+        acts.push({
+          timePeriod: 'stay',
+          titleKh: 'ពេលយប់៖ សណ្ឋាគារដែលណែនាំឲ្យស្នាក់នៅ',
+          titleEn: 'Night: Recommended Hotel Stay',
+          descKh: `សម្រាកស្នាក់នៅ «${hotelPick.nameKh}» នៅ${provinceKh} ជាសណ្ឋាគារដែលមានពិន្ទុវាយតម្លៃល្អ ស័ក្ដិសមនឹងថវិកា និងដំណើរកម្សាន្តរបស់អ្នក។`,
+          descEn: `Rest at ${hotelPick.nameEn || hotelPick.nameKh} in ${meta.en}, a well-rated stay that fits your budget.`,
+          placeNameKh: hotelPick.nameKh,
+          placeNameEn: hotelPick.nameEn,
+          photoUrl: hotelPick.photoUrl,
+          estimatedCostUsd: budgetLevel === 'budget' ? 20 : budgetLevel === 'medium' ? 45 : 110,
+          placeKind: 'hotel',
+          placeId: hotelPick.id,
+          latitude: hotelPick.latitude,
+          longitude: hotelPick.longitude,
+        });
+      }
 
       days.push({
         dayNumber: i,
         titleKh: `ថ្ងៃទី ${i}៖ ដំណើរកម្សាន្ត និងស្វែងយល់រសជាតិនៅ${provinceKh} (${companionLabelKh})`,
         titleEn: `Day ${i}: Exploring & Dining in ${meta.en} (${companionLabelEn})`,
-        dayEstimatedCostUsd: costPerDay,
-        activities: [
-          {
-            timePeriod: 'morning',
-            titleKh: 'ពេលព្រឹក៖ ទស្សនាទីតាំងទេសចរណ៍ និងថតរូបអនុស្សាវរីយ៍',
-            titleEn: 'Morning: Scenic Sightseeing & Photography',
-            descKh: `ទស្សនាកម្សាន្តនៅ «${dest1.nameKh}» (${provinceKh}) រីករាយជាមួយទេសភាពស្រស់ត្រកាល និងខ្យល់អាកាសបរិសុទ្ធ។ ${dest1.descriptionKh ? dest1.descriptionKh.slice(0, 90) + '...' : ''}`,
-            descEn: `Visit ${dest1.nameEn || dest1.nameKh} in ${meta.en} and enjoy scenic panoramic views.`,
-            placeNameKh: dest1.nameKh,
-            photoUrl: dest1.photoUrl,
-            estimatedCostUsd: budgetLevel === 'budget' ? 5 : budgetLevel === 'medium' ? 15 : 30,
-          },
-          {
-            timePeriod: 'lunch',
-            titleKh: 'ពេលថ្ងៃត្រង់៖ អាហារថ្ងៃត្រង់រសជាតិដើមខ្មែរឆ្ងាញ់ពិសា',
-            titleEn: 'Lunch: Authentic Local Cuisine',
-            descKh: `ពិសាអាហារថ្ងៃត្រង់នៅ «${rest1.nameKh}» ភ្លក្សម្ហូបពិសេសប្រចាំខេត្ត (${meta.specialtyKh} / ${rest1.signatureDishesKh?.[0] || foodPick.nameKh})។`,
-            descEn: `Enjoy lunch at ${rest1.nameEn || rest1.nameKh} featuring ${meta.specialtyEn}.`,
-            placeNameKh: rest1.nameKh,
-            dishNameKh: rest1.signatureDishesKh?.[0] || meta.specialtyKh || foodPick.nameKh,
-            photoUrl: rest1.photoUrl,
-            estimatedCostUsd: budgetLevel === 'budget' ? 10 : budgetLevel === 'medium' ? 25 : 50,
-          },
-          {
-            timePeriod: 'afternoon',
-            titleKh: 'ពេលរសៀល៖ ផ្សងព្រេង និងទស្សនាកន្លែងល្បីប្រចាំតំបន់',
-            titleEn: 'Afternoon: Adventure & Regional Highlights',
-            descKh: `បន្តដំណើរទៅកាន់ «${dest2.nameKh}» ស្វែងយល់ពីវប្បធម៌ ធម្មជាតិ និងថតរូប Review ស្អាតៗនៅ${provinceKh}។`,
-            descEn: `Explore ${dest2.nameEn || dest2.nameKh} in ${meta.en}.`,
-            placeNameKh: dest2.nameKh,
-            photoUrl: dest2.photoUrl,
-            estimatedCostUsd: budgetLevel === 'budget' ? 5 : budgetLevel === 'medium' ? 15 : 30,
-          },
-          {
-            timePeriod: 'dinner',
-            titleKh: 'ពេលល្ងាច៖ អាហារពេលរាត្រី និងសម្រាកលម្ហែកាយ',
-            titleEn: 'Dinner: Evening Dining & Relaxation',
-            descKh: `អាហារពេលល្ងាចនៅ «${rest2.nameKh}» ជាមួយបរិយាកាសកក់ក្តៅសម្រាប់${companionLabelKh} និងភ្លក្សមុខម្ហូប ${rest2.signatureDishesKh?.[0] || meta.specialtyKh}។`,
-            descEn: `Dine at ${rest2.nameEn || rest2.nameKh} in ${meta.en}.`,
-            placeNameKh: rest2.nameKh,
-            dishNameKh: rest2.signatureDishesKh?.[0] || meta.specialtyKh,
-            photoUrl: rest2.photoUrl,
-            estimatedCostUsd: budgetLevel === 'budget' ? 15 : budgetLevel === 'medium' ? 20 : 50,
-          },
-        ],
+        dayEstimatedCostUsd: acts.reduce((sum, a) => sum + (a.estimatedCostUsd || 0), 0) || costPerDay,
+        activities: acts,
       });
     }
 
@@ -16531,7 +16453,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       durationDays,
       budgetLevel,
       companion,
-      totalEstimatedCostUsd: costPerDay * durationDays,
+      totalEstimatedCostUsd: days.reduce((sum: number, d: any) => sum + (d.dayEstimatedCostUsd || 0), 0),
       days,
       createdAt: new Date().toISOString(),
     };
@@ -16640,9 +16562,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       )
     );
     showToast(
-      language === 'km'
-        ? 'បានកំណត់ចំណូលចិត្តស្វែងរកឡើងវិញ (រក្សាទុកទិន្នន័យ និងរូបភាពចុងក្រោយទាំងអស់)'
-        : 'Preferences reset (all latest database records & photos preserved)',
+      tr(language, 'បានកំណត់ចំណូលចិត្តស្វែងរកឡើងវិញ (រក្សាទុកទិន្នន័យ និងរូបភាពចុងក្រោយទាំងអស់)', 'Preferences reset (all latest database records & photos preserved)', '偏好设置已重置（保留所有最新数据库记录与照片）'),
       'info'
     );
   };

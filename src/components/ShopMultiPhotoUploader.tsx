@@ -11,6 +11,8 @@ import {
 } from '../utils/androidMediaHelper';
 import { validateAndModerateShopImage } from '../utils/imageModeration';
 import { DefaultShopIcon } from './icons/DefaultShopIcon';
+import { useApp } from '../context/AppContext';
+import { tr } from '../utils/i18n';
 
 export interface ShopMultiPhotoUploaderProps {
   photos: string[];
@@ -28,6 +30,7 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
   isKm = true,
   onToast,
 }) => {
+  const { language } = useApp();
   const [isProcessing, setIsProcessing] = useState(false);
   const [moderationWarning, setModerationWarning] = useState<string | null>(null);
 
@@ -58,15 +61,13 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
         const modRes = await validateAndModerateShopImage(nativePick.dataUrl, isKm ? 'km' : 'en');
         if (!modRes.valid || !modRes.dataUrl) {
           setModerationWarning(modRes.reason || null);
-          toast(modRes.reason || (isKm ? '⚠️ រូបភាពមិនត្រឹមត្រូវ' : '⚠️ Invalid shop image'), 'warning');
+          toast(modRes.reason || (tr(language, '⚠️ រូបភាពមិនត្រឹមត្រូវ', '⚠️ Invalid shop image', '⚠️ 店铺图片无效')), 'warning');
           setIsProcessing(false);
           return;
         }
         onChangePhotos([modRes.dataUrl]);
         toast(
-          isKm
-            ? '✅ បានជ្រើសរូបភាពតំណាងហាង ១ សន្លឹកជោគជ័យ!'
-            : '✅ Single shop photo selected & verified!',
+          tr(language, '✅ បានជ្រើសរូបភាពតំណាងហាង ១ សន្លឹកជោគជ័យ!', '✅ Single shop photo selected & verified!', '✅ 已选择并验证 1 张店铺图片！'),
           'success'
         );
         setIsProcessing(false);
@@ -88,18 +89,16 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
       const modRes = await validateAndModerateShopImage(file, isKm ? 'km' : 'en');
       if (!modRes.valid || !modRes.dataUrl) {
         setModerationWarning(modRes.reason || null);
-        toast(modRes.reason || (isKm ? '⚠️ រូបភាពមិនត្រឹមត្រូវ' : '⚠️ Invalid shop image'), 'warning');
+        toast(modRes.reason || (tr(language, '⚠️ រូបភាពមិនត្រឹមត្រូវ', '⚠️ Invalid shop image', '⚠️ 店铺图片无效')), 'warning');
         return;
       }
       onChangePhotos([modRes.dataUrl]);
       toast(
-        isKm
-          ? '✅ បានជ្រើសរូបភាពតំណាងហាង ១ សន្លឹកជោគជ័យ!'
-          : '✅ Single shop photo selected & verified!',
+        tr(language, '✅ បានជ្រើសរូបភាពតំណាងហាង ១ សន្លឹកជោគជ័យ!', '✅ Single shop photo selected & verified!', '✅ 已选择并验证 1 张店铺图片！'),
         'success'
       );
     } catch (err: any) {
-      toast(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image file'), 'error');
+      toast(err?.message || (tr(language, 'រូបភាពមិនត្រឹមត្រូវ', 'Invalid image file', '图片文件无效')), 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -126,12 +125,10 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
       <div className="flex items-center justify-between gap-2">
         <div>
           <h4 className="font-bold text-xs text-slate-900 dark:text-white">
-            {isKm ? '📸 រូបភាពតំណាងហាង (១ សន្លឹកគត់)' : '📸 Single Shop Photo Only'}
+            {tr(language, '📸 រូបភាពតំណាងហាង (១ សន្លឹកគត់)', '📸 Single Shop Photo Only', '📸 仅限 1 张店铺图片')}
           </h4>
           <p className="text-[10px] text-slate-500 dark:text-slate-400">
-            {isKm
-              ? 'អនុញ្ញាតតែរូបភាពតំណាងឱ្យហាង ១ សន្លឹកប៉ុណ្ណោះ (មិនមានការបញ្ចូលរូបមុខម្ហូបនីមួយៗទេ)។'
-              : 'Only 1 photo representing the shop is allowed (no individual food/menu photos).'}
+            {tr(language, 'អនុញ្ញាតតែរូបភាពតំណាងឱ្យហាង ១ សន្លឹកប៉ុណ្ណោះ (មិនមានការបញ្ចូលរូបមុខម្ហូបនីមួយៗទេ)។', 'Only 1 photo representing the shop is allowed (no individual food/menu photos).', '仅允许上传 1 张代表店铺的图片（不允许单独上传菜品/菜单图片）。')}
           </p>
         </div>
         <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 font-bold text-[10px] shrink-0">
@@ -164,14 +161,10 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
               {currentPhoto ? <RefreshCw className="w-3.5 h-3.5" /> : <ImageIcon className="w-3.5 h-3.5" />}
               <span>
                 {isProcessing
-                  ? isKm
-                    ? 'កំពុងពិនិត្យ...'
-                    : 'Checking...'
+                  ? tr(language, 'កំពុងពិនិត្យ...', 'Checking...', '正在检查...')
                   : currentPhoto
-                  ? isKm
-                    ? 'ប្តូររូបហាង'
-                    : 'Replace Photo'
-                  : isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos'}
+                  ? tr(language, 'ប្តូររូបហាង', 'Replace Photo', '更换图片')
+                  : tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册')}
               </span>
             </button>
 
@@ -182,7 +175,7 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
               className="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer disabled:opacity-50"
             >
               <Camera className="w-3.5 h-3.5" />
-              <span>{isKm ? 'ថតរូបហាង' : 'Take Photo'}</span>
+              <span>{tr(language, 'ថតរូបហាង', 'Take Photo', '拍照')}</span>
             </button>
           </div>
 
@@ -193,7 +186,7 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
               className="py-1.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>{isKm ? 'លុបរូបភាពហាង' : 'Remove Photo'}</span>
+              <span>{tr(language, 'លុបរូបភាពហាង', 'Remove Photo', '删除图片')}</span>
             </button>
           )}
         </div>

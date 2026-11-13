@@ -11,6 +11,7 @@ import {
   processAndCompressImageFile,
   decodeQrFromImageDataUrl,
 } from '../utils/androidMediaHelper';
+import { tr } from '../utils/i18n';
 
 export const QrScannerModal: React.FC = () => {
   const { 
@@ -74,7 +75,7 @@ export const QrScannerModal: React.FC = () => {
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error(isKm ? 'ឧបករណ៍នេះពុំគាំទ្រការប្រើកាមេរ៉ាក្នុងកម្មវិធីរុករកទេ សូមប្រើការស្កេនរូបថត។' : 'Camera API not supported. Please scan from a photo.');
+        throw new Error(tr(language, 'ឧបករណ៍នេះពុំគាំទ្រការប្រើកាមេរ៉ាក្នុងកម្មវិធីរុករកទេ សូមប្រើការស្កេនរូបថត។', 'Camera API not supported. Please scan from a photo.', '浏览器不支持相机功能，请选择从相片扫描。'));
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -90,7 +91,7 @@ export const QrScannerModal: React.FC = () => {
       }
     } catch (err: any) {
       console.warn('Camera error:', err);
-      setCameraError(err?.message || (isKm ? 'មិនអាចបើកកាមេរ៉ាបានទេ។ សូមអនុញ្ញាតសិទ្ធិកាមេរ៉ា ឬប្រើការស្កេនរូបភាព។' : 'Cannot access camera. Please allow camera permissions or upload an image.'));
+      setCameraError(err?.message || (tr(language, 'មិនអាចបើកកាមេរ៉ាបានទេ។ សូមអនុញ្ញាតសិទ្ធិកាមេរ៉ា ឬប្រើការស្កេនរូបភាព។', 'Cannot access camera. Please allow camera permissions or upload an image.', '无法访问相机，请允许相机权限或上传图片。')));
       setIsScanningCamera(false);
     }
   };
@@ -139,19 +140,17 @@ export const QrScannerModal: React.FC = () => {
       setIsProcessingImage(false);
       if (decoded) {
         handleDecodedData(decoded);
-        showToast(isKm ? '✅ បានស្គាល់កូដ QR ពីរូបថតដោយជោគជ័យ! 🎉' : '✅ QR Code recognized from photo! 🎉', 'success');
+        showToast(tr(language, '✅ បានស្គាល់កូដ QR ពីរូបថតដោយជោគជ័យ! 🎉', '✅ QR Code recognized from photo! 🎉', '✅ 成功从相片识别二维码！🎉'), 'success');
       } else {
         showToast(
-          isKm
-            ? '⚠️ រកមិនឃើញកូដ QR ក្នុងរូបភាពនេះទេ។ សូមជ្រើសរើសរូបភាពកូដ QR ឱ្យបានច្បាស់។'
-            : '⚠️ No valid QR code found in this photo. Please select a clearer QR image.',
+          tr(language, '⚠️ រកមិនឃើញកូដ QR ក្នុងរូបភាពនេះទេ។ សូមជ្រើសរើសរូបភាពកូដ QR ឱ្យបានច្បាស់។', '⚠️ No valid QR code found in this photo. Please select a clearer QR image.', '⚠️ 未在此相片中找到有效的二维码，请选择更清晰的二维码图片。'),
           'warning'
         );
       }
     } catch {
       setIsProcessingImage(false);
       showToast(
-        isKm ? '⚠️ មានបញ្ហាក្នុងការអានរូបភាព QR។' : '⚠️ Error processing QR image.',
+        tr(language, '⚠️ មានបញ្ហាក្នុងការអានរូបភាព QR។', '⚠️ Error processing QR image.', '⚠️ 处理二维码图片时出错。'),
         'warning'
       );
     }
@@ -191,7 +190,7 @@ export const QrScannerModal: React.FC = () => {
     } catch (err: any) {
       setIsProcessingImage(false);
       showToast(
-        err?.message || (isKm ? 'មិនអាចអានរូបភាពពី រូបភាពរបស់ខ្ញុំ បានទេ។' : 'Could not read image from My Photos.'),
+        err?.message || (tr(language, 'មិនអាចអានរូបភាពពី រូបភាពរបស់ខ្ញុំ បានទេ។', 'Could not read image from My Photos.', '无法从“我的照片”中读取图片。')),
         'warning'
       );
     }
@@ -207,10 +206,10 @@ export const QrScannerModal: React.FC = () => {
       setScanResult({
         raw: trimmed,
         type: 'aba_khqr',
-        title: isKm ? '🏦 ABA KHQR Payment Code' : '🏦 ABA KHQR Payment Code',
+        title: tr(language, '🏦 ABA KHQR Payment Code', '🏦 ABA KHQR Payment Code', '🏦 ABA KHQR 支付码'),
         details: isDual 
-          ? (isKm ? 'កូដទូទាត់ផ្លូវការ ABA KHQR៖ CHEA SAVUTH (USD 000 056 833 / KHR 003 787 096)' : 'Official ABA KHQR: CHEA SAVUTH (USD 000 056 833 / KHR 003 787 096)')
-          : (isKm ? 'កូដទូទាត់ ABA KHQR ត្រឹមត្រូវតាមស្ដង់ដារបាគង' : 'Valid ABA KHQR merchant payment code'),
+          ? (tr(language, 'កូដទូទាត់ផ្លូវការ ABA KHQR៖ CHEA SAVUTH (USD 000 056 833 / KHR 003 787 096)', 'Official ABA KHQR: CHEA SAVUTH (USD 000 056 833 / KHR 003 787 096)', '官方 ABA KHQR：CHEA SAVUTH (USD 000 056 833 / KHR 003 787 096)'))
+          : (tr(language, 'កូដទូទាត់ ABA KHQR ត្រឹមត្រូវតាមស្ដង់ដារបាគង', 'Valid ABA KHQR merchant payment code', '有效的 ABA KHQR 商户收款码')),
         merchantName: isDual ? 'CHEA SAVUTH' : 'ABA Merchant',
         usdAccount: '000 056 833',
         khrAccount: '003 787 096'
@@ -223,7 +222,7 @@ export const QrScannerModal: React.FC = () => {
       setScanResult({
         raw: trimmed,
         type: 'url',
-        title: isKm ? '🌐 តំណភ្ជាប់គេហទំព័រ (URL Link)' : '🌐 Web URL Link',
+        title: tr(language, '🌐 តំណភ្ជាប់គេហទំព័រ (URL Link)', '🌐 Web URL Link', '🌐 网页 URL 链接'),
         details: trimmed
       });
       return;
@@ -233,7 +232,7 @@ export const QrScannerModal: React.FC = () => {
     setScanResult({
       raw: trimmed,
       type: 'text',
-      title: isKm ? '📄 ព័ត៌មានអត្ថបទ QR' : '📄 Decoded QR Text',
+      title: tr(language, '📄 ព័ត៌មានអត្ថបទ QR', '📄 Decoded QR Text', '📄 二维码解码内容'),
       details: trimmed
     });
   };
@@ -268,10 +267,10 @@ export const QrScannerModal: React.FC = () => {
             </div>
             <div>
               <h3 className="font-moul text-sm sm:text-base text-white">
-                {isKm ? 'ម៉ាស៊ីនស្កេនកូដ QR' : 'QR Code Scanner'}
+                {tr(language, 'ម៉ាស៊ីនស្កេនកូដ QR', 'QR Code Scanner', '二维码扫描器')}
               </h3>
               <p className="text-[11px] text-emerald-200 font-khmer">
-                {isKm ? 'ស្កេន ABA KHQR, ហាង និងតំណភ្ជាប់ផ្សេងៗ' : 'Scan ABA KHQR, shops & links'}
+                {tr(language, 'ស្កេន ABA KHQR, ហាង និងតំណភ្ជាប់ផ្សេងៗ', 'Scan ABA KHQR, shops & links', '扫描 ABA KHQR、店铺及链接')}
               </p>
             </div>
           </div>
@@ -298,7 +297,7 @@ export const QrScannerModal: React.FC = () => {
             }`}
           >
             <Image className="w-4 h-4" />
-            <span>{isKm ? 'ស្កេនពីរូបថត' : 'Scan from Photo'}</span>
+            <span>{tr(language, 'ស្កេនពីរូបថត', 'Scan from Photo', '从相片扫描')}</span>
           </button>
 
           <button
@@ -313,7 +312,7 @@ export const QrScannerModal: React.FC = () => {
             }`}
           >
             <Camera className="w-4 h-4" />
-            <span>{isKm ? 'ស្កេនកាមេរ៉ា' : 'Live Camera'}</span>
+            <span>{tr(language, 'ស្កេនកាមេរ៉ា', 'Live Camera', '实时相机')}</span>
           </button>
         </div>
 
@@ -343,22 +342,22 @@ export const QrScannerModal: React.FC = () => {
                 <div>
                   <h4 className="font-bold text-slate-900 dark:text-white text-sm">
                     {isProcessingImage
-                      ? (isKm ? 'កំពុងអាន និងស្កេនរូបភាព QR...' : 'Scanning QR image...')
-                      : (isKm ? 'ជ្រើសរើសរូបថតកូដ QR ពី រូបភាពរបស់ខ្ញុំ' : 'Pick QR Code Photo from My Photos')}
+                      ? (tr(language, 'កំពុងអាន និងស្កេនរូបភាព QR...', 'Scanning QR image...', '正在扫描二维码图片...'))
+                      : (tr(language, 'ជ្រើសរើសរូបថតកូដ QR ពី រូបភាពរបស់ខ្ញុំ', 'Pick QR Code Photo from My Photos', '从“我的照片”中选取二维码图片'))}
                   </h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                    {isKm ? 'គាំទ្ររូបថត Screenshot ឬរូប QR (PNG, JPG, JPEG)' : 'Supports screenshots or saved QR images (PNG, JPG, JPEG)'}
+                    {tr(language, 'គាំទ្ររូបថត Screenshot ឬរូប QR (PNG, JPG, JPEG)', 'Supports screenshots or saved QR images (PNG, JPG, JPEG)', '支持截屏或保存的二维码图片 (PNG, JPG, JPEG)')}
                   </p>
                 </div>
                 <span className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs shadow-sm">
-                  {isKm ? '📂 រូបភាពរបស់ខ្ញុំ' : '📂 My Photos'}
+                  {tr(language, '📂 រូបភាពរបស់ខ្ញុំ', '📂 My Photos', '📂 我的照片')}
                 </span>
               </button>
 
               {selectedQrImagePreview && (
                 <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
                   <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                    {isKm ? '🖼️ រូបភាពដែលបានជ្រើសរើស៖' : '🖼️ Selected Image Preview:'}
+                    {tr(language, '🖼️ រូបភាពដែលបានជ្រើសរើស៖', '🖼️ Selected Image Preview:', '🖼️ 所选图片预览：')}
                   </p>
                   <img loading="lazy" decoding="async"
                     src={selectedQrImagePreview}
@@ -381,7 +380,7 @@ export const QrScannerModal: React.FC = () => {
                     onClick={() => setActiveTab('upload')}
                     className="px-4 py-1.5 rounded-xl bg-rose-600 text-white font-bold text-xs"
                   >
-                    {isKm ? 'ប្តូរទៅស្កេនរូបភាពវិញ' : 'Switch to Photo Scan'}
+                    {tr(language, 'ប្តូរទៅស្កេនរូបភាពវិញ', 'Switch to Photo Scan', '切换到相片扫描')}
                   </button>
                 </div>
               ) : (
@@ -396,7 +395,7 @@ export const QrScannerModal: React.FC = () => {
               )}
 
               <p className="text-[11px] text-slate-500">
-                {isKm ? 'សូមតម្រង់កាមេរ៉ាទៅលើកូដ QR ឱ្យចំកណ្តាល' : 'Align QR code inside the frame to scan'}
+                {tr(language, 'សូមតម្រង់កាមេរ៉ាទៅលើកូដ QR ឱ្យចំកណ្តាល', 'Align QR code inside the frame to scan', '将二维码对准框内即可扫描')}
               </p>
             </div>
           )}
@@ -457,7 +456,7 @@ export const QrScannerModal: React.FC = () => {
                       className="w-full py-2.5 px-4 rounded-xl bg-[#004B87] hover:bg-[#003966] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-95"
                     >
                       <ExternalLink className="w-4 h-4" />
-                      <span>{isKm ? 'បើកក្នុង ABA Mobile ដើម្បីទូទាត់' : 'Open in ABA Mobile to Pay'}</span>
+                      <span>{tr(language, 'បើកក្នុង ABA Mobile ដើម្បីទូទាត់', 'Open in ABA Mobile to Pay', '在 ABA Mobile 中打开以支付')}</span>
                     </button>
 
                     {currentUser?.role !== 'admin' && (
@@ -469,7 +468,7 @@ export const QrScannerModal: React.FC = () => {
                         className="w-full py-2 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition"
                       >
                         <Award className="w-4 h-4" />
-                        <span>{isKm ? 'ដំឡើងគណនី Premium VIP' : 'Upgrade to Premium VIP'}</span>
+                        <span>{tr(language, 'ដំឡើងគណនី Premium VIP', 'Upgrade to Premium VIP', '升级至 Premium VIP')}</span>
                       </button>
                     )}
                   </div>
@@ -482,7 +481,7 @@ export const QrScannerModal: React.FC = () => {
                     className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    <span>{isKm ? 'បើកតំណភ្ជាប់ (Open Link)' : 'Open Link'}</span>
+                    <span>{tr(language, 'បើកតំណភ្ជាប់ (Open Link)', 'Open Link', '打开链接')}</span>
                   </button>
                 )}
 
@@ -490,12 +489,12 @@ export const QrScannerModal: React.FC = () => {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(scanResult.raw);
-                    showToast(isKm ? 'បានចម្លងរួចរាល់!' : 'Copied to clipboard!', 'success');
+                    showToast(tr(language, 'បានចម្លងរួចរាល់!', 'Copied to clipboard!', '已复制到剪贴板！'), 'success');
                   }}
                   className="w-full py-2 px-4 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition"
                 >
                   <Copy className="w-3.5 h-3.5" />
-                  <span>{isKm ? 'ចម្លងទិន្នន័យ (Copy)' : 'Copy Raw Data'}</span>
+                  <span>{tr(language, 'ចម្លងទិន្នន័យ (Copy)', 'Copy Raw Data', '复制原始内容')}</span>
                 </button>
               </div>
 
@@ -507,7 +506,7 @@ export const QrScannerModal: React.FC = () => {
                 className="w-full py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition hover:bg-slate-300"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>{isKm ? 'ស្កេនកូដ QR ផ្សេងទៀត' : 'Scan Another QR Code'}</span>
+                <span>{tr(language, 'ស្កេនកូដ QR ផ្សេងទៀត', 'Scan Another QR Code', '扫描其他二维码')}</span>
               </button>
             </div>
           )}

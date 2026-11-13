@@ -22,6 +22,7 @@ import {
 import { rankBySearchRelevance, normalizeSearchText } from '../utils/searchEngine';
 import { getCurrentDeviceLocation } from '../services/restaurantCheckInService';
 import { extractCoordsFromGoogleMapsUrl, isValidGoogleMapsUrl, openExternalUrlNativeSafe } from '../types';
+import { tr } from '../utils/i18n';
 
 export interface ShopCheckInLocationResult {
   latitude: number;
@@ -206,9 +207,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
           setCustomMapUrl(trimmed);
         }
         setPasteNotice(
-          isKm
-            ? `✅ បានទាញយកកូអរដោនេ GPS (${pLat.toFixed(5)}, ${pLng.toFixed(5)}) និងលីង Google Maps ដោយស្វ័យប្រវត្តិ!`
-            : `✅ Automatically retrieved GPS (${pLat.toFixed(5)}, ${pLng.toFixed(5)}) & Google Maps link!`
+          tr(language, `✅ បានទាញយកកូអរដោនេ GPS (${pLat.toFixed(5)}, ${pLng.toFixed(5)}) និងលីង Google Maps ដោយស្វ័យប្រវត្តិ!`, `✅ Automatically retrieved GPS (${pLat.toFixed(5)}, ${pLng.toFixed(5)}) & Google Maps link!`, `✅ 已自动获取 GPS (${pLat.toFixed(5)}, ${pLng.toFixed(5)}) 及 Google Maps 链接！`)
         );
         await reverseGeocodeCoordinates(pLat, pLng);
         return true;
@@ -224,9 +223,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
           setLng(Number(pLng.toFixed(6)));
           setManualCoordInput(`${pLat.toFixed(6)}, ${pLng.toFixed(6)}`);
           setPasteNotice(
-            isKm
-              ? `✅ បានកំណត់កូអរដោនេ GPS (${pLat.toFixed(5)}, ${pLng.toFixed(5)}) ដោយជោគជ័យ!`
-              : `✅ GPS coordinates (${pLat.toFixed(5)}, ${pLng.toFixed(5)}) applied!`
+            tr(language, `✅ បានកំណត់កូអរដោនេ GPS (${pLat.toFixed(5)}, ${pLng.toFixed(5)}) ដោយជោគជ័យ!`, `✅ GPS coordinates (${pLat.toFixed(5)}, ${pLng.toFixed(5)}) applied!`, `✅ 已应用 GPS 坐标 (${pLat.toFixed(5)}, ${pLng.toFixed(5)})！`)
           );
           await reverseGeocodeCoordinates(pLat, pLng);
           return true;
@@ -237,9 +234,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
       if (isValidGoogleMapsUrl(trimmed)) {
         setCustomMapUrl(trimmed);
         setPasteNotice(
-          isKm
-            ? '✅ បានរក្សាទុកលីង Google Maps! សូមពិនិត្យម្ជុល GPS នៅលើផែនទីខាងក្រោម។'
-            : '✅ Saved Google Maps link! Verify the GPS pin on the map below.'
+          tr(language, '✅ បានរក្សាទុកលីង Google Maps! សូមពិនិត្យម្ជុល GPS នៅលើផែនទីខាងក្រោម។', '✅ Saved Google Maps link! Verify the GPS pin on the map below.', '✅ 已保存 Google Maps 链接！请在下方地图上确认 GPS 定位图钉。')
         );
         return true;
       }
@@ -259,17 +254,13 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
       setManualCoordInput(`${gps.latitude.toFixed(6)}, ${gps.longitude.toFixed(6)}`);
       if (gps.errorMessage) {
         setGpsWarning(
-          isKm
-            ? 'មិនអាចទាញយក GPS ផ្ទាល់ពីឧបករណ៍បានទេ។ អ្នកអាចវាយឈ្មោះហាង/ផ្លូវ ដើម្បីស្វែងរកលើផែនទី ឬរំកិលម្ជុល (Pin) ខាងក្រោម!'
-            : 'GPS permission unavailable. You can search your shop/street or adjust the pin below!'
+          tr(language, 'មិនអាចទាញយក GPS ផ្ទាល់ពីឧបករណ៍បានទេ។ អ្នកអាចវាយឈ្មោះហាង/ផ្លូវ ដើម្បីស្វែងរកលើផែនទី ឬរំកិលម្ជុល (Pin) ខាងក្រោម!', 'GPS permission unavailable. You can search your shop/street or adjust the pin below!', '无法获取 GPS 权限。您可以在下方搜索您的店铺/街道或微调定位图钉！')
         );
       }
       await reverseGeocodeCoordinates(gps.latitude, gps.longitude);
     } catch {
       setGpsWarning(
-        isKm
-          ? 'ប្រព័ន្ធ GPS មិនដំណើរការទេ។ សូមស្វែងរកទីតាំងហាងនៅលើផែនទីខាងក្រោម។'
-          : 'GPS unavailable. Please search or select your shop location below.'
+        tr(language, 'ប្រព័ន្ធ GPS មិនដំណើរការទេ។ សូមស្វែងរកទីតាំងហាងនៅលើផែនទីខាងក្រោម។', 'GPS unavailable. Please search or select your shop location below.', 'GPS 不可用。请在下方搜索或选择您的店铺位置。')
       );
     } finally {
       setIsLocatingGps(false);
@@ -336,9 +327,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
       // Fallback
     }
     setGpsWarning(
-      isKm
-        ? 'សូមបិទភ្ជាប់ (Paste) លីង Google Maps ឬកូអរដោនេ GPS ទៅក្នុងប្រអប់ស្វែងរកខាងក្រោម។'
-        : 'Please paste your Google Maps link or GPS coordinates into the search box below.'
+      tr(language, 'សូមបិទភ្ជាប់ (Paste) លីង Google Maps ឬកូអរដោនេ GPS ទៅក្នុងប្រអប់ស្វែងរកខាងក្រោម។', 'Please paste your Google Maps link or GPS coordinates into the search box below.', '请在下方搜索框中粘贴您的 Google Maps 链接或 GPS 坐标。')
     );
   };
 
@@ -498,9 +487,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
       setCustomMapUrl(`https://www.google.com/maps/search/?api=1&query=${c.lat.toFixed(6)},${c.lng.toFixed(6)}`);
     }
     setPasteNotice(
-      isKm
-        ? `✅ បានជ្រើសរើសទីតាំង «${c.name}» (GPS: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)})`
-        : `✅ Selected location "${c.name}" (GPS: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)})`
+      tr(language, `✅ បានជ្រើសរើសទីតាំង «${c.name}» (GPS: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)})`, `✅ Selected location "${c.name}" (GPS: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)})`, `✅ 已选择位置 "${c.name}" (GPS: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)})`)
     );
     setSearchResults([]);
     setSearchStatus('idle');
@@ -574,12 +561,10 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
             </div>
             <div>
               <h3 className="font-moul text-xs sm:text-sm text-white">
-                {isKm ? '📍 ជ្រើសរើសទីតាំងហាងលើផែនទី Google Maps' : '📍 Select Shop Location on Google Maps'}
+                {tr(language, '📍 ជ្រើសរើសទីតាំងហាងលើផែនទី Google Maps', '📍 Select Shop Location on Google Maps', '📍 在 Google Maps 上选择店铺位置')}
               </h3>
               <p className="text-[11px] text-emerald-100">
-                {isKm
-                  ? 'ជ្រើសរើសទីតាំងពិតប្រាកដ ដើម្បីទាញយក GPS និងលីងផែនទីដោយស្វ័យប្រវត្តិ'
-                  : 'Select exact location to auto-fill GPS coordinates and Google Maps link'}
+                {tr(language, 'ជ្រើសរើសទីតាំងពិតប្រាកដ ដើម្បីទាញយក GPS និងលីងផែនទីដោយស្វ័យប្រវត្តិ', 'Select exact location to auto-fill GPS coordinates and Google Maps link', '选择精确位置以自动填充 GPS 坐标和 Google Maps 链接')}
               </p>
             </div>
           </div>
@@ -597,17 +582,13 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
           {/* Clear Khmer Step-by-Step Guide */}
           <div className="p-3 rounded-2xl bg-emerald-950/70 border border-emerald-500/40 text-[11px] text-emerald-100 space-y-1 leading-relaxed">
             <div className="font-bold text-amber-300">
-              {isKm ? '💡 របៀបជ្រើសរើសទីតាំងហាងដោយងាយស្រួល៖' : '💡 How to select your shop location:'}
+              {tr(language, '💡 របៀបជ្រើសរើសទីតាំងហាងដោយងាយស្រួល៖', '💡 How to select your shop location:', '💡 如何选择您的店铺位置：')}
             </div>
             <p>
-              {isKm
-                ? '១. ចុច «🎯 ប្រើទីតាំងបច្ចុប្បន្ន (GPS)» ឬវាយឈ្មោះហាង/ផ្លូវ ដើម្បីស្វែងរកទីតាំងនៅលើផែនទីខាងក្រោម។'
-                : '1. Tap "Use Current GPS" or search your shop/street name on the map below.'}
+              {tr(language, '១. ចុច «🎯 ប្រើទីតាំងបច្ចុប្បន្ន (GPS)» ឬវាយឈ្មោះហាង/ផ្លូវ ដើម្បីស្វែងរកទីតាំងនៅលើផែនទីខាងក្រោម។', '1. Tap "Use Current GPS" or search your shop/street name on the map below.', '1. 点击“使用当前 GPS 定位”或在下方地图上搜索您的店铺/街道名称。')}
             </p>
             <p>
-              {isKm
-                ? '២. ពេលជ្រើសរើសរួច សូមចុចប៊ូតុងពណ៌បៃតងខាងក្រោម ដើម្បីត្រឡប់ទៅទម្រង់ហាង និងបំពេញ GPS + លីង Google Maps ដោយស្វ័យប្រវត្តិ។'
-                : '2. Tap the green Confirm button below to return and auto-fill GPS & Maps link.'}
+              {tr(language, '២. ពេលជ្រើសរើសរួច សូមចុចប៊ូតុងពណ៌បៃតងខាងក្រោម ដើម្បីត្រឡប់ទៅទម្រង់ហាង និងបំពេញ GPS + លីង Google Maps ដោយស្វ័យប្រវត្តិ។', '2. Tap the green Confirm button below to return and auto-fill GPS & Maps link.', '2. 点击下方绿色确认按钮返回并自动填充 GPS 及地图链接。')}
             </p>
           </div>
 
@@ -632,9 +613,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
                 <Navigation className="w-4 h-4" />
               )}
               <span>
-                {isKm
-                  ? '🎯 ប្រើទីតាំងបច្ចុប្បន្នរបស់ខ្ញុំ (GPS)'
-                  : '🎯 Use My Current Location (GPS)'}
+                {tr(language, '🎯 ប្រើទីតាំងបច្ចុប្បន្នរបស់ខ្ញុំ (GPS)', '🎯 Use My Current Location (GPS)', '🎯 使用我的当前位置 (GPS)')}
               </span>
             </button>
 
@@ -669,7 +648,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
             >
               <ExternalLink className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">
-                {isKm ? '🗺️ បើកកម្មវិធី Google Maps' : '🗺️ Open Google Maps App'}
+                {tr(language, '🗺️ បើកកម្មវិធី Google Maps', '🗺️ Open Google Maps App', '🗺️ 打开 Google Maps 应用')}
               </span>
             </a>
 
@@ -680,7 +659,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
             >
               <ClipboardPaste className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">
-                {isKm ? '📋 បិទភ្ជាប់លីងពី Google Maps' : '📋 Paste Google Maps Link'}
+                {tr(language, '📋 បិទភ្ជាប់លីងពី Google Maps', '📋 Paste Google Maps Link', '📋 粘贴 Google Maps 链接')}
               </span>
             </button>
           </div>
@@ -709,9 +688,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
                     }
                   }}
                   placeholder={
-                    isKm
-                      ? 'វាយឈ្មោះហាង ផ្លូវ សង្កាត់ ឬបិទភ្ជាប់លីង Google Maps...'
-                      : 'Search shop name, street, or paste Google Maps link...'
+                    tr(language, 'វាយឈ្មោះហាង ផ្លូវ សង្កាត់ ឬបិទភ្ជាប់លីង Google Maps...', 'Search shop name, street, or paste Google Maps link...', '搜索店铺名称、街道或粘贴 Google Maps 链接...')
                   }
                   className="w-full pl-9 pr-3 py-2.5 bg-slate-800 border border-slate-700 focus:border-emerald-500 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none"
                 />
@@ -722,7 +699,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
                 className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shrink-0 flex items-center gap-1.5 cursor-pointer"
               >
                 {isSearchingPlace ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-                <span>{isKm ? 'ស្វែងរក' : 'Search'}</span>
+                <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
               </button>
             </div>
 
@@ -730,15 +707,13 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
             {searchStatus === 'loading' && searchResults.length === 0 && (
               <div className="mt-1.5 px-3.5 py-3 bg-slate-800 border border-slate-700 rounded-2xl flex items-center gap-2 text-xs text-slate-300">
                 <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-                <span>{isKm ? `កំពុងស្វែងរក «${searchQuery.trim()}»...` : `Searching "${searchQuery.trim()}"...`}</span>
+                <span>{tr(language, `កំពុងស្វែងរក «${searchQuery.trim()}»...`, `Searching "${searchQuery.trim()}"...`, `正在搜索 "${searchQuery.trim()}"...`)}</span>
               </div>
             )}
             {searchStatus === 'empty' && searchResults.length === 0 && searchQuery.trim() && (
               <div className="mt-1.5 p-3.5 bg-slate-800 border border-amber-500/30 rounded-2xl space-y-2">
                 <p className="text-xs text-amber-200">
-                  {isKm
-                    ? `រកមិនឃើញទីតាំងដែលត្រូវនឹង «${searchQuery.trim()}» ទេ។ សូមពិនិត្យអក្ខរាវិរុទ្ធ ឬបើក Google Maps ដើម្បីចម្លងលីងទីតាំងហាង រួចបិទភ្ជាប់នៅទីនេះ។`
-                    : `No verified place matches "${searchQuery.trim()}". Check the spelling, or open Google Maps, copy the shop's link and paste it here.`}
+                  {tr(language, `រកមិនឃើញទីតាំងដែលត្រូវនឹង «${searchQuery.trim()}» ទេ។ សូមពិនិត្យអក្ខរាវិរុទ្ធ ឬបើក Google Maps ដើម្បីចម្លងលីងទីតាំងហាង រួចបិទភ្ជាប់នៅទីនេះ។`, `No verified place matches "${searchQuery.trim()}". Check the spelling, or open Google Maps, copy the shop's link and paste it here.`, `未找到与 "${searchQuery.trim()}" 匹配的已验证地点。请检查拼写，或打开 Google Maps 复制店铺链接并粘贴到此处。`)}
                 </p>
                 <button
                   type="button"
@@ -750,7 +725,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
                   className="px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 font-bold text-[11px] flex items-center gap-1.5 cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  {isKm ? `ស្វែងរក «${searchQuery.trim()}» លើ Google Maps` : `Search "${searchQuery.trim()}" on Google Maps`}
+                  {tr(language, `ស្វែងរក «${searchQuery.trim()}» លើ Google Maps`, `Search "${searchQuery.trim()}" on Google Maps`, `在 Google Maps 上搜索 "${searchQuery.trim()}"`)}
                 </button>
               </div>
             )}
@@ -772,7 +747,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
                       <div className="text-[11px] text-slate-400 truncate">{c.address}</div>
                     </div>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold shrink-0">
-                      {isKm ? 'ជ្រើសរើស' : 'Select'}
+                      {tr(language, 'ជ្រើសរើស', 'Select', '选择')}
                     </span>
                   </button>
                 ))}
@@ -797,9 +772,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
                 <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center space-y-2">
                   <MapPin className="w-8 h-8 text-amber-400" />
                   <p className="text-xs text-slate-300">
-                    {isKm
-                      ? 'ផែនទីកំពុងប្រើប្រាស់ទម្រង់កូអរដោនេ GPS ផ្ទាល់'
-                      : 'Using direct GPS coordinate pin mode'}
+                    {tr(language, 'ផែនទីកំពុងប្រើប្រាស់ទម្រង់កូអរដោនេ GPS ផ្ទាល់', 'Using direct GPS coordinate pin mode', '正在使用直接 GPS 坐标大头针模式')}
                   </p>
                 </div>
               )}
@@ -816,7 +789,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
             <div className="p-2.5 bg-slate-900/95 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-1 text-[11px] text-slate-300 font-bold">
                 <Crosshair className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isKm ? 'រំកិលម្ជុលលើផែនទី៖' : 'Adjust Pin:'}</span>
+                <span>{tr(language, 'រំកិលម្ជុលលើផែនទី៖', 'Adjust Pin:', '微调图钉位置：')}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <button
@@ -824,28 +797,28 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
                   onClick={() => nudgePin(0.00045, 0)}
                   className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold border border-slate-700 cursor-pointer"
                 >
-                  ⬆️ {isKm ? 'ជើង' : 'N'}
+                  ⬆️ {tr(language, 'ជើង', 'N', '北')}
                 </button>
                 <button
                   type="button"
                   onClick={() => nudgePin(-0.00045, 0)}
                   className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold border border-slate-700 cursor-pointer"
                 >
-                  ⬇️ {isKm ? 'ត្បូង' : 'S'}
+                  ⬇️ {tr(language, 'ត្បូង', 'S', '南')}
                 </button>
                 <button
                   type="button"
                   onClick={() => nudgePin(0, -0.00045)}
                   className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold border border-slate-700 cursor-pointer"
                 >
-                  ⬅️ {isKm ? 'លិច' : 'W'}
+                  ⬅️ {tr(language, 'លិច', 'W', '西')}
                 </button>
                 <button
                   type="button"
                   onClick={() => nudgePin(0, 0.00045)}
                   className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold border border-slate-700 cursor-pointer"
                 >
-                  ➡️ {isKm ? 'កើត' : 'E'}
+                  ➡️ {tr(language, 'កើត', 'E', '东')}
                 </button>
               </div>
             </div>
@@ -854,21 +827,19 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
           {/* Auto-Retrieved Location Details Summary */}
           <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-2.5">
             <div className="text-[11px] font-bold text-amber-300">
-              {isKm
-                ? '📋 ទិន្នន័យទីតាំងដែលនឹងត្រូវបំពេញចូលទម្រង់ហាងដោយស្វ័យប្រវត្តិ៖'
-                : '📋 Location Details to Auto-Fill in Shop Form:'}
+              {tr(language, '📋 ទិន្នន័យទីតាំងដែលនឹងត្រូវបំពេញចូលទម្រង់ហាងដោយស្វ័យប្រវត្តិ៖', '📋 Location Details to Auto-Fill in Shop Form:', '📋 将自动填入店铺表单的位置详情：')}
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-[11px] font-bold text-emerald-300 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5" />
-                  <span>{isKm ? 'អាសយដ្ឋានហាង៖' : 'Shop Address:'}</span>
+                  <span>{tr(language, 'អាសយដ្ឋានហាង៖', 'Shop Address:', '店铺地址：')}</span>
                 </label>
                 {isReverseGeocoding && (
                   <span className="text-[10px] text-amber-300 flex items-center gap-1">
                     <Loader2 className="w-3 h-3 animate-spin" />
-                    {isKm ? 'កំពុងទាញអាសយដ្ឋាន...' : 'Fetching address...'}
+                    {tr(language, 'កំពុងទាញអាសយដ្ឋាន...', 'Fetching address...', '正在获取地址...')}
                   </span>
                 )}
               </div>
@@ -877,9 +848,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
                 value={formattedAddress}
                 onChange={(e) => setFormattedAddress(e.target.value)}
                 placeholder={
-                  isKm
-                    ? 'ឧ. ផ្លូវ ២៧១ សង្កាត់ទួលទំពូង ខណ្ឌចំការមន ភ្នំពេញ'
-                    : 'e.g. Street 271, Tuol Tompoung, Phnom Penh'
+                  tr(language, 'ឧ. ផ្លូវ ២៧១ សង្កាត់ទួលទំពូង ខណ្ឌចំការមន ភ្នំពេញ', 'e.g. Street 271, Tuol Tompoung, Phnom Penh', '例如：Street 271, Tuol Tompoung, Phnom Penh')
                 }
                 className="w-full px-3 py-2 bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl text-xs text-white focus:outline-none"
               />
@@ -888,7 +857,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <label className="block text-[10px] text-slate-400 mb-0.5">
-                  {isKm ? 'ទីតាំង GPS (Latitude, Longitude)៖' : 'GPS Coordinates:'}
+                  {tr(language, 'ទីតាំង GPS (Latitude, Longitude)៖', 'GPS Coordinates:', 'GPS 坐标：')}
                 </label>
                 <div className="flex gap-1.5">
                   <input
@@ -903,7 +872,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
               </div>
               <div>
                 <label className="block text-[10px] text-slate-400 mb-0.5">
-                  {isKm ? 'តំណភ្ជាប់ Google Maps៖' : 'Google Maps Link:'}
+                  {tr(language, 'តំណភ្ជាប់ Google Maps៖', 'Google Maps Link:', 'Google Maps 链接：')}
                 </label>
                 <input
                   type="text"
@@ -923,7 +892,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition cursor-pointer"
           >
-            {isKm ? 'បោះបង់' : 'Cancel'}
+            {tr(language, 'បោះបង់', 'Cancel', '取消')}
           </button>
           <button
             type="button"
@@ -932,9 +901,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
           >
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>
-              {isKm
-                ? '✅ បញ្ជាក់ទីតាំង និងត្រឡប់ទៅបំពេញទម្រង់ហាង'
-                : '✅ Confirm Location & Return to Shop Form'}
+              {tr(language, '✅ បញ្ជាក់ទីតាំង និងត្រឡប់ទៅបំពេញទម្រង់ហាង', '✅ Confirm Location & Return to Shop Form', '✅ 确认位置并返回店铺表单')}
             </span>
           </button>
         </div>

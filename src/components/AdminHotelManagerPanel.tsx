@@ -544,9 +544,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
             <h4 className="font-bold text-amber-900 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
               <span>
                 ⏳{' '}
-                {isKm
-                  ? `សណ្ឋាគារ និងកន្លែងស្នាក់នៅរង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin (${pendingHotelSubmissions.length})`
-                  : `Pending Hotel / Accommodation Submissions for Admin Approval (${pendingHotelSubmissions.length})`}
+                {tr(language, `សណ្ឋាគារ និងកន្លែងស្នាក់នៅរង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin (${pendingHotelSubmissions.length})`, `Pending Hotel / Accommodation Submissions for Admin Approval (${pendingHotelSubmissions.length})`, `待管理员审批的酒店/住宿提交 (${pendingHotelSubmissions.length})`)}
               </span>
             </h4>
             <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
@@ -579,7 +577,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                           {isKm ? catInfo.labelKh : catInfo.labelEn}
                         </span>
                         <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
-                          {isKm ? 'រង់ចាំអនុម័ត' : 'Pending Approval'}
+                          {tr(language, 'រង់ចាំអនុម័ត', 'Pending Approval', '待审核')}
                         </span>
                       </div>
                       <h5 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white break-words">
@@ -597,7 +595,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                           className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 underline"
                         >
                           <ExternalLink className="w-3 h-3" />
-                          <span>{isKm ? 'បើកមើលទីតាំងលើ Google Maps' : 'Open Location in Google Maps'}</span>
+                          <span>{tr(language, 'បើកមើលទីតាំងលើ Google Maps', 'Open Location in Google Maps', '在 Google Maps 中打开位置')}</span>
                         </a>
                       )}
                     </div>
@@ -613,21 +611,21 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                       className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-black shadow-xs flex items-center gap-1 transition cursor-pointer"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
-                      <span>{isKm ? 'កែប្រែ' : 'Edit'}</span>
+                      <span>{tr(language, 'កែប្រែ', 'Edit', '编辑')}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => approveRestaurant(rest.id)}
                       className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
                     >
-                      {isKm ? '✅ អនុម័ត (Approve)' : '✅ Approve'}
+                      {tr(language, '✅ អនុម័ត (Approve)', '✅ Approve', '✅ 批准')}
                     </button>
                     <button
                       type="button"
                       onClick={() => rejectRestaurant(rest.id)}
                       className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
                     >
-                      {isKm ? '🚫 បដិសេធ (Reject)' : '🚫 Reject'}
+                      {tr(language, '🚫 បដិសេធ (Reject)', '🚫 Reject', '🚫 拒绝')}
                     </button>
                     <button
                       type="button"
@@ -635,7 +633,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                       className="px-2.5 py-1.5 rounded-xl bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      <span>{isKm ? 'លុប' : 'Delete'}</span>
+                      <span>{tr(language, 'លុប', 'Delete', '删除')}</span>
                     </button>
                   </div>
                 </div>
@@ -652,9 +650,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
             <h4 className="font-bold text-amber-950 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
               <span>
                 ⬆️{' '}
-                {isKm
-                  ? `សំណើដំឡើង និងកែប្រែសណ្ឋាគារដែលមានស្រាប់ពីសមាជិក VIP (${pendingHotelUpgrades.length})`
-                  : `Pending Existing Hotel Upgrade Requests (${pendingHotelUpgrades.length})`}
+                {tr(language, `សំណើដំឡើង និងកែប្រែសណ្ឋាគារដែលមានស្រាប់ពីសមាជិក VIP (${pendingHotelUpgrades.length})`, `Pending Existing Hotel Upgrade Requests (${pendingHotelUpgrades.length})`, `待处理的现有酒店升级申请 (${pendingHotelUpgrades.length})`)}
               </span>
             </h4>
             <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
@@ -689,7 +685,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                           {isKm ? catInfo.labelKh : catInfo.labelEn}
                         </span>
                         <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
-                          {isKm ? 'សំណើដំឡើងសណ្ឋាគារដែលមានស្រាប់' : 'Existing Hotel Upgrade'}
+                          {tr(language, 'សំណើដំឡើងសណ្ឋាគារដែលមានស្រាប់', 'Existing Hotel Upgrade', '现有酒店升级')}
                         </span>
                       </div>
                       <h5 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white break-words">
@@ -713,14 +709,14 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                       onClick={() => approveListingUpgradeRequest(rest.id)}
                       className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-xs transition cursor-pointer"
                     >
-                      {isKm ? '✅ អនុម័ត និងផ្សព្វផ្សាយ (Approve)' : '✅ Approve & Publish'}
+                      {tr(language, '✅ អនុម័ត និងផ្សព្វផ្សាយ (Approve)', '✅ Approve & Publish', '✅ 批准并发布')}
                     </button>
                     <button
                       type="button"
                       onClick={() => rejectListingUpgradeRequest(rest.id)}
                       className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-xs transition cursor-pointer"
                     >
-                      {isKm ? '🚫 បដិសេធ (Reject)' : '🚫 Reject'}
+                      {tr(language, '🚫 បដិសេធ (Reject)', '🚫 Reject', '🚫 拒绝')}
                     </button>
                   </div>
                 </div>
@@ -735,9 +731,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
         <div className="p-4 rounded-2xl bg-amber-50/90 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-700/60 space-y-3">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <h4 className="font-bold text-amber-900 dark:text-amber-300 text-xs sm:text-sm">
-              {isKm
-                ? `📸 សំណើប្តូររូបភាពសណ្ឋាគារថ្មី (${pendingHotelPhotos.length} រង់ចាំការអនុម័ត)`
-                : `📸 Hotel Photo Replacement Requests (${pendingHotelPhotos.length} Pending Approval)`}
+              {tr(language, `📸 សំណើប្តូររូបភាពសណ្ឋាគារថ្មី (${pendingHotelPhotos.length} រង់ចាំការអនុម័ត)`, `📸 Hotel Photo Replacement Requests (${pendingHotelPhotos.length} Pending Approval)`, `📸 酒店照片更换申请（${pendingHotelPhotos.length} 个待审批）`)}
             </h4>
           </div>
           <div className="space-y-2.5">
@@ -764,27 +758,27 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                         className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
                       >
                         <Check className="w-3.5 h-3.5" />
-                        <span>{isKm ? 'អនុម័តរូបភាពថ្មី' : 'Approve Photo'}</span>
+                        <span>{tr(language, 'អនុម័តរូបភាពថ្មី', 'Approve Photo', '批准照片')}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() =>
                           rejectShopPhotoReplacement(
                             rest.id,
-                            isKm ? 'បដិសេធដោយ Admin' : 'Rejected by Admin'
+                            tr(language, 'បដិសេធដោយ Admin', 'Rejected by Admin', '管理员已拒绝')
                           )
                         }
                         className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
                       >
                         <Ban className="w-3.5 h-3.5" />
-                        <span>{isKm ? 'បដិសេធ' : 'Reject'}</span>
+                        <span>{tr(language, 'បដិសេធ', 'Reject', '拒绝')}</span>
                       </button>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2.5">
                     <div>
                       <span className="block text-[10px] font-bold text-slate-500 mb-1">
-                        {isKm ? '១. រូបបច្ចុប្បន្ន' : '1. Current Photo'}
+                        {tr(language, '១. រូបបច្ចុប្បន្ន', '1. Current Photo', '1. 当前照片')}
                       </span>
                       <img
                         src={resolveFoodPhotoUrl(rest.photoUrl)}
@@ -796,7 +790,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                     </div>
                     <div>
                       <span className="block text-[10px] font-bold text-amber-800 mb-1">
-                        {isKm ? '២. រូបថ្មីដែលស្នើប្តូរ' : '2. Submitted Photo'}
+                        {tr(language, '២. រូបថ្មីដែលស្នើប្តូរ', '2. Submitted Photo', '2. 提交的新照片')}
                       </span>
                       <img
                         src={resolveFoodPhotoUrl(req.newPhotoUrl)}
@@ -1199,9 +1193,9 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                             type="button"
                             onClick={() => onNavigateToOwnerUser(ownerInfo.userId || ownerInfo.ownerEmail || ownerInfo.ownerName || h.id)}
                             className="px-2.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border border-amber-300 dark:border-amber-700 font-bold text-xs cursor-pointer"
-                            title={isKm ? 'មើលគណនីម្ចាស់សណ្ឋាគារក្នុងផ្នែកអ្នកប្រើប្រាស់' : 'View Hotel Owner in Users Tab'}
+                            title={tr(language, 'មើលគណនីម្ចាស់សណ្ឋាគារក្នុងផ្នែកអ្នកប្រើប្រាស់', 'View Hotel Owner in Users Tab', '在用户选项卡中查看酒店所有者')}
                           >
-                            👤 {isKm ? 'មើលម្ចាស់' : 'Owner'}
+                            👤 {tr(language, 'មើលម្ចាស់', 'Owner', '店主')}
                           </button>
                         )}
                         {isVipRecord && (
@@ -1209,9 +1203,9 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                             type="button"
                             onClick={() => openManageMyVipStore(h.id)}
                             className="px-2.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs cursor-pointer"
-                            title={isKm ? 'បើកផ្ទាំងគ្រប់គ្រងសណ្ឋាគារពេញលេញ' : 'Open Full Hotel Manager'}
+                            title={tr(language, 'បើកផ្ទាំងគ្រប់គ្រងសណ្ឋាគារពេញលេញ', 'Open Full Hotel Manager', '打开完整酒店管理器')}
                           >
-                            🏨 {isKm ? 'គ្រប់គ្រង' : 'Manage'}
+                            🏨 {tr(language, 'គ្រប់គ្រង', 'Manage', '管理')}
                           </button>
                         )}
                         {ownerInfo.rest && (
@@ -1227,8 +1221,8 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                               });
                               showToast(
                                 nextSusp
-                                  ? (isKm ? `⏸️ បានផ្អាកសណ្ឋាគារ "${h.nameKh}"` : `⏸️ Suspended "${h.nameEn || h.nameKh}"`)
-                                  : (isKm ? `▶️ បានបើកសណ្ឋាគារ "${h.nameKh}" ឡើងវិញ` : `▶️ Reactivated "${h.nameEn || h.nameKh}"`),
+                                  ? (tr(language, `⏸️ បានផ្អាកសណ្ឋាគារ "${h.nameKh}"`, `⏸️ Suspended "${h.nameEn || h.nameKh}"`, `⏸️ 已暂停“${h.nameEn || h.nameKh}”`))
+                                  : (tr(language, `▶️ បានបើកសណ្ឋាគារ "${h.nameKh}" ឡើងវិញ`, `▶️ Reactivated "${h.nameEn || h.nameKh}"`, `▶️ 已重新激活“${h.nameEn || h.nameKh}”`)),
                                 'info'
                               );
                             }}
@@ -1238,7 +1232,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                                 : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
                             }`}
                           >
-                            {ownerInfo.isSuspended ? (isKm ? '▶️ បើកវិញ' : '▶️ Activate') : (isKm ? '⏸️ ផ្អាក' : '⏸️ Suspend')}
+                            {ownerInfo.isSuspended ? (tr(language, '▶️ បើកវិញ', '▶️ Activate', '▶️ 激活')) : (tr(language, '⏸️ ផ្អាក', '⏸️ Suspend', '⏸️ 暂停'))}
                           </button>
                         )}
                         {ownerInfo.rest && (
@@ -1250,7 +1244,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                             }}
                             className="px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800 font-bold text-xs cursor-pointer"
                           >
-                            🔄 {isKm ? 'ផ្ទេរម្ចាស់' : 'Transfer'}
+                            🔄 {tr(language, 'ផ្ទេរម្ចាស់', 'Transfer', '转让')}
                           </button>
                         )}
                       </>
@@ -1322,7 +1316,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                 <div className="pt-3 border-t border-blue-200 dark:border-blue-800/60 bg-blue-50/50 dark:bg-blue-950/30 p-3 rounded-xl space-y-2 text-xs">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-blue-900 dark:text-blue-200">
-                      🔄 {isKm ? `ផ្ទេរសិទ្ធិគ្រប់គ្រងសណ្ឋាគារ «${h.nameKh}» ទៅគណនីអ្នកប្រើប្រាស់៖` : `Transfer Hotel "${h.nameEn || h.nameKh}" Ownership to User:`}
+                      🔄 {tr(language, `ផ្ទេរសិទ្ធិគ្រប់គ្រងសណ្ឋាគារ «${h.nameKh}» ទៅគណនីអ្នកប្រើប្រាស់៖`, `Transfer Hotel "${h.nameEn || h.nameKh}" Ownership to User:`, `将酒店“${h.nameEn || h.nameKh}”的所有权转让给用户：`)}
                     </span>
                     <button
                       type="button"
@@ -1336,7 +1330,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                     type="text"
                     value={transferOwnerSearch}
                     onChange={(e) => setTransferOwnerSearch(e.target.value)}
-                    placeholder={isKm ? 'ស្វែងរកគណនីតាមឈ្មោះ អ៊ីមែល លេខទូរស័ព្ទ ឬ User ID...' : 'Search user by name, email, phone, or User ID...'}
+                    placeholder={tr(language, 'ស្វែងរកគណនីតាមឈ្មោះ អ៊ីមែល លេខទូរស័ព្ទ ឬ User ID...', 'Search user by name, email, phone, or User ID...', '按姓名、邮箱、电话或用户 ID 搜索用户...')}
                     className="w-full px-3 py-1.5 rounded-lg border border-blue-300 dark:border-blue-700 bg-white dark:bg-stone-900 text-slate-900 dark:text-white"
                   />
                   <div className="max-h-36 overflow-y-auto space-y-1">
@@ -1371,15 +1365,13 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                               });
                               setTransferringHotelId(null);
                               showToast(
-                                isKm
-                                  ? `✅ បានផ្ទេរសណ្ឋាគារ «${h.nameKh}» ទៅគណនី ${u.name} (${u.id}) ជោគជ័យ!`
-                                  : `✅ Transferred "${h.nameEn || h.nameKh}" to ${u.name} (${u.id})!`,
+                                tr(language, `✅ បានផ្ទេរសណ្ឋាគារ «${h.nameKh}» ទៅគណនី ${u.name} (${u.id}) ជោគជ័យ!`, `✅ Transferred "${h.nameEn || h.nameKh}" to ${u.name} (${u.id})!`, `✅ 已将“${h.nameEn || h.nameKh}”转让给 ${u.name} (${u.id})！`),
                                 'success'
                               );
                             }}
                             className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] shrink-0 cursor-pointer"
                           >
-                            {isKm ? 'ជ្រើសរើសគណនីនេះ' : 'Assign Owner'}
+                            {tr(language, 'ជ្រើសរើសគណនីនេះ', 'Assign Owner', '指定所有者')}
                           </button>
                         </div>
                       ))}
@@ -1554,7 +1546,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
 
         {filteredHotels.length === 0 && (
           <div className="py-10 text-center text-slate-400 text-xs">
-            {isKm ? 'រកមិនឃើញសណ្ឋាគារដែលត្រូវនឹងការស្វែងរកទេ' : 'No hotels matched your search'}
+            {tr(language, 'រកមិនឃើញសណ្ឋាគារដែលត្រូវនឹងការស្វែងរកទេ', 'No hotels matched your search', '未找到符合您搜索条件的酒店')}
           </div>
         )}
       </div>

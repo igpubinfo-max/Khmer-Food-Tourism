@@ -16,6 +16,8 @@ import {
   pickImageUsingNativeAndroidGallery,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
+import { useApp } from '../context/AppContext';
+import { tr } from '../utils/i18n';
 
 interface RestaurantImageModalProps {
   restaurant: Restaurant | null;
@@ -32,6 +34,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
   onSave,
   isKm,
 }) => {
+  const { language } = useApp();
   const profileFileInputRef = useRef<HTMLInputElement>(null);
   const profileCameraInputRef = useRef<HTMLInputElement>(null);
   const shopGalleryFileInputRef = useRef<HTMLInputElement>(null);
@@ -121,7 +124,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
         setFoodPhotos((prev) => prev.map((item, i) => (i === target.index ? dataUrl : item)));
       }
     } catch (err: any) {
-      setErrorMsg(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image'));
+      setErrorMsg(err?.message || (tr(language, 'រូបភាពមិនត្រឹមត្រូវ', 'Invalid image', '图片无效')));
     } finally {
       setIsProcessing(false);
     }
@@ -140,7 +143,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
       setShopPhotos((prev) => Array.from(new Set([dataUrl, ...prev])).filter(Boolean));
       setUrlInput('');
     } catch (err: any) {
-      setErrorMsg(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image'));
+      setErrorMsg(err?.message || (tr(language, 'រូបភាពមិនត្រឹមត្រូវ', 'Invalid image', '图片无效')));
     } finally {
       setIsProcessing(false);
     }
@@ -159,7 +162,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
         const dataUrl = await processAndCompressImageFile(file);
         if (dataUrl) added.push(dataUrl);
       } catch (err: any) {
-        setErrorMsg(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image'));
+        setErrorMsg(err?.message || (tr(language, 'រូបភាពមិនត្រឹមត្រូវ', 'Invalid image', '图片无效')));
       }
     }
     setIsProcessing(false);
@@ -223,7 +226,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
         const dataUrl = await processAndCompressImageFile(file);
         if (dataUrl) added.push(dataUrl);
       } catch (err: any) {
-        setErrorMsg(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image'));
+        setErrorMsg(err?.message || (tr(language, 'រូបភាពមិនត្រឹមត្រូវ', 'Invalid image', '图片无效')));
       }
     }
     setIsProcessing(false);
@@ -262,7 +265,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
       !trimmed.startsWith('data:image/') &&
       !trimmed.startsWith('/')
     ) {
-      setErrorMsg(isKm ? 'តំណភ្ជាប់ត្រូវចាប់ផ្ដើមដោយ https://' : 'URL must start with https://');
+      setErrorMsg(tr(language, 'តំណភ្ជាប់ត្រូវចាប់ផ្ដើមដោយ https://', 'URL must start with https://', '网址必须以 https:// 开头'));
       return;
     }
     setPhotoUrl(trimmed);
@@ -277,7 +280,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
   const handleSave = () => {
     const finalCover = photoUrl || shopPhotos[0] || '';
     if (!finalCover) {
-      setErrorMsg(isKm ? 'សូមបញ្ចូលរូបភាពតំណាងហាងមុនពេលរក្សាទុក' : 'Please provide a shop profile photo before saving');
+      setErrorMsg(tr(language, 'សូមបញ្ចូលរូបភាពតំណាងហាងមុនពេលរក្សាទុក', 'Please provide a shop profile photo before saving', '保存前请提供店铺头像图片'));
       return;
     }
 
@@ -311,7 +314,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold font-moul leading-tight">
-                {isKm ? 'កែប្រែរូបភាពតំណាងហាង' : 'Edit Shop Photos'}
+                {tr(language, 'កែប្រែរូបភាពតំណាងហាង', 'Edit Shop Photos', '编辑店铺图片')}
               </h2>
               <p className="text-[11px] text-emerald-100 line-clamp-1">
                 {isKm ? restaurant.nameKh : restaurant.nameEn}
@@ -334,13 +337,11 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
               <span className="flex items-center gap-1.5">
                 <Store className="w-4 h-4 text-emerald-600" />
                 <span>
-                  {isKm
-                    ? `១. រូបហាង (Shop Photos - ${shopPhotos.length} សន្លឹក)`
-                    : `1. Shop Photos (${shopPhotos.length})`}
+                  {tr(language, `១. រូបហាង (Shop Photos - ${shopPhotos.length} សន្លឹក)`, `1. Shop Photos (${shopPhotos.length})`, `1. 店铺图片 (${shopPhotos.length})`)}
                 </span>
               </span>
               <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-bold">
-                {isKm ? 'រូបហាង' : 'Shop Category'}
+                {tr(language, 'រូបហាង', 'Shop Category', '店铺分类')}
               </span>
             </div>
 
@@ -354,18 +355,18 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-slate-400">
                   <ImageIcon className="w-10 h-10 mb-2 stroke-1" />
-                  <span className="text-xs">{isKm ? 'មិនទាន់មានរូបភាព' : 'No image selected'}</span>
+                  <span className="text-xs">{tr(language, 'មិនទាន់មានរូបភាព', 'No image selected', '未选择图片')}</span>
                 </div>
               )}
 
               <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/70 text-[10px] text-white font-bold">
-                {isKm ? 'រូបហាង' : 'Shop Photo'}
+                {tr(language, 'រូបហាង', 'Shop Photo', '店铺图片')}
               </div>
 
               {isProcessing && (
                 <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white gap-2">
                   <RefreshCw className="w-6 h-6 animate-spin text-emerald-400" />
-                  <span className="text-xs">{isKm ? 'កំពុងដំណើរការរូបភាព...' : 'Processing image...'}</span>
+                  <span className="text-xs">{tr(language, 'កំពុងដំណើរការរូបភាព...', 'Processing image...', '正在处理图片...')}</span>
                 </div>
               )}
             </div>
@@ -386,7 +387,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
                       className="w-full h-full object-cover cursor-pointer"
                     />
                     <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/75 text-white text-[9px] font-bold">
-                      {isKm ? 'រូបហាង' : 'Shop'}
+                      {tr(language, 'រូបហាង', 'Shop', '店铺')}
                     </span>
                     <div className="absolute inset-x-0 bottom-0 p-1 bg-black/75 flex items-center justify-between gap-1">
                       <button
@@ -394,7 +395,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
                         onClick={() => handleReplaceShopPhoto(i)}
                         className="px-1.5 py-0.5 rounded bg-white/90 text-slate-900 font-bold text-[9px] cursor-pointer"
                       >
-                        {isKm ? 'ប្តូរ' : 'Replace'}
+                        {tr(language, 'ប្តូរ', 'Replace', '更换')}
                       </button>
                       {shopPhotos.length > 1 && (
                         <button
@@ -457,7 +458,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
                 className="py-2.5 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white flex items-center justify-center gap-1.5 font-bold text-xs transition cursor-pointer"
               >
                 <Upload className="w-4 h-4" />
-                <span>{isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos'}</span>
+                <span>{tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册')}</span>
               </button>
               <button
                 type="button"
@@ -465,7 +466,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
                 className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-1.5 font-bold text-xs transition cursor-pointer"
               >
                 <Camera className="w-4 h-4" />
-                <span>{isKm ? 'ថតរូបហាងថ្មី (Camera)' : 'Camera Shop Photo'}</span>
+                <span>{tr(language, 'ថតរូបហាងថ្មី (Camera)', 'Camera Shop Photo', '拍摄店铺照片')}</span>
               </button>
             </div>
           </div>
@@ -479,7 +480,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
           {/* Direct Image URL */}
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-              {isKm ? 'ឬ បញ្ចូលតំណភ្ជាប់រូបភាព (Image URL)' : 'Or Paste Image URL'}
+              {tr(language, 'ឬ បញ្ចូលតំណភ្ជាប់រូបភាព (Image URL)', 'Or Paste Image URL', '或粘贴图片网址')}
             </span>
 
             <div className="flex gap-2">
@@ -495,7 +496,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
                 onClick={handleApplyUrl}
                 className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition shrink-0"
               >
-                {isKm ? 'មើល' : 'Preview'}
+                {tr(language, 'មើល', 'Preview', '预览')}
               </button>
             </div>
           </div>
@@ -508,7 +509,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-slate-200 dark:hover:bg-slate-700 transition"
           >
-            {isKm ? 'បោះបង់' : 'Cancel'}
+            {tr(language, 'បោះបង់', 'Cancel', '取消')}
           </button>
 
           <button
@@ -518,7 +519,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
             className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:brightness-110 text-white font-bold text-xs shadow-md shadow-emerald-950/20 flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             <Check className="w-4 h-4" />
-            <span>{isKm ? 'រក្សាទុករូបភាពទាំងអស់' : 'Save Photos'}</span>
+            <span>{tr(language, 'រក្សាទុករូបភាពទាំងអស់', 'Save Photos', '保存图片')}</span>
           </button>
         </div>
       </div>

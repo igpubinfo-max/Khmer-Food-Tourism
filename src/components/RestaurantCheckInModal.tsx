@@ -16,6 +16,7 @@ import {
   NearbyRestaurantMatch, 
   GpsLocationResult
 } from '../services/restaurantCheckInService';
+import { tr } from '../utils/i18n';
 
 const CAMBODIA_PROVINCES = [
   { kh: 'រាជធានីភ្នំពេញ', en: 'Phnom Penh' },
@@ -165,9 +166,7 @@ export const RestaurantCheckInModal: React.FC = () => {
   const handleSubmitCheckIn = async () => {
     if (!currentUser || currentUser.role !== 'admin') {
       showToast(
-        isKm
-          ? '🔒 មុខងារឆែកអ៊ីន & បញ្ជាក់ទីតាំង GPS Live គឺអនុញ្ញាតសម្រាប់តែ Administrator ប៉ុណ្ណោះ!'
-          : '🔒 Check-in & GPS Live verification is restricted to Administrators only!',
+        tr(language, '🔒 មុខងារឆែកអ៊ីន & បញ្ជាក់ទីតាំង GPS Live គឺអនុញ្ញាតសម្រាប់តែ Administrator ប៉ុណ្ណោះ!', '🔒 Check-in & GPS Live verification is restricted to Administrators only!', '🔒 签到及 GPS 实时验证仅限管理员使用！'),
         'warning'
       );
       if (!currentUser) setIsAuthModalOpen(true);
@@ -176,9 +175,7 @@ export const RestaurantCheckInModal: React.FC = () => {
 
     if (!selectedMatch && !isCustomShop) {
       showToast(
-        isKm 
-          ? 'សូមជ្រើសរើសហាងពីបញ្ជី ឬចុច «➕ ផ្សេងៗ (ហាងមិនមានក្នុងបញ្ជី)»!' 
-          : 'Please select a restaurant or tap "+ Other (Shop Not in List)"!',
+        tr(language, 'សូមជ្រើសរើសហាងពីបញ្ជី ឬចុច «➕ ផ្សេងៗ (ហាងមិនមានក្នុងបញ្ជី)»!', 'Please select a restaurant or tap "+ Other (Shop Not in List)"!', '请选择餐厅或点击“+ 其他（未在列表中的店铺）”！'),
         'warning'
       );
       return;
@@ -186,9 +183,7 @@ export const RestaurantCheckInModal: React.FC = () => {
 
     if (isCustomShop && !customShopName.trim()) {
       showToast(
-        isKm 
-          ? 'សូមវាយបញ្ចូលឈ្មោះហាង ឬភោជនីយដ្ឋានជាមុនសិន!' 
-          : 'Please enter the shop/restaurant name first!',
+        tr(language, 'សូមវាយបញ្ចូលឈ្មោះហាង ឬភោជនីយដ្ឋានជាមុនសិន!', 'Please enter the shop/restaurant name first!', '请先输入店铺/餐厅名称！'),
         'warning'
       );
       return;
@@ -198,9 +193,7 @@ export const RestaurantCheckInModal: React.FC = () => {
     const rate = checkUserCheckInRateLimit(currentUser.id);
     if (!rate.allowed) {
       showToast(
-        isKm 
-          ? `អ្នកបានឆែកអ៊ីនលើសកម្រិតកំណត់ (១០ ដង/ម៉ោង)។ សូមរង់ចាំ ${rate.waitMinutes} នាទី!` 
-          : `Rate limit reached. Please wait ${rate.waitMinutes} minutes!`,
+        tr(language, `អ្នកបានឆែកអ៊ីនលើសកម្រិតកំណត់ (១០ ដង/ម៉ោង)។ សូមរង់ចាំ ${rate.waitMinutes} នាទី!`, `Rate limit reached. Please wait ${rate.waitMinutes} minutes!`, `已达到频率限制。请等待 ${rate.waitMinutes} 分钟！`),
         'warning'
       );
       return;
@@ -311,9 +304,7 @@ export const RestaurantCheckInModal: React.FC = () => {
     setIsSubmitting(false);
     setStep('success');
     showToast(
-      isKm 
-        ? '🎉 ឆែកអ៊ីនទីតាំងភោជនីយដ្ឋានបានជោគជ័យ!' 
-        : '🎉 Restaurant check-in recorded successfully!',
+      tr(language, '🎉 ឆែកអ៊ីនទីតាំងភោជនីយដ្ឋានបានជោគជ័យ!', '🎉 Restaurant check-in recorded successfully!', '🎉 餐厅签到成功！'),
       'success'
     );
   };
@@ -333,13 +324,13 @@ export const RestaurantCheckInModal: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-moul text-sm sm:text-base text-white flex items-center gap-2">
-                  <span>{isKm ? 'ឆែកអ៊ីន & បញ្ជាក់ទីតាំងហាង' : 'Restaurant Check-in & GPS'}</span>
+                  <span>{tr(language, 'ឆែកអ៊ីន & បញ្ជាក់ទីតាំងហាង', 'Restaurant Check-in & GPS', '餐厅签到与 GPS 验证')}</span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-sans font-bold">
                     GPS Live
                   </span>
                 </h3>
                 <p className="text-[11px] text-emerald-200 font-khmer">
-                  {isKm ? 'បញ្ជាក់ទីតាំងពិតប្រាកដ • រូបថតម្ហូប • ការពារទិន្នន័យផ្ទាល់ខ្លួន' : 'Spatial Verification • Venue Photo • Privacy Guard'}
+                  {tr(language, 'បញ្ជាក់ទីតាំងពិតប្រាកដ • រូបថតម្ហូប • ការពារទិន្នន័យផ្ទាល់ខ្លួន', 'Spatial Verification • Venue Photo • Privacy Guard', '空间实地验证 • 现场照片 • 隐私保护')}
                 </p>
               </div>
             </div>
@@ -362,19 +353,17 @@ export const RestaurantCheckInModal: React.FC = () => {
               </div>
               <div className="space-y-1.5">
                 <h4 className="font-moul text-sm text-slate-800 dark:text-slate-100">
-                  {isKm ? 'មុខងារសម្រាប់តែ Administrator ប៉ុណ្ណោះ' : 'Administrator Access Only'}
+                  {tr(language, 'មុខងារសម្រាប់តែ Administrator ប៉ុណ្ណោះ', 'Administrator Access Only', '仅限管理员访问')}
                 </h4>
                 <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-                  {isKm
-                    ? 'មុខងារឆែកអ៊ីន & បញ្ជាក់ទីតាំងហាងតាមរយៈ GPS Live ត្រូវបានកំណត់សិទ្ធិសម្រាប់តែគណនី Administrator ដើម្បីត្រួតពិនិត្យឈ្មោះ រូបភាព និងទីតាំងហាងឱ្យបានត្រឹមត្រូវ ១០០%។'
-                    : 'Check-in & GPS Live restaurant verification is restricted to Administrator accounts only.'}
+                  {tr(language, 'មុខងារឆែកអ៊ីន & បញ្ជាក់ទីតាំងហាងតាមរយៈ GPS Live ត្រូវបានកំណត់សិទ្ធិសម្រាប់តែគណនី Administrator ដើម្បីត្រួតពិនិត្យឈ្មោះ រូបភាព និងទីតាំងហាងឱ្យបានត្រឹមត្រូវ ១០០%។', 'Check-in & GPS Live restaurant verification is restricted to Administrator accounts only.', '签到及 GPS 实时餐厅验证仅限管理员账户使用。')}
                 </p>
               </div>
               <button
                 onClick={handleClose}
                 className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
               >
-                {isKm ? 'យល់ព្រម (បិទ)' : 'Close'}
+                {tr(language, 'យល់ព្រម (បិទ)', 'Close', '关闭')}
               </button>
             </div>
           ) : step === 'success' ? (
@@ -385,29 +374,27 @@ export const RestaurantCheckInModal: React.FC = () => {
               </div>
               <div>
                 <h4 className="font-moul text-base text-slate-900 dark:text-white">
-                  {isKm ? '🎉 ឆែកអ៊ីនជោគជ័យ!' : '🎉 Check-in Successful!'}
+                  {tr(language, '🎉 ឆែកអ៊ីនជោគជ័យ!', '🎉 Check-in Successful!', '🎉 签到成功！')}
                 </h4>
                 <p className="text-slate-600 dark:text-slate-300 text-xs mt-1">
-                  {isKm 
-                    ? `អ្នកបានឆែកអ៊ីននៅ «${checkedInShopDisplay?.nameKh || selectedMatch?.restaurant.nameKh || customShopName}» រួចរាល់។` 
-                    : `Checked in at "${checkedInShopDisplay?.nameEn || selectedMatch?.restaurant.nameEn || customShopName}".`}
+                  {tr(language, `អ្នកបានឆែកអ៊ីននៅ «${checkedInShopDisplay?.nameKh || selectedMatch?.restaurant.nameKh || customShopName}» រួចរាល់។`, `Checked in at "${checkedInShopDisplay?.nameEn || selectedMatch?.restaurant.nameEn || customShopName}".`, `已在 "${checkedInShopDisplay?.nameEn || selectedMatch?.restaurant.nameEn || customShopName}" 签到。`)}
                 </p>
               </div>
 
               <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-left border border-slate-200 dark:border-slate-700 space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">{isKm ? 'ស្ថានភាពទីតាំង៖' : 'Location Status:'}</span>
+                  <span className="text-slate-500">{tr(language, 'ស្ថានភាពទីតាំង៖', 'Location Status:', '位置状态：')}</span>
                   <span className="font-bold text-emerald-600 flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5" />
                     <span>
                       {(checkedInShopDisplay?.isVerified ?? selectedMatch?.isWithinThreshold) 
-                        ? (isKm ? 'បញ្ជាក់ទីតាំងពិត (Verified)' : 'Verified at Venue') 
-                        : (isKm ? 'រង់ចាំពិនិត្យ' : 'Pending Review')}
+                        ? (tr(language, 'បញ្ជាក់ទីតាំងពិត (Verified)', 'Verified at Venue', '实地验证通过')) 
+                        : (tr(language, 'រង់ចាំពិនិត្យ', 'Pending Review', '待审核'))}
                     </span>
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">{isKm ? 'ចម្ងាយពីហាង៖' : 'Distance:'}</span>
+                  <span className="text-slate-500">{tr(language, 'ចម្ងាយពីហាង៖', 'Distance:', '距离：')}</span>
                   <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                     {formatDistance(checkedInShopDisplay?.distanceMeters ?? selectedMatch?.distanceMeters ?? 0, isKm)}
                   </span>
@@ -418,7 +405,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                 onClick={handleClose}
                 className="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition cursor-pointer"
               >
-                {isKm ? 'រួចរាល់ (បិទ)' : 'Done (Close)'}
+                {tr(language, 'រួចរាល់ (បិទ)', 'Done (Close)', '完成（关闭）')}
               </button>
             </div>
           ) : (
@@ -431,12 +418,12 @@ export const RestaurantCheckInModal: React.FC = () => {
                   <div>
                     <span className="font-bold text-emerald-900 dark:text-emerald-200 block">
                       {isLocating 
-                        ? (isKm ? 'កំពុងស្វែងរកទីតាំង GPS...' : 'Acquiring GPS location...') 
-                        : (isKm ? 'ទីតាំង GPS បានទទួលជោគជ័យ' : 'GPS location acquired')}
+                        ? (tr(language, 'កំពុងស្វែងរកទីតាំង GPS...', 'Acquiring GPS location...', '正在获取 GPS 定位...')) 
+                        : (tr(language, 'ទីតាំង GPS បានទទួលជោគជ័យ', 'GPS location acquired', '已获取 GPS 位置'))}
                     </span>
                     {gps && (
                       <span className="text-slate-500 dark:text-slate-400 text-[10px]">
-                        {isKm ? `កម្រិតលម្អិត ±${gps.accuracyMeters}m • ក្នុងប្រទេសកម្ពុជា` : `Accuracy ±${gps.accuracyMeters}m • Cambodia`}
+                        {tr(language, `កម្រិតលម្អិត ±${gps.accuracyMeters}m • ក្នុងប្រទេសកម្ពុជា`, `Accuracy ±${gps.accuracyMeters}m • Cambodia`, `精确度 ±${gps.accuracyMeters}米 • 柬埔寨`)}
                       </span>
                     )}
                   </div>
@@ -454,14 +441,14 @@ export const RestaurantCheckInModal: React.FC = () => {
                   }}
                   className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-emerald-400 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] hover:bg-emerald-100 transition cursor-pointer shrink-0"
                 >
-                  {isKm ? '🔄 ផ្ទុកឡើងវិញ' : 'Refresh'}
+                  {tr(language, '🔄 ផ្ទុកឡើងវិញ', 'Refresh', '刷新')}
                 </button>
               </div>
 
               {/* Photo Input */}
               <div className="space-y-1.5">
                 <label className="font-bold text-slate-800 dark:text-slate-200 block">
-                  {isKm ? 'រូបថតនៅហាង ឬរូបថតម្ហូប (Venue Photo)៖' : 'Photo at venue or food dish:'}
+                  {tr(language, 'រូបថតនៅហាង ឬរូបថតម្ហូប (Venue Photo)៖', 'Photo at venue or food dish:', '现场照片或菜品照片：')}
                 </label>
 
                 {photoDataUrl ? (
@@ -481,14 +468,14 @@ export const RestaurantCheckInModal: React.FC = () => {
                       className="p-3 rounded-2xl border-2 border-dashed border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex flex-col items-center justify-center gap-1 transition cursor-pointer"
                     >
                       <Camera className="w-5 h-5 text-emerald-600" />
-                      <span>{isKm ? 'ថតរូបភ្លាមៗ' : 'Take Photo'}</span>
+                      <span>{tr(language, 'ថតរូបភ្លាមៗ', 'Take Photo', '拍照')}</span>
                     </button>
                     <button
                       onClick={() => galleryInputRef.current?.click()}
                       className="p-3 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex flex-col items-center justify-center gap-1 transition cursor-pointer"
                     >
                       <ImageIcon className="w-5 h-5 text-amber-500" />
-                      <span>{isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos'}</span>
+                      <span>{tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册')}</span>
                     </button>
                   </div>
                 )}
@@ -501,7 +488,7 @@ export const RestaurantCheckInModal: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="font-bold text-slate-800 dark:text-slate-200">
-                    {isKm ? 'ជ្រើសរើសភោជនីយដ្ឋាននៅជិតអ្នក៖' : 'Select nearby restaurant:'}
+                    {tr(language, 'ជ្រើសរើសភោជនីយដ្ឋាននៅជិតអ្នក៖', 'Select nearby restaurant:', '选择附近餐厅：')}
                   </label>
                   <button
                     type="button"
@@ -513,7 +500,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                     }`}
                   >
                     <PlusCircle className="w-3.5 h-3.5" />
-                    <span>{isKm ? 'ផ្សេងៗ (ហាងមិនមានក្នុងបញ្ជី)' : 'Other (Not in list)'}</span>
+                    <span>{tr(language, 'ផ្សេងៗ (ហាងមិនមានក្នុងបញ្ជី)', 'Other (Not in list)', '其他（不在列表中）')}</span>
                   </button>
                 </div>
 
@@ -524,7 +511,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                     type="text"
                     value={shopSearchQuery}
                     onChange={(e) => setShopSearchQuery(e.target.value)}
-                    placeholder={isKm ? 'ស្វែងរកឈ្មោះហាងក្នុងបញ្ជី ឬចុច «ផ្សេងៗ» ខាងក្រោម...' : 'Search shop in list or select "Other" below...'}
+                    placeholder={tr(language, 'ស្វែងរកឈ្មោះហាងក្នុងបញ្ជី ឬចុច «ផ្សេងៗ» ខាងក្រោម...', 'Search shop in list or select "Other" below...', '在列表中搜索店铺或选择下方“其他”...')}
                     className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500"
                   />
                 </div>
@@ -535,14 +522,14 @@ export const RestaurantCheckInModal: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
                         <Store className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                        <span>{isKm ? 'បញ្ចូលព័ត៌មានហាងថ្មី (ហាងមិនមានក្នុងបញ្ជី)៖' : 'Enter Custom Shop (Not in List):'}</span>
+                        <span>{tr(language, 'បញ្ចូលព័ត៌មានហាងថ្មី (ហាងមិនមានក្នុងបញ្ជី)៖', 'Enter Custom Shop (Not in List):', '输入自定义店铺（不在列表中）：')}</span>
                       </span>
                       <button
                         type="button"
                         onClick={() => setIsCustomShop(false)}
                         className="text-[10px] text-slate-500 hover:text-slate-800 dark:hover:text-white underline cursor-pointer"
                       >
-                        {isKm ? 'ត្រឡប់ទៅបញ្ជីវិញ' : 'Back to list'}
+                        {tr(language, 'ត្រឡប់ទៅបញ្ជីវិញ', 'Back to list', '返回列表')}
                       </button>
                     </div>
 
@@ -550,7 +537,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                       type="text"
                       value={customShopName}
                       onChange={(e) => setCustomShopName(e.target.value)}
-                      placeholder={isKm ? 'ឈ្មោះហាង / ភោជនីយដ្ឋាន * (ឧ. ហាងគុយទាវអ៊ុំស្រី)...' : 'Shop / Restaurant Name * ...'}
+                      placeholder={tr(language, 'ឈ្មោះហាង / ភោជនីយដ្ឋាន * (ឧ. ហាងគុយទាវអ៊ុំស្រី)...', 'Shop / Restaurant Name * ...', '店铺 / 餐厅名称 * ...')}
                       className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500 font-bold"
                     />
 
@@ -571,7 +558,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                         type="text"
                         value={customShopPhone}
                         onChange={(e) => setCustomShopPhone(e.target.value)}
-                        placeholder={isKm ? 'លេខទូរស័ព្ទហាង (បើមាន)...' : 'Shop Phone (Optional)...'}
+                        placeholder={tr(language, 'លេខទូរស័ព្ទហាង (បើមាន)...', 'Shop Phone (Optional)...', '店铺电话（选填）...')}
                         className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500"
                       />
                     </div>
@@ -580,7 +567,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                       type="text"
                       value={customShopAddress}
                       onChange={(e) => setCustomShopAddress(e.target.value)}
-                      placeholder={isKm ? 'អាសយដ្ឋាន ឬទីតាំងសម្គាល់ (ទុកទទេដើម្បីប្រើ GPS ផ្ទាល់)...' : 'Address or landmark (leave blank to use live GPS)...'}
+                      placeholder={tr(language, 'អាសយដ្ឋាន ឬទីតាំងសម្គាល់ (ទុកទទេដើម្បីប្រើ GPS ផ្ទាល់)...', 'Address or landmark (leave blank to use live GPS)...', '地址或地标（留空以使用实时 GPS）...')}
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500"
                     />
 
@@ -592,9 +579,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                         className="rounded accent-emerald-600 w-3.5 h-3.5"
                       />
                       <span>
-                        {isKm 
-                          ? 'បន្ថែមហាងថ្មីនេះចូលក្នុងបញ្ជីភោជនីយដ្ឋានរបស់កម្មវិធីដោយស្វ័យប្រវត្តិ' 
-                          : 'Automatically add this new shop to the app directory'}
+                        {tr(language, 'បន្ថែមហាងថ្មីនេះចូលក្នុងបញ្ជីភោជនីយដ្ឋានរបស់កម្មវិធីដោយស្វ័យប្រវត្តិ', 'Automatically add this new shop to the app directory', '自动将此新店铺添加至应用名录')}
                       </span>
                     </label>
                   </div>
@@ -644,7 +629,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                             </span>
                             {match.isWithinThreshold && (
                               <span className="text-[9px] text-emerald-600 font-bold block mt-0.5">
-                                ✓ {isKm ? 'ក្នុងរង្វង់ 500m' : '< 500m verified'}
+                                ✓ {tr(language, 'ក្នុងរង្វង់ 500m', '< 500m verified', '< 500米 已验证')}
                               </span>
                             )}
                           </div>
@@ -663,15 +648,15 @@ export const RestaurantCheckInModal: React.FC = () => {
                         </div>
                         <div>
                           <span className="font-bold text-amber-800 dark:text-amber-300 block">
-                            {isKm ? '➕ ផ្សេងៗ — ហាងមិនមានក្នុងបញ្ជី (Other)' : '➕ Other — Shop Not in List'}
+                            {tr(language, '➕ ផ្សេងៗ — ហាងមិនមានក្នុងបញ្ជី (Other)', '➕ Other — Shop Not in List', '➕ 其他 — 不在列表中的店铺')}
                           </span>
                           <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                            {isKm ? 'ចុចទីនេះដើម្បីវាយបញ្ចូលឈ្មោះហាងថ្មីដោយខ្លួនឯង' : 'Tap here to type a custom shop name'}
+                            {tr(language, 'ចុចទីនេះដើម្បីវាយបញ្ចូលឈ្មោះហាងថ្មីដោយខ្លួនឯង', 'Tap here to type a custom shop name', '点击此处手动输入店铺名称')}
                           </span>
                         </div>
                       </div>
                       <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-bold shrink-0">
-                        {isKm ? '+ បន្ថែមហាង' : '+ Custom'}
+                        {tr(language, '+ បន្ថែមហាង', '+ Custom', '+ 自定义')}
                       </span>
                     </div>
                   </div>
@@ -682,7 +667,7 @@ export const RestaurantCheckInModal: React.FC = () => {
               <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-800 dark:text-slate-200">
-                    {isKm ? 'ការវាយតម្លៃរសជាតិ៖' : 'Food Rating:'}
+                    {tr(language, 'ការវាយតម្លៃរសជាតិ៖', 'Food Rating:', '美食评分：')}
                   </span>
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -702,7 +687,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                   type="text"
                   value={dishName}
                   onChange={(e) => setDishName(e.target.value)}
-                  placeholder={isKm ? 'មុខម្ហូបដែលអ្នកបានញ៉ាំ (ឧ. អាម៉ុកត្រី)...' : 'Dish ordered (e.g. Fish Amok)...'}
+                  placeholder={tr(language, 'មុខម្ហូបដែលអ្នកបានញ៉ាំ (ឧ. អាម៉ុកត្រី)...', 'Dish ordered (e.g. Fish Amok)...', '品尝的菜品（例如：阿莫克鱼 Fish Amok）...')}
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500"
                 />
 
@@ -710,7 +695,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                   value={reviewNote}
                   onChange={(e) => setReviewNote(e.target.value)}
                   rows={2}
-                  placeholder={isKm ? 'ចំណាប់អារម្មណ៍ ឬការណែនាំរបស់អ្នក...' : 'Your experience / review note...'}
+                  placeholder={tr(language, 'ចំណាប់អារម្មណ៍ ឬការណែនាំរបស់អ្នក...', 'Your experience / review note...', '您的用餐体验 / 评价感想...')}
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-500 resize-none"
                 />
               </div>
@@ -724,8 +709,8 @@ export const RestaurantCheckInModal: React.FC = () => {
                 <Send className="w-4 h-4" />
                 <span>
                   {isSubmitting 
-                    ? (isKm ? 'កំពុងកត់ត្រា...' : 'Submitting...') 
-                    : (isKm ? '✅ បញ្ជាក់ & បោះពុម្ពផ្សាយការឆែកអ៊ីន' : '✅ Confirm & Publish Check-in')}
+                    ? (tr(language, 'កំពុងកត់ត្រា...', 'Submitting...', '正在提交...')) 
+                    : (tr(language, '✅ បញ្ជាក់ & បោះពុម្ពផ្សាយការឆែកអ៊ីន', '✅ Confirm & Publish Check-in', '✅ 确认并发布签到'))}
                 </span>
               </button>
             </div>

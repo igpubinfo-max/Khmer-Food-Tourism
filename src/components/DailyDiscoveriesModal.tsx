@@ -40,6 +40,7 @@ import { calculateDistanceKm } from '../services/dailyDiscoveryAndNotificationSe
 import { tr } from '../utils/i18n';
 import { IconProvinceFood } from './icons/HandcraftedIcons';
 import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
+import type { Restaurant } from '../types';
 
 type VipAiTasteId = 'all' | 'soup_kroeung' | 'grill_seafood' | 'street_dessert';
 
