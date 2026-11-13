@@ -1,3 +1,4 @@
+import { resolveCanonicalFoodCategorySlug } from '../utils/foodFilters';
 declare const __KFT_VERSION_NAME__: string | undefined;
 declare const __KFT_BUILD_CODE__: number | undefined;
 export const APP_VERSION_NAME: string =
@@ -5,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1576;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1577;
 export const APP_RELEASE_DATE = '2026-11-13';
 
 /**
@@ -172,7 +173,13 @@ export function deduplicateFoodItems<
     if (normNameKh) seenNamesKh.add(normNameKh);
     if (normNameEn) seenNamesEn.add(normNameEn);
     if (normPhoto && !normPhoto.startsWith('data:image/')) seenPhotoUrls.add(normPhoto);
-    out.push(item);
+    const canonicalSlug = item.nameKh ? resolveCanonicalFoodCategorySlug(item as any) : (item as any).categorySlug;
+    if (canonicalSlug && (item as any).categorySlug && (item as any).categorySlug !== canonicalSlug) {
+      anySkipped = true;
+      out.push({ ...item, categorySlug: canonicalSlug });
+    } else {
+      out.push(item);
+    }
   }
   return anySkipped ? out : items;
 }
@@ -1354,8 +1361,10 @@ export function organizeAndDeduplicateFoods(items: FoodItem[]): FoodItem[] {
   const byNormNameEn = new Map<string, FoodItem>();
   const byNormPhoto = new Map<string, FoodItem>();
 
-  for (const raw of items) {
-    if (!raw || !raw.id || !raw.nameKh) continue;
+  for (const rawItem of items) {
+    if (!rawItem || !rawItem.id || !rawItem.nameKh) continue;
+    const canonicalSlug = resolveCanonicalFoodCategorySlug(rawItem);
+    const raw = rawItem.categorySlug !== canonicalSlug ? { ...rawItem, categorySlug: canonicalSlug } : rawItem;
     const rawId = String(raw.id).trim();
     if (!rawId || REMOVED_DUPLICATE_FOOD_IDS.has(rawId)) continue;
 
@@ -3142,9 +3151,6 @@ export const isUserVipActive = (user?: User | null): boolean => {
   ) {
     return false;
   }
-  if (isPermanentVipEmail(user.email)) {
-    return true;
-  }
   // Retired 30-dish check-in reward references never grant active VIP
   if (typeof user.transactionRef === 'string' && user.transactionRef.trim().startsWith('REWARD-FOODCHECKIN')) {
     return false;
@@ -3255,7 +3261,6 @@ export const isUserPaidVipActive = (user?: User | null): boolean => {
   if (!isUserVipActive(user)) return false;
   if (isUserOnConsumerFreeTrial(user)) return false;
   const hasPaidVipRecord =
-    isPermanentVipEmail(user.email) ||
     user.paymentStatus === 'verified' ||
     (user.membershipTier === 'premium_vip' &&
       (user.subscriptionStatus === 'active' || user.vipStatus === 'active' || !user.subscriptionStatus));
@@ -3540,6 +3545,74 @@ export const sanitizeLegacyVipTransactionPricing = (
     }
   }
 
+  if (
+    aiVerificationReport &&
+    aiVerificationReport.checks &&
+    aiVerificationReport.checks.recipient?.passed &&
+    aiVerificationReport.checks.amount?.passed &&
+    aiVerificationReport.checks.trxId?.passed &&
+    aiVerificationReport.checks.date?.passed &&
+    !aiVerificationReport.checks.antiReplay?.passed &&
+    !aiVerificationReport.extractedReceipt?.isModifiedOrFake
+  ) {
+    const rawTrx = String(aiVerificationReport.extractedReceipt?.trxId || txn.transactionRef || '').trim();
+    const recName = aiVerificationReport.extractedReceipt?.recipientName || 'CHEA SAVUTH';
+    const recDate = aiVerificationReport.extractedReceipt?.transactionDate || txn.createdAt;
+    aiVerificationReport = {
+      ...aiVerificationReport,
+      status: 'flagged_manual_review',
+      canAutoApprove: false,
+      confidenceScore: 100,
+      summaryKh: `⏳ បឋម៖ វិក្កយបត្រ ABA ត្រូវគ្នាជាមួយគណនី "${recName}", ចំនួនទឹកប្រាក់ ${(amountUsd || 0).toFixed(2)} USD, លេខប្រតិបត្តិការ (${rawTrx}) និងកាលបរិច្ឆេទ (${recDate})។ កំពុងរង់ចាំរដ្ឋបាលពិនិត្យ និងអនុម័ត!`,
+      summaryEn: `⏳ Pre-check passed: ABA receipt matches recipient "${recName}", amount ${(amountUsd || 0).toFixed(2)} USD, Trx. ID (${rawTrx}), and date (${recDate}). Awaiting Admin approval!`,
+      checks: {
+        ...aiVerificationReport.checks,
+        antiReplay: {
+          passed: true,
+          expected: 'Unique unused ABA Transaction & Receipt',
+          detected: 'មិនធ្លាប់ប្រើពីមុន',
+          reasonKh: '✅ វិក្កយបត្រ និងលេខប្រតិបត្តិការមិនធ្លាប់ត្រូវបានប្រើប្រាស់ពីមុនទេ',
+          reasonEn: '✅ Transaction ID and receipt image have not been used before',
+        },
+      },
+    };
+    changed = true;
+  }
+
+  if (
+    aiVerificationReport &&
+    aiVerificationReport.checks &&
+    aiVerificationReport.checks.recipient?.passed &&
+    aiVerificationReport.checks.amount?.passed &&
+    aiVerificationReport.checks.trxId?.passed &&
+    aiVerificationReport.checks.date?.passed &&
+    !aiVerificationReport.checks.antiReplay?.passed &&
+    !aiVerificationReport.extractedReceipt?.isModifiedOrFake
+  ) {
+    const rawTrx = String(aiVerificationReport.extractedReceipt?.trxId || txn.transactionRef || '').trim();
+    const recName = aiVerificationReport.extractedReceipt?.recipientName || 'CHEA SAVUTH';
+    const recDate = aiVerificationReport.extractedReceipt?.transactionDate || txn.createdAt;
+    aiVerificationReport = {
+      ...aiVerificationReport,
+      status: 'flagged_manual_review',
+      canAutoApprove: false,
+      confidenceScore: 100,
+      summaryKh: `⏳ បឋម៖ វិក្កយបត្រ ABA ត្រូវគ្នាជាមួយគណនី "${recName}", ចំនួនទឹកប្រាក់ ${(amountUsd || 0).toFixed(2)} USD, លេខប្រតិបត្តិការ (${rawTrx}) និងកាលបរិច្ឆេទ (${recDate})។ កំពុងរង់ចាំរដ្ឋបាលពិនិត្យ និងអនុម័ត!`,
+      summaryEn: `⏳ Pre-check passed: ABA receipt matches recipient "${recName}", amount ${(amountUsd || 0).toFixed(2)} USD, Trx. ID (${rawTrx}), and date (${recDate}). Awaiting Admin approval!`,
+      checks: {
+        ...aiVerificationReport.checks,
+        antiReplay: {
+          passed: true,
+          expected: 'Unique unused ABA Transaction & Receipt',
+          detected: 'មិនធ្លាប់ប្រើពីមុន',
+          reasonKh: '✅ វិក្កយបត្រ និងលេខប្រតិបត្តិការមិនធ្លាប់ត្រូវបានប្រើប្រាស់ពីមុនទេ',
+          reasonEn: '✅ Transaction ID and receipt image have not been used before',
+        },
+      },
+    };
+    changed = true;
+  }
+
   if (aiVerificationReport && aiVerificationReport.canAutoApprove) {
     aiVerificationReport = {
       ...aiVerificationReport,
@@ -3573,22 +3646,323 @@ export const sanitizeLegacyVipTransactionPricing = (
   };
 };
 
+export interface ArchivedVipEntitlement {
+  userId: string;
+  email?: string;
+  phone?: string;
+  legacyIds?: string[];
+  vipPlanDays: number;
+  vipPlanType: 'quarterly' | 'annual';
+  activeConsumerPlanId?: User['activeConsumerPlanId'];
+  subscriptionStartDate: string;
+  subscriptionExpiryDate: string;
+  transactionRef: string;
+  paymentMethod?: User['paymentMethod'];
+  verifiedAt?: string;
+  paidAdditionalStoreSlots?: number;
+  additionalStorePaymentIds?: string[];
+  vipMembershipHistory?: NonNullable<User['vipMembershipHistory']>;
+  archivedAt: string;
+}
+
 export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   if (!user) return user;
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const nowMs = getAuthoritativeServerNowMs();
+
+  // 1. Sanitize VIP Membership History & identify rejected transactionRefs / store slot IDs
+  const rejectedRefTimestamps = new Map<string, number>();
+  const verifiedRefTimestamps = new Map<string, number>();
+  const rejectedTxnIds = new Set<string>();
+
   if (Array.isArray(user.vipMembershipHistory) && user.vipMembershipHistory.length > 0) {
-    let histChanged = false;
-    const cleanHist = user.vipMembershipHistory.map(h => {
-      const nextH = sanitizeVipMembershipHistoryEntry(h);
-      if (nextH !== h) histChanged = true;
-      return nextH;
+    const sanitizedHist = user.vipMembershipHistory
+      .filter((h): h is VipMembershipHistoryEntry => Boolean(h && typeof h === 'object'))
+      .map(h => sanitizeVipMembershipHistoryEntry(h));
+
+    for (const h of sanitizedHist) {
+      const refKey = String(h.transactionRef || '').trim().toUpperCase();
+      const hMs = parseSafeDateMs(h.date);
+      if (h.status === 'failed' || h.action === 'payment_failed') {
+        if (refKey) {
+          const prev = rejectedRefTimestamps.get(refKey) || 0;
+          if (hMs >= prev) rejectedRefTimestamps.set(refKey, hMs || 1);
+        }
+        if (typeof h.id === 'string' && h.id.startsWith('hist-reject-')) {
+          const rawTxnId = h.id.slice('hist-reject-'.length).trim();
+          if (rawTxnId) rejectedTxnIds.add(rawTxnId);
+        }
+      } else if (h.status === 'verified' && (h.action as string) !== 'cancellation' && refKey) {
+        const prev = verifiedRefTimestamps.get(refKey) || 0;
+        if (hMs >= prev) verifiedRefTimestamps.set(refKey, hMs || 1);
+      }
+    }
+
+    // Filter out any erroneous 'verified' history entry for a transactionRef that was rejected at an equal or newer time
+    const cleanHist = sanitizedHist.filter(h => {
+      if (h.status === 'verified' && h.transactionRef) {
+        const refKey = String(h.transactionRef).trim().toUpperCase();
+        const rejMs = rejectedRefTimestamps.get(refKey);
+        if (rejMs !== undefined) {
+          const verMs = parseSafeDateMs(h.date);
+          if (rejMs >= verMs || verMs <= 0) {
+            return false;
+          }
+        }
+      }
+      return true;
     });
-    if (histChanged) {
+
+    if (
+      cleanHist.length !== user.vipMembershipHistory.length ||
+      cleanHist.some((h, idx) => h !== user.vipMembershipHistory![idx])
+    ) {
       user = { ...user, vipMembershipHistory: cleanHist };
     }
   }
+
+  // Clean rejected store-slot transaction IDs so rejected store slot requests never inflate paidAdditionalStoreSlots
+  if (rejectedTxnIds.size > 0 && Array.isArray(user.additionalStorePaymentIds)) {
+    const cleanStoreIds = user.additionalStorePaymentIds.filter(id => !rejectedTxnIds.has(String(id).trim()));
+    if (cleanStoreIds.length !== user.additionalStorePaymentIds.length) {
+      user = {
+        ...user,
+        additionalStorePaymentIds: cleanStoreIds,
+        paidAdditionalStoreSlots: cleanStoreIds.length,
+      };
+    }
+  }
+
   if (isAdminAccount(user)) return user;
-  const DAY_MS = 24 * 60 * 60 * 1000;
-  const nowMs = getAuthoritativeServerNowMs();
+
+  // Strip legacy 30-day freeTrialDurationDays pollution on non-trial accounts (consumer free trial is strictly 7 days)
+  const rawRef = String(user.transactionRef || '').trim();
+  const isServerTrialRef =
+    rawRef.startsWith('TRIAL-7D-') || rawRef.startsWith('FREE-TRIAL-') || rawRef.startsWith('VIP-TRIAL-');
+  if (
+    !isServerTrialRef &&
+    ((typeof user.freeTrialDurationDays === 'number' && user.freeTrialDurationDays > 7) ||
+      (user.freeTrialActivated === false && (user.freeTrialDurationDays || user.freeTrialExpiresAt)))
+  ) {
+    user = {
+      ...user,
+      freeTrialActivated: false,
+      freeTrialExpiresAt: undefined,
+      freeTrialDurationDays: undefined,
+    };
+  }
+
+  // 2. Reconcile against verified vs. rejected entries in vipMembershipHistory
+  const isRefRejected = (candidateRef?: string | null): boolean => {
+    const key = String(candidateRef || '').trim().toUpperCase();
+    if (!key) return false;
+    const rejMs = rejectedRefTimestamps.get(key);
+    if (rejMs === undefined) return false;
+    const verMs = verifiedRefTimestamps.get(key) || 0;
+    return rejMs >= verMs;
+  };
+
+  const currentRefRejected = isRefRejected(rawRef);
+  const histEntries = Array.isArray(user.vipMembershipHistory) ? user.vipMembershipHistory : [];
+  const validVerifiedHist = histEntries.filter(h => {
+    if (!h || h.status !== 'verified' || (h.action as string) === 'cancellation' || h.action === 'payment_failed') {
+      return false;
+    }
+    const hRef = String(h.transactionRef || '').trim();
+    if (!hRef || hRef === 'VIP-PERMANENT-IGP2026D' || hRef.startsWith('REWARD-FOODCHECKIN')) {
+      return false;
+    }
+    return !isRefRejected(hRef);
+  });
+
+  // Find latest initial_upgrade timestamp to bound any pre-reset legacy test entries
+  let latestInitialUpgradeMs = 0;
+  for (const h of validVerifiedHist) {
+    if (h.action === 'initial_upgrade') {
+      const ms = parseSafeDateMs(h.date);
+      if (ms > latestInitialUpgradeMs) latestInitialUpgradeMs = ms;
+    }
+  }
+
+  const cancelMs =
+    (user.subscriptionStatus as string) === 'cancelled' ||
+    (user.paymentStatus as string) === 'cancelled' ||
+    Boolean(user.vipCancelledAt)
+      ? parseSafeDateMs(user.vipCancelledAt) || 0
+      : 0;
+
+  interface CandidateVerifiedGrant {
+    entry: VipMembershipHistoryEntry;
+    startMs: number;
+    expMs: number;
+    planDays: number;
+    isCurrentCycle: boolean;
+  }
+
+  const candidateGrants: CandidateVerifiedGrant[] = [];
+  for (const h of validVerifiedHist) {
+    const startMs = parseSafeDateMs(h.date);
+    if (cancelMs > 0 && startMs > 0 && startMs < cancelMs) {
+      continue;
+    }
+    const planDays =
+      typeof h.durationDays === 'number' && h.durationDays >= 1
+        ? Math.round(h.durationDays)
+        : h.planType === 'annual'
+          ? 90
+          : 30;
+    let expMs = parseSafeDateMs(h.expiryDate);
+    if (expMs <= 0 && startMs > 0) {
+      expMs = startMs + planDays * DAY_MS;
+    }
+    // If an older pre-reset entry has an inflated expiry exceeding its own durationDays and a newer initial_upgrade exists, clamp to its standalone window
+    if (
+      latestInitialUpgradeMs > 0 &&
+      startMs > 0 &&
+      startMs < latestInitialUpgradeMs &&
+      expMs > startMs + (planDays + 5) * DAY_MS
+    ) {
+      expMs = startMs + planDays * DAY_MS;
+    }
+    if (expMs > 0) {
+      candidateGrants.push({
+        entry: h,
+        startMs: startMs > 0 ? startMs : expMs - planDays * DAY_MS,
+        expMs,
+        planDays,
+        isCurrentCycle: latestInitialUpgradeMs <= 0 || startMs >= latestInitialUpgradeMs,
+      });
+    }
+  }
+
+  const activeGrants = candidateGrants
+    .filter(g => g.expMs > nowMs)
+    .sort((a, b) => {
+      if (a.isCurrentCycle !== b.isCurrentCycle) return a.isCurrentCycle ? -1 : 1;
+      if (b.planDays !== a.planDays) return b.planDays - a.planDays;
+      return b.expMs - a.expMs;
+    });
+
+  const bestActiveGrant = activeGrants[0];
+  const bestExpiredGrant =
+    activeGrants.length === 0 && candidateGrants.length > 0
+      ? [...candidateGrants].sort((a, b) => b.expMs - a.expMs)[0]
+      : undefined;
+
+  const isPendingApproval =
+    user.subscriptionStatus === 'pending' ||
+    user.paymentStatus === 'paid_pending_approval' ||
+    user.paymentStatus === 'pending_verification';
+
+  if (bestActiveGrant) {
+    const curExpMs = parseSafeDateMs(user.subscriptionExpiryDate || user.vipExpiresAt);
+    const curPlanDays = resolveUserActualVipPlanDays(user);
+    const needsRestoreFromVerifiedHistory =
+      currentRefRejected ||
+      user.membershipTier !== 'premium_vip' ||
+      user.subscriptionStatus !== 'active' ||
+      user.vipStatus !== 'active' ||
+      user.paymentStatus !== 'verified' ||
+      bestActiveGrant.planDays > curPlanDays ||
+      curExpMs <= nowMs ||
+      (String(user.transactionRef || '').trim() !== String(bestActiveGrant.entry.transactionRef || '').trim() &&
+        bestActiveGrant.expMs > curExpMs);
+
+    if (needsRestoreFromVerifiedHistory) {
+      const restoredStartIso = new Date(bestActiveGrant.startMs).toISOString();
+      const restoredExpIso = new Date(bestActiveGrant.expMs).toISOString();
+      const restoredPlanDays = bestActiveGrant.planDays;
+      const restoredPlanType: 'quarterly' | 'annual' = restoredPlanDays <= 35 ? 'quarterly' : 'annual';
+      const restoredConsumerPlanId =
+        restoredPlanDays >= 350
+          ? 'consumer_365d'
+          : restoredPlanDays >= 85
+            ? 'consumer_90d'
+            : bestActiveGrant.entry.amountUsd && bestActiveGrant.entry.amountUsd <= 1.25
+              ? 'consumer_promo_30d'
+              : 'consumer_30d';
+
+      user = {
+        ...user,
+        membershipTier: 'premium_vip',
+        subscriptionStatus: 'active',
+        vipStatus: 'active',
+        paymentStatus: 'verified',
+        vipPlanDays: restoredPlanDays,
+        vipPlanType: restoredPlanType,
+        activeConsumerPlanId: restoredConsumerPlanId,
+        subscriptionStartDate: restoredStartIso,
+        subscriptionExpiryDate: restoredExpIso,
+        vipExpiresAt: restoredExpIso,
+        vipCancelledAt: undefined,
+        transactionRef: bestActiveGrant.entry.transactionRef,
+        paymentMethod: (bestActiveGrant.entry.paymentMethod as User['paymentMethod']) || user.paymentMethod || 'KHQR',
+        freeTrialActivated: false,
+        freeTrialExpiresAt: undefined,
+        freeTrialDurationDays: undefined,
+      };
+    }
+  } else if (currentRefRejected && !isPendingApproval) {
+    if (bestExpiredGrant) {
+      const expStartIso = new Date(bestExpiredGrant.startMs).toISOString();
+      const expIso = new Date(bestExpiredGrant.expMs).toISOString();
+      return {
+        ...user,
+        membershipTier: 'free',
+        subscriptionStatus: 'expired',
+        vipStatus: 'expired',
+        paymentStatus: 'verified',
+        vipPlanDays: bestExpiredGrant.planDays,
+        vipPlanType: bestExpiredGrant.planDays <= 35 ? 'quarterly' : 'annual',
+        subscriptionStartDate: expStartIso,
+        subscriptionExpiryDate: expIso,
+        vipExpiresAt: expIso,
+        transactionRef: bestExpiredGrant.entry.transactionRef,
+        freeTrialActivated: false,
+        freeTrialExpiresAt: undefined,
+        freeTrialDurationDays: undefined,
+      };
+    }
+    return {
+      ...user,
+      membershipTier: 'free',
+      subscriptionStatus: 'none',
+      vipStatus: 'none',
+      paymentStatus: 'rejected',
+      subscriptionStartDate: undefined,
+      subscriptionExpiryDate: undefined,
+      vipExpiresAt: undefined,
+      vipPlanDays: undefined,
+      activeConsumerPlanId: undefined,
+      transactionRef: undefined,
+      freeTrialActivated: false,
+      freeTrialExpiresAt: undefined,
+      freeTrialDurationDays: undefined,
+    };
+  } else if (bestExpiredGrant && !isPendingApproval && cancelMs <= 0) {
+    const curExpMs = parseSafeDateMs(user.subscriptionExpiryDate || user.vipExpiresAt);
+    if (curExpMs <= 0 || user.subscriptionStatus === 'none' || !user.subscriptionStatus) {
+      const expStartIso = new Date(bestExpiredGrant.startMs).toISOString();
+      const expIso = new Date(bestExpiredGrant.expMs).toISOString();
+      return {
+        ...user,
+        membershipTier: 'free',
+        subscriptionStatus: 'expired',
+        vipStatus: 'expired',
+        paymentStatus: 'verified',
+        vipPlanDays: bestExpiredGrant.planDays,
+        vipPlanType: bestExpiredGrant.planDays <= 35 ? 'quarterly' : 'annual',
+        subscriptionStartDate: expStartIso,
+        subscriptionExpiryDate: expIso,
+        vipExpiresAt: expIso,
+        transactionRef: bestExpiredGrant.entry.transactionRef,
+        freeTrialActivated: false,
+        freeTrialExpiresAt: undefined,
+        freeTrialDurationDays: undefined,
+      };
+    }
+  }
+
   const ref = String(user.transactionRef || '').trim();
   const actualPlanDays = resolveUserActualVipPlanDays(user);
 
@@ -3645,7 +4019,6 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
     };
   }
 
-  const isServerTrialRef = ref.startsWith('TRIAL-7D-') || ref.startsWith('FREE-TRIAL-') || ref.startsWith('VIP-TRIAL-');
   const freeTrialStartMs = parseSafeDateMs(user.freeTrialActivatedAt);
   const rawExpiry =
     user.subscriptionExpiryDate ||
@@ -3654,12 +4027,12 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   let expMs = parseSafeDateMs(rawExpiry);
 
   let reconciledUser: User = user;
-  // Only reconcile genuine 7-day Consumer Free Trial records (never retired 30-day check-in rewards or cancelled/unapproved users)
-  if ((user.freeTrialActivated || isServerTrialRef) && !user.foodCheckInRewardAt) {
-    const trialDays =
-      typeof user.freeTrialDurationDays === 'number' && user.freeTrialDurationDays >= 1
-        ? user.freeTrialDurationDays
-        : 7;
+  // Only reconcile genuine 7-day Consumer Free Trial records (strictly 7 days, never 30-day paid or check-in records)
+  if (
+    (isServerTrialRef || (user.freeTrialActivated && (!user.freeTrialDurationDays || user.freeTrialDurationDays <= 7))) &&
+    !user.foodCheckInRewardAt
+  ) {
+    const trialDays = 7;
     const effectiveTrialStartMs =
       freeTrialStartMs > 0
         ? freeTrialStartMs
@@ -3741,31 +4114,13 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
       subscriptionStartDate: correctedStartIso,
       subscriptionExpiryDate: correctedExpIso,
       vipExpiresAt: correctedExpIso,
-      freeTrialActivated: true,
-      freeTrialActivatedAt: reconciledUser.freeTrialActivatedAt || correctedStartIso,
-      freeTrialExpiresAt: correctedExpIso,
-      freeTrialDurationDays: actualPlanDays,
+      freeTrialActivated: false,
+      freeTrialExpiresAt: undefined,
+      freeTrialDurationDays: undefined,
       transactionRef:
         reconciledUser.transactionRef === 'VIP-PERMANENT-IGP2026D'
           ? `VIP-${actualPlanDays}D-IGP2026D`
           : reconciledUser.transactionRef,
-    };
-  }
-
-  // If permanent VIP email has expired or missing expiry, set to actualPlanDays (30 days default)
-  if (isPermanentVipEmail(reconciledUser.email) && expMs <= nowMs) {
-    const correctedExpIso = new Date(nowMs + actualPlanDays * DAY_MS).toISOString();
-    return {
-      ...reconciledUser,
-      membershipTier: 'premium_vip',
-      subscriptionStatus: 'active',
-      vipStatus: 'active',
-      paymentStatus: 'verified',
-      vipPlanDays: actualPlanDays,
-      vipPlanType: actualPlanDays <= 30 ? 'quarterly' : 'annual',
-      subscriptionStartDate: reconciledUser.subscriptionStartDate || new Date(nowMs).toISOString(),
-      subscriptionExpiryDate: correctedExpIso,
-      vipExpiresAt: correctedExpIso,
     };
   }
 
@@ -3777,7 +4132,6 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   }
 
   if (
-    !isPermanentVipEmail(reconciledUser.email) &&
     expMs > 0 &&
     expMs <= nowMs &&
     (reconciledUser.membershipTier === 'premium_vip' ||
@@ -3795,6 +4149,193 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   return reconciledUser;
 };
 
+/**
+ * Authoritatively reconciles a User account's VIP membership and store slot entitlements
+ * against verified RegistrationTransactions, archived VIP entitlements (saved across account deletions),
+ * and the user's vipMembershipHistory.
+ * - Never grants VIP based solely on email address.
+ * - Restores valid active VIP status, plan duration (e.g. 90 days), and exact expiration date on re-registration / login.
+ * - Restores expired status ('expired') if previous verified subscriptions have expired, never granting a new 30-day VIP.
+ * - Rolls back rejected payment transactions while preserving any prior valid verified VIP subscription.
+ */
+export const reconcileUserVipWithVerifiedHistoryAndTransactions = (
+  user: User,
+  transactions?: RegistrationTransaction[] | null,
+  archivedEntitlements?: ArchivedVipEntitlement[] | null
+): User => {
+  if (!user || isAdminAccount(user)) return user;
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const cleanEmail = String(user.email || '').trim().toLowerCase();
+  const cleanPhone = String(user.phone || '').replace(/\D/g, '');
+  const idSet = new Set<string>(
+    [user.id, ...(Array.isArray(user.legacyIds) ? user.legacyIds : [])]
+      .filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
+      .map(v => v.trim())
+  );
+  if (cleanEmail) {
+    const emailSlug = cleanEmail.replace(/[^a-z0-9]/g, '_');
+    idSet.add(`google-${emailSlug}`);
+    idSet.add(`user-${emailSlug}`);
+    idSet.add(`owner-${emailSlug}`);
+  }
+
+  const matchesThisUser = (target: {
+    userId?: string;
+    ownerId?: string;
+    email?: string;
+    phone?: string;
+    legacyIds?: string[];
+  }): boolean => {
+    if (target.userId && idSet.has(target.userId.trim())) return true;
+    if (target.ownerId && idSet.has(target.ownerId.trim())) return true;
+    if (Array.isArray(target.legacyIds) && target.legacyIds.some(id => id && idSet.has(id.trim()))) return true;
+    if (cleanEmail && target.email && String(target.email).trim().toLowerCase() === cleanEmail) return true;
+    if (cleanPhone.length >= 7 && target.phone) {
+      const tPhone = String(target.phone).replace(/\D/g, '');
+      if (tPhone.length >= 7 && (tPhone === cleanPhone || tPhone.endsWith(cleanPhone.slice(-8)) || cleanPhone.endsWith(tPhone.slice(-8)))) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const historyMap = new Map<string, VipMembershipHistoryEntry>();
+  for (const h of Array.isArray(user.vipMembershipHistory) ? user.vipMembershipHistory : []) {
+    if (h && typeof h === 'object' && h.id) {
+      historyMap.set(h.id, sanitizeVipMembershipHistoryEntry(h));
+    }
+  }
+
+  // 1. Merge matching archived VIP entitlements (saved prior to account deletion)
+  if (Array.isArray(archivedEntitlements) && archivedEntitlements.length > 0) {
+    for (const arch of archivedEntitlements) {
+      if (!arch || !matchesThisUser({ userId: arch.userId, email: arch.email, phone: arch.phone, legacyIds: arch.legacyIds })) {
+        continue;
+      }
+      if (Array.isArray(arch.vipMembershipHistory)) {
+        for (const h of arch.vipMembershipHistory) {
+          if (h && typeof h === 'object' && h.id && !historyMap.has(h.id)) {
+            historyMap.set(h.id, sanitizeVipMembershipHistoryEntry(h));
+          }
+        }
+      }
+      if (arch.transactionRef && arch.subscriptionExpiryDate) {
+        const synthId = `hist-vip-${arch.transactionRef}`;
+        if (!historyMap.has(synthId)) {
+          const expFormatted = arch.subscriptionExpiryDate.split('T')[0];
+          const priceUsd = arch.vipPlanDays >= 350 ? 19.99 : arch.vipPlanDays >= 85 ? 6.99 : 2.99;
+          historyMap.set(synthId, {
+            id: synthId,
+            date: arch.subscriptionStartDate || arch.verifiedAt || arch.archivedAt,
+            action: 'initial_upgrade',
+            planType: arch.vipPlanType || (arch.vipPlanDays <= 35 ? 'quarterly' : 'annual'),
+            durationDays: arch.vipPlanDays || 30,
+            amountUsd: priceUsd,
+            paymentMethod: (arch.paymentMethod as 'KHQR' | 'Bakong' | 'Card') || 'KHQR',
+            transactionRef: arch.transactionRef,
+            expiryDate: arch.subscriptionExpiryDate,
+            status: 'verified',
+            noteKh: `បានស្តារសមាជិកភាព VIP ដែលបានផ្ទៀងផ្ទាត់ (${arch.vipPlanDays} ថ្ងៃ / $${priceUsd.toFixed(2)} USD) រហូតដល់ ${expFormatted}`,
+            noteEn: `Restored verified VIP membership (${arch.vipPlanDays} days / $${priceUsd.toFixed(2)} USD) until ${expFormatted}`,
+          });
+        }
+      }
+    }
+  }
+
+  // 2. Reconcile against RegistrationTransactions ledger
+  let verifiedStoreSlotIds: string[] | undefined;
+  if (Array.isArray(transactions) && transactions.length > 0) {
+    const userTxns = transactions.filter(t =>
+      t &&
+      matchesThisUser({
+        userId: t.userId,
+        ownerId: t.ownerId,
+        email: t.userEmail,
+      })
+    );
+
+    const storeSlotSet = new Set<string>();
+    for (const t of userTxns) {
+      const tRef = String(t.transactionRef || '').trim();
+      if (t.status === 'rejected' || (t.paymentStatus as string) === 'failed') {
+        const rejHistId = `hist-reject-${t.id}`;
+        if (!historyMap.has(rejHistId)) {
+          const rejDateMs = parseSafeDateMs(t.verifiedAt || t.createdAt) || Date.now();
+          historyMap.set(rejHistId, {
+            id: rejHistId,
+            date: new Date(rejDateMs).toISOString(),
+            action: 'payment_failed',
+            planType: t.planType === 'annual' || (t.durationDays && t.durationDays > 35) ? 'annual' : 'quarterly',
+            durationDays: t.durationDays || 30,
+            amountUsd: t.amountUsd || 2.99,
+            paymentMethod: (t.paymentMethod as 'KHQR' | 'Bakong' | 'Card') || 'KHQR',
+            transactionRef: tRef || t.id,
+            status: 'failed',
+            noteKh: `ការទូទាត់មិនត្រូវបានអនុម័ត៖ ${t.notes || 'Transaction rejected'}`,
+            noteEn: `Payment verification failed: ${t.notes || 'Transaction rejected'}`,
+          });
+        }
+      } else if (t.status === 'verified') {
+        if (t.type === 'additional_store_slot') {
+          storeSlotSet.add(t.id);
+        } else if (tRef && !tRef.startsWith('REWARD-FOODCHECKIN')) {
+          const verHistId = `hist-vip-${tRef}`;
+          if (!historyMap.has(verHistId)) {
+            const startMs = parseSafeDateMs(t.verifiedAt || t.createdAt) || Date.now();
+            const days =
+              typeof t.durationDays === 'number' && t.durationDays >= 1
+                ? t.durationDays
+                : t.planId === 'consumer_365d'
+                  ? 365
+                  : t.planId === 'consumer_90d' || t.planType === 'annual'
+                    ? 90
+                    : 30;
+            const expMs = parseSafeDateMs(t.expiresAt) || startMs + days * DAY_MS;
+            const expIso = new Date(expMs).toISOString();
+            const expFormatted = expIso.split('T')[0];
+            const amt = typeof t.amountUsd === 'number' && t.amountUsd > 0 ? t.amountUsd : days >= 85 ? 6.99 : 2.99;
+            historyMap.set(verHistId, {
+              id: verHistId,
+              date: new Date(startMs).toISOString(),
+              action: 'initial_upgrade',
+              planType: days <= 35 ? 'quarterly' : 'annual',
+              durationDays: days,
+              amountUsd: amt,
+              paymentMethod: (t.paymentMethod as 'KHQR' | 'Bakong' | 'Card') || 'KHQR',
+              transactionRef: tRef,
+              expiryDate: expIso,
+              status: 'verified',
+              noteKh: `បានបើកដំណើរការ ឬបន្តសមាជិកភាព VIP (${days} ថ្ងៃ / $${amt.toFixed(2)} USD) រហូតដល់ ${expFormatted}`,
+              noteEn: `Activated / renewed VIP membership (${days} days / $${amt.toFixed(2)} USD) until ${expFormatted}`,
+            });
+          }
+        }
+      }
+    }
+    if (userTxns.some(t => t.type === 'additional_store_slot')) {
+      verifiedStoreSlotIds = Array.from(storeSlotSet);
+    }
+  }
+
+  const mergedHist = Array.from(historyMap.values())
+    .sort((a, b) => parseSafeDateMs(b.date) - parseSafeDateMs(a.date))
+    .slice(0, 50);
+
+  const enrichedUser: User = {
+    ...user,
+    vipMembershipHistory: mergedHist.length > 0 ? mergedHist : user.vipMembershipHistory,
+    ...(verifiedStoreSlotIds !== undefined
+      ? {
+          additionalStorePaymentIds: verifiedStoreSlotIds,
+          paidAdditionalStoreSlots: verifiedStoreSlotIds.length,
+        }
+      : {}),
+  };
+
+  return sanitizeUserVipPlanAndExpiry(enrichedUser);
+};
+
 // Helper to calculate remaining days in VIP / Free Trial subscription using authoritative server time (strictly for VIP users, 0 for Admin)
 export const getVipRemainingDays = (user?: User | null): number => {
   if (!user || isAdminAccount(user)) return 0;
@@ -3810,7 +4351,7 @@ export const getVipRemainingDays = (user?: User | null): number => {
   if (expMs <= 0) return planDays;
   const diffMs = expMs - nowServerMs;
   if (diffMs <= 0) {
-    return isPermanentVipEmail(user.email) ? planDays : 0;
+    return 0;
   }
   const computedDays = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
   // Guard against displaying >95 days (e.g. 365 days) when the user's plan is a 30-day or 90-day package

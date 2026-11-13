@@ -1,12 +1,14 @@
 import {
   isPlaceLocationVerified,
   isStrictVerifiedCambodiaRestaurant,
+  type FoodCategorySlug,
   type FoodItem,
   type Language,
   type Restaurant,
 } from '../types';
 import { includesKhmerToken, normalizeKhmerFoodText } from './khmerFoodSearch';
 import { getLocalizedRestaurant } from './zhDynamicTranslator';
+import { getDishTagIds } from './dishTags';
 
 export interface ProvinceFilterOption {
   id: string;
@@ -1595,4 +1597,324 @@ export function getMatchingRestaurantsForDish(
     userCoords,
     preferredProvinceKh
   ).slice(0, limit);
+}
+
+export type StrictFoodCategoryId =
+  | 'all'
+  | 'rice'
+  | 'noodles'
+  | 'soup'
+  | 'stirfry'
+  | 'grilled'
+  | 'salad'
+  | 'dessert';
+
+const SWEET_DESSERT_OR_CAKE_RE =
+  /^បង្អែម|ចេកខ្ទិះ|សង់ខ្យា|អន្សមចេក|ក្រឡាន|បបរផ្អែម|បបរត្នោត|បបរត្រាវ|បបរសណ្តែក|បបរសណ្ដែក|បបរល្ពៅ|បាញ់ឌុក|បាញ់ចានឿក|បាយដំណើបស្វាយទុំ|បាយដំណើបសង់ខ្យា|បាយដំណើបធូរេន|លតស្វិត|លតអង្ករ|នំផ្លែអាយ|នំកង|នំគម|នំចាក់ចុល|នំល្ពៅ|នំចេក|ចេកចៀន|ដំឡូង.*បំពង|អំបុក|ចាហួយ|តៅហ៊ូទឹកស្ករ|ទឹកកកឈូស|ការ៉េម|\bdessert\b|\bcustard\b|\bsweet\s*soup\b|\bsweet\s*pudding\b|\bice\s*cream\b/i;
+
+const SAVORY_NON_DESSERT_EXCLUSION_RE =
+  /បាញ់ឆែវ|បាញ់ហយ|នំប៉័ង|គួង|ណែម|គូឆាយ|កាឆាយ|កចាយ|នំត្រាវបំពង|អន្សមជ្រូក|អន្សមចៀន|ពងទាកូន|ប្រហិត|នំគ្រក់|នំបញ្ចុក|ទឹកគ្រឿង/i;
+
+const BEVERAGE_RE =
+  /ភេសជ្ជៈ|^កាហ្វេ|^តែ(?!ងៀត)|^ទឹកអំពៅ|^ទឹកដូង|^ទឹកក្រឡុក|^ទឹកសណ្តែក|^ទឹកសណ្ដែក|^ទឹកផ្លែឈើ|^ទឹកត្រឡាច|^ទឹកមាត់ចាប|^ទឹកត្នោត|\bdrink\b|\bbeverage\b|\bsmoothie\b|\biced\s*tea\b|\bcoffee\b|\bcoconut\s*water\b|\bsugarcane\s*juice\b/i;
+
+export function isBeverageDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug'>): boolean {
+  if (!food) return false;
+  const kh = (food.nameKh || '').trim();
+  if (SAVORY_NON_DESSERT_EXCLUSION_RE.test(kh)) return false;
+  if (food.categorySlug === 'drink') return true;
+  return BEVERAGE_RE.test(`${kh} ${food.nameEn || ''}`);
+}
+
+export function isSweetDessertOrCakeDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug'>): boolean {
+  if (!food || isBeverageDishStrict(food)) return false;
+  const kh = (food.nameKh || '').trim();
+  if (SAVORY_NON_DESSERT_EXCLUSION_RE.test(kh)) return false;
+  if (food.categorySlug === 'dessert') return true;
+  return SWEET_DESSERT_OR_CAKE_RE.test(`${kh} ${food.nameEn || ''}`);
+}
+
+export function isRiceDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug'>): boolean {
+  if (!food || isBeverageDishStrict(food) || isSweetDessertOrCakeDishStrict(food)) return false;
+  const kh = (food.nameKh || '').trim();
+  if (/^បបរ|^បាយដំណើប/i.test(kh)) return false;
+  return /^បាយ/i.test(kh);
+}
+
+export function isNoodleDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug'>): boolean {
+  if (!food || isBeverageDishStrict(food) || isSweetDessertOrCakeDishStrict(food) || isRiceDishStrict(food)) {
+    return false;
+  }
+  const kh = (food.nameKh || '').trim();
+  if (/^(បុក|ញាំ|ភ្លា|សម្ល|ស្ងោរ|ស៊ុប|បបរ|គួង|ចាដូវ)/i.test(kh)) return false;
+  return /^(គុយទាវ|មី|នំបញ្ចុក|លតឆា|បាញ់កាញ់|បាញ់ស៊ុង|បាញ់ហយ|ស្ប៉ាហ្គេទី|ហ្វឺ)/i.test(kh);
+}
+
+export function isSoupOrCurryDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug'>): boolean {
+  if (
+    !food ||
+    isBeverageDishStrict(food) ||
+    isSweetDessertOrCakeDishStrict(food) ||
+    isRiceDishStrict(food) ||
+    isNoodleDishStrict(food)
+  ) {
+    return false;
+  }
+  const kh = (food.nameKh || '').trim();
+  if (
+    /^(គុយទាវ|មី|លត|បាញ់កាញ់|បាញ់ស៊ុង|បាញ់ហយ|នំបញ្ចុក|បបរ|បាយ|ប្រហុក|ទឹកគ្រឿង|កាពិ|ផាក់ឡូវ|ផាកឡូវ|ទាផាក់ឡូវ|ត្រី.*ចំហុយ|ខួរជ្រូកខ|ខមុំា|ខត្រី|ខសាច់|ខជើងជ្រូក|ខប្រហុក|ខកង្កែប|អណ្តាតជ្រូកខ|ក្រពះខ|ហុងជើងជ្រូក)/i.test(
+      kh
+    )
+  ) {
+    return false;
+  }
+  return (
+    /^(សម្ល|ស្ងោរ|ស៊ុប|ការី|អាម៉ុក|ម្ជូរ|ឆ្នាំងភ្លើង|យ៉ាវហន|ខគោ)/i.test(kh) ||
+    /(សម្ល|ការី|អាម៉ុក|កកូរ|ម្ជូរ|ប្រហើរ|ស្ងោរ|ស៊ុប|ឆ្នាំងភ្លើង|យ៉ាវហន)/i.test(kh)
+  );
+}
+
+export function isStirFriedDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug'>): boolean {
+  if (
+    !food ||
+    isBeverageDishStrict(food) ||
+    isSweetDessertOrCakeDishStrict(food) ||
+    isRiceDishStrict(food) ||
+    isNoodleDishStrict(food) ||
+    isSoupOrCurryDishStrict(food)
+  ) {
+    return false;
+  }
+  const kh = (food.nameKh || '').trim();
+  if (
+    /^(សម្ល|ស្ងោរ|ស៊ុប|ការី|អាម៉ុក|ម្ជូរ|បបរ|បាយ|គុយទាវ|មី|លត|នំបញ្ចុក|បាញ់|ស្ប៉ាហ្គេទី|ញាំ|ភ្លា|បុក|ជ្រក់|ទឹកគ្រឿង|ប្រហុក|ផ្អក|មុំា|មំា|ខ|ហុង|ផាក់ឡូវ|ផាកឡូវ|ទាផាក់ឡូវ|អណ្តាតជ្រូកខ|ក្រពះខ|ងាវអប់|អយស្ទ័រ|ត្រី.*ចៀន|ត្រី.*បំពង|ត្រី.*អាំង|ត្រី.*ដុត|មាន់ដុត|មាន់អាំង|សាច់គោអាំង|សាច់ជ្រូកអាំង)/i.test(
+      kh
+    )
+  ) {
+    return false;
+  }
+  return /^(ឆា|លីង|ឡុកឡាក់|លាសឆា|ក្តាម.*ឆា|ក្ដាម.*ឆា|បង្កងឆា|កំពិសលីង|ពោះតាន់ស្ពៃជូរ)/i.test(kh);
+}
+
+export function isGrilledOrFriedDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug'>): boolean {
+  if (
+    !food ||
+    isBeverageDishStrict(food) ||
+    isSweetDessertOrCakeDishStrict(food) ||
+    isRiceDishStrict(food) ||
+    isNoodleDishStrict(food) ||
+    isSoupOrCurryDishStrict(food) ||
+    isStirFriedDishStrict(food)
+  ) {
+    return false;
+  }
+  const kh = (food.nameKh || '').trim();
+  if (
+    /^(ឆា|បាយ|មី|គុយទាវ|លត|នំបញ្ចុក|បាញ់កាញ់|បាញ់ស៊ុង|បាញ់ហយ|បបរ|សម្ល|ស្ងោរ|ស៊ុប|ញាំ|ភ្លា|ជ្រក់|បុក|ទឹកគ្រឿង|ប្រហុកអាំងស្លឹកចេក|ប្រហុកកប់|ប្រហុកខ្ទិះ|ប្រហុកឆៅ|ផ្អក|មុំា|មំា|ឡុកឡាក់|ក្តាម.*ឆា|ក្ដាម.*ឆា|លាសឆា|បង្កងឆា|អយស្ទ័រស្រស់|ផាកឡូវ|ផាក់ឡូវ|ទាផាក់ឡូវ|ពងក្រួចកូន|ពងទាកូន|ងាវអប់|ងាវស្រុះ|ប្រហិតខ្យង)/i.test(
+      kh
+    )
+  ) {
+    return false;
+  }
+  return /(អាំង|ចៀន|ដុត|បំពង|បាញ់ឆែវ|នំគ្រក់|សាច់ក្រក|សង្វាក់អាំង|ត្រីហើមក្រឡុកគ្រឿង)/i.test(kh);
+}
+
+export function isSaladOrDipDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug'>): boolean {
+  if (
+    !food ||
+    isBeverageDishStrict(food) ||
+    isSweetDessertOrCakeDishStrict(food) ||
+    isRiceDishStrict(food) ||
+    isNoodleDishStrict(food) ||
+    isSoupOrCurryDishStrict(food) ||
+    isStirFriedDishStrict(food) ||
+    isGrilledOrFriedDishStrict(food)
+  ) {
+    return false;
+  }
+  const kh = (food.nameKh || '').trim();
+  return /^(ញាំ|ភ្លា|បុក|ជ្រក់|ទឹកគ្រឿង|ប្រហុក|ផ្អក|មុំា|មំា|សាឡាដ|អយស្ទ័រស្រស់|ងាវស្រុះ|ពោះគោទឹកប្រហុក|ត្រីសាលម៉ុនត្រាំ|ហៃប៊ីក្រូចឆ្មារ)/i.test(
+    kh
+  );
+}
+
+export function resolveCanonicalFoodCategorySlug(
+  food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug'>
+): FoodCategorySlug {
+  if (!food) return 'specialty';
+  if (isBeverageDishStrict(food)) return 'drink';
+  if (isSweetDessertOrCakeDishStrict(food)) return 'dessert';
+  if (isRiceDishStrict(food)) return 'rice';
+  if (isNoodleDishStrict(food)) return 'noodles';
+  if (isSoupOrCurryDishStrict(food)) return 'soup';
+  if (isStirFriedDishStrict(food)) return 'stirfry';
+  if (isGrilledOrFriedDishStrict(food)) return 'grilled';
+  if (isSaladOrDipDishStrict(food)) return 'salad';
+  if (food.categorySlug === 'streetfood') return 'streetfood';
+  return 'specialty';
+}
+
+export function matchesStrictFoodCategory(food: FoodItem, categoryFilter: string): boolean {
+  if (!food || !food.id || !food.nameKh) return false;
+  if (!categoryFilter || categoryFilter === 'all') return true;
+  const canonicalSlug = resolveCanonicalFoodCategorySlug(food);
+  switch (categoryFilter) {
+    case 'rice':
+      return canonicalSlug === 'rice' && isRiceDishStrict(food);
+    case 'noodles':
+      return canonicalSlug === 'noodles' && isNoodleDishStrict(food);
+    case 'soup':
+      return canonicalSlug === 'soup' && isSoupOrCurryDishStrict(food);
+    case 'stirfry':
+      return canonicalSlug === 'stirfry' && isStirFriedDishStrict(food);
+    case 'grilled':
+      return canonicalSlug === 'grilled' && isGrilledOrFriedDishStrict(food);
+    case 'salad':
+      return canonicalSlug === 'salad' && isSaladOrDipDishStrict(food);
+    case 'dessert':
+      return canonicalSlug === 'dessert' && isSweetDessertOrCakeDishStrict(food);
+    case 'drink':
+      return canonicalSlug === 'drink' && isBeverageDishStrict(food);
+    default:
+      return canonicalSlug === categoryFilter;
+  }
+}
+
+export function isVegetarianDishStrict(food: FoodItem): boolean {
+  if (!food || !food.id || !food.nameKh) return false;
+  if (food.isVegetarian) return true;
+  const text = `${food.nameKh || ''} ${food.nameEn || ''} ${food.categoryKh || ''} ${food.categoryEn || ''}`;
+  if (/ម្ហូបបួស|បួស|\bvegetarian\b|\bvegan\b|\bplant[\s-]*based\b|素食|纯素|斋/i.test(text)) {
+    return true;
+  }
+  if (isBeverageDishStrict(food) || isSweetDessertOrCakeDishStrict(food)) {
+    return false;
+  }
+  return getDishTagIds(food).includes('vegetarian_friendly');
+}
+
+/**
+ * Strictly classifies whether a dish belongs to a specific category filter
+ * ('all' | 'rice' | 'noodles' | 'soup' | 'stirfry' | 'grilled' | 'salad' | 'dessert').
+ * Prevents cross-category leakage (e.g. "Stir-fried" matching `\bfried\b` in grilled,
+ * `បាយដំណើប` matching savory rice, or `មីសួរ` soups/salads matching noodles).
+ */
+export function matchesDishCategoryFilter(food: FoodItem, categoryFilter: string): boolean {
+  if (!food) return false;
+  if (!categoryFilter || categoryFilter === 'all') return true;
+
+  const khName = (food.nameKh || '').trim();
+  const title = `${khName} ${food.nameEn || ''}`.toLowerCase();
+
+  const isDessert =
+    food.categorySlug === 'dessert' ||
+    food.categorySlug === 'cake' ||
+    /^បង្អែម|ចេកខ្ទិះ|ចេកចៀន|បាយដំណើបស្វាយ|បាយដំណើបធូរេន|បាយដំណើបសង់ខ្យា|សង់ខ្យា|អន្សម|ក្រឡាន|បបរផ្អែម|បបរត្នោត|បបរល្ពៅ|បបរត្រាវ|បាញ់ឌុក|លតស្វិត|លតអង្ករ|នំផ្លែអាយ|នំកង|នំចាក់ចុល|នំគម|នំអាកោ|នំបត់|ទឹកត្នោតផ្អែម|ទឹកអំពៅ|ទឹកសណ្តែក|ទឹកដូង|ទឹកក្រឡុក|ការ៉េម|\bdessert\b|\bcustard\b|\bsweet\s*sticky\s*rice\b/i.test(
+      title
+    );
+
+  switch (categoryFilter) {
+    case 'rice':
+      if (
+        isDessert ||
+        /បាយដំណើប|^បបរ|^សម្ល|^ស្ងោរ|^គុយទាវ|^មី|^នំបញ្ចុក|^លត|^បាញ់|^នំ|^ភ្លា|^ញាំ|^បុក|^ឆា(?!បាយ)/i.test(khName)
+      ) {
+        return false;
+      }
+      return (
+        food.categorySlug === 'rice' ||
+        /^បាយ|បាយឆា|បាយសាច់|បាយមាន់|បាយក្ដាំង|បាយក្តាំង|បាយស្រូប|បាយគោងៀត|បាយខជើងជ្រូក|\bfried\s*rice\b|\bpork\s*rice\b|\bchicken\s*rice\b/i.test(
+          title
+        )
+      );
+
+    case 'noodles':
+      if (
+        isDessert ||
+        /ទឹកត្រីផ្អែម|លតស្វិត|លតអង្ករ|^សម្ល|^ស្ងោរ|^ចាដូវ|^គួង|^បាយ|^បបរ|^ញាំ|^ភ្លា|^បុក|^ឆា(?!មី|គុយទាវ|លត|មីសួរ)/i.test(
+          khName
+        )
+      ) {
+        return false;
+      }
+      return (
+        food.categorySlug === 'noodles' ||
+        /^គុយទាវ|^មី|^នំបញ្ចុក|^លត|^ហ្វឺ|^បាញ់កាញ់|^បាញ់សុង|គុយទាវ|នំបញ្ចុក|មីឆា|មីស៊ុប|មីគោក|មីកូឡា|មីទាញ|លតឆា|\bnoodles?\b|\bkuy\s*teav\b|\bbanh\s*chok\b|\blort\s*cha\b|\bpho\b|\bvermicelli\b/i.test(
+          title
+        )
+      );
+
+    case 'soup':
+      if (
+        isDessert ||
+        /^គុយទាវ|^នំបញ្ចុក|^មី|^លត|^ហ្វឺ|^បាយ|^ឆា|^ភ្លា|^ញាំ|^បុក|^បាញ់|^នំ|^សាច់គោអាំង|^ត្រីអាំង|^មាន់ដុត|^មាន់អាំង|^ទាអាំង|^ទាដុត/i.test(
+          khName
+        )
+      ) {
+        return false;
+      }
+      return (
+        food.categorySlug === 'soup' ||
+        /^សម្ល|^ស៊ុប|^ស្ងោរ|^អាម៉ុក|^ហហ្មុក|^ខជើងជ្រូក|^ខសាច់|^ខគោ|^ខត្រី|^បបរ|សម្ល|ស្ងោរ|ស៊ុប|ម្ជូរគ្រឿង|ម្ជូរព្រៃ|កកូរ|ប្រហើរ|ង៉ាំង៉ូវ|ងាំង៉ូវ|\bsoup\b|\bcurry\b|\bsamlor\b|\bamok\b|\bbroth\b|\bcongee\b|\bporridge\b/i.test(
+          title
+        )
+      );
+
+    case 'stirfry':
+      if (
+        isDessert ||
+        /^បាយ|^គុយទាវ|^មី|^លត|^នំបញ្ចុក|^សម្ល|^ស្ងោរ|^ស៊ុប|^អាម៉ុក|^ភ្លា|^ញាំ|^បុក|^បបរ|^បាញ់|^នំ/i.test(khName)
+      ) {
+        return false;
+      }
+      return (
+        food.categorySlug === 'stirfry' ||
+        /^ឆា|ឡុកឡាក់|ឆាក្តៅ|ឆាខ្ញី|ឆាម្រះព្រៅ|ឆាគ្រឿង|ឆាត្រកួន|ឆាខាត់ណា|ឆាផ្សិត|ឆាត្រប់|ឆាព្រលិត|ឆាជូរផ្អែម|ក្តាមឆា|ក្ដាមឆា|បង្គាឆា|មឹកឆា|លាសឆា|លៀសឆា|^លីង|\bstir[\s-]*fr|\bwok[\s-]*fr|\blok\s*lak\b/i.test(
+          title
+        )
+      );
+
+    case 'grilled':
+      if (
+        isDessert ||
+        /^បាយ|^គុយទាវ|^មី|^លត|^នំបញ្ចុក|^សម្ល|^ស្ងោរ|^ស៊ុប|^ឆា|^ភ្លា|^ញាំ|^បុក|^បបរ|^ទឹកគ្រឿង|^ប្រហុកខ្ទិះ/i.test(
+          khName
+        )
+      ) {
+        return false;
+      }
+      return (
+        food.categorySlug === 'grilled' ||
+        /អាំង|បំពង|ចៀន|ដុត|ងៀត|ឆ្អើរ|គោឡើងភ្នំ|សាច់ក្រក|ប្រហិត|បាញ់ឆែវ|នំគ្រក់|\bgrilled\b|\bdeep[\s-]*fried\b|\broast(?:ed)?\b|\bbbq\b|\bcharcoal\b/i.test(
+          title
+        )
+      );
+
+    case 'salad':
+      if (
+        isDessert ||
+        /^បាយ|^គុយទាវ|^មី(?!សួរ)|^លត|^សម្ល|^ស្ងោរ|^ឆា|^សាច់គោអាំង|^ត្រីអាំង|^មាន់អាំង|^មាន់ដុត|^ទាអាំង/i.test(khName)
+      ) {
+        return false;
+      }
+      return (
+        food.categorySlug === 'salad' ||
+        /^ញាំ|^ភ្លា|^បុក|^ទឹកគ្រឿង|^ប្រហុក|^ផ្អក|^ម៉ាំ|^ជ្រក់|^កាពិ|ញាំ|ភ្លា|បុកល្ហុង|ទឹកគ្រឿង|\bsalad\b|\bceviche\b|\bteuk\s*kroeung\b|\bprahok\b/i.test(
+          title
+        )
+      );
+
+    case 'dessert':
+      if (
+        /^សម្ល|^ឆា|^ស្ងោរ|^ត្រី|^សាច់|^បាយ(?!ដំណើប)|^គុយទាវ|^មី|^លត(?!ស្វិត|អង្ករ)|^នំបញ្ចុក|^ភ្លា|^ញាំ|^បុក|^បបរ(?!ផ្អែម|ត្នោត|ល្ពៅ|ត្រាវ|សណ្តែក)/i.test(
+          khName
+        )
+      ) {
+        return false;
+      }
+      return isDessert;
+
+    default:
+      return food.categorySlug === categoryFilter;
+  }
 }

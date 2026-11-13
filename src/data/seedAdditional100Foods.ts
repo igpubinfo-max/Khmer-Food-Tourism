@@ -1,3 +1,4 @@
+import { resolveCanonicalFoodCategorySlug } from '../utils/foodFilters';
 import { FoodItem, FoodCategorySlug } from '../types';
 
 interface AdditionalDishSeed {
@@ -3384,7 +3385,7 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
     id,
     nameKh: item.nameKh,
     nameEn: item.nameEn,
-    categorySlug: item.cat,
+    categorySlug: resolveCanonicalFoodCategorySlug({ nameKh: item.nameKh, nameEn: item.nameEn, categorySlug: item.cat }),
     categoryKh: item.catKh,
     categoryEn: item.catEn,
     descriptionKh,

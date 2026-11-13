@@ -47,9 +47,27 @@ export const FoodView: React.FC = () => {
   const dishListStartRef = useRef<HTMLDivElement | null>(null);
   const dishCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
+  const [scrollRequestTick, setScrollRequestTick] = useState<number>(0);
+
   const scrollToDishList = (_keepCategoriesVisible = false) => {
-    smoothScrollToElement(dishListStartRef.current, { offsetTop: 8 });
+    setScrollRequestTick((prev) => prev + 1);
+    smoothScrollToElement(dishListStartRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: 'kft-dish-list-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
   };
+
+  useEffect(() => {
+    if (scrollRequestTick === 0) return;
+    smoothScrollToElement(dishListStartRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: 'kft-dish-list-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
+  }, [scrollRequestTick, selectedCategory, provinceFilter, tagFilter]);
 
   const handleExecuteFoodSearch = () => {
     const trimmed = foodSearchQuery.trim();
@@ -307,7 +325,7 @@ export const FoodView: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl min-w-0 mx-auto bg-[#1E293B] text-[#1E293B] min-h-full font-khmer pb-20 overflow-x-hidden">
+    <div className="w-full max-w-6xl min-w-0 mx-auto bg-[#1E293B] text-[#1E293B] min-h-full font-khmer pb-20">
       {/* 1. Header – Angkor Wat Hero Background */}
       <AngkorHeroTopHeader mode="food" foodCount={filteredFoods.length} />
 
@@ -618,10 +636,8 @@ export const FoodView: React.FC = () => {
           </div>
         )}
 
-        <div ref={dishListStartRef} id="kft-dish-list-section" className="scroll-mt-2" />
-
         {/* Section Title Bar on Dark Slate (#1E293B) - Positioned at top of screen on scroll */}
-        <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
+        <div ref={dishListStartRef} id="kft-dish-list-section" className="flex items-center justify-between gap-2 px-0.5 pt-0.5 scroll-mt-2">
           <div className="flex items-center gap-1.5 min-w-0">
             <Flame className="w-5 h-5 text-orange-400 fill-amber-400 shrink-0" />
             <h2 className="font-extrabold text-[15px] sm:text-base text-white leading-[1.65] break-words">
@@ -649,7 +665,7 @@ export const FoodView: React.FC = () => {
 
         {/* 6. Food Listing Cards */}
         {filteredFoods.length === 0 ? (
-          <div className="p-8 text-center bg-white rounded-3xl border border-slate-200 space-y-2 shadow-2xs">
+          <div className="p-8 text-center bg-white rounded-3xl border border-slate-200 space-y-2 shadow-2xs min-h-[85vh]">
             <Utensils className="w-8 h-8 mx-auto text-slate-400" />
             <p className="text-sm text-slate-700 font-bold">
               {tr(language, 'មិនមានមុខម្ហូបក្នុងផ្នែកនេះទេ', 'No matching dishes found', '未找到匹配的菜品')}
@@ -690,3 +706,4 @@ export const FoodView: React.FC = () => {
     </div>
   );
 };
+

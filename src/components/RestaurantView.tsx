@@ -114,9 +114,27 @@ export const RestaurantView: React.FC = () => {
   const shopListStartRef = useRef<HTMLDivElement | null>(null);
   const shopCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
+  const [scrollRequestTick, setScrollRequestTick] = useState<number>(0);
+
   const scrollToShopList = (_keepCategoriesVisible = false) => {
-    smoothScrollToElement(shopListStartRef.current, { offsetTop: 8 });
+    setScrollRequestTick((prev) => prev + 1);
+    smoothScrollToElement(shopListStartRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: 'kft-shop-list-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
   };
+
+  useEffect(() => {
+    if (scrollRequestTick === 0) return;
+    smoothScrollToElement(shopListStartRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: 'kft-shop-list-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
+  }, [scrollRequestTick, categoryFilter, selectedProvince, nearMeActive, sortMode]);
 
   const handleExecuteShopSearch = () => {
     setDebouncedShopSearchQuery(shopSearchQuery);
@@ -916,13 +934,11 @@ export const RestaurantView: React.FC = () => {
           </div>
         </div>
 
-        <div ref={shopListStartRef} id="kft-shop-list-section" className="scroll-mt-3" />
-
         {/* ===================================================================
             3. NEARBY & POPULAR SHOPS LISTINGS
             =================================================================== */}
         {sortedRestaurants.length > 0 ? (
-          <div className="space-y-4 pt-0.5 min-h-[85vh]">
+          <div ref={shopListStartRef} id="kft-shop-list-section" className="space-y-4 pt-0.5 min-h-[85vh] scroll-mt-2">
             {/* Section 1: ហាងពេញនិយមជិតខ្ញុំ (Popular Shops Near Me) */}
             {featuredRestaurants.length > 0 && (
               <div className="space-y-2.5">
@@ -1032,7 +1048,7 @@ export const RestaurantView: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="py-12 px-4 text-center bg-white rounded-3xl border border-slate-200 text-slate-600 space-y-2.5 shadow-xs">
+          <div ref={shopListStartRef} id="kft-shop-list-section" className="py-12 px-4 text-center bg-white rounded-3xl border border-slate-200 text-slate-600 space-y-2.5 shadow-xs min-h-[85vh] scroll-mt-2">
             <Store className="w-10 h-10 mx-auto text-slate-400" strokeWidth={1.75} />
             <p className="text-xs font-bold text-slate-700">
               {debouncedShopSearchQuery.trim()
@@ -1072,3 +1088,4 @@ export const RestaurantView: React.FC = () => {
     </div>
   );
 };
+

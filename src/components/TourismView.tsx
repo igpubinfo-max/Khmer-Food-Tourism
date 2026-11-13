@@ -67,9 +67,27 @@ export const TourismView: React.FC = () => {
   const tourismListStartRef = useRef<HTMLDivElement | null>(null);
   const tourismCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
+  const [scrollRequestTick, setScrollRequestTick] = useState<number>(0);
+
   const scrollToTourismList = (_keepCategoriesVisible = false) => {
-    smoothScrollToElement(tourismListStartRef.current, { offsetTop: 8 });
+    setScrollRequestTick((prev) => prev + 1);
+    smoothScrollToElement(tourismListStartRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: 'kft-tourism-list-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
   };
+
+  useEffect(() => {
+    if (scrollRequestTick === 0) return;
+    smoothScrollToElement(tourismListStartRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: 'kft-tourism-list-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
+  }, [scrollRequestTick, selectedCategory, selectedProvince, nearMeActive]);
 
   useEffect(() => {
     setVisibleCount(TOURISM_BATCH_SIZE);
@@ -82,7 +100,7 @@ export const TourismView: React.FC = () => {
       if (!nearMeActive) {
         handleToggleNearMe();
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTourismList();
     }
   }, []);
 
@@ -417,7 +435,7 @@ export const TourismView: React.FC = () => {
   }, [visibleCount, filteredDestinations.length]);
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-20 overflow-x-hidden">
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-20">
       {/* 1. Shared Master Hero Header with Free Account Status Badge */}
       <AngkorHeroTopHeader mode="food" />
 
@@ -631,10 +649,8 @@ export const TourismView: React.FC = () => {
           </div>
         </div>
 
-        <div ref={tourismListStartRef} id="kft-tourism-list-section" className="scroll-mt-3" />
-
         {/* Row 3: Section Title Bar on Dark Slate (#1E293B) */}
-        <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
+        <div ref={tourismListStartRef} id="kft-tourism-list-section" className="flex items-center justify-between gap-2 px-0.5 pt-0.5 scroll-mt-2">
           <div className="flex items-center gap-2 min-w-0 flex-wrap">
             <div className="flex items-center gap-1.5 min-w-0">
               <Flame className="w-5 h-5 text-orange-400 fill-amber-400 shrink-0" />
@@ -679,7 +695,7 @@ export const TourismView: React.FC = () => {
 
         {/* Row 4: Destination Cards Grid */}
         {filteredDestinations.length === 0 ? (
-          <div className="p-8 text-center bg-white rounded-[24px] border border-slate-200 space-y-2.5 font-khmer shadow-xs text-slate-900">
+          <div className="p-8 text-center bg-white rounded-[24px] border border-slate-200 space-y-2.5 font-khmer shadow-xs text-slate-900 min-h-[85vh]">
             <Compass className="w-8 h-8 mx-auto text-slate-400" />
             <p className="text-xs text-slate-600 font-bold">
               {tr(language, 'មិនមានតំបន់ទេសចរណ៍ក្នុងផ្នែកនេះទេ', 'No destinations match your criteria', '未找到符合条件的旅游景点')}
@@ -730,3 +746,4 @@ export const TourismView: React.FC = () => {
     </div>
   );
 };
+

@@ -1,3 +1,4 @@
+import { resolveCanonicalFoodCategorySlug } from '../utils/foodFilters';
 import {
   FoodItem,
   SEED_FOOD_PHOTO_BASELINE_ISO,

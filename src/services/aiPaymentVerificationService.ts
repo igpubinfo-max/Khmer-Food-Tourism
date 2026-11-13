@@ -431,10 +431,10 @@ async function extractReceiptViaGeminiVision(
   "currency": "USD" or "KHR",
   "recipientName": string or null (the recipient account name at the top of the ABA receipt, e.g. "CHEA SAVUTH" or "SAVUTH CHEA"),
   "recipientAccount": string or null (the "To account" number, e.g. "000 056 833" or "003 787 096"),
-  "transactionDate": string or null (the "Transaction date" printed on the receipt, e.g. "Oct 23, 2025 06:31 PM"),
+  "transactionDate": string or null (the "Transaction date" printed on the receipt, e.g. "Nov 13, 2026 04:47 PM"),
   "senderName": string or null (the "From" name on the receipt),
   "paymentStatus": "completed" | "pending" | "failed" | "unknown",
-  "isModifiedOrFake": boolean,
+  "isModifiedOrFake": boolean (true ONLY if there is clear visual pixel/font editing on the image; NEVER flag as fake due to the calendar year/date such as 2026 or 2027),
   "tamperReason": string or null
 }`;
 
@@ -542,7 +542,9 @@ async function extractReceiptViaGeminiVision(
       transactionDate: parsed.transactionDate ? String(parsed.transactionDate).trim() : undefined,
       senderName: parsed.senderName ? String(parsed.senderName).trim() : undefined,
       paymentStatus: ['completed', 'pending', 'failed', 'unknown'].includes(String(parsed.paymentStatus || '').toLowerCase()) ? (String(parsed.paymentStatus).toLowerCase() as 'completed' | 'pending' | 'failed' | 'unknown') : 'completed',
-      isModifiedOrFake: Boolean(parsed.isModifiedOrFake),
+      isModifiedOrFake:
+        Boolean(parsed.isModifiedOrFake) &&
+        !/\b(future|2026|2027|2028|date|year)\b/i.test(String(parsed.tamperReason || '')),
       tamperReason: parsed.tamperReason ? String(parsed.tamperReason).trim() : undefined,
     };
   } catch (err) {
@@ -978,6 +980,9 @@ export async function verifyAbaPaymentAndReceipt(params: {
       recipientAccount: extracted.recipientAccount,
       transactionDate: extracted.transactionDate,
       senderName: extracted.senderName,
+      paymentStatus: extracted.paymentStatus,
+      isModifiedOrFake: extracted.isModifiedOrFake,
+      tamperReason: extracted.tamperReason,
       rawOcrText: extracted.rawOcrText,
     },
     checks: {

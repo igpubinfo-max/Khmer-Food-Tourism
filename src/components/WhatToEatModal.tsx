@@ -58,7 +58,7 @@ import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } fro
 import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { getDishTagIds, type DishTagId } from '../utils/dishTags';
-import { getMatchingRestaurantsForDish } from '../utils/foodFilters';
+import { getMatchingRestaurantsForDish, matchesDishCategoryFilter } from '../utils/foodFilters';
 import {
   getSpicyDishScore,
   isSweetOrBeverageFood,
@@ -196,60 +196,7 @@ const HEALTH_OPTIONS: Array<{
 ];
 
 function matchesCategoryStrict(food: FoodItem, categoryFilter: string): boolean {
-  if (categoryFilter === 'all') return true;
-  const title = `${food.nameKh || ''} ${food.nameEn || ''}`.toLowerCase();
-  const khName = (food.nameKh || '').trim();
-  const isDessert =
-    food.categorySlug === 'dessert' ||
-    food.categorySlug === 'cake' ||
-    /^បង្អែម|ចេកខ្ទិះ|សង់ខ្យា|អន្សម|ក្រឡាន|បបរផ្អែម|បាញ់ឌុក|លតស្វិត|នំផ្លែអាយ|នំកង|នំចាក់ចុល|\bdessert\b|\bcustard\b/i.test(
-      title
-    );
-
-  switch (categoryFilter) {
-    case 'rice':
-      if (isDessert) return false;
-      return (
-        food.categorySlug === 'rice' ||
-        /^បាយ|បាយឆា|បាយសាច់|បាយមាន់|បាយក្ដាំង|បាយក្តាំង|បាយស្រូប|\bfried\s*rice\b|\bpork\s*rice\b|\bchicken\s*rice\b/i.test(
-          title
-        )
-      );
-    case 'noodles':
-      if (isDessert || /ទឹកត្រីផ្អែម|លតស្វិត|^សម្ល|^ចាដូវ|^គួង|^បាយ/i.test(khName)) return false;
-      return /^គុយទាវ|^មី|^នំបញ្ចុក|^លត|^ហ្វឺ|គុយទាវ|នំបញ្ចុក|មីឆា|មីស៊ុប|មីសួរ|មីទាញ|លតឆា|\bnoodle\b|\bkuy\s*teav\b|\bbanh\s*chok\b|\blort\b|\bpho\b|\bvermicelli\b/i.test(
-        title
-      );
-    case 'soup':
-      if (isDessert || /^គុយទាវ|^នំបញ្ចុក|^មី/i.test(khName)) return false;
-      return (
-        food.categorySlug === 'soup' ||
-        /^សម្ល|^ស៊ុប|ម្ជូរ|កកូរ|ការី|^ស្ងោរ|^អាម៉ុក|\bsoup\b|\bcurry\b|\bsamlor\b|\bamok\b|\bbroth\b/i.test(title)
-      );
-    case 'grilled':
-      if (isDessert || /^បាយ|^គុយទាវ|^មី|^លត|^សម្ល/i.test(khName)) return false;
-      return (
-        food.categorySlug === 'grilled' ||
-        /អាំង|បំពង|ចៀន|ដុត|\bgrilled\b|\bfried\b|\bcrispy\b|\broast\b|\bbbq\b/i.test(title)
-      );
-    case 'stirfry':
-      if (isDessert) return false;
-      return (
-        food.categorySlug === 'stirfry' ||
-        /^ឆា|ឡុកឡាក់|ឆាក្តៅ|ឆាខ្ញី|ឆាម្រះព្រៅ|\bstir[\s-]*fr|\blok\s*lak\b/i.test(title)
-      );
-    case 'salad':
-      if (isDessert || /^សាច់គោអាំង|^ត្រីអាំង|^មាន់អាំង/i.test(khName)) return false;
-      return (
-        food.categorySlug === 'salad' ||
-        /^ញាំ|^ភ្លា|^បុក|^ទឹកគ្រឿង|^ប្រហុក|ញាំ|ភ្លា|បុក|\bsalad\b|\bceviche\b/i.test(title)
-      );
-    case 'dessert':
-      if (/^សម្ល|^ឆា|^ស្ងោរ|^ត្រី|^សាច់|\bsoup\b|\bsour\b/i.test(title)) return false;
-      return isDessert;
-    default:
-      return food.categorySlug === categoryFilter;
-  }
+  return matchesDishCategoryFilter(food, categoryFilter);
 }
 
 function matchesMealSlotStrict(
@@ -803,7 +750,8 @@ export const WhatToEatModal: React.FC = () => {
     // Only enforce automatic clock-based mealtime filtering when no explicit search query is typed
     // (or when the user explicitly selected a specific mealSlotFilter chip).
     // Otherwise searching "ស្ងោរជ្រក់ត្រី" or "សម្លកកូរ" at 3:45 PM (afternoon snack slot) would discard soups!
-    const shouldEnforceMealSlot = !qTrim || mealSlotFilter !== 'auto';
+    const shouldEnforceMealSlot =
+      mealSlotFilter !== 'auto' || (!qTrim && categoryFilter === 'all' && vipDietFilter === 'none');
 
     // 1. Strict 4-way intersection (Craving + Category + MealSlot + Diet)
     const strictAll = basePool.filter(
@@ -826,10 +774,16 @@ export const WhatToEatModal: React.FC = () => {
     const categoryAndDietOnly = foods.filter(
       (food) =>
         matchesCategoryStrict(food, categoryFilter) &&
-        matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot) &&
+        (!shouldEnforceMealSlot || matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot)) &&
         matchesDietStrict(food, vipDietFilter)
     );
     if (categoryAndDietOnly.length > 0) return withCustomLead(categoryAndDietOnly);
+
+    // 4. Keep Category strict across all foods so selecting a category never leaks other categories
+    if (categoryFilter !== 'all') {
+      const categoryOnly = foods.filter((food) => matchesCategoryStrict(food, categoryFilter));
+      if (categoryOnly.length > 0) return withCustomLead(categoryOnly);
+    }
 
     return withCustomLead(basePool);
   }, [
@@ -972,7 +926,8 @@ export const WhatToEatModal: React.FC = () => {
   const scrollToResultsSection = (targetEl?: HTMLElement | null) => {
     smoothScrollToElement(targetEl || dishCardRef.current, {
       containerEl: scrollerRef.current,
-      offsetTop: 8,
+      offsetTop: 6,
+      delayMs: 25,
     });
   };
 
@@ -3989,3 +3944,4 @@ export const WhatToEatModal: React.FC = () => {
     </div>
   );
 };
+

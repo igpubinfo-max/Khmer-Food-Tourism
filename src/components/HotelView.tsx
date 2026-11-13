@@ -298,9 +298,27 @@ export const HotelView: React.FC = () => {
   const hotelListStartRef = useRef<HTMLDivElement | null>(null);
   const hotelCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
+  const [scrollRequestTick, setScrollRequestTick] = useState<number>(0);
+
   const scrollToHotelList = (_keepCategoriesVisible = false) => {
-    smoothScrollToElement(hotelListStartRef.current, { offsetTop: 8 });
+    setScrollRequestTick((prev) => prev + 1);
+    smoothScrollToElement(hotelListStartRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: 'kft-hotel-list-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
   };
+
+  useEffect(() => {
+    if (scrollRequestTick === 0) return;
+    smoothScrollToElement(hotelListStartRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: 'kft-hotel-list-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
+  }, [scrollRequestTick, categoryFilter, selectedProvince, sortMode, ratingFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -799,6 +817,7 @@ export const HotelView: React.FC = () => {
   }, [featuredHotels, distanceMap]);
 
   const handleToggleNearMe = () => {
+    setSortMode('nearest');
     if (typeof navigator !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -915,7 +934,7 @@ export const HotelView: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-20 overflow-x-hidden">
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-20">
       {/* 1. Shared Master Hero Header with 7-Day Free Trial Badge (Matching Reference Image 2) */}
       <AngkorHeroTopHeader mode="food" />
 
@@ -1184,13 +1203,11 @@ export const HotelView: React.FC = () => {
           </div>
         </div>
 
-        <div ref={hotelListStartRef} id="kft-hotel-list-section" className="scroll-mt-3" />
-
         {/* =====================================================================
             3. HOTEL LISTINGS (Clean White Cards on Dark Slate #1E293B)
             ===================================================================== */}
         {filteredHotels.length > 0 ? (
-          <div className="space-y-4 pt-0.5 min-h-[85vh]">
+          <div ref={hotelListStartRef} id="kft-hotel-list-section" className="space-y-4 pt-0.5 min-h-[85vh] scroll-mt-2">
             {/* Section 1: សណ្ឋាគារពេញនិយមជិតខ្ញុំ (Popular Hotels Near Me - Clean White Featured Cards) */}
             {featuredHotels.length > 0 && (
               <div className="space-y-2.5">
@@ -1556,7 +1573,7 @@ export const HotelView: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="py-12 text-center text-slate-500 space-y-2 font-khmer bg-white rounded-2xl border border-slate-200/80 p-6">
+          <div ref={hotelListStartRef} id="kft-hotel-list-section" className="py-12 text-center text-slate-500 space-y-2 font-khmer bg-white rounded-2xl border border-slate-200/80 p-6 min-h-[85vh] scroll-mt-2">
             <BedDouble className="w-10 h-10 mx-auto text-slate-300" strokeWidth={1.75} />
             <p className="text-xs font-bold text-slate-600">
               {debouncedSearchQuery.trim()
@@ -1621,3 +1638,4 @@ export const HotelView: React.FC = () => {
     </div>
   );
 };
+

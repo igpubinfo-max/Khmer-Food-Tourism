@@ -30,7 +30,9 @@ import {
   getAuthoritativeServerNowMs,
   setAuthoritativeServerNowMs,
   resolveUserActualVipPlanDays,
+  ArchivedVipEntitlement,
   sanitizeUserVipPlanAndExpiry,
+  reconcileUserVipWithVerifiedHistoryAndTransactions,
   sanitizeVipMembershipHistoryEntry,
   sanitizeLegacyVipTransactionPricing,
   isUnapprovedAiAutoVerifiedTransaction,
@@ -2712,7 +2714,9 @@ export function normalizeVipExpiryOnUser(rawUser: User): User {
  * - Active non-expired VIP membership with furthest expiration date
  * - Highest `paidAdditionalStoreSlots` and merged `linkedProviders`
  */
-export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
+export function mergeTwoUserRecordsCanonical(rawFirst: User, rawSecond: User): User {
+  const first = sanitizeUserVipPlanAndExpiry(rawFirst);
+  const second = sanitizeUserVipPlanAndExpiry(rawSecond);
   const canonicalId = getCanonicalUserId({
     ...first,
     ...second,
@@ -3107,6 +3111,7 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
       vipStatus: 'active',
       vipPlanDays: bestVip.vipPlanDays || secondNorm.vipPlanDays || firstNorm.vipPlanDays,
       vipPlanType: bestVip.vipPlanType || secondNorm.vipPlanType || firstNorm.vipPlanType,
+      activeConsumerPlanId: bestVip.activeConsumerPlanId || secondNorm.activeConsumerPlanId || firstNorm.activeConsumerPlanId,
       vipExpiresAt: bestVip.subscriptionExpiryDate,
       vipCancelledAt: undefined,
       paymentStatus: 'verified',
@@ -3126,6 +3131,7 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
       vipStatus: 'active',
       vipPlanDays: activeVip.vipPlanDays || baseMerged.vipPlanDays,
       vipPlanType: activeVip.vipPlanType || baseMerged.vipPlanType,
+      activeConsumerPlanId: activeVip.activeConsumerPlanId || baseMerged.activeConsumerPlanId,
       vipExpiresAt: activeVip.subscriptionExpiryDate,
       vipCancelledAt: undefined,
       paymentStatus: 'verified',
@@ -3429,15 +3435,22 @@ export async function upsertSingleUserToCloud(
     ]);
     // ROOT-CAUSE/EGRESS FIX: every login used to download AND rewrite the entire user list. The whole-list
     // aggregates are now consulted only for LEGACY accounts that have no atomic `kft_user_<id>` row yet.
-    const needLegacyAggregateLookup = updateAggregate && existingAtomicDocs.length === 0;
-    const [cloudUsersV2, cloudVipBackup, cloudDeleted]: [User[] | null, any, DeletedUserRecord[] | null] =
-      needLegacyAggregateLookup
-        ? await Promise.all([
-            pullCloudDocument<User[]>('kft_cloud_users_v2'),
-            pullCloudDocument<any>('kft_cloud_vip_backup_v1'),
-            pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
-          ])
-        : [null, null, null];
+    const needLegacyAggregateLookup = updateAggregate || existingAtomicDocs.length === 0;
+    const [cloudUsersV2, cloudVipBackup, cloudDeleted, cloudTxnsForRecovery, cloudArchivedVip]: [
+      User[] | null,
+      any,
+      DeletedUserRecord[] | null,
+      RegistrationTransaction[] | null,
+      ArchivedVipEntitlement[] | null
+    ] = needLegacyAggregateLookup
+      ? await Promise.all([
+          pullCloudDocument<User[]>('kft_cloud_users_v2'),
+          pullCloudDocument<any>('kft_cloud_vip_backup_v1'),
+          pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
+          pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1'),
+          pullCloudDocument<ArchivedVipEntitlement[]>('kft_cloud_archived_vip_entitlements_v1'),
+        ])
+      : [null, null, null, null, null];
 
     const allDeleted = [
       ...deletedUsers,
@@ -3539,6 +3552,39 @@ export async function upsertSingleUserToCloud(
         canonicalUser = mergedSingle[0];
       }
     }
+
+    // Reconcile canonicalUser against verified payment transactions and archived VIP entitlements (local + cloud)
+    // so re-login / re-registration after account deletion always restores verified VIP status & remaining days
+    // (or expired status if expired) without ever assigning an unverified 30-day membership.
+    let localTxnsForRecovery: RegistrationTransaction[] = [];
+    let localArchivedVip: ArchivedVipEntitlement[] = [];
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const rawLocalTxns = localStorage.getItem('kft_transactions_v4');
+        if (rawLocalTxns) {
+          const parsedTxns = JSON.parse(rawLocalTxns);
+          if (Array.isArray(parsedTxns)) localTxnsForRecovery = parsedTxns;
+        }
+        const rawLocalArch = localStorage.getItem('kft_archived_vip_entitlements_v1');
+        if (rawLocalArch) {
+          const parsedArch = JSON.parse(rawLocalArch);
+          if (Array.isArray(parsedArch)) localArchivedVip = parsedArch;
+        }
+      }
+    } catch {}
+    const combinedRecoveryTxns = [
+      ...(Array.isArray(cloudTxnsForRecovery) ? cloudTxnsForRecovery : []),
+      ...localTxnsForRecovery,
+    ];
+    const combinedArchivedVip = [
+      ...(Array.isArray(cloudArchivedVip) ? cloudArchivedVip : []),
+      ...localArchivedVip,
+    ];
+    canonicalUser = reconcileUserVipWithVerifiedHistoryAndTransactions(
+      canonicalUser,
+      combinedRecoveryTxns,
+      combinedArchivedVip
+    );
 
     // 2. Write merged atomic per-user row immediately (and update any existing alias atomic keys so they never diverge)
     const keysToPush = Array.from(
@@ -4463,11 +4509,13 @@ export async function syncAllAppDataWithSupabase(localState: {
           cloudHadDeprecatedSeedTxns = true;
           continue;
         }
+        const isVerifiedEntitlementTxn = rawT && rawT.status === 'verified';
         if (
           rawT &&
           rawT.id &&
-          !deletedTxnIdSet.has(rawT.id) &&
-          !isActivityUserDeleted(rawT.userId || rawT.ownerId, rawT.userEmail, rawT.phone)
+          (isVerifiedEntitlementTxn ||
+            (!deletedTxnIdSet.has(rawT.id) &&
+              !isActivityUserDeleted(rawT.userId || rawT.ownerId, rawT.userEmail, rawT.phone)))
         ) {
           const t = sanitizeLegacyVipTransactionPricing(rawT);
           txnMap.set(t.id, t);
@@ -4475,12 +4523,14 @@ export async function syncAllAppDataWithSupabase(localState: {
       }
     }
     for (const rawT of localState.transactions) {
+      const isVerifiedEntitlementTxn = rawT && rawT.status === 'verified';
       if (
         !rawT ||
         !rawT.id ||
         isDeprecatedDemoSeedTransaction(rawT) ||
-        deletedTxnIdSet.has(rawT.id) ||
-        isActivityUserDeleted(rawT.userId || rawT.ownerId, rawT.userEmail, rawT.phone)
+        (!isVerifiedEntitlementTxn &&
+          (deletedTxnIdSet.has(rawT.id) ||
+            isActivityUserDeleted(rawT.userId || rawT.ownerId, rawT.userEmail, rawT.phone)))
       ) {
         continue;
       }
@@ -4514,6 +4564,25 @@ export async function syncAllAppDataWithSupabase(localState: {
     const mergedTransactions = Array.from(txnMap.values()).sort(
       (a, b) => parseSafeDateMs(b.createdAt) - parseSafeDateMs(a.createdAt)
     );
+
+    // Reconcile all mergedUsers against mergedTransactions and archived VIP entitlements so payment & subscription history stay 100% consistent
+    let localArchVipList: ArchivedVipEntitlement[] = [];
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const rawArch = localStorage.getItem('kft_archived_vip_entitlements_v1');
+        if (rawArch) {
+          const parsedArch = JSON.parse(rawArch);
+          if (Array.isArray(parsedArch)) localArchVipList = parsedArch;
+        }
+      }
+    } catch {}
+    for (let i = 0; i < mergedUsers.length; i++) {
+      mergedUsers[i] = reconcileUserVipWithVerifiedHistoryAndTransactions(
+        mergedUsers[i],
+        mergedTransactions,
+        localArchVipList
+      );
+    }
 
     // 4. Merge Custom & Google Maps Smart-Cached Restaurants by ID (excluding built-in rest-1..250 seeds, deleted users' shops, and permanently deleted shop IDs)
     let localDeletedRestsMap: Record<string, string> = { ...(localState.deletedRestaurantIds || {}) };

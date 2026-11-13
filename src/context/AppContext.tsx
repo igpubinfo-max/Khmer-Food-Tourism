@@ -34,7 +34,9 @@ import {
   normalizeFoodPhotoUrlForDedup,
   deduplicateFoodItems,
   resolveUserActualVipPlanDays,
+  ArchivedVipEntitlement,
   sanitizeUserVipPlanAndExpiry,
+  reconcileUserVipWithVerifiedHistoryAndTransactions,
   sanitizeVipMembershipHistoryEntry,
   sanitizeLegacyVipTransactionPricing,
   isDeprecatedDemoSeedTransaction,
@@ -6344,17 +6346,60 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
    * Immediately synchronizes a newly logged-in / registered user against their atomic & aggregate
    * Supabase cloud records so Admin-approved VIP status is unlocked right away on any device.
    */
-  const syncLoggedInUserFromCloud = (userObj: User) => {
+  const syncLoggedInUserFromCloud = (rawUserObj: User) => {
+    let localArchivedVip: ArchivedVipEntitlement[] = [];
+    try {
+      const rawArch = localStorage.getItem('kft_archived_vip_entitlements_v1');
+      if (rawArch) {
+        const parsedArch = JSON.parse(rawArch);
+        if (Array.isArray(parsedArch)) localArchivedVip = parsedArch;
+      }
+    } catch {}
+    const liveTxns = latestSyncStateRef.current.transactions || transactions;
+    const userObj = reconcileUserVipWithVerifiedHistoryAndTransactions(
+      rawUserObj,
+      liveTxns,
+      localArchivedVip
+    );
+    if (JSON.stringify(userObj) !== JSON.stringify(rawUserObj)) {
+      setCurrentUser(userObj);
+      latestSyncStateRef.current.currentUser = userObj;
+      setUsers(prev => {
+        const next = deduplicateAndNormalizeUsers(
+          [userObj, ...prev],
+          latestSyncStateRef.current.deletedUsers || deletedUsers
+        );
+        latestSyncStateRef.current.users = next;
+        safeSetCriticalAccountStorage('kft_users_v5', next);
+        return next;
+      });
+    }
     safeSetCriticalAccountStorage('kft_current_user_v5', userObj);
     const cleanedDeleted = pruneStaleDeletedTombstoneForActiveAuth(userObj);
     if (!isSupabaseConfigured()) return;
     upsertSingleUserToCloud(userObj, cleanedDeleted, true)
       .then(cloudMerged => {
         if (Array.isArray(cloudMerged) && cloudMerged.length > 0) {
+          let latestArchVip: ArchivedVipEntitlement[] = localArchivedVip;
+          try {
+            const rawArch = localStorage.getItem('kft_archived_vip_entitlements_v1');
+            if (rawArch) {
+              const parsedArch = JSON.parse(rawArch);
+              if (Array.isArray(parsedArch)) latestArchVip = parsedArch;
+            }
+          } catch {}
+          const currentTxns = latestSyncStateRef.current.transactions || transactions;
+          const reconciledCloudMerged = cloudMerged.map(cm =>
+            reconcileUserVipWithVerifiedHistoryAndTransactions(cm, currentTxns, latestArchVip)
+          );
           setUsers(prev => {
             const next = deduplicateAndNormalizeUsers(
-              [userObj, ...prev, ...cloudMerged],
+              [userObj, ...prev, ...reconciledCloudMerged],
               latestSyncStateRef.current.deletedUsers || cleanedDeleted
+            ).map(u =>
+              doesUserMatchTarget(u, userObj)
+                ? reconcileUserVipWithVerifiedHistoryAndTransactions(u, currentTxns, latestArchVip)
+                : u
             );
             latestSyncStateRef.current.users = next;
             safeSetCriticalAccountStorage('kft_users_v5', next);
@@ -6789,15 +6834,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             h.expiryDate
         )
       : undefined;
-    const cleanExpiryIso =
+    const existingActiveExpMs =
+      existing && isUserVipActive(existing)
+        ? parseSafeDateMs(existing.subscriptionExpiryDate || existing.vipExpiresAt)
+        : 0;
+    const rawCandidateExpMs =
       alreadyAppliedHist?.expiryDate && parseSafeDateMs(alreadyAppliedHist.expiryDate) > 0
-        ? new Date(parseSafeDateMs(alreadyAppliedHist.expiryDate)).toISOString()
-        : new Date(expMs).toISOString();
+        ? parseSafeDateMs(alreadyAppliedHist.expiryDate)
+        : expMs;
+    const safeguardedExpMs = Math.max(rawCandidateExpMs, existingActiveExpMs);
+    const cleanExpiryIso = new Date(safeguardedExpMs).toISOString();
 
-    const resolvedPlanDays =
+    const requestedPlanDays =
       typeof params.durationDays === 'number' && params.durationDays >= 1
         ? Math.round(params.durationDays)
         : Math.max(1, Math.round((expMs - startMs) / (1000 * 60 * 60 * 24)));
+    const existingActivePlanDays =
+      existing && isUserVipActive(existing) && existingActiveExpMs > Date.now()
+        ? resolveUserActualVipPlanDays(existing)
+        : 0;
+    const resolvedPlanDays = Math.max(requestedPlanDays, existingActivePlanDays);
     const resolvedPlanType =
       params.planType ||
       (resolvedPlanDays <= 35 ? 'quarterly' : 'annual');
@@ -7724,7 +7780,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    // 5. Remove user's registration/VIP transactions & payment proof receipts
+    // 5. Archive verified VIP entitlements & preserve verified payment transactions so re-registration with the same verified email restores valid VIP
     const isTargetTransaction = (t: RegistrationTransaction) =>
       Boolean(
         (t.ownerId && allTargetIdSet.has(t.ownerId)) ||
@@ -7733,18 +7789,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
 
     const userTxns = liveTransactions.filter(isTargetTransaction);
-    const nextTransactions = liveTransactions.filter(t => !isTargetTransaction(t));
+    const reconciledTargetForArchive = reconcileUserVipWithVerifiedHistoryAndTransactions(
+      targetUser,
+      liveTransactions
+    );
+    let updatedArchivedEntitlements: ArchivedVipEntitlement[] | null = null;
+    if (
+      reconciledTargetForArchive.transactionRef &&
+      (reconciledTargetForArchive.subscriptionExpiryDate || reconciledTargetForArchive.vipExpiresAt) &&
+      (reconciledTargetForArchive.paymentStatus === 'verified' ||
+        (Array.isArray(reconciledTargetForArchive.vipMembershipHistory) &&
+          reconciledTargetForArchive.vipMembershipHistory.some(h => h && h.status === 'verified')))
+    ) {
+      const archiveEntry: ArchivedVipEntitlement = {
+        userId: reconciledTargetForArchive.id,
+        email: targetEmailLower || reconciledTargetForArchive.email,
+        phone: targetPhoneClean || reconciledTargetForArchive.phone,
+        legacyIds: allTargetIds,
+        vipPlanDays: resolveUserActualVipPlanDays(reconciledTargetForArchive),
+        vipPlanType: reconciledTargetForArchive.vipPlanType === 'annual' ? 'annual' : 'quarterly',
+        activeConsumerPlanId: reconciledTargetForArchive.activeConsumerPlanId,
+        subscriptionStartDate:
+          reconciledTargetForArchive.subscriptionStartDate ||
+          reconciledTargetForArchive.verifiedAt ||
+          nowIso,
+        subscriptionExpiryDate:
+          reconciledTargetForArchive.subscriptionExpiryDate ||
+          reconciledTargetForArchive.vipExpiresAt ||
+          nowIso,
+        transactionRef: reconciledTargetForArchive.transactionRef,
+        paymentMethod: reconciledTargetForArchive.paymentMethod || 'KHQR',
+        verifiedAt: reconciledTargetForArchive.verifiedAt || nowIso,
+        paidAdditionalStoreSlots: reconciledTargetForArchive.paidAdditionalStoreSlots || 0,
+        additionalStorePaymentIds: reconciledTargetForArchive.additionalStorePaymentIds,
+        vipMembershipHistory: reconciledTargetForArchive.vipMembershipHistory,
+        archivedAt: nowIso,
+      };
+      try {
+        const rawExistingArch = localStorage.getItem('kft_archived_vip_entitlements_v1');
+        const parsedArch: ArchivedVipEntitlement[] = rawExistingArch ? JSON.parse(rawExistingArch) || [] : [];
+        const filteredArch = parsedArch.filter(
+          a =>
+            a &&
+            a.userId !== archiveEntry.userId &&
+            (!targetEmailLower || String(a.email || '').toLowerCase().trim() !== targetEmailLower)
+        );
+        updatedArchivedEntitlements = [archiveEntry, ...filteredArch].slice(0, 500);
+        localStorage.setItem('kft_archived_vip_entitlements_v1', JSON.stringify(updatedArchivedEntitlements));
+      } catch {}
+    }
+
+    // Only remove unverified/pending draft transactions; NEVER delete or blacklist verified payment records
+    const removableDraftTxns = userTxns.filter(t => t.status !== 'verified');
+    const removableDraftIdSet = new Set(removableDraftTxns.map(t => t.id));
+    const nextTransactions = liveTransactions.filter(t => !removableDraftIdSet.has(t.id));
     latestSyncStateRef.current.transactions = nextTransactions;
     setTransactions(nextTransactions);
     try {
       localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTransactions));
-      if (userTxns.length > 0) {
+      if (removableDraftTxns.length > 0) {
         let localDelTxnIds: string[] = [];
         try {
           const rawDel = localStorage.getItem('kft_deleted_transactions_v1');
           if (rawDel) localDelTxnIds = JSON.parse(rawDel) || [];
         } catch {}
-        const mergedDelTxns = Array.from(new Set([...localDelTxnIds, ...userTxns.map(t => t.id)]));
+        const mergedDelTxns = Array.from(new Set([...localDelTxnIds, ...removableDraftTxns.map(t => t.id)]));
         localStorage.setItem('kft_deleted_transactions_v1', JSON.stringify(mergedDelTxns));
       }
     } catch {}
@@ -7754,7 +7863,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
       if (rawVault) {
         localVault = JSON.parse(rawVault) || {};
-        for (const t of userTxns) {
+        for (const t of removableDraftTxns) {
           delete localVault[t.id];
         }
         localStorage.setItem('kft_secure_payment_proofs_vault_v1', JSON.stringify(localVault));
@@ -7835,14 +7944,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const customRests = nextRestaurants.filter(r => !isSeedRestaurantId(r.id));
       // Intentional admin deletion of specific accounts: allowed through the server-side delete guard.
       resetUserHighWater(nextUsers.length);
-      const atomicDeletes = allTargetIds.map(tid =>
-        deleteCloudDocument(`${USER_RECORD_PREFIX}${tid}`, 8000, { allowDestructive: true })
+      const candidateAtomicKeys = Array.from(
+        new Set([
+          ...allTargetIds.map(tid => `${USER_RECORD_PREFIX}${tid}`),
+          ...getCandidateAtomicUserKeys(targetUser),
+        ])
       );
+      const atomicDeletes = candidateAtomicKeys.map(k =>
+        deleteCloudDocument(k, 8000, { allowDestructive: true })
+      );
+      const nextActiveVips = nextUsers.filter(u => isUserVipActive(u));
+      try {
+        safeSetCriticalAccountStorage('kft_vip_registry_backup_v1', nextActiveVips);
+      } catch {}
       Promise.all([
         ...atomicDeletes,
         pushCloudDocument('kft_cloud_deleted_users_v1', nextDeletedUsers),
         pushCloudDocument('kft_cloud_users_v2', nextUsers),
         pushCloudDocument('kft_cloud_users_v1', nextUsers),
+        pushCloudDocument('kft_cloud_vip_backup_v1', nextActiveVips),
+        ...(updatedArchivedEntitlements
+          ? [pushCloudDocument('kft_cloud_archived_vip_entitlements_v1', updatedArchivedEntitlements)]
+          : []),
         pushCloudDocument('kft_cloud_transactions_v1', nextTransactions),
         pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests),
         pushCloudDocument('kft_cloud_support_tickets_v1', nextTickets),
@@ -12977,7 +13100,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     // Strict Guard A: Block modified, fake, or explicitly mismatched receipts from being approved
-    if (matchedTxn.aiVerificationReport?.status === 'rejected_mismatch') {
+    const repChecks = matchedTxn.aiVerificationReport?.checks;
+    const all4CorePassed = Boolean(
+      repChecks?.recipient?.passed &&
+      repChecks?.amount?.passed &&
+      repChecks?.trxId?.passed &&
+      repChecks?.date?.passed &&
+      !matchedTxn.aiVerificationReport?.extractedReceipt?.isModifiedOrFake
+    );
+    if (matchedTxn.aiVerificationReport?.status === 'rejected_mismatch' && !all4CorePassed) {
       showToast(
         tr(language, '\u26d4 \u1794\u178a\u17b7\u179f\u17c1\u1792\u1780\u17b6\u179a\u17a2\u1793\u17bb\u1798\u17d0\u178f\u17d6 \u179c\u17b7\u1780\u17d2\u1780\u1799\u1794\u178f\u17d2\u179a\u1793\u17c1\u17c7\u1798\u17b7\u1793\u1787\u17b6\u1794\u17cb\u1780\u17b6\u179a\u1795\u17d2\u1791\u17c0\u1784\u1795\u17d2\u1791\u17b6\u178f\u17cb (Rejected Mismatch)!', '\u26d4 Approval Blocked: Receipt failed verification checks (modified, fake, old, duplicate, or mismatched)!', '⛔ 批准已被阻止：收据未通过验证检查（篡改、伪造、过期、重复或不匹配）！'),
         'warning'
@@ -13564,21 +13695,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         noteEn: `Payment verification failed: ${rejectionReason}`,
       };
 
+      const liveTxnsAfterReject = (latestSyncStateRef.current.transactions || transactions).map(t =>
+        t.id === txnId ? { ...t, status: 'rejected' as const, paymentStatus: 'failed' as const } : t
+      );
+
       setUsers(prev => {
         let updatedTargetUser: User | null = null;
         const nextUsers: User[] = prev.map(u => {
           if (!doesUserMatchTarget(u, { id: targetUserId, email: matchedTxn.userEmail, phone: matchedTxn.phone })) return u;
           const prevHist = Array.isArray(u.vipMembershipHistory) ? u.vipMembershipHistory : [];
-          const keepVip = isUserVipActive(u);
-          const nextU: User = {
+          const withRejHist: User = {
             ...u,
-            membershipTier: keepVip ? u.membershipTier : 'free',
-            subscriptionStatus: keepVip ? u.subscriptionStatus : 'cancelled',
-            paymentStatus: (keepVip ? 'verified' : 'rejected') as User['paymentStatus'],
             vipMembershipHistory: [rejectHistEntry, ...prevHist.filter(h => h.id !== rejectHistEntry.id)].slice(0, 50),
           };
-          updatedTargetUser = nextU;
-          return nextU;
+          const reconciledU = reconcileUserVipWithVerifiedHistoryAndTransactions(withRejHist, liveTxnsAfterReject);
+          updatedTargetUser = reconciledU;
+          return reconciledU;
         });
         safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
         latestSyncStateRef.current.users = nextUsers;
@@ -13594,14 +13726,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCurrentUser(prev => {
           if (!prev) return null;
           const prevHist = Array.isArray(prev.vipMembershipHistory) ? prev.vipMembershipHistory : [];
-          const keepVip = isUserVipActive(prev);
-          const updatedCur: User = {
+          const withRejHist: User = {
             ...prev,
-            membershipTier: keepVip ? prev.membershipTier : 'free',
-            subscriptionStatus: keepVip ? prev.subscriptionStatus : 'cancelled',
-            paymentStatus: keepVip ? 'verified' : 'rejected',
             vipMembershipHistory: [rejectHistEntry, ...prevHist.filter(h => h.id !== rejectHistEntry.id)].slice(0, 50),
           };
+          const updatedCur = reconcileUserVipWithVerifiedHistoryAndTransactions(withRejHist, liveTxnsAfterReject);
           safeSetCriticalAccountStorage('kft_current_user_v5', updatedCur);
           latestSyncStateRef.current.currentUser = updatedCur;
           return updatedCur;

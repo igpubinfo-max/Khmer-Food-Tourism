@@ -641,6 +641,50 @@ export function findLocalAuthoritativeVipEntitlement(
         }
       }
 
+      // 5. Check Archived VIP Entitlements saved before account deletion (`kft_archived_vip_entitlements_v1`)
+      const archived = getCachedParsedLocalStorage('kft_archived_vip_entitlements_v1');
+      if (Array.isArray(archived)) {
+        for (const arch of archived) {
+          if (!arch || !doesUserMatchCandidate({ id: arch.userId, email: arch.email, phone: arch.phone, legacyIds: arch.legacyIds }, targetUser)) {
+            continue;
+          }
+          const archRef = String(arch.transactionRef || '').trim();
+          if (archRef && unapprovedRefs.has(archRef)) continue;
+          const archStartMs = parseSafeDateMs(arch.subscriptionStartDate || arch.verifiedAt || arch.archivedAt);
+          if (latestCancelMs > 0 && archStartMs <= latestCancelMs) continue;
+          const expMs = parseSafeDateMs(arch.subscriptionExpiryDate);
+          if (expMs > nowMs && expMs > bestExpMs) {
+            bestExpMs = expMs;
+            bestStartIso = arch.subscriptionStartDate || arch.verifiedAt || bestStartIso;
+            bestTxnRef = arch.transactionRef || bestTxnRef;
+            bestMethod = arch.paymentMethod || bestMethod;
+            if (typeof arch.paidAdditionalStoreSlots === 'number' && arch.paidAdditionalStoreSlots > bestSlots) {
+              bestSlots = arch.paidAdditionalStoreSlots;
+            }
+            bestMatchedUser = sanitizeUserVipPlanAndExpiry({
+              ...(targetUser as User),
+              id: arch.userId || targetUser.id || 'user',
+              name: targetUser.name || 'VIP Member',
+              email: arch.email || targetUser.email || '',
+              role: 'user',
+              membershipTier: 'premium_vip',
+              subscriptionStatus: 'active',
+              vipStatus: 'active',
+              paymentStatus: 'verified',
+              vipPlanDays: arch.vipPlanDays,
+              vipPlanType: arch.vipPlanType,
+              activeConsumerPlanId: arch.activeConsumerPlanId,
+              subscriptionStartDate: arch.subscriptionStartDate,
+              subscriptionExpiryDate: arch.subscriptionExpiryDate,
+              vipExpiresAt: arch.subscriptionExpiryDate,
+              transactionRef: arch.transactionRef,
+              paymentMethod: arch.paymentMethod,
+              vipMembershipHistory: arch.vipMembershipHistory,
+            });
+          }
+        }
+      }
+
       // Retired: old 30-dish check-in reward (`kft_v3_food_checkin_reward_claims_v1`) never grants VIP.
     }
   } catch {}
@@ -655,22 +699,6 @@ export function findLocalAuthoritativeVipEntitlement(
       paymentMethod: bestMethod,
       paidAdditionalStoreSlots: bestSlots,
       matchedUser: bestMatchedUser,
-    };
-  }
-
-  if (isPermanentVipEmail(targetUser.email)) {
-    const planDays = resolveUserActualVipPlanDays(targetUser as User);
-    const existingTargetExpMs = parseSafeDateMs(targetUser.subscriptionExpiryDate || targetUser.vipExpiresAt);
-    // Reuse existing future expiry timestamp so permanent VIP email does not trigger a 60-second cloud push loop
-    const permExpMs = existingTargetExpMs > nowMs ? existingTargetExpMs : nowMs + planDays * 24 * 60 * 60 * 1000;
-    return {
-      found: true,
-      expiryMs: permExpMs,
-      expiryIso: new Date(permExpMs).toISOString(),
-      startIso: targetUser.subscriptionStartDate || new Date(nowMs).toISOString(),
-      transactionRef: targetUser.transactionRef || `VIP-${planDays}D-IGP2026D`,
-      paymentMethod: targetUser.paymentMethod || 'KHQR',
-      paidAdditionalStoreSlots: Math.max(targetUser.paidAdditionalStoreSlots || 0, 2),
     };
   }
 
@@ -837,6 +865,8 @@ export async function verifyAndSanitizeUserSession(
               .sort((a, b) => parseSafeDateMs(b.date) - parseSafeDateMs(a.date))
               .slice(0, 50);
           }
+          const resanitized = sanitizeUserVipPlanAndExpiry(sanitized);
+          Object.assign(sanitized, resanitized);
         }
         sanitized.integritySeal = await computeUserIntegritySeal(sanitized);
       }
@@ -1030,6 +1060,8 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
                   .sort((a, b) => parseSafeDateMs(b.date) - parseSafeDateMs(a.date))
                   .slice(0, 50);
               }
+              const resanitized = sanitizeUserVipPlanAndExpiry(parsed);
+              Object.assign(parsed, resanitized);
             }
             parsed.integritySeal = computeUserIntegritySealSync(parsed);
             updated = true;

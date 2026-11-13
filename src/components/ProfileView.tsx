@@ -11,7 +11,7 @@ import {
   Edit2, Check, X as CloseIcon, Crown, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera, RotateCw, RotateCcw
 } from 'lucide-react';
 import {
-  isRestaurantPremiumActive, isUserVipActive, isUserOnConsumerFreeTrial, isUserPaidVipActive, getConsumerVipPricingCatalog, getVipAccountState, getVipRemainingDays,
+  isRestaurantPremiumActive, isUserVipActive, isUserOnConsumerFreeTrial, isUserPaidVipActive, getConsumerVipPricingCatalog, getVipAccountState, getVipRemainingDays, resolveUserActualVipPlanDays,
   APP_VERSION, APP_BUILD_CODE, getDynamicVipPlans, getDynamicVipBenefits,
   isAdminAccount,
   isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, getVipFeaturedRotationState,
@@ -62,7 +62,7 @@ export const ProfileView: React.FC = () => {
 
   const handleSelfDeleteAccount = async () => {
     if (!currentUser || isAdmin) return;
-    const msg = tr(language, `តើអ្នកពិតជាចង់លុបគណនីរបស់អ្នក (${currentUser.email || currentUser.name}) ជាអចិន្ត្រៃយ៍មែនទេ? ទិន្នន័យគណនី រូបភាព និងការកំណត់ទាំងអស់នឹងត្រូវលុបចេញភ្លាមៗ។ ហាង សមាជិកភាព VIP និងកំណត់ត្រាទូទាត់ដែលភ្ជាប់នឹងគណនីនេះក៏នឹងត្រូវលុបផងដែរ ហើយមិនអាចយកមកវិញបានទេ។`, `Are you sure you want to permanently delete your account (${currentUser.email || currentUser.name})? All your profile data, saved favorites, and account settings will be permanently deleted. Restaurants you listed, your VIP membership and related payment records will also be removed, and this cannot be undone.`, `您确定要永久注销您的账户（${currentUser.email || currentUser.name}）吗？您的所有个人资料、收藏和账户设置将被永久删除。您发布的餐厅、VIP 会员资格及相关支付记录也将被移除，且此操作无法撤销。`);
+    const msg = tr(language, `តើអ្នកពិតជាចង់លុបគណនីរបស់អ្នក (${currentUser.email || currentUser.name}) មែនទេ? ទិន្នន័យប្រវត្តិរូប រូបភាព និងការកំណត់ទាំងអស់នឹងត្រូវលុបចេញភ្លាមៗ។ (កំណត់ត្រាទូទាត់ប្រាក់ និងសុពលភាពសមាជិកភាព VIP ដែលបានផ្ទៀងផ្ទាត់នឹងត្រូវរក្សាទុកដោយសុវត្ថិភាព ប្រសិនបើអ្នកចូលប្រើប្រាស់ម្តងទៀតដោយអ៊ីមែលដដែល)`, `Are you sure you want to delete your account (${currentUser.email || currentUser.name})? All your profile data, saved favorites, and account settings will be deleted immediately. (Verified payment records and remaining VIP membership entitlement are securely retained if you sign in again with the same verified email.)`, `您确定要注销您的账户（${currentUser.email || currentUser.name}）吗？您的个人资料、收藏和账户设置将被立即删除。（已核实的付款记录和剩余 VIP 会员权益将被安全保留，使用同一认证邮箱重新登录即可恢复。）`);
     if (!window.confirm(msg)) return;
     await deleteUserAccount(currentUser.id);
   };
@@ -87,6 +87,8 @@ export const ProfileView: React.FC = () => {
         restaurants.some(r => r.ownerId === currentUser.id))
   );
   const remainingDays = getVipRemainingDays(currentUser);
+  const actualPlanDays = resolveUserActualVipPlanDays(currentUser);
+  const vipExpiryShort = (currentUser?.subscriptionExpiryDate || currentUser?.vipExpiresAt || '').slice(0, 10);
   const [selectedVipPowerPanel, setSelectedVipPowerPanel] = useState<'analytics' | 'reels' | 'photos' | 'rank' | null>('analytics');
 
   const [activeSubTab, setActiveSubTab] = useState<'bookmarks' | 'wishlists' | 'tripplans' | 'settings' | 'myrestaurant' | 'membership'>(
@@ -773,21 +775,56 @@ export const ProfileView: React.FC = () => {
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => openUpgradeVipModal()}
-          className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#F59E0B] via-[#F97316] to-[#EA580C] hover:from-[#D97706] hover:to-[#C2410C] text-white font-extrabold text-xs sm:text-[13px] shadow-[0_6px_16px_rgba(234,88,12,0.25)] flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer leading-[1.55]"
-        >
-          <Crown className="w-4 h-4 fill-white shrink-0" />
-          <span>
-            {tr(
-              language,
-              'ដំឡើងទៅជាសមាជិក VIP ឥឡូវនេះ',
-              'Upgrade to VIP Membership Now',
-              '立即升级 VIP 会员'
-            )}
-          </span>
-        </button>
+        {isPaidVip ? (
+          <div className="space-y-2">
+            <div className="px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-2 text-[11.5px] font-bold text-emerald-900">
+              <span>
+                {tr(
+                  language,
+                  `✅ សមាជិក VIP សកម្ម (${actualPlanDays} ថ្ងៃ • សល់ ${remainingDays} ថ្ងៃ)`,
+                  `✅ Active VIP (${actualPlanDays}d Plan • ${remainingDays}d left)`,
+                  `✅ 已激活 VIP（${actualPlanDays} 天套餐 • 剩余 ${remainingDays} 天）`
+                )}
+              </span>
+              {vipExpiryShort && (
+                <span className="font-mono text-[10.5px] text-emerald-700">
+                  {tr(language, `ផុតកំណត់៖ ${vipExpiryShort}`, `Exp: ${vipExpiryShort}`, `到期：${vipExpiryShort}`)}
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('membership')}
+              className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#059669] via-[#10B981] to-[#047857] hover:from-[#047857] hover:to-[#065F46] text-white font-extrabold text-xs sm:text-[13px] shadow-[0_6px_16px_rgba(5,150,105,0.25)] flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer leading-[1.55]"
+            >
+              <Crown className="w-4 h-4 fill-white shrink-0" />
+              <span>
+                {tr(
+                  language,
+                  'គ្រប់គ្រង / បន្តសុពលភាពសមាជិក VIP',
+                  'Manage / Extend VIP Membership',
+                  '管理 / 续期 VIP 会员'
+                )}
+              </span>
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => openUpgradeVipModal()}
+            className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#F59E0B] via-[#F97316] to-[#EA580C] hover:from-[#D97706] hover:to-[#C2410C] text-white font-extrabold text-xs sm:text-[13px] shadow-[0_6px_16px_rgba(234,88,12,0.25)] flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer leading-[1.55]"
+          >
+            <Crown className="w-4 h-4 fill-white shrink-0" />
+            <span>
+              {tr(
+                language,
+                'ដំឡើងទៅជាសមាជិក VIP ឥឡូវនេះ',
+                'Upgrade to VIP Membership Now',
+                '立即升级 VIP 会员'
+              )}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* Card 2: Collapsible Shop & Hotel Registration Benefits (Clean Modern White Card with Emerald Accents) */}
@@ -1002,10 +1039,15 @@ export const ProfileView: React.FC = () => {
                         <span>{tr(language, '🎁 សាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ (Free Trial)', '🎁 7-Day Free Trial', '🎁 7 天免费试用')}</span>
                       </span>
                     ) : isPaidVip ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border border-amber-400 shadow-2xs font-khmer">
-                        <Crown className="w-3.5 h-3.5 fill-amber-700 text-amber-700" />
-                        <span>{tr(language, 'សមាជិក VIP បង់ប្រាក់', 'Paid VIP Member', '付费 VIP 尊享会员')}</span>
-                      </span>
+                      <>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border border-amber-400 shadow-2xs font-khmer">
+                          <Crown className="w-3.5 h-3.5 fill-amber-700 text-amber-700" />
+                          <span>{tr(language, 'សមាជិក VIP បង់ប្រាក់', 'Paid VIP Member', '付费 VIP 尊享会员')}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-extrabold bg-amber-50 text-amber-900 border border-amber-300 font-khmer">
+                          <span>{tr(language, `កញ្ចប់ ${actualPlanDays} ថ្ងៃ • សល់ ${remainingDays} ថ្ងៃ`, `${actualPlanDays}d Plan • ${remainingDays}d left`, `${actualPlanDays}天套餐 • 剩${remainingDays}天`)}</span>
+                        </span>
+                      </>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 shadow-2xs font-khmer">
                         <span>{tr(language, 'គណនីធម្មតា (Free User)', 'Free User', '普通免费账户')}</span>

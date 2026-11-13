@@ -358,7 +358,7 @@ export const HomeView: React.FC = () => {
   );
 
   return (
-    <div className="w-full max-w-6xl min-w-0 mx-auto bg-[#FBF9F5] text-slate-900 min-h-full font-khmer overflow-x-hidden">
+    <div className="w-full max-w-6xl min-w-0 mx-auto bg-[#FBF9F5] text-slate-900 min-h-full font-khmer">
       {/* 1. Full-Bleed Angkor Wat Hero Header + Ask AI Bar (No Green Background) */}
       <AngkorHeroTopHeader
         mode="home"

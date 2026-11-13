@@ -239,9 +239,30 @@ export const GuideView: React.FC = () => {
   const provinceResultsRef = useRef<HTMLDivElement | null>(null);
   const tipResultsRef = useRef<HTMLUListElement | null>(null);
 
+  const [scrollRequestTick, setScrollRequestTick] = useState<number>(0);
+  const lastTargetRef = useRef<HTMLElement | null>(null);
+
   const scrollToGuideSection = (targetEl?: HTMLElement | null) => {
-    smoothScrollToElement(targetEl || guideContentStartRef.current, { offsetTop: 8 });
+    lastTargetRef.current = targetEl || guideContentStartRef.current;
+    setScrollRequestTick((prev) => prev + 1);
+    smoothScrollToElement(targetEl || guideContentStartRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: targetEl?.id || 'kft-guide-content-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
   };
+
+  useEffect(() => {
+    if (scrollRequestTick === 0) return;
+    const target = lastTargetRef.current || guideContentStartRef.current;
+    smoothScrollToElement(target, {
+      containerId: 'kft-main-scroll',
+      targetId: target?.id || 'kft-guide-content-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
+  }, [scrollRequestTick, tab, mealOverride, provinceKey, tipFilter]);
 
   const now = useMemo(() => new Date(), []);
   const hour = now.getHours();
@@ -473,7 +494,7 @@ export const GuideView: React.FC = () => {
   }, [bigPhraseId]);
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-slate-900 min-h-full font-khmer pb-12 overflow-x-hidden">
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-slate-900 min-h-full font-khmer pb-12">
       {/* 1. Shared Master Hero Header with Angkor Wat Backdrop */}
       <AngkorHeroTopHeader mode="food" />
 
@@ -1234,3 +1255,4 @@ export const GuideView: React.FC = () => {
     </div>
   );
 };
+
