@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { TouristDestination } from '../types';
+import { TouristDestination, type Language } from '../types';
+import { useApp } from '../context/AppContext';
+import { tr } from '../utils/i18n';
 import { 
   X, Upload, Image as ImageIcon, Check, RefreshCw, 
   MapPin, Smartphone, CheckCircle2, AlertCircle
@@ -111,14 +113,15 @@ const compressDataUrl = (
 // Normalize and validate any image format (HTTP/HTTPS, Data URL, or raw Base64)
 export const normalizeAndValidateImage = (
   input: string,
-  isKm = true
+  isKm = true,
+  language: Language = isKm ? 'km' : 'en'
 ): { isValid: boolean; normalizedUrl: string; error?: string } => {
   const trimmed = (input || '').trim();
   if (!trimmed) {
     return {
       isValid: false,
       normalizedUrl: '',
-      error: isKm ? 'សូមបញ្ចូលតំណភ្ជាប់រូបភាព ឬជ្រើសរើសឯកសារ' : 'Please provide an image URL or choose a file'
+      error: tr(language, 'សូមបញ្ចូលតំណភ្ជាប់រូបភាព ឬជ្រើសរើសឯកសារ', 'Please provide an image URL or choose a file', '请输入图片链接或选择文件')
     };
   }
 
@@ -129,7 +132,7 @@ export const normalizeAndValidateImage = (
       return {
         isValid: false,
         normalizedUrl: '',
-        error: isKm ? 'ទម្រង់ Data URL មិនត្រឹមត្រូវ (ខ្វះទិន្នន័យ Base64)' : 'Invalid Data URL format (Missing Base64 payload)'
+        error: tr(language, 'ទម្រង់ Data URL មិនត្រឹមត្រូវ (ខ្វះទិន្នន័យ Base64)', 'Invalid Data URL format (Missing Base64 payload)', 'Data URL 格式无效（缺少 Base64 数据）')
       };
     }
     return { isValid: true, normalizedUrl: trimmed };
@@ -158,7 +161,7 @@ export const normalizeAndValidateImage = (
       return {
         isValid: false,
         normalizedUrl: '',
-        error: isKm ? 'តំណភ្ជាប់ URL មិនត្រឹមត្រូវ' : 'Invalid URL syntax'
+        error: tr(language, 'តំណភ្ជាប់ URL មិនត្រឹមត្រូវ', 'Invalid URL syntax', 'URL 链接格式无效')
       };
     }
   }
@@ -171,9 +174,7 @@ export const normalizeAndValidateImage = (
   return {
     isValid: false,
     normalizedUrl: '',
-    error: isKm 
-      ? 'សូមបញ្ចូលតំណភ្ជាប់រូបភាព (https://...) ឬ Data URL (data:image/...)' 
-      : 'Please provide a valid image URL (https://...) or Data URL (data:image/...)'
+    error: tr(language, 'សូមបញ្ចូលតំណភ្ជាប់រូបភាព (https://...) ឬ Data URL (data:image/...)', 'Please provide a valid image URL (https://...) or Data URL (data:image/...)', '请提供有效的图片链接 (https://...) 或 Data URL (data:image/...)')
   };
 };
 
@@ -184,6 +185,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
   onSave,
   isKm,
 }) => {
+  const { language } = useApp();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [photoUrl, setPhotoUrl] = useState('');
@@ -212,13 +214,13 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
     // Validate type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type.toLowerCase())) {
-      setErrorMsg(isKm ? 'សូមជ្រើសរើសប្រភេទរូបភាព JPG, PNG ឬ WebP ប៉ុណ្ណោះ' : 'Please select a JPG, PNG, or WebP image');
+      setErrorMsg(tr(language, 'សូមជ្រើសរើសប្រភេទរូបភាព JPG, PNG ឬ WebP ប៉ុណ្ណោះ', 'Please select a JPG, PNG, or WebP image', '请选择 JPG、PNG 或 WebP 格式的图片'));
       return;
     }
 
     // Validate size (max 20MB before compression)
     if (file.size > 20 * 1024 * 1024) {
-      setErrorMsg(isKm ? 'ទំហំរូបភាពធំពេក (អតិបរមា 20MB)' : 'File size is too large (max 20MB)');
+      setErrorMsg(tr(language, 'ទំហំរូបភាពធំពេក (អតិបរមា 20MB)', 'File size is too large (max 20MB)', '图片文件过大（最大 20MB）'));
       return;
     }
 
@@ -249,7 +251,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
         })
       );
     } catch (err: any) {
-      setErrorMsg(err.message || (isKm ? 'បរាជ័យក្នុងការដំណើរការរូបភាព' : 'Error processing image'));
+      setErrorMsg(err.message || (tr(language, 'បរាជ័យក្នុងការដំណើរការរូបភាព', 'Error processing image', '处理图片失败')));
     } finally {
       setIsProcessing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -270,7 +272,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
           setPhotoUrl(finalUrl);
           setUrlInput('');
           setFileDetails({
-            origSize: isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos',
+            origSize: tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册'),
             compSize: `${compKb} KB`,
           });
           const nowIso = new Date().toISOString();
@@ -310,7 +312,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
   const handleApplyUrl = () => {
     const check = normalizeAndValidateImage(urlInput, isKm);
     if (!check.isValid) {
-      setErrorMsg(check.error || (isKm ? 'ទម្រង់រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image format'));
+      setErrorMsg(check.error || (tr(language, 'ទម្រង់រូបភាពមិនត្រឹមត្រូវ', 'Invalid image format', '图片格式无效')));
       return;
     }
     setPhotoUrl(check.normalizedUrl);
@@ -335,7 +337,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
     const check = normalizeAndValidateImage(candidate, isKm);
 
     if (!check.isValid) {
-      setErrorMsg(check.error || (isKm ? 'សូមបញ្ចូលរូបភាព ឬជ្រើសរើសឯកសារត្រឹមត្រូវ' : 'Please provide a valid image'));
+      setErrorMsg(check.error || (tr(language, 'សូមបញ្ចូលរូបភាព ឬជ្រើសរើសឯកសារត្រឹមត្រូវ', 'Please provide a valid image', '请提供有效的图片')));
       setIsProcessing(false);
       return;
     }
@@ -365,7 +367,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
       onClose();
     } catch (saveErr: any) {
       console.error('Error saving destination photo:', saveErr);
-      setErrorMsg(isKm ? 'បរាជ័យក្នុងការរក្សាទុករូបភាព។ សូមព្យាយាមម្ដងទៀត។' : 'Failed to save photo. Please try again.');
+      setErrorMsg(tr(language, 'បរាជ័យក្នុងការរក្សាទុករូបភាព។ សូមព្យាយាមម្ដងទៀត។', 'Failed to save photo. Please try again.', '保存图片失败，请重试。'));
     } finally {
       setIsProcessing(false);
     }
@@ -385,7 +387,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             </div>
             <div>
               <h3 className="font-moul text-sm text-white">
-                {isKm ? 'ផ្លាស់ប្តូររូបភាពកន្លែងទេសចរណ៍' : 'Change Destination Photo'}
+                {tr(language, 'ផ្លាស់ប្តូររូបភាពកន្លែងទេសចរណ៍', 'Change Destination Photo', '更换景点图片')}
               </h3>
               <p className="text-[11px] text-emerald-200 font-khmer flex items-center gap-1">
                 <span>{destination.nameKh}</span>
@@ -425,7 +427,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-[#0F172A] dark:text-slate-200 font-khmer flex items-center gap-1.5">
                 <ImageIcon className="w-4 h-4 text-[#059669]" />
-                <span>{isKm ? 'ការមើលរូបភាពជាក់ស្តែង (Live Preview)' : 'Live Preview'}</span>
+                <span>{tr(language, 'ការមើលរូបភាពជាក់ស្តែង (Live Preview)', 'Live Preview', '实时预览')}</span>
               </label>
 
               {/* Fit Mode Toggle */}
@@ -457,19 +459,19 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
                   src={photoUrl} 
                   alt="Destination Preview" 
                   className={`w-full h-full ${fitMode === 'cover' ? 'object-cover' : 'object-contain'}`}
-                  onError={() => setErrorMsg(isKm ? 'មិនអាចបើករូបភាពតាមប្រភពនេះបានទេ សូមពិនិត្យឡើងវិញ' : 'Cannot load image from this source')}
+                  onError={() => setErrorMsg(tr(language, 'មិនអាចបើករូបភាពតាមប្រភពនេះបានទេ សូមពិនិត្យឡើងវិញ', 'Cannot load image from this source', '无法从该来源加载图片，请检查重试'))}
                 />
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 font-khmer text-xs">
                   <ImageIcon className="w-10 h-10 mb-2 opacity-50" />
-                  <span>{isKm ? 'គ្មានរូបភាពជ្រើសរើស' : 'No photo selected'}</span>
+                  <span>{tr(language, 'គ្មានរូបភាពជ្រើសរើស', 'No photo selected', '未选择图片')}</span>
                 </div>
               )}
 
               {isProcessing && (
                 <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white text-xs font-khmer gap-2">
                   <RefreshCw className="w-6 h-6 animate-spin text-emerald-300" />
-                  <span>{isKm ? 'កំពុងដំណើរការ និងបង្រួមទំហំរូបភាព...' : 'Processing and optimizing image...'}</span>
+                  <span>{tr(language, 'កំពុងដំណើរការ និងបង្រួមទំហំរូបភាព...', 'Processing and optimizing image...', '正在处理并压缩图片...')}</span>
                 </div>
               )}
 
@@ -488,7 +490,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[#0F172A] dark:text-emerald-300 font-khmer flex items-center gap-1.5">
                 <Smartphone className="w-4 h-4 text-[#059669]" />
-                <span>{isKm ? 'វិធីទី១៖ ជ្រើសរើសពី រូបភាពរបស់ខ្ញុំ' : 'Option 1: Choose from My Photos'}</span>
+                <span>{tr(language, 'វិធីទី១៖ ជ្រើសរើសពី រូបភាពរបស់ខ្ញុំ', 'Option 1: Choose from My Photos', '方式 1：从我的相册选择')}</span>
               </span>
               <span className="text-[10px] text-slate-500 font-khmer font-bold">JPG, PNG, WebP</span>
             </div>
@@ -508,7 +510,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
               className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 transition active:scale-[0.99] disabled:opacity-50 cursor-pointer"
             >
               <Upload className="w-4 h-4 text-emerald-300" />
-              <span>{isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos'}</span>
+              <span>{tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册')}</span>
             </button>
             <p className="text-[10px] text-slate-500 font-khmer text-center">
               {isKm 
@@ -520,7 +522,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
           {/* Action 2: Direct Image URL or Base64 / Data URL */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-[#0F172A] dark:text-slate-200 font-khmer block">
-              {isKm ? 'វិធីទី២៖ ឬបញ្ចូលតំណភ្ជាប់រូបភាព (Image URL / Base64)' : 'Option 2: Or Paste Image URL or Base64'}
+              {tr(language, 'វិធីទី២៖ ឬបញ្ចូលតំណភ្ជាប់រូបភាព (Image URL / Base64)', 'Option 2: Or Paste Image URL or Base64', '方式 2：或粘贴图片链接 (Image URL / Base64)')}
             </label>
             <div className="flex gap-2">
               <input 
@@ -535,7 +537,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
                 onClick={handleApplyUrl}
                 className="px-3.5 py-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-khmer font-bold rounded-xl transition active:scale-95 cursor-pointer"
               >
-                {isKm ? 'ដាក់រូប' : 'Apply'}
+                {tr(language, 'ដាក់រូប', 'Apply', '应用')}
               </button>
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-khmer">
@@ -561,7 +563,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
               className="text-[11px] text-slate-500 hover:text-[#064E3B] font-khmer flex items-center gap-1 transition cursor-pointer"
             >
               <RefreshCw className="w-3 h-3" />
-              <span>{isKm ? 'កំណត់រូបភាពដើមឡើងវិញ' : 'Reset to default image'}</span>
+              <span>{tr(language, 'កំណត់រូបភាពដើមឡើងវិញ', 'Reset to default image', '恢复默认图片')}</span>
             </button>
           </div>
         </div>
@@ -573,7 +575,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-khmer text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
           >
-            {isKm ? 'បោះបង់' : 'Cancel'}
+            {tr(language, 'បោះបង់', 'Cancel', '取消')}
           </button>
           <button
             type="button"
@@ -586,7 +588,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             ) : (
               <Check className="w-4 h-4 text-emerald-300" />
             )}
-            <span>{isKm ? 'រក្សាទុករូបភាព' : 'Save Photo'}</span>
+            <span>{tr(language, 'រក្សាទុករូបភាព', 'Save Photo', '保存图片')}</span>
           </button>
         </div>
       </div>

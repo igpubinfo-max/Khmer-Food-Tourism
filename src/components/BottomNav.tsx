@@ -12,7 +12,7 @@ import {
 
 const NAV_COUNT = 6;
 
-export const BottomNav: React.FC = () => {
+const BottomNavInner: React.FC = () => {
   const { activeTab, setActiveTab, language } = useApp();
 
   // Profile is opened from the avatar button at the top-right of every page header.
@@ -115,3 +115,5 @@ export const BottomNav: React.FC = () => {
     </nav>
   );
 };
+
+export const BottomNav = React.memo(BottomNavInner);
