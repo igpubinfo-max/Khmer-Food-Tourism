@@ -217,7 +217,7 @@ export function calculateVipDates(
   if (existingExpiry) {
     const existingTime = parseSafeDateMs(existingExpiry);
     const remainingMs = existingTime - startTime;
-    if (remainingMs > 0 && remainingMs <= 95 * 24 * 60 * 60 * 1000) {
+    if (remainingMs > 0 && remainingMs <= 370 * 24 * 60 * 60 * 1000) {
       startTime = existingTime;
     }
   }
@@ -459,11 +459,14 @@ export async function verifyAdditionalStorePaymentOnBackend(
     };
   }
 
-  if (
-    typeof req.amountUsd !== 'number' ||
-    Number.isNaN(req.amountUsd) ||
-    Math.abs(req.amountUsd - expectedFee) > 0.02
-  ) {
+  const isValidShopOrSlotAmount =
+    typeof req.amountUsd === 'number' &&
+    !Number.isNaN(req.amountUsd) &&
+    (Math.abs(req.amountUsd - expectedFee) <= 0.05 ||
+      Math.abs(req.amountUsd - 6.99) <= 0.05 ||
+      Math.abs(req.amountUsd - 49.99) <= 0.05 ||
+      Math.abs(req.amountUsd - 59.99) <= 0.05);
+  if (!isValidShopOrSlotAmount) {
     return {
       success: false,
       transactionRef: cleanRef,
@@ -506,8 +509,8 @@ export async function verifyAdditionalStorePaymentOnBackend(
     transactionRef: cleanRef,
     verificationSignature: signature,
     verifiedAt: new Date(timestamp).toISOString(),
-    amountUsd: expectedFee,
-    expectedAmountUsd: expectedFee,
+    amountUsd: req.amountUsd,
+    expectedAmountUsd: req.amountUsd,
     storeSlotNumber: slotNum,
   };
 }

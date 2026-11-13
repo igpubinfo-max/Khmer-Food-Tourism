@@ -35,6 +35,8 @@ import {
   GoogleMapsPlaceMetadata,
   SHOP_ALL_INCLUSIVE_5_BENEFITS,
   getShopSubscriptionCatalog,
+  getOfficialAbaKhqrImageForPlan,
+  getOfficialAbaKhqrDownloadFilename,
   isShopSubscriptionActive,
   isIosOrIpadAppStoreRuntime,
   isUserVipActive,
@@ -329,6 +331,37 @@ export const VipAddRestaurantModal: React.FC = () => {
 
   const isIosAppStore = isIosOrIpadAppStoreRuntime();
   const shopCatalog = useMemo(() => getShopSubscriptionCatalog(appSettings), [appSettings]);
+  const [selectedShopPlanId, setSelectedShopPlanId] = useState<'shop_30d' | 'shop_earlybird_365d'>('shop_30d');
+  const shopPlanOptions = useMemo(() => {
+    const p30 = shopCatalog.monthlyPlan;
+    const p365 =
+      shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled
+        ? shopCatalog.earlyBirdPlan
+        : {
+            ...shopCatalog.yearlyPlan,
+            planId: 'shop_earlybird_365d' as const,
+            priceUsd: 49.99,
+            qrImageUrl: getOfficialAbaKhqrImageForPlan({
+              planId: 'shop_earlybird_365d',
+              priceUsd: 49.99,
+              durationDays: 365,
+              category: 'shop',
+            }),
+          };
+    return [p30, p365];
+  }, [shopCatalog]);
+  const selectedShopPlan = useMemo(
+    () => shopPlanOptions.find((p) => p.planId === selectedShopPlanId) || shopPlanOptions[0],
+    [shopPlanOptions, selectedShopPlanId]
+  );
+  const selectedShopQrUrl = useMemo(
+    () => getOfficialAbaKhqrImageForPlan(selectedShopPlan),
+    [selectedShopPlan]
+  );
+  const selectedShopQrFilename = useMemo(
+    () => getOfficialAbaKhqrDownloadFilename(selectedShopPlan),
+    [selectedShopPlan]
+  );
   const quota = getCurrentUserStoreQuota(currentUser);
   const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
   // Section B: Independent Shop Package — submitting a shop has ZERO Consumer VIP prerequisite and ZERO extra-slot lock!
@@ -1347,7 +1380,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     try {
       const res = await submitAdditionalStorePaymentRequest(
         slotTrxRef.trim(),
-        `Additional Store Slot #${quota.totalAllowedStores + 1} ($${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+        `Additional Store Slot #${quota.totalAllowedStores + 1} ($${selectedShopPlan.priceUsd.toFixed(2)} USD ({selectedShopPlan.durationDays} {tr(language, 'ថ្ងៃ', 'Days', '天')}))`,
         slotProofData || undefined,
         quota.additionalStoreFeeUsd
       );
@@ -1867,7 +1900,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                 type="button"
                 onClick={async () => {
                   try {
-                    const res = await savePngDataUrlToGallery('/images/aba_khqr_official_savuth.png', 'ABA-KHQR-CHEA-SAVUTH-000056833.png');
+                    const res = await savePngDataUrlToGallery(selectedShopQrUrl, selectedShopQrFilename);
                     showToast(
                       res.duplicate
                         ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមមាននៅក្នុង រូបភាពរបស់ខ្ញុំ រួចហើយ!', '✅ Original ABA QR image is already in My Photos!', '✅ 原始 ABA 二维码图片已在我的照片中！')
@@ -1879,7 +1912,8 @@ export const VipAddRestaurantModal: React.FC = () => {
                 className="w-60 sm:w-68 max-w-full mx-auto rounded-2xl overflow-hidden border-2 border-amber-400 shadow-sm bg-white cursor-pointer active:scale-[0.985] transition block p-0"
               >
                 <img loading="lazy" decoding="async"
-                  src="/images/aba_khqr_official_savuth.png"
+                  key={selectedShopQrUrl}
+                  src={selectedShopQrUrl}
                   alt="ABA KHQR — CHEA SAVUTH"
                   className="w-full h-auto object-contain block bg-white"
                 />

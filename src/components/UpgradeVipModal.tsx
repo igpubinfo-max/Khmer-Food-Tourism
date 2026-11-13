@@ -13,6 +13,8 @@ import {
   getDynamicVipBenefits,
   OfficialPlanId,
   getConsumerVipPricingCatalog,
+  getOfficialAbaKhqrImageForPlan,
+  getOfficialAbaKhqrDownloadFilename,
   isConsumerTrial7dEligible,
   isConsumerPromo099Eligible,
   hasAuthenticatedEmailAccount, hasAuthenticatedPhoneAccount, isAdminAccount, isIosOrIpadAppStoreRuntime
@@ -35,6 +37,7 @@ interface VipPlanOption {
   badgeText?: string;
   isPopular?: boolean;
   isWinbackPromo?: boolean;
+  qrImageUrl?: string;
 }
 
 // Strict Payment Status Flow (Requirement 6 + Admin Request More Info)
@@ -103,6 +106,7 @@ export const UpgradeVipModal: React.FC = () => {
         priceUsd: p.priceUsd,
         badgeText: tr(language, p.badgeKm || '១ ដងគត់ក្រោយសាកល្បង', p.badgeEn || 'Post-Trial Special', '试用后专属特惠'),
         isWinbackPromo: true,
+        qrImageUrl: p.qrImageUrl || getOfficialAbaKhqrImageForPlan(p),
       });
     }
     for (const p of [consumerCatalog.monthlyPlan, consumerCatalog.quarterlyPlan, consumerCatalog.yearlyPlan]) {
@@ -122,6 +126,7 @@ export const UpgradeVipModal: React.FC = () => {
         priceUsd: p.priceUsd,
         badgeText: tr(language, p.badgeKm || '', p.badgeEn || '', zhBadge),
         isPopular: p.planId === 'consumer_90d' || p.planId === 'consumer_365d',
+        qrImageUrl: p.qrImageUrl || getOfficialAbaKhqrImageForPlan(p),
       });
     }
     return list;
@@ -158,7 +163,17 @@ export const UpgradeVipModal: React.FC = () => {
   const [submittedTxnId, setSubmittedTxnId] = useState('');
   const [submissionTimestamp, setSubmissionTimestamp] = useState('');
   const [hasCopiedAccount, setHasCopiedAccount] = useState(false);
-  const [qrCodeDataUrl] = useState<string>('/images/aba_qr_code_only.png');
+  const qrCodeDataUrl = useMemo(
+    () =>
+      selectedPlan?.qrImageUrl ||
+      getOfficialAbaKhqrImageForPlan({
+        planId: selectedPlan?.planId,
+        priceUsd: selectedPlan?.priceUsd,
+        durationDays: selectedPlan?.days,
+        category: 'consumer',
+      }),
+    [selectedPlan]
+  );
   const [customTxnRef, setCustomTxnRef] = useState<string>(() => 
     `ABA-KHQR-30D-${Date.now().toString(36).toUpperCase()}`
   );
@@ -331,6 +346,7 @@ export const UpgradeVipModal: React.FC = () => {
     setSessionExpiryTime(Date.now() + 15 * 60 * 1000);
     try {
       localStorage.setItem('kft_user_active_plan_type', plan.id);
+      localStorage.setItem('kft_user_active_official_plan_id', plan.planId);
     } catch {}
   };
 
@@ -353,7 +369,12 @@ export const UpgradeVipModal: React.FC = () => {
 
   const handleSaveQrImage = async () => {
     try {
-      const fileName = `ABA-KHQR-CHEA-SAVUTH-000056833.png`;
+      const fileName = getOfficialAbaKhqrDownloadFilename({
+        planId: selectedPlan?.planId,
+        priceUsd: selectedPlan?.priceUsd,
+        durationDays: selectedPlan?.days,
+        category: 'consumer',
+      });
       const result = await savePngDataUrlToGallery(qrCodeDataUrl, fileName);
       showToast(
         result.duplicate
@@ -1433,10 +1454,11 @@ export const UpgradeVipModal: React.FC = () => {
                     title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកទៅក្នុង រូបភាពរបស់ខ្ញុំ', 'Tap QR code to save original image to My Photos', '点击二维码保存原图到我的照片')}
                     className="w-[42%] max-w-[162px] p-1.5 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 hover:border-emerald-500 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition"
                   >
-                    <img loading="lazy" decoding="async"
+                    <img
+                      key={qrCodeDataUrl}
                       src={qrCodeDataUrl}
-                      alt="ABA KHQR Code"
-                      className="w-full aspect-square object-contain rounded-lg select-none"
+                      alt={`ABA KHQR Code — ${selectedPlan.priceUsd.toFixed(2)} USD (${selectedPlan.days} Days)`}
+                      className="w-full aspect-[3/4] object-contain rounded-lg select-none"
                     />
                   </button>
 
@@ -1450,6 +1472,14 @@ export const UpgradeVipModal: React.FC = () => {
                       </div>
                       <div className="font-mono font-bold text-[11px] text-emerald-700 leading-tight mt-0.5">
                         KHR: 003 787 096
+                      </div>
+                      <div className="mt-1 px-2 py-0.5 rounded-lg bg-emerald-600/15 border border-emerald-500/40 font-mono font-black text-[11px] text-emerald-900">
+                        {tr(
+                          language,
+                          `គម្រោង៖ ${selectedPlan.days} ថ្ងៃ • ${selectedPlan.priceUsd.toFixed(2)} USD`,
+                          `Plan: ${selectedPlan.days} Days • ${selectedPlan.priceUsd.toFixed(2)} USD`,
+                          `套餐：${selectedPlan.days} 天 • ${selectedPlan.priceUsd.toFixed(2)} USD`
+                        )}
                       </div>
                       <a
                         href="https://pay.ababank.com/oRF8/tyy7642t"

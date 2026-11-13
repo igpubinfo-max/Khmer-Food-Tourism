@@ -18,6 +18,8 @@ import {
   isUserOwnerOfRestaurantRecord,
   SHOP_ALL_INCLUSIVE_5_BENEFITS,
   getShopSubscriptionCatalog,
+  getOfficialAbaKhqrImageForPlan,
+  getOfficialAbaKhqrDownloadFilename,
   isShopSubscriptionActive,
   isIosOrIpadAppStoreRuntime,
   parseSafeDateMs,
@@ -184,6 +186,11 @@ export const ManageMenuModal: React.FC = () => {
       } else if (requestedTab && ['info', 'photos', 'analytics', 'membership'].includes(requestedTab)) {
         setMainTab(requestedTab);
         (window as any).__kft_manage_initial_tab = undefined;
+      }
+      const requestedPlanId = (window as any).__kft_manage_initial_plan_id;
+      if (requestedPlanId && ['shop_30d', 'shop_365d', 'shop_earlybird_365d'].includes(requestedPlanId)) {
+        setSelectedShopPlanId(requestedPlanId);
+        (window as any).__kft_manage_initial_plan_id = undefined;
       }
     }
   }, [isManageMenuModalOpen]);
@@ -1918,15 +1925,27 @@ export const ManageMenuModal: React.FC = () => {
 
           {/* TAB 4: INDEPENDENT ALL-INCLUSIVE SHOP PACKAGE ($6.99/30d, $49.99 Early-Bird/365d, $59.99/365d — NO Lifetime; hidden on iOS) */}
           {!isIosAppStore && mainTab === 'membership' && (() => {
-            const shopOptions = [
-              shopCatalog.monthlyPlan,
-              ...(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? [shopCatalog.earlyBirdPlan] : []),
-              shopCatalog.yearlyPlan,
-            ].filter((p) => p.enabled);
+            const yearly49Plan =
+              shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled
+                ? shopCatalog.earlyBirdPlan
+                : {
+                    ...shopCatalog.yearlyPlan,
+                    priceUsd: 49.99,
+                    qrImageUrl: getOfficialAbaKhqrImageForPlan({
+                      planId: 'shop_earlybird_365d',
+                      priceUsd: 49.99,
+                      durationDays: 365,
+                      category: 'shop',
+                    }),
+                  };
+            const shopOptions = [shopCatalog.monthlyPlan, yearly49Plan].filter((p) => p.enabled);
             const activeShopPlan =
-              shopOptions.find((p) => p.planId === selectedShopPlanId) || shopOptions[0] || shopCatalog.monthlyPlan;
-            const mustWaitForAdminApproval =
-              !isAdmin && appSettings.shopPayAfterApproval !== false && currentRest.status !== 'approved';
+              shopOptions.find((p) => p.planId === selectedShopPlanId) ||
+              (selectedShopPlanId !== 'shop_30d' ? yearly49Plan : shopOptions[0]) ||
+              shopCatalog.monthlyPlan;
+            const activeShopQrUrl = getOfficialAbaKhqrImageForPlan(activeShopPlan);
+            const activeShopQrFilename = getOfficialAbaKhqrDownloadFilename(activeShopPlan);
+            const mustWaitForAdminApproval = false;
 
             const handlePickShopReceipt = async () => {
               if (isNativeAndroidOrIosPlatform()) {
@@ -2161,13 +2180,18 @@ export const ManageMenuModal: React.FC = () => {
                         type="button"
                         onClick={async () => {
                           try {
-                            await savePngDataUrlToGallery('/images/aba_qr_code_only.png', 'ABA-KHQR-CHEA-SAVUTH-000056833.png');
+                            await savePngDataUrlToGallery(activeShopQrUrl, activeShopQrFilename);
                             showToast(tr(language, '✅ បានរក្សាទុក ABA QR ទៅក្នុង រូបភាពរបស់ខ្ញុំ!', '✅ Saved ABA QR to Gallery!', '✅ 已将 ABA QR 保存至相册！'), 'success');
                           } catch {}
                         }}
-                        className="w-28 h-28 p-1.5 rounded-xl bg-white border-2 border-emerald-500/50 shrink-0 cursor-pointer"
+                        className="w-28 h-36 p-1.5 rounded-xl bg-white border-2 border-emerald-500/50 shrink-0 cursor-pointer"
                       >
-                        <img loading="lazy" decoding="async" src="/images/aba_qr_code_only.png" alt="ABA KHQR" className="w-full h-full object-contain" />
+                        <img
+                          key={activeShopQrUrl}
+                          src={activeShopQrUrl}
+                          alt={`ABA KHQR — ${activeShopPlan.priceUsd.toFixed(2)} USD (${activeShopPlan.durationDays} Days)`}
+                          className="w-full h-full object-contain"
+                        />
                       </button>
                       <div className="min-w-0 flex-1 space-y-1.5 text-xs">
                         <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
@@ -2187,7 +2211,7 @@ export const ManageMenuModal: React.FC = () => {
                           type="button"
                           onClick={async () => {
                             try {
-                              await savePngDataUrlToGallery('/images/aba_qr_code_only.png', 'ABA-KHQR-CHEA-SAVUTH-000056833.png');
+                              await savePngDataUrlToGallery(activeShopQrUrl, activeShopQrFilename);
                               showToast(tr(language, '✅ បានរក្សាទុក ABA QR!', '✅ Saved ABA QR!', '✅ 已保存 ABA QR！'), 'success');
                             } catch {}
                           }}

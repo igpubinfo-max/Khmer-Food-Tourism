@@ -14149,16 +14149,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const latestSettings = (await refreshAppSettingsFromServer(true)) || appSettings;
-    if (latestSettings.shopPayAfterApproval !== false && targetShop.status !== 'approved' && !isAdminAccount(currentUser)) {
-      const waitMsg = tr(
-        language,
-        '⏳ សូមរង់ចាំ Admin ពិនិត្យ និងអនុម័តហាងរបស់អ្នកជាមុនសិន មុនពេលបង់ប្រាក់បើកកញ្ចប់ហាង។',
-        '⏳ Please wait for Admin to approve your shop listing before submitting Shop Package payment.',
-        '⏳ 请等待管理员审核批准您的店铺后再支付店铺套餐。'
-      );
-      showToast(waitMsg, 'info');
-      return { success: false, transactionId: '', error: waitMsg };
-    }
 
     const shopCat = getShopSubscriptionCatalog(latestSettings);
     const chosenPlan =
@@ -14233,7 +14223,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? aiReport.extractedReceipt.trxId
         : cleanTrxRef;
 
-    const isAutoVerified = Boolean(aiReport && aiReport.canAutoApprove && aiReport.status === 'verified');
+    const isAutoVerified = false; // Strict Requirement: Only activate VIP / Shop package after Admin verification and approval
     const existingExpRaw =
       targetShop.shopSubscriptionExpiresAt || targetShop.subscriptionExpiresAt || targetShop.membershipExpiresAt;
     const existingExpMs = parseSafeDateMs(existingExpRaw);
@@ -14607,9 +14597,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? aiReport.extractedReceipt.trxId
         : cleanTrxRef;
 
-    const isAutoVerified = Boolean(
-      aiReport && aiReport.canAutoApprove && aiReport.status === 'verified'
-    );
+    const isAutoVerified = false; // Strict Requirement: Only activate VIP membership after Admin verification and approval
 
     // When the SERVER granted the VIP, use exactly the dates it stored so this device and the database agree.
     const { startDate, expiryDate } = serverGrant
@@ -15175,8 +15163,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (paymentProofData?.dataUrl) {
       aiReport = await verifyAbaPaymentAndReceipt({
         receiptDataUrl: paymentProofData.dataUrl,
-        expectedAmountUsd: requiredFee,
-        expectedDurationDays: 90,
+        expectedAmountUsd: effectiveAmount,
+        expectedDurationDays: effectiveAmount >= 40 ? 365 : 30,
         submittedTrxId: cleanTrxRef,
         submittedDate: nowIso.split('T')[0],
         userId: currentUser.id,
@@ -15189,9 +15177,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? aiReport.extractedReceipt.trxId
         : cleanTrxRef;
 
-    const isAutoVerified = Boolean(
-      aiReport && aiReport.canAutoApprove && aiReport.status === 'verified'
-    );
+    const isAutoVerified = false; // Strict Requirement: Only activate VIP membership after Admin verification and approval
 
     if (isAutoVerified) {
       recordVerifiedTransaction(effectiveTrxRef);
@@ -15217,7 +15203,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ownerId: currentUser.id,
       ownerName: currentUser.name,
       ownerPhone: currentUser.phone,
-      amountUsd: requiredFee,
+      planId: effectiveAmount >= 40 ? 'shop_earlybird_365d' : 'shop_30d',
+      durationDays: effectiveAmount >= 40 ? 365 : 30,
+      amountUsd: effectiveAmount,
       currency: 'USD',
       status: isAutoVerified ? 'verified' : 'pending_verification',
       paymentMethod: 'KHQR',
@@ -15234,9 +15222,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         : undefined,
       notes:
         notes ||
-        `Additional Store Slot #${nextSlotNumber} ($${requiredFee.toFixed(2)} USD) — ${
-          isAutoVerified ? 'Verified & Unlocked' : 'Awaiting Admin Verification'
-        }`,
+        `Additional Store Slot #${nextSlotNumber} (${effectiveAmount.toFixed(2)} USD / ${effectiveAmount >= 40 ? 365 : 30}d) — Awaiting Admin Verification`,
       aiVerificationReport: aiReport,
     };
 

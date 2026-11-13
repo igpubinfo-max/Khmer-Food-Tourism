@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1568;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1569;
 export const APP_RELEASE_DATE = '2026-11-13';
 
 /**
@@ -4249,6 +4249,7 @@ export interface OfficialPlanDefinition {
   badgeZh?: string;
   priceKhrApprox: string;
   equivalentMonthlyUsd?: string;
+  qrImageUrl?: string;
 }
 
 export const SHOP_ALL_INCLUSIVE_5_BENEFITS: ReadonlyArray<{
@@ -4367,6 +4368,80 @@ const clampPosDays = (v: unknown, def: number): number => {
   return Number.isFinite(n) && n >= 1 ? Math.min(3650, Math.round(n)) : def;
 };
 
+export const ABA_KHQR_PLAN_IMAGES = {
+  USD_2_99: '/images/aba_khqr_savuth_2_99.jpg',
+  USD_6_99: '/images/aba_khqr_savuth_6_99.jpg',
+  USD_19_99: '/images/aba_khqr_savuth_19_99.jpg',
+  USD_49_99: '/images/aba_khqr_savuth_49_99.jpg',
+  OPEN_AMOUNT: '/images/aba_khqr_official_savuth.png',
+} as const;
+
+export const getOfficialAbaKhqrImageForPlan = (
+  input?:
+    | {
+        planId?: string | null;
+        priceUsd?: number | null;
+        durationDays?: number | null;
+        category?: 'consumer' | 'shop' | null;
+      }
+    | string
+    | number
+    | null
+): string => {
+  if (typeof input === 'string') {
+    const pid = input.trim();
+    if (pid === 'consumer_30d') return ABA_KHQR_PLAN_IMAGES.USD_2_99;
+    if (pid === 'consumer_90d' || pid === 'shop_30d' || pid === 'additional_store') return ABA_KHQR_PLAN_IMAGES.USD_6_99;
+    if (pid === 'consumer_365d') return ABA_KHQR_PLAN_IMAGES.USD_19_99;
+    if (pid === 'shop_earlybird_365d' || pid === 'shop_365d') return ABA_KHQR_PLAN_IMAGES.USD_49_99;
+  }
+  if (typeof input === 'number' && Number.isFinite(input)) {
+    if (Math.abs(input - 2.99) <= 0.05) return ABA_KHQR_PLAN_IMAGES.USD_2_99;
+    if (Math.abs(input - 6.99) <= 0.05) return ABA_KHQR_PLAN_IMAGES.USD_6_99;
+    if (Math.abs(input - 19.99) <= 0.05) return ABA_KHQR_PLAN_IMAGES.USD_19_99;
+    if (Math.abs(input - 49.99) <= 0.05 || Math.abs(input - 59.99) <= 0.05) return ABA_KHQR_PLAN_IMAGES.USD_49_99;
+    return ABA_KHQR_PLAN_IMAGES.OPEN_AMOUNT;
+  }
+  if (input && typeof input === 'object') {
+    const pid = (input.planId || '').trim();
+    if (pid === 'consumer_30d') return ABA_KHQR_PLAN_IMAGES.USD_2_99;
+    if (pid === 'consumer_90d' || pid === 'shop_30d' || pid === 'additional_store') return ABA_KHQR_PLAN_IMAGES.USD_6_99;
+    if (pid === 'consumer_365d') return ABA_KHQR_PLAN_IMAGES.USD_19_99;
+    if (pid === 'shop_earlybird_365d' || pid === 'shop_365d') return ABA_KHQR_PLAN_IMAGES.USD_49_99;
+
+    const price = typeof input.priceUsd === 'number' ? input.priceUsd : NaN;
+    if (Number.isFinite(price)) {
+      if (Math.abs(price - 2.99) <= 0.05) return ABA_KHQR_PLAN_IMAGES.USD_2_99;
+      if (Math.abs(price - 6.99) <= 0.05) return ABA_KHQR_PLAN_IMAGES.USD_6_99;
+      if (Math.abs(price - 19.99) <= 0.05) return ABA_KHQR_PLAN_IMAGES.USD_19_99;
+      if (Math.abs(price - 49.99) <= 0.05 || Math.abs(price - 59.99) <= 0.05) return ABA_KHQR_PLAN_IMAGES.USD_49_99;
+    }
+
+    const days = typeof input.durationDays === 'number' ? input.durationDays : NaN;
+    if (input.category === 'shop') {
+      if (days >= 300) return ABA_KHQR_PLAN_IMAGES.USD_49_99;
+      return ABA_KHQR_PLAN_IMAGES.USD_6_99;
+    }
+    if (input.category === 'consumer') {
+      if (days >= 300) return ABA_KHQR_PLAN_IMAGES.USD_19_99;
+      if (days >= 80) return ABA_KHQR_PLAN_IMAGES.USD_6_99;
+      if (days >= 25 && (!Number.isFinite(price) || price >= 2.0)) return ABA_KHQR_PLAN_IMAGES.USD_2_99;
+    }
+  }
+  return ABA_KHQR_PLAN_IMAGES.OPEN_AMOUNT;
+};
+
+export const getOfficialAbaKhqrDownloadFilename = (
+  input?: Parameters<typeof getOfficialAbaKhqrImageForPlan>[0]
+): string => {
+  const url = getOfficialAbaKhqrImageForPlan(input);
+  if (url === ABA_KHQR_PLAN_IMAGES.USD_2_99) return 'ABA-KHQR-CHEA-SAVUTH-2.99USD.jpg';
+  if (url === ABA_KHQR_PLAN_IMAGES.USD_6_99) return 'ABA-KHQR-CHEA-SAVUTH-6.99USD.jpg';
+  if (url === ABA_KHQR_PLAN_IMAGES.USD_19_99) return 'ABA-KHQR-CHEA-SAVUTH-19.99USD.jpg';
+  if (url === ABA_KHQR_PLAN_IMAGES.USD_49_99) return 'ABA-KHQR-CHEA-SAVUTH-49.99USD.jpg';
+  return 'ABA-KHQR-CHEA-SAVUTH-000056833.png';
+};
+
 export const getConsumerVipPricingCatalog = (settings?: Partial<AppSettings> | null) => {
   const s = settings || getStoredAppSettingsFallback();
   const consumerVipEnabled = s.consumerVipEnabled !== false;
@@ -4396,6 +4471,7 @@ export const getConsumerVipPricingCatalog = (settings?: Partial<AppSettings> | n
     titleEn: p.nameEn,
     titleZh: p.nameZh,
     badgeKm: p.badgeKh,
+    qrImageUrl: getOfficialAbaKhqrImageForPlan(p),
   });
 
   const trialPlan: OfficialPlanDefinition = withTitles({
@@ -4519,6 +4595,7 @@ export const getShopSubscriptionCatalog = (
     titleEn: p.nameEn,
     titleZh: p.nameZh,
     badgeKm: p.badgeKh,
+    qrImageUrl: getOfficialAbaKhqrImageForPlan(p),
   });
 
   const monthly30d: OfficialPlanDefinition = withTitles({
