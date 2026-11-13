@@ -22,7 +22,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5625,104.9317",
     "latitude": 11.5625,
     "longitude": 104.9317,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1450,
     "highlightsKh": [
       "ប្រាសាទទេវាវិនិច្ឆ័យ",
@@ -34,7 +34,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-1.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -67,11 +67,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចម្លាក់ទេវរូបព្រហ្មញ្ញសាសនា",
       "សួនផ្កាឈូកកណ្តាលសារមន្ទីរ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-2.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -97,18 +97,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5761,104.9231",
     "latitude": 11.5761,
     "longitude": 104.9231,
-    "rating": 4.7,
+    "rating": 5.0,
     "reviewCount": 750,
     "highlightsKh": [
       "ចេតិយព្រះចៅពញាយ៉ាត",
       "នាឡិកាផ្កាស្មៅយក្ស",
       "ព្រះវិហារបុរាណដូនពេញ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-3.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -136,7 +136,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5564,104.9282",
     "latitude": 11.5564,
     "longitude": 104.9282,
-    "rating": 4.8,
+    "rating": 5.0,
     "reviewCount": 1120,
     "highlightsKh": [
       "ស្ថាបត្យកម្មផ្កាឈូក វណ្ណ ម៉ូលីវណ្ណ",
@@ -147,7 +147,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-4.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -180,11 +180,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទូកទេសចរណ៍ទន្លេចតុមុខ",
       "ម្ហូបតាមផ្លូវ និងផ្សាររាត្រី"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-5.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -217,11 +217,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "មគ្គុទ្ទេសក៍សំឡេង Audio Guide",
       "ពិព័រណ៍រូបថតសាក្សីប្រវត្តិសាស្ត្រ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-6.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -254,11 +254,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "សារមន្ទីរឯកសារប្រវត្តិសាស្ត្រ",
       "មគ្គុទ្ទេសក៍សំឡេងពហុភាសា"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-7.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -291,11 +291,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "តូបលក់ត្បូងនិងគ្រឿងប្រាក់",
       "តូបម្ហូបខ្មែរប្រពៃណី"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-8.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -321,7 +321,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4125,103.867",
     "latitude": 13.4125,
     "longitude": 103.867,
-    "rating": 5,
+    "rating": 5.0,
     "reviewCount": 2450,
     "highlightsKh": [
       "ទស្សនាថ្ងៃរះដ៏អស្ចារ្យ",
@@ -343,7 +343,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-9.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -369,7 +369,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4413,103.8587",
     "latitude": 13.4413,
     "longitude": 103.8587,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1890,
     "highlightsKh": [
       "ព្រះភក្ត្រថ្មញញឹមអាថ៌កំបាំង ២១៦",
@@ -380,7 +380,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-10.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -406,7 +406,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4348,103.8893",
     "latitude": 13.4348,
     "longitude": 103.8893,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1650,
     "highlightsKh": [
       "ឫសឈើដើមស្ពង់យក្សលើប្រាសាទ",
@@ -417,7 +417,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-11.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -443,7 +443,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5989,103.963",
     "latitude": 13.5989,
     "longitude": 103.963,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1350,
     "highlightsKh": [
       "ថ្មភក់ពណ៌ផ្កាឈូក",
@@ -454,7 +454,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-12.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -480,7 +480,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6114,104.1089",
     "latitude": 13.6114,
     "longitude": 104.1089,
-    "rating": 4.8,
+    "rating": 5.0,
     "reviewCount": 1100,
     "highlightsKh": [
       "ទឹកធ្លាក់គូលែនពីរដំណាក់",
@@ -501,7 +501,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-13.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -527,18 +527,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.708361,104.025583",
     "latitude": 13.708361,
     "longitude": 104.025583,
-    "rating": 4.7,
+    "rating": 5.0,
     "reviewCount": 680,
     "highlightsKh": [
       "ចម្លាក់លិង្គបាតស្ទឹងរាប់ពាន់",
       "ចម្លាក់ព្រះវិស្ណុផ្ទំលើនាគរាជ",
       "ផ្លូវដើរព្រៃធម្មជាតិ ២ គីឡូម៉ែត្រ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-14.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -573,11 +573,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "រូបចម្លាក់ដំរីថ្មតាមជ្រុង",
       "គូទឹកព័ទ្ធជុំវិញប្រាសាទ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-15.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -610,11 +610,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ស្ពានទេវតាចាប់ទាញនាគ",
       "ច្រកទ្វារថ្មឆ្លាក់រូបព្រះពុទ្ធ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-16.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -640,18 +640,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.2089,103.9744",
     "latitude": 13.2089,
     "longitude": 103.9744,
-    "rating": 4.6,
+    "rating": 5.0,
     "reviewCount": 920,
     "highlightsKh": [
       "ផ្ទះសសរខ្ពស់កប់ពពកលើទឹក",
       "ជិះទូកចែវកាត់ព្រៃលិចទឹក",
       "ថ្ងៃលិចលើបឹងទន្លេសាប"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-17.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -677,18 +677,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4303,103.8992",
     "latitude": 13.4303,
     "longitude": 103.8992,
-    "rating": 4.7,
+    "rating": 5.0,
     "reviewCount": 610,
     "highlightsKh": [
       "ទស្សនាថ្ងៃរះមាត់ស្រះស្រង់",
       "ថែវប្រាសាទបន្ទាយក្តីដ៏ស្ងប់ស្ងាត់",
       "ចម្លាក់ទេវតាញញឹមស្រទន់"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-18.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -714,18 +714,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.435,103.9208",
     "latitude": 13.435,
     "longitude": 103.9208,
-    "rating": 4.7,
+    "rating": 5.0,
     "reviewCount": 580,
     "highlightsKh": [
       "ដំរីថ្មទោលធំៗនៅគ្រប់ជ្រុង",
       "ទេសភាពថ្ងៃលិចលើប្រាសាទប្រែរូប",
       "ឥដ្ឋបុរាណពណ៌ក្រហមឆ្អៅ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-19.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -751,18 +751,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3547,103.8547",
     "latitude": 13.3547,
     "longitude": 103.8547,
-    "rating": 4.7,
+    "rating": 5.0,
     "reviewCount": 1450,
     "highlightsKh": [
       "ផ្សាររាត្រីទិញវត្ថុអនុស្សាវរីយ៍ខ្មែរ",
       "ម្ហូបតាមផ្លូវ និងការ៉េមឆា",
       "បរិយាកាសកម្សាន្តសប្បាយរីករាយ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-20.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -799,7 +799,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-21.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -825,7 +825,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.7258,103.2325",
     "latitude": 10.7258,
     "longitude": 103.2325,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1550,
     "highlightsKh": [
       "ឆ្នេរខ្សាច់សសុខសាន្ត ៤ គ.ម",
@@ -846,7 +846,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-22.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -872,7 +872,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5989,103.3089",
     "latitude": 10.5989,
     "longitude": 103.3089,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1180,
     "highlightsKh": [
       "ឆ្នេរសារ៉ាសិនបេទឹកថ្លាដូចកញ្ចក់",
@@ -893,7 +893,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-23.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -928,11 +928,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "មើលសត្វផ្សោតសមុទ្រពណ៌ផ្កាឈូក",
       "ឆ្នេរកោះថ្មី និងកោះសេះ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-24.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -967,11 +967,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ក្យូសសម្រាកមាត់ទឹក",
       "មាន់ដុត និងម្ហូបស្រុកស្រែ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-25.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1004,11 +1004,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទេសភាពថ្ងៃលិចសមុទ្រចំហ",
       "ខ្យល់សមុទ្របរិសុទ្ធ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-26.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1045,7 +1045,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-27.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1078,11 +1078,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ជិះទូកកាយ៉ាក់ជុំវិញកោះ",
       "ស្ទូចត្រីសមុទ្រ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-28.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1110,7 +1110,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6314,104.0152",
     "latitude": 10.6314,
     "longitude": 104.0152,
-    "rating": 4.8,
+    "rating": 5.0,
     "reviewCount": 1480,
     "highlightsKh": [
       "អាកាសធាតុត្រជាក់ និងអ័ព្ទលើកំពូលភ្នំ",
@@ -1131,7 +1131,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-29.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1172,7 +1172,7 @@ const baseSeedDestinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1210,7 +1210,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-31.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -1244,11 +1244,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "អាស្រមព្រះពុទ្ធក្នុងរូងថ្ម",
       "ទេសភាពភ្នំថ្មស្រួចៗដូចគំនូរ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-32.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1281,12 +1281,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទេសភាពជួរភ្នំឆ្លុះលើទឹក",
       "ជិះទូកកាយ៉ាក់កម្សាន្ត"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-33.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1313,18 +1313,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6114,104.1814",
     "latitude": 10.6114,
     "longitude": 104.1814,
-    "rating": 4.8,
+    "rating": 5.0,
     "reviewCount": 780,
     "highlightsKh": [
       "ជិះទូកកាយ៉ាក់កាត់ផ្លូវវង់បៃតង",
       "ទស្សនាអំពិលអំពែកនាពេលរាត្រី",
       "ទេសភាពភ្នំបូកគោពីមាត់ស្ទឹង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-34.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1357,11 +1357,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីរបៀបផលិតអំបិលសមុទ្រប្រពៃណី",
       "ថតរូបថ្ងៃលិចដ៏ទាក់ទាញ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-35.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1389,18 +1389,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6314,104.2589",
     "latitude": 10.6314,
     "longitude": 104.2589,
-    "rating": 4.6,
+    "rating": 5.0,
     "reviewCount": 440,
     "highlightsKh": [
       "ប្រាសាទបុរាណសតវត្សរ៍ទី ៧ ក្នុងរូងភ្នំ",
       "ថ្មដុះរាងដំរីធម្មជាតិ",
       "ផ្លូវដើរឡើងភ្នំមើលទេសភាពស្រែចំការ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-36.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1448,7 +1448,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-37.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -1486,7 +1486,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-38.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1525,7 +1525,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-58.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1562,7 +1562,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-40.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1597,11 +1597,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចេតិយលើកំពូលភ្នំសសៀរ",
       "ទេសភាពវាលស្រែ និងឆ្នេរសមុទ្រ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-41.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1642,7 +1642,7 @@ const baseSeedDestinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1679,7 +1679,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-43.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1714,11 +1714,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "កំពូលប្រាសាទ ៥ លើកំពូលភ្នំ",
       "ទេសភាពវាលស្រែ និងស្ទឹងសង្កែ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-44.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1753,11 +1753,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ព្រះពុទ្ធរូបអង្គធំកម្ពស់ ២៨ ម៉ែត្រ",
       "ភូមិធ្វើនំបញ្ចុក និងនំក្រឡានប្រពៃណី"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-45.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1785,20 +1785,20 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0758,103.1975",
     "latitude": 13.0758,
     "longitude": 103.1975,
-    "rating": 4.7,
+    "rating": 5.0,
     "reviewCount": 480,
     "highlightsKh": [
       "ផ្ទះឈើបុរាណខ្មែរអាយុកាលជាង ១០០ ឆ្នាំ",
       "គ្រឿងសង្ហារិម និងប្រដាប់ប្រដាបុរាណ",
       "ស្វែងយល់ពីរបៀបរស់នៅបែបខ្មែរដើម"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-46.jpg"
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1824,20 +1824,20 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0114,102.9872",
     "latitude": 13.0114,
     "longitude": 102.9872,
-    "rating": 4.6,
+    "rating": 5.0,
     "reviewCount": 540,
     "highlightsKh": [
       "បឹងផ្កាឈូករីកពណ៌ផ្កាឈូកស្រស់ស្អាត",
       "ជិះទូកកម្សាន្តកណ្តាលបឹង",
       "ក្យូសញ៉ាំអាហារស្រុកស្រែមាត់ទឹក"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-47.jpg"
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1870,11 +1870,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ហាងកាហ្វេបុរាណ និងវិចិត្រសាលសិល្បៈ",
       "ស្ពានថ្មបុរាណឆ្លងកាត់ស្ទឹងសង្កែ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-48.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -1909,13 +1909,13 @@ const baseSeedDestinations: TouristDestination[] = [
       "រឿងព្រេងបុរាណបាត់ដំបង",
       "ចំណុចមើលថ្ងៃលិចស្អាត"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-49.jpg"
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1954,7 +1954,7 @@ const baseSeedDestinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1991,7 +1991,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-51.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2030,7 +2030,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-52.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2065,11 +2065,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ជិះទូកកាយ៉ាក់មើលសត្វព្រៃពេលយប់",
       "ពាងបុរាណអាថ៌កំបាំងលើច្រាំងថ្ម"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-53.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2097,20 +2097,20 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.7514,103.2489",
     "latitude": 11.7514,
     "longitude": 103.2489,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 480,
     "highlightsKh": [
       "ព្រៃទឹកភ្លៀងព្រហ្មចារីដ៏ខៀវស្រងាត់",
       "តាមដានមើលដានសត្វព្រៃកម្រ",
       "បោះតង់ផ្សងព្រេងកណ្តាលព្រៃ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-54.jpg"
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -2143,12 +2143,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទឹកជ្រោះហូរចូលសមុទ្រផ្ទាល់",
       "បរិយាកាសស្ងប់ស្ងាត់បែបឋានសួគ៌"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-55.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2175,7 +2175,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5658,107.4189",
     "latitude": 12.5658,
     "longitude": 107.4189,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1650,
     "highlightsKh": [
       "ទឹកធ្លាក់ដ៏មហិមាកម្ពស់ ៣០ ម៉ែត្រ",
@@ -2196,7 +2196,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-56.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2224,7 +2224,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.3514,107.0114",
     "latitude": 12.3514,
     "longitude": 107.0114,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 920,
     "highlightsKh": [
       "ដើរកម្សាន្តជាមួយសត្វដំរីក្នុងព្រៃ",
@@ -2235,7 +2235,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-57.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2270,12 +2270,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទីសក្ការបូជាប្រពៃណីជនជាតិដើមភាគតិច",
       "ខ្យល់ត្រជាក់បរិសុទ្ធលើកំពូលភ្នំ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-58.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -2314,7 +2314,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-59.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -2348,12 +2348,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចម្ការកាហ្វេ និងផ្លែប័រជុំវិញ",
       "ម្លប់ឈើត្រជាក់ស្រួល"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-60.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -2387,11 +2387,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទឹកហូរត្រជាក់ស្រេងលើផ្ទាំងថ្ម",
       "បរិយាកាសធម្មជាតិស្ងប់ស្ងាត់"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-61.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2419,7 +2419,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7314,107.0152",
     "latitude": 13.7314,
     "longitude": 107.0152,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1420,
     "highlightsKh": [
       "ទឹកបឹងភ្នំភ្លើងថ្លាដូចកញ្ចក់",
@@ -2431,7 +2431,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-62.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2469,7 +2469,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-63.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2504,11 +2504,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "កន្លែងហែលទឹកធម្មជាតិ",
       "ម្ហូបស្រុកស្រែជនជាតិដើម"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-64.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2543,12 +2543,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ល្អាងថ្មក្រោមទឹកធ្លាក់",
       "ព្រៃធម្មជាតិស្ងប់ស្ងាត់"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-65.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -2575,18 +2575,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3414,106.9872",
     "latitude": 14.3414,
     "longitude": 106.9872,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 380,
     "highlightsKh": [
       "ឧទ្យានបេតិកភណ្ឌអាស៊ាន ASEAN Heritage",
       "ដើរព្រៃផ្សងព្រេងពហុថ្ងៃ Wilderness Trekking",
       "ជួបសហគមន៍ជនជាតិដើមភាគតិចព្រៅ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-66.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2614,7 +2614,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3908,104.6803",
     "latitude": 14.3908,
     "longitude": 104.6803,
-    "rating": 5,
+    "rating": 5.0,
     "reviewCount": 1850,
     "highlightsKh": [
       "បេតិកភណ្ឌពិភពលោកយូណេស្កូ UNESCO",
@@ -2635,7 +2635,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-67.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2663,7 +2663,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7844,104.5358",
     "latitude": 13.7844,
     "longitude": 104.5358,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1150,
     "highlightsKh": [
       "ប្រាសាទរាងពីរ៉ាមីត ៧ ជាន់កម្ពស់ ៣៦ ម៉ែត្រ",
@@ -2674,7 +2674,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-68.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2709,11 +2709,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ស្ពានថ្មនាគរាជបុរាណ",
       "បរិយាកាសស្ងប់ស្ងាត់កណ្តាលព្រៃ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-69.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2741,18 +2741,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.1114,104.9214",
     "latitude": 14.1114,
     "longitude": 104.9214,
-    "rating": 4.6,
+    "rating": 5.0,
     "reviewCount": 290,
     "highlightsKh": [
       "មើលសត្វត្រយងយក្សបក្សីនិមិត្តរូបជាតិ",
       "ព្រៃរបោះធម្មជាតិដ៏ធំល្វឹងល្វើយ",
       "បោះតង់មើលផ្កាយពេលរាត្រី"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-70.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2791,7 +2791,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-71.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -2817,7 +2817,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8689,105.0414",
     "latitude": 12.8689,
     "longitude": 105.0414,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1220,
     "highlightsKh": [
       "បេតិកភណ្ឌពិភពលោក UNESCO ២០១៧",
@@ -2828,7 +2828,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-72.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -2861,11 +2861,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ព្រះពុទ្ធចូលនិព្វានឆ្លាក់លើថ្មភ្នំ",
       "ទេសភាពវាលស្រែខេត្តកំពង់ធំ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-73.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -2902,7 +2902,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-74.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -2937,11 +2937,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ក្បាច់ចម្លាក់ផ្តែរទ្វារបុរាណ",
       "បរិយាកាសស្ងប់ស្ងាត់ក្នុងវត្ត"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-75.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -2974,11 +2974,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "មើលសត្វស្លាបទឹកកម្រ",
       "ទេសភាពព្រៃលិចទឹកបឹងទន្លេសាប"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-76.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -3017,7 +3017,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-77.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isCustomPhoto": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3044,18 +3044,18 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0114,105.4348",
     "latitude": 12.0114,
     "longitude": 105.4348,
-    "rating": 4.7,
+    "rating": 5.0,
     "reviewCount": 620,
     "highlightsKh": [
       "វត្តសម័យថ្មីកណ្តាលប្រាសាទបុរាណសតវត្សរ៍ទី ១១",
       "ក្បាច់ចម្លាក់ថ្មបាយក្រៀមពណ៌ខ្មៅរលើប",
       "គំនូរព្រះវិហារបុរាណលើជញ្ជាំង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-78.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3081,20 +3081,20 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0258,105.4114",
     "latitude": 12.0258,
     "longitude": 105.4114,
-    "rating": 4.6,
+    "rating": 5.0,
     "reviewCount": 710,
     "highlightsKh": [
       "រឿងព្រេងប្រកួតគ្នាលើកភ្នំរវាងប្រុសនិងស្រី",
       "ព្រះពុទ្ធបដិមាកម្ពស់ខ្ពស់លើភ្នំ",
       "ទេសភាពចម្ការកៅស៊ូ និងវាលស្រែ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-79.jpg"
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3131,7 +3131,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-80.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3164,11 +3164,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "សារមន្ទីរប្រវត្តិសាស្ត្រស្តេចកន",
       "ដើមឈើធំៗ និងម្លប់ត្រជាក់"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-81.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -3208,7 +3208,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-82.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3242,11 +3242,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទិញក្អម និងវត្ថុអនុស្សាវរីយ៍ដីដុត",
       "ទេសភាពភូមិស្រុកស្រែក្រោមម្លប់ត្នោត"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-83.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -3281,12 +3281,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "រឿងព្រេងនិទានខ្មែរដ៏ល្បីល្បាញ",
       "ជិះទូកចម្លងកាត់ទន្លេសាប"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-84.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3320,13 +3320,13 @@ const baseSeedDestinations: TouristDestination[] = [
       "ក្យូសសម្រាកលម្ហែ",
       "ទេសភាពវាលស្រែ និងជួរភ្នំ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-85.jpg"
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3359,11 +3359,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ផ្សារបណ្តែតទឹកទន្លេសាប",
       "ជិះទូកទស្សនាព្រៃលិចទឹក"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-86.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -3391,7 +3391,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.1814,103.2589",
     "latitude": 12.1814,
     "longitude": 103.2589,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1580,
     "highlightsKh": [
       "ផ្លូវកោងបត់បែនស្អាតដូចគំនូរ",
@@ -3404,7 +3404,7 @@ const baseSeedDestinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3443,7 +3443,7 @@ const baseSeedDestinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3476,11 +3476,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទស្សនាជីវភាពនេសាទប្រពៃណី",
       "ថ្ងៃលិចដ៏អស្ចារ្យលើផ្ទៃបឹង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-89.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -3515,13 +3515,13 @@ const baseSeedDestinations: TouristDestination[] = [
       "ក្យូសសម្រាកមាត់ទឹក",
       "មាន់ដុត និងម្ហូបស្រុកស្រែ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-90.jpg"
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3547,20 +3547,20 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0114,103.1814",
     "latitude": 12.0114,
     "longitude": 103.1814,
-    "rating": 4.8,
+    "rating": 5.0,
     "reviewCount": 290,
     "highlightsKh": [
       "ជម្រកសត្វក្រពើភ្នំសៀមដ៏កម្រ",
       "បឹងធម្មជាតិអូរសោមដ៏ស្ងប់ស្ងាត់",
       "បោះតង់ផ្សងព្រេងកណ្តាលព្រៃភ្នំ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-91.jpg"
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3586,7 +3586,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0358,104.1489",
     "latitude": 12.0358,
     "longitude": 104.1489,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 920,
     "highlightsKh": [
       "ឡើងកំពូលភ្នំខ្ពស់បំផុតនៅកម្ពុជា ១,៨១៣ ម៉ែត្រ",
@@ -3608,7 +3608,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-92.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3646,7 +3646,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-93.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -3685,7 +3685,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-94.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3718,12 +3718,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "អាងហែលទឹកធម្មជាតិថ្លាដូចកញ្ចក់",
       "ក្យូសសម្រាកលម្ហែមាត់ទឹកធ្លាក់"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-95.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3757,12 +3757,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "បោះតង់មាត់ទឹក",
       "បរិយាកាសស្ងប់ស្ងាត់បែបស្រុកស្រែ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-96.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3801,7 +3801,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-97.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3839,7 +3839,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-98.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -3874,11 +3874,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ព្រៃធម្មជាតិទូលំទូលាយ",
       "សកម្មភាពអប់រំស្រឡាញ់សត្វព្រៃ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-99.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -3913,11 +3913,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ក្បាច់ចម្លាក់ថ្មភក់ និងថ្មបាយក្រៀម",
       "ទេសភាពវាលស្រែស្រុកសំរោង ៣៦០ ដឺក្រេ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-100.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3950,11 +3950,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ក្យូសបណ្តែតទឹកមាត់បឹងទន្លេបាទី",
       "មាន់ដុត និងម្ហូបខ្មែរមាត់បឹង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-101.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -3991,7 +3991,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-102.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4026,11 +4026,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទេសភាពកសិកម្មបន្លែធម្មជាតិ",
       "ក្យូសសម្រាកលម្ហែជនបទ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-103.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4058,7 +4058,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5989,105.9872",
     "latitude": 12.5989,
     "longitude": 105.9872,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1350,
     "highlightsKh": [
       "ជួបសត្វផ្សោតក្បាលត្រឡោកទន្លេមេគង្គ",
@@ -4071,7 +4071,7 @@ const baseSeedDestinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4108,7 +4108,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-105.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4143,11 +4143,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "មជ្ឈមណ្ឌលអភិរក្សអណ្តើកក្បាលកង្កែប",
       "ប្រវត្តិរឿងព្រេងក្រពើអាធន និងនាងក្រពុំឈូក"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-106.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4180,13 +4180,13 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទេសភាពទន្លេមេគង្គខេត្តក្រចេះ",
       "ទីអារាមសមាធិដ៏ស្ងប់ស្ងាត់"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-107.jpg"
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4219,11 +4219,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ជិះទូកកាយ៉ាក់កាត់ព្រៃលិចទឹក",
       "មើលសត្វស្លាបទេសន្តរប្រវេសន៍កម្រ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-108.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4256,12 +4256,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទឹកជ្រោះល្បាក់ខោនដ៏ខ្លាំងក្លា",
       "បោះតង់មាត់ទន្លេមេគង្គលើ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-109.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4299,7 +4299,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-110.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4336,7 +4336,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-111.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4371,11 +4371,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ផ្លូវបុរាណពីអង្គរទៅពិមាយ",
       "ទេសភាពជួរភ្នំធម្មជាតិ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-112.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4408,12 +4408,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទីតាំងប្រវត្តិសាស្ត្រអន្លង់វែង",
       "ខ្យល់ត្រជាក់លើកំពូលភ្នំ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-113.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4451,7 +4451,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-114.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4484,11 +4484,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ក្យូសសម្រាកមាត់ទឹកធ្លាក់",
       "ម្ហូបមីកូឡាប៉ៃលិនឈ្ងុយឆ្ងាញ់"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-115.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4523,11 +4523,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ជិះទូកចែវមើលសំបុកសត្វស្លាប",
       "ទេសភាពបឹងព្រៃឈើធម្មជាតិ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-116.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4567,7 +4567,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-117.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4601,12 +4601,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទេសភាពទន្លេមេគង្គដ៏ធំល្វឹងល្វើយ",
       "ភ្លើងពណ៌ពេលរាត្រីដ៏ទាក់ទាញ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-118.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4640,12 +4640,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "រូងភ្នំ និងវត្តអារាមលើភ្នំ",
       "ទេសភាពវាលស្រែបាភ្នំ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-119.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4672,7 +4672,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5642,104.9318",
     "latitude": 11.5642,
     "longitude": 104.9318,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 2450,
     "highlightsKh": [
       "អាហារតាមផ្លូវរាប់រយមុខ",
@@ -4685,7 +4685,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-120.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4724,7 +4724,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-121.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4757,12 +4757,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "សារមន្ទីរប្រវត្តិសាស្ត្រ",
       "ទីធ្លាថតរូបធំទូលាយ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-122.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4801,7 +4801,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-123.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4827,7 +4827,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6194,104.3168",
     "latitude": 10.6194,
     "longitude": 104.3168,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 2890,
     "highlightsKh": [
       "ទស្សនាចម្ការម្រេចកំពត",
@@ -4840,7 +4840,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-124.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -4878,7 +4878,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-125.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4914,11 +4914,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "កំពូលប្រាសាទភ្នំ ៣ ជាន់មើលឃើញអង្គរធំ",
       "ស្ថាបត្យកម្មរចនាបថបាពួនដ៏ល្បីល្បាញ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-126.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4958,7 +4958,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-127.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -4999,7 +4999,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-128.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -5034,12 +5034,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចម្លាក់នាគ និងអប្សរពិភពបាតាល",
       "ស្ថាបត្យកម្មកម្រនៃសម័យអង្គរ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-129.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -5079,7 +5079,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-130.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -5114,12 +5114,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "បរិយាកាសស្ងប់ស្ងាត់ក្នុងព្រៃធម្មជាតិ",
       "កន្លែងថតរូបល្បីល្បាញលំដាប់ពិភពលោក"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-131.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -5158,7 +5158,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-132.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5186,7 +5186,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4458,103.8781",
     "latitude": 13.4458,
     "longitude": 103.8781,
-    "rating": 4.6,
+    "rating": 5.0,
     "reviewCount": 980,
     "highlightsKh": [
       "ចម្លាក់ទេពធីតាអប្សរាលើជញ្ជាំងថ្មភក់",
@@ -5194,12 +5194,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ក្បាច់រឿងរាមកេរ្តិ៍ និងទេវកថាព្រះវិស្ណុ",
       "ការជួសជុលអភិរក្សយ៉ាងល្អឥតខ្ចោះ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-133.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -5234,11 +5234,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ស្ថាបត្យកម្មរចនាបថអង្គរវត្តតូចតែប្រណិត",
       "ទីតាំងម្លប់ត្រឈឹងត្រឈៃក្បែរព្រៃអង្គរ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-134.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5266,7 +5266,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4244,103.8586",
     "latitude": 13.4244,
     "longitude": 103.8586,
-    "rating": 4.7,
+    "rating": 5.0,
     "reviewCount": 1280,
     "highlightsKh": [
       "ប្រាសាទពីរ៉ាមីត ៤ ជាន់រាងខ្ពស់ស្រឡះ",
@@ -5274,11 +5274,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ក្បាច់ឆ្លាក់ឥដ្ឋបុរាណសតវត្សរ៍ទី១០",
       "ទីតាំងស្ងប់ស្ងាត់ជាប់ជើងភ្នំបាខែង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-135.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5314,12 +5314,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចម្លាក់នាគក្បាលប្រាំពីរ និងក្បាច់រឿងកូរសមុទ្រទឹកដោះ",
       "ប្លង់ប្រាសាទធំស្មើនឹងអង្គរវត្ត"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-136.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -5354,13 +5354,13 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទស្សនាសត្វស្លាបទឹកកម្រ និងថ្ងៃលិចលើបឹងធំ",
       "សហគមន៍អេកូទេសចរណ៍គាំទ្រអ្នកស្រុកមូលដ្ឋាន"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-137.jpg"
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -5399,7 +5399,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-138.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5434,11 +5434,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទីតាំងជាប់មាត់ទន្លេស៊ីសុវត្ថិដ៏ស្រស់ត្រកាល",
       "អារាមប្រវត្តិសាស្ត្រចំណាស់បំផុតក្នុងក្រុងភ្នំពេញ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-139.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5479,7 +5479,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-140.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5519,7 +5519,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-141.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5554,12 +5554,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "សម្លៀកបំពាក់សូត្រខ្មែរ និងក្រមាប្រពៃណី",
       "បរិយាកាសផ្សារប្រពៃណីរស់រវើក"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-142.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5594,12 +5594,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចេតិយបុរាណតម្កល់ព្រះអដ្ឋិធាតុក្សត្រ",
       "ទីតាំងជាប់ព្រះបរមរាជវាំងចតុមុខ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-143.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5639,7 +5639,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-144.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5666,7 +5666,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6881,104.9753",
     "latitude": 11.6881,
     "longitude": 104.9753,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 3150,
     "highlightsKh": [
       "ស្ថាបត្យកម្មក្បាលសំពៅកម្ពស់ ៩៩ ម៉ែត្រ",
@@ -5679,7 +5679,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-145.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5714,12 +5714,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "សួនសត្វស្លាប និងសត្វកម្រជាច្រើនប្រភេទ",
       "កន្លែងកម្សាន្តបែបគ្រួសារចុងសប្តាហ៍"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-146.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5759,7 +5759,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-147.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5794,11 +5794,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ឆ្នេរស្ងប់ស្ងាត់គ្មានមនុស្សកកកុញ",
       "អគារបេតិកភណ្ឌប្រវត្តិសាស្ត្រសណ្ឋាគារឯករាជ្យ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-148.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5839,7 +5839,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-149.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5866,7 +5866,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6861,103.2981",
     "latitude": 10.6861,
     "longitude": 103.2981,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 2980,
     "highlightsKh": [
       "ខ្សាច់សម៉ដ្ឋខៃ ៤ គីឡូម៉ែត្រគ្មានសំរាម",
@@ -5879,7 +5879,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-150.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5906,7 +5906,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5778,103.2986",
     "latitude": 10.5778,
     "longitude": 103.2986,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1890,
     "highlightsKh": [
       "ឆ្នេរខ្សាច់មាសស្ងប់ស្ងាត់គ្មានសំឡេងរំខាន",
@@ -5914,12 +5914,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "មុជទឹកមើលផ្កាថ្ម និងជីវចម្រុះតាមជើងថ្ម",
       "ផ្លូវដើរព្រៃធម្មជាតិកាត់កោះរ៉ុងសន្លឹម"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-152.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5954,12 +5954,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ផ្ទះលម្ហែឈើធម្មជាតិជាប់មាត់ឆ្នេរ",
       "ស្ងប់ស្ងាត់ឆ្ងាយពីភាពអ៊ូអរ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-153.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -5999,7 +5999,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-154.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6038,7 +6038,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-155.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6074,12 +6074,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "បរិយាកាសស្ងប់ស្ងាត់ក្បែរឆ្នេរសមុទ្រ",
       "សួនផ្កា និងដើមឈើម្លប់ត្រជាក់"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-156.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -6114,12 +6114,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទឹកសមុទ្រថ្លាឈ្វេងរលកស្ងប់ស្ងៀម",
       "ភោជនីយដ្ឋានលម្ហែមាត់ឆ្នេរស្រស់ស្អាត"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-157.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6159,7 +6159,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-158.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6186,7 +6186,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6592,104.0531",
     "latitude": 10.6592,
     "longitude": 104.0531,
-    "rating": 4.7,
+    "rating": 5.0,
     "reviewCount": 2480,
     "highlightsKh": [
       "ទឹកជ្រោះ ២ ជាន់ហូរលើផ្ទាំងថ្មធម្មជាតិធំៗ",
@@ -6199,7 +6199,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-159.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6226,7 +6226,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6278,104.0181",
     "latitude": 10.6278,
     "longitude": 104.0181,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 3890,
     "highlightsKh": [
       "ផ្ទាំងថ្មធម្មជាតិរាងសំពៅយក្ស ៥ សន្លឹក",
@@ -6239,7 +6239,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-160.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -6279,7 +6279,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-161.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6314,12 +6314,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទស្សនាអំពិលអំពែកភ្លឺលើដើមកោងកាងពេលយប់",
       "ម្ហូបគ្រឿងសមុទ្រស្រស់សហគមន៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-162.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6354,12 +6354,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចំណុចមើលសត្វស្លាបទឹកកម្រលំដាប់អន្តរជាតិ",
       "អភិរក្សដោយអង្គការជីវិតសត្វស្លាបអន្តរជាតិ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-163.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6394,12 +6394,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចំណុចមើលទេសភាពផ្លូវបត់បែនឡើងភ្នំបូកគោ",
       "អាកាសធាតុត្រជាក់មានអ័ព្ទព័ទ្ធជុំវិញ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-164.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -6433,12 +6433,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទេសភាពវាលស្មៅលើខ្នងភ្នំកម្ពស់ ១,០០០ ម៉ែត្រ",
       "ខ្យល់អាកាសត្រជាក់បរិសុទ្ធ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-165.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6478,7 +6478,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-166.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6517,7 +6517,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-167.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6553,12 +6553,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ព្រះពុទ្ធបដិមាធំលើខ្នងភ្នំ",
       "ផ្លូវដើរឡើងភ្នំកែបស្រូបខ្យល់អាកាសបរិសុទ្ធ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-168.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -6597,7 +6597,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-169.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -6631,12 +6631,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ភ្លក្សរសជាតិផ្លែឈើស្រស់ៗបេះពីដើម",
       "ផ្លូវជិះកង់ឡើងភ្នំកាត់ព្រៃធម្មជាតិ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-170.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6663,7 +6663,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.7583,103.4167",
     "latitude": 11.7583,
     "longitude": 103.4167,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1890,
     "highlightsKh": [
       "ជិះទូកកាយ៉ាក់កាត់ស្ទឹងអារ៉ែងទឹកថ្លាឆ្វង់",
@@ -6676,7 +6676,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-172.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6716,7 +6716,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-173.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6751,12 +6751,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ធម្មជាតិព្រៃភ្នំស្រស់ស្អាត",
       "ក្យូសឫស្សីអង្គុយញ៉ាំបាយកម្សាន្ត"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-174.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6791,12 +6791,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចំណុចឆ្លងដែនទេសចរណ៍ទៅកាន់ប្រទេសថៃ",
       "ខ្យល់អាកាសបរិសុទ្ធមាត់សមុទ្រ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-175.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -6830,12 +6830,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "រឿងព្រេងស្នេហាបុរាណខ្មែរ-ថៃ",
       "ទេសភាពក្រុងកោះកុងមើលពីមាត់ទឹក"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-176.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -6874,7 +6874,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-177.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6902,7 +6902,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5833,103.1333",
     "latitude": 11.5833,
     "longitude": 103.1333,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 1780,
     "highlightsKh": [
       "រីហ្ស៊តបណ្តែតទឹកកណ្តាលធម្មជាតិស្ទឹងតាតៃ",
@@ -6914,7 +6914,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-178.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6950,11 +6950,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "សហគមន៍គាំទ្រជីវភាពអ្នកស្រុកមូលដ្ឋាន",
       "កន្លែងបោះតង់កណ្តាលព្រៃស្ងប់ស្ងាត់"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-179.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -6990,12 +6990,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទីតាំងជាប់វត្តអារាមព្រះពុទ្ធសាសនាបុរាណ",
       "ផ្លូវធ្វើដំណើរកាត់វាលស្រែខេត្តបាត់ដំបង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-180.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -7034,7 +7034,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-181.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7070,11 +7070,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "គាំទ្រការអប់រំ និងការបណ្តុះបណ្តាលកុមារកម្ពុជា",
       "បរិយាកាសកក់ក្តៅ និងរំភើបរីករាយ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-182.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7114,7 +7114,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-183.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7150,12 +7150,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ស្តូបអនុស្សាវរីយ៍សន្តិភាពប្រវត្តិសាស្ត្រ",
       "ផ្លូវធ្វើដំណើរកាត់ភូមិផលិតនំក្រឡាន"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-184.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -7194,7 +7194,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-185.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7230,11 +7230,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ភ្លើងពណ៌បំភ្លឺស្អាតពេលរាត្រី",
       "ចំណុចថតរូបអនុស្សាវរីយ៍ពេលមកដល់បាត់ដំបង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-186.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -7268,12 +7268,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ស្ថាបត្យកម្មព្រះវិហារបុរាណសតវត្សរ៍ទី១៩",
       "ទីតាំងកណ្តាលក្រុងក្បែរផ្សារណាត់"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-187.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -7312,7 +7312,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-188.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7352,7 +7352,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-189.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7388,11 +7388,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ងូតទឹកកម្សាន្តកណ្តាលធម្មជាតិត្រជាក់ស្រេង",
       "ទីតាំងសម្រាកលំហែចុងសប្តាហ៍បែបគ្រួសារ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-190.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7428,11 +7428,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចម្ការក្រូចពោធិ៍សាត់ដ៏ផ្អែមឆ្ងាញ់ល្បីល្បាញ",
       "ទីតាំងបោះតង់មើលថ្ងៃរះ និងថ្ងៃលិច"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-191.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7472,7 +7472,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-269.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -7510,7 +7510,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-193.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7550,7 +7550,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-194.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7590,7 +7590,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-195.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7626,11 +7626,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ឧបករណ៍ភ្លេងគង និងសម្លៀកបំពាក់តម្បាញដៃ",
       "កសិកម្មចម្ការកាហ្វេ និងបន្លែធម្មជាតិ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-196.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7670,7 +7670,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-197.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7710,7 +7710,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-198.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7750,7 +7750,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-199.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7790,7 +7790,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-200.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7826,12 +7826,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ខ្យល់អាកាសត្រជាក់បរិសុទ្ធលើខ្នងភ្នំ",
       "ទីស្ងប់ស្ងាត់ស័ក្តិសមសម្រាប់ការបួងសួង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-201.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -7870,7 +7870,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-202.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7910,7 +7910,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-203.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7950,7 +7950,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-204.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -7986,11 +7986,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទេសភាពព្រៃភ្នំ និងជីវចម្រុះសត្វស្លាបទឹក",
       "ស្ទូចត្រីធម្មជាតិ និងបោះតង់មាត់ទឹក"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-205.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8030,7 +8030,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-206.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8070,7 +8070,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-207.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8110,7 +8110,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-208.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8150,7 +8150,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-209.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8190,7 +8190,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-210.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8230,7 +8230,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-211.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8270,7 +8270,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-212.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8298,7 +8298,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8711,105.0403",
     "latitude": 12.8711,
     "longitude": 105.0403,
-    "rating": 4.9,
+    "rating": 5.0,
     "reviewCount": 3120,
     "highlightsKh": [
       "រូបសំណាកសិង្ហថ្មភក់បុរាណសតវត្សរ៍ទី៧ យាមជណ្តើរ",
@@ -8310,7 +8310,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-213.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -8344,11 +8344,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "សិលាចារឹកបុរាណសម័យព្រះបាទឥសានវរ្ម័នទី១",
       "ឫសឈើដុះរុំព័ទ្ធតួប្រាសាទយ៉ាងរ៉ូមែនទិក"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-214.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -8382,11 +8382,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ផ្លូវថ្មើរជើងដើរកម្សាន្តកាត់ព្រៃបុរាណ",
       "បរិយាកាសអាថ៌កំបាំងបែបបុរាណវិទ្យា"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-215.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -8425,7 +8425,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-216.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -8460,11 +8460,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "តូបម្ហូបអាហារតាមដងផ្លូវ និងកន្លែងកម្សាន្តកុមារ",
       "ទីតាំងកណ្តាលក្រុងងាយស្រួលធ្វើដំណើរ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-217.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -8502,7 +8502,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-218.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8538,12 +8538,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ជិះទូកទាកម្សាន្តលើផ្ទៃទឹក",
       "កន្លែងសម្រាកលំហែចុងសប្តាហ៍ពេញនិយម"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-219.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8582,7 +8582,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-221.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8622,7 +8622,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-222.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8662,7 +8662,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-223.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8698,11 +8698,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចម្ការកៅស៊ូ និងដីក្រហមធម្មជាតិដ៏ស្រស់ស្អាត",
       "សារមន្ទីរប្រវត្តិសាស្ត្រ និងវត្ថុបុរាណមេមត់"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-224.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8738,12 +8738,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "អារាមប្រវត្តិសាស្ត្រស្ងប់ស្ងាត់ម្លប់ត្រជាក់",
       "ពិធីបុណ្យប្រពៃណីអ្នកស្រុកអូររាំងឪ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-225.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -8782,7 +8782,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-226.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8823,7 +8823,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-227.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -8858,11 +8858,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ក្យូសលំហែអង្គុយញ៉ាំបាយកម្សាន្ត",
       "បរិយាកាសស្ងប់ស្ងាត់បែបជនបទពិតៗ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-228.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -8888,7 +8888,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6667,104.05",
     "latitude": 11.6667,
     "longitude": 104.05,
-    "rating": 5,
+    "rating": 5.0,
     "reviewCount": 4890,
     "highlightsKh": [
       "សមុទ្រពពកហោះកាត់វាលស្មៅលើខ្នងភ្នំពេលព្រឹក",
@@ -8896,7 +8896,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "បទពិសោធន៍បោះតង់មើលថ្ងៃរះ និងថ្ងៃលិចដ៏អស្ចារ្យ",
       "តំបន់ទេសចរណ៍ផ្សងព្រេងពេញនិយមបំផុតរបស់យុវជន"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "isTrendingSocial": true,
     "socialPlatform": "tiktok",
     "socialHashtag": "#KnongPhsar #SeaOfClouds",
@@ -8907,7 +8907,7 @@ const baseSeedDestinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -8946,7 +8946,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-230.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -8986,7 +8986,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-231.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9025,7 +9025,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-232.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9061,11 +9061,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចំណុចថតរូបអនុស្សាវរីយ៍ដ៏ស្រស់ស្អាត",
       "អាកាសធាតុត្រជាក់ពេញមួយឆ្នាំ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-233.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9105,7 +9105,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-58.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -9144,7 +9144,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-235.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -9183,7 +9183,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-236.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9219,12 +9219,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ខ្យល់អាកាសត្រជាក់បរិសុទ្ធកណ្តាលព្រៃភ្នំ",
       "ទីស្ងប់ស្ងាត់សម្រាប់សមាធិ និងបួងសួង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-237.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -9263,7 +9263,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-238.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9303,7 +9303,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-239.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9345,7 +9345,7 @@ const baseSeedDestinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -9383,7 +9383,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-241.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -9422,7 +9422,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-242.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -9462,7 +9462,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-243.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -9502,7 +9502,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-244.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9537,11 +9537,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "បដិមាក្បាច់ថ្មភក់សិល្បៈរចនាបថភ្នំដា",
       "ស្វែងយល់ពីប្រភពដើមនៃអរិយធម៌ខ្មែរបុរាណ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-245.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9581,7 +9581,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-246.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9622,7 +9622,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-247.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -9657,12 +9657,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទេសភាពខ្យល់អាកាសបរិសុទ្ធលើខ្នងភ្នំ",
       "ចំណុចហាត់ប្រាណឡើងភ្នំដ៏ពេញនិយម"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-248.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -9697,12 +9697,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "បរិយាកាសស្ងប់ស្ងាត់ស័ក្តិសមសម្រាប់បួងសួង",
       "ប្រវត្តិសាស្ត្រវត្តអារាមស្រុកទ្រាំង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-249.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -9742,7 +9742,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-250.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9777,11 +9777,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ទស្សនាសត្វផ្សោតក្បាលត្រឡោកតាមដងទន្លេ",
       "ភ្លក្សម្ហូបស្រុកស្រែសរីរាង្គពិតៗ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-251.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9817,12 +9817,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "បរិវេណអារាមធំទូលាយម្លប់ឈើត្រជាក់",
       "ទីតាំងបួងសួងសុំសេចក្តីសុខចម្រើន"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-252.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -9861,7 +9861,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-253.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9901,7 +9901,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-254.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -9943,7 +9943,7 @@ const baseSeedDestinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -9977,12 +9977,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "កុដិសមាធិស្ងប់ស្ងាត់ក្នុងព្រៃព្រឹក្សា",
       "សត្វស្វាព្រៃ និងបក្សាបក្សីធម្មជាតិ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-256.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -10017,11 +10017,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "សម្រាកផ្ទះសហគមន៍ញ៉ាំត្រីមេគង្គស្រស់ៗ",
       "ទស្សនាខ្សែទឹកជួរថ្មធម្មជាតិដ៏អស្ចារ្យ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-257.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10061,7 +10061,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-258.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10101,7 +10101,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-259.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10137,12 +10137,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ឆ្លងកាត់ស្ពានទន្លេសេកុង និងទេសភាពជនបទ",
       "ទីតាំងបុរាណវិទ្យាដ៏កម្ររបស់កម្ពុជា"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-260.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10181,7 +10181,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-261.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10221,7 +10221,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-263.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10262,7 +10262,7 @@ const baseSeedDestinations: TouristDestination[] = [
       "/destinations/dest-264.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10297,12 +10297,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "វត្តអារាម និងទីសក្ការបូជាលើកំពូលភ្នំ",
       "កន្លែងហាត់ប្រាណ និងស្រូបខ្យល់អាកាសបរិសុទ្ធ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-265.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10341,7 +10341,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-266.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10381,7 +10381,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-267.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10421,7 +10421,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-268.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10457,12 +10457,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "ខ្យល់អាកាសបរិសុទ្ធត្រជាក់ល្ហឹម",
       "ជិះទូកឈើកម្សាន្តទៅកាន់ប្រាសាទកោះមេបុណ្យ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-269.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10501,7 +10501,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-270.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10537,11 +10537,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ខ្យល់អាកាសត្រជាក់បរិសុទ្ធដូចតំបន់ខ្ពង់រាប",
       "ទីតាំងថតរូបអនុស្សាវរីយ៍ស្អាតប្លែកភ្នែក"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-271.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10581,7 +10581,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-272.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10617,11 +10617,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "បទពិសោធន៍កសិកម្មចម្រុះបែបធម្មជាតិ",
       "ទិញផ្លែឈើស្រស់ៗជាកាដូផ្ញើបងប្អូន"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-273.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10657,11 +10657,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "សួនច្បារដើរលេង និងហាត់ប្រាណខ្យល់អាកាសបរិសុទ្ធ",
       "តូបម្ហូបអាហារស្រុកស្រែជុំវិញមាត់បឹង"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-274.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10697,12 +10697,12 @@ const baseSeedDestinations: TouristDestination[] = [
       "បរិវេណគូទឹកបុរាណ និងម្លប់ឈើត្រជាក់",
       "ទីតាំងប្រវត្តិសាស្ត្រស្ងប់ស្ងាត់បែបស្រាវជ្រាវ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-275.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10737,11 +10737,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "គំនូរផែនទី និងវត្ថុអនុស្សាវរីយ៍ប្រវត្តិសាស្ត្រ",
       "ទេសភាពបឹង និងជួរភ្នំដងរែកជុំវិញ"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-276.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10777,11 +10777,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ដើរព្រៃស្រូបយកថាមពលធម្មជាតិ និងខ្យល់បរិសុទ្ធ",
       "បោះតង់ និងរៀនសូត្រពីការការពារបរិស្ថាន"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-277.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10817,11 +10817,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ខ្ចុះមាត់ទឹកញ៉ាំមាន់ដុត និងបុកល្ហុងស្រុកស្រែ",
       "បរិយាកាសជើងភ្នំស្ងប់ស្ងាត់ និងម្លប់ត្រឈឹងត្រឈៃ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-278.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10861,7 +10861,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-279.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10901,7 +10901,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-60.webp"
     ],
-    "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isCustomPhoto": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -10940,7 +10940,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-281.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -10980,7 +10980,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-282.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11016,11 +11016,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ថតរូបអនុស្សាវរីយ៍កណ្តាលចម្ការផ្លែឈើ",
       "ទិញមៀនធម្មជាតិគុណភាពខ្ពស់តម្លៃដើម"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-283.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isCustomPhoto": true,
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -11060,7 +11060,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-284.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11096,11 +11096,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ចំណុចថតរូបសត្វព្រៃ និងថ្ងៃលិចដ៏អស្ចារ្យ",
       "គាំទ្រសហគមន៍ការពារសត្វស្លាបក្នុងតំបន់"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-285.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11140,7 +11140,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-286.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11180,7 +11180,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-287.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11216,11 +11216,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "តូបអាហារសម្រន់ និងម្ហូបខ្មែរឆ្ងាញ់ៗពេលល្ងាច",
       "ភ្លើងពណ៌បំភ្លឺស្អាតពេលរាត្រី"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-288.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11260,7 +11260,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-289.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11300,7 +11300,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-290.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11340,7 +11340,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-291.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11380,7 +11380,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-292.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11416,11 +11416,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "បរិយាកាសពាណិជ្ជកម្ម និងទេសចរណ៍ដ៏អ៊ូអរ",
       "កន្លែងទិញទំនិញអនុស្សាវរីយ៍ចម្រុះ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-293.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11460,7 +11460,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-294.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11496,11 +11496,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "បរិយាកាសជនបទ និងម្លប់ឈើបុរាណត្រជាក់",
       "ទីតាំងស្រាវជ្រាវប្រវត្តិសាស្ត្រ និងបុរាណវិទ្យា"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-295.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11536,11 +11536,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "បោះតង់សម្រាកលំហែកាយជាមួយមិត្តភក្តិ",
       "រៀនសូត្រពីការការពារព្រៃឈើសហគមន៍"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-296.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11580,7 +11580,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-297.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11616,11 +11616,11 @@ const baseSeedDestinations: TouristDestination[] = [
       "ខ្ចុះមាត់ទឹកទទួលទានម្ហូបស្រុកស្រែ",
       "ចំណុចគយគន់ថ្ងៃលិចដ៏ស្រស់ស្អាត"
     ],
-    "isFeatured": false,
+    "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-299.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
@@ -11660,7 +11660,7 @@ const baseSeedDestinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-300.jpg"
     ],
-    "photoUpdatedAt": "2026-11-05T08:53:23.538Z",
+    "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z",

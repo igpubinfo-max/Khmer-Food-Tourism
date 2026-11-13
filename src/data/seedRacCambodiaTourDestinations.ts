@@ -69,7 +69,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -174,7 +174,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -314,7 +314,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -454,7 +454,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -664,7 +664,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -839,7 +839,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -1014,7 +1014,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -1154,7 +1154,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងឡើងភ្នំ គយគន់ទេសភាពពីលើកំពូលភ្នំ និងថតរូប",
       "ធម្មជាតិព្រៃឈើ និងជីវចម្រុះក្នុងតំបន់"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -1329,7 +1329,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -1644,7 +1644,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -1819,7 +1819,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -1959,7 +1959,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -2239,7 +2239,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងងូតទឹកកម្សាន្ត និងគយគន់ថ្ងៃលិចដ៏ស្រស់ស្អាត",
       "ម្ហូបគ្រឿងសមុទ្រ និងម្ហូបប្រចាំតំបន់ស្រស់ៗ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -2449,7 +2449,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -2626,7 +2626,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -2766,7 +2766,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -2941,7 +2941,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -3081,7 +3081,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងងូតទឹកកម្សាន្ត និងគយគន់ថ្ងៃលិចដ៏ស្រស់ស្អាត",
       "ម្ហូបគ្រឿងសមុទ្រ និងម្ហូបប្រចាំតំបន់ស្រស់ៗ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -3256,7 +3256,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -3361,7 +3361,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -3536,7 +3536,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -3676,7 +3676,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -3851,7 +3851,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -3991,7 +3991,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -4166,7 +4166,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/rac-k_05.jpg"
     ],
@@ -4273,7 +4273,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -4448,7 +4448,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -4588,7 +4588,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -4693,7 +4693,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -4833,7 +4833,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -5008,7 +5008,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងងូតទឹកកម្សាន្ត និងគយគន់ថ្ងៃលិចដ៏ស្រស់ស្អាត",
       "ម្ហូបគ្រឿងសមុទ្រ និងម្ហូបប្រចាំតំបន់ស្រស់ៗ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -5323,7 +5323,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -5463,7 +5463,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -5603,7 +5603,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -5778,7 +5778,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -5918,7 +5918,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -6163,7 +6163,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -6303,7 +6303,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -6478,7 +6478,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -6793,7 +6793,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងឡើងភ្នំ គយគន់ទេសភាពពីលើកំពូលភ្នំ និងថតរូប",
       "ធម្មជាតិព្រៃឈើ និងជីវចម្រុះក្នុងតំបន់"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -6933,7 +6933,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -7073,7 +7073,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -7248,7 +7248,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -7388,7 +7388,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -7563,7 +7563,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -7878,7 +7878,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -8053,7 +8053,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -8193,7 +8193,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -8368,7 +8368,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -8508,7 +8508,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -8683,7 +8683,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -8823,7 +8823,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -9103,7 +9103,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -9278,7 +9278,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -9597,7 +9597,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -9737,7 +9737,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -9912,7 +9912,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -10052,7 +10052,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -10227,7 +10227,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -10367,7 +10367,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងឡើងភ្នំ គយគន់ទេសភាពពីលើកំពូលភ្នំ និងថតរូប",
       "ធម្មជាតិព្រៃឈើ និងជីវចម្រុះក្នុងតំបន់"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -10542,7 +10542,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -10682,7 +10682,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -10857,7 +10857,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -11102,7 +11102,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -11242,7 +11242,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -11417,7 +11417,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -11557,7 +11557,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -11732,7 +11732,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -12047,7 +12047,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -12222,7 +12222,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -12327,7 +12327,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -12502,7 +12502,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -12642,7 +12642,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -12817,7 +12817,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -12922,7 +12922,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -13097,7 +13097,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -13377,7 +13377,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -13552,7 +13552,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -13692,7 +13692,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -13832,7 +13832,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -13972,7 +13972,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -14147,7 +14147,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -14252,7 +14252,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -14357,7 +14357,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -14672,7 +14672,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -14847,7 +14847,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -14987,7 +14987,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -15057,7 +15057,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -15197,7 +15197,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -15337,7 +15337,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -15512,7 +15512,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -15652,7 +15652,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -15827,7 +15827,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -15967,7 +15967,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [
       "/destinations/rac-k_13.jpg"
     ],
@@ -16144,7 +16144,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -16284,7 +16284,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -16459,7 +16459,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -16774,7 +16774,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -16844,7 +16844,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -17019,7 +17019,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -17229,7 +17229,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -17369,7 +17369,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងឡើងភ្នំ គយគន់ទេសភាពពីលើកំពូលភ្នំ និងថតរូប",
       "ធម្មជាតិព្រៃឈើ និងជីវចម្រុះក្នុងតំបន់"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -17544,7 +17544,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -17686,7 +17686,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងឡើងភ្នំ គយគន់ទេសភាពពីលើកំពូលភ្នំ និងថតរូប",
       "ធម្មជាតិព្រៃឈើ និងជីវចម្រុះក្នុងតំបន់"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -17861,7 +17861,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -18176,7 +18176,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -18351,7 +18351,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -18631,7 +18631,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -18701,7 +18701,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -18876,7 +18876,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -19016,7 +19016,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -19191,7 +19191,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -19331,7 +19331,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -19506,7 +19506,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -19821,7 +19821,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -19996,7 +19996,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -20101,7 +20101,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -20276,7 +20276,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -20416,7 +20416,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -20451,7 +20451,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -20766,7 +20766,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងងូតទឹកកម្សាន្ត និងគយគន់ថ្ងៃលិចដ៏ស្រស់ស្អាត",
       "ម្ហូបគ្រឿងសមុទ្រ និងម្ហូបប្រចាំតំបន់ស្រស់ៗ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -20941,7 +20941,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -21081,7 +21081,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -21221,7 +21221,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -21361,7 +21361,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -21501,7 +21501,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -21676,7 +21676,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -21816,7 +21816,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -21991,7 +21991,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -22131,7 +22131,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -22306,7 +22306,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -22446,7 +22446,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -22621,7 +22621,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -22936,7 +22936,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -23111,7 +23111,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -23251,7 +23251,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -23426,7 +23426,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -23566,7 +23566,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -23741,7 +23741,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -23881,7 +23881,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -24056,7 +24056,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -24196,7 +24196,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -24336,7 +24336,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -24616,7 +24616,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -24756,7 +24756,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -24896,7 +24896,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -25071,7 +25071,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -25211,7 +25211,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -25386,7 +25386,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -25526,7 +25526,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងឡើងភ្នំ គយគន់ទេសភាពពីលើកំពូលភ្នំ និងថតរូប",
       "ធម្មជាតិព្រៃឈើ និងជីវចម្រុះក្នុងតំបន់"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -25701,7 +25701,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -26016,7 +26016,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -26191,7 +26191,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -26331,7 +26331,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -26506,7 +26506,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -26646,7 +26646,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -26821,7 +26821,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -27031,7 +27031,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងងូតទឹកកម្សាន្ត និងគយគន់ថ្ងៃលិចដ៏ស្រស់ស្អាត",
       "ម្ហូបគ្រឿងសមុទ្រ និងម្ហូបប្រចាំតំបន់ស្រស់ៗ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -27136,7 +27136,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងងូតទឹកកម្សាន្ត និងគយគន់ថ្ងៃលិចដ៏ស្រស់ស្អាត",
       "ម្ហូបគ្រឿងសមុទ្រ និងម្ហូបប្រចាំតំបន់ស្រស់ៗ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -27311,7 +27311,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងងូតទឹកកម្សាន្ត និងគយគន់ថ្ងៃលិចដ៏ស្រស់ស្អាត",
       "ម្ហូបគ្រឿងសមុទ្រ និងម្ហូបប្រចាំតំបន់ស្រស់ៗ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -27451,7 +27451,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -27766,7 +27766,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -27908,7 +27908,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -28050,7 +28050,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -28330,7 +28330,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -28505,7 +28505,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -28610,7 +28610,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -28715,7 +28715,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -29034,7 +29034,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -29209,7 +29209,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -29349,7 +29349,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -29524,7 +29524,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -29699,7 +29699,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -29804,7 +29804,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -29944,7 +29944,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -30119,7 +30119,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -30294,7 +30294,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -30469,7 +30469,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -30644,7 +30644,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -30819,7 +30819,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -30994,7 +30994,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -31134,7 +31134,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -31309,7 +31309,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -31449,7 +31449,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -31624,7 +31624,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -31764,7 +31764,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -31904,7 +31904,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -32114,7 +32114,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -32254,7 +32254,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -32394,7 +32394,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -32569,7 +32569,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -32709,7 +32709,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -32884,7 +32884,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -33024,7 +33024,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -33199,7 +33199,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -33514,7 +33514,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -33689,7 +33689,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -33829,7 +33829,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -34004,7 +34004,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -34146,7 +34146,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -34321,7 +34321,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -34461,7 +34461,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -34636,7 +34636,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -34776,7 +34776,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -34951,7 +34951,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -35231,7 +35231,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -35406,7 +35406,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -35476,7 +35476,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -35651,7 +35651,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -35791,7 +35791,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -35966,7 +35966,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -36106,7 +36106,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -36211,7 +36211,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -36491,7 +36491,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -36666,7 +36666,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -36806,7 +36806,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -36981,7 +36981,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -37121,7 +37121,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -37296,7 +37296,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -37436,7 +37436,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -37611,7 +37611,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -37751,7 +37751,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -37926,7 +37926,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -38486,7 +38486,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងឡើងភ្នំ គយគន់ទេសភាពពីលើកំពូលភ្នំ និងថតរូប",
       "ធម្មជាតិព្រៃឈើ និងជីវចម្រុះក្នុងតំបន់"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -38626,7 +38626,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -38801,7 +38801,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -38941,7 +38941,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -39186,7 +39186,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -39326,7 +39326,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -39501,7 +39501,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -39676,7 +39676,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -39816,7 +39816,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -39991,7 +39991,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -40306,7 +40306,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -40481,7 +40481,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "កន្លែងសម្រាកលម្ហែកាយ និងពិសាអាហារជួបជុំគ្រួសារ និងមិត្តភក្តិ",
       "សកម្មភាពកម្សាន្តធម្មជាតិ និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -40621,7 +40621,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "ស្វែងយល់ពីប្រវត្តិ និងជំនឿប្រពៃណីក្នុងតំបន់",
       "បរិយាកាសស្ងប់ស្ងាត់ និងសំណង់ស្ថាបត្យកម្មខ្មែរ"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -40796,7 +40796,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",
@@ -40901,7 +40901,7 @@ export const racCambodiaTourDestinations: TouristDestination[] = [
       "តំបន់បេតិកភណ្ឌប្រវត្តិសាស្ត្រ និងវប្បធម៌ជាតិ",
       "បរិយាកាសស្ងប់ស្ងាត់សាកសមសម្រាប់ការទស្សនា និងថតរូបអនុស្សាវរីយ៍"
     ],
-    "isFeatured": true,
+    "isFeatured": false,
     "galleryPhotos": [],
     "photoUpdatedAt": "2026-11-05T10:00:00.000Z",
     "locationVerificationStatus": "verified",

@@ -52,6 +52,9 @@ export const BottomNav: React.FC = () => {
                 if (activeTab === item.id) {
                   const mainEl = document.getElementById('kft-main-scroll');
                   if (mainEl) mainEl.scrollTop = 0;
+                  if (item.id === 'tourism' && typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('kft:tourism-menu-refresh'));
+                  }
                 } else {
                   setActiveTab(item.id);
                 }
@@ -75,9 +78,8 @@ export const BottomNav: React.FC = () => {
                 <Icon className="w-[18px] h-[18px] min-[360px]:w-[19px] min-[360px]:h-[19px] shrink-0" />
               </div>
               <span
-                style={{ fontSize: 'clamp(10.2px, 2.82vw, 13.8px)' }}
-                className={`mt-0.5 leading-[1.72] pt-0.5 pb-1 text-center max-w-full tracking-tight font-khmer whitespace-nowrap overflow-visible ${
-                  isActive ? 'font-extrabold text-amber-300' : 'font-medium text-slate-400 group-hover:text-slate-200'
+                className={`kft-nav-label ${
+                  isActive ? 'font-extrabold text-amber-300' : 'font-semibold text-slate-400 group-hover:text-slate-200'
                 }`}
               >
                 {tr(language, item.labelKh, item.labelEn, item.labelZh)}

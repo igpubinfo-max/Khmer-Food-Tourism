@@ -160,7 +160,8 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     const isCompactDirectoryRow = destination.id.startsWith('rac-') && !destination.isFeatured;
 
     // Compact Clean White Card Variant
-    if (!hasClearPhoto || isCompactDirectoryRow) {
+    if (!hasClearPhoto) return null;
+    if (isCompactDirectoryRow) {
       return (
         <article
           data-testid={`dest-row-${destination.id}`}

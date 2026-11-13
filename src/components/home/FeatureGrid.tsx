@@ -17,7 +17,6 @@ interface FeatureItem {
   id: string;
   imageSrc: string;
   label: string;
-  isLongLabel?: boolean;
   onClick: () => void;
 }
 
@@ -41,7 +40,6 @@ const FeatureGridImpl: React.FC<Props> = ({
       id: 'compare-dishes',
       imageSrc: '/categories/home_cat_drinks.png',
       label: tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佳肴与饮品'),
-      isLongLabel: true,
       onClick: onNearbyPlaces,
     },
     {
@@ -54,21 +52,18 @@ const FeatureGridImpl: React.FC<Props> = ({
       id: 'daily-food',
       imageSrc: '/categories/home_cat_province_food.png',
       label: tr(language, 'ម្ហូបតាមខេត្ត', 'Food by Province', '各省美食'),
-      isLongLabel: language === 'en',
       onClick: onDailyFoodDiscovery,
     },
     {
       id: 'map-nav',
       imageSrc: '/categories/home_cat_map_route.png',
       label: tr(language, 'ផែនទីធ្វើដំណើរ', 'Map Route', '地图导航'),
-      isLongLabel: language === 'km',
       onClick: onMapNavigation,
     },
     {
       id: 'smart-ai',
       imageSrc: '/categories/home_cat_smart_ai.png',
       label: tr(language, 'ជំនួយការឆ្លាតវៃ Ai', 'Smart AI', 'AI 智能助手'),
-      isLongLabel: language === 'km',
       onClick: onSmartAiAssistant,
     },
   ];
@@ -110,16 +105,7 @@ const FeatureGridImpl: React.FC<Props> = ({
             </div>
 
             {/* Clear White Text Title Directly Below Each Illustration */}
-            <span
-              className="mt-1 px-0.5 font-khmer font-extrabold leading-[1.52] text-center break-words whitespace-normal w-full transition-colors duration-150 group-hover:text-[#FDE047]"
-              style={{
-                fontSize: it.isLongLabel
-                  ? 'clamp(10px, 2.75vw, 12.6px)'
-                  : 'clamp(11px, 3.05vw, 13.4px)',
-                color: '#FFFFFF',
-                textShadow: '0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75)',
-              }}
-            >
+            <span className="kft-cat-label">
               {it.label}
             </span>
           </button>

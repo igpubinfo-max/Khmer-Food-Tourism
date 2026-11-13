@@ -1404,7 +1404,7 @@ export const ProfileView: React.FC = () => {
           >
             <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
             <Store className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
-            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
+            <span className="kft-tile-label">
               {tr(language, 'ហាងខ្ញុំ', 'My Shop', '我的店铺')}
             </span>
           </button>
@@ -1424,7 +1424,7 @@ export const ProfileView: React.FC = () => {
           >
             <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
             <Bookmark className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
-            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
+            <span className="kft-tile-label">
               {tr(language, 'បញ្ជីហាង', 'Shop List', '店铺清单')}
               <span className="ml-0.5 text-[10px] opacity-90">({wishlists.length})</span>
             </span>
@@ -1450,7 +1450,7 @@ export const ProfileView: React.FC = () => {
           >
             <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
             <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
-            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
+            <span className="kft-tile-label">
               {tr(language, 'ផែនការ', 'Plans', '行程计划')}
               <span className="ml-0.5 text-[10px] opacity-90">
                 {!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${tripPlans.length})`}
@@ -1473,7 +1473,7 @@ export const ProfileView: React.FC = () => {
           >
             <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
             <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
-            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
+            <span className="kft-tile-label">
               {tr(language, 'រក្សាទុក', 'Saved', '已收藏')}
               <span className="ml-0.5 text-[10px] opacity-90">
                 ({savedFoods.length + savedDestinations.length + savedRestaurants.length})
@@ -1495,7 +1495,7 @@ export const ProfileView: React.FC = () => {
           >
             <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
             <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
-            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
+            <span className="kft-tile-label">
               {tr(language, 'សមាជិកភាព', 'Membership', '尊享会员')}
             </span>
           </button>
@@ -1514,7 +1514,7 @@ export const ProfileView: React.FC = () => {
           >
             <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
             <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
-            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
+            <span className="kft-tile-label">
               {tr(language, 'ការកំណត់', 'Settings', '设置')}
             </span>
           </button>

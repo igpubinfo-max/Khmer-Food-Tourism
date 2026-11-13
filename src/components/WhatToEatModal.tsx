@@ -3086,7 +3086,6 @@ export const WhatToEatModal: React.FC = () => {
                   const isOpen = openGroup === g.id;
                   const isHighlighted = isOpen || g.active;
                   const displayText = g.value || g.label;
-                  const isLongText = displayText.length >= 13;
                   return (
                     <button
                       key={g.id}
@@ -3132,21 +3131,9 @@ export const WhatToEatModal: React.FC = () => {
                       </div>
 
                       {/* Clear White Text Title Below Button */}
-                      <div className="w-full flex items-center justify-center px-0.5 pt-0.5 min-h-[20px]">
-                        <span
-                          className="font-khmer font-extrabold text-center leading-[1.5] tracking-tight break-words whitespace-normal w-full"
-                          style={{
-                            fontSize: isLongText
-                              ? 'clamp(9.6px, 2.6vw, 12px)'
-                              : 'clamp(11px, 3.05vw, 13.4px)',
-                            color: isHighlighted ? '#FDE047' : '#FFFFFF',
-                            textShadow:
-                              '0 1.5px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.55)',
-                          }}
-                        >
-                          {displayText}
-                        </span>
-                      </div>
+                      <span className={`kft-cat-label ${isHighlighted ? 'kft-cat-label-active' : ''}`}>
+                        {displayText}
+                      </span>
                     </button>
                   );
                 })}
@@ -3154,7 +3141,6 @@ export const WhatToEatModal: React.FC = () => {
                 {/* 5th Premium 3D Button: Beverage Pairings */}
                 {(() => {
                   const drinkLabel = tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佳肴配饮');
-                  const isLongDrink = drinkLabel.length >= 13;
                   return (
                     <button
                       type="button"
@@ -3188,21 +3174,9 @@ export const WhatToEatModal: React.FC = () => {
                         )}
                       </div>
 
-                      <div className="w-full flex items-center justify-center px-0.5 pt-0.5 min-h-[20px]">
-                        <span
-                          className="font-khmer font-extrabold text-center leading-[1.5] tracking-tight break-words whitespace-normal w-full"
-                          style={{
-                            fontSize: isLongDrink
-                              ? 'clamp(9.6px, 2.6vw, 12px)'
-                              : 'clamp(11px, 3.05vw, 13.4px)',
-                            color: drinkMode ? '#FDE047' : '#FFFFFF',
-                            textShadow:
-                              '0 1.5px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.55)',
-                          }}
-                        >
-                          {drinkLabel}
-                        </span>
-                      </div>
+                      <span className={`kft-cat-label ${drinkMode ? 'kft-cat-label-active' : ''}`}>
+                        {drinkLabel}
+                      </span>
                     </button>
                   );
                 })()}
@@ -3210,7 +3184,6 @@ export const WhatToEatModal: React.FC = () => {
                 {/* 6th Premium 3D Button: New Picks / Shuffle */}
                 {(() => {
                   const newPicksLabel = tr(language, 'ប្តូរមុខម្ហូបថ្មី', 'New Picks', '换一批推荐');
-                  const isLongNewPicks = newPicksLabel.length >= 13;
                   return (
                     <button
                       type="button"
@@ -3232,21 +3205,9 @@ export const WhatToEatModal: React.FC = () => {
                         />
                       </div>
 
-                      <div className="w-full flex items-center justify-center px-0.5 pt-0.5 min-h-[20px]">
-                        <span
-                          className="font-khmer font-extrabold text-center leading-[1.5] tracking-tight break-words whitespace-normal w-full"
-                          style={{
-                            fontSize: isLongNewPicks
-                              ? 'clamp(9.6px, 2.6vw, 12px)'
-                              : 'clamp(11px, 3.05vw, 13.4px)',
-                            color: '#FFFFFF',
-                            textShadow:
-                              '0 1.5px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.55)',
-                          }}
-                        >
-                          {newPicksLabel}
-                        </span>
-                      </div>
+                      <span className="kft-cat-label">
+                        {newPicksLabel}
+                      </span>
                     </button>
                   );
                 })()}

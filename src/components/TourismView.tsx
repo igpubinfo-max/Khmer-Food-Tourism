@@ -13,8 +13,14 @@ import {
   Mountain,
   Sparkles,
   Flame,
+  RefreshCw,
 } from 'lucide-react';
-import { shuffleForCurrentSession } from '../utils/sessionShuffle';
+import {
+  generateFreshShuffleSeed,
+  getRecentTopTourismIds,
+  saveRecentTopTourismIds,
+  shuffleTourismByRatingTiers,
+} from '../utils/sessionShuffle';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 import { DISH_PROVINCES } from '../utils/foodFilters';
 import { tr } from '../utils/i18n';
@@ -55,6 +61,8 @@ export const TourismView: React.FC = () => {
   const [nearMeActive, setNearMeActive] = useState<boolean>(false);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [visibleCount, setVisibleCount] = useState<number>(TOURISM_BATCH_SIZE);
+  const [shuffleSeed, setShuffleSeed] = useState<number>(() => generateFreshShuffleSeed());
+  const [avoidTopIds, setAvoidTopIds] = useState<ReadonlySet<string>>(() => getRecentTopTourismIds());
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const tourismListStartRef = useRef<HTMLDivElement | null>(null);
   const tourismCategoryCardRef = useRef<HTMLDivElement | null>(null);
@@ -130,7 +138,6 @@ export const TourismView: React.FC = () => {
         nameKh: 'ទាំងអស់',
         nameEn: 'All Places',
         nameZh: '全部景点',
-        isLongLabel: false,
       },
       {
         id: 'temple',
@@ -138,7 +145,6 @@ export const TourismView: React.FC = () => {
         nameKh: 'ប្រាសាទបុរាណ',
         nameEn: 'Temples',
         nameZh: '古迹与寺庙',
-        isLongLabel: language === 'km',
       },
       {
         id: 'nature',
@@ -146,7 +152,6 @@ export const TourismView: React.FC = () => {
         nameKh: 'ធម្មជាតិ & ទឹកធ្លាក់',
         nameEn: 'Nature & Falls',
         nameZh: '自然与瀑布',
-        isLongLabel: true,
       },
       {
         id: 'beach',
@@ -154,7 +159,6 @@ export const TourismView: React.FC = () => {
         nameKh: 'កោះ & ឆ្នេរសមុទ្រ',
         nameEn: 'Islands & Beaches',
         nameZh: '海岛与海滩',
-        isLongLabel: true,
       },
       {
         id: 'mountain',
@@ -162,7 +166,6 @@ export const TourismView: React.FC = () => {
         nameKh: 'ភ្នំ & ឧទ្យានជាតិ',
         nameEn: 'Mountains',
         nameZh: '高山与森林',
-        isLongLabel: language === 'km',
       },
       {
         id: 'cultural',
@@ -170,17 +173,26 @@ export const TourismView: React.FC = () => {
         nameKh: 'វប្បធម៌ & ពេញនិយម',
         nameEn: 'Culture & Popular',
         nameZh: '文化与热门',
-        isLongLabel: true,
       },
     ],
     [language]
   );
 
-  // Exclude hotels (categorySlug === 'hotel') since Hotels have their own dedicated BottomNav menu tab
-  const scenicDestinationsOnly = useMemo(
-    () => destinations.filter((d) => Boolean(d && d.categorySlug !== 'hotel')),
-    [destinations]
-  );
+  // Exclude hotels, blurry/scraped RAC records, and duplicate fallback photos so every displayed attraction
+  // has a verified, clear, authentic, 100% unique photograph matching the actual tourist destination.
+  const scenicDestinationsOnly = useMemo(() => {
+    const verified = destinations.filter((d) => {
+      if (!d || d.categorySlug === 'hotel') return false;
+      const hasPhoto = Boolean(d.photoUrl && d.photoUrl.trim());
+      if (!hasPhoto) return false;
+      const isCustomAdmin = Boolean(d.isAdminEdited || d.isCustomPhoto);
+      if (d.id.startsWith('rac-') && !isCustomAdmin) return false;
+      if (d.isFeatured === false && !isCustomAdmin) return false;
+      return true;
+    });
+    // Deduplicate strictly by ID, normalized Khmer/English names, and clean photoUrl
+    return shuffleTourismByRatingTiers(verified, shuffleSeed, avoidTopIds);
+  }, [destinations, shuffleSeed, avoidTopIds]);
 
   // Compute GPS distance (in km) for each destination
   const distanceMap = useMemo(() => {
@@ -262,19 +274,30 @@ export const TourismView: React.FC = () => {
     return map;
   }, [scenicDestinationsOnly, hasActiveTourismSearch]);
 
-  // Separate full-card HD destinations (shuffled first) and compact directory rows (shuffled second)
-  const orderedSessionDestinations = useMemo(() => {
-    const fullCards = scenicDestinationsOnly.filter(
-      (d) => Boolean(d.photoUrl && d.photoUrl.trim()) && (!d.id.startsWith('rac-') || Boolean(d.isFeatured))
-    );
-    const compactRows = scenicDestinationsOnly.filter(
-      (d) => Boolean(!d.photoUrl || !d.photoUrl.trim() || (d.id.startsWith('rac-') && !d.isFeatured))
-    );
-    return [
-      ...shuffleForCurrentSession(fullCards),
-      ...shuffleForCurrentSession(compactRows),
-    ];
-  }, [scenicDestinationsOnly]);
+  // Ordered destinations are already rating-tier prioritized (5.0★ at top -> 4.9★ -> 4.8★ -> 4.7★ -> 4.6★)
+  // and randomized within each rating tier for the current open/refresh cycle.
+  const orderedSessionDestinations = scenicDestinationsOnly;
+
+  // Persist the current top 8 displayed IDs so the next menu reopen or refresh rotates fresh 5-star places to the top
+  useEffect(() => {
+    if (orderedSessionDestinations.length > 0) {
+      saveRecentTopTourismIds(orderedSessionDestinations.slice(0, 8).map((d) => d.id));
+    }
+  }, [orderedSessionDestinations]);
+
+  const triggerTourismReshuffle = () => {
+    setAvoidTopIds(getRecentTopTourismIds());
+    setShuffleSeed(generateFreshShuffleSeed());
+    setVisibleCount(TOURISM_BATCH_SIZE);
+  };
+
+  useEffect(() => {
+    const handleMenuRefresh = () => {
+      triggerTourismReshuffle();
+    };
+    window.addEventListener('kft:tourism-menu-refresh', handleMenuRefresh);
+    return () => window.removeEventListener('kft:tourism-menu-refresh', handleMenuRefresh);
+  }, []);
 
   const filteredDestinations = useMemo(() => {
     const trimmedQuery = deferredSearchQuery.trim();
@@ -376,6 +399,7 @@ export const TourismView: React.FC = () => {
     setSelectedProvince('');
     setSearchQuery('');
     setNearMeActive(false);
+    triggerTourismReshuffle();
   };
 
   useEffect(() => {
@@ -514,6 +538,9 @@ export const TourismView: React.FC = () => {
                   id={`kft-travel-cat-${cat.id}-btn`}
                   type="button"
                   onClick={() => {
+                    if (selectedCategory === cat.id || cat.id === 'all') {
+                      triggerTourismReshuffle();
+                    }
                     setSelectedCategory(cat.id);
                     scrollToTourismList(true);
                   }}
@@ -539,16 +566,7 @@ export const TourismView: React.FC = () => {
                   </div>
 
                   {/* Clear White Title Below Each Button */}
-                  <span
-                    className="mt-1 px-0.5 font-khmer font-extrabold leading-[1.62] text-center break-words whitespace-normal w-full transition-colors duration-150"
-                    style={{
-                      fontSize: 'clamp(11px, 3.05vw, 13.4px)',
-                      color: active ? '#FDE047' : '#FFFFFF',
-                      textShadow: active
-                        ? '0 1px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(250, 204, 21, 0.45)'
-                        : '0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75)',
-                    }}
-                  >
+                  <span className={`kft-cat-label ${active ? 'kft-cat-label-active' : ''}`}>
                     {label}
                   </span>
 
@@ -638,14 +656,25 @@ export const TourismView: React.FC = () => {
             )}
           </div>
 
-          <span className="px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-xs font-extrabold text-slate-800 shrink-0">
-            {tr(
-              language,
-              `${filteredDestinations.length} កន្លែង`,
-              `${filteredDestinations.length} places`,
-              `${filteredDestinations.length} 处景点`
-            )}
-          </span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={triggerTourismReshuffle}
+              title={tr(language, 'ប្តូរលំដាប់តំបន់ទេសចរណ៍ថ្មី', 'Shuffle attractions', '随机刷新景点')}
+              className="px-2.5 py-1 rounded-full bg-amber-400/95 hover:bg-amber-300 text-slate-950 border border-amber-200 shadow-2xs text-xs font-extrabold inline-flex items-center gap-1 transition active:scale-95 cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-slate-950 shrink-0" strokeWidth={2.4} />
+              <span>{tr(language, 'ប្តូរថ្មី', 'Shuffle', '换一批')}</span>
+            </button>
+            <span className="px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-xs font-extrabold text-slate-800 shrink-0">
+              {tr(
+                language,
+                `${filteredDestinations.length} កន្លែង`,
+                `${filteredDestinations.length} places`,
+                `${filteredDestinations.length} 处景点`
+              )}
+            </span>
+          </div>
         </div>
 
         {/* Row 4: Destination Cards Grid */}

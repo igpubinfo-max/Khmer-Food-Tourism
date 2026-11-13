@@ -170,10 +170,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
                   <span className="relative z-10 flex items-center justify-center text-white drop-shadow-xs mt-1">
                     <DishTagIcon id={id} className="w-6 h-6 shrink-0" />
                   </span>
-                  <span
-                    className="relative z-10 font-khmer font-extrabold leading-[1.68] text-center break-words whitespace-normal w-full px-0.5 text-white"
-                    style={{ fontSize: 'clamp(11.4px, 3.24vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
-                  >
+                  <span className="kft-tile-label relative z-10">
                     {tr(language, def.labelKh, def.labelEn, def.labelZh)}
                   </span>
                 </button>
@@ -263,10 +260,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
                 <span className="relative z-10 flex items-center justify-center text-white drop-shadow-xs mt-1">
                   <DishTagIcon id={id} className="w-6 h-6 shrink-0" />
                 </span>
-                <span
-                  className="relative z-10 font-khmer font-extrabold leading-[1.68] text-center break-words whitespace-normal w-full px-0.5 text-white"
-                  style={{ fontSize: 'clamp(11.4px, 3.24vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
-                >
+                <span className="kft-tile-label relative z-10">
                   {tr(language, def.labelKh, def.labelEn, def.labelZh)}
                 </span>
               </button>

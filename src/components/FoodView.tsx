@@ -489,7 +489,6 @@ export const FoodView: React.FC = () => {
             ].map((cat) => {
               const active = selectedCategory === cat.id;
               const label = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
-              const isLongKh = language === 'km' && (cat.id === 'bong_aem' || cat.id === 'all');
               return (
                 <button
                   key={cat.id}
@@ -514,16 +513,7 @@ export const FoodView: React.FC = () => {
                   />
                   {/* Centered Large Bold WHITE Label Inside Button Directly Below the Food Illustration */}
                   <div className="pointer-events-none absolute inset-x-[4%] top-[69%] bottom-[6.5%] flex items-center justify-center px-0.5 overflow-visible">
-                    <span
-                      className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
-                      style={{
-                        fontSize: isLongKh
-                          ? 'clamp(8.5px, 2.25vw, 13px)'
-                          : 'clamp(9.8px, 2.6vw, 14.5px)',
-                        textShadow:
-                          '0 1.5px 3px rgba(0, 0, 0, 0.85), 0 0 8px rgba(0, 0, 0, 0.55)',
-                      }}
-                    >
+                    <span className="kft-food-cat-label">
                       {label}
                     </span>
                   </div>

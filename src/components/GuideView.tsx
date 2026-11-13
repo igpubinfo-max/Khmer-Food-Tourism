@@ -586,16 +586,7 @@ export const GuideView: React.FC = () => {
                   </div>
 
                   {/* Clear White Title Below Each Button */}
-                  <span
-                    className="mt-1 px-0.5 font-khmer font-extrabold leading-[1.62] text-center break-words whitespace-normal w-full transition-colors duration-150"
-                    style={{
-                      fontSize: 'clamp(11px, 3.05vw, 13.4px)',
-                      color: active ? '#FDE047' : '#FFFFFF',
-                      textShadow: active
-                        ? '0 1px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(250, 204, 21, 0.45)'
-                        : '0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75)',
-                    }}
-                  >
+                  <span className={`kft-cat-label ${active ? 'kft-cat-label-active' : ''}`}>
                     {t.label}
                   </span>
 
