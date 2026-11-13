@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1570;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1571;
 export const APP_RELEASE_DATE = '2026-11-13';
 
 /**
@@ -3251,10 +3251,15 @@ export const isUserOnConsumerFreeTrial = (user?: User | null): boolean => {
  * (excludes Free Users and 7-Day Free Trial users).
  */
 export const isUserPaidVipActive = (user?: User | null): boolean => {
-  if (!user) return false;
+  if (!user || isAdminAccount(user) || user.isDisabled) return false;
   if (!isUserVipActive(user)) return false;
   if (isUserOnConsumerFreeTrial(user)) return false;
-  return true;
+  const hasPaidVipRecord =
+    isPermanentVipEmail(user.email) ||
+    user.paymentStatus === 'verified' ||
+    (user.membershipTier === 'premium_vip' &&
+      (user.subscriptionStatus === 'active' || user.vipStatus === 'active' || !user.subscriptionStatus));
+  return Boolean(hasPaidVipRecord);
 };
 
 /**
@@ -4069,7 +4074,7 @@ export interface AppSettings {
   shopEarlyBirdYearlyPriceUsd?: number; // Default: $49.99 / 365 days (first 50 shops)
   shopEarlyBirdMaxShops?: number; // Default: 50 shops
   shopEarlyBirdClaimedCount?: number; // Default: 0 (auto-switches to $59.99 once >= max)
-  shopPayAfterApproval?: boolean; // Default: true (submit -> Admin approve -> pay -> active)
+  shopPayAfterApproval?: boolean; // Default: false (payment required to add Shop or Hotel)
 }
 
 // User–Admin Two-Way Support & Payment Verification System
@@ -4586,7 +4591,7 @@ export const getShopSubscriptionCatalog = (
       : Math.max(0, Math.floor(Number(s.shopEarlyBirdClaimedCount) || 0));
   const ebRemaining = Math.max(0, ebMax - ebClaimed);
   const isEarlyBirdAvailable = ebEnabled && ebRemaining > 0;
-  const payAfterApproval = s.shopPayAfterApproval !== false;
+  const payAfterApproval = s.shopPayAfterApproval === true;
 
   const toKhr = (usd: number) => `${Math.round(usd * 4100).toLocaleString()} រៀល`;
   const withTitles = (p: Omit<OfficialPlanDefinition, 'titleKm' | 'titleEn' | 'titleZh'>): OfficialPlanDefinition => ({
@@ -5019,13 +5024,11 @@ export const getUserStoreQuotaSummary = (
 
   const totalAllowedStores = isAdmin
     ? 9999
-    : isPaidVip
-    ? includedFreeStores + paidAdditionalStoreSlots
-    : 0;
+    : includedFreeStores + paidAdditionalStoreSlots;
   const usedStoresCount = ownedStores.length;
   const remainingAvailableSlots = Math.max(0, totalAllowedStores - usedStoresCount);
-  const canCreateNewStoreWithoutPayment = isAdmin || (isPaidVip && remainingAvailableSlots > 0);
-  const canReplaceExistingStoreForFree = isAdmin || (isPaidVip && usedStoresCount > 0);
+  const canCreateNewStoreWithoutPayment = isAdmin || remainingAvailableSlots > 0;
+  const canReplaceExistingStoreForFree = isAdmin || (totalAllowedStores > 0 && usedStoresCount > 0);
   const canEditExistingFree = true;
 
   return {

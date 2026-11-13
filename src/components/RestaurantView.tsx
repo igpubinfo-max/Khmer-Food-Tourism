@@ -577,21 +577,6 @@ export const RestaurantView: React.FC = () => {
       setIsAuthModalOpen(true);
       return;
     }
-    if (isAdmin) {
-      (window as any).__kft_vip_store_initial_mode = { mode: 'create', businessType: 'restaurant' };
-      setIsVipAddRestaurantModalOpen(true);
-      return;
-    }
-    if (storeQuota.usedStoresCount < storeQuota.totalAllowedStores) {
-      (window as any).__kft_vip_store_initial_mode = { mode: 'create', businessType: 'restaurant' };
-      setIsVipAddRestaurantModalOpen(true);
-      return;
-    }
-    if (myExistingRest) {
-      setActiveManagedShopId(myExistingRest.id);
-      openManageMyVipStore(myExistingRest.id);
-      return;
-    }
     (window as any).__kft_vip_store_initial_mode = { mode: 'create', businessType: 'restaurant' };
     setIsVipAddRestaurantModalOpen(true);
   };

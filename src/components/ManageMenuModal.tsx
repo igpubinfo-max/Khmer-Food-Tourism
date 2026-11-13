@@ -177,7 +177,9 @@ export const ManageMenuModal: React.FC = () => {
   // Allow external triggers (e.g. ProfileView VIP feature cards) to open a specific tab
   useEffect(() => {
     if (isManageMenuModalOpen) {
-      const requestedTab = (window as any).__kft_manage_initial_tab;
+      const freshManaged = managingRestaurant ? (restaurants.find((r) => r.id === managingRestaurant.id) || managingRestaurant) : null;
+      const isUnpaidManaged = Boolean(!isAdminUser && !isIosAppStore && freshManaged && !isShopSubscriptionActive(freshManaged));
+      const requestedTab = isUnpaidManaged ? 'membership' : (window as any).__kft_manage_initial_tab;
       if (requestedTab === 'video' || requestedTab === 'menu') {
         setMainTab('info');
         (window as any).__kft_manage_initial_tab = undefined;

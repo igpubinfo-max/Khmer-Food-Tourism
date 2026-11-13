@@ -710,31 +710,6 @@ export const HotelView: React.FC = () => {
       setIsAuthModalOpen(true);
       return;
     }
-    // Enforce: VIP user can add 1 only. If added shop, cannot add hotel!
-    if (!isAdmin && myExistingShop) {
-      showToast(
-        tr(
-          language,
-          `គណនី VIP អាចបង្កើតហាងអាហារ ឬសណ្ឋាគារបានតែ ១ ប៉ុណ្ណោះ! អ្នកបានបង្កើតហាងអាហារ «${myExistingShop.nameKh}» រួចហើយ ដូច្នេះមិនអាចបន្ថែមសណ្ឋាគារបានទៀតទេ។`,
-          `VIP accounts can add 1 listing only (Shop OR Hotel). You already added Shop "${myExistingShop.nameEn || myExistingShop.nameKh}", so you cannot add a Hotel.`,
-          `VIP 账号仅可添加 1 家（餐厅或酒店二选一）。您已添加餐厅“${myExistingShop.nameEn || myExistingShop.nameKh}”，无法再添加酒店。`
-        ),
-        'warning'
-      );
-      return;
-    }
-    if (!isAdmin && myExistingHotel && storeQuota.remainingAvailableSlots <= 0) {
-      showToast(
-        tr(
-          language,
-          `គណនី VIP អាចបង្កើតសណ្ឋាគារបានតែ ១ ប៉ុណ្ណោះ! អ្នកបានបង្កើតសណ្ឋាគារ «${myExistingHotel.nameKh}» រួចហើយ (អាចចុច «កែប្រែសណ្ឋាគារខ្ញុំ» ដើម្បីកែព័ត៌មាន)។`,
-          `VIP accounts can add 1 listing only! You already added "${myExistingHotel.nameEn || myExistingHotel.nameKh}" (tap "Edit My Hotel" below).`,
-          `VIP 账号仅可添加 1 家酒店！您已添加“${myExistingHotel.nameEn || myExistingHotel.nameKh}”（可点击下方编辑）。`
-        ),
-        'warning'
-      );
-      return;
-    }
     (window as any).__kft_vip_store_initial_mode = { mode: 'create', businessType: 'hotel' };
     setIsVipAddRestaurantModalOpen(true);
   };

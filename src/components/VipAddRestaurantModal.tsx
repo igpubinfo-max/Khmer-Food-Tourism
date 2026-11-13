@@ -365,8 +365,10 @@ export const VipAddRestaurantModal: React.FC = () => {
   );
   const quota = getCurrentUserStoreQuota(currentUser);
   const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
-  // Section B: Independent Shop Package — submitting a shop has ZERO Consumer VIP prerequisite and ZERO extra-slot lock!
-  const requiresAdditionalPayment = false;
+  const requiresAdditionalPayment =
+    !isAdmin &&
+    !replacingStoreId &&
+    !quota.canCreateNewStoreWithoutPayment;
 
     // 7 Core Form Fields requested by User:
   // 1. Shop / Hotel Name
@@ -644,10 +646,15 @@ export const VipAddRestaurantModal: React.FC = () => {
     );
     setShowMoreOptions(true);
     setIsPreviewStep(false);
-    setActiveTab('create_form');
+    setActiveTab(!isAdmin && !quota.canCreateNewStoreWithoutPayment ? 'pay_additional_slot' : 'create_form');
   };
 
   const beginReplaceStore = (store: (typeof ownedRestaurants)[0]) => {
+    if (!isAdmin && (!quota.canReplaceExistingStoreForFree || !isShopSubscriptionActive(store))) {
+      setReplacingStoreId(null);
+      setActiveTab('pay_additional_slot');
+      return;
+    }
     const inferred = inferBusinessTypeAndCategory(store);
     const bType = inferred.businessType;
     setBusinessType(bType);
@@ -721,7 +728,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     );
     setShowMoreOptions(true);
     setIsPreviewStep(false);
-    setActiveTab('create_form');
+    setActiveTab(!isAdmin && !quota.canCreateNewStoreWithoutPayment ? 'pay_additional_slot' : 'create_form');
   };
 
   const selectExistingOption = (opt: ExistingListingOption) => {
@@ -793,7 +800,8 @@ export const VipAddRestaurantModal: React.FC = () => {
         setReplacingStoreId(null);
         setSubmittedPendingShop(null);
         setIsPreviewStep(false);
-        setActiveTab('create_form');
+        const freshQuota = getCurrentUserStoreQuota(currentUser);
+        setActiveTab(!isAdmin && !freshQuota.canCreateNewStoreWithoutPayment ? 'pay_additional_slot' : 'create_form');
         return;
       } else if (initialReq.mode === 'replace' && initialReq.storeId) {
         const found = ownedRestaurants.find((s) => s.id === initialReq.storeId) || ownedRestaurants[0];
@@ -822,7 +830,8 @@ export const VipAddRestaurantModal: React.FC = () => {
     setLocationNotice(null);
     setSubmittedPendingShop(null);
     setIsPreviewStep(false);
-    setActiveTab('create_form');
+    const freshQuota = getCurrentUserStoreQuota(currentUser);
+    setActiveTab(!isAdmin && !freshQuota.canCreateNewStoreWithoutPayment ? 'pay_additional_slot' : 'create_form');
   }, [isVipAddRestaurantModalOpen]);
 
   if (!isVipAddRestaurantModalOpen) return null;
@@ -1156,6 +1165,20 @@ export const VipAddRestaurantModal: React.FC = () => {
 
   const handleConfirmSubmit = () => {
     if (isSaving) return;
+    if (requiresAdditionalPayment) {
+      showToast(
+        tr(
+          language,
+          `🔒 សូមបង់ប្រាក់កញ្ចប់${businessType === 'hotel' ? 'សណ្ឋាគារ' : 'ហាង'} (${selectedShopPlan.priceUsd.toFixed(2)} USD / ${selectedShopPlan.durationDays} ថ្ងៃ) តាម ABA KHQR ជាមុនសិន!`,
+          `🔒 Payment Required: Please complete the ${businessType === 'hotel' ? 'Hotel' : 'Shop'} Package payment (${selectedShopPlan.priceUsd.toFixed(2)} USD / ${selectedShopPlan.durationDays} Days) first!`,
+          `🔒 需先付款：请先完成${businessType === 'hotel' ? '酒店' : '店铺'}套餐付款 (${selectedShopPlan.priceUsd.toFixed(2)} USD / ${selectedShopPlan.durationDays} 天)！`
+        ),
+        'warning'
+      );
+      setIsPreviewStep(false);
+      setActiveTab('pay_additional_slot');
+      return;
+    }
 
     const trimmedNameKh = nameKh.trim();
     const trimmedNameEn = nameEn.trim();
@@ -1510,7 +1533,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               type="button"
               onClick={() => {
                 setReplacingStoreId(null);
-                setActiveTab('create_form');
+                setActiveTab(requiresAdditionalPayment ? 'pay_additional_slot' : 'create_form');
               }}
               className={`flex-1 py-2 px-3 rounded-xl font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
                 activeTab === 'create_form'
@@ -1795,7 +1818,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               onClick={() => {
                 resetFormFields();
                 setFormMode('add_new');
-                setActiveTab('create_form');
+                setActiveTab(requiresAdditionalPayment ? 'pay_additional_slot' : 'create_form');
               }}
               className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer"
             >
@@ -1808,7 +1831,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               onClick={() => {
                 resetFormFields();
                 setFormMode('upgrade_existing');
-                setActiveTab('create_form');
+                setActiveTab(requiresAdditionalPayment ? 'pay_additional_slot' : 'create_form');
               }}
               className="w-full py-2.5 px-3.5 rounded-2xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700/60 font-extrabold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
             >
@@ -1823,7 +1846,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               </span>
             </button>
           </div>
-        ) : activeTab === 'pay_additional_slot' ? (
+        ) : activeTab === 'pay_additional_slot' || requiresAdditionalPayment ? (
           /* ============================================================================
              EXTRA STORE SLOT CHECKOUT
              ============================================================================ */
@@ -1834,42 +1857,81 @@ export const VipAddRestaurantModal: React.FC = () => {
             <div className="flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setActiveTab('create_form')}
+                onClick={() => {
+                  if (requiresAdditionalPayment) {
+                    if (ownedRestaurants.length > 0) {
+                      setActiveTab('my_stores');
+                    } else {
+                      setIsVipAddRestaurantModalOpen(false);
+                    }
+                  } else {
+                    setActiveTab('create_form');
+                  }
+                }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1 cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>{tr(language, 'ត្រឡប់ក្រោយ', 'Back', '返回')}</span>
               </button>
               <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold text-[11px]">
-                +${quota.additionalStoreFeeUsd.toFixed(2)} USD / 1 {tr(language, 'ហាងបន្ថែម', 'Extra Shop', '额外店铺')}
+                ${selectedShopPlan.priceUsd.toFixed(2)} USD / {selectedShopPlan.durationDays} {tr(language, 'ថ្ងៃ', 'Days', '天')}
               </span>
             </div>
 
-            <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-400/80 space-y-1.5">
+            <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-400/80 space-y-2">
+              <div className="grid grid-cols-2 gap-1.5 pb-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBusinessType('restaurant');
+                    setBusinessCategory('restaurant');
+                  }}
+                  className={`py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 border transition cursor-pointer ${businessType === 'restaurant' ? 'bg-[#064E3B] text-white border-[#064E3B]' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'}`}
+                >
+                  <span>🏪 {tr(language, 'បន្ថែមហាងអាហារ', 'Add Shop', '添加餐厅/店铺')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBusinessType('hotel');
+                    setBusinessCategory('hotel');
+                  }}
+                  className={`py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 border transition cursor-pointer ${businessType === 'hotel' ? 'bg-[#064E3B] text-white border-[#064E3B]' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'}`}
+                >
+                  <span>🏨 {tr(language, 'បន្ថែមសណ្ឋាគារ', 'Add Hotel', '添加酒店')}</span>
+                </button>
+              </div>
               <div className="font-bold text-amber-900 dark:text-amber-200 flex items-center justify-between">
                 <span>
-                  {tr(
-                    language,
-                    `🏪 តម្លៃបន្ថែមហាងទី ${quota.nextStoreSlotNumber}`,
-                    `🏪 Additional Shop #${quota.nextStoreSlotNumber} Fee`,
-                    `🏪 第 ${quota.nextStoreSlotNumber} 家额外店铺费用`
-                  )}
+                  {businessType === 'hotel'
+                    ? tr(language, '🔒 តម្រូវឱ្យបង់ប្រាក់ដើម្បីបន្ថែមសណ្ឋាគារថ្មី', '🔒 Payment Required to Add Hotel', '🔒 添加酒店需先付款')
+                    : tr(language, '🔒 តម្រូវឱ្យបង់ប្រាក់ដើម្បីបន្ថែមហាងថ្មី', '🔒 Payment Required to Add Shop', '🔒 添加店铺需先付款')}
                 </span>
                 <span className="font-mono font-black text-emerald-700 dark:text-emerald-300 text-sm">
-                  +${quota.additionalStoreFeeUsd.toFixed(2)} USD
+                  ${selectedShopPlan.priceUsd.toFixed(2)} USD
                 </span>
               </div>
               <p className="text-[11px] text-slate-700 dark:text-slate-200 leading-relaxed">
                 {tr(
                   language,
-                  `ការដាក់ហាង និងមុខងារ VIP ទាំង ៥ តម្រូវឱ្យបើកកញ្ចប់ហាងបង់ប្រាក់ (មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃទេ)។ រាល់ការបន្ថែមហាងបន្ទាប់ តម្រូវឱ្យបង់ប្រាក់បន្ថែម ${quota.additionalStoreFeeUsd.toFixed(2)} USD ក្នុង ១ ហាង។`,
-                  `Shop listing & all 5 VIP store benefits require the Paid Shop Package (not included in the 7-Day Free Trial). Each additional shop slot requires ${quota.additionalStoreFeeUsd.toFixed(2)} USD.`,
-                  `上架店铺及 5 项 VIP 权益需开通付费店铺套餐（不含在 7 天免费试用内）。每增加一家额外店铺需支付 ${quota.additionalStoreFeeUsd.toFixed(2)} USD。`
+                  'គណនីឥតគិតថ្លៃមិនអាចបន្ថែមហាង ឬសណ្ឋាគារដោយមិនបង់ប្រាក់បានទេ។ សូមជ្រើសរើសកញ្ចប់ 30 ថ្ងៃ ($6.99) ឬ 365 ថ្ងៃ ($49.99) រួចស្កេនបង់ប្រាក់តាម ABA KHQR ខាងក្រោមដើម្បីបើកសិទ្ធិដាក់ហាង ឬសណ្ឋាគារ។',
+                  'Free users cannot add a Shop or Hotel without payment. Please select the 30-Day ($6.99) or 365-Day ($49.99) plan and pay via ABA KHQR below to unlock Shop/Hotel registration.',
+                  '免费用户无法免费添加店铺或酒店。请选择 30 天（$6.99）或 365 天（$49.99）套餐并通过下方 ABA KHQR 付款后解锁。'
                 )}
               </p>
+              {quota.pendingAdditionalStoreTransaction && (
+                <div className="p-2.5 rounded-xl bg-emerald-100/80 dark:bg-emerald-950/60 border border-emerald-400 text-emerald-900 dark:text-emerald-200 text-[11px] font-bold">
+                  {tr(
+                    language,
+                    `⏳ អ្នកបានដាក់ស្នើវិក្កយបត្របង់ប្រាក់ (${quota.pendingAdditionalStoreTransaction.id}) រួចហើយ — កំពុងរង់ចាំ Admin ផ្ទៀងផ្ទាត់ និងអនុម័ត!`,
+                    `⏳ Your payment receipt (${quota.pendingAdditionalStoreTransaction.id}) has been submitted and is awaiting Admin verification & approval!`,
+                    `⏳ 您的付款凭证（${quota.pendingAdditionalStoreTransaction.id}）已提交，正在等待管理员审核批准！`
+                  )}
+                </div>
+              )}
             </div>
 
-            {ownedRestaurants[0] && (
+            {quota.canReplaceExistingStoreForFree && ownedRestaurants[0] && isShopSubscriptionActive(ownedRestaurants[0]) && (
               <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-400 space-y-2">
                 <p className="text-[11px] text-slate-700 dark:text-slate-200 font-medium">
                   {tr(
@@ -2551,7 +2613,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                             )}
                           </span>
                         </button>
-                        {ownedRestaurants[0] && (
+                        {quota.canReplaceExistingStoreForFree && ownedRestaurants[0] && isShopSubscriptionActive(ownedRestaurants[0]) && (
                           <button
                             type="button"
                             onClick={() => beginReplaceStore(ownedRestaurants[0])}
@@ -2594,8 +2656,8 @@ export const VipAddRestaurantModal: React.FC = () => {
                       <div className="pt-2 border-t border-slate-700/80 text-[10.5px] font-bold text-amber-300 leading-relaxed">
                         {tr(
                           language,
-                          `🔒 កញ្ចប់ដាក់ហាងបង់ប្រាក់ (${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ។ ការបង់ប្រាក់ធ្វើឡើងក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តព័ត៌មានហាង។`,
-                          `🔒 Paid Shop Package (${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr) — Not included in the 7-Day Free Trial. Payment is completed after Admin approves your shop details.`,
+                          `🔒 កញ្ចប់ដាក់ហាងបង់ប្រាក់ (${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ។ តម្រូវឱ្យបង់ប្រាក់តាម ABA KHQR និងផ្ទៀងផ្ទាត់ដោយ Admin ជាមុនសិន។`,
+                          `🔒 Paid Shop Package (${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr) — Not included in the 7-Day Free Trial. Payment via ABA KHQR and Admin verification is required to activate your listing.`,
                           `🔒 付费店铺套餐（${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天 或 ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/年）——不含在 7 天免费试用内，管理员审核通过后付款开通。`
                         )}
                       </div>

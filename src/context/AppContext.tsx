@@ -10132,6 +10132,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const quota = getUserStoreQuotaSummary(currentUser, restaurants, transactions, appSettings);
     const replaceTargetId = options?.replaceRestaurantId?.trim();
 
+    if (!isAdmin && !replaceTargetId && !quota.canCreateNewStoreWithoutPayment) {
+      showToast(
+        tr(
+          language,
+          '🔒 គណនីឥតគិតថ្លៃមិនអាចបន្ថែមហាង ឬសណ្ឋាគារដោយមិនបង់ប្រាក់បានទេ! សូមជ្រើសរើសកញ្ចប់ $6.99 (30 ថ្ងៃ) ឬ $49.99 (365 ថ្ងៃ) និងបង់ប្រាក់តាម ABA KHQR ជាមុនសិន។',
+          '🔒 Free accounts cannot add a Shop or Hotel without payment! Please select the $6.99 (30 Days) or $49.99 (365 Days) package and pay via ABA KHQR first.',
+          '🔒 免费账号无法免费添加店铺或酒店！请先选择 $6.99（30天）或 $49.99（365天）套餐并通过 ABA KHQR 付款。'
+        ),
+        'warning'
+      );
+      setIsVipAddRestaurantModalOpen(true);
+      return null;
+    }
+
     // Prevent duplicate shop/hotel entries by checking existing records by Google Place ID, Name, Phone, and GPS
     const candidatePlaceId = (restData.googlePlaceId || restData.googleMapsMeta?.placeId || '').trim();
     if (!replaceTargetId) {
@@ -10211,8 +10225,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ? targetToReplace.storeSlotNumber || 1
       : quota.usedStoresCount + 1;
     const isOwnerPaidVipSlot = Boolean(
-      !isAdmin && isUserPaidVipActive(currentUser) && slotNumber <= Math.max(1, quota.totalAllowedStores)
+      !isAdmin && quota.canCreateNewStoreWithoutPayment && slotNumber <= Math.max(1, quota.totalAllowedStores)
     );
+    const verifiedStoreSlotTxn = quota.verifiedAdditionalStoreTransactions[0];
+    const verifiedStoreSlotExpiryIso = verifiedStoreSlotTxn
+      ? new Date(Date.now() + (verifiedStoreSlotTxn.durationDays || (verifiedStoreSlotTxn.amountUsd >= 40 ? 365 : 30)) * 24 * 60 * 60 * 1000).toISOString()
+      : undefined;
     const inheritedShopActive = Boolean(
       (targetToReplace && isShopSubscriptionActive(targetToReplace)) || isOwnerPaidVipSlot
     );
@@ -10221,7 +10239,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const nowIso = new Date().toISOString();
     const adminDefaultExpiryIso = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
-    const ownerPaidVipExpiryIso = currentUser.subscriptionExpiryDate || currentUser.vipExpiresAt;
+    const ownerPaidVipExpiryIso = currentUser.subscriptionExpiryDate || currentUser.vipExpiresAt || verifiedStoreSlotExpiryIso;
     const replacedRawExpiryIso =
       targetToReplace?.shopSubscriptionExpiresAt ||
       targetToReplace?.subscriptionExpiresAt ||
@@ -10278,7 +10296,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : finalStatus === 'pending' && appSettings.shopPayAfterApproval !== false
             ? 'awaiting_admin_approval'
             : 'awaiting_payment',
-      activeShopPlanId: targetToReplace?.activeShopPlanId,
+      activeShopPlanId: targetToReplace?.activeShopPlanId || verifiedStoreSlotTxn?.planId || (isOwnerPaidVipSlot ? 'shop_30d' : undefined),
       paymentStatus: isPendingPayment ? 'pending_verification' : (isAdmin || inheritedShopActive) ? 'verified' : undefined,
       menuItems: targetToReplace?.menuItems || [],
       storeSlotNumber: slotNumber,
@@ -11993,9 +12011,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser.id === 'admin-authorized-single' ||
       currentUser.username === 'admin' ||
       currentUser.username === 'cheasavuth';
-    const isApprovedVip = isUserVipActive(currentUser);
+    const upgradeQuota = getUserStoreQuotaSummary(currentUser, restaurants, transactions, appSettings);
 
-    if (!isAdmin && !isApprovedVip) {
+    if (!isAdmin && !upgradeQuota.canCreateNewStoreWithoutPayment) {
       showToast(
         tr(language, '🔒 មានតែសមាជិក VIP សកម្មប៉ុណ្ណោះដែលអាចស្នើដំឡើង និងកែប្រែហាង/សណ្ឋាគារដែលមានស្រាប់បាន!', '🔒 Only active VIP members can submit an upgrade request for an existing shop or hotel!', '🔒 仅有效 VIP 会员可以提交现有店铺或酒店的升级申请！'),
         'warning'
@@ -15075,10 +15093,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser.id === 'admin-authorized-single' ||
       currentUser.username === 'admin' ||
       currentUser.username === 'cheasavuth';
-    if (!isAdmin && !isUserPaidVipActive(currentUser)) {
+    if (!isAdmin && !hasAuthenticatedAccount(currentUser)) {
       const msg =
-        tr(language, '🔒 មានតែគណនី VIP សកម្មប៉ុណ្ណោះដែលអាចបន្ថែមហាងថ្មីបាន។ សូមដំឡើង ឬបន្តសមាជិកភាព VIP ជាមុនសិន!', '🔒 Only active VIP accounts can purchase additional store slots. Please upgrade or renew VIP first!', '🔒 仅有效 VIP 账号可购买额外店铺名额。请先升级或续费 VIP！');
+        tr(language, 'សូមចុះឈ្មោះ ឬចូលគណនីជាមុនសិន ដើម្បីបង់ប្រាក់កញ្ចប់ហាង/សណ្ឋាគារ!', 'Please sign in first to purchase a Shop or Hotel package!', '请先登录以购买店铺或酒店套餐！');
       showToast(msg, 'warning');
+      setIsAuthModalOpen(true);
       return { success: false, transactionId: '', error: msg };
     }
 

@@ -444,7 +444,7 @@ export async function verifyAdditionalStorePaymentOnBackend(
 ): Promise<AdditionalStorePaymentVerificationResult> {
   const expectedFee = getAdditionalStoreFeeUsd(settings);
   const cleanRef = req.transactionRef ? req.transactionRef.trim().toUpperCase() : '';
-  const slotNum = req.storeSlotNumber && req.storeSlotNumber >= 2 ? req.storeSlotNumber : 2;
+  const slotNum = req.storeSlotNumber && req.storeSlotNumber >= 1 ? req.storeSlotNumber : 1;
 
   if (!req.userId || !cleanRef || cleanRef.length < 4) {
     return {
