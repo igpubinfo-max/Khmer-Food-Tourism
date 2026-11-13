@@ -3198,6 +3198,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const seedRestPhotoMapRef = useRef<Map<string, string> | null>(null);
 
   const lastWrittenStorageJsonRef = useRef<Record<string, string>>({});
+  const lastWrittenStorageRef = useRef<Record<string, unknown>>({});
 
   const compactDataForBulkLocalStorage = (
     key: string,
@@ -3334,15 +3335,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const scheduleStorageWrite = (key: string, data: unknown, delayMs = 1000) => {
+    if (data !== undefined && data !== null && lastWrittenStorageRef.current[key] === data) {
+      return;
+    }
     if (storageWriteTimersRef.current[key]) {
       window.clearTimeout(storageWriteTimersRef.current[key]);
     }
     storageWriteTimersRef.current[key] = window.setTimeout(() => {
       delete storageWriteTimersRef.current[key];
       const performWrite = () => {
+        if (data !== undefined && data !== null && lastWrittenStorageRef.current[key] === data) {
+          return;
+        }
         try {
           const compacted = compactDataForBulkLocalStorage(key, data, false);
           const serialized = JSON.stringify(compacted);
+          lastWrittenStorageRef.current[key] = data;
           if (lastWrittenStorageJsonRef.current[key] === serialized) return;
           localStorage.setItem(key, serialized);
           lastWrittenStorageJsonRef.current[key] = serialized;
@@ -3387,11 +3395,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const writeRestaurantsToStorageImmediate = (nextList: Restaurant[]) => {
     try {
       const compacted = compactDataForBulkLocalStorage('kft_restaurants_real_v13', nextList, false);
-      localStorage.setItem('kft_restaurants_real_v13', JSON.stringify(compacted));
+      const serialized = JSON.stringify(compacted);
+      localStorage.setItem('kft_restaurants_real_v13', serialized);
+      lastWrittenStorageJsonRef.current['kft_restaurants_real_v13'] = serialized;
+      lastWrittenStorageRef.current['kft_restaurants_real_v13'] = nextList;
+      return;
     } catch {
       try {
         const aggressivelyCompacted = compactDataForBulkLocalStorage('kft_restaurants_real_v13', nextList, true);
-        localStorage.setItem('kft_restaurants_real_v13', JSON.stringify(aggressivelyCompacted));
+        const serialized = JSON.stringify(aggressivelyCompacted);
+        localStorage.setItem('kft_restaurants_real_v13', serialized);
+        lastWrittenStorageJsonRef.current['kft_restaurants_real_v13'] = serialized;
+        lastWrittenStorageRef.current['kft_restaurants_real_v13'] = nextList;
+        return;
       } catch (retryErr) {
         console.warn('Immediate storage sync warning for kft_restaurants_real_v13:', retryErr);
       }
@@ -3642,25 +3658,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       attemptedCloudMigrationSigsRef.current.add(`${id}:${url.length}:${url.slice(-24)}`);
     };
 
-    const restNeedsMigration = restaurants.some(
-      (r) =>
-        needsUnattemptedUpload(r.id, r.photoUrl) ||
-        needsUnattemptedUpload(`${r.id}_prof`, r.profileImage) ||
-        needsUnattemptedUpload(`${r.id}_pend`, r.pendingPhotoReplacement?.newPhotoUrl) ||
-        needsUnattemptedUpload(`${r.id}_upg`, r.pendingUpgradeRequest?.proposedChanges?.photoUrl) ||
-        (Array.isArray(r.menuItems) && r.menuItems.some((m) => needsUnattemptedUpload(m.id, m.photoUrl)))
-    );
-    const isAdminSession = isCurrentUserAdmin();
-    const foodNeedsMigration = isAdminSession && foods.some((f) => needsUnattemptedUpload(f.id, f.photoUrl));
-    const destNeedsMigration = isAdminSession && destinations.some((d) => needsUnattemptedUpload(d.id, d.photoUrl));
-    const trendNeedsMigration = isAdminSession && trendingFoods.some((t) => needsUnattemptedUpload(t.id, t.photoUrl));
-
-    if (!restNeedsMigration && !foodNeedsMigration && !destNeedsMigration && !trendNeedsMigration) {
-      return;
-    }
-
     const timer = window.setTimeout(async () => {
       if (isMigratingCloudImagesRef.current) return;
+      if (!isAppActiveRef.current) return;
+      const restNeedsMigration = latestSyncStateRef.current.restaurants.some(
+        (r) =>
+          needsUnattemptedUpload(r.id, r.photoUrl) ||
+          needsUnattemptedUpload(`${r.id}_prof`, r.profileImage) ||
+          needsUnattemptedUpload(`${r.id}_pend`, r.pendingPhotoReplacement?.newPhotoUrl) ||
+          needsUnattemptedUpload(`${r.id}_upg`, r.pendingUpgradeRequest?.proposedChanges?.photoUrl) ||
+          (Array.isArray(r.menuItems) && r.menuItems.some((m) => needsUnattemptedUpload(m.id, m.photoUrl)))
+      );
+      const isAdminSession = isCurrentUserAdmin();
+      const foodNeedsMigration = isAdminSession && foods.some((f) => needsUnattemptedUpload(f.id, f.photoUrl));
+      const destNeedsMigration = isAdminSession && destinations.some((d) => needsUnattemptedUpload(d.id, d.photoUrl));
+      const trendNeedsMigration = isAdminSession && trendingFoods.some((t) => needsUnattemptedUpload(t.id, t.photoUrl));
+
+      if (!restNeedsMigration && !foodNeedsMigration && !destNeedsMigration && !trendNeedsMigration) {
+        return;
+      }
       isMigratingCloudImagesRef.current = true;
       try {
         // 1. Migrate Shops & Hotels (`restaurants`) sequentially to avoid Canvas/GPU memory spikes

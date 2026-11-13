@@ -3108,12 +3108,9 @@ export const WhatToEatModal: React.FC = () => {
                         <img
                           src={g.imageSrc}
                           alt={displayText}
-                          loading="eager"
                           decoding="async"
                           style={{
-                            filter: isHighlighted
-                              ? 'drop-shadow(0 0 2px #FDE047) drop-shadow(0 5px 14px rgba(245, 158, 11, 0.55)) brightness(1.05)'
-                              : 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42))',
+                            transform: 'none',
                           }}
                           className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-150"
                         />
@@ -3156,12 +3153,9 @@ export const WhatToEatModal: React.FC = () => {
                         <img
                           src="/categories/ai_cat_drinks.png"
                           alt={drinkLabel}
-                          loading="eager"
                           decoding="async"
                           style={{
-                            filter: drinkMode
-                              ? 'drop-shadow(0 0 2px #FDE047) drop-shadow(0 5px 14px rgba(245, 158, 11, 0.55)) brightness(1.05)'
-                              : 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42))',
+                            transform: 'none',
                           }}
                           className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-150"
                         />
@@ -3194,10 +3188,9 @@ export const WhatToEatModal: React.FC = () => {
                         <img
                           src="/categories/ai_cat_new_picks.png"
                           alt={newPicksLabel}
-                          loading="eager"
                           decoding="async"
                           style={{
-                            filter: 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42))',
+                            transform: 'none',
                           }}
                           className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-200 ${
                             isSpinning ? 'brightness-110 scale-[0.98]' : ''

@@ -563,8 +563,8 @@ export const AiTripPlannerModal: React.FC = () => {
                 draggable={false}
                 className={`w-full h-full object-contain select-none pointer-events-none transition-all duration-200 ${
                   assistantTab === 'food_advisor'
-                    ? 'scale-[1.03] drop-shadow-[0_4px_12px_rgba(250,204,21,0.45)]'
-                    : 'opacity-90 group-hover:opacity-100 drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]'
+                    ? 'scale-[1.03]'
+                    : 'opacity-90 group-hover:opacity-100'
                 }`}
               />
             </div>
@@ -594,8 +594,8 @@ export const AiTripPlannerModal: React.FC = () => {
                 draggable={false}
                 className={`w-full h-full object-contain select-none pointer-events-none transition-all duration-200 ${
                   assistantTab === 'healthy_vip'
-                    ? 'scale-[1.03] drop-shadow-[0_4px_12px_rgba(250,204,21,0.45)]'
-                    : 'opacity-90 group-hover:opacity-100 drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]'
+                    ? 'scale-[1.03]'
+                    : 'opacity-90 group-hover:opacity-100'
                 }`}
               />
             </div>
@@ -626,8 +626,8 @@ export const AiTripPlannerModal: React.FC = () => {
                 draggable={false}
                 className={`w-full h-full object-contain select-none pointer-events-none transition-all duration-200 ${
                   assistantTab === 'route_planner'
-                    ? 'scale-[1.03] drop-shadow-[0_4px_12px_rgba(250,204,21,0.45)]'
-                    : 'opacity-90 group-hover:opacity-100 drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]'
+                    ? 'scale-[1.03]'
+                    : 'opacity-90 group-hover:opacity-100'
                 }`}
               />
             </div>

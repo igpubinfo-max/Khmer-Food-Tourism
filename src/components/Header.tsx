@@ -17,7 +17,7 @@ interface HeaderProps {
   onOpenSmartHub?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
+const HeaderInner: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
   const {
     language,
     setLanguage,
@@ -285,3 +285,5 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
     </header>
   );
 };
+
+export const Header = React.memo(HeaderInner);

@@ -370,9 +370,7 @@ export const FoodView: React.FC = () => {
         <div className="w-full flex items-center gap-1.5 min-[360px]:gap-2 min-w-0">
           <div
             style={{
-              background: 'rgba(255, 255, 255, 0.92)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
+              background: 'rgba(255, 255, 255, 0.96)',
               boxShadow: '0 6px 20px rgba(15, 23, 42, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
             }}
             className="flex-1 min-w-0 h-[44px] rounded-full border-[1.5px] border-white pl-2.5 min-[360px]:pl-3.5 pr-1.5 flex items-center gap-1.5 min-[360px]:gap-2"
@@ -442,9 +440,7 @@ export const FoodView: React.FC = () => {
         <div
           ref={dishCategoryCardRef}
           style={{
-            background: 'rgba(255, 255, 255, 0.96)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            background: 'rgba(255, 255, 255, 0.98)',
             boxShadow: '0 8px 22px rgba(15, 23, 42, 0.08)',
           }}
           className="w-full max-w-full min-w-0 rounded-[24px] p-1.5 min-[360px]:p-2 sm:p-3 border border-white"
@@ -503,10 +499,10 @@ export const FoodView: React.FC = () => {
                   <img
                     src={cat.imageSrc}
                     alt={label}
-                    className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none transition-all duration-150 ${
+                    className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none transition-transform duration-150 ${
                       active
-                        ? 'drop-shadow-[0_6px_14px_rgba(21,128,61,0.45)] brightness-[1.03]'
-                        : 'drop-shadow-[0_4px_10px_rgba(15,23,42,0.16)] opacity-95 group-hover:opacity-100'
+                        ? 'scale-[1.02]'
+                        : 'opacity-95 group-hover:opacity-100'
                     }`}
                     loading="eager"
                     decoding="async"

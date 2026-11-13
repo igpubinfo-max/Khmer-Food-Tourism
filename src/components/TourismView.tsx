@@ -462,9 +462,7 @@ export const TourismView: React.FC = () => {
         <div className="w-full flex items-center gap-2 min-w-0">
           <div
             style={{
-              background: 'rgba(255, 255, 255, 0.96)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
+              background: 'rgba(255, 255, 255, 0.98)',
               boxShadow: '0 8px 24px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1)',
             }}
             className="flex-1 min-w-0 min-h-[48px] py-1 rounded-full border border-white pl-3.5 pr-2 flex items-center gap-2"
@@ -551,7 +549,6 @@ export const TourismView: React.FC = () => {
                   <div
                     className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px]"
                     style={{
-                      filter: 'drop-shadow(0 4px 8px rgba(2, 6, 23, 0.42))',
                       transform: 'none',
                     }}
                   >

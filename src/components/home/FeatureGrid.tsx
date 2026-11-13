@@ -90,7 +90,6 @@ const FeatureGridImpl: React.FC<Props> = ({
             <div
               className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200"
               style={{
-                filter: 'drop-shadow(0 4px 8px rgba(2, 6, 23, 0.42))',
                 transform: 'none',
               }}
             >

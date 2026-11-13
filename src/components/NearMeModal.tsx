@@ -81,6 +81,7 @@ export function calculateDistanceMeters(lat1: number, lon1: number, lat2: number
 }
 
 export const MAX_NEARBY_RADIUS_METERS = 500;
+const NEARBY_BATCH_SIZE = 24;
 const LAST_KNOWN_GPS_STORAGE_KEY = 'kft_last_known_user_gps_v1';
 
 const RADIUS_OPTIONS: { value: number; labelKh: string; labelEn: string; labelZh: string }[] = [
@@ -200,6 +201,11 @@ export const NearMeModal: React.FC = () => {
   const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
   const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>([]);
   const [liveNearbyAttractions, setLiveNearbyAttractions] = useState<GooglePlaceCachedItem[]>([]);
+  const [visibleNearbyCount, setVisibleNearbyCount] = useState<number>(NEARBY_BATCH_SIZE);
+
+  useEffect(() => {
+    setVisibleNearbyCount(NEARBY_BATCH_SIZE);
+  }, [activeTab, quickFilterId, nearbyQuery, selectedRadiusMeters, manualProvince]);
 
   // All 25 Cambodian Provinces & Capital City center coordinates
   const provinceCenters: Record<string, { lat: number; lng: number }> = {
@@ -419,20 +425,21 @@ export const NearMeModal: React.FC = () => {
 
   const filteredNearbyRestaurants = useMemo(() => {
     const rawQuery = nearbyQuery.trim();
+    const needZh = language === 'zh' || /[\u4e00-\u9fff]/.test(rawQuery);
     const passesQuickFilter = (r: Restaurant): boolean => {
       if (quickFilterId === 'all') return true;
-      const zhLoc = getLocalizedRestaurant(r, 'zh');
+      const zhLoc = needZh ? getLocalizedRestaurant(r, 'zh') : null;
       const shopKind = classifyShopBusinessKind(r);
       const haystack = normalizeKhmerFoodText(
         [
           r.nameKh,
           r.nameEn,
-          zhLoc.name,
+          zhLoc?.name,
           r.categoryKh,
           r.categoryEn,
           ...(r.signatureDishesKh || []),
           ...(r.signatureDishesEn || []),
-          ...(zhLoc.signatureDishes || []),
+          ...(zhLoc?.signatureDishes || []),
           ...((r.menuItems || []).map((m) => `${m.nameKh} ${m.nameEn || ''}`)),
         ]
           .filter(Boolean)
@@ -540,24 +547,25 @@ export const NearMeModal: React.FC = () => {
 
   const filteredNearbyDestinations = useMemo(() => {
     const q = nearbyQuery.trim().toLowerCase();
+    const needZh = language === 'zh' || /[\u4e00-\u9fff]/.test(q);
     return nearbyDestinations.filter((d) => {
-      const zhLoc = getLocalizedDestination(d, 'zh');
+      const zhLoc = needZh ? getLocalizedDestination(d, 'zh') : null;
       const haystack = [
         d.nameKh,
         d.nameEn,
-        zhLoc.name,
+        zhLoc?.name,
         d.categoryKh,
         d.categoryEn,
-        zhLoc.category,
+        zhLoc?.category,
         d.descriptionKh,
         d.descriptionEn,
-        zhLoc.description,
+        zhLoc?.description,
         d.addressKh,
         d.addressEn,
-        zhLoc.address,
+        zhLoc?.address,
         d.provinceKh,
         d.provinceEn,
-        zhLoc.province,
+        zhLoc?.province,
       ]
         .filter(Boolean)
         .join(' ')
@@ -568,15 +576,15 @@ export const NearMeModal: React.FC = () => {
       if (
         q &&
         !matchesSearchQuery(nearbyQuery, {
-          ...destinationSearchFields(d, [zhLoc.name]),
-          categories: [d.categoryKh, d.categoryEn, zhLoc.category, d.categorySlug],
-          texts: [d.descriptionKh, d.descriptionEn, zhLoc.description, zhLoc.address],
+          ...destinationSearchFields(d, zhLoc ? [zhLoc.name] : []),
+          categories: [d.categoryKh, d.categoryEn, zhLoc?.category || '', d.categorySlug],
+          texts: [d.descriptionKh, d.descriptionEn, zhLoc?.description || '', zhLoc?.address || ''],
         })
       )
         return false;
       return true;
     });
-  }, [nearbyDestinations, nearbyQuery, quickFilterId]);
+  }, [nearbyDestinations, nearbyQuery, quickFilterId, language]);
 
   if (!isNearMeModalOpen) return null;
 
@@ -868,9 +876,8 @@ export const NearMeModal: React.FC = () => {
                     <div
                       className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px]"
                       style={{
-                      filter: 'drop-shadow(0 4px 8px rgba(2, 6, 23, 0.42))',
-                      transform: 'none',
-                    }}
+                        transform: 'none',
+                      }}
                     >
                       <img
                         src={card.imageSrc}
@@ -981,8 +988,9 @@ export const NearMeModal: React.FC = () => {
                 </div>
               </div>
             ) : (
+              <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {filteredNearbyRestaurants.map((r) => {
+                {filteredNearbyRestaurants.slice(0, visibleNearbyCount).map((r) => {
                   const rLoc = getLocalizedRestaurant(r, language);
                   const hasOfficialPhoto =
                     Boolean(r.photoUrl) &&
@@ -998,7 +1006,7 @@ export const NearMeModal: React.FC = () => {
                         setSelectedRestaurant(r);
                         setIsNearMeModalOpen(false);
                       }}
-                      className={`p-3 bg-white rounded-[22px] border transition space-y-2.5 cursor-pointer ${
+                      className={`kft-cv-card p-3 bg-white rounded-[22px] border transition space-y-2.5 cursor-pointer ${
                         isVipShop
                           ? 'border-amber-400 ring-1 ring-amber-400/50 shadow-[0_6px_20px_rgba(245,158,11,0.16)]'
                           : 'border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.05)] hover:border-emerald-500/60'
@@ -1119,6 +1127,25 @@ export const NearMeModal: React.FC = () => {
                   );
                 })}
               </div>
+              {visibleNearbyCount < filteredNearbyRestaurants.length && (
+                <div className="pt-3 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleNearbyCount((prev) => prev + NEARBY_BATCH_SIZE)}
+                    className="kft-btn-load-more"
+                  >
+                    <span>
+                      {tr(
+                        language,
+                        `បង្ហាញហាងបន្ថែម (${filteredNearbyRestaurants.length - visibleNearbyCount} ទៀត)`,
+                        `Load More (${filteredNearbyRestaurants.length - visibleNearbyCount} left)`,
+                        `加载更多（剩余 ${filteredNearbyRestaurants.length - visibleNearbyCount} 家）`
+                      )}
+                    </span>
+                  </button>
+                </div>
+              )}
+              </>
             )
           ) : filteredNearbyDestinations.length === 0 ? (
             <div className="py-12 px-4 text-center bg-white rounded-3xl border border-slate-200/90 shadow-xs my-2">
@@ -1172,8 +1199,9 @@ export const NearMeModal: React.FC = () => {
               </div>
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {filteredNearbyDestinations.map((d) => {
+              {filteredNearbyDestinations.slice(0, visibleNearbyCount).map((d) => {
                 const dLoc = getLocalizedDestination(d, language);
                 const hasOfficialPhoto =
                   !d.photoUrl?.startsWith('data:image/svg+xml') &&
@@ -1181,7 +1209,7 @@ export const NearMeModal: React.FC = () => {
                 return (
                   <div
                     key={d.id}
-                    className="p-3 bg-white rounded-[22px] border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.05)] hover:border-emerald-500/60 transition space-y-2.5"
+                    className="kft-cv-card p-3 bg-white rounded-[22px] border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.05)] hover:border-emerald-500/60 transition space-y-2.5"
                   >
                     <div className="flex gap-3">
                       <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200/70">
@@ -1278,6 +1306,25 @@ export const NearMeModal: React.FC = () => {
                 );
               })}
             </div>
+            {visibleNearbyCount < filteredNearbyDestinations.length && (
+              <div className="pt-3 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleNearbyCount((prev) => prev + NEARBY_BATCH_SIZE)}
+                  className="kft-btn-load-more"
+                >
+                  <span>
+                    {tr(
+                      language,
+                      `បង្ហាញទីតាំងបន្ថែម (${filteredNearbyDestinations.length - visibleNearbyCount} ទៀត)`,
+                      `Load More (${filteredNearbyDestinations.length - visibleNearbyCount} left)`,
+                      `加载更多（剩余 ${filteredNearbyDestinations.length - visibleNearbyCount} 处）`
+                    )}
+                  </span>
+                </button>
+              </div>
+            )}
+            </>
           )}
         </div>
         </div>

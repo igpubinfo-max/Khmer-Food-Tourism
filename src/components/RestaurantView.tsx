@@ -665,9 +665,7 @@ export const RestaurantView: React.FC = () => {
         <div className="w-full flex items-center gap-1.5 min-[360px]:gap-2 min-w-0">
           <div
             style={{
-              background: 'rgba(255, 255, 255, 0.92)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
+              background: 'rgba(255, 255, 255, 0.96)',
               boxShadow: '0 6px 20px rgba(15, 23, 42, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
             }}
             className="flex-1 min-w-0 h-[44px] rounded-full border-[1.5px] border-white pl-2.5 min-[360px]:pl-3.5 pr-1.5 flex items-center gap-1.5 min-[360px]:gap-2"
@@ -824,7 +822,6 @@ export const RestaurantView: React.FC = () => {
                   <div
                     className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] transition-all duration-200 rounded-[14px]"
                     style={{
-                      filter: 'drop-shadow(0 4px 8px rgba(2, 6, 23, 0.42))',
                       transform: 'none',
                     }}
                   >

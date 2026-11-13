@@ -38,7 +38,6 @@ export interface RestaurantCardProps {
 
 interface RestaurantCardViewProps {
   restaurant: Restaurant;
-  allRestaurants: Restaurant[];
   language: Language;
   isAdmin: boolean;
   variant: 'hero' | 'featured' | 'compact';
@@ -110,7 +109,6 @@ function getShopCuisineTags(
 const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
   ({
     restaurant,
-    allRestaurants,
     language,
     isAdmin,
     variant,
@@ -274,13 +272,12 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
         <article
           data-testid={`shop-featured-${restaurant.id}`}
           onClick={handleCardClick}
-          className="bg-white rounded-[22px] p-2.5 border border-slate-200/90 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:border-emerald-500/60 transition flex gap-3 items-stretch cursor-pointer font-khmer"
+          className="kft-cv-card bg-white rounded-[22px] p-2.5 border border-slate-200/90 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:border-emerald-500/60 transition flex gap-3 items-stretch cursor-pointer font-khmer"
         >
           {/* Left Photo Box with Distance Pill & Heart Button */}
           <div className="w-[100px] min-[340px]:w-[120px] min-[380px]:w-[144px] sm:w-[156px] min-h-[130px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100 border border-slate-100">
             <ShopAvatar
               restaurant={avatarRestaurant}
-              allRestaurants={allRestaurants}
               alt={loc.name}
               className="w-full h-full object-cover"
             />
@@ -398,12 +395,11 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
       <article
         data-testid={`shop-row-${restaurant.id}`}
         onClick={handleCardClick}
-        className="bg-white rounded-[20px] p-2.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(15,23,42,0.04)] hover:border-emerald-500/60 transition flex items-center gap-3 cursor-pointer font-khmer"
+        className="kft-cv-card bg-white rounded-[20px] p-2.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(15,23,42,0.04)] hover:border-emerald-500/60 transition flex items-center gap-3 cursor-pointer font-khmer"
       >
         <div className="w-16 h-14 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200/80">
           <ShopAvatar
             restaurant={avatarRestaurant}
-            allRestaurants={allRestaurants}
             alt={loc.name}
             className="w-full h-full object-cover"
           />
@@ -454,16 +450,22 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
         </div>
       </article>
     );
-  }
+  },
+  (prev, next) =>
+    prev.restaurant === next.restaurant &&
+    prev.language === next.language &&
+    prev.isAdmin === next.isAdmin &&
+    prev.variant === next.variant &&
+    prev.distanceKm === next.distanceKm &&
+    prev.bookmarked === next.bookmarked
 );
 
-export const RestaurantCard: React.FC<RestaurantCardProps> = ({
+const RestaurantCardInner: React.FC<RestaurantCardProps> = ({
   restaurant,
   variant = 'featured',
   distanceKm = null,
 }) => {
   const {
-    restaurants,
     language,
     currentUser,
     isBookmarked,
@@ -482,7 +484,6 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({
   return (
     <RestaurantCardView
       restaurant={restaurant}
-      allRestaurants={restaurants}
       language={language}
       isAdmin={isAdmin}
       variant={variant}
@@ -498,3 +499,5 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({
     />
   );
 };
+
+export const RestaurantCard = React.memo(RestaurantCardInner);

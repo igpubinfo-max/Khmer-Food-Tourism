@@ -112,8 +112,6 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
             <div
               className="pointer-events-none absolute inset-x-0 bottom-0 h-20"
               style={{
-                backdropFilter: 'blur(3.5px)',
-                WebkitBackdropFilter: 'blur(3.5px)',
                 maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 100%)',
                 WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 100%)',
               }}
@@ -225,8 +223,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
           {/* Language Pill Switcher (ខ្មែរ | EN | 中文) - Kept in current exact position */}
           <div
             style={{
-              background: 'rgba(15, 23, 42, 0.68)',
-              backdropFilter: 'blur(8px)',
+              background: 'rgba(15, 23, 42, 0.78)',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.32)',
             }}
             className="inline-flex items-center rounded-full p-[2px] border border-white/35"
@@ -280,9 +277,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
               handleTriggerAskAi();
             }}
             style={{
-              background: 'linear-gradient(90deg, rgba(15, 23, 42, 0.72) 0%, rgba(30, 41, 59, 0.68) 55%, rgba(15, 23, 42, 0.74) 100%)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
+              background: 'linear-gradient(90deg, rgba(15, 23, 42, 0.84) 0%, rgba(30, 41, 59, 0.80) 55%, rgba(15, 23, 42, 0.86) 100%)',
               boxShadow:
                 '0 0 0 1px rgba(245, 197, 66, 0.45), 0 4px 14px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.16)',
             }}
@@ -435,8 +430,7 @@ export const AccountTrialStatusBar: React.FC<{ className?: string; inline?: bool
         type="button"
         onClick={() => openUpgradeVipModal()}
         style={{
-          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(6, 78, 59, 0.90) 100%)',
-          backdropFilter: 'blur(8px)',
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(6, 78, 59, 0.92) 100%)',
           boxShadow: '0 3px 12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.16)',
         }}
         className="relative min-h-[34px] min-[360px]:min-h-[38px] py-1 px-2.5 min-[360px]:px-3 rounded-full border border-[#FDE047]/65 flex items-center gap-1.5 text-white hover:border-[#FDE047]/90 transition active:scale-95 cursor-pointer shrink-0 overflow-hidden"

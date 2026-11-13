@@ -634,10 +634,11 @@ export const HotelView: React.FC = () => {
       return scoped;
     }
 
+    const needZhSearch = language === 'zh' || /[\u4e00-\u9fff]/.test(trimmedQ);
     return rankBySearchRelevance(
       scoped,
       trimmedQ,
-      (h) => destinationSearchFields(h, [getLocalizedDestination(h, 'zh').name, classifyHotelSubCategory(h)]),
+      (h) => destinationSearchFields(h, [needZhSearch ? getLocalizedDestination(h, 'zh').name : '', classifyHotelSubCategory(h)]),
       {
         bucketSize: 100,
         tieBreak: (a, b) => {
@@ -983,9 +984,7 @@ export const HotelView: React.FC = () => {
         <div className="w-full flex items-center gap-2 min-w-0">
           <div
             style={{
-              background: 'rgba(255, 255, 255, 0.96)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
+              background: 'rgba(255, 255, 255, 0.98)',
               boxShadow: '0 8px 24px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1)',
             }}
             className="flex-1 min-w-0 min-h-[48px] py-1 rounded-full border border-white pl-3.5 pr-2 flex items-center gap-2"
@@ -1074,7 +1073,6 @@ export const HotelView: React.FC = () => {
                   <div
                     className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px]"
                     style={{
-                      filter: 'drop-shadow(0 4px 8px rgba(2, 6, 23, 0.42))',
                       transform: 'none',
                     }}
                   >
@@ -1473,7 +1471,7 @@ export const HotelView: React.FC = () => {
                         key={hotel.id}
                         data-testid={`hotel-row-${hotel.id}`}
                         onClick={() => setSelectedDestination(hotel)}
-                        className="bg-white rounded-[20px] p-2.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(15,23,42,0.04)] hover:border-emerald-500/60 transition flex items-center gap-3 cursor-pointer font-khmer text-slate-900"
+                        className="kft-cv-card bg-white rounded-[20px] p-2.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(15,23,42,0.04)] hover:border-emerald-500/60 transition flex items-center gap-3 cursor-pointer font-khmer text-slate-900"
                       >
                         <div className="w-16 h-14 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200/80">
                           <HotelAvatar

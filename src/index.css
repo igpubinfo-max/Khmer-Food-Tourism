@@ -631,9 +631,7 @@ img[src^="data:image"],
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 9999px;
-  background: rgba(15, 23, 42, 0.62);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.24);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
   color: #FFFFFF;
@@ -780,6 +778,8 @@ img[src^="data:image"],
   min-height: 0;
   aspect-ratio: 2.12 / 1;
   overflow: visible;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 .kft-cat-img-wrap > img {
   display: block;
@@ -790,6 +790,8 @@ img[src^="data:image"],
   min-width: 0;
   min-height: 0;
   object-fit: contain;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
 /* 14. Unified Compact Green Khmer Angkor Wat Decorative Header Banner (Untitled-3.png) */

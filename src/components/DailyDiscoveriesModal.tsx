@@ -296,6 +296,16 @@ export const DailyDiscoveriesModal: React.FC = () => {
     [filteredDishes, visibleDishCount]
   );
 
+  const matchedRestaurantsByDishId = useMemo(() => {
+    const map = new Map<string, Restaurant[]>();
+    for (const food of displayedDishes) {
+      const pid = selectedProvinceId !== 'all' ? selectedProvinceId : detectDishProvince(food);
+      const provMeta = getProvinceOptionById(pid);
+      map.set(food.id, getMatchingRestaurantsForProvinceDish(food, provMeta, restaurants));
+    }
+    return map;
+  }, [displayedDishes, selectedProvinceId, restaurants]);
+
   useEffect(() => {
     if (!isDailyDiscoveriesModalOpen) return;
     const node = loadMoreDishesRef.current;
@@ -584,9 +594,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
                     <div
                       className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px]"
                       style={{
-                      filter: 'drop-shadow(0 4px 8px rgba(2, 6, 23, 0.42))',
-                      transform: 'none',
-                    }}
+                        transform: 'none',
+                      }}
                     >
                       <img
                         src={card.imageSrc}
@@ -925,7 +934,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                       : detectDishProvince(food);
                   const provMeta = getProvinceOptionById(pid);
                   const locFood = getLocalizedFood(food, language);
-                  const matchedRests = getMatchingRestaurantsForProvinceDish(food, provMeta, restaurants);
+                  const matchedRests = matchedRestaurantsByDishId.get(food.id) || [];
                   const resolvedPhoto =
                     resolveFoodPhotoUrl(
                       food.photoUrl,
