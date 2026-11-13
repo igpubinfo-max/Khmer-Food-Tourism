@@ -161,7 +161,6 @@ export const UpgradeVipModal: React.FC = () => {
   const [paymentState, setPaymentState] = useState<PaymentStatusFlow>('AWAITING_PAYMENT');
   const dismissedRejectedTxnIdRef = useRef<string | null>(null);
   const manualOneTimeCheckoutRef = useRef<boolean>(false);
-  const [isOneTimePaymentMode, setIsOneTimePaymentMode] = useState<boolean>(false);
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isRestoring, setIsRestoring] = useState(false);
@@ -307,7 +306,6 @@ export const UpgradeVipModal: React.FC = () => {
 
   const handleClose = () => {
     manualOneTimeCheckoutRef.current = false;
-    setIsOneTimePaymentMode(false);
     setIsVipRenewMode(false);
     setIsUpgradeVipModalOpen(false);
   };
@@ -381,6 +379,8 @@ export const UpgradeVipModal: React.FC = () => {
     if (userLatestVipTxn?.id) {
       dismissedRejectedTxnIdRef.current = userLatestVipTxn.id;
     }
+    manualOneTimeCheckoutRef.current = true;
+    setPaymentProofDraft(null);
     setCustomTxnRef(`ABA-KHQR-${selectedPlan.days}D-${Date.now().toString(36).toUpperCase()}`);
     setSessionExpiryTime(Date.now() + 15 * 60 * 1000);
     setPaymentState('AWAITING_PAYMENT');
@@ -628,63 +628,12 @@ export const UpgradeVipModal: React.FC = () => {
     }
   };
 
-  // Switch from Payment Verification screen to One-Time Payment (No Auto-Renew Subscription) or submit draft as One-Time Payment
-  const handleOneTimePaymentOption = () => {
-    setAutoRenewOptIn(false);
-    setAutoRenewConsentChecked(false);
-    setIsOneTimePaymentMode(true);
-
-    if (paymentProofDraft) {
-      const targetTxnId = userLatestVipTxn?.id || submittedTxnId;
-      if (targetTxnId) {
-        cancelVipAutoRenew();
-        const res = uploadPaymentProofToTransaction(
-          targetTxnId,
-          paymentProofDraft.dataUrl,
-          paymentProofDraft.fileName,
-          paymentProofDraft.mimeType
-        );
-        if (res.success) {
-          setPaymentProofDraft(null);
-          manualOneTimeCheckoutRef.current = false;
-          setPaymentState('PENDING_ADMIN_APPROVAL');
-          showToast(
-            tr(
-              language,
-              '✅ បានបញ្ជូនវិក្កយបត្រសម្រាប់ការបង់ប្រាក់ ១ ដងគត់ (មិនបន្តស្វ័យប្រវត្តិ)!',
-              '✅ Submitted receipt for One-Time Payment (No Auto-Renewal)!',
-              '✅ 已提交一次性付款凭证（不自动续费）！'
-            ),
-            'success'
-          );
-          return;
-        }
-      }
-    }
-
-    manualOneTimeCheckoutRef.current = true;
-    setCustomTxnRef(`ABA-KHQR-ONETIME-${selectedPlan.days}D-${Date.now().toString(36).toUpperCase()}`);
-    setSessionExpiryTime(Date.now() + 15 * 60 * 1000);
-    setErrorMessage('');
-    setPaymentState('AWAITING_PAYMENT');
-    showToast(
-      tr(
-        language,
-        '💳 បានបើកជម្រើសបង់ប្រាក់ ១ ដងគត់ (មិនបន្តសុពលភាពស្វ័យប្រវត្តិ)',
-        '💳 Switched to One-Time Payment option (No Auto-Renewal)',
-        '💳 已切换为一次性付款选项（不自动续费）'
-      ),
-      'info'
-    );
-  };
-
   // Requirement 2 & 3: Submit Payment Confirmation Request to Admin Queue
   const handleSubmitPaymentForAdminApproval = async (overrideAutoRenew?: boolean) => {
     const effectiveAutoRenew = typeof overrideAutoRenew === 'boolean' ? overrideAutoRenew : autoRenewOptIn;
     if (typeof overrideAutoRenew === 'boolean') {
       setAutoRenewOptIn(overrideAutoRenew);
       setAutoRenewConsentChecked(overrideAutoRenew);
-      setIsOneTimePaymentMode(!overrideAutoRenew);
     }
     if (!currentUser) {
       setIsAuthModalOpen(true);
@@ -692,7 +641,7 @@ export const UpgradeVipModal: React.FC = () => {
     }
 
     // Require payment receipt attachment before submitting so we never submit empty requests or show false bank verification errors
-    if (!paymentProofDraft?.dataUrl && !userLatestVipTxn?.paymentProofUrl) {
+    if (!paymentProofDraft?.dataUrl && (manualOneTimeCheckoutRef.current || !userLatestVipTxn?.paymentProofUrl)) {
       showToast(
         tr(
           language,
@@ -1116,43 +1065,16 @@ export const UpgradeVipModal: React.FC = () => {
                 )}
               </div>
 
-              {/* Clearly Distinguished One-Time Payment Option (Separate from Subscription Payment) */}
-              <div className="p-3 rounded-2xl bg-blue-50/80 border border-blue-200/90 text-left space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-extrabold text-blue-950 flex items-center gap-1.5">
-                    <QrCode className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>
-                      {tr(
-                        language,
-                        'ជម្រើសបង់ប្រាក់ ១ ដងគត់ (ខុសពីគម្រោងបន្តស្វ័យប្រវត្តិ)',
-                        'One-Time Payment Option (Separate from Subscription)',
-                        '一次性付款选项（区别于自动续费订阅）'
-                      )}
-                    </span>
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-extrabold shrink-0">
-                    {tr(language, '១ ដងគត់ • មិនបន្តស្វ័យប្រវត្តិ', 'One-Time Only', '仅单次付款')}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleOneTimePaymentOption}
-                  style={{
-                    background: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
-                  }}
-                  className="w-full py-2.5 px-4 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-98 cursor-pointer"
-                >
-                  <QrCode className="w-4 h-4 text-white shrink-0" />
-                  <span>
-                    {tr(
-                      language,
-                      '💳 បង់ប្រាក់ ១ ដងគត់ (មិនបន្តសុពលភាពស្វ័យប្រវត្តិ)',
-                      '💳 One-Time Payment (No Auto-Renew Subscription)',
-                      '💳 一次性付款（不开启自动续费订阅）'
-                    )}
-                  </span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleRestartSession}
+                style={{
+                  background: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+                }}
+                className="w-full py-2.5 px-4 rounded-xl text-white text-xs font-bold transition cursor-pointer shadow-md"
+              >
+                {tr(language, '🔄 បង្កើតសំណើទូទាត់ប្រាក់ថ្មី', '🔄 Pay Again / Resubmit Payment', '🔄 重新发起付款申请')}
+              </button>
 
               <button
                 onClick={handleClose}
@@ -1377,7 +1299,9 @@ export const UpgradeVipModal: React.FC = () => {
             <div className="space-y-2.5">
               {/* If user has a pending verification request, show a friendly status bar without blocking the upgrade flow */}
               {(userLatestVipTxn?.status === 'pending_verification' ||
-                userLatestVipTxn?.status === 'needs_more_info') && (
+                userLatestVipTxn?.status === 'needs_more_info') &&
+                !manualOneTimeCheckoutRef.current &&
+                dismissedRejectedTxnIdRef.current !== userLatestVipTxn?.id && (
                 <div className="p-3 rounded-2xl bg-white border border-amber-300 shadow-xs flex items-center justify-between gap-2 text-xs">
                   <div className="flex items-center gap-2 text-amber-800 font-semibold">
                     <Clock className="w-4 h-4 text-amber-600 shrink-0" />
@@ -1796,26 +1720,7 @@ export const UpgradeVipModal: React.FC = () => {
                   )}
                 </button>
 
-                {/* Distinct One-Time Payment Submit Button (No Auto-Renew Subscription) */}
-                <button
-                  type="button"
-                  onClick={() => handleSubmitPaymentForAdminApproval(false)}
-                  disabled={isSubmittingRequest || isProcessingProofImage}
-                  style={{
-                    background: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
-                  }}
-                  className="w-full py-2.5 px-4 rounded-2xl text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer disabled:opacity-50"
-                >
-                  <QrCode className="w-4 h-4 text-white shrink-0" />
-                  <span>
-                    {tr(
-                      language,
-                      `💳 បង់ប្រាក់ ១ ដងគត់ ($${selectedPlan.priceUsd.toFixed(2)} — មិនបន្តស្វ័យប្រវត្តិ)`,
-                      `💳 One-Time Payment ($${selectedPlan.priceUsd.toFixed(2)} — No Auto-Renew)`,
-                      `💳 一次性付款 ($${selectedPlan.priceUsd.toFixed(2)} — 不自动续费)`
-                    )}
-                  </span>
-                </button>
+
               </div>
             </div>
           )}
