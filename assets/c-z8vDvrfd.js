@@ -1,1 +1,0 @@
-import{o as e}from"./c-BCiCTKAo.js";import{r as t}from"./c-DNAgropv.js";import{z as n}from"./k-D7Vpta4f.js";var r=e(t(),1),i=()=>{let{isAddRestaurantModalOpen:e,setIsAddRestaurantModalOpen:t,setIsVipAddRestaurantModalOpen:i}=n();return(0,r.useEffect)(()=>{e&&(t(!1),window.__kft_vip_store_initial_mode={mode:`create`},i(!0))},[e,t,i]),null};export{i as AddRestaurantModal};
