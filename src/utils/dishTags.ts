@@ -184,8 +184,7 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
       ));
 
   const isClearBrothSoupOrCongee =
-    (food.categorySlug === 'soup' && !isBraisedKhoDish && !isRichCoconutCurry) ||
-    (/ស៊ុប|សម្លប្រហើរ|សម្លម្ជូរ|សម្លកកូរ|បបរ|គុយទាវ(?!ឆា|ខ)|មីសួរ(?!ឆា)|បាញ់កាញ់|ពងទាកូន|អន្សមជ្រូក/i.test(titleKh) &&
+    (/ស៊ុប|សម្លប្រហើរ|ស្ងោរ|បបរ|គុយទាវ(?!ឆា|ខ)|មីសួរ(?!ឆា)|បាញ់កាញ់|ពងទាកូន|អន្សមជ្រូក/i.test(titleKh) &&
       !isStirFriedDish &&
       !isBraisedKhoDish &&
       !isRichCoconutCurry &&
@@ -235,7 +234,7 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
   // Plant-based savory dishes/snacks, or only animal ingredient is a swappable condiment (fish sauce / prahok / paste)
   const cleanTitleForVeg = stripNotMeat(nameText).replace(/ទឹកដោះគោ|ប្រេងខ្យង|oyster\s+sauce|condensed\s+milk/gi, ' ');
   const hasMeatInTitle =
-    /សាច់|ជ្រូក|គោ(?!ល)|មាន់|ទា(?!ញ)|ត្រី|បង្គា|បង្កង|ក្តាម|ក្ដាម|មឹក|ងាវ|លៀស|គ្រំ|ខ្យង|កង្កែប|អន្ទង់|កំពិស|ផ្អក|ទឹកគ្រឿង|ប្រហុកខ្ទិះ|\bpork\b|\bbeef\b|\bchicken\b|\bduck\b|\bfish\b|\bprawn\b|\bshrimp\b|\bcrab\b|\bsquid\b|\bcockle\b|\bclam\b|\bsnail\b|\bfrog\b|\beel\b|\bpig\b/i.test(
+    /សាច់|ជ្រូក|គោ(?!ល)|មាន់|ទា(?!ញ)|ត្រី|បង្គា|បង្កង|ក្តាម|ក្ដាម|មឹក|ងាវ|លៀស|លាស|គ្រំ|ខ្យង|អយស្ទ័រ|កង្កែប|អន្ទង់|កំពិស|ឃ្មុំ|ផ្អក|មុំា|មំា|កាពិ|ទឹកគ្រឿង|ប្រហុក|\bpork\b|\bbeef\b|\bchicken\b|\bduck\b|\bfish\b|\bprawn\b|\bshrimp\b|\bcrab\b|\bsquid\b|\bcockle\b|\bclam\b|\bsnail\b|\boysters?\b|\bfrog\b|\beel\b|\bpig\b|\bhoneycomb\b|\bprahok\b/i.test(
       cleanTitleForVeg
     );
   const hasMeatIngredient =

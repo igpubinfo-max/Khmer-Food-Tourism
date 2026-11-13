@@ -141,6 +141,7 @@ import {
   subscribeToCloudRealtimeUpdates,
   clearBackendVipVerifyCache,
   permanentlyInvalidateAndDeleteUserInCloud,
+  reRegisterFreshUserAfterDeletionInCloud,
   isRevokedOrDeletedUserRecord,
 } from '../services/supabaseService';
 import { resetUserHighWater } from '../services/userDataIntegrityService';
@@ -703,16 +704,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (!matched) return false;
 
-      // Permanently deleted accounts can never be resurrected by login/register timestamps
-      if (d.permanentlyDeleted !== false) {
-        return true;
-      }
       const delMs = d.deletedAt ? parseSafeDateMs(d.deletedAt) : 0;
       if (delMs > 0 && restoredMs > delMs + 1000) {
         return false;
       }
       return true;
     });
+  };
+
+  const clearDeletedTombstonesForFreshRegistration = (
+    candidate: { id?: string; email?: string; phone?: string; username?: string },
+    sourceList?: DeletedUserRecord[]
+  ): DeletedUserRecord[] => {
+    const liveList = sourceList || latestSyncStateRef.current.deletedUsers || deletedUsers || [];
+    if (!Array.isArray(liveList) || liveList.length === 0) return [];
+    const candId = candidate.id ? String(candidate.id).trim() : '';
+    const candEmailRaw = candidate.email ? String(candidate.email).toLowerCase().trim() : '';
+    const candEmailNorm = normalizeEmailForIdentity(candEmailRaw)?.canonical || candEmailRaw;
+    const candUsername = candidate.username ? String(candidate.username).toLowerCase().trim() : '';
+    const candPhoneCanon = extractCanonicalPhoneDigitsFromAny(candidate.phone, candEmailRaw, candId);
+
+    const filtered = liveList.filter(d => {
+      if (!d) return false;
+      const dEmailRaw = d.email ? String(d.email).toLowerCase().trim() : '';
+      const dEmailNorm = normalizeEmailForIdentity(dEmailRaw)?.canonical || dEmailRaw;
+      const dPhoneCanon = extractCanonicalPhoneDigitsFromAny(d.phone, dEmailRaw, d.id);
+      if (candId && d.id && d.id === candId) return false;
+      if (candEmailNorm && dEmailNorm && dEmailNorm === candEmailNorm) return false;
+      if (candUsername && d.username && d.username.toLowerCase().trim() === candUsername) return false;
+      if (candPhoneCanon.length >= 7 && dPhoneCanon.length >= 7 && dPhoneCanon === candPhoneCanon) return false;
+      return true;
+    });
+
+    latestSyncStateRef.current.deletedUsers = filtered;
+    setDeletedUsers(filtered);
+    try {
+      localStorage.setItem('kft_deleted_users_v1', JSON.stringify(filtered));
+    } catch {}
+    return filtered;
   };
 
   const pruneStaleDeletedTombstoneForActiveAuth = (candidate: {
@@ -6563,9 +6592,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast(
         tr(
           language,
-          '⛔ គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ហើយ មិនអាចចូលប្រើប្រាស់វិញបានទេ!',
-          '⛔ This account has been permanently deleted and cannot be accessed again.',
-          '⛔ 此账号已被永久删除，无法再次访问。'
+          '⛔ គណនីនេះត្រូវបានលុបរួចហើយ! ប្រសិនបើអ្នកចង់ប្រើប្រាស់ម្តងទៀត សូមចុចផ្ទាំង «បង្កើតគណនីថ្មី» ដើម្បីចុះឈ្មោះពីសូន្យ។',
+          '⛔ This account has been deleted! If you want to use the app again, please switch to "Create Account" to register a new account from scratch.',
+          '⛔ 此账号已被删除！如果您想再次使用，请切换到“注册新账号”重新注册。'
         ),
         'warning'
       );
@@ -6580,9 +6609,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast(
         tr(
           language,
-          '⛔ គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ហើយ មិនអាចចូលប្រើប្រាស់វិញបានទេ!',
-          '⛔ This account has been permanently deleted and cannot be accessed again.',
-          '⛔ 此账号已被永久删除，无法再次访问。'
+          '⛔ គណនីនេះត្រូវបានលុបរួចហើយ! ប្រសិនបើអ្នកចង់ប្រើប្រាស់ម្តងទៀត សូមចុចផ្ទាំង «បង្កើតគណនីថ្មី» ដើម្បីចុះឈ្មោះពីសូន្យ។',
+          '⛔ This account has been deleted! If you want to use the app again, please switch to "Create Account" to register a new account from scratch.',
+          '⛔ 此账号已被删除！如果您想再次使用，请切换到“注册新账号”重新注册。'
         ),
         'warning'
       );
@@ -9029,30 +9058,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const displayName = name.trim() || (isPhone ? `អ្នកប្រើប្រាស់ ${cleanId}` : cleanId.split('@')[0]);
     const nowIso = new Date().toISOString();
 
-    const activeDeletedList = latestSyncStateRef.current.deletedUsers || deletedUsers;
-    if (
-      checkIsUserDeleted(
+    let activeDeletedList = latestSyncStateRef.current.deletedUsers || deletedUsers;
+    const wasDeletedInSyncRegister = checkIsUserDeleted(
+      { email: emailVal, phone: cleanPhoneDigits.length >= 7 ? cleanPhoneDigits : undefined },
+      activeDeletedList
+    );
+    if (wasDeletedInSyncRegister) {
+      purgeDeletedCandidateFromLocalUsers(
         { email: emailVal, phone: cleanPhoneDigits.length >= 7 ? cleanPhoneDigits : undefined },
         activeDeletedList
-      )
-    ) {
-      showToast(
-        tr(
-          language,
-          '⛔ គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ហើយ មិនអាចចូលប្រើប្រាស់វិញបានទេ!',
-          '⛔ This account has been permanently deleted and cannot be accessed again.',
-          '⛔ 此账号已被永久删除，无法再次访问。'
-        ),
-        'warning'
       );
-      return false;
+      activeDeletedList = clearDeletedTombstonesForFreshRegistration(
+        { email: emailVal, phone: cleanPhoneDigits.length >= 7 ? cleanPhoneDigits : undefined },
+        activeDeletedList
+      );
     }
 
-    // Check if user already exists
-    const existing = users.find(u =>
-      doesUserMatchTarget(u, { email: emailVal, phone: cleanPhoneDigits.length >= 7 ? cleanPhoneDigits : undefined })
-    );
-    if (existing) {
+    // Check if user already exists (only if not freshly re-registering after deletion)
+    const existing = wasDeletedInSyncRegister
+      ? undefined
+      : users.find(u =>
+          doesUserMatchTarget(u, { email: emailVal, phone: cleanPhoneDigits.length >= 7 ? cleanPhoneDigits : undefined })
+        );
+    if (existing && !isRevokedOrDeletedUserRecord(existing) && !checkIsUserDeleted(existing, activeDeletedList)) {
       showToast(
         tr(
           language,
@@ -9064,7 +9092,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return false;
     }
-    
 
     const newCanonicalId = getCanonicalUserId({
       email: emailVal,
@@ -9093,12 +9120,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       avatar: newCachedAv || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       createdAt: nowIso.split('T')[0],
       registeredAtIso: nowIso,
+      restoredAt: nowIso,
       lastLoginAt: nowIso,
       lastActiveAt: nowIso,
+      isDeleted: false,
+      permanentlyDeleted: false,
+      isDisabled: false,
+      membershipTier: 'free',
     };
     recordDeviceAccountRegistration(newUser.phone || newUser.email || newUser.id).catch(() => {});
     setUsers(prev => {
-      const next = deduplicateAndNormalizeUsers([...prev, newUser], deletedUsers);
+      const next = deduplicateAndNormalizeUsers([...prev, newUser], activeDeletedList);
       latestSyncStateRef.current.users = next;
       safeSetCriticalAccountStorage('kft_users_v5', next);
       return next;
@@ -9109,7 +9141,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!completePendingVipRedirectAfterEmailAuth(newUser)) {
       setIsAuthModalOpen(false);
     }
-    syncLoggedInUserFromCloud(newUser);
+    if (wasDeletedInSyncRegister && isSupabaseConfigured()) {
+      reRegisterFreshUserAfterDeletionInCloud({
+        newUser,
+        candidateKeys: getCandidateAtomicUserKeys(newUser),
+        cleanedDeletedUsers: activeDeletedList,
+      }).then(() => syncLoggedInUserFromCloud(newUser));
+    } else {
+      syncLoggedInUserFromCloud(newUser);
+    }
     return true;
   };
 
@@ -9236,45 +9276,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const localZeroDigits = canonicalPhone.startsWith('+855') ? `0${canonicalPhone.slice(4)}` : digits;
     const syntheticEmail = `phone_${digits}@phone.kh`;
     const canonicalId = `user-phone-${digits}`;
+    const candidateCloudKeys = [
+      `${USER_RECORD_PREFIX}${canonicalId}`,
+      `${USER_RECORD_PREFIX}user-phone-${localZeroDigits}`,
+      `${USER_RECORD_PREFIX}user-phone_${digits}_phone_kh`,
+    ];
 
     const { mergedDeletedUsers, validPulledUsers, foundRevokedAtomicDoc } =
-      await fetchAndMergeDeletedUsersForAuthCheck([
-        `${USER_RECORD_PREFIX}${canonicalId}`,
-        `${USER_RECORD_PREFIX}user-phone-${localZeroDigits}`,
-        `${USER_RECORD_PREFIX}user-phone_${digits}_phone_kh`,
-      ]);
+      await fetchAndMergeDeletedUsersForAuthCheck(candidateCloudKeys);
 
-    if (
-      foundRevokedAtomicDoc ||
-      checkIsUserDeleted({ id: canonicalId, phone: canonicalPhone, email: syntheticEmail }, mergedDeletedUsers)
-    ) {
-      purgeDeletedCandidateFromLocalUsers({ id: canonicalId, phone: canonicalPhone, email: syntheticEmail }, mergedDeletedUsers);
-      const msg = tr(
-        language,
-        '⛔ គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ហើយ មិនអាចចូលប្រើប្រាស់វិញបានទេ!',
-        '⛔ This account has been permanently deleted and cannot be accessed again.',
-        '⛔ 此账号已被永久删除，无法再次访问。'
-      );
-      showToast(msg, 'warning');
-      return { ok: false, error: msg };
-    }
-
-    const cloudExisting: User | null = validPulledUsers[0] || null;
     const localExisting = (latestSyncStateRef.current.users || users).find((u) =>
       doesUserMatchTarget(u, { id: canonicalId, phone: canonicalPhone, email: syntheticEmail })
     );
-    const existing = cloudExisting || localExisting || null;
+    const cloudExisting: User | null = validPulledUsers[0] || null;
+    const rawExisting = cloudExisting || localExisting || null;
 
-    if (existing && (isRevokedOrDeletedUserRecord(existing) || checkIsUserDeleted(existing, mergedDeletedUsers))) {
-      purgeDeletedCandidateFromLocalUsers(existing, mergedDeletedUsers);
-      const msg = tr(
-        language,
-        '⛔ គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ហើយ មិនអាចចូលប្រើប្រាស់វិញបានទេ!',
-        '⛔ This account has been permanently deleted and cannot be accessed again.',
-        '⛔ 此账号已被永久删除，无法再次访问。'
+    // Option A: If this phone number's previous account was deleted, allow registering a brand-new account from scratch!
+    const wasPreviouslyDeleted =
+      foundRevokedAtomicDoc ||
+      checkIsUserDeleted({ id: canonicalId, phone: canonicalPhone, email: syntheticEmail }, mergedDeletedUsers) ||
+      Boolean(rawExisting && (isRevokedOrDeletedUserRecord(rawExisting) || checkIsUserDeleted(rawExisting, mergedDeletedUsers)));
+
+    let activeDeletedUsers = mergedDeletedUsers;
+    let existing: User | null = rawExisting;
+
+    if (wasPreviouslyDeleted) {
+      purgeDeletedCandidateFromLocalUsers({ id: canonicalId, phone: canonicalPhone, email: syntheticEmail }, mergedDeletedUsers);
+      activeDeletedUsers = clearDeletedTombstonesForFreshRegistration(
+        { id: canonicalId, phone: canonicalPhone, email: syntheticEmail },
+        mergedDeletedUsers
       );
-      showToast(msg, 'warning');
-      return { ok: false, error: msg };
+      existing = null;
     }
 
     if (existing) {
@@ -9355,15 +9387,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
           createdAt: nowIso.split('T')[0],
           registeredAtIso: nowIso,
+          restoredAt: nowIso,
           lastLoginAt: nowIso,
           lastActiveAt: nowIso,
           registeredDeviceHash,
+          membershipTier: 'free',
+          isDeleted: false,
+          permanentlyDeleted: false,
+          isDisabled: false,
         };
 
     setUsers((prev) => {
       const next = deduplicateAndNormalizeUsers(
         [...prev.filter((u) => !doesUserMatchTarget(u, savedUser)), savedUser],
-        mergedDeletedUsers
+        activeDeletedUsers
       );
       latestSyncStateRef.current.users = next;
       safeSetCriticalAccountStorage('kft_users_v5', next);
@@ -9373,7 +9410,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     latestSyncStateRef.current.currentUser = savedUser;
     safeSetCriticalAccountStorage('kft_current_user_v5', savedUser);
     if (isSupabaseConfigured()) {
-      upsertSingleUserToCloud(savedUser, mergedDeletedUsers).catch(() => {});
+      if (wasPreviouslyDeleted) {
+        const updatedDel = await reRegisterFreshUserAfterDeletionInCloud({
+          newUser: savedUser,
+          candidateKeys: candidateCloudKeys,
+          cleanedDeletedUsers: activeDeletedUsers,
+        });
+        activeDeletedUsers = updatedDel;
+        latestSyncStateRef.current.deletedUsers = updatedDel;
+        setDeletedUsers(updatedDel);
+      } else {
+        upsertSingleUserToCloud(savedUser, activeDeletedUsers).catch(() => {});
+      }
     }
     showToast(
       tr(
@@ -9429,6 +9477,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast(msg, 'warning');
       return { ok: false, error: msg };
     }
+
     const digits = canonicalPhone.slice(1);
     const localZeroDigits = canonicalPhone.startsWith('+855') ? `0${canonicalPhone.slice(4)}` : digits;
     const canonicalId = `user-phone-${digits}`;
@@ -9457,9 +9506,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       purgeDeletedCandidateFromLocalUsers({ id: canonicalId, phone: canonicalPhone, email: syntheticEmail }, mergedDeletedUsers);
       const msg = tr(
         language,
-        '⛔ គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ហើយ មិនអាចចូលប្រើប្រាស់វិញបានទេ!',
-        '⛔ This account has been permanently deleted and cannot be accessed again.',
-        '⛔ 此账号已被永久删除，无法再次访问。'
+        '⛔ គណនីនេះត្រូវបានលុបរួចហើយ! ប្រសិនបើអ្នកចង់ប្រើប្រាស់ម្តងទៀត សូមចុចផ្ទាំង «បង្កើតគណនីថ្មី» ដើម្បីចុះឈ្មោះពីសូន្យ។',
+        '⛔ This account has been deleted! If you want to use the app again, please switch to "Create Account" to register a new account from scratch.',
+        '⛔ 此账号已被删除！如果您想再次使用，请切换到“注册新账号”重新注册。'
       );
       showToast(msg, 'warning');
       return { ok: false, error: msg };
@@ -9616,28 +9665,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       authProvider: 'email',
     });
     const emailSlug = cleanEmail.replace(/[^a-z0-9]/g, '_');
+    const candidateCloudKeys = [
+      `${USER_RECORD_PREFIX}${canonicalId}`,
+      `${USER_RECORD_PREFIX}user-${emailSlug}`,
+      `${USER_RECORD_PREFIX}google-${emailSlug}`,
+    ];
 
     const { mergedDeletedUsers, validPulledUsers, foundRevokedAtomicDoc } =
-      await fetchAndMergeDeletedUsersForAuthCheck([
-        `${USER_RECORD_PREFIX}${canonicalId}`,
-        `${USER_RECORD_PREFIX}user-${emailSlug}`,
-        `${USER_RECORD_PREFIX}google-${emailSlug}`,
-      ]);
-
-    if (
-      foundRevokedAtomicDoc ||
-      checkIsUserDeleted({ id: canonicalId, email: cleanEmail, phone: validatedPhone }, mergedDeletedUsers)
-    ) {
-      purgeDeletedCandidateFromLocalUsers({ id: canonicalId, email: cleanEmail, phone: validatedPhone }, mergedDeletedUsers);
-      const msg = tr(
-        language,
-        '⛔ គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ហើយ មិនអាចចូលប្រើប្រាស់វិញបានទេ!',
-        '⛔ This account has been permanently deleted and cannot be accessed again.',
-        '⛔ 此账号已被永久删除，无法再次访问。'
-      );
-      showToast(msg, 'warning');
-      return { ok: false, error: msg };
-    }
+      await fetchAndMergeDeletedUsersForAuthCheck(candidateCloudKeys);
 
     const cloudExisting: User | null = validPulledUsers[0] || null;
     const localExisting = (latestSyncStateRef.current.users || users).find((u) => {
@@ -9647,18 +9682,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         (uNormE && uNormE === normIdentity)
       );
     });
-    const existing = cloudExisting || localExisting || null;
+    const rawExisting = cloudExisting || localExisting || null;
 
-    if (existing && (isRevokedOrDeletedUserRecord(existing) || checkIsUserDeleted(existing, mergedDeletedUsers))) {
-      purgeDeletedCandidateFromLocalUsers(existing, mergedDeletedUsers);
-      const msg = tr(
-        language,
-        '⛔ គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ហើយ មិនអាចចូលប្រើប្រាស់វិញបានទេ!',
-        '⛔ This account has been permanently deleted and cannot be accessed again.',
-        '⛔ 此账号已被永久删除，无法再次访问。'
+    // Option A: If this email's previous account was deleted, allow registering a brand-new account from scratch!
+    const wasPreviouslyDeleted =
+      foundRevokedAtomicDoc ||
+      checkIsUserDeleted({ id: canonicalId, email: cleanEmail, phone: validatedPhone }, mergedDeletedUsers) ||
+      Boolean(rawExisting && (isRevokedOrDeletedUserRecord(rawExisting) || checkIsUserDeleted(rawExisting, mergedDeletedUsers)));
+
+    let activeDeletedUsers = mergedDeletedUsers;
+    let existing: User | null = rawExisting;
+
+    if (wasPreviouslyDeleted) {
+      purgeDeletedCandidateFromLocalUsers({ id: canonicalId, email: cleanEmail, phone: validatedPhone }, mergedDeletedUsers);
+      activeDeletedUsers = clearDeletedTombstonesForFreshRegistration(
+        { id: canonicalId, email: cleanEmail, phone: validatedPhone },
+        mergedDeletedUsers
       );
-      showToast(msg, 'warning');
-      return { ok: false, error: msg };
+      existing = null;
     }
 
     if (existing) {
@@ -9719,15 +9760,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       avatar: newCachedAv || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       createdAt: nowIso.split('T')[0],
       registeredAtIso: nowIso,
+      restoredAt: nowIso,
       lastLoginAt: nowIso,
       lastActiveAt: nowIso,
       registeredDeviceHash,
+      membershipTier: 'free',
+      isDeleted: false,
+      permanentlyDeleted: false,
+      isDisabled: false,
     };
 
     setUsers((prev) => {
       const next = deduplicateAndNormalizeUsers(
         [...prev.filter((u) => !doesUserMatchTarget(u, savedUser)), savedUser],
-        mergedDeletedUsers
+        activeDeletedUsers
       );
       latestSyncStateRef.current.users = next;
       safeSetCriticalAccountStorage('kft_users_v5', next);
@@ -9737,7 +9783,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     latestSyncStateRef.current.currentUser = savedUser;
     safeSetCriticalAccountStorage('kft_current_user_v5', savedUser);
     if (isSupabaseConfigured()) {
-      upsertSingleUserToCloud(savedUser, mergedDeletedUsers).catch(() => {});
+      if (wasPreviouslyDeleted) {
+        const updatedDel = await reRegisterFreshUserAfterDeletionInCloud({
+          newUser: savedUser,
+          candidateKeys: candidateCloudKeys,
+          cleanedDeletedUsers: activeDeletedUsers,
+        });
+        activeDeletedUsers = updatedDel;
+        latestSyncStateRef.current.deletedUsers = updatedDel;
+        setDeletedUsers(updatedDel);
+      } else {
+        upsertSingleUserToCloud(savedUser, activeDeletedUsers).catch(() => {});
+      }
     }
     showToast(
       tr(language, `សូមស្វាគមន៍ ${savedUser.name}!`, `Welcome, ${savedUser.name}!`, `欢迎，${savedUser.name}！`),
@@ -9811,9 +9868,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       purgeDeletedCandidateFromLocalUsers({ id: `user-${emailSlug}`, email: cleanEmail }, mergedDeletedUsers);
       const msg = tr(
         language,
-        '⛔ គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ហើយ មិនអាចចូលប្រើប្រាស់វិញបានទេ!',
-        '⛔ This account has been permanently deleted and cannot be accessed again.',
-        '⛔ 此账号已被永久删除，无法再次访问。'
+        '⛔ គណនីនេះត្រូវបានលុបរួចហើយ! ប្រសិនបើអ្នកចង់ប្រើប្រាស់ម្តងទៀត សូមចុចផ្ទាំង «បង្កើតគណនីថ្មី» ដើម្បីចុះឈ្មោះពីសូន្យ។',
+        '⛔ This account has been deleted! If you want to use the app again, please switch to "Create Account" to register a new account from scratch.',
+        '⛔ 此账号已被删除！如果您想再次使用，请切换到“注册新账号”重新注册。'
       );
       showToast(msg, 'warning');
       return { ok: false, error: msg };
@@ -9928,7 +9985,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     syncLoggedInUserFromCloud(updatedUser);
     return { ok: true };
   };
-
   const loginWithGoogle = (profile: {
     id: string;
     name: string;
@@ -15204,16 +15260,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (existingPending && !isVipRenewMode) {
       const updatedRef =
         (transactionRef || '').trim().toUpperCase() || existingPending.transactionRef;
+      const nowIsoPending = new Date().toISOString();
+      if (autoRenewAuth !== undefined) {
+        const wantAutoRenew = autoRenewAuth.enabled !== false;
+        const updatedAutoRenewUser: User = {
+          ...currentUser,
+          autoRenew: wantAutoRenew,
+          autoRenewPlanId: wantAutoRenew ? planType : currentUser.autoRenewPlanId,
+          autoRenewPaymentMethod: wantAutoRenew ? (autoRenewAuth.paymentMethod || 'KHQR') : currentUser.autoRenewPaymentMethod,
+          autoRenewPaymentLabel: wantAutoRenew ? (autoRenewAuth.paymentLabel || 'ABA KHQR (000 056 833)') : currentUser.autoRenewPaymentLabel,
+          autoRenewConsentAt: wantAutoRenew ? nowIsoPending : currentUser.autoRenewConsentAt,
+          autoRenewCancelledAt: wantAutoRenew ? undefined : nowIsoPending,
+          autoRenewUpdatedAt: nowIsoPending,
+        };
+        setCurrentUser(updatedAutoRenewUser);
+        setUsers(prev => prev.map(u => (doesUserMatchTarget(u, currentUser) ? updatedAutoRenewUser : u)));
+      }
       setTransactions(prev => {
         const nextTxns = prev.map(t =>
           t.id === existingPending.id
             ? {
                 ...t,
+                status: 'pending_verification' as RegistrationTransaction['status'],
                 planId: resolvedConsumerPlanId,
                 planType,
                 amountUsd: validPrice,
                 durationDays: validDays,
                 transactionRef: updatedRef,
+                notes: notes || t.notes,
                 paymentProofUrl: paymentProofData?.dataUrl || t.paymentProofUrl,
                 paymentProofFileName: paymentProofData?.fileName || t.paymentProofFileName,
                 paymentProofMimeType: paymentProofData?.mimeType || t.paymentProofMimeType,

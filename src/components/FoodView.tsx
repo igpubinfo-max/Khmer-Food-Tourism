@@ -35,6 +35,8 @@ export const FoodView: React.FC = () => {
   );
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [categoryShuffleNonce, setCategoryShuffleNonce] = useState<number>(0);
+  const lastCategoryOrderRef = useRef<Record<string, { firstId: string; topIds: string; fullOrder: string }>>({});
   const [mealTimeFilter, setMealTimeFilter] = useState<MealTimeFilter>('all');
   const [foodSearchQuery, setFoodSearchQuery] = useState<string>('');
   const [showFilterDrawer, setShowFilterDrawer] = useState<boolean>(false);
@@ -67,7 +69,7 @@ export const FoodView: React.FC = () => {
       offsetTop: 6,
       delayMs: 25,
     });
-  }, [scrollRequestTick, selectedCategory, provinceFilter, tagFilter]);
+  }, [scrollRequestTick, selectedCategory, categoryShuffleNonce, provinceFilter, tagFilter]);
 
   const handleExecuteFoodSearch = () => {
     const trimmed = foodSearchQuery.trim();
@@ -96,7 +98,7 @@ export const FoodView: React.FC = () => {
 
   useEffect(() => {
     setVisibleCount(PAGE_BATCH_SIZE);
-  }, [selectedCategory, mealTimeFilter, foodSearchQuery, provinceFilter, tagFilter]);
+  }, [selectedCategory, categoryShuffleNonce, mealTimeFilter, foodSearchQuery, provinceFilter, tagFilter]);
 
   const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
   const provinceOptions = useMemo(() => {
@@ -116,10 +118,17 @@ export const FoodView: React.FC = () => {
 
   const filteredFoods = useMemo(() => {
     const q = foodSearchQuery.trim().toLowerCase();
-    const matched = organizedFoods.filter((food) => {
-      if (!matchesFoodScreenCategoryTab(food, selectedCategory)) return false;
-      if (provinceFilter && !doesDishBelongToProvince(food, provinceFilter)) return false;
-      if (!matchesTagFilter(food, tagFilter)) return false;
+    const seenIds = new Set<string>();
+    const seenNames = new Set<string>();
+    const matched: FoodItem[] = [];
+
+    for (const food of organizedFoods) {
+      if (!food || !food.id || seenIds.has(food.id)) continue;
+      const nameKey = (food.nameKh || '').trim();
+      if (!nameKey || seenNames.has(nameKey)) continue;
+      if (!matchesFoodScreenCategoryTab(food, selectedCategory)) continue;
+      if (provinceFilter && !doesDishBelongToProvince(food, provinceFilter)) continue;
+      if (!matchesTagFilter(food, tagFilter)) continue;
       if (q) {
         const hay = [
           food.nameKh,
@@ -131,57 +140,70 @@ export const FoodView: React.FC = () => {
           .filter(Boolean)
           .join(' ')
           .toLowerCase();
-        if (!hay.includes(q)) return false;
+        if (!hay.includes(q)) continue;
       }
-      return true;
-    });
+      seenIds.add(food.id);
+      seenNames.add(nameKey);
+      matched.push(food);
+    }
 
-    if (selectedCategory === 'all') {
+    if (matched.length <= 1) {
       return matched;
     }
 
-    // Prioritize signature dishes of the selected category first in a deterministic order
-    const getCategoryPriority = (f: FoodItem): number => {
-      const kh = (f.nameKh || '').trim();
-      const isVeg = Boolean(f.isVegetarian || /បួស|\bvegetarian\b|\bvegan\b/i.test(`${kh} ${f.nameEn || ''} ${f.categoryKh || ''}`));
-
-      if (selectedCategory === 'vegetarian') {
-        if (f.isVegetarian) return 1;
-        if (/បួស|\bvegetarian\b|\bvegan\b/i.test(`${kh} ${f.nameEn || ''} ${f.categoryKh || ''}`)) return 2;
-        return 3;
+    const fisherYatesShuffle = (items: FoodItem[]): FoodItem[] => {
+      const arr = [...items];
+      for (let i = arr.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
       }
-
-      const vegPenalty = isVeg ? 50 : 0;
-
-      if (selectedCategory === 'samlor') {
-        if (/^សម្លកកូរ|^អាម៉ុក|^សម្លការី|^សម្លម្ជូរ|^សម្លប្រហើរ/i.test(kh)) return 1 + vegPenalty;
-        if (/^សម្ល|^ស្ងោរ|^ស៊ុប/i.test(kh)) return 2 + vegPenalty;
-        return 3 + vegPenalty;
-      }
-      if (selectedCategory === 'cha') {
-        if (f.categorySlug === 'grilled' && /(អាំង|ដុត|ចៀន|បំពង)/i.test(kh)) return 1 + vegPenalty;
-        if (/(អាំង|ដុត)/i.test(kh)) return 2 + vegPenalty;
-        if (/(ចៀន|បំពង)/i.test(kh)) return 3 + vegPenalty;
-        return 4 + vegPenalty;
-      }
-      if (selectedCategory === 'bong_aem') {
-        if (/^បង្អែម|^សង់ខ្យា|^ចេកខ្ទិះ|^លតអង្ករ|^ក្រឡាន|^បាយដំណើប/i.test(kh)) return 1 + vegPenalty;
-        if (f.categorySlug === 'dessert' || f.categorySlug === 'cake') return 2 + vegPenalty;
-        return 3 + vegPenalty;
-      }
-      return 5 + vegPenalty;
+      return arr;
     };
 
-    return [...matched].sort((a, b) => {
-      const pa = getCategoryPriority(a);
-      const pb = getCategoryPriority(b);
-      if (pa !== pb) return pa - pb;
-      if (Boolean(b.isFeatured) !== Boolean(a.isFeatured)) {
-        return b.isFeatured ? 1 : -1;
+    const prevRecord = lastCategoryOrderRef.current[selectedCategory];
+    const topWindowSize = Math.min(4, matched.length);
+    let candidate = fisherYatesShuffle(matched);
+
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      const firstId = candidate[0]?.id || '';
+      const topIds = candidate
+        .slice(0, topWindowSize)
+        .map((f) => f.id)
+        .join(',');
+      const fullOrder = candidate.map((f) => f.id).join(',');
+
+      const isDifferentFirst = !prevRecord || firstId !== prevRecord.firstId;
+      const isDifferentTop = !prevRecord || topIds !== prevRecord.topIds;
+      const isDifferentOrder = !prevRecord || fullOrder !== prevRecord.fullOrder;
+
+      if (isDifferentFirst && isDifferentTop && isDifferentOrder) {
+        break;
       }
-      return 0;
-    });
-  }, [organizedFoods, selectedCategory, provinceFilter, tagFilter, foodSearchQuery]);
+      candidate = fisherYatesShuffle(matched);
+    }
+
+    if (prevRecord && candidate.length > 1 && candidate[0]?.id === prevRecord.firstId) {
+      const swapIdx = candidate.findIndex((item) => item.id !== prevRecord.firstId);
+      if (swapIdx > 0) {
+        const tmp = candidate[0];
+        candidate[0] = candidate[swapIdx];
+        candidate[swapIdx] = tmp;
+      }
+    }
+
+    lastCategoryOrderRef.current[selectedCategory] = {
+      firstId: candidate[0]?.id || '',
+      topIds: candidate
+        .slice(0, topWindowSize)
+        .map((f) => f.id)
+        .join(','),
+      fullOrder: candidate.map((f) => f.id).join(','),
+    };
+
+    return candidate;
+  }, [organizedFoods, selectedCategory, categoryShuffleNonce, provinceFilter, tagFilter, foodSearchQuery]);
 
   const displayedFoods = useMemo(
     () => filteredFoods.slice(0, visibleCount),
@@ -196,11 +218,13 @@ export const FoodView: React.FC = () => {
 
   const resetAllFilters = () => {
     setSelectedCategory('all');
+    setCategoryShuffleNonce((prev) => prev + 1);
     setMealTimeFilter('all');
     setProvinceFilter('');
     setTagFilter('all');
     setFoodSearchQuery('');
     setShowFilterDrawer(false);
+    setVisibleCount(PAGE_BATCH_SIZE);
     scrollToDishList();
   };
 
@@ -504,6 +528,8 @@ export const FoodView: React.FC = () => {
                   onClick={() => {
                     setShowFilterDrawer(false);
                     setSelectedCategory(cat.id);
+                    setCategoryShuffleNonce((prev) => prev + 1);
+                    setVisibleCount(PAGE_BATCH_SIZE);
                     scrollToDishList();
                   }}
                   aria-pressed={active}

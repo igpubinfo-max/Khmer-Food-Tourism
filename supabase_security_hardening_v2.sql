@@ -119,10 +119,18 @@ BEGIN
     END IF;
 
     IF old_p IS NOT NULL AND jsonb_typeof(old_p) = 'object' THEN
-      -- [G0] Permanently Deleted Account Guard: once permanentlyDeleted/isDeleted is set, unauthenticated callers cannot resurrect the row
-      IF coalesce((old_p->>'permanentlyDeleted')::boolean, false) = true
-         OR coalesce((old_p->>'isDeleted')::boolean, false) = true
-         OR coalesce(old_p->>'passwordHash', '') LIKE 'REVOKED_DELETED_%' THEN
+      -- [G0] Deleted Account Guard: unauthenticated callers cannot resurrect a deleted row unless re-registering from scratch with matching x-kft-prev-pw-hash
+      IF (
+           coalesce((old_p->>'permanentlyDeleted')::boolean, false) = true
+           OR coalesce((old_p->>'isDeleted')::boolean, false) = true
+           OR coalesce(old_p->>'passwordHash', '') LIKE 'REVOKED_DELETED_%'
+         )
+         AND NOT (
+           coalesce(v_prev_pw_hash, '') <> ''
+           AND v_prev_pw_hash = coalesce(old_p->>'passwordHash', '')
+           AND coalesce((NEW.payload->>'isDeleted')::boolean, false) = false
+           AND coalesce(NEW.payload->>'membershipTier', 'free') = 'free'
+         ) THEN
         NEW.payload := old_p || jsonb_build_object(
           'isDeleted', true,
           'permanentlyDeleted', true,

@@ -143,10 +143,10 @@ export function matchesFoodScreenCategoryTab(food: FoodItem, catId: string): boo
   if (!food || !food.id || !food.nameKh) return false;
   if (!catId || catId === 'all') return true;
   if (catId === 'samlor') {
-    return isSamlorSoupOrCurryDish(food);
+    return isSamlorSoupOrCurryDish(food) && !isVegetarianDish(food);
   }
   if (catId === 'cha') {
-    return isGrilledOrFriedDish(food);
+    return isGrilledOrFriedDish(food) && !isVegetarianDish(food);
   }
   if (catId === 'vegetarian') {
     return isVegetarianDish(food);
@@ -182,8 +182,6 @@ export function scoreCambodianDishForCategoryAndMealTime(
       if (isCongee) return 100;
       if (/^ខគោ|^សម្លការី/i.test(kh)) return 96;
       if (MORNING_SAMLOR_STEW_RE.test(title)) return 86;
-      if (HEAVY_LUNCH_DINNER_ONLY_RE.test(kh)) return 0;
-      if (/^សម្លប្រហើរ|^ស្ងោរ|^ខ/i.test(kh)) return 76;
       return 0;
     }
     if (HEAVY_LUNCH_DINNER_ONLY_RE.test(kh)) return 0;
@@ -228,7 +226,7 @@ export function scoreCambodianDishForCategoryAndMealTime(
     if (isCongee) return 0;
     if (AFTERNOON_SAVORY_SNACK_RE.test(title)) return 100;
     if (catTab === 'bong_aem') return 95;
-    if (isSaladOrDipDish(food) || isGrilledOrFriedDish(food)) return 75;
+    if (/^(បុក|ញាំ|ប្រហិត|សាច់ចង្កាក់|សាច់គោចង្កាក់|សាច់គោអាំងចង្កាក់|ស្លាបមាន់|នំគ្រក់|បាញ់ឆែវ|គួង|ណែម|ចាយ៉|ពងទាកូន|ពងក្រួច|សាច់ក្រក|សង្វាក់|កំពិសលីង|ងាវស្រុះ|ខ្យងស្រែអាំង)/i.test(kh)) return 82;
     return 0;
   }
 

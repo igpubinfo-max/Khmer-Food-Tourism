@@ -58,7 +58,12 @@ import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } fro
 import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { getDishTagIds, type DishTagId } from '../utils/dishTags';
-import { getMatchingRestaurantsForDish, matchesDishCategoryFilter } from '../utils/foodFilters';
+import {
+  getMatchingRestaurantsForDish,
+  matchesDishCategoryFilter,
+  matchesPresetCravingChip,
+  resolvePresetCravingChipId,
+} from '../utils/foodFilters';
 import {
   getSpicyDishScore,
   isSweetOrBeverageFood,
@@ -654,7 +659,10 @@ export const WhatToEatModal: React.FC = () => {
     const parsedCraving = parseKhmerFoodSearchQuery(cravingQuery);
     let basePool: FoodItem[];
 
-    if (qTrim) {
+    const presetChipId = resolvePresetCravingChipId(cravingQuery);
+    if (presetChipId) {
+      basePool = foods.filter((f) => matchesPresetCravingChip(f, presetChipId));
+    } else if (qTrim) {
       const advisorAll = aiCravingRecommendations?.allMatchedDishes || [];
       if (advisorAll.length > 0) {
         // Strictly filter preset craving chips & flavor intents so every craving returns 100% relevant dishes
@@ -958,8 +966,8 @@ export const WhatToEatModal: React.FC = () => {
         }
       }
 
-      // Ensure every batch consistently displays 4 verified Cambodian food cards when catalog has >= 4 items
-      if (result.length < BATCH_SIZE && verifiedFoods.length > result.length) {
+      // Only pad from general catalog when no structured filter is active
+      if (!hasStructuredFilter && result.length < BATCH_SIZE && verifiedFoods.length > result.length) {
         const extraOffset = (spinCount * BATCH_SIZE) % verifiedFoods.length;
         const rotatedFallback = [
           ...verifiedFoods.slice(extraOffset),

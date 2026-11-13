@@ -2499,6 +2499,122 @@ export async function permanentlyInvalidateAndDeleteUserInCloud(params: {
 }
 
 /**
+ * Option A — Re-register a brand-new account from scratch using an email or phone number
+ * whose previous account was deleted:
+ *  - Overwrites any revoked `kft_user_<id>` tombstone rows in Supabase with the fresh `newUser`
+ *    by supplying the existing `REVOKED_DELETED_...` hash via `x-kft-prev-pw-hash` so `a_kft_kv_guard`
+ *    accepts the new passwordHash.
+ *  - Removes the old deletion tombstones for this identity from `kft_cloud_deleted_users_v1`.
+ */
+export async function reRegisterFreshUserAfterDeletionInCloud(params: {
+  newUser: User;
+  candidateKeys: string[];
+  cleanedDeletedUsers: DeletedUserRecord[];
+}): Promise<DeletedUserRecord[]> {
+  const { newUser, candidateKeys, cleanedDeletedUsers } = params;
+  const cleanCandidateKeys = Array.from(
+    new Set([
+      `${USER_RECORD_PREFIX}${newUser.id}`,
+      ...getCandidateAtomicUserKeys(newUser),
+      ...candidateKeys,
+    ].filter(Boolean))
+  );
+
+  for (const k of cleanCandidateKeys) {
+    dropFromCloudOutbox(k);
+    lastPushedAtomicUserSigMap.delete(k);
+    secondaryFailoverMemoryMap.delete(k);
+  }
+
+  if (!isSupabaseConfigured()) return cleanedDeletedUsers;
+
+  try {
+    const [existingDocs, cloudDeleted] = await Promise.all([
+      cleanCandidateKeys.length > 0
+        ? pullCloudDocumentsByKeys<User>(cleanCandidateKeys, 6000)
+        : Promise.resolve([]),
+      pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1', 6000),
+    ]);
+
+    const allAtomicKeys = Array.from(
+      new Set([...cleanCandidateKeys, ...existingDocs.map(d => d.key).filter(Boolean)])
+    );
+
+    const newEmailLower = (newUser.email || '').toLowerCase().trim();
+    const newEmailNorm = normalizeEmailForIdentity(newEmailLower)?.canonical || newEmailLower;
+    const newPhoneCanon = getCanonicalPhoneDigits(newUser.phone || '');
+    const keyIdSet = new Set(
+      allAtomicKeys.map(k => (k.startsWith(USER_RECORD_PREFIX) ? k.slice(USER_RECORD_PREFIX.length) : k))
+    );
+    keyIdSet.add(newUser.id);
+
+    const isMatchingTombstone = (d?: DeletedUserRecord | null): boolean => {
+      if (!d) return false;
+      if (d.id && keyIdSet.has(d.id)) return true;
+      const dEmail = (d.email || '').toLowerCase().trim();
+      const dEmailNorm = normalizeEmailForIdentity(dEmail)?.canonical || dEmail;
+      if (newEmailNorm && dEmailNorm && dEmailNorm === newEmailNorm) return true;
+      const dPhoneCanon = getCanonicalPhoneDigits(d.phone || '');
+      if (newPhoneCanon && newPhoneCanon.length >= 7 && dPhoneCanon && dPhoneCanon === newPhoneCanon) return true;
+      return false;
+    };
+
+    const delMap = new Map<string, DeletedUserRecord>();
+    if (Array.isArray(cloudDeleted)) {
+      for (const d of cloudDeleted) {
+        if (d && d.id && !isMatchingTombstone(d)) {
+          delMap.set(d.id, d);
+        }
+      }
+    }
+    for (const d of cleanedDeletedUsers) {
+      if (d && d.id && !isMatchingTombstone(d)) {
+        delMap.set(d.id, d);
+      }
+    }
+    const finalDeletedList = Array.from(delMap.values());
+
+    const cleanFreshUser: User = {
+      ...newUser,
+      isDeleted: false,
+      permanentlyDeleted: false,
+      deletedAt: undefined,
+      sessionRevokedAt: undefined,
+      isDisabled: false,
+      disabledAt: undefined,
+      membershipTier: 'free',
+      subscriptionStatus: undefined,
+      vipStatus: undefined,
+      paymentStatus: undefined,
+      vipCancelledAt: undefined,
+      subscriptionExpiryDate: undefined,
+      vipExpiresAt: undefined,
+    };
+
+    await Promise.all([
+      ...allAtomicKeys.map(async k => {
+        const existingDoc = existingDocs.find(d => d.key === k)?.payload;
+        const prevPwHash = existingDoc?.passwordHash || '';
+        const rowId = k.startsWith(USER_RECORD_PREFIX) ? k.slice(USER_RECORD_PREFIX.length) : cleanFreshUser.id;
+        const rowPayload: User = {
+          ...cleanFreshUser,
+          id: rowId,
+        };
+        await pushCloudDocument(k, rowPayload, 8000, {
+          prevPasswordHash: prevPwHash || undefined,
+        });
+      }),
+      pushCloudDocument('kft_cloud_deleted_users_v1', finalDeletedList, 8000, { allowDestructive: true }),
+    ]);
+
+    return finalDeletedList;
+  } catch (e) {
+    console.warn('reRegisterFreshUserAfterDeletionInCloud error:', e);
+    return cleanedDeletedUsers;
+  }
+}
+
+/**
  * Determine a deterministic canonical User ID so the same person (across Android APK, Web OAuth,
  * or Email/Phone sign-in) always maps to a single unified account without creating duplicates.
  */
@@ -3382,7 +3498,6 @@ export function deduplicateAndNormalizeUsers(
     if (isRevokedOrDeletedUserRecord(u)) return true;
     const delInfo = getDeletedInfoForUser(u);
     if (delInfo.ms <= 0) return false;
-    if (delInfo.permanent) return true;
 
     const restoredMs = parseSafeDateMs((u as any).restoredAt);
     if (delInfo.ms > 1 && restoredMs > delInfo.ms + 1000) {
@@ -4221,7 +4336,6 @@ export async function syncAllAppDataWithSupabase(localState: {
       const uEmail = String(u.email || '').toLowerCase().trim();
       const uPhone = String(u.phone || '').replace(/[\s-+()]/g, '');
       for (const [delKey, delRec] of Array.from(deletedMap.entries())) {
-        if (delRec.permanentlyDeleted) continue;
         const dEmail = String(delRec.email || '').toLowerCase().trim();
         const dPhone = String(delRec.phone || '').replace(/[\s-+()]/g, '');
         const isMatch =

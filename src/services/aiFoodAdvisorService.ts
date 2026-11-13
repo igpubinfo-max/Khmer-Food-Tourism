@@ -1,5 +1,6 @@
 import { FoodItem, Language, Restaurant, isPlaceLocationVerified } from '../types';
 import { getDishTagIds, DishTagId } from '../utils/dishTags';
+import { matchesPresetCravingChip, resolvePresetCravingChipId } from '../utils/foodFilters';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { tr } from '../utils/i18n';
 import {
@@ -422,9 +423,17 @@ export function getAiFoodAdvisorRecommendations(params: {
       ? SEMANTIC_CRAVING_RULES.filter((rule) => rule.triggerRegex.test(effectiveCleanQuery))
       : [];
 
+  const presetChipId = hasActiveQuery ? resolvePresetCravingChipId(query) : null;
   const scoredFoods: Array<{ food: FoodItem; score: number }> = [];
 
   for (const food of foods) {
+    if (presetChipId) {
+      if (matchesPresetCravingChip(food, presetChipId)) {
+        hasTitleMatch = true;
+        scoredFoods.push({ food, score: 200 + (food.rating || 4.5) * 10 });
+      }
+      continue;
+    }
     const tags = getDishTagIds(food);
     const zhLoc = getLocalizedFood(food, 'zh');
 
