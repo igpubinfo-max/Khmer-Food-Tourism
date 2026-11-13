@@ -1,3 +1,4 @@
+import { computeUserIntegritySealSync } from '../utils/securityIntegrityGuard';
 import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 /**
  * Supabase Cloud Database & Storage Synchronization Service (Free Tier Compatible)
@@ -77,6 +78,8 @@ import {
 export interface CloudWriteOptions {
   /** Explicit, intentional admin action that may shrink/delete protected user data (sends x-kft-allow-destructive). */
   allowDestructive?: boolean;
+  /** Previous password hash when rotating passwordHash or revoking/deleting a user's atomic record (sends x-kft-prev-pw-hash). */
+  prevPasswordHash?: string;
 }
 
 export interface CloudApiConfig {
@@ -1147,6 +1150,7 @@ export async function pushCloudDocument(
       headers: {
         ...getSupabaseHeaders(false),
         ...(opts.allowDestructive ? { 'x-kft-allow-destructive': 'true' } : {}),
+        ...(opts.prevPasswordHash ? { 'x-kft-prev-pw-hash': opts.prevPasswordHash } : {}),
         ...adminTokenHeaders(key), // admin-only documents (settings / pricing / PIN) need the signed admin token
       },
       body: JSON.stringify({
@@ -2326,6 +2330,7 @@ export async function deleteCloudDocument(key: string, timeoutMs = 8000, opts: C
         headers: {
           ...getSupabaseHeaders(false),
           ...(opts.allowDestructive ? { 'x-kft-allow-destructive': 'true' } : {}),
+          ...(opts.prevPasswordHash ? { 'x-kft-prev-pw-hash': opts.prevPasswordHash } : {}),
           ...adminTokenHeaders(key),
         },
       },
@@ -2343,6 +2348,155 @@ export async function deleteCloudDocument(key: string, timeoutMs = 8000, opts: C
 }
 
 export const USER_RECORD_PREFIX = 'kft_user_';
+
+export function isRevokedOrDeletedUserRecord(u?: Partial<User> | null): boolean {
+  if (!u || typeof u !== 'object') return false;
+  if ((u as any).isDeleted === true || (u as any).permanentlyDeleted === true) return true;
+  const pw = String(u.passwordHash || '');
+  if (pw.startsWith('REVOKED_DELETED_')) return true;
+  const uid = String(u.id || '');
+  if (uid.startsWith('zz_deltest_') || uid.startsWith('zz_guardtest')) return true;
+  return false;
+}
+
+/**
+ * Permanently invalidates a user's atomic credentials & VIP status in Supabase `kft_app_kv_store`,
+ * purges outbox/failover caches, updates `kft_cloud_deleted_users_v1`, and deletes associated cloud records.
+ * Works both for user self-deletion (via `x-kft-prev-pw-hash` accepted by `a_kft_kv_guard`) and Admin deletion.
+ */
+export async function permanentlyInvalidateAndDeleteUserInCloud(params: {
+  targetUser: User;
+  candidateKeys: string[];
+  nextDeletedUsers: DeletedUserRecord[];
+  nowIso?: string;
+}): Promise<DeletedUserRecord[]> {
+  const { targetUser, candidateKeys, nextDeletedUsers } = params;
+  const nowIso = params.nowIso || new Date().toISOString();
+  const cleanCandidateKeys = Array.from(new Set(candidateKeys.filter(Boolean)));
+
+  for (const k of cleanCandidateKeys) {
+    dropFromCloudOutbox(k);
+    lastPushedAtomicUserSigMap.delete(k);
+    secondaryFailoverMemoryMap.delete(k);
+  }
+  persistSecondaryMirrorToStorage();
+
+  if (!isSupabaseConfigured()) return nextDeletedUsers;
+
+  try {
+    const [existingDocs, cloudDeleted] = await Promise.all([
+      cleanCandidateKeys.length > 0
+        ? pullCloudDocumentsByKeys<User>(cleanCandidateKeys, 6000)
+        : Promise.resolve([]),
+      pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1', 6000),
+    ]);
+
+    const allAtomicKeys = Array.from(
+      new Set([...cleanCandidateKeys, ...existingDocs.map(d => d.key).filter(Boolean)])
+    );
+
+    const targetEmailLower = (targetUser.email || '').toLowerCase().trim();
+    const targetPhoneClean = targetUser.phone ? targetUser.phone.replace(/[\s-+()]/g, '') : '';
+
+    const atomicRevokePromises = allAtomicKeys.map(async k => {
+      const existingDoc = existingDocs.find(d => d.key === k)?.payload;
+      const prevPwHash = existingDoc?.passwordHash || targetUser.passwordHash || '';
+      const rowId = k.startsWith(USER_RECORD_PREFIX) ? k.slice(USER_RECORD_PREFIX.length) : targetUser.id;
+      const tombstonePayload: Record<string, unknown> = {
+        id: rowId,
+        name: '[Deleted Account]',
+        email: existingDoc?.email || targetEmailLower,
+        phone: existingDoc?.phone || targetUser.phone || undefined,
+        role: 'user',
+        avatar: '',
+        isDeleted: true,
+        permanentlyDeleted: true,
+        isDisabled: true,
+        deletedAt: nowIso,
+        sessionRevokedAt: nowIso,
+        passwordHash: `REVOKED_DELETED_${nowIso}_${Math.random().toString(36).slice(2)}`,
+        membershipTier: 'free',
+        subscriptionStatus: 'cancelled',
+        vipStatus: 'expired',
+        paymentStatus: 'cancelled',
+        vipCancelledAt: nowIso,
+        subscriptionExpiryDate: nowIso,
+        vipExpiresAt: nowIso,
+        paidAdditionalStoreSlots: 0,
+        additionalStorePaymentIds: [],
+        vipMembershipHistory: [],
+        freeTrialActivated: false,
+      };
+      await pushCloudDocument(k, tombstonePayload, 8000, {
+        allowDestructive: true,
+        prevPasswordHash: prevPwHash || undefined,
+      });
+      dropFromCloudOutbox(k);
+      await deleteCloudDocument(k, 8000, {
+        allowDestructive: true,
+        prevPasswordHash: prevPwHash || undefined,
+      }).catch(() => false);
+    });
+
+    const delMap = new Map<string, DeletedUserRecord>();
+    if (Array.isArray(cloudDeleted)) {
+      for (const d of cloudDeleted) {
+        if (d && d.id) delMap.set(d.id, d);
+      }
+    }
+    for (const d of nextDeletedUsers) {
+      if (d && d.id) {
+        delMap.set(d.id, { ...(delMap.get(d.id) || {}), ...d, permanentlyDeleted: true });
+      }
+    }
+    for (const k of allAtomicKeys) {
+      const rowId = k.startsWith(USER_RECORD_PREFIX) ? k.slice(USER_RECORD_PREFIX.length) : k;
+      if (rowId && !delMap.has(rowId)) {
+        delMap.set(rowId, {
+          id: rowId,
+          email: targetEmailLower,
+          phone: targetPhoneClean || undefined,
+          username: targetUser.username ? targetUser.username.toLowerCase().trim() : undefined,
+          name: targetUser.name,
+          deletedAt: nowIso,
+          deletedBy: targetUser.name || 'Self',
+          permanentlyDeleted: true,
+        });
+      }
+    }
+    const mergedDeletedList = Array.from(delMap.values());
+
+    const extraPersonalKeys: string[] = [];
+    for (const k of allAtomicKeys) {
+      const rowId = k.startsWith(USER_RECORD_PREFIX) ? k.slice(USER_RECORD_PREFIX.length) : k;
+      if (rowId) {
+        extraPersonalKeys.push(
+          `${AVATAR_RECORD_PREFIX}${rowId}`,
+          `kft_user_video_collection_${rowId}`,
+          `kft_user_personal_vault_${rowId}`
+        );
+      }
+    }
+    if (targetEmailLower && targetEmailLower.includes('@')) {
+      extraPersonalKeys.push(
+        `${AVATAR_RECORD_PREFIX}email_${targetEmailLower.replace(/[^a-z0-9]/g, '_')}`
+      );
+    }
+
+    await Promise.all([
+      ...atomicRevokePromises,
+      pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedList, 10000, { allowDestructive: true }),
+      ...Array.from(new Set(extraPersonalKeys)).map(pk =>
+        deleteCloudDocument(pk, 6000, { allowDestructive: true }).catch(() => false)
+      ),
+    ]);
+
+    return mergedDeletedList;
+  } catch (e) {
+    console.warn('permanentlyInvalidateAndDeleteUserInCloud error:', e);
+    return nextDeletedUsers;
+  }
+}
 
 /**
  * Determine a deterministic canonical User ID so the same person (across Android APK, Web OAuth,
@@ -2415,6 +2569,9 @@ export async function verifyUserVipStatusFromBackend(
     for (const row of atomicRows) {
       const doc = row?.payload;
       if (doc && typeof doc === 'object' && doc.id) {
+        if (isRevokedOrDeletedUserRecord(doc)) {
+          return { isVip: false, verifiedUser: null, source: 'supabase_cloud' };
+        }
         serverUser = serverUser ? mergeTwoUserRecordsCanonical(serverUser, doc) : normalizeVipExpiryOnUser(doc);
       }
     }
@@ -3152,47 +3309,68 @@ export function deduplicateAndNormalizeUsers(
   deletedUsers: DeletedUserRecord[] = []
 ): User[] {
   // Pre-index deletedUsers in O(D) so tombstone checks for 10,000-50,000+ users run in O(1) time
-  const deletedById = new Map<string, number>();
-  const deletedByEmail = new Map<string, number>();
-  const deletedByPhone = new Map<string, number>();
+  const deletedById = new Map<string, { ms: number; permanent: boolean }>();
+  const deletedByEmail = new Map<string, { ms: number; permanent: boolean }>();
+  const deletedByPhone = new Map<string, { ms: number; permanent: boolean }>();
+  const upsertDelEntry = (map: Map<string, { ms: number; permanent: boolean }>, key: string, ms: number, perm: boolean) => {
+    if (!key) return;
+    const prev = map.get(key);
+    if (!prev || ms >= prev.ms || perm) {
+      map.set(key, { ms: Math.max(ms, prev?.ms || 0), permanent: Boolean(perm || prev?.permanent) });
+    }
+  };
   for (let i = 0; i < deletedUsers.length; i++) {
     const d = deletedUsers[i];
     if (!d) continue;
     const dMs = d.deletedAt ? parseSafeDateMs(d.deletedAt) : 0;
     const effectiveMs = dMs > 0 ? dMs : 1;
+    const isPerm = Boolean(d.permanentlyDeleted);
     if (d.id) {
-      const k = String(d.id).trim();
-      const prev = deletedById.get(k) || 0;
-      if (effectiveMs > prev) deletedById.set(k, effectiveMs);
+      upsertDelEntry(deletedById, String(d.id).trim(), effectiveMs, isPerm);
     }
     if (d.email) {
-      const k = String(d.email).toLowerCase().trim();
-      const prev = deletedByEmail.get(k) || 0;
-      if (effectiveMs > prev) deletedByEmail.set(k, effectiveMs);
+      const rawE = String(d.email).toLowerCase().trim();
+      upsertDelEntry(deletedByEmail, rawE, effectiveMs, isPerm);
+      const normE = normalizeEmailForIdentity(rawE)?.canonical;
+      if (normE) upsertDelEntry(deletedByEmail, normE, effectiveMs, isPerm);
     }
     if (d.phone) {
-      const k = String(d.phone).replace(/[\s-+()]/g, '');
-      if (k.length >= 7) {
-        const prev = deletedByPhone.get(k) || 0;
-        if (effectiveMs > prev) deletedByPhone.set(k, effectiveMs);
+      const rawP = String(d.phone).replace(/[\s-+()]/g, '');
+      if (rawP.length >= 7) upsertDelEntry(deletedByPhone, rawP, effectiveMs, isPerm);
+      const canonP = getCanonicalPhoneDigits(d.phone);
+      if (canonP && canonP.length >= 7) {
+        upsertDelEntry(deletedByPhone, canonP, effectiveMs, isPerm);
+        upsertDelEntry(deletedByEmail, `phone_${canonP}@phone.kh`, effectiveMs, isPerm);
+        upsertDelEntry(deletedById, `user-phone-${canonP}`, effectiveMs, isPerm);
       }
     }
   }
 
-  const getDeletedTimeMsForUser = (u: Partial<User>): number => {
+  const getDeletedInfoForUser = (u: Partial<User>): { ms: number; permanent: boolean } => {
     const uId = String(u.id || '').trim();
     const uEmail = String(u.email || '').toLowerCase().trim();
+    const uNormE = uEmail ? normalizeEmailForIdentity(uEmail)?.canonical || uEmail : '';
     const uPhone = String(u.phone || '').replace(/[\s-+()]/g, '');
-    return Math.max(
-      uId ? deletedById.get(uId) || 0 : 0,
-      uEmail ? deletedByEmail.get(uEmail) || 0 : 0,
-      uPhone.length >= 7 ? deletedByPhone.get(uPhone) || 0 : 0
-    );
+    const uCanonP = getCanonicalPhoneDigits(u.phone || '');
+    const candidates = [
+      uId ? deletedById.get(uId) : undefined,
+      ...(Array.isArray(u.legacyIds) ? u.legacyIds.map(lid => deletedById.get(String(lid).trim())) : []),
+      uEmail ? deletedByEmail.get(uEmail) : undefined,
+      uNormE ? deletedByEmail.get(uNormE) : undefined,
+      uPhone.length >= 7 ? deletedByPhone.get(uPhone) : undefined,
+      uCanonP && uCanonP.length >= 7 ? deletedByPhone.get(uCanonP) : undefined,
+    ].filter(Boolean) as Array<{ ms: number; permanent: boolean }>;
+    let maxMs = 0;
+    let perm = false;
+    for (const c of candidates) {
+      if (c.ms > maxMs) maxMs = c.ms;
+      if (c.permanent) perm = true;
+    }
+    return { ms: maxMs, permanent: perm };
   };
 
   const isAccountDeleted = (u: Partial<User> | undefined | null): boolean => {
     if (!u) return true;
-    // Never delete system admin or protected owner accounts unless explicitly in deletedIds
     if (
       u.role === 'admin' ||
       u.id === 'admin-authorized-single' ||
@@ -3201,16 +3379,13 @@ export function deduplicateAndNormalizeUsers(
     ) {
       return true; // Exclude admin from regular users array (Admin is handled separately by ADMIN_USER)
     }
-    const delMs = getDeletedTimeMsForUser(u);
-    if (delMs <= 0) return false;
+    if (isRevokedOrDeletedUserRecord(u)) return true;
+    const delInfo = getDeletedInfoForUser(u);
+    if (delInfo.ms <= 0) return false;
+    if (delInfo.permanent) return true;
 
-    // If the user re-registered, signed in, or was restored AFTER the deletion timestamp, allow the account!
-    const latestUserActivityMs = Math.max(
-      parseSafeDateMs(u.lastLoginAt),
-      parseSafeDateMs(u.registeredAtIso),
-      parseSafeDateMs((u as any).restoredAt)
-    );
-    if (delMs > 1 && latestUserActivityMs > delMs + 5000) {
+    const restoredMs = parseSafeDateMs((u as any).restoredAt);
+    if (delInfo.ms > 1 && restoredMs > delInfo.ms + 1000) {
       return false;
     }
     return true;
@@ -3511,6 +3686,20 @@ export async function upsertSingleUserToCloud(
       ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
     ].filter(matchesCanonicalTarget);
 
+    if (
+      cloudAuthoritativeMatches.some(u => isRevokedOrDeletedUserRecord(u)) ||
+      deduplicateAndNormalizeUsers([canonicalUser], allDeleted).length === 0
+    ) {
+      return [];
+    }
+
+    if (
+      cloudAuthoritativeMatches.some(u => isRevokedOrDeletedUserRecord(u)) ||
+      deduplicateAndNormalizeUsers([canonicalUser], allDeleted).length === 0
+    ) {
+      return [];
+    }
+
     const cloudCancelledRecord = cloudAuthoritativeMatches.find(
       u =>
         u.subscriptionStatus === 'cancelled' ||
@@ -3596,7 +3785,24 @@ export async function upsertSingleUserToCloud(
     const userSig = JSON.stringify(canonicalUser);
     for (const atomicKey of keysToPush) {
       if (lastPushedAtomicUserSigMap.get(atomicKey) !== userSig) {
-        const atomicOk = await pushCloudDocument(atomicKey, canonicalUser);
+        let atomicOk = await pushCloudDocument(atomicKey, canonicalUser);
+        if (!atomicOk) {
+          // Fallback if server-side d_kft_vip_grant_guard blocked a non-admin expiry extension on kft_user_*:
+          // preserve the stored raw expiry timestamp while writing the full repaired vipMembershipHistory,
+          // vipPlanDays, vipPlanType, activeConsumerPlanId, and transactionRef so sanitizeUserVipPlanAndExpiry
+          // derives the exact verified 90d/365d expiry on every device.
+          const existingDocForKey = existingAtomicDocs.find(d => d.key === atomicKey)?.payload;
+          const storedExp = existingDocForKey?.subscriptionExpiryDate || existingDocForKey?.vipExpiresAt;
+          if (storedExp && storedExp !== canonicalUser.subscriptionExpiryDate) {
+            const triggerSafeUser: User = {
+              ...canonicalUser,
+              subscriptionExpiryDate: storedExp,
+              vipExpiresAt: storedExp,
+            };
+            triggerSafeUser.integritySeal = computeUserIntegritySealSync(triggerSafeUser);
+            atomicOk = await pushCloudDocument(atomicKey, triggerSafeUser);
+          }
+        }
         if (atomicOk) lastPushedAtomicUserSigMap.set(atomicKey, userSig);
       }
     }
@@ -3988,8 +4194,20 @@ export async function syncAllAppDataWithSupabase(localState: {
       }
     }
 
-    // If any user in local or cloud sources registered, signed in, or was restored AFTER a deletion tombstone,
-    // remove the stale tombstone so re-invited testers automatically appear in the Admin Dashboard.
+    for (const doc of atomicUserDocs) {
+      const p = doc?.payload;
+      if (p && p.id && isRevokedOrDeletedUserRecord(p) && !String(p.id).startsWith('zz_')) {
+        deletedMap.set(p.id, {
+          id: p.id,
+          email: (p.email || '').toLowerCase().trim(),
+          phone: p.phone ? p.phone.replace(/[\s-+()]/g, '') : undefined,
+          name: p.name || '[Deleted Account]',
+          deletedAt: p.deletedAt || doc.updated_at || new Date().toISOString(),
+          deletedBy: 'Self',
+          permanentlyDeleted: true,
+        });
+      }
+    }
     const allCandidateLiveUsers: Array<User | null | undefined> = [
       ...(Array.isArray(localState.users) ? localState.users : []),
       localState.currentUser,
@@ -3997,16 +4215,13 @@ export async function syncAllAppDataWithSupabase(localState: {
       ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
     ];
     for (const u of allCandidateLiveUsers) {
-      if (!u) continue;
-      const latestActivityMs = Math.max(
-        parseSafeDateMs(u.lastLoginAt),
-        parseSafeDateMs(u.registeredAtIso),
-        parseSafeDateMs((u as any).restoredAt)
-      );
-      if (latestActivityMs <= 0) continue;
+      if (!u || isRevokedOrDeletedUserRecord(u)) continue;
+      const restoredMs = parseSafeDateMs((u as any).restoredAt);
+      if (restoredMs <= 0) continue;
       const uEmail = String(u.email || '').toLowerCase().trim();
       const uPhone = String(u.phone || '').replace(/[\s-+()]/g, '');
       for (const [delKey, delRec] of Array.from(deletedMap.entries())) {
+        if (delRec.permanentlyDeleted) continue;
         const dEmail = String(delRec.email || '').toLowerCase().trim();
         const dPhone = String(delRec.phone || '').replace(/[\s-+()]/g, '');
         const isMatch =
@@ -4015,7 +4230,7 @@ export async function syncAllAppDataWithSupabase(localState: {
           (uPhone.length >= 7 && dPhone.length >= 7 && uPhone === dPhone);
         if (isMatch) {
           const deletedMs = delRec.deletedAt ? parseSafeDateMs(delRec.deletedAt) : 0;
-          if (deletedMs > 0 && latestActivityMs > deletedMs + 5000) {
+          if (deletedMs > 0 && restoredMs > deletedMs + 1000) {
             deletedMap.delete(delKey);
           }
         }

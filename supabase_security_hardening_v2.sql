@@ -64,6 +64,15 @@ BEGIN
   END IF;
 
   IF TG_OP = 'DELETE' THEN
+    -- Allow authenticated user self-deletion of their own `kft_user_*` record when x-kft-allow-destructive is sent with matching x-kft-prev-pw-hash
+    IF OLD.key LIKE 'kft\_user\_%' ESCAPE '\'
+       AND coalesce(headers_json->>'x-kft-allow-destructive', '') IN ('1', 'true')
+       AND (
+         coalesce(OLD.payload->>'passwordHash', '') = ''
+         OR (coalesce(v_prev_pw_hash, '') <> '' AND v_prev_pw_hash = (OLD.payload->>'passwordHash'))
+       ) THEN
+      RETURN OLD;
+    END IF;
     RAISE EXCEPTION 'KFT_GUARD: delete of protected key % blocked (intentional admin deletes must send x-kft-allow-destructive with a valid x-kft-admin-token)', OLD.key
       USING ERRCODE = 'P0001';
   END IF;
@@ -110,6 +119,18 @@ BEGIN
     END IF;
 
     IF old_p IS NOT NULL AND jsonb_typeof(old_p) = 'object' THEN
+      -- [G0] Permanently Deleted Account Guard: once permanentlyDeleted/isDeleted is set, unauthenticated callers cannot resurrect the row
+      IF coalesce((old_p->>'permanentlyDeleted')::boolean, false) = true
+         OR coalesce((old_p->>'isDeleted')::boolean, false) = true
+         OR coalesce(old_p->>'passwordHash', '') LIKE 'REVOKED_DELETED_%' THEN
+        NEW.payload := old_p || jsonb_build_object(
+          'isDeleted', true,
+          'permanentlyDeleted', true,
+          'isDisabled', true
+        );
+        RETURN NEW;
+      END IF;
+
       -- [G2] Account Takeover Guard: immutable primary identity (email, googleSub, phone) & passwordHash protection
       IF coalesce(old_p->>'email', '') <> ''
          AND lower(coalesce(NEW.payload->>'email', '')) <> lower(old_p->>'email') THEN

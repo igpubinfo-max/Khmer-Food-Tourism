@@ -62,7 +62,7 @@ export const ProfileView: React.FC = () => {
 
   const handleSelfDeleteAccount = async () => {
     if (!currentUser || isAdmin) return;
-    const msg = tr(language, `តើអ្នកពិតជាចង់លុបគណនីរបស់អ្នក (${currentUser.email || currentUser.name}) មែនទេ? ទិន្នន័យប្រវត្តិរូប រូបភាព និងការកំណត់ទាំងអស់នឹងត្រូវលុបចេញភ្លាមៗ។ (កំណត់ត្រាទូទាត់ប្រាក់ និងសុពលភាពសមាជិកភាព VIP ដែលបានផ្ទៀងផ្ទាត់នឹងត្រូវរក្សាទុកដោយសុវត្ថិភាព ប្រសិនបើអ្នកចូលប្រើប្រាស់ម្តងទៀតដោយអ៊ីមែលដដែល)`, `Are you sure you want to delete your account (${currentUser.email || currentUser.name})? All your profile data, saved favorites, and account settings will be deleted immediately. (Verified payment records and remaining VIP membership entitlement are securely retained if you sign in again with the same verified email.)`, `您确定要注销您的账户（${currentUser.email || currentUser.name}）吗？您的个人资料、收藏和账户设置将被立即删除。（已核实的付款记录和剩余 VIP 会员权益将被安全保留，使用同一认证邮箱重新登录即可恢复。）`);
+    const msg = tr(language, `⚠️ តើអ្នកពិតជាចង់លុបគណនីរបស់អ្នក (${currentUser.email || currentUser.phone || currentUser.name}) ជាអចិន្ត្រៃយ៍មែនទេ?\n\nការលុបគណនីនឹងលុបទិន្នន័យផ្ទាល់ខ្លួន ហាងដែលបានចុះឈ្មោះ សិទ្ធិសមាជិកភាព VIP និងលេខសម្ងាត់ចូលប្រើប្រាស់ទាំងអស់ជាអចិន្ត្រៃយ៍ ហើយមិនអាចចូលប្រើប្រាស់គណនីនេះម្តងទៀតបានឡើយ។`, `⚠️ Are you sure you want to permanently delete your account (${currentUser.email || currentUser.phone || currentUser.name})?\n\nThis will permanently delete your account, personal data, listed stores, VIP membership records, and login credentials. Deleted accounts cannot log in again.`, `⚠️ 您确定要永久删除您的账号（${currentUser.email || currentUser.phone || currentUser.name}）吗？\n\n此操作将永久删除您的账号、个人资料、店铺信息、VIP 会员记录和登录凭证，删除后无法再次登录。`);
     if (!window.confirm(msg)) return;
     await deleteUserAccount(currentUser.id);
   };

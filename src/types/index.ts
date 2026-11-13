@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1577;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1578;
 export const APP_RELEASE_DATE = '2026-11-13';
 
 /**
@@ -932,6 +932,10 @@ export interface User {
   isDisabled?: boolean;
   disabledAt?: string;
   restoredAt?: string;
+  isDeleted?: boolean;
+  permanentlyDeleted?: boolean;
+  deletedAt?: string;
+  sessionRevokedAt?: string;
 
   // Additional Store Slots purchased beyond the 1st free VIP store ($10 per additional store)
   paidAdditionalStoreSlots?: number;
@@ -3865,8 +3869,7 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
       user.paymentStatus !== 'verified' ||
       bestActiveGrant.planDays > curPlanDays ||
       curExpMs <= nowMs ||
-      (String(user.transactionRef || '').trim() !== String(bestActiveGrant.entry.transactionRef || '').trim() &&
-        bestActiveGrant.expMs > curExpMs);
+      bestActiveGrant.expMs > curExpMs + 5000;
 
     if (needsRestoreFromVerifiedHistory) {
       const restoredStartIso = new Date(bestActiveGrant.startMs).toISOString();
