@@ -145,15 +145,7 @@ export const NearMeModal: React.FC = () => {
   const nearbyListStartRef = useRef<HTMLDivElement | null>(null);
   const nearbyCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToNearbyShopList = (keepCategoriesVisible = false) => {
-    if (keepCategoriesVisible && nearbyCategoryCardRef.current) {
-      smoothScrollToElement(nearbyCategoryCardRef.current, {
-        containerEl: nearMeScrollRef.current,
-        offsetTop: 8,
-        onlyIfOutOfView: true,
-      });
-      return;
-    }
+  const scrollToNearbyShopList = (_keepCategoriesVisible = false) => {
     smoothScrollToElement(nearbyListStartRef.current, {
       containerEl: nearMeScrollRef.current,
       offsetTop: 8,
@@ -246,6 +238,7 @@ export const NearMeModal: React.FC = () => {
     setUserCoords(center);
     setGeoStatus('fallback');
     void fetchLiveNearby500m(center, false, selectedRadiusMeters);
+    scrollToNearbyShopList();
   };
 
   const fetchLiveNearby500m = async (
@@ -338,6 +331,7 @@ export const NearMeModal: React.FC = () => {
   const handleSelectRadius = (newRadius: number) => {
     setSelectedRadiusMeters(newRadius);
     fetchLiveNearby500m(baseCoords, true, newRadius);
+    scrollToNearbyShopList();
   };
 
   // Merge & deduplicate verified Supabase restaurants + Google Maps/Live nearby places within user's location
@@ -794,6 +788,13 @@ export const NearMeModal: React.FC = () => {
               type="text"
               value={nearbyQuery}
               onChange={(e) => setNearbyQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  (e.currentTarget as HTMLInputElement).blur();
+                  scrollToNearbyShopList();
+                }
+              }}
               placeholder={tr(
                 language,
                 'ស្វែងរកហាង ឬមុខម្ហូបជិតអ្នក (ឧ. គុយទាវ, កាហ្វេ, បាយ)...',

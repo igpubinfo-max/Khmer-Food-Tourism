@@ -367,6 +367,7 @@ export const WhatToEatModal: React.FC = () => {
   const cravingInputRef = useRef<HTMLInputElement | null>(null);
   const dishCardRef = useRef<HTMLDivElement | null>(null);
   const drinkPairingTopRef = useRef<HTMLDivElement | null>(null);
+  const expandedGroupPanelRef = useRef<HTMLDivElement | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(null);
@@ -501,13 +502,11 @@ export const WhatToEatModal: React.FC = () => {
       setOpenGroup(null);
       setSetPage(0);
       setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
-      setTimeout(() => {
-        if (scrollerRef.current) {
-          scrollerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          drinkPairingTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 60);
+      smoothScrollToElement(drinkPairingTopRef.current || dishCardRef.current, {
+        containerEl: scrollerRef.current,
+        offsetTop: 8,
+        delayMs: 55,
+      });
     } else if ((window as any).__kft_wte_open_health) {
       (window as any).__kft_wte_open_health = false;
       setDrinkMode(false);
@@ -974,16 +973,12 @@ export const WhatToEatModal: React.FC = () => {
 
   const [recommendationError, setRecommendationError] = useState<string>('');
 
-  const scrollToResultsSection = () => {
-    setTimeout(() => {
-      if (!dishCardRef.current || !scrollerRef.current) return;
-      const scrollerRect = scrollerRef.current.getBoundingClientRect();
-      const cardRect = dishCardRef.current.getBoundingClientRect();
-      // Only scroll if the dish card is below the visible area of the modal scroller
-      if (cardRect.top > scrollerRect.bottom - 120) {
-        dishCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }, 90);
+  const scrollToResultsSection = (targetEl?: HTMLElement | null) => {
+    smoothScrollToElement(targetEl || dishCardRef.current, {
+      containerEl: scrollerRef.current,
+      offsetTop: 8,
+      delayMs: 45,
+    });
   };
 
   // Top 4 Recommended Dishes per batch for the 2-column RESULTS section
@@ -1470,11 +1465,7 @@ export const WhatToEatModal: React.FC = () => {
         });
         setSpinCount((c) => c + 1);
         setIsSpinning(false);
-        if (scrollerRef.current) {
-          scrollerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          drinkPairingTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        scrollToResultsSection(dishCardRef.current);
       }, 200);
       return;
     }
@@ -1595,24 +1586,16 @@ export const WhatToEatModal: React.FC = () => {
   const MealIcon = currentMealInfo.icon;
 
   const handleOpenDrinkPairing = () => {
+    const nextDrinkMode = !drinkMode;
     setComparedDishIds([]);
-    setDrinkMode((v) => {
-      const next = !v;
-      if (next) {
-        setSetPage(0);
-        setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
-      }
-      return next;
-    });
+    setDrinkMode(nextDrinkMode);
+    if (nextDrinkMode) {
+      setSetPage(0);
+      setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
+    }
     setCravingQuery('');
     setOpenGroup(null);
-    setTimeout(() => {
-      if (scrollerRef.current) {
-        scrollerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        drinkPairingTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 50);
+    scrollToResultsSection(nextDrinkMode ? drinkPairingTopRef.current || dishCardRef.current : dishCardRef.current);
   };
 
   const activeSlot = MEAL_SLOTS.find((s) => s.id === mealSlotFilter);
@@ -3095,7 +3078,17 @@ export const WhatToEatModal: React.FC = () => {
                       onClick={() => {
                         setShowVipAiUpgradeNotice(false);
                         setDrinkMode(false);
-                        setOpenGroup((cur) => (cur === g.id ? null : g.id));
+                        const willOpen = openGroup !== g.id;
+                        setOpenGroup(willOpen ? g.id : null);
+                        if (willOpen) {
+                          smoothScrollToElement(expandedGroupPanelRef.current || dishCardRef.current, {
+                            containerEl: scrollerRef.current,
+                            offsetTop: 8,
+                            delayMs: 45,
+                          });
+                        } else {
+                          scrollToResultsSection(dishCardRef.current);
+                        }
                       }}
                       className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
@@ -3232,7 +3225,7 @@ export const WhatToEatModal: React.FC = () => {
 
               {/* Expanded options panel */}
               {openGroup && (
-                <div className="p-2.5 rounded-2xl bg-emerald-50/80 border border-emerald-200">
+                <div ref={expandedGroupPanelRef} className="p-2.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 scroll-mt-2">
                   <div className="flex flex-wrap gap-1.5">
                     {openGroup === 'time' &&
                       MEAL_SLOTS.map((slot) => {
@@ -3448,6 +3441,7 @@ export const WhatToEatModal: React.FC = () => {
                         onClick={() => {
                           setDrinkKind(k.id);
                           setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
+                          scrollToResultsSection(dishCardRef.current);
                         }}
                         className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer ${
                           drinkKind === k.id
@@ -3468,6 +3462,7 @@ export const WhatToEatModal: React.FC = () => {
                           setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
                           setSpinCount((c) => c + 1);
                           setIsSpinning(false);
+                          scrollToResultsSection(dishCardRef.current);
                         }, 180);
                       }}
                       className="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 transition active:scale-95 cursor-pointer"
@@ -3482,7 +3477,7 @@ export const WhatToEatModal: React.FC = () => {
           </div>
 
           {/* Content body (Dark Slate #1E293B background for all marked areas) */}
-          <div ref={dishCardRef} className="px-3.5 pt-3.5 pb-4 space-y-3 bg-[#1E293B] flex-1">
+          <div ref={dishCardRef} className="px-3.5 pt-3.5 pb-8 space-y-3 bg-[#1E293B] flex-1 min-h-[85dvh] scroll-mt-2">
 
             {/* Beverage Pairing sets */}
             {showSets && (

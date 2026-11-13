@@ -911,6 +911,7 @@ export const HotelView: React.FC = () => {
     setHotelSearchQuery('');
     setRatingFilter('all');
     setSortMode('newest');
+    scrollToHotelList();
   };
 
   return (

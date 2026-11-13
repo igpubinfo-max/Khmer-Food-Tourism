@@ -77,10 +77,29 @@ export function smoothScrollToElement(
 
   const runScroll = () => {
     if (!targetEl) return;
+    const findNearestScrollableAncestor = (el: HTMLElement | null): HTMLElement | null => {
+      if (!el || typeof window === 'undefined') return null;
+      let cur: HTMLElement | null = el.parentElement;
+      while (cur && cur !== document.body && cur !== document.documentElement) {
+        if (cur.id === 'kft-main-scroll') return cur;
+        const style = window.getComputedStyle(cur);
+        const overflowY = style?.overflowY || '';
+        if ((overflowY === 'auto' || overflowY === 'scroll') && cur.clientHeight > 0) {
+          return cur;
+        }
+        cur = cur.parentElement;
+      }
+      return null;
+    };
+
     const scrollContainer =
       options?.containerEl ||
+      (options?.containerId && typeof document !== 'undefined'
+        ? (document.getElementById(options.containerId) as HTMLElement | null)
+        : null) ||
+      findNearestScrollableAncestor(targetEl) ||
       (typeof document !== 'undefined'
-        ? (document.getElementById(options?.containerId || 'kft-main-scroll') as HTMLElement | null)
+        ? (document.getElementById('kft-main-scroll') as HTMLElement | null)
         : null);
 
     if (scrollContainer) {

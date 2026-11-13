@@ -182,6 +182,8 @@ export const FoodView: React.FC = () => {
     setProvinceFilter('');
     setTagFilter('all');
     setFoodSearchQuery('');
+    setShowFilterDrawer(false);
+    scrollToDishList();
   };
 
   useEffect(() => {

@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { TripPlan, isUserVipActive, isAdminAccount, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, openExternalUrlNativeSafe } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 import { IconSmartAssistant } from './icons/HandcraftedIcons';
 import {
   translateDynamicTextToZh,
@@ -132,6 +133,7 @@ export const AiTripPlannerModal: React.FC = () => {
   const [goalSeed, setGoalSeed] = useState<number>(1);
   const advisorInputRef = useRef<HTMLInputElement | null>(null);
   const advisorResultsRef = useRef<HTMLDivElement | null>(null);
+  const goalResultsRef = useRef<HTMLDivElement | null>(null);
   const contentScrollRef = useRef<HTMLDivElement | null>(null);
   const goalCardRefs = useRef<Partial<Record<AdvisorGoalId, HTMLDivElement | null>>>({});
 
@@ -193,16 +195,10 @@ export const AiTripPlannerModal: React.FC = () => {
   );
 
   const scrollGoalIntoView = (goalId: AdvisorGoalId) => {
-    if (typeof window === 'undefined') return;
-    window.requestAnimationFrame(() => {
-      const container = contentScrollRef.current;
-      const cardEl = goalCardRefs.current[goalId];
-      if (container && cardEl) {
-        const containerRect = container.getBoundingClientRect();
-        const cardRect = cardEl.getBoundingClientRect();
-        const targetTop = container.scrollTop + (cardRect.top - containerRect.top) - 10;
-        container.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
-      }
+    smoothScrollToElement(goalResultsRef.current || goalCardRefs.current[goalId], {
+      containerEl: contentScrollRef.current,
+      offsetTop: 8,
+      delayMs: 45,
     });
   };
 
@@ -218,11 +214,11 @@ export const AiTripPlannerModal: React.FC = () => {
       scrollGoalIntoView(targetGoal);
       return;
     }
-    if (typeof window !== 'undefined') {
-      window.requestAnimationFrame(() => {
-        advisorResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    }
+    smoothScrollToElement(advisorResultsRef.current, {
+      containerEl: contentScrollRef.current,
+      offsetTop: 8,
+      delayMs: 45,
+    });
   };
 
   if (!isAiTripPlannerModalOpen) return null;
@@ -777,6 +773,11 @@ export const AiTripPlannerModal: React.FC = () => {
                             setAdvisorPrompt('');
                           } else {
                             setAdvisorPrompt(chipQuery);
+                            smoothScrollToElement(advisorResultsRef.current, {
+                              containerEl: contentScrollRef.current,
+                              offsetTop: 8,
+                              delayMs: 45,
+                            });
                           }
                           setAdvisorSeed(1);
                         }}
@@ -1135,7 +1136,7 @@ export const AiTripPlannerModal: React.FC = () => {
 
                 {/* Selected Goal Recommendations (Shown cleanly beneath the dropdown when a goal is selected) */}
                 {expandedGoalId && (
-                  <div className="p-3 rounded-2xl border border-emerald-500/35 bg-slate-50/90 space-y-2.5">
+                  <div ref={goalResultsRef} className="p-3 rounded-2xl border border-emerald-500/35 bg-slate-50/90 space-y-2.5 scroll-mt-2">
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <span className="text-[11px] font-extrabold text-[#064E3B] block truncate">

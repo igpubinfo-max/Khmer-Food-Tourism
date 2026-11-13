@@ -38,6 +38,7 @@ import {
 } from '../utils/foodFilters';
 import { calculateDistanceKm } from '../services/dailyDiscoveryAndNotificationService';
 import { tr } from '../utils/i18n';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 import { IconProvinceFood } from './icons/HandcraftedIcons';
 import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import type { Restaurant } from '../types';
@@ -82,7 +83,16 @@ export const DailyDiscoveriesModal: React.FC = () => {
   const [isLoadingProvince, setIsLoadingProvince] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const bodyScrollRef = useRef<HTMLDivElement | null>(null);
+  const dishesListStartRef = useRef<HTMLDivElement | null>(null);
   const loadMoreDishesRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToProvincialDishes = () => {
+    smoothScrollToElement(dishesListStartRef.current, {
+      containerEl: bodyScrollRef.current,
+      offsetTop: 8,
+      delayMs: 40,
+    });
+  };
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -108,17 +118,19 @@ export const DailyDiscoveriesModal: React.FC = () => {
     setVisibleDishCount(PROVINCIAL_DISH_BATCH_SIZE);
   }, [selectedProvinceId, debouncedQuery, vipTasteProfile]);
 
-  const handleSelectProvince = (provId: string) => {
+  const handleSelectProvince = (provId: string, showProvinceDirectory = false) => {
     setLoadError(null);
     setIsLoadingProvince(true);
     setSelectedProvinceId(provId);
     setVisibleDishCount(PROVINCIAL_DISH_BATCH_SIZE);
     setTimeout(() => {
       setIsLoadingProvince(false);
-      if (bodyScrollRef.current) {
-        bodyScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      if (showProvinceDirectory) {
+        bodyScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        scrollToProvincialDishes();
       }
-    }, 40);
+    }, 35);
   };
 
   // Deduplicate and verify all dishes so no duplicate names or photos ever appear
@@ -527,8 +539,13 @@ export const DailyDiscoveriesModal: React.FC = () => {
           </button>
         </div>
 
+        {/* Main Scrollable Container (wraps Control Bar + 4 Category Cards + Province Pills + Results so selecting any category/province smoothly positions the results at the top of the screen) */}
+        <div
+          ref={bodyScrollRef}
+          className="flex-1 overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch] bg-[#1E293B]"
+        >
         {/* Control Bar: Search + GPS Nearest Province + 4 Colorful Category Cards */}
-        <div className="px-3.5 pt-3 pb-2.5 bg-[#1E293B] border-b border-slate-700/80 space-y-2.5 shrink-0 shadow-[0_4px_12px_rgba(15,23,42,0.18)]">
+        <div className="px-3.5 pt-3 pb-2.5 bg-[#1E293B] border-b border-slate-700/80 space-y-2.5 shadow-[0_4px_12px_rgba(15,23,42,0.18)]">
           {/* Row 1: Rounded White Search Bar + Glossy GPS Nearest Province Button */}
           <div className="flex items-center gap-2">
             <div className="relative flex-1 min-w-0">
@@ -537,6 +554,13 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    (e.currentTarget as HTMLInputElement).blur();
+                    scrollToProvincialDishes();
+                  }
+                }}
                 placeholder={tr(
                   language,
                   'ស្វែងរកឈ្មោះម្ហូប ឬខេត្ត-ក្រុង...',
@@ -587,7 +611,10 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   <button
                     key={card.id}
                     type="button"
-                    onClick={() => setVipTasteProfile(card.id)}
+                    onClick={() => {
+                      setVipTasteProfile(card.id);
+                      scrollToProvincialDishes();
+                    }}
                     aria-pressed={active}
                     className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 overflow-visible p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                   >
@@ -696,10 +723,9 @@ export const DailyDiscoveriesModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Scrollable Content on Dark Slate (#1E293B) Surface */}
+        {/* Results & Province Directory Content on Dark Slate (#1E293B) Surface */}
         <div
-          ref={bodyScrollRef}
-          className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-4 no-scrollbar bg-[#1E293B]"
+          className="p-3.5 sm:p-4 pb-16 space-y-4 bg-[#1E293B] min-h-[85dvh]"
         >
           {/* Selected Province Culinary Specialty & Interactive Map Banner */}
           {activeProvinceMeta ? (
@@ -707,7 +733,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
               <div className="flex items-center justify-between gap-2">
                 <button
                   type="button"
-                  onClick={() => handleSelectProvince('all')}
+                  onClick={() => handleSelectProvince('all', true)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold border border-slate-200 transition cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 text-emerald-700" />
@@ -897,12 +923,14 @@ export const DailyDiscoveriesModal: React.FC = () => {
             </div>
           )}
 
+          <div ref={dishesListStartRef} id="kft-provincial-dishes-section" className="scroll-mt-2" />
+
           {/* Section Title for Dishes */}
           {!isLoadingProvince && displayedDishes.length > 0 && (
             <div className="flex items-center justify-between pt-1 px-0.5">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 min-w-0">
                 <Flame className="w-5 h-5 text-orange-400 fill-amber-400 shrink-0" />
-                <h4 className="font-extrabold text-[15px] sm:text-base text-white leading-[1.6]">
+                <h4 className="font-extrabold text-[15px] sm:text-base text-white leading-[1.6] break-words">
                   {activeProvinceMeta
                     ? tr(
                         language,
@@ -910,6 +938,12 @@ export const DailyDiscoveriesModal: React.FC = () => {
                         `Signature Dishes in ${activeProvinceMeta.en}`,
                         `${activeProvinceMeta.zh}代表美食`
                       )
+                    : vipTasteProfile === 'soup_kroeung'
+                    ? tr(language, 'សម្ល & ទឹកគ្រឿងតាមខេត្ត-ក្រុង', 'Provincial Soups & Kroeung', '各省市浓汤与鱼酱')
+                    : vipTasteProfile === 'grill_seafood'
+                    ? tr(language, 'អាំង ឆា & សមុទ្រតាមខេត្ត-ក្រុង', 'Provincial Grills & Seafood', '各省市烧烤与海鲜')
+                    : vipTasteProfile === 'street_dessert'
+                    ? tr(language, 'គុយទាវ & បង្អែមតាមខេត្ត-ក្រុង', 'Provincial Noodles & Sweets', '各省市汤粉与甜品')
                     : tr(
                         language,
                         'ម្ហូបពេញនិយមតាមខេត្ត-ក្រុង',
@@ -918,7 +952,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                       )}
                 </h4>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700 text-[11px] font-extrabold font-mono shadow-2xs">
+              <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700 text-[11px] font-extrabold font-mono shadow-2xs shrink-0">
                 {filteredDishes.length} {tr(language, 'មុខ', 'dishes', '道')}
               </span>
             </div>
@@ -927,7 +961,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
           {/* Provincial Dishes List on Clean White Cards */}
           {!isLoadingProvince && displayedDishes.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 min-h-[82vh] content-start">
                 {displayedDishes.map((food) => {
                   const pid =
                     selectedProvinceId !== 'all'
@@ -1168,6 +1202,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   setSelectedProvinceId('all');
                   setSearchQuery('');
                   setVipTasteProfile('all');
+                  scrollToProvincialDishes();
                 }}
                 style={{
                   background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
@@ -1181,6 +1216,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
               </button>
             </div>
           ) : null}
+        </div>
         </div>
       </div>
     </div>

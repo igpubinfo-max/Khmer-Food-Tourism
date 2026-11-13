@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { FoodItem, Language, Restaurant, TouristDestination } from '../types';
 import {
@@ -13,6 +13,7 @@ import {
   sortRestaurantsWithVipRotation,
 } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { ShopAvatar } from './icons/DefaultShopIcon';
@@ -233,6 +234,14 @@ export const GuideView: React.FC = () => {
   const [provinceKey, setProvinceKey] = useState<string>(() => stripProvincePrefix(selectedProvince));
   const [tipFilter, setTipFilter] = useState<TipCategory | 'all'>('all');
   const [bigPhraseId, setBigPhraseId] = useState<string | null>(null);
+  const guideContentStartRef = useRef<HTMLDivElement | null>(null);
+  const mealPicksSectionRef = useRef<HTMLElement | null>(null);
+  const provinceResultsRef = useRef<HTMLDivElement | null>(null);
+  const tipResultsRef = useRef<HTMLUListElement | null>(null);
+
+  const scrollToGuideSection = (targetEl?: HTMLElement | null) => {
+    smoothScrollToElement(targetEl || guideContentStartRef.current, { offsetTop: 8 });
+  };
 
   const now = useMemo(() => new Date(), []);
   const hour = now.getHours();
@@ -564,7 +573,10 @@ export const GuideView: React.FC = () => {
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  onClick={() => setTab(t.id)}
+                  onClick={() => {
+                    setTab(t.id);
+                    scrollToGuideSection(guideContentStartRef.current);
+                  }}
                   className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 overflow-visible p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                 >
                   {/* 3D Gold-Bordered Button Graphic */}
@@ -604,6 +616,8 @@ export const GuideView: React.FC = () => {
             })}
           </div>
         </div>
+
+      <div ref={guideContentStartRef} id="kft-guide-content-section" className="scroll-mt-2" />
 
       {/* ------------------------------------------------------------------ */}
       {/* FOR YOU                                                            */}
@@ -686,7 +700,7 @@ export const GuideView: React.FC = () => {
           )}
 
           {/* Time-aware meal picks */}
-          <section className="space-y-2.5">
+          <section ref={mealPicksSectionRef} className="space-y-2.5 scroll-mt-2">
             <SectionTitle
               icon={<Utensils className="w-4 h-4" />}
               title={tr(language, 'ញ៉ាំអ្វីល្អឥឡូវនេះ?', 'What to eat right now', '现在吃什么')}
@@ -699,7 +713,10 @@ export const GuideView: React.FC = () => {
                   <button
                     key={s.id}
                     type="button"
-                    onClick={() => setMealOverride(s.id)}
+                    onClick={() => {
+                      setMealOverride(s.id);
+                      scrollToGuideSection(mealPicksSectionRef.current);
+                    }}
                     className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
                       active
                         ? 'bg-emerald-700 text-white border-emerald-600 shadow-xs'
@@ -815,7 +832,10 @@ export const GuideView: React.FC = () => {
                     <button
                       key={g.key}
                       type="button"
-                      onClick={() => setProvinceKey(g.key)}
+                      onClick={() => {
+                        setProvinceKey(g.key);
+                        scrollToGuideSection(provinceResultsRef.current || guideContentStartRef.current);
+                      }}
                       className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
                         active
                           ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
@@ -830,7 +850,7 @@ export const GuideView: React.FC = () => {
               </div>
 
               {activeGroup && (
-                <div className="space-y-4">
+                <div ref={provinceResultsRef} className="space-y-4 min-h-[82vh] scroll-mt-2">
                   <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <h3 className="font-moul text-sm text-[#064E3B] leading-[1.7] py-0.5 break-words">{provinceName(activeGroup)}</h3>
@@ -1110,7 +1130,10 @@ export const GuideView: React.FC = () => {
                   <button
                     key={c.id}
                     type="button"
-                    onClick={() => setTipFilter(c.id)}
+                    onClick={() => {
+                      setTipFilter(c.id);
+                      scrollToGuideSection(tipResultsRef.current || guideContentStartRef.current);
+                    }}
                     className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
                       active
                         ? 'bg-emerald-700 text-white border-emerald-600 shadow-xs'
@@ -1122,7 +1145,7 @@ export const GuideView: React.FC = () => {
                 );
               })}
             </div>
-            <ul className="space-y-2">
+            <ul ref={tipResultsRef} className="space-y-2 min-h-[75vh] scroll-mt-2">
               {visibleTips.map((t) => (
                 <li
                   key={t.id}

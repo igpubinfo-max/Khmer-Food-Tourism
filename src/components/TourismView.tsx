@@ -396,6 +396,7 @@ export const TourismView: React.FC = () => {
     setSearchQuery('');
     setNearMeActive(false);
     triggerTourismReshuffle();
+    scrollToTourismList();
   };
 
   useEffect(() => {

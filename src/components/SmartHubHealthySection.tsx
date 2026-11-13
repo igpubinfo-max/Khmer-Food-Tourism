@@ -3,6 +3,7 @@ import { RefreshCw, ChevronRight, Lock, Crown, CheckCircle2, Utensils, Sun, Suns
 import { useApp } from '../context/AppContext';
 import { resolveFoodPhotoUrl, handleFoodImageError, type FoodItem } from '../types';
 import { tr } from '../utils/i18n';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 import {
   DISH_TAG_DEFS, getDishTagIds, tagBenefit, tagCookingTip, TAG_ESTIMATE_NOTE, GENERAL_FOOD_INFO_NOTE,
 } from '../utils/dishTags';
@@ -48,11 +49,10 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
       return;
     }
     setSelected(id);
-    if (typeof window !== 'undefined') {
-      window.requestAnimationFrame(() => {
-        recommendedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      });
-    }
+    smoothScrollToElement(recommendedRef.current, {
+      offsetTop: 8,
+      delayMs: 40,
+    });
   };
 
   // Matches per tag, best-rated & most representative first, photo-first so cards always look appetizing (computed only for verified VIP accounts)
