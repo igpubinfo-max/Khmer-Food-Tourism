@@ -243,3 +243,23 @@ CREATE POLICY "food_media_service_delete"
   FOR DELETE
   TO service_role
   USING (bucket_id = 'food-media');
+
+-- ============================================================================
+-- 6. Lock down auxiliary directory, activity log, and API usage tables with RLS
+-- ============================================================================
+DO $$
+BEGIN
+  IF to_regclass('public.kft_users_directory') IS NOT NULL THEN
+    EXECUTE 'ALTER TABLE public.kft_users_directory ENABLE ROW LEVEL SECURITY';
+    EXECUTE 'REVOKE ALL ON public.kft_users_directory FROM anon, authenticated';
+  END IF;
+  IF to_regclass('public.kft_user_activity_logs') IS NOT NULL THEN
+    EXECUTE 'ALTER TABLE public.kft_user_activity_logs ENABLE ROW LEVEL SECURITY';
+    EXECUTE 'REVOKE ALL ON public.kft_user_activity_logs FROM anon, authenticated';
+  END IF;
+  IF to_regclass('public.kft_api_usage_log') IS NOT NULL THEN
+    EXECUTE 'ALTER TABLE public.kft_api_usage_log ENABLE ROW LEVEL SECURITY';
+    EXECUTE 'REVOKE ALL ON public.kft_api_usage_log FROM anon, authenticated';
+  END IF;
+END
+$$;

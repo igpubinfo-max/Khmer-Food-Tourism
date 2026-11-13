@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Pure server-side rules for checking an ABA / KHQR payment receipt (shared with unit tests, no Deno globals).
  * Port of the on-device checks in src/services/aiPaymentVerificationService.ts, hardened:
  *   - a Trx ID MUST be read from the receipt (the old "invent a reference from the image fingerprint" fallback is gone)
@@ -342,6 +342,7 @@ export function applyVipGrant(
     vipPlanDays: g.days,
     vipPlanType: g.planType,
     transactionRef: g.trxId,
+    freeTrialActivated: false,
   };
   if (g.planId) {
     out.activeConsumerPlanId = g.planId;
@@ -351,6 +352,8 @@ export function applyVipGrant(
     }
   }
   delete out.vipCancelledAt;
+  delete out.freeTrialExpiresAt;
+  delete out.freeTrialDurationDays;
   return out;
 }
 

@@ -1,3 +1,4 @@
+import { WindowLimiter, resolveAllowedOrigin, verifyClientAppIntegrity } from '../_shared/common.ts';
 // Supabase Edge Function: social-food-discovery
 // Secure backend proxy for Apify (TikTok & Facebook Cambodia Food/Travel Reviews) + YouTube Data API v3 & RSS Feeds
 // Keeps APIFY_API_TOKEN and YOUTUBE_API_KEY strictly server-side (Deno.env) with zero mobile-bundle exposure.
@@ -9,8 +10,11 @@ declare const Deno: {
   };
 };
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+const burstLimiter = new WindowLimiter(120, 60_000);
+
+const corsHeaders: Record<string, string> = {
+  'Access-Control-Allow-Origin': 'https://igpubinfo-max.github.io',
+  'Vary': 'Origin',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-app-id, x-kft-app-platform, x-kft-app-sig',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
@@ -553,8 +557,24 @@ async function fetchApifyRecentItems(apifyToken: string): Promise<SocialDiscover
 }
 
 Deno.serve(async (req: Request) => {
+  corsHeaders['Access-Control-Allow-Origin'] = resolveAllowedOrigin(req);
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
+  }
+  const appIntegrity = verifyClientAppIntegrity(req);
+  if (!appIntegrity.ok) {
+    return new Response(JSON.stringify({ ok: false, error: 'CLONED_APP_BLOCKED' }), {
+      status: 403,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const fwd = req.headers.get('x-forwarded-for') || '';
+  const ip = req.headers.get('cf-connecting-ip') || fwd.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown';
+  if (!burstLimiter.allow(ip)) {
+    return new Response(JSON.stringify({ ok: false, error: 'RATE_LIMITED' }), {
+      status: 429,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   try {

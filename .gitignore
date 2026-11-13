@@ -43,3 +43,9 @@ android/app/src/main/assets/public/[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][
 templates/
 backup/
 _backups/
+*.jks
+*.keystore
+key.properties
+android/key.properties
+*.pem
+Emergency_Recovery_Kit/

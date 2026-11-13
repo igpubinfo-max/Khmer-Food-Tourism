@@ -16,7 +16,7 @@
 //   GET  /places-proxy?health=1                                                         -> {ok, configured}
 
 import { sanitizePhotoRequest, sanitizePlacesRequest, MAX_BODY_BYTES } from './sanitize.ts';
-import { WindowLimiter, envInt, safeUserId, sha256Hex, verifyClientAppIntegrity } from '../_shared/common.ts';
+import { WindowLimiter, envInt, safeUserId, sha256Hex, resolveAllowedOrigin, verifyClientAppIntegrity } from '../_shared/common.ts';
 import { background, cacheGet, cachePut, logUsage, usageHit } from '../_shared/supa.ts';
 
 declare const Deno: {
@@ -25,7 +25,8 @@ declare const Deno: {
 };
 
 const corsHeaders: Record<string, string> = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://igpubinfo-max.github.io',
+  'Vary': 'Origin',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-user-id, x-kft-app-id, x-kft-app-platform, x-kft-app-sig',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Expose-Headers': 'x-places-proxy, x-places-cache',
@@ -55,6 +56,7 @@ async function fetchWithTimeout(url: string, init: RequestInit, ms: number): Pro
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
+  corsHeaders['Access-Control-Allow-Origin'] = resolveAllowedOrigin(req);
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   const appIntegrity = verifyClientAppIntegrity(req);
   if (!appIntegrity.ok) return json(403, { error: { status: 'PERMISSION_DENIED', message: 'Unauthorized cloned/modified app' } });

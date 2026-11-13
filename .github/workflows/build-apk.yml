@@ -70,10 +70,18 @@ jobs:
           rm -rf android/app/src/main/assets/public && mkdir -p android/app/src/main/assets/public && cp -rf dist/* android/app/src/main/assets/public/
 
       - name: 7. Build & V1+V2+V3 Sign Android Package (APK / AAB)
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          if [ ! -f android/app/khmerfood-upload-key.jks ]; then
-            echo "::error::Signing keystore android/app/khmerfood-upload-key.jks is missing. Refusing to build with a new random key (installed apps could not be updated)."
+          if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ] && [ ! -f android/app/khmerfood-upload-key.jks ]; then
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/khmerfood-upload-key.jks
+          fi
+          if [ ! -f android/app/khmerfood-upload-key.jks ] || [ -z "${KEYSTORE_PASSWORD:-}" ]; then
+            echo "::error::Signing keystore or KEYSTORE_PASSWORD secret is missing. Configure ANDROID_KEYSTORE_BASE64 and KEYSTORE_PASSWORD in GitHub Secrets."
             exit 1
           fi
           FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle)
@@ -162,9 +170,9 @@ jobs:
             "$ZIPALIGN" -p -f 4 "$REL_APK" ../release_out/aligned-official.apk
             "$APKSIGNER" sign \
               --ks app/khmerfood-upload-key.jks \
-              --ks-key-alias khmerfood-upload \
-              --ks-pass pass:KhmerFood2026PlayStore \
-              --key-pass pass:KhmerFood2026PlayStore \
+              --ks-key-alias "${KEY_ALIAS:-khmerfood-upload}" \
+              --ks-pass env:KEYSTORE_PASSWORD \
+              --key-pass env:KEY_PASSWORD \
               --v1-signing-enabled true \
               --v2-signing-enabled true \
               --v3-signing-enabled true \

@@ -16,8 +16,5 @@
         <domain includeSubdomains="true">githubusercontent.com</domain>
         <domain includeSubdomains="true">google.com</domain>
         <domain includeSubdomains="true">googleapis.com</domain>
-        <pin-set expiration="2028-01-01">
-            <!-- Strict TLS configurations -->
-        </pin-set>
     </domain-config>
 </network-security-config>

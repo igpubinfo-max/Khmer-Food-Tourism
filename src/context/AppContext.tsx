@@ -1,4 +1,4 @@
-import { verifyAppCloneIntegrity } from '../utils/appCloneIntegrityGuard';
+﻿import { verifyAppCloneIntegrity } from '../utils/appCloneIntegrityGuard';
 import { verifyVipPurchaseOnServer, claimConsumerTrialOnServer, fetchCentralizedPaymentRegistryAndAudit, adminApproveAndLockTransactionOnServer, adminRejectTransactionOnServer, type UsedAbaTransactionRecord, type PaymentAuditLogRecord } from '../services/vipPurchaseClient';
 import { getDeviceHashForTrialOrPromoClaim, checkDeviceAccountRegistrationEligibility, recordDeviceAccountRegistration } from '../services/deviceIdentityService';
 import {
@@ -6969,36 +6969,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // If the exact same transactionRef was already verified & applied in existing.vipMembershipHistory,
     // preserve its already-applied expiryDate so duplicate calls or syncs never double-extend VIP expiration!
     const existingHistList = Array.isArray(existing?.vipMembershipHistory) ? existing!.vipMembershipHistory! : [];
-    const alreadyAppliedHist = resolvedRef
+    const normIncomingRef = normalizeAbaTrxId(resolvedRef || '') || String(resolvedRef || '').trim().toUpperCase();
+    const alreadyAppliedHist = normIncomingRef
       ? existingHistList.find(
           h =>
             h &&
             h.status === 'verified' &&
             h.transactionRef &&
-            String(h.transactionRef).trim().toUpperCase() === String(resolvedRef).trim().toUpperCase() &&
+            ((normalizeAbaTrxId(h.transactionRef) && normalizeAbaTrxId(h.transactionRef) === normIncomingRef) ||
+              String(h.transactionRef).trim().toUpperCase() === normIncomingRef) &&
             h.expiryDate
         )
       : undefined;
-    const existingActiveExpMs =
-      existing && isUserVipActive(existing)
-        ? parseSafeDateMs(existing.subscriptionExpiryDate || existing.vipExpiresAt)
-        : 0;
-    const rawCandidateExpMs =
-      alreadyAppliedHist?.expiryDate && parseSafeDateMs(alreadyAppliedHist.expiryDate) > 0
-        ? parseSafeDateMs(alreadyAppliedHist.expiryDate)
-        : expMs;
-    const safeguardedExpMs = Math.max(rawCandidateExpMs, existingActiveExpMs);
-    const cleanExpiryIso = new Date(safeguardedExpMs).toISOString();
-
     const requestedPlanDays =
       typeof params.durationDays === 'number' && params.durationDays >= 1
         ? Math.round(params.durationDays)
         : Math.max(1, Math.round((expMs - startMs) / (1000 * 60 * 60 * 24)));
+    const existingRefNorm =
+      normalizeAbaTrxId(existing?.transactionRef || '') || String(existing?.transactionRef || '').trim().toUpperCase();
+    const existingStartMs = parseSafeDateMs(existing?.subscriptionStartDate);
+    const isGenuineDifferentPaidRenewal = Boolean(
+      existing &&
+        isUserPaidVipActive(existing) &&
+        !existing.freeTrialActivated &&
+        !alreadyAppliedHist &&
+        normIncomingRef &&
+        existingRefNorm &&
+        existingRefNorm !== normIncomingRef &&
+        (existingStartMs <= 0 || Math.abs(startMs - existingStartMs) > 120_000)
+    );
+    const existingActiveExpMs = isGenuineDifferentPaidRenewal
+      ? parseSafeDateMs(existing!.subscriptionExpiryDate || existing!.vipExpiresAt)
+      : 0;
+    const standaloneMaxExpMs = startMs + requestedPlanDays * 24 * 60 * 60 * 1000;
+    const rawCandidateExpMs =
+      alreadyAppliedHist?.expiryDate && parseSafeDateMs(alreadyAppliedHist.expiryDate) > 0
+        ? Math.min(parseSafeDateMs(alreadyAppliedHist.expiryDate), isGenuineDifferentPaidRenewal ? parseSafeDateMs(alreadyAppliedHist.expiryDate) : standaloneMaxExpMs)
+        : isGenuineDifferentPaidRenewal
+          ? expMs
+          : Math.min(expMs, standaloneMaxExpMs);
+    const safeguardedExpMs = isGenuineDifferentPaidRenewal
+      ? Math.max(rawCandidateExpMs, existingActiveExpMs)
+      : rawCandidateExpMs;
+    const cleanExpiryIso = new Date(safeguardedExpMs).toISOString();
+
     const existingActivePlanDays =
-      existing && isUserVipActive(existing) && existingActiveExpMs > Date.now()
-        ? resolveUserActualVipPlanDays(existing)
+      isGenuineDifferentPaidRenewal && existingActiveExpMs > Date.now()
+        ? resolveUserActualVipPlanDays(existing!)
         : 0;
-    const resolvedPlanDays = Math.max(requestedPlanDays, existingActivePlanDays);
+    const resolvedPlanDays = isGenuineDifferentPaidRenewal
+      ? Math.max(requestedPlanDays, existingActivePlanDays)
+      : requestedPlanDays;
     const resolvedPlanType =
       params.planType ||
       (resolvedPlanDays <= 35 ? 'quarterly' : 'annual');
@@ -13894,10 +13915,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const matchedUserObj = (latestSyncStateRef.current.users || users).find(u =>
       doesUserMatchTarget(u, { id: targetUserId || undefined, email: matchedTxn.userEmail || undefined })
     );
-    const activeExistingExpiry =
-      matchedUserObj?.subscriptionExpiryDate ||
-      matchedUserObj?.vipExpiresAt ||
-      matchedUserObj?.freeTrialExpiresAt;
+    const matchedUserNormRef =
+      normalizeAbaTrxId(matchedUserObj?.transactionRef || '') ||
+      String(matchedUserObj?.transactionRef || '').trim().toUpperCase();
+    const matchedUserStartMs = parseSafeDateMs(matchedUserObj?.subscriptionStartDate);
+    const canStackOntoExistingPaidVip = Boolean(
+      matchedUserObj &&
+        isUserPaidVipActive(matchedUserObj) &&
+        !matchedUserObj.freeTrialActivated &&
+        matchedUserNormRef &&
+        matchedUserNormRef !== normTrxKey &&
+        matchedUserNormRef !== String(matchedTxn.transactionRef || '').trim().toUpperCase() &&
+        (matchedUserStartMs <= 0 || Math.abs(now.getTime() - matchedUserStartMs) > 120_000)
+    );
+    const activeExistingExpiry = canStackOntoExistingPaidVip
+      ? matchedUserObj?.subscriptionExpiryDate || matchedUserObj?.vipExpiresAt
+      : undefined;
     const { startDate: calcStart, expiryDate: calcExpiry } = calculateVipDates(
       activeExistingExpiry,
       durationDays,
@@ -13989,7 +14022,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         durationDays,
         planType: validatedPlan.id,
         paymentMethod: matchedTxn.paymentMethod,
-        transactionRef: matchedTxn.transactionRef,
+        transactionRef: normTrxKey,
         extraFields: {
           activeConsumerPlanId: resolvedConsumerPlanId,
           ...(resolvedConsumerPlanId === 'consumer_promo_30d' ? { promo099Used: true } : {}),
@@ -16609,8 +16642,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetUser = (latestSyncStateRef.current.users || users).find(u =>
       doesUserMatchTarget(u, { id: ticket.userId, email: ticket.userEmail })
     );
+    const supportExistingExpiry =
+      targetUser &&
+      isUserPaidVipActive(targetUser) &&
+      !targetUser.freeTrialActivated &&
+      normalizeAbaTrxId(targetUser.transactionRef || '') !== normalizeAbaTrxId(ticket.paymentRef || '')
+        ? targetUser.subscriptionExpiryDate
+        : undefined;
     const { startDate, expiryDate } = calculateVipDates(
-      targetUser?.subscriptionExpiryDate,
+      supportExistingExpiry,
       finalDays,
       appSettingsRef.current
     );

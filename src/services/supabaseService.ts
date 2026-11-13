@@ -1,4 +1,4 @@
-import { computeUserIntegritySealSync } from '../utils/securityIntegrityGuard';
+﻿import { computeUserIntegritySealSync } from '../utils/securityIntegrityGuard';
 import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 /**
  * Supabase Cloud Database & Storage Synchronization Service (Free Tier Compatible)
@@ -4760,25 +4760,31 @@ export async function syncAllAppDataWithSupabase(localState: {
         const bestTxn = verifiedFutureTxns[0];
         const currentExpMs = parseSafeDateMs(usr.subscriptionExpiryDate);
         const txnExpMs = parseSafeDateMs(bestTxn.expiresAt);
+        const isSameSingleTxnInflated =
+          (verifiedFutureTxns.length === 1 ||
+            String(usr.transactionRef || '').trim().toUpperCase() === String(bestTxn.transactionRef || '').trim().toUpperCase()) &&
+          Math.abs(txnExpMs - currentExpMs) > 60_000;
         if (
           usr.membershipTier !== 'premium_vip' ||
           usr.subscriptionStatus !== 'active' ||
           usr.paymentStatus !== 'verified' ||
-          txnExpMs > currentExpMs
+          txnExpMs > currentExpMs ||
+          isSameSingleTxnInflated
         ) {
-          mergedUsers[i] = {
+          mergedUsers[i] = normalizeVipExpiryOnUser({
             ...usr,
             membershipTier: 'premium_vip',
             subscriptionStatus: 'active',
             subscriptionStartDate: usr.subscriptionStartDate || bestTxn.verifiedAt || bestTxn.createdAt,
             subscriptionExpiryDate: bestTxn.expiresAt,
             vipStatus: 'active',
+            vipPlanDays: bestTxn.durationDays || usr.vipPlanDays,
             vipExpiresAt: bestTxn.expiresAt,
             vipCancelledAt: undefined,
             paymentStatus: 'verified',
             paymentMethod: (bestTxn.paymentMethod as any) || usr.paymentMethod || 'KHQR',
             transactionRef: bestTxn.transactionRef || usr.transactionRef,
-          };
+          });
         }
       }
 

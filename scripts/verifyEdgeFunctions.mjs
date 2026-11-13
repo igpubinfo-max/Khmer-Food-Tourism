@@ -334,7 +334,7 @@ ok('vip-purchase function: no client-supplied price, receipts reserved before th
   assert.ok(fn.includes("readUserDoc('kft_cloud_admin_vip_pricing_v2')"), 'server pricing is used');
   assert.ok(fn.indexOf("restInsert('kft_payment_receipts', { ...baseRow, status: 'verified'") < fn.indexOf('writeKv(userKvKey(userId)'), 'the unique receipt row must be reserved BEFORE the grant is written');
   assert.ok(fn.includes('ins.status === 409'), 'a unique-index conflict means "already used"');
-  assert.ok(/VIP_AUTO_APPROVE'\) === 'true'/.test(fn) && /autoApprove && evaluation\.allPassed/.test(fn), 'automatic activation must be OFF unless explicitly enabled (manual approval is the default)');
+  assert.ok((/const autoApprove = false/.test(fn) || /VIP_AUTO_APPROVE'\) === 'true'/.test(fn)) && /autoApprove && evaluation\.allPassed/.test(fn), 'automatic activation must be OFF unless explicitly enabled (manual approval is the default)');
   assert.ok(/status=in\.\(verified,pending\)/.test(fn), 'a Trx ID that is already pending/verified cannot fund a second VIP');
   assert.ok(!/AIza[0-9A-Za-z_-]{20,}|AQ\.Ab8/.test(fn), 'no key literal');
 });
@@ -767,6 +767,23 @@ ok('Code Obfuscation + Anti-Debugging + Anti-Clone Check (Vite, ProGuard, MainAc
 
   const mainTsx = read('src/main.tsx');
   assert.ok(mainTsx.includes('installRuntimeAntiDebugGuard()'), 'main.tsx installs runtime anti-debug guard at startup');
+});
+
+ok('CORS Origin allowlist & RLS hardening across Edge Functions and SQL', () => {
+  const reqAllowed = new Request('https://example.com', { headers: { origin: 'https://igpubinfo-max.github.io' } });
+  const reqCap = new Request('https://example.com', { headers: { origin: 'capacitor://localhost' } });
+  const reqEvil = new Request('https://example.com', { headers: { origin: 'https://evil-cloned-app.com' } });
+  assert.equal(common.isAllowedOrigin(reqAllowed), true);
+  assert.equal(common.isAllowedOrigin(reqCap), true);
+  assert.equal(common.isAllowedOrigin(reqEvil), false);
+  assert.equal(common.verifyClientAppIntegrity(reqEvil).ok, false);
+  assert.equal(common.resolveAllowedOrigin(reqCap), 'capacitor://localhost');
+  assert.equal(common.resolveAllowedOrigin(reqEvil), 'https://igpubinfo-max.github.io');
+
+  const scaleSql = read('supabase_admin_users_scale_10k.sql');
+  assert.ok(scaleSql.includes('ALTER TABLE public.kft_users_directory ENABLE ROW LEVEL SECURITY;'));
+  assert.ok(scaleSql.includes('ALTER TABLE public.kft_user_activity_logs ENABLE ROW LEVEL SECURITY;'));
+  assert.ok(scaleSql.includes("SELECT (payload - 'passwordHash') AS payload"));
 });
 
 console.log(`\n[edge] ALL ${passed} CHECKS PASSED`);

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Pure helpers shared by the Edge Functions (no Deno globals => unit-tested from Node: `npm run test:edge`).
  * Only erasable TypeScript syntax is used so Node can load this file directly.
  */
@@ -21,10 +21,10 @@ export function userKvKey(id: string): string {
 export function isVipActive(u: unknown, nowMs: number = Date.now()): boolean {
   if (!u || typeof u !== 'object') return false;
   const r = u as Record<string, unknown>;
-  if (r.membershipTier !== 'premium_vip') return false;
+  if (r.membershipTier !== 'premium_vip' && r.vipStatus !== 'active') return false;
   if (r.subscriptionStatus !== 'active') return false;
   if (r.vipCancelledAt) return false;
-  const exp = r.subscriptionExpiryDate;
+  const exp = r.subscriptionExpiryDate || r.vipExpiresAt;
   if (typeof exp === 'string' && exp) {
     const t = Date.parse(exp);
     if (Number.isFinite(t) && t <= nowMs) return false;
@@ -165,8 +165,25 @@ export class WindowLimiter {
 
 export const OFFICIAL_APP_PACKAGE_ID = 'com.khmerfood.tourism';
 
+const ALLOWED_ORIGIN_RE =
+  /^(?:https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?|(?:capacitor|ionic|discovercambodia|app|file):\/\/.*|https:\/\/(?:igpubinfo-max\.github\.io|(?:www\.)?khmerfoodtourism\.com|(?:www\.)?cambodiaflavorstourism\.com|[a-z0-9-]+\.(?:vercel\.app|netlify\.app|pages\.dev)))$/i;
+
+export function isAllowedOrigin(req: Request): boolean {
+  const origin = (req.headers.get('origin') || '').trim();
+  if (!origin || origin === 'null') return true;
+  return ALLOWED_ORIGIN_RE.test(origin);
+}
+
+export function resolveAllowedOrigin(req: Request): string {
+  const origin = (req.headers.get('origin') || '').trim();
+  if (origin && ALLOWED_ORIGIN_RE.test(origin)) {
+    return origin;
+  }
+  return 'https://igpubinfo-max.github.io';
+}
+
 /**
- * Verifies client app attestation headers to block repackaged/cloned APKs from abusing Edge Functions.
+ * Verifies client app attestation headers and origin to block repackaged/cloned APKs and unauthorized web clones from abusing Edge Functions.
  */
 export function verifyClientAppIntegrity(req: Request): { ok: boolean; reason?: string } {
   const appId = (req.headers.get('x-kft-app-id') || '').trim();
@@ -176,6 +193,9 @@ export function verifyClientAppIntegrity(req: Request): { ok: boolean; reason?: 
   }
   if (appId && appId !== OFFICIAL_APP_PACKAGE_ID) {
     return { ok: false, reason: `UNRECOGNIZED_APP_ID:${appId}` };
+  }
+  if (!isAllowedOrigin(req)) {
+    return { ok: false, reason: `UNAUTHORIZED_ORIGIN:${(req.headers.get('origin') || '').trim()}` };
   }
   return { ok: true };
 }

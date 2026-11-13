@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1581;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1582;
 export const APP_RELEASE_DATE = '2026-11-13';
 
 /**
@@ -3797,18 +3797,25 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
 
   interface CandidateVerifiedGrant {
     entry: VipMembershipHistoryEntry;
+    normRef: string;
     startMs: number;
     expMs: number;
     planDays: number;
     isCurrentCycle: boolean;
   }
 
-  const candidateGrants: CandidateVerifiedGrant[] = [];
+  const rawGrants: CandidateVerifiedGrant[] = [];
   for (const h of validVerifiedHist) {
     const startMs = parseSafeDateMs(h.date);
     if (cancelMs > 0 && startMs > 0 && startMs < cancelMs) {
       continue;
     }
+    const hRefRaw = String(h.transactionRef || '').trim();
+    if (hRefRaw.toUpperCase().startsWith('TRIAL-7D-') || hRefRaw.toUpperCase().startsWith('TRIAL7D-')) {
+      continue;
+    }
+    const digitsOnly = hRefRaw.replace(/\D/g, '');
+    const normRef = digitsOnly.length >= 8 ? digitsOnly : hRefRaw.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     const planDays =
       typeof h.durationDays === 'number' && h.durationDays >= 1
         ? Math.round(h.durationDays)
@@ -3819,32 +3826,81 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
     if (expMs <= 0 && startMs > 0) {
       expMs = startMs + planDays * DAY_MS;
     }
-    // If an older pre-reset entry has an inflated expiry exceeding its own durationDays and a newer initial_upgrade exists, clamp to its standalone window
-    if (
-      latestInitialUpgradeMs > 0 &&
-      startMs > 0 &&
-      startMs < latestInitialUpgradeMs &&
-      expMs > startMs + (planDays + 5) * DAY_MS
-    ) {
-      expMs = startMs + planDays * DAY_MS;
-    }
-    if (expMs > 0) {
-      candidateGrants.push({
+    const resolvedStartMs = startMs > 0 ? startMs : expMs - planDays * DAY_MS;
+    if (expMs > 0 && resolvedStartMs > 0) {
+      rawGrants.push({
         entry: h,
-        startMs: startMs > 0 ? startMs : expMs - planDays * DAY_MS,
+        normRef,
+        startMs: resolvedStartMs,
         expMs,
         planDays,
-        isCurrentCycle: latestInitialUpgradeMs <= 0 || startMs >= latestInitialUpgradeMs,
+        isCurrentCycle: latestInitialUpgradeMs <= 0 || resolvedStartMs >= latestInitialUpgradeMs - 60_000,
       });
     }
+  }
+
+  // Deduplicate grants that share the same normalized ABA transactionRef OR were recorded within 2 minutes for the same planDays
+  const sortedChronological = [...rawGrants].sort((a, b) => a.startMs - b.startMs);
+  const dedupedChronological: CandidateVerifiedGrant[] = [];
+  for (const g of sortedChronological) {
+    const dupIdx = dedupedChronological.findIndex(
+      existing =>
+        (g.normRef && existing.normRef === g.normRef) ||
+        (existing.planDays === g.planDays && Math.abs(existing.startMs - g.startMs) < 120_000)
+    );
+    if (dupIdx >= 0) {
+      const prev = dedupedChronological[dupIdx];
+      const preferNewRef = /^\d{8,}$/.test(g.normRef) && !/^\d{8,}$/.test(prev.normRef);
+      dedupedChronological[dupIdx] = {
+        ...prev,
+        entry: preferNewRef ? g.entry : prev.entry,
+        normRef: preferNewRef ? g.normRef : prev.normRef,
+        startMs: Math.min(prev.startMs, g.startMs),
+        planDays: Math.max(prev.planDays, g.planDays),
+        expMs: Math.min(prev.expMs, g.expMs),
+        isCurrentCycle: prev.isCurrentCycle || g.isCurrentCycle,
+      };
+    } else {
+      dedupedChronological.push({ ...g });
+    }
+  }
+
+  // Compute authoritative stacked expiry chain so a single 30-day (or 90-day / 365-day) purchase can NEVER double-stack to 60 days
+  const candidateGrants: CandidateVerifiedGrant[] = [];
+  let chainExpMs = 0;
+  let prevChainCycle = false;
+  for (const g of dedupedChronological) {
+    const standaloneExpMs = g.startMs + g.planDays * DAY_MS;
+    let legitExpMs = standaloneExpMs;
+    if (
+      g.isCurrentCycle &&
+      prevChainCycle &&
+      chainExpMs > g.startMs &&
+      g.entry.action !== 'initial_upgrade'
+    ) {
+      legitExpMs = chainExpMs + g.planDays * DAY_MS;
+    }
+    // Clamp any inflated expiry (such as client+server double-grant 30d -> 60d) to the legitimate chain expiry
+    const clampedExpMs =
+      g.expMs > legitExpMs + 60_000
+        ? legitExpMs
+        : g.expMs < standaloneExpMs - 60_000
+          ? standaloneExpMs
+          : g.expMs;
+    chainExpMs = clampedExpMs;
+    prevChainCycle = g.isCurrentCycle;
+    candidateGrants.push({
+      ...g,
+      expMs: clampedExpMs,
+    });
   }
 
   const activeGrants = candidateGrants
     .filter(g => g.expMs > nowMs)
     .sort((a, b) => {
       if (a.isCurrentCycle !== b.isCurrentCycle) return a.isCurrentCycle ? -1 : 1;
-      if (b.planDays !== a.planDays) return b.planDays - a.planDays;
-      return b.expMs - a.expMs;
+      if (b.expMs !== a.expMs) return b.expMs - a.expMs;
+      return b.planDays - a.planDays;
     });
 
   const bestActiveGrant = activeGrants[0];
@@ -3860,6 +3916,7 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
 
   if (bestActiveGrant) {
     const curExpMs = parseSafeDateMs(user.subscriptionExpiryDate || user.vipExpiresAt);
+    const curVipExpMs = parseSafeDateMs(user.vipExpiresAt);
     const curPlanDays = resolveUserActualVipPlanDays(user);
     const needsRestoreFromVerifiedHistory =
       currentRefRejected ||
@@ -3867,9 +3924,10 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
       user.subscriptionStatus !== 'active' ||
       user.vipStatus !== 'active' ||
       user.paymentStatus !== 'verified' ||
-      bestActiveGrant.planDays > curPlanDays ||
+      bestActiveGrant.planDays !== curPlanDays ||
       curExpMs <= nowMs ||
-      bestActiveGrant.expMs > curExpMs + 5000;
+      Math.abs(bestActiveGrant.expMs - curExpMs) > 60_000 ||
+      Math.abs(bestActiveGrant.expMs - curVipExpMs) > 60_000;
 
     if (needsRestoreFromVerifiedHistory) {
       const restoredStartIso = new Date(bestActiveGrant.startMs).toISOString();
@@ -4094,14 +4152,21 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   const spanDays =
     rawStartMs > 0 && expMs > rawStartMs ? Math.round((expMs - rawStartMs) / DAY_MS) : 0;
 
-  // Detect genuine legacy synthetic 365-day inflation without touching stacked renewals (e.g. 115d or 170d) or legitimate 365d plans
+  // Detect genuine legacy synthetic 365-day inflation OR single-package double-grant inflation (e.g. 30-day plan showing 60 days remaining)
+  const distinctActiveCycleGrants = activeGrants.filter(g => g.isCurrentCycle).length;
+  const hasSinglePackageDoubleGrantInflation =
+    distinctActiveCycleGrants <= 1 &&
+    actualPlanDays >= 1 &&
+    (remainingDays > actualPlanDays || spanDays > actualPlanDays + 1);
+
   const hasSynthetic365Inflation =
-    actualPlanDays <= 90 &&
-    ((ref === 'VIP-PERMANENT-IGP2026D' && remainingDays > 95) ||
-      (remainingDays > 300 && reconciledUser.vipPlanDays !== 365) ||
-      (spanDays >= 350 &&
-        !/(?:^|[-_])(180|365)D(?:[-_]|$)/i.test(ref) &&
-        (reconciledUser.vipPlanType === 'quarterly' || reconciledUser.vipPlanType === '30d' || !reconciledUser.vipPlanDays)));
+    hasSinglePackageDoubleGrantInflation ||
+    (actualPlanDays <= 90 &&
+      ((ref === 'VIP-PERMANENT-IGP2026D' && remainingDays > 95) ||
+        (remainingDays > 300 && reconciledUser.vipPlanDays !== 365) ||
+        (spanDays >= 350 &&
+          !/(?:^|[-_])(180|365)D(?:[-_]|$)/i.test(ref) &&
+          (reconciledUser.vipPlanType === 'quarterly' || reconciledUser.vipPlanType === '30d' || !reconciledUser.vipPlanDays))));
 
   if (hasSynthetic365Inflation) {
     const validStartMs =
@@ -4357,15 +4422,35 @@ export const getVipRemainingDays = (user?: User | null): number => {
     return 0;
   }
   const computedDays = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-  // Guard against displaying >95 days (e.g. 365 days) when the user's plan is a 30-day or 90-day package
-  if (computedDays > 95 && planDays <= 90) {
+  // Count distinct active verified paid grants so a single 30-day (or 90-day / 365-day) purchase can NEVER display > planDays (e.g. 60 days on a 30-day plan)
+  const histList = Array.isArray(user.vipMembershipHistory) ? user.vipMembershipHistory : [];
+  const distinctActivePaidRefs = new Set<string>();
+  const distinctActiveStarts: number[] = [];
+  for (const h of histList) {
+    if (!h || h.status !== 'verified' || (h.action as string) === 'cancellation' || h.action === 'payment_failed') continue;
+    const hRef = String(h.transactionRef || '').trim();
+    if (!hRef || hRef === 'VIP-PERMANENT-IGP2026D' || hRef.startsWith('REWARD-FOODCHECKIN') || hRef.toUpperCase().startsWith('TRIAL')) continue;
+    const hStart = parseSafeDateMs(h.date);
+    const hDays = typeof h.durationDays === 'number' && h.durationDays >= 1 ? h.durationDays : 30;
+    const hExp = parseSafeDateMs(h.expiryDate) || (hStart > 0 ? hStart + hDays * 86_400_000 : 0);
+    if (hExp <= nowServerMs) continue;
+    const digits = hRef.replace(/\D/g, '');
+    const normKey = digits.length >= 8 ? digits : hRef.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    const isNearDup = distinctActiveStarts.some(s => hStart > 0 && Math.abs(s - hStart) < 120_000);
+    if (!isNearDup && normKey) {
+      distinctActivePaidRefs.add(normKey);
+      if (hStart > 0) distinctActiveStarts.push(hStart);
+    }
+  }
+  const isSinglePackagePurchase = distinctActivePaidRefs.size <= 1;
+  if ((isSinglePackagePurchase && computedDays > planDays) || (computedDays > 95 && planDays <= 90 && distinctActivePaidRefs.size <= 1)) {
     const startMs = parseSafeDateMs(
       user.subscriptionStartDate || user.freeTrialActivatedAt || user.verifiedAt
     );
     if (startMs > 0 && startMs <= nowServerMs) {
       const trueExpMs = startMs + planDays * 24 * 60 * 60 * 1000;
       if (trueExpMs > nowServerMs) {
-        return Math.max(1, Math.ceil((trueExpMs - nowServerMs) / (1000 * 60 * 60 * 24)));
+        return Math.min(planDays, Math.max(1, Math.ceil((trueExpMs - nowServerMs) / (1000 * 60 * 60 * 24))));
       }
     }
     return planDays;

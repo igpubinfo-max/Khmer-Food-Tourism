@@ -106,6 +106,11 @@ CREATE INDEX IF NOT EXISTS idx_kft_activity_logs_ts ON public.kft_user_activity_
 CREATE INDEX IF NOT EXISTS idx_kft_activity_logs_user_id ON public.kft_user_activity_logs (user_id, timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_kft_activity_logs_category ON public.kft_user_activity_logs (category, timestamp DESC);
 
+-- Enable strict Row Level Security on directory & activity log tables (service_role only)
+ALTER TABLE public.kft_users_directory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.kft_user_activity_logs ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.kft_users_directory, public.kft_user_activity_logs FROM anon, authenticated;
+
 -- 4. Server-Side Paginated Query RPC over public.kft_app_kv_store (kft_user_<id>)
 CREATE OR REPLACE FUNCTION public.kft_query_users_paginated(
   p_search TEXT DEFAULT '',
@@ -154,7 +159,7 @@ BEGIN
   SELECT COALESCE(jsonb_agg(sub.payload), '[]'::jsonb)
   INTO v_items
   FROM (
-    SELECT payload
+    SELECT (payload - 'passwordHash') AS payload
     FROM public.kft_app_kv_store
     WHERE key LIKE 'kft_user_%'
       AND COALESCE(payload->>'role', 'user') <> 'admin'
@@ -193,4 +198,6 @@ BEGIN
     'offset', p_offset
   );
 END;
-$$;
+$;
+REVOKE ALL ON FUNCTION public.kft_query_users_paginated(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.kft_query_users_paginated(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER) TO service_role;

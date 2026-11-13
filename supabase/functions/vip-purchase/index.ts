@@ -1,4 +1,4 @@
-// Supabase Edge Function: vip-purchase
+﻿// Supabase Edge Function: vip-purchase
 // Server-side check of:
 //   1. 1-Time 7-Day Consumer Free Trial claims (action: 'claim_trial') enforced via Two-Line Anti-Abuse
 //      (normalized Gmail/+855 Phone SHA-256 identity_hash OR salted Android/Web device_hash).
@@ -13,7 +13,7 @@
 
 import { verifyToken } from '../_shared/admin-token.ts';
 import { geminiEndpoints, shouldTryNextEndpoint } from '../food-ai/endpoint.ts';
-import { WindowLimiter, envInt, safeUserId, userKvKey, verifyClientAppIntegrity } from '../_shared/common.ts';
+import { WindowLimiter, envInt, safeUserId, userKvKey, resolveAllowedOrigin, verifyClientAppIntegrity } from '../_shared/common.ts';
 import { computeServerIdentityHashes, sanitizeHexHash, validateCambodiaPhoneForRegistration } from '../_shared/identity-normalize.ts';
 import { createAbaReceiptVisionAdapter } from '../_shared/payment-adapter.ts';
 import {
@@ -39,7 +39,8 @@ declare const Deno: {
 };
 
 const corsHeaders: Record<string, string> = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://igpubinfo-max.github.io',
+  'Vary': 'Origin',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-user-id, x-kft-admin-token, x-kft-app-id, x-kft-app-platform, x-kft-app-sig',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Expose-Headers': 'x-vip-purchase',
@@ -185,6 +186,7 @@ async function hasExistingClaim(
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
+  corsHeaders['Access-Control-Allow-Origin'] = resolveAllowedOrigin(req);
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   const appIntegrity = verifyClientAppIntegrity(req);
   if (!appIntegrity.ok) return json(403, { ok: false, error: 'CLONED_APP_BLOCKED' });
@@ -1047,7 +1049,32 @@ async function handleAdminApproveTransaction(req: Request, body: Record<string, 
     try {
       const existingDoc = await readUserDoc(userKvKey(targetUserId));
       const baseDoc = existingDoc && typeof existingDoc === 'object' ? (existingDoc as Record<string, unknown>) : { id: targetUserId, email: targetEmail || '' };
-      const win = computeVipWindow(baseDoc.subscriptionExpiryDate, durationDays, Date.now());
+      const existingRefKey = normalizeTrxKey(typeof baseDoc.transactionRef === 'string' ? baseDoc.transactionRef : '');
+      const existingStartMs = typeof baseDoc.subscriptionStartDate === 'string' ? Date.parse(baseDoc.subscriptionStartDate) : NaN;
+      const histList = Array.isArray(baseDoc.vipMembershipHistory) ? baseDoc.vipMembershipHistory : [];
+      const alreadyInHist = histList.some(
+        (h: unknown) =>
+          Boolean(h && typeof h === 'object' && normalizeTrxKey(String((h as Record<string, unknown>).transactionRef || '')) === trxKey)
+      );
+      const isSameOrRecentClientWrite =
+        existingRefKey === trxKey ||
+        alreadyInHist ||
+        (Number.isFinite(existingStartMs) && Math.abs(Date.now() - existingStartMs) < 300_000);
+      const isExistingGenuinePaidVip =
+        baseDoc.membershipTier === 'premium_vip' &&
+        baseDoc.subscriptionStatus === 'active' &&
+        baseDoc.paymentStatus === 'verified' &&
+        !baseDoc.freeTrialActivated &&
+        baseDoc.paymentMethod !== 'FREE_TRIAL_7D' &&
+        !String(baseDoc.transactionRef || '').startsWith('TRIAL') &&
+        !String(baseDoc.transactionRef || '').startsWith('REWARD-FOODCHECKIN');
+      const anchorNowMs =
+        isSameOrRecentClientWrite && Number.isFinite(existingStartMs) && Math.abs(Date.now() - existingStartMs) < 300_000
+          ? existingStartMs
+          : Date.now();
+      const win = isSameOrRecentClientWrite || !isExistingGenuinePaidVip
+        ? computeVipWindow(null, durationDays, anchorNowMs)
+        : computeVipWindow(baseDoc.subscriptionExpiryDate, durationDays, Date.now());
       const planType = durationDays >= 300 ? 'annual' : 'quarterly';
       const updatedDoc = applyVipGrant(baseDoc, {
         startIso: win.startIso,

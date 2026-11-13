@@ -21,7 +21,7 @@
     "test:users:restore": "node scripts/userDataRestoreTest.mjs",
     "test:users:safety": "node scripts/verifyUserDataSafety.mjs",
     "test:users:migration": "node scripts/verify_update_migration_audit.mjs",
-    "test:edge": "node scripts/verifyEdgeFunctions.mjs",
+    "test:edge": "npx tsx scripts/verifyEdgeFunctions.mjs",
     "test:ios": "node scripts/verifyIosReview.mjs",
     "predeploy:users": "npm run test:users:safety && npm run test:edge && npm run test:users:migration && npm run backup:users && npm run test:users:restore",
     "build:release": "npm run predeploy:users && vite build"

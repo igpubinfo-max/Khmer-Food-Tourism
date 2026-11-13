@@ -14,7 +14,7 @@
 //   {action:'change_pin', newPin, currentPassword?, token?, ticket?}  -> {ok, ticket, ticketExpiresAt}
 
 import { hashSecretPBKDF2, safeSecretEqual, signToken, verifySecretPBKDF2, verifyToken } from '../_shared/admin-token.ts';
-import { WindowLimiter, envInt, verifyClientAppIntegrity } from '../_shared/common.ts';
+import { WindowLimiter, envInt, resolveAllowedOrigin, verifyClientAppIntegrity } from '../_shared/common.ts';
 import { background, getSecurityConfig, logUsage, setSecurityConfig, usageClear, usageGet, usageHit } from '../_shared/supa.ts';
 
 declare const Deno: {
@@ -23,7 +23,8 @@ declare const Deno: {
 };
 
 const corsHeaders: Record<string, string> = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://igpubinfo-max.github.io',
+  'Vary': 'Origin',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-app-id, x-kft-app-platform, x-kft-app-sig',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Expose-Headers': 'x-admin-auth',
@@ -75,6 +76,7 @@ async function verifyActivePassword(
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
+  corsHeaders['Access-Control-Allow-Origin'] = resolveAllowedOrigin(req);
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json(405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
 
