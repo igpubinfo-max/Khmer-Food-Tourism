@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1572;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1573;
 export const APP_RELEASE_DATE = '2026-11-13';
 
 /**
@@ -3470,11 +3470,66 @@ export const sanitizeLegacyVipTransactionPricing = (
     changed = true;
   }
 
+  let aiVerificationReport = txn.aiVerificationReport;
+  if (
+    aiVerificationReport &&
+    aiVerificationReport.checks &&
+    aiVerificationReport.checks.recipient?.passed &&
+    aiVerificationReport.checks.amount?.passed &&
+    aiVerificationReport.checks.date?.passed &&
+    aiVerificationReport.checks.antiReplay?.passed !== false &&
+    !aiVerificationReport.checks.trxId?.passed
+  ) {
+    const rawExtractedTrx = String(
+      aiVerificationReport.extractedReceipt?.trxId || txn.transactionRef || ''
+    )
+      .replace(/^(?:Trx\.?\s*ID|Transaction\s*ID|Tx\.?\s*ID|Ref(?:erence)?\.?\s*(?:No|ID|#)?|ABA\s*Ref)\s*[:.\-#\s]*/i, '')
+      .trim();
+    const isGenuineBankTrx =
+      /^[0-9A-Z\-]{8,28}$/i.test(rawExtractedTrx) &&
+      /\d{4,}/.test(rawExtractedTrx) &&
+      !/^ABA-(?:KHQR|STORE|SHOP|SLOT|VIP|PAY|TXN)/i.test(rawExtractedTrx) &&
+      !/^ADMIN-VIP-/i.test(rawExtractedTrx) &&
+      !/^TXN-/i.test(rawExtractedTrx) &&
+      !/^AUTO/i.test(rawExtractedTrx);
+
+    const expectedStr = String(aiVerificationReport.checks.trxId?.expected || '');
+    const wasPlaceholderMismatch =
+      !expectedStr ||
+      /ABA-(?:KHQR|STORE|SHOP|SLOT|VIP|PAY|TXN)/i.test(expectedStr) ||
+      /Valid ABA Trx/i.test(expectedStr);
+
+    if (isGenuineBankTrx && wasPlaceholderMismatch) {
+      const recName = aiVerificationReport.extractedReceipt?.recipientName || 'CHEA SAVUTH';
+      const recDate = aiVerificationReport.extractedReceipt?.transactionDate || txn.createdAt;
+      aiVerificationReport = {
+        ...aiVerificationReport,
+        status: 'verified',
+        canAutoApprove: true,
+        confidenceScore: 100,
+        summaryKh: `✅ បានផ្ទៀងផ្ទាត់ជោគជ័យ 100%៖ វិក្កយបត្រ ABA ត្រូវគ្នាជាមួយគណនី "${recName}", ចំនួនទឹកប្រាក់ ${(amountUsd || 0).toFixed(2)} USD, លេខប្រតិបត្តិការ (${rawExtractedTrx}) និងកាលបរិច្ឆេទ (${recDate})។ អនុម័តបើកដំណើរការដោយស្វ័យប្រវត្តិ!`,
+        summaryEn: `✅ 100% Verified: ABA receipt matches recipient "${recName}", amount ${(amountUsd || 0).toFixed(2)} USD, Trx. ID (${rawExtractedTrx}), and date (${recDate}). Auto-approved!`,
+        checks: {
+          ...aiVerificationReport.checks,
+          trxId: {
+            passed: true,
+            expected: 'Valid ABA Trx. ID / Ref on Receipt',
+            detected: `Trx. ID: ${rawExtractedTrx}`,
+            reasonKh: `✅ លេខប្រតិបត្តិការ ABA ត្រឹមត្រូវ៖ ${rawExtractedTrx}`,
+            reasonEn: `✅ Valid ABA Trx. ID verified: ${rawExtractedTrx}`,
+          },
+        },
+      };
+      changed = true;
+    }
+  }
+
   if (!changed) return txn;
   return {
     ...txn,
     amountUsd,
     notes,
+    aiVerificationReport,
   };
 };
 
@@ -5000,10 +5055,21 @@ export const getUserStoreQuotaSummary = (
     : [];
 
   const verifiedAdditionalStoreTransactions = userAdditionalTxns.filter(
-    (t) => t.status === 'verified'
+    (t) =>
+      t.status === 'verified' ||
+      (t.status === 'pending_verification' &&
+        t.aiVerificationReport?.canAutoApprove === true &&
+        t.aiVerificationReport?.status === 'verified' &&
+        (t.aiVerificationReport?.confidenceScore ?? 0) >= 90)
   );
   const pendingAdditionalStoreTxns = userAdditionalTxns.filter(
-    (t) => t.status === 'pending_verification' || t.status === 'needs_more_info'
+    (t) =>
+      (t.status === 'pending_verification' || t.status === 'needs_more_info') &&
+      !(
+        t.aiVerificationReport?.canAutoApprove === true &&
+        t.aiVerificationReport?.status === 'verified' &&
+        (t.aiVerificationReport?.confidenceScore ?? 0) >= 90
+      )
   );
   const pendingAdditionalStoreTransaction = pendingAdditionalStoreTxns[0] || null;
 

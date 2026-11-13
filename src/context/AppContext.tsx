@@ -71,6 +71,8 @@ import {
   verifyAbaPaymentAndReceipt,
   computeReceiptImageFingerprint,
   recordVerifiedReceiptFingerprint,
+  normalizeAbaTrxId,
+  getCambodiaDateIso,
 } from '../services/aiPaymentVerificationService';
 import { 
   verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
@@ -4919,6 +4921,140 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } catch (e) {
       console.warn('Storage sync failed for transactions:', e);
+    }
+  }, [transactions]);
+
+  // Automatically approve any pending transaction whose AI verification report passed 100%
+  // (including transactions healed from placeholder Trx ID false-negatives like TXN-STORE-MWELW67V-697)
+  useEffect(() => {
+    if (!Array.isArray(transactions) || transactions.length === 0) return;
+    const candidates = transactions.filter(t => {
+      if (!t || t.status !== 'pending_verification') return false;
+      const healed = sanitizeLegacyVipTransactionPricing(t);
+      const rep = healed.aiVerificationReport;
+      if (!rep || !rep.canAutoApprove || rep.status !== 'verified' || (rep.confidenceScore ?? 0) < 90) {
+        return false;
+      }
+      const rawTrx = rep.extractedReceipt?.trxId || healed.transactionRef || '';
+      const normKey = normalizeAbaTrxId(rawTrx).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+      if (!normKey || normKey.length < 8) return false;
+      const usedElsewhere = transactions.some(other => {
+        if (!other || other.id === t.id || other.status !== 'verified') return false;
+        const oRef = normalizeAbaTrxId(other.transactionRef).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+        const oAiRef = normalizeAbaTrxId(other.aiVerificationReport?.extractedReceipt?.trxId).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+        return oRef === normKey || oAiRef === normKey;
+      });
+      return !usedElsewhere;
+    });
+
+    if (candidates.length === 0) return;
+
+    const nowIso = new Date().toISOString();
+    const formattedNow = nowIso.replace('T', ' ').slice(0, 16);
+    const approvedIds = new Set(candidates.map(c => c.id));
+
+    for (const c of candidates) {
+      const healed = sanitizeLegacyVipTransactionPricing(c);
+      const effRef = healed.aiVerificationReport?.extractedReceipt?.trxId || healed.transactionRef;
+      if (effRef) recordVerifiedTransaction(effRef);
+      try {
+        const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+        const logs = rawLogs ? JSON.parse(rawLogs) : [];
+        logs.unshift({
+          id: `audit_reconcile_${c.id}_${Date.now()}`,
+          action: 'AUTO_APPROVE_VERIFIED_PENDING_PAYMENT',
+          txnId: c.id,
+          transactionRef: effRef,
+          targetUserId: c.userId || c.ownerId,
+          amountUsd: c.amountUsd,
+          adminId: 'ai-payment-verifier',
+          adminName: 'AI Payment Verifier (Auto-Approved)',
+          timestamp: nowIso,
+        });
+        localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+      } catch {}
+    }
+
+    setTransactions(prev => {
+      const nextTxns = prev.map(t => {
+        if (!approvedIds.has(t.id)) return t;
+        const healed = sanitizeLegacyVipTransactionPricing(t);
+        const effRef = healed.aiVerificationReport?.extractedReceipt?.trxId || healed.transactionRef;
+        return {
+          ...healed,
+          transactionRef: effRef,
+          status: 'verified' as const,
+          paymentStatus: 'verified' as const,
+          verifiedAt: formattedNow,
+          verifiedBy: 'AI & Transaction Verification Engine (Auto-Approved)',
+        };
+      });
+      skipNextTransactionsCloudPushRef.current = false;
+      latestSyncStateRef.current.transactions = nextTxns;
+      try {
+        localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+      } catch {}
+      if (isSupabaseConfigured()) {
+        mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+      }
+      return nextTxns;
+    });
+
+    const storeSlotCandidates = candidates.filter(c => c.type === 'additional_store_slot');
+    if (storeSlotCandidates.length > 0) {
+      setUsers(prev => {
+        let anyUserUpdated = false;
+        const nextUsers = prev.map(u => {
+          const matchingSlotTxns = storeSlotCandidates.filter(c =>
+            doesUserMatchTarget(u, { id: c.userId || c.ownerId, email: c.userEmail })
+          );
+          if (matchingSlotTxns.length === 0) return u;
+          anyUserUpdated = true;
+          const existingIds = Array.isArray(u.additionalStorePaymentIds) ? u.additionalStorePaymentIds : [];
+          const nextIds = Array.from(new Set([...existingIds, ...matchingSlotTxns.map(c => c.id)]));
+          const nextSlots = Math.max(u.paidAdditionalStoreSlots || 0, nextIds.length);
+          const updatedU: User = {
+            ...u,
+            paidAdditionalStoreSlots: nextSlots,
+            additionalStorePaymentIds: nextIds,
+          };
+          if (isSupabaseConfigured()) {
+            const atomicKeys = getCandidateAtomicUserKeys(updatedU);
+            Promise.all(atomicKeys.map(k => pushCloudDocument(k, updatedU))).catch(() => {});
+          }
+          return updatedU;
+        });
+        if (anyUserUpdated) {
+          latestSyncStateRef.current.users = nextUsers;
+          safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+          if (isSupabaseConfigured()) {
+            pushCloudDocument('kft_cloud_users_v2', nextUsers).catch(() => {});
+          }
+        }
+        return anyUserUpdated ? nextUsers : prev;
+      });
+
+      if (currentUser) {
+        const myMatchingSlotTxns = storeSlotCandidates.filter(c =>
+          doesUserMatchTarget(currentUser, { id: c.userId || c.ownerId, email: c.userEmail })
+        );
+        if (myMatchingSlotTxns.length > 0) {
+          setCurrentUser(prev => {
+            if (!prev) return null;
+            const existingIds = Array.isArray(prev.additionalStorePaymentIds) ? prev.additionalStorePaymentIds : [];
+            const nextIds = Array.from(new Set([...existingIds, ...myMatchingSlotTxns.map(c => c.id)]));
+            const nextSlots = Math.max(prev.paidAdditionalStoreSlots || 0, nextIds.length);
+            const updatedCur: User = {
+              ...prev,
+              paidAdditionalStoreSlots: nextSlots,
+              additionalStorePaymentIds: nextIds,
+            };
+            latestSyncStateRef.current.currentUser = updatedCur;
+            safeSetCriticalAccountStorage('kft_current_user_v5', updatedCur);
+            return updatedCur;
+          });
+        }
+      }
     }
   }, [transactions]);
 
@@ -10215,18 +10351,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const galleryImgs = [profileImg].filter(Boolean);
     const foodImgs: string[] = [];
 
-    const isPendingPayment = !isAdmin && restData.paymentStatus === 'pending_verification';
-    const isPendingManualReview = !isAdmin && !targetToReplace;
-    const finalStatus: 'approved' | 'pending' | 'rejected' =
-      isPendingPayment || isPendingManualReview
-        ? 'pending'
-        : (targetToReplace?.status || 'approved');
     const slotNumber = targetToReplace
       ? targetToReplace.storeSlotNumber || 1
       : quota.usedStoresCount + 1;
     const isOwnerPaidVipSlot = Boolean(
       !isAdmin && quota.canCreateNewStoreWithoutPayment && slotNumber <= Math.max(1, quota.totalAllowedStores)
     );
+    const isPendingPayment = !isAdmin && restData.paymentStatus === 'pending_verification';
+    const isPendingManualReview = !isAdmin && !targetToReplace && !isOwnerPaidVipSlot;
+    const finalStatus: 'approved' | 'pending' | 'rejected' =
+      isPendingPayment || isPendingManualReview
+        ? 'pending'
+        : (targetToReplace?.status || 'approved');
     const verifiedStoreSlotTxn = quota.verifiedAdditionalStoreTransactions[0];
     const verifiedStoreSlotExpiryIso = verifiedStoreSlotTxn
       ? new Date(Date.now() + (verifiedStoreSlotTxn.durationDays || (verifiedStoreSlotTxn.amountUsd >= 40 ? 365 : 30)) * 24 * 60 * 60 * 1000).toISOString()
@@ -12786,8 +12922,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    const matchedTxn = transactions.find(t => t.id === txnId);
-    if (!matchedTxn) return;
+    const rawMatchedTxn = transactions.find(t => t.id === txnId);
+    if (!rawMatchedTxn) return;
+    const matchedTxn = sanitizeLegacyVipTransactionPricing(rawMatchedTxn);
 
     // Prevent duplicate approvals and duplicate VIP extensions
     if (matchedTxn.status === 'verified') {
@@ -12813,9 +12950,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       matchedTxn.transactionRef ||
       ''
     ).trim();
-    const normTrxKey = /^ABA-KHQR-|^ADMIN-VIP-|^ABA-STORE-|^AUTO/i.test(rawCandidateTrx)
-      ? ''
-      : rawCandidateTrx.replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+    const normTrxKey = normalizeAbaTrxId(rawCandidateTrx).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
 
     if (!normTrxKey || normTrxKey.length < 8) {
       showToast(
@@ -13746,12 +13881,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
     } catch {}
 
+    verifyAbaPaymentAndReceipt({
+      receiptDataUrl: proofDataUrl,
+      expectedAmountUsd: matchedTxn.amountUsd || 6.99,
+      expectedDurationDays: matchedTxn.durationDays || 30,
+      submittedTrxId: normalizeAbaTrxId(matchedTxn.transactionRef),
+      submittedDate: getCambodiaDateIso(new Date()),
+      userId: matchedTxn.userId || currentUser.id,
+      currentTransactionId: txnId,
+      existingTransactions: transactions,
+    })
+      .then(aiReport => {
+        if (!aiReport) return;
+        setTransactions(prev =>
+          prev.map(t => {
+            if (t.id !== txnId) return t;
+            const effRef =
+              aiReport.extractedReceipt?.trxId && !normalizeAbaTrxId(t.transactionRef)
+                ? aiReport.extractedReceipt.trxId
+                : t.transactionRef;
+            return {
+              ...t,
+              transactionRef: effRef,
+              aiVerificationReport: aiReport,
+            };
+          })
+        );
+      })
+      .catch(() => {});
+
     showToast(
       tr(
         language,
-        '📸 បានអាប់ឡូតភស្តុតាងបង់ប្រាក់រួចរាល់! កំពុងរង់ចាំរដ្ឋបាលពិនិត្យ និងអនុម័ត។',
-        '📸 Payment proof uploaded! Awaiting administrator verification and approval.',
-        '📸 付款凭据已上传！正在等待管理员审核与批准。'
+        '📸 បានអាប់ឡូតភស្តុតាងបង់ប្រាក់រួចរាល់! ប្រព័ន្ធ AI កំពុងផ្ទៀងផ្ទាត់វិក្កយបត្រដោយស្វ័យប្រវត្តិ។',
+        '📸 Payment proof uploaded! AI is verifying your receipt automatically.',
+        '📸 付款凭据已上传！AI 正在自动验证您的收据。'
       ),
       'success'
     );
@@ -14212,40 +14376,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     let aiReport: AbaReceiptVerificationReport | undefined;
     let serverGrant: { startIso: string; expiryIso: string } | undefined;
+    const manualUserShopTrx = normalizeAbaTrxId(cleanTrxRef);
     if (params.paymentProofData?.dataUrl) {
       const serverRes = await verifyVipPurchaseOnServer({
         userId: currentUser.id,
         durationDays: validDays,
         receiptDataUrl: params.paymentProofData.dataUrl,
-        submittedTrxId: cleanTrxRef,
+        submittedTrxId: manualUserShopTrx,
         planId: resolvedPlanId,
         shopId: targetShop.id,
       });
-      if (serverRes.kind !== 'unavailable') {
+      if (serverRes.kind === 'verified') {
         aiReport = serverRes.report as unknown as AbaReceiptVerificationReport;
-        if (serverRes.kind === 'verified') serverGrant = serverRes.grant;
+        serverGrant = serverRes.grant;
       } else {
-        aiReport = await Promise.race([
-          verifyAbaPaymentAndReceipt({
-            receiptDataUrl: params.paymentProofData.dataUrl,
-            expectedAmountUsd: validPrice,
-            expectedDurationDays: validDays,
-            submittedTrxId: cleanTrxRef,
-            submittedDate: nowIso.split('T')[0],
-            userId: currentUser.id,
-            existingTransactions: transactions,
-          }).catch(() => undefined),
-          new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 2500)),
-        ]);
+        aiReport = await verifyAbaPaymentAndReceipt({
+          receiptDataUrl: params.paymentProofData.dataUrl,
+          expectedAmountUsd: validPrice,
+          expectedDurationDays: validDays,
+          submittedTrxId: manualUserShopTrx,
+          submittedDate: getCambodiaDateIso(now),
+          userId: currentUser.id,
+          currentTransactionId: txnId,
+          existingTransactions: transactions,
+        }).catch(() => (serverRes.kind !== 'unavailable' ? (serverRes.report as unknown as AbaReceiptVerificationReport) : undefined));
       }
     }
 
     const effectiveTrxRef =
-      aiReport?.extractedReceipt?.trxId && /^ABA-SHOP-/i.test(cleanTrxRef)
+      aiReport?.extractedReceipt?.trxId && !manualUserShopTrx
         ? aiReport.extractedReceipt.trxId
         : cleanTrxRef;
 
-    const isAutoVerified = false; // Strict Requirement: Only activate VIP / Shop package after Admin verification and approval
+    const isAutoVerified = Boolean(
+      serverGrant ||
+      (aiReport && aiReport.canAutoApprove && aiReport.status === 'verified' && aiReport.confidenceScore >= 90)
+    );
     const existingExpRaw =
       targetShop.shopSubscriptionExpiresAt || targetShop.subscriptionExpiresAt || targetShop.membershipExpiresAt;
     const existingExpMs = parseSafeDateMs(existingExpRaw);
@@ -14583,43 +14749,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               computeIdentityClaimHashes({ email: currentUser.email, phone: currentUser.phone }),
             ])
           : [null, null];
+      const manualUserVipTrx = normalizeAbaTrxId(cleanTrxRef);
       const serverRes = await verifyVipPurchaseOnServer({
         userId: currentUser.id,
         durationDays: validDays,
         receiptDataUrl: paymentProofData.dataUrl,
-        submittedTrxId: cleanTrxRef,
+        submittedTrxId: manualUserVipTrx,
         planId: resolvedConsumerPlanId,
         email: currentUser.email,
         phone: currentUser.phone,
         deviceHash: claimDeviceInfo?.deviceHash || undefined,
         identityHashes: claimIdentityInfo?.identityHashes,
       });
-      if (serverRes.kind !== 'unavailable') {
+      if (serverRes.kind === 'verified') {
         aiReport = serverRes.report as unknown as AbaReceiptVerificationReport;
-        if (serverRes.kind === 'verified') serverGrant = serverRes.grant;
+        serverGrant = serverRes.grant;
       } else {
-        // 2) Legacy on-device verification - ONLY when the server function is not deployed / reachable.
-        aiReport = await Promise.race([
-          verifyAbaPaymentAndReceipt({
-            receiptDataUrl: paymentProofData.dataUrl,
-            expectedAmountUsd: validPrice,
-            expectedDurationDays: validDays,
-            submittedTrxId: cleanTrxRef,
-            submittedDate: nowIso.split('T')[0],
-            userId: currentUser.id,
-            existingTransactions: transactions,
-          }).catch(() => undefined),
-          new Promise<undefined>(resolve => setTimeout(() => resolve(undefined), 2500)),
-        ]);
+        aiReport = await verifyAbaPaymentAndReceipt({
+          receiptDataUrl: paymentProofData.dataUrl,
+          expectedAmountUsd: validPrice,
+          expectedDurationDays: validDays,
+          submittedTrxId: manualUserVipTrx,
+          submittedDate: getCambodiaDateIso(now),
+          userId: currentUser.id,
+          currentTransactionId: txnId,
+          existingTransactions: transactions,
+        }).catch(() => (serverRes.kind !== 'unavailable' ? (serverRes.report as unknown as AbaReceiptVerificationReport) : undefined));
       }
     }
 
     const effectiveTrxRef =
-      aiReport?.extractedReceipt?.trxId && /^ABA-KHQR-/i.test(cleanTrxRef)
+      aiReport?.extractedReceipt?.trxId && !normalizeAbaTrxId(cleanTrxRef)
         ? aiReport.extractedReceipt.trxId
         : cleanTrxRef;
 
-    const isAutoVerified = false; // Strict Requirement: Only activate VIP membership after Admin verification and approval
+    const isAutoVerified = Boolean(
+      serverGrant ||
+      (aiReport && aiReport.canAutoApprove && aiReport.status === 'verified' && aiReport.confidenceScore >= 90)
+    );
 
     // When the SERVER granted the VIP, use exactly the dates it stored so this device and the database agree.
     const { startDate, expiryDate } = serverGrant
@@ -15107,19 +15274,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       typeof submittedAmountUsd === 'number' ? submittedAmountUsd : requiredFee;
     const nextSlotNumber = Math.max(quota.totalAllowedStores + 1, quota.usedStoresCount + 1);
 
-    // Prevent duplicate pending charges for additional store slots
+    // Prevent duplicate pending charges for additional store slots; if proof is uploaded, verify & auto-approve immediately
     if (quota.pendingAdditionalStoreTransaction) {
+      const pendingTxn = quota.pendingAdditionalStoreTransaction;
       if (paymentProofData?.dataUrl) {
         uploadPaymentProofToTransaction(
-          quota.pendingAdditionalStoreTransaction.id,
+          pendingTxn.id,
           paymentProofData.dataUrl,
           paymentProofData.fileName || 'aba_store_slot_receipt.png',
           paymentProofData.mimeType || 'image/png'
         );
+        const recheckReport = await verifyAbaPaymentAndReceipt({
+          receiptDataUrl: paymentProofData.dataUrl,
+          expectedAmountUsd: pendingTxn.amountUsd || effectiveAmount,
+          expectedDurationDays: pendingTxn.durationDays || (effectiveAmount >= 40 ? 365 : 30),
+          submittedTrxId: normalizeAbaTrxId(transactionRef || pendingTxn.transactionRef),
+          submittedDate: getCambodiaDateIso(new Date()),
+          userId: currentUser.id,
+          currentTransactionId: pendingTxn.id,
+          existingTransactions: transactions,
+        }).catch(() => undefined);
+        const autoApprovedNow = Boolean(
+          recheckReport &&
+          recheckReport.canAutoApprove &&
+          recheckReport.status === 'verified' &&
+          recheckReport.confidenceScore >= 90
+        );
+        if (recheckReport) {
+          setTransactions(prev =>
+            prev.map(t =>
+              t.id === pendingTxn.id
+                ? {
+                    ...t,
+                    transactionRef: recheckReport.extractedReceipt?.trxId || t.transactionRef,
+                    aiVerificationReport: recheckReport,
+                  }
+                : t
+            )
+          );
+        }
         return {
           success: true,
-          transactionId: quota.pendingAdditionalStoreTransaction.id,
-          autoVerified: false,
+          transactionId: pendingTxn.id,
+          autoVerified: autoApprovedNow,
         };
       }
       const pendingMsg =
@@ -15182,25 +15379,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } catch {}
     }
 
+    const manualUserStoreTrx = normalizeAbaTrxId(transactionRef);
     let aiReport: AbaReceiptVerificationReport | undefined;
     if (paymentProofData?.dataUrl) {
       aiReport = await verifyAbaPaymentAndReceipt({
         receiptDataUrl: paymentProofData.dataUrl,
         expectedAmountUsd: effectiveAmount,
         expectedDurationDays: effectiveAmount >= 40 ? 365 : 30,
-        submittedTrxId: cleanTrxRef,
-        submittedDate: nowIso.split('T')[0],
+        submittedTrxId: manualUserStoreTrx,
+        submittedDate: getCambodiaDateIso(now),
         userId: currentUser.id,
+        currentTransactionId: txnId,
         existingTransactions: transactions,
       });
     }
 
     const effectiveTrxRef =
-      aiReport?.extractedReceipt?.trxId && /^ABA-STORE-/i.test(cleanTrxRef)
+      aiReport?.extractedReceipt?.trxId && !manualUserStoreTrx
         ? aiReport.extractedReceipt.trxId
         : cleanTrxRef;
 
-    const isAutoVerified = false; // Strict Requirement: Only activate VIP membership after Admin verification and approval
+    const isAutoVerified = Boolean(
+      aiReport &&
+      aiReport.canAutoApprove &&
+      aiReport.status === 'verified' &&
+      aiReport.confidenceScore >= 90
+    );
 
     if (isAutoVerified) {
       recordVerifiedTransaction(effectiveTrxRef);
@@ -15241,15 +15445,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: formattedNow,
       verifiedAt: isAutoVerified ? formattedNow : undefined,
       verifiedBy: isAutoVerified
-        ? 'AI & Server Transaction Verifier (Kim Seng Verified)'
+        ? 'AI & Server Transaction Verifier (Auto-Approved)'
         : undefined,
       notes:
         notes ||
-        `Additional Store Slot #${nextSlotNumber} (${effectiveAmount.toFixed(2)} USD / ${effectiveAmount >= 40 ? 365 : 30}d) — Awaiting Admin Verification`,
+        (isAutoVerified
+          ? `Additional Store Slot #${nextSlotNumber} (${effectiveAmount.toFixed(2)} USD / ${effectiveAmount >= 40 ? 365 : 30}d) — Auto-Verified 100%`
+          : `Additional Store Slot #${nextSlotNumber} (${effectiveAmount.toFixed(2)} USD / ${effectiveAmount >= 40 ? 365 : 30}d) — Awaiting Admin Verification`),
       aiVerificationReport: aiReport,
     };
 
-    setTransactions(prev => [newTxn, ...prev]);
+    const baseTxns = latestSyncStateRef.current.transactions || transactions;
+    const nextTxns = [newTxn, ...baseTxns.filter(t => t.id !== newTxn.id)];
+    skipNextTransactionsCloudPushRef.current = false;
+    latestSyncStateRef.current.transactions = nextTxns;
+    try {
+      localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+    } catch {}
+    setTransactions(nextTxns);
+    if (isSupabaseConfigured()) {
+      mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+    }
 
     if (isAutoVerified) {
       const existingIds = Array.isArray(currentUser.additionalStorePaymentIds)
@@ -15263,10 +15479,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         additionalStorePaymentIds: nextIds,
       };
       setCurrentUser(updatedUser);
-      setUsers(prev => prev.map(u => (u.id === currentUser.id ? updatedUser : u)));
+      latestSyncStateRef.current.currentUser = updatedUser;
+      safeSetCriticalAccountStorage('kft_current_user_v5', updatedUser);
+      setUsers(prev => {
+        const nextUsers = prev.map(u => (doesUserMatchTarget(u, currentUser) ? updatedUser : u));
+        latestSyncStateRef.current.users = nextUsers;
+        safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+        if (isSupabaseConfigured()) {
+          const atomicKeys = getCandidateAtomicUserKeys(updatedUser);
+          Promise.all([
+            ...atomicKeys.map(k => pushCloudDocument(k, updatedUser)),
+            pushCloudDocument('kft_cloud_users_v2', nextUsers),
+          ]).catch(() => {});
+        }
+        return nextUsers;
+      });
+
+      try {
+        const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+        const logs = rawLogs ? JSON.parse(rawLogs) : [];
+        logs.unshift({
+          id: `audit_auto_store_${Date.now()}`,
+          action: 'AUTO_APPROVE_ADDITIONAL_STORE_PAYMENT',
+          txnId,
+          transactionRef: effectiveTrxRef,
+          targetUserId: currentUser.id,
+          amountUsd: effectiveAmount,
+          storeSlotNumber: nextSlotNumber,
+          adminId: 'ai-payment-verifier',
+          adminName: 'AI Payment Verifier (Auto-Approved)',
+          timestamp: nowIso,
+        });
+        localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+      } catch {}
 
       showToast(
-        tr(language, `🎉 ផ្ទៀងផ្ទាត់ការបង់ប្រាក់បន្ថែមហាង ($${requiredFee.toFixed(2)} USD) ជោគជ័យ! ឥឡូវនេះអ្នកអាចបង្កើតហាងទី ${nextSlotNumber} បានភ្លាមៗ!`, `🎉 Verified $${requiredFee.toFixed(2)} USD additional-store payment! You can now create Store #${nextSlotNumber} immediately!`, `🎉 已核实 $${requiredFee.toFixed(2)} USD 附加店铺付款！您现在可以立即创建第 #${nextSlotNumber} 家店铺！`),
+        tr(language, `🎉 ផ្ទៀងផ្ទាត់ការបង់ប្រាក់បន្ថែមហាង (${effectiveAmount.toFixed(2)} USD) ជោគជ័យ 100%! ឥឡូវនេះអ្នកអាចបង្កើតហាងទី ${nextSlotNumber} បានភ្លាមៗ!`, `🎉 Verified ${effectiveAmount.toFixed(2)} USD additional-store payment (100%)! You can now create Store #${nextSlotNumber} immediately!`, `🎉 已核实 ${effectiveAmount.toFixed(2)} USD 附加店铺付款 (100%)！您现在可以立即创建第 #${nextSlotNumber} 家店铺！`),
         'success'
       );
       return { success: true, transactionId: txnId, autoVerified: true };

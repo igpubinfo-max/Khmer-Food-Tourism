@@ -1,12 +1,7 @@
 /**
- * Smoothly scrolls a scrollable container (defaults to #kft-main-scroll)
- * so that 	argetEl is positioned clearly at the top of the visible area
- * (offsetTop pixels below the container's top edge).
- *
- * When onlyIfOutOfView: true is set (used for category button grids),
- * it never scrolls the category buttons off the top of the screen; it only
- * scrolls if the category grid is partially above the top edge so both the
- * 6 category buttons and the listings below remain in full view.
+ * Smoothly scrolls the main scrollable container (#kft-main-scroll)
+ * so that targetEl (the results section heading and first result card)
+ * is positioned right near the top of the screen.
  */
 export interface SmoothScrollOptions {
   containerEl?: HTMLElement | null;
@@ -18,16 +13,34 @@ export interface SmoothScrollOptions {
 
 const activeAnimations = new WeakMap<HTMLElement, number>();
 
-function animateScrollTop(container: HTMLElement, targetTop: number, durationMs = 340) {
+function computeTargetScrollTop(
+  container: HTMLElement,
+  targetEl: HTMLElement,
+  offsetTop: number
+): number {
+  const containerRect = container.getBoundingClientRect();
+  const targetRect = targetEl.getBoundingClientRect();
+  const relativeTop = targetRect.top - containerRect.top;
+  const rawTop = container.scrollTop + relativeTop - offsetTop;
+  const maxScroll = Math.max(0, container.scrollHeight - container.clientHeight);
+  return Math.max(0, Math.min(Math.round(rawTop), maxScroll));
+}
+
+function animateScrollToTarget(
+  container: HTMLElement,
+  targetEl: HTMLElement,
+  offsetTop: number,
+  durationMs = 320
+) {
   const prevRaf = activeAnimations.get(container);
   if (prevRaf) {
     cancelAnimationFrame(prevRaf);
   }
 
   const startTop = container.scrollTop;
-  const delta = targetTop - startTop;
-  if (Math.abs(delta) < 2) {
-    container.scrollTop = targetTop;
+  const initialTargetTop = computeTargetScrollTop(container, targetEl, offsetTop);
+  if (Math.abs(initialTargetTop - startTop) < 2) {
+    container.scrollTop = initialTargetTop;
     return;
   }
 
@@ -35,14 +48,18 @@ function animateScrollTop(container: HTMLElement, targetTop: number, durationMs 
   const step = (now: number) => {
     const elapsed = now - startTime;
     const progress = Math.min(1, elapsed / durationMs);
-    // Cubic ease-out for natural mobile deceleration
+    // Re-read target position dynamically in case React finished rendering filtered cards
+    const liveTargetTop = computeTargetScrollTop(container, targetEl, offsetTop);
+    const delta = liveTargetTop - startTop;
+    // Cubic ease-out for smooth, natural mobile deceleration
     const eased = 1 - Math.pow(1 - progress, 3);
     container.scrollTop = Math.round(startTop + delta * eased);
+
     if (progress < 1) {
       const nextId = requestAnimationFrame(step);
       activeAnimations.set(container, nextId);
     } else {
-      container.scrollTop = targetTop;
+      container.scrollTop = computeTargetScrollTop(container, targetEl, offsetTop);
       activeAnimations.delete(container);
     }
   };
@@ -55,9 +72,8 @@ export function smoothScrollToElement(
   targetEl: HTMLElement | null | undefined,
   options?: SmoothScrollOptions
 ): void {
-  const offsetTop = options?.offsetTop ?? 10;
+  const offsetTop = options?.offsetTop ?? 8;
   const delayMs = options?.delayMs ?? 35;
-  const onlyIfOutOfView = options?.onlyIfOutOfView ?? false;
 
   const runScroll = () => {
     if (!targetEl) return;
@@ -68,37 +84,10 @@ export function smoothScrollToElement(
         : null);
 
     if (scrollContainer) {
-      const containerRect = scrollContainer.getBoundingClientRect();
-      const targetRect = targetEl.getBoundingClientRect();
-      const relativeTop = targetRect.top - containerRect.top;
-
-      // If onlyIfOutOfView is true and the category grid is already fully visible near the top,
-      // do not scroll it off the top edge!
-      if (onlyIfOutOfView && relativeTop >= 4 && relativeTop <= containerRect.height * 0.45) {
-        return;
-      }
-
-      const rawTop = scrollContainer.scrollTop + relativeTop - offsetTop;
-      const maxScroll = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
-      const nextTop = Math.max(0, Math.min(Math.round(rawTop), maxScroll));
-
-      const reducedMotion =
-        typeof window !== 'undefined' &&
-        typeof window.matchMedia === 'function' &&
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      if (reducedMotion) {
-        animateScrollTop(scrollContainer, nextTop, 340);
-      } else {
-        try {
-          scrollContainer.scrollTo({ top: nextTop, behavior: 'smooth' });
-        } catch {
-          animateScrollTop(scrollContainer, nextTop, 340);
-        }
-      }
+      animateScrollToTarget(scrollContainer, targetEl, offsetTop, 320);
     } else {
       try {
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch {
         targetEl.scrollIntoView();
       }

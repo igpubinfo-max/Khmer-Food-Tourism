@@ -3688,6 +3688,27 @@ export function matchCambodianDish(
   return best && best.score >= 60 ? best : null;
 }
 
+/**
+ * Master Content Safety Shield (ខែលការពារសុវត្ថិភាពមាតិកា ៣ ជាន់)
+ * Strictly blocks:
+ *  1. Sexual / 18+ / Adult / Pornographic / Nudity content (អាសអាភាស / ផ្លូវភេទ / សិចស៊ី 18+)
+ *  2. Political Parties / Elections / Protests / Political Propaganda (គណបក្សនយោបាយ / ការបោះឆ្នោត / បាតុកម្ម)
+ *  3. Gambling / Online Casinos / Drugs / Gore & Violence (ល្បែងស៊ីសង / កាស៊ីណូអនឡាញ / គ្រឿងញៀន / អំពើហិង្សា)
+ * across YouTube, TikTok, and Facebook videos, accounts, and search queries.
+ */
+export const STRICT_UNSAFE_CONTENT_BLOCK_RE =
+  /(អាសអាភាស|សិចស៊ី|រឿងសិច|វីដេអូសិច|ស្រាត|ននលគក|ផ្លូវភេទ|រួមភេទ|បម្រើផ្លូវភេទ|ស្រីខូច|គណបក្ស|នយោបាយ|អ្នកនយោបាយ|បោះឆ្នោត|ឃោសនាបោះឆ្នោត|បក្សប្រឆាំង|បក្សកាន់អំណាច|បាតុកម្ម|កូដកម្ម|រដ្ឋប្រហារ|ផ្តួលរំលំ|សកម្មជននយោបាយ|ល្បែងស៊ីសង|កាស៊ីណូ|ភ្នាល់បាល់|ភ្នាល់អនឡាញ|ស្លត់|បាការ៉ាត់|គ្រឿងញៀន|ជក់ម៉ា|ឃាតកម្ម|18+|xxx|porn|porno|nsfw|nude|nudity|naked|sexs*video|sexual|erotic|onlyfans|hentai|adults*video|stripper|politicals*party|politics|politician|election|protest|coup|oppositions*party|rulings*party|propaganda|casino|gambling|onlines*betting|slots*machine|baccarat|1xbet|色情|成人视频|裸体|情色|政党|政治|选举|游行|抗议|政变|赌场|赌博|博彩|网赌|百家乐|毒品)/i;
+
+export function isSafeFoodAndTourismSocialContent(
+  text?: string | null,
+  authorOrChannel?: string | null,
+  url?: string | null
+): boolean {
+  const combined = `${text || ''} ${authorOrChannel || ''} ${url || ''}`;
+  if (!combined.trim()) return true;
+  return !STRICT_UNSAFE_CONTENT_BLOCK_RE.test(combined);
+}
+
 const YT_NON_FOOD_EXCLUDE_RE =
   /\b(gaming|gameplay|pubg|mobile legends|free fire|valorant|minecraft|music video|official mv|official video|karaoke|ខារ៉ាអូខេ|ចម្រៀង|បទថ្មី|ព័ត៌មាន|នយោបាយ|breaking news|politics|election|football|soccer|boxing|គុនខ្មែរ|kun khmer|movie trailer|full movie|រឿងភាគ|ឈុតខ្លី|real estate|condo for sale|apartment for rent|crypto|forex)\b/i;
 
@@ -3702,6 +3723,7 @@ export function isRelevantCambodianFoodReviewVideo(
   categorySlug: TrendingFoodCategorySlug = 'popular_food'
 ): boolean {
   const combined = `${title || ''} ${description || ''} ${channelName || ''}`;
+  if (!isSafeFoodAndTourismSocialContent(combined, channelName)) return false;
   if (YT_NON_FOOD_EXCLUDE_RE.test(combined)) return false;
   if (categorySlug === 'tourist_attraction') return true;
   return YT_FOOD_OR_CAMBODIA_POSITIVE_RE.test(combined);
@@ -6659,6 +6681,9 @@ export function isCambodianFoodRelatedTikTokVideo(desc: string, handle?: string)
   const cleanDesc = String(desc || '').trim();
   const normHandle = normalizeTikTokHandle(handle);
 
+  if (!isSafeFoodAndTourismSocialContent(cleanDesc, normHandle)) {
+    return false;
+  }
   if (cleanDesc && FOOD_TIKTOK_EXCLUDE_NON_FOOD_RE.test(cleanDesc)) {
     return false;
   }
@@ -6741,7 +6766,7 @@ export function registerDiscoveredTikTokCreator(
   }
 ): { added: boolean; record: DiscoveredTikTokCreatorRecord | null } {
   const norm = normalizeTikTokHandle(rawHandle);
-  if (!norm) return { added: false, record: null };
+  if (!norm || !isSafeFoodAndTourismSocialContent(options?.displayName, norm)) return { added: false, record: null };
 
   const currentDb = getExpandedTikTokCreatorDatabase();
   const existing = currentDb.find((c) => normalizeTikTokHandle(c.handle) === norm);
@@ -7290,6 +7315,15 @@ export function deduplicateAndRankDiscoveries(items: OnlineFoodDiscoveryItem[]):
   const unique: OnlineFoodDiscoveryItem[] = [];
 
   for (const item of items) {
+    if (
+      !isSafeFoodAndTourismSocialContent(
+        `${item.titleKh || ''} ${item.titleEn || ''} ${item.descriptionKh || ''} ${item.descriptionEn || ''}`,
+        `${item.sourceName || ''} ${item.authorHandle || ''}`,
+        item.sourceUrl
+      )
+    ) {
+      continue;
+    }
     if (item.platform === 'tiktok') {
       const tiktokVid = extractTikTokVideoId(item.inlineVideoId || item.sourceUrl);
       const dedupKey = tiktokVid ? `tiktok:${tiktokVid}` : (item.id || item.sourceUrl);

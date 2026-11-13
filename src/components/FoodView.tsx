@@ -6,7 +6,7 @@ import {
   FoodItem,
   organizeAndDeduplicateFoods,
 } from '../types';
-import { Utensils, Crown, MapPin, Plus, Search, Filter, X } from 'lucide-react';
+import { Utensils, Crown, MapPin, Plus, Search, Filter, X , Flame } from 'lucide-react';
 import { DISH_PROVINCES, doesDishBelongToProvince } from '../utils/foodFilters';
 import { TAG_FILTERS, matchesTagFilter, TagFilterId, DishTagId } from '../utils/dishTags';
 import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
@@ -47,21 +47,13 @@ export const FoodView: React.FC = () => {
   const dishListStartRef = useRef<HTMLDivElement | null>(null);
   const dishCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToDishList = (keepCategoriesVisible = false) => {
-    if (keepCategoriesVisible && dishCategoryCardRef.current) {
-      smoothScrollToElement(dishCategoryCardRef.current, { offsetTop: 8, onlyIfOutOfView: true });
-      return;
-    }
-    smoothScrollToElement(dishListStartRef.current, { offsetTop: 10 });
+  const scrollToDishList = (_keepCategoriesVisible = false) => {
+    smoothScrollToElement(dishListStartRef.current, { offsetTop: 8 });
   };
 
   const handleExecuteFoodSearch = () => {
     const trimmed = foodSearchQuery.trim();
-    if (!trimmed) {
-      searchInputRef.current?.focus();
-      return;
-    }
-    if (trimmed !== foodSearchQuery) {
+    if (trimmed && trimmed !== foodSearchQuery) {
       setFoodSearchQuery(trimmed);
     }
     searchInputRef.current?.blur();
@@ -490,8 +482,9 @@ export const FoodView: React.FC = () => {
                   key={cat.id}
                   type="button"
                   onClick={() => {
+                    setShowFilterDrawer(false);
                     setSelectedCategory(cat.id);
-                    scrollToDishList(true);
+                    scrollToDishList();
                   }}
                   aria-pressed={active}
                   className="group relative block w-full max-w-full min-w-0 min-h-0 aspect-[560/460] overflow-visible bg-transparent border-0 p-0 active:scale-95 transition-transform cursor-pointer select-none"
@@ -577,7 +570,10 @@ export const FoodView: React.FC = () => {
                     <button
                       key={t.id}
                       type="button"
-                      onClick={() => setTagFilter(t.id)}
+                      onClick={() => {
+                        setTagFilter(t.id);
+                        scrollToDishList();
+                      }}
                       className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center gap-1.5 border transition cursor-pointer ${
                         active
                           ? 'bg-[#235D3A] text-white border-[#235D3A]'
@@ -600,7 +596,11 @@ export const FoodView: React.FC = () => {
               </label>
               <select
                 value={provinceFilter}
-                onChange={(e) => setProvinceFilter(e.target.value)}
+                onChange={(e) => {
+                  setProvinceFilter(e.target.value);
+                  setShowFilterDrawer(false);
+                  scrollToDishList();
+                }}
                 className="w-full h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600"
               >
                 <option value="">{tr(language, 'គ្រប់ខេត្តទាំងអស់', 'All Provinces', '全部省份')}</option>
@@ -614,7 +614,34 @@ export const FoodView: React.FC = () => {
           </div>
         )}
 
-        <div ref={dishListStartRef} id="kft-dish-list-section" className="scroll-mt-3" />
+        <div ref={dishListStartRef} id="kft-dish-list-section" className="scroll-mt-2" />
+
+        {/* Section Title Bar on Dark Slate (#1E293B) - Positioned at top of screen on scroll */}
+        <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Flame className="w-5 h-5 text-orange-400 fill-amber-400 shrink-0" />
+            <h2 className="font-extrabold text-[15px] sm:text-base text-white leading-[1.65] break-words">
+              {selectedCategory === 'samlor'
+                ? tr(language, 'សម្លខ្មែរពេញនិយម', 'Popular Khmer Soups', '热门高棉汤羹')
+                : selectedCategory === 'cha'
+                ? tr(language, 'ម្ហូបអាំង និងចៀនពេញនិយម', 'Popular Grill & Stir-Fry', '热门烧烤与煎炸')
+                : selectedCategory === 'vegetarian'
+                ? tr(language, 'ម្ហូបបួស និងសុខភាព', 'Vegetarian & Healthy Dishes', '素食与健康菜肴')
+                : selectedCategory === 'bong_aem'
+                ? tr(language, 'បង្អែម និងភេសជ្ជៈខ្មែរ', 'Khmer Desserts & Drinks', '高棉甜品与饮品')
+                : tr(language, 'មុខម្ហូបខ្មែរពេញនិយម', 'Popular Cambodian Dishes', '热门柬埔寨美食')}
+            </h2>
+          </div>
+
+          <span className="px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-xs font-extrabold text-slate-800 shrink-0">
+            {tr(
+              language,
+              `${filteredFoods.length} មុខម្ហូប`,
+              `${filteredFoods.length} dishes`,
+              `${filteredFoods.length} 道美食`
+            )}
+          </span>
+        </div>
 
         {/* 6. Food Listing Cards */}
         {filteredFoods.length === 0 ? (
@@ -632,7 +659,7 @@ export const FoodView: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-3.5 min-h-[65vh] content-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-3.5 min-h-[85vh] content-start">
             {displayedFoods.map((food) => (
               <FoodCard key={food.id} food={food} />
             ))}

@@ -114,12 +114,8 @@ export const RestaurantView: React.FC = () => {
   const shopListStartRef = useRef<HTMLDivElement | null>(null);
   const shopCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToShopList = (keepCategoriesVisible = false) => {
-    if (keepCategoriesVisible && shopCategoryCardRef.current) {
-      smoothScrollToElement(shopCategoryCardRef.current, { offsetTop: 8, onlyIfOutOfView: true });
-      return;
-    }
-    smoothScrollToElement(shopListStartRef.current, { offsetTop: 10 });
+  const scrollToShopList = (_keepCategoriesVisible = false) => {
+    smoothScrollToElement(shopListStartRef.current, { offsetTop: 8 });
   };
 
   const handleExecuteShopSearch = () => {
@@ -735,6 +731,8 @@ export const RestaurantView: React.FC = () => {
                     setSortMode('popular');
                     setShopSearchQuery('');
                     setDebouncedShopSearchQuery('');
+                    setShowFilterDrawer(false);
+                    scrollToShopList();
                   }}
                   className="kft-btn-reset"
                 >
@@ -753,6 +751,7 @@ export const RestaurantView: React.FC = () => {
                 value={cleanSelectedProvince}
                 onChange={(e) => {
                   setSelectedProvince(e.target.value || 'ទាំងអស់');
+                  setShowFilterDrawer(false);
                   scrollToShopList();
                 }}
                 className="w-full h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600"
@@ -789,6 +788,7 @@ export const RestaurantView: React.FC = () => {
                   type="button"
                   id={`kft-shop-cat-${cat.id}-btn`}
                   onClick={() => {
+                    setShowFilterDrawer(false);
                     if (cat.id === 'near_me_toggle') {
                       handleToggleNearMe();
                     } else if (cat.id === 'all') {
@@ -798,7 +798,7 @@ export const RestaurantView: React.FC = () => {
                     } else {
                       setCategoryFilter(cat.id);
                     }
-                    scrollToShopList(true);
+                    scrollToShopList();
                   }}
                   aria-pressed={active}
                   className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none bg-transparent border-0 select-none"
@@ -923,7 +923,7 @@ export const RestaurantView: React.FC = () => {
             3. NEARBY & POPULAR SHOPS LISTINGS
             =================================================================== */}
         {sortedRestaurants.length > 0 ? (
-          <div className="space-y-4 pt-0.5 min-h-[65vh]">
+          <div className="space-y-4 pt-0.5 min-h-[85vh]">
             {/* Section 1: ហាងពេញនិយមជិតខ្ញុំ (Popular Shops Near Me) */}
             {featuredRestaurants.length > 0 && (
               <div className="space-y-2.5">

@@ -298,12 +298,8 @@ export const HotelView: React.FC = () => {
   const hotelListStartRef = useRef<HTMLDivElement | null>(null);
   const hotelCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToHotelList = (keepCategoriesVisible = false) => {
-    if (keepCategoriesVisible && hotelCategoryCardRef.current) {
-      smoothScrollToElement(hotelCategoryCardRef.current, { offsetTop: 8, onlyIfOutOfView: true });
-      return;
-    }
-    smoothScrollToElement(hotelListStartRef.current, { offsetTop: 10 });
+  const scrollToHotelList = (_keepCategoriesVisible = false) => {
+    smoothScrollToElement(hotelListStartRef.current, { offsetTop: 8 });
   };
 
   useEffect(() => {
@@ -972,6 +968,13 @@ export const HotelView: React.FC = () => {
               size={1}
               value={hotelSearchQuery}
               onChange={(e) => setHotelSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  searchInputRef.current?.blur();
+                  scrollToHotelList();
+                }
+              }}
               placeholder={tr(
                 language,
                 'ស្វែងរកសណ្ឋាគារ, ផ្ទះសំណាក់ ឬតំបន់ជិតអ្នក...',
@@ -1187,7 +1190,7 @@ export const HotelView: React.FC = () => {
             3. HOTEL LISTINGS (Clean White Cards on Dark Slate #1E293B)
             ===================================================================== */}
         {filteredHotels.length > 0 ? (
-          <div className="space-y-4 pt-0.5 min-h-[65vh]">
+          <div className="space-y-4 pt-0.5 min-h-[85vh]">
             {/* Section 1: សណ្ឋាគារពេញនិយមជិតខ្ញុំ (Popular Hotels Near Me - Clean White Featured Cards) */}
             {featuredHotels.length > 0 && (
               <div className="space-y-2.5">

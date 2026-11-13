@@ -6,7 +6,7 @@
  *   - price / duration come from the SERVER copy of the VIP pricing, never from the client
  */
 
-export const OFFICIAL_RECIPIENT_ACCOUNTS = ['095245959', '012719946'];
+export const OFFICIAL_RECIPIENT_ACCOUNTS = ['000056833', '003787096', '095245959', '012719946'];
 export const RECEIPT_MAX_AGE_DAYS = 14;
 
 export interface ExtractedReceipt {
@@ -48,7 +48,7 @@ export function isOfficialRecipient(recipientName?: string, recipientAccount?: s
     .replace(/\s+/g, ' ')
     .trim();
   const cleanAcc = (recipientAccount || '').replace(/\D+/g, '');
-  const nameMatched = cleanName.includes('KIM SENG') || cleanName.includes('KIMSENG') || (cleanName.includes('CHEA') && cleanName.includes('SENG'));
+  const nameMatched = cleanName.includes('SAVUTH') || (cleanName.includes('CHEA') && cleanName.includes('SAVUTH')) || cleanName.includes('KIM SENG') || cleanName.includes('KIMSENG') || (cleanName.includes('CHEA') && cleanName.includes('SENG'));
   const accMatched = OFFICIAL_RECIPIENT_ACCOUNTS.some((acc) => cleanAcc.length >= 8 && cleanAcc.includes(acc));
   if (cleanName && !nameMatched) return false; // another person's name is shown
   if (cleanAcc && cleanAcc.length >= 8 && !accMatched) return false; // another person's account is shown
@@ -57,7 +57,8 @@ export function isOfficialRecipient(recipientName?: string, recipientAccount?: s
 
 export function normalizeTrxKey(v: unknown): string {
   const raw = typeof v === 'string' ? v.trim() : '';
-  if (!raw || /^ABA-KHQR-/i.test(raw) || /^ABA-\d{6}$/i.test(raw) || /^ADMIN-VIP-/i.test(raw) || /^ABA-STORE-/i.test(raw) || /^AUTO/i.test(raw)) return '';
+  const stripped = raw.replace(/^(?:Trx\.?\s*ID|Transaction\s*ID|Tx\.?\s*ID|Ref(?:erence)?\.?\s*(?:No|ID|#)?|ABA\s*Ref)\s*[:.\-#\s]*/i, '').trim();
+  if (!stripped || /^ABA-(?:KHQR|STORE|SHOP|SLOT|VIP|PAY|TXN)[-\w]*/i.test(stripped) || /^ABA-\d{4,8}$/i.test(stripped) || /^ADMIN-VIP-/i.test(stripped) || /^TXN-(?:STORE|SHOP|VIP|REST|ADM)[-\w]*/i.test(stripped) || /^AUTO/i.test(stripped) || /^SUP-/i.test(stripped)) return '';
   return raw.replace(/[^0-9A-Za-z-]/g, '').toUpperCase();
 }
 
@@ -67,9 +68,7 @@ export function isValidTrxKey(trxKey: string): boolean {
 
 /** Ignore auto-generated placeholders the app may put in the "reference" box. */
 export function cleanSubmittedTrx(v: unknown): string {
-  const raw = typeof v === 'string' ? v.trim() : '';
-  if (!raw || /^ABA-KHQR-/i.test(raw) || /^ABA-\d{6}$/i.test(raw) || /^AUTO/i.test(raw)) return '';
-  return raw;
+  return normalizeTrxKey(v);
 }
 
 export function evaluateReceipt(input: {
@@ -88,7 +87,7 @@ export function evaluateReceipt(input: {
   const recipientOk = extracted.isAbaReceipt && isOfficialRecipient(extracted.recipientName, extracted.recipientAccount);
   const recipient: CheckItem = {
     passed: recipientOk,
-    expected: 'Kim Seng / CHEA KIMSENG (095 245 959)',
+    expected: 'CHEA SAVUTH / SAVUTH CHEA (000 056 833)',
     detected: shownRecipient || '-',
     reasonKh: recipientOk ? `✅ ឈ្មោះគណនីអ្នកទទួលត្រូវគ្នា៖ ${shownRecipient}` : `❌ អ្នកទទួលលើវិក្កយបត្រ (${shownRecipient || 'មិនឃើញ'}) មិនមែនគណនីផ្លូវការ`,
     reasonEn: recipientOk ? `✅ Recipient matches: ${shownRecipient}` : `❌ Receipt recipient (${shownRecipient || 'not found'}) is not the official account`,

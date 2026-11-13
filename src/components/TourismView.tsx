@@ -67,12 +67,8 @@ export const TourismView: React.FC = () => {
   const tourismListStartRef = useRef<HTMLDivElement | null>(null);
   const tourismCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToTourismList = (keepCategoriesVisible = false) => {
-    if (keepCategoriesVisible && tourismCategoryCardRef.current) {
-      smoothScrollToElement(tourismCategoryCardRef.current, { offsetTop: 8, onlyIfOutOfView: true });
-      return;
-    }
-    smoothScrollToElement(tourismListStartRef.current, { offsetTop: 10 });
+  const scrollToTourismList = (_keepCategoriesVisible = false) => {
+    smoothScrollToElement(tourismListStartRef.current, { offsetTop: 8 });
   };
 
   useEffect(() => {
@@ -473,6 +469,13 @@ export const TourismView: React.FC = () => {
               size={1}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  (e.currentTarget as HTMLInputElement).blur();
+                  scrollToTourismList();
+                }
+              }}
               placeholder={tr(
                 language,
                 'ស្វែងរកតំបន់ទេសចរណ៍ (ខ្មែរ / EN / 中文)...',
@@ -695,7 +698,7 @@ export const TourismView: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 min-h-[65vh] content-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 min-h-[85vh] content-start">
             {displayedDestinations.map((dest) => (
               <TouristCard
                 key={dest.id}

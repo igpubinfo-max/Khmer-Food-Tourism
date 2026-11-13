@@ -112,6 +112,94 @@ export function recordVerifiedReceiptFingerprint(
 }
 
 /**
+ * Returns true if the string is an internal app-generated placeholder reference
+ * (e.g. ABA-KHQR-..., ABA-STORE-SLOT1-..., ABA-SHOP-..., ADMIN-VIP-..., TXN-..., AUTO-...)
+ * rather than a genuine bank Transaction ID entered by the user.
+ */
+export function isPlaceholderTrxRef(raw?: string | null): boolean {
+  if (!raw) return true;
+  const trimmed = String(raw)
+    .replace(/^(?:Trx\.?\s*ID|Transaction\s*ID|Tx\.?\s*ID|Ref(?:erence)?\.?\s*(?:No|ID|#)?|ABA\s*Ref)\s*[:.\-#\s]*/i, '')
+    .trim();
+  if (!trimmed) return true;
+  return (
+    /^ABA-(?:KHQR|STORE|SHOP|SLOT|VIP|PAY|TXN)[-\w]*/i.test(trimmed) ||
+    /^ABA-\d{4,8}$/i.test(trimmed) ||
+    /^ADMIN-VIP-/i.test(trimmed) ||
+    /^TXN-(?:STORE|SHOP|VIP|REST|ADM)[-\w]*/i.test(trimmed) ||
+    /^AUTO/i.test(trimmed) ||
+    /^SUP-/i.test(trimmed)
+  );
+}
+
+/**
+ * Strips any 'Trx. ID:' / 'Ref:' prefix, removes internal whitespace, and filters out
+ * system-generated placeholders and official recipient account numbers.
+ */
+export function normalizeAbaTrxId(raw?: string | null): string {
+  if (!raw) return '';
+  const stripped = String(raw)
+    .replace(/^(?:Trx\.?\s*ID|Transaction\s*ID|Tx\.?\s*ID|Ref(?:erence)?\.?\s*(?:No|ID|#)?|ABA\s*Ref)\s*[:.\-#\s]*/i, '')
+    .trim();
+  if (!stripped || isPlaceholderTrxRef(stripped)) return '';
+  const compact = stripped.replace(/\s+/g, '').replace(/[^0-9A-Za-z\-]/g, '');
+  if (!compact) return '';
+  const digitsOnly = compact.replace(/\D+/g, '');
+  if (OFFICIAL_RECIPIENT_ACCOUNTS.includes(digitsOnly)) return '';
+  return compact;
+}
+
+/**
+ * Returns YYYY-MM-DD in Cambodia Standard Time (Asia/Phnom_Penh, UTC+7)
+ */
+export function getCambodiaDateIso(date: Date = new Date()): string {
+  const cambodiaMs = date.getTime() + 7 * 60 * 60 * 1000;
+  return new Date(cambodiaMs).toISOString().split('T')[0];
+}
+
+/**
+ * Parses an ABA Mobile receipt date/time string (e.g. 'Nov 13, 2026 01:38 PM', '13 Nov 2026 13:38',
+ * '2026-11-13 06:39', '13/11/2026 13:38') in Cambodia time (UTC+7) when no explicit timezone is present.
+ */
+export function parseAbaReceiptDateMs(dateStr?: string | null): number | null {
+  if (!dateStr) return null;
+  const clean = String(dateStr)
+    .replace(/^Transaction\s*date\s*[:.\-]?\s*/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!clean) return null;
+
+  // Handle DD/MM/YYYY or DD-MM-YYYY (with optional HH:mm AM/PM)
+  const dmyMatch = clean.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?)?$/i);
+  if (dmyMatch) {
+    const day = parseInt(dmyMatch[1], 10);
+    const month = parseInt(dmyMatch[2], 10);
+    const year = parseInt(dmyMatch[3], 10);
+    let hour = dmyMatch[4] ? parseInt(dmyMatch[4], 10) : 12;
+    const minute = dmyMatch[5] ? parseInt(dmyMatch[5], 10) : 0;
+    const ampm = (dmyMatch[6] || '').toUpperCase();
+    if (ampm === 'PM' && hour < 12) hour += 12;
+    if (ampm === 'AM' && hour === 12) hour = 0;
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      const utcMs = Date.UTC(year, month - 1, day, hour, minute) - 7 * 60 * 60 * 1000;
+      return utcMs;
+    }
+  }
+
+  // If string has no timezone indicator (Z, GMT, +07, etc.), try parsing with Cambodia +07:00 first
+  const hasTz = /(?:Z|GMT|UTC|[+-]\d{2}:?\d{2})$/i.test(clean);
+  if (!hasTz) {
+    const withCambodiaTz = Date.parse(`${clean} GMT+0700`);
+    if (!Number.isNaN(withCambodiaTz)) {
+      return withCambodiaTz;
+    }
+  }
+
+  const directMs = Date.parse(clean);
+  return Number.isNaN(directMs) ? null : directMs;
+}
+
+/**
  * Parse raw OCR text extracted from an ABA Mobile payment receipt screenshot.
  */
 export function parseAbaReceiptOcrText(rawText: string): Partial<ExtractedReceiptData> {
@@ -132,19 +220,24 @@ export function parseAbaReceiptOcrText(rawText: string): Partial<ExtractedReceip
     upperFull.includes('TRANSACTION DATE') ||
     upperFull.includes('ARRIVED AT RECIPIENT');
 
-  // 1. Extract Trx. ID (e.g. "Trx. ID: 176121426630955" or "Trx ID 176121426630955" or "Ref #: ...")
+  // 1. Extract Trx. ID (e.g. "Trx. ID: 65030941734" or "Trx. ID: 176121426630955" or "Ref #: ...")
   let trxId: string | undefined;
   const trxMatch =
-    normalized.match(/(?:Trx|Tx|Trans(?:action)?)\.?\s*(?:ID|1D|lD|No|#)?\s*[:.\-\s]+([0-9A-Z]{8,22})/i) ||
-    normalized.match(/Ref(?:erence)?\.?\s*(?:No|ID|#)?\s*[:.\-\s]+([0-9A-Z]{8,22})/i);
+    normalized.match(/(?:Trx|Tx|Trans(?:action)?)\.?\s*(?:ID|1D|lD|No|#)?\s*[:.\-\s]+([0-9A-Z][0-9A-Z ]{7,24})/i) ||
+    normalized.match(/Ref(?:erence)?\.?\s*(?:No|ID|#)?\s*[:.\-\s]+([0-9A-Z][0-9A-Z ]{7,24})/i);
   if (trxMatch && trxMatch[1]) {
-    trxId = trxMatch[1].trim();
-  } else {
-    // Look for standalone 10-18 digit ABA transaction ID (excluding recipient account numbers)
-    const allDigitMatches = [...normalized.matchAll(/\b(\d{10,18})\b/g)];
+    const firstLineToken = trxMatch[1].split(/\n/)[0].trim();
+    const cleanedCandidate = normalizeAbaTrxId(firstLineToken);
+    if (cleanedCandidate.length >= 8) {
+      trxId = cleanedCandidate;
+    }
+  }
+  if (!trxId) {
+    // Look for standalone 8-20 digit ABA transaction ID (excluding recipient account numbers)
+    const allDigitMatches = [...normalized.matchAll(/\b(\d{8,20})\b/g)];
     for (const m of allDigitMatches) {
-      const candidate = m[1];
-      if (candidate !== '000056833' && candidate !== '003787096' && candidate !== '095245959' && candidate !== '012719946') {
+      const candidate = normalizeAbaTrxId(m[1]);
+      if (candidate && candidate.length >= 8) {
         trxId = candidate;
         break;
       }
@@ -436,7 +529,7 @@ async function extractReceiptViaGeminiVision(
     if (!parsed || typeof parsed !== 'object') return null;
     return {
       isAbaReceipt: Boolean(parsed.isAbaReceipt),
-      trxId: parsed.trxId ? String(parsed.trxId).trim() : undefined,
+      trxId: parsed.trxId ? (normalizeAbaTrxId(String(parsed.trxId)) || undefined) : undefined,
       amountUsd:
         typeof parsed.amountUsd === 'number'
           ? Math.abs(parsed.amountUsd)
@@ -510,6 +603,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
   submittedTrxId?: string;
   submittedDate?: string;
   userId?: string;
+  currentTransactionId?: string;
   existingTransactions?: RegistrationTransaction[];
 }): Promise<AbaReceiptVerificationReport> {
   const {
@@ -519,20 +613,15 @@ export async function verifyAbaPaymentAndReceipt(params: {
     submittedTrxId = '',
     submittedDate = '',
     userId = '',
+    currentTransactionId = '',
     existingTransactions = [],
   } = params;
 
   const now = new Date();
   const verifiedAt = now.toISOString().replace('T', ' ').slice(0, 16);
 
-  // Clean user-submitted Trx ID (ignore auto-generated placeholders like ABA-KHQR-... or ABA-123456)
-  const rawUserRef = submittedTrxId.trim();
-  const isPlaceholderRef =
-    !rawUserRef ||
-    /^ABA-KHQR-/i.test(rawUserRef) ||
-    /^ABA-\d{6}$/i.test(rawUserRef) ||
-    /^AUTO/i.test(rawUserRef);
-  const cleanUserTrxId = isPlaceholderRef ? '' : rawUserRef;
+  // Clean user-submitted Trx ID (ignore auto-generated placeholders like ABA-KHQR-..., ABA-STORE-..., ABA-SHOP-..., etc.)
+  const cleanUserTrxId = normalizeAbaTrxId(submittedTrxId);
 
   // Step 1: Extract data from receipt image via both Gemini Vision (if available) and Tesseract OCR
   let extracted: ExtractedReceiptData = {
@@ -652,32 +741,35 @@ export async function verifyAbaPaymentAndReceipt(params: {
   };
 
   // ============================================================================
-  // CHECK 4: Transaction Date (Must be recent & current year, not stale 2025 receipt)
+  // CHECK 4: Transaction Date (Evaluated in Cambodia Time UTC+7, within 14 days)
   // ============================================================================
   let datePassed = false;
   let dateReasonKh = '⏳ រង់ចាំរដ្ឋបាលពិនិត្យកាលបរិច្ឆេទលើវិក្កយបត្រ';
   let dateReasonEn = '⏳ Awaiting administrator verification of transaction date';
 
   if (extracted.transactionDate) {
-    const parsedReceiptMs = Date.parse(extracted.transactionDate);
-    if (!Number.isNaN(parsedReceiptMs)) {
-      const receiptDateObj = new Date(parsedReceiptMs);
-      const receiptYear = receiptDateObj.getFullYear();
-      const currentYear = now.getFullYear();
-      const diffDays = Math.abs(now.getTime() - parsedReceiptMs) / (1000 * 60 * 60 * 24);
+    const parsedReceiptMs = parseAbaReceiptDateMs(extracted.transactionDate);
+    if (parsedReceiptMs !== null && !Number.isNaN(parsedReceiptMs)) {
+      const ageDays = (now.getTime() - parsedReceiptMs) / (1000 * 60 * 60 * 24);
+      const receiptDateObj = new Date(parsedReceiptMs + 7 * 60 * 60 * 1000);
+      const receiptYear = receiptDateObj.getUTCFullYear();
 
-      if (receiptYear < currentYear) {
+      if (ageDays > 30 && receiptYear < new Date(now.getTime() + 7 * 60 * 60 * 1000).getUTCFullYear()) {
         datePassed = false;
         dateReasonKh = `❌ វិក្កយបត្រនេះជាវិក្កយបត្រចាស់ពីឆ្នាំ ${receiptYear} (${extracted.transactionDate}) មិនមែនការបង់ប្រាក់ថ្មីទេ!`;
         dateReasonEn = `❌ Stale receipt from year ${receiptYear} (${extracted.transactionDate}) — not a current payment!`;
-      } else if (diffDays > 14) {
+      } else if (ageDays > 14) {
         datePassed = false;
         dateReasonKh = `❌ កាលបរិច្ឆេទលើវិក្កយបត្រ (${extracted.transactionDate}) ហួសរយៈពេលកំណត់ (${Math.round(
-          diffDays
+          ageDays
         )} ថ្ងៃមុន)!`;
         dateReasonEn = `❌ Receipt date (${extracted.transactionDate}) is too old (${Math.round(
-          diffDays
+          ageDays
         )} days ago)!`;
+      } else if (ageDays < -2) {
+        datePassed = false;
+        dateReasonKh = `❌ កាលបរិច្ឆេទលើវិក្កយបត្រ (${extracted.transactionDate}) ខុសប្រក្រតី (កាលបរិច្ឆេទអនាគត)!`;
+        dateReasonEn = `❌ Receipt date (${extracted.transactionDate}) is in the future!`;
       } else {
         datePassed = true;
         dateReasonKh = `✅ កាលបរិច្ឆេទប្រតិបត្តិការត្រឹមត្រូវ៖ ${extracted.transactionDate}`;
@@ -688,7 +780,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
 
   const dateCheck: AbaVerificationCheckItem = {
     passed: datePassed,
-    expected: submittedDate || now.toISOString().split('T')[0],
+    expected: submittedDate || getCambodiaDateIso(now),
     detected: extracted.transactionDate || 'រង់ចាំការពិនិត្យពីរដ្ឋបាល',
     reasonKh: dateReasonKh,
     reasonEn: dateReasonEn,
@@ -696,24 +788,30 @@ export async function verifyAbaPaymentAndReceipt(params: {
 
   // ============================================================================
   // CHECK 3: ABA Transaction ID (Trx. ID)
-  // If OCR missed the tiny footer Trx. ID on an otherwise 100% verified ABA transfer
-  // receipt to CHEA KIMSENG (095 245 959) with matching amount and current date,
-  // fall back to a deterministic receipt reference from the image fingerprint + timestamp.
   // ============================================================================
   const imgFingerprint = receiptDataUrl ? computeReceiptImageFingerprint(receiptDataUrl) : '';
-  // Strict Rule: Never invent a synthetic Trx ID from image fingerprint; require a real ABA Trx ID.
 
-  const resolvedTrxId = (extracted.trxId || cleanUserTrxId || '').trim();
+  const cleanExtractedTrxId = normalizeAbaTrxId(extracted.trxId);
+  if (cleanExtractedTrxId) {
+    extracted.trxId = cleanExtractedTrxId;
+  }
+  const resolvedTrxId = (cleanExtractedTrxId || cleanUserTrxId || '').trim();
   const isValidAbaTrxFormat =
-    (/^[0-9A-Z\-]{8,28}$/i.test(resolvedTrxId) && /\d{2,}/.test(resolvedTrxId));
+    /^[0-9A-Z\-]{8,28}$/i.test(resolvedTrxId) && /\d{4,}/.test(resolvedTrxId);
+
   const userAndReceiptTrxMatch =
     !cleanUserTrxId ||
-    !extracted.trxId ||
-    cleanUserTrxId.replace(/\s+/g, '').toUpperCase() ===
-      extracted.trxId.replace(/\s+/g, '').toUpperCase();
+    !cleanExtractedTrxId ||
+    cleanUserTrxId.replace(/[^0-9A-Z]/gi, '').toUpperCase() ===
+      cleanExtractedTrxId.replace(/[^0-9A-Z]/gi, '').toUpperCase();
 
+  // Pass when receipt has a valid ABA Trx ID (or user supplied a valid ABA Trx ID on an otherwise valid ABA receipt)
+  const hasVerifiedTrxSource = Boolean(
+    cleanExtractedTrxId ||
+      (cleanUserTrxId && recipientMatched && amountMatched && datePassed)
+  );
   const trxIdPassed = Boolean(
-    extracted.trxId && isValidAbaTrxFormat && userAndReceiptTrxMatch
+    hasVerifiedTrxSource && isValidAbaTrxFormat && userAndReceiptTrxMatch
   );
 
   const trxIdCheck: AbaVerificationCheckItem = {
@@ -721,20 +819,18 @@ export async function verifyAbaPaymentAndReceipt(params: {
     expected: cleanUserTrxId
       ? `Trx. ID: ${cleanUserTrxId}`
       : 'Valid ABA Trx. ID / Ref on Receipt',
-    detected: extracted.trxId
-      ? `Trx. ID: ${extracted.trxId}`
-      : cleanUserTrxId
-      ? cleanUserTrxId
+    detected: resolvedTrxId
+      ? `Trx. ID: ${resolvedTrxId}`
       : 'រង់ចាំការពិនិត្យពីរដ្ឋបាល',
     reasonKh: trxIdPassed
-      ? `✅ លេខប្រតិបត្តិការ ABA ត្រឹមត្រូវ៖ ${extracted.trxId}`
+      ? `✅ លេខប្រតិបត្តិការ ABA ត្រឹមត្រូវ៖ ${resolvedTrxId}`
       : !userAndReceiptTrxMatch
-      ? `❌ លេខប្រតិបត្តិការដែលបានបញ្ចូល (${cleanUserTrxId}) មិនត្រូវគ្នាជាមួយវិក្កយបត្រ (${extracted.trxId}) ទេ!`
+      ? `❌ លេខប្រតិបត្តិការដែលបានបញ្ចូល (${cleanUserTrxId}) មិនត្រូវគ្នាជាមួយវិក្កយបត្រ (${cleanExtractedTrxId}) ទេ!`
       : '⏳ រង់ចាំរដ្ឋបាលពិនិត្យលេខប្រតិបត្តិការលើវិក្កយបត្រ',
     reasonEn: trxIdPassed
-      ? `✅ Valid ABA Trx. ID verified: ${extracted.trxId}`
+      ? `✅ Valid ABA Trx. ID verified: ${resolvedTrxId}`
       : !userAndReceiptTrxMatch
-      ? `❌ Submitted Trx. ID (${cleanUserTrxId}) does NOT match receipt Trx. ID (${extracted.trxId})!`
+      ? `❌ Submitted Trx. ID (${cleanUserTrxId}) does NOT match receipt Trx. ID (${cleanExtractedTrxId})!`
       : '⏳ Awaiting administrator verification of transaction ID on receipt',
   };
 
@@ -750,9 +846,9 @@ export async function verifyAbaPaymentAndReceipt(params: {
   const normResolved = resolvedTrxId.replace(/[^0-9A-Za-z]/g, '').toUpperCase();
   const dupInTxns = normResolved.length >= 6
     ? existingTransactions.some(t => {
-        if (!t) return false;
-        const tRef = (t.transactionRef || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
-        const tAiRef = (t.aiVerificationReport?.extractedReceipt?.trxId || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+        if (!t || (currentTransactionId && t.id === currentTransactionId)) return false;
+        const tRef = normalizeAbaTrxId(t.transactionRef).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+        const tAiRef = normalizeAbaTrxId(t.aiVerificationReport?.extractedReceipt?.trxId).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
         const matchesTrx = (tRef && tRef === normResolved) || (tAiRef && tAiRef === normResolved);
         if (!matchesTrx) return false;
         return t.status === 'verified' || (t.status === 'pending_verification' && t.userId && userId && t.userId !== userId);
