@@ -4,7 +4,7 @@ import {
   AbaVerificationCheckItem,
   RegistrationTransaction,
 } from '../types';
-import { getCloudApiConfig } from './supabaseService';
+import { getCloudApiConfig, isSupabaseConfigured, pullCloudDocument } from './supabaseService';
 import { checkDuplicateTransaction } from './paymentService';
 
 const USED_RECEIPT_HASHES_KEY = 'kft_used_receipt_hashes_v1';
@@ -31,6 +31,7 @@ export const OFFICIAL_RECIPIENT_ACCOUNTS = [
 interface ExtractedReceiptData {
   isAbaReceipt: boolean;
   trxId?: string;
+  referenceId?: string;
   amountUsd?: number;
   currency?: string;
   recipientName?: string;
@@ -362,9 +363,22 @@ export function parseAbaReceiptOcrText(rawText: string): Partial<ExtractedReceip
     }
   }
 
+  let referenceId: string | undefined;
+  const refCodeMatch =
+    normalized.match(/Ref(?:erence)?\.?\s*(?:No|ID|#)?\s*[:.\-\s]+([0-9A-Z][0-9A-Z ]{7,24})/i) ||
+    normalized.match(/\b(100FT[0-9A-Z]{6,18})\b/i);
+  if (refCodeMatch && refCodeMatch[1]) {
+    const firstToken = refCodeMatch[1].split(/\n/)[0].trim();
+    const cleanedRef = normalizeAbaTrxId(firstToken);
+    if (cleanedRef.length >= 8) {
+      referenceId = cleanedRef;
+    }
+  }
+
   return {
     isAbaReceipt,
     trxId,
+    referenceId,
     amountUsd,
     currency,
     recipientName,
@@ -426,7 +440,8 @@ async function extractReceiptViaGeminiVision(
     const prompt = `Analyze this Cambodian ABA Bank / KHQR payment receipt image and return ONLY a JSON object with these exact keys:
 {
   "isAbaReceipt": boolean,
-  "trxId": string or null (the Trx. ID / Reference number on the receipt),
+  "trxId": string or null (the numeric Trx. ID printed on the receipt, e.g. "65057056625"),
+  "referenceId": string or null (the Reference # printed on the receipt, e.g. "100FT40376844728"),
   "amountUsd": number or null (the numeric payment amount printed on the receipt as a positive number, e.g. 2.99 for USD or 12000 for KHR),
   "currency": "USD" or "KHR",
   "recipientName": string or null (the recipient account name at the top of the ABA receipt, e.g. "CHEA SAVUTH" or "SAVUTH CHEA"),
@@ -530,6 +545,7 @@ async function extractReceiptViaGeminiVision(
     return {
       isAbaReceipt: Boolean(parsed.isAbaReceipt),
       trxId: parsed.trxId ? (normalizeAbaTrxId(String(parsed.trxId)) || undefined) : undefined,
+      referenceId: parsed.referenceId ? (normalizeAbaTrxId(String(parsed.referenceId)) || undefined) : undefined,
       amountUsd:
         typeof parsed.amountUsd === 'number'
           ? Math.abs(parsed.amountUsd)
@@ -607,6 +623,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
   userId?: string;
   currentTransactionId?: string;
   existingTransactions?: RegistrationTransaction[];
+  usedTrxKeys?: string[];
 }): Promise<AbaReceiptVerificationReport> {
   const {
     receiptDataUrl,
@@ -617,7 +634,46 @@ export async function verifyAbaPaymentAndReceipt(params: {
     userId = '',
     currentTransactionId = '',
     existingTransactions = [],
+    usedTrxKeys = [],
   } = params;
+
+  // Merge local + live cloud transactions so recently verified receipts across any account/device are always checked
+  const allKnownTxnsMap = new Map<string, RegistrationTransaction>();
+  const mergeCandidateTxn = (t?: RegistrationTransaction | null) => {
+    if (!t || !t.id) return;
+    const prev = allKnownTxnsMap.get(t.id);
+    if (!prev) {
+      allKnownTxnsMap.set(t.id, t);
+      return;
+    }
+    if (prev.status === 'verified' || t.status === 'verified') {
+      const ver = prev.status === 'verified' ? prev : t;
+      allKnownTxnsMap.set(t.id, { ...prev, ...t, status: 'verified', verifiedAt: ver.verifiedAt || t.verifiedAt });
+    } else if (prev.status === 'rejected' || t.status === 'rejected') {
+      allKnownTxnsMap.set(t.id, { ...prev, ...t, status: 'rejected' });
+    } else {
+      allKnownTxnsMap.set(t.id, { ...prev, ...t });
+    }
+  };
+  for (const t of existingTransactions) mergeCandidateTxn(t);
+  try {
+    const rawLocalTxns = localStorage.getItem('kft_transactions_v4');
+    if (rawLocalTxns) {
+      const parsedLocal = JSON.parse(rawLocalTxns);
+      if (Array.isArray(parsedLocal)) {
+        for (const t of parsedLocal) mergeCandidateTxn(t);
+      }
+    }
+  } catch {}
+  try {
+    if (isSupabaseConfigured()) {
+      const cloudTxns = await pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1', 4000).catch(() => null);
+      if (Array.isArray(cloudTxns)) {
+        for (const t of cloudTxns) mergeCandidateTxn(t);
+      }
+    }
+  } catch {}
+  const allKnownTransactions = Array.from(allKnownTxnsMap.values());
 
   const now = new Date();
   const verifiedAt = now.toISOString().replace('T', ' ').slice(0, 16);
@@ -645,6 +701,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
     extracted = {
       isAbaReceipt: Boolean(geminiRes?.isAbaReceipt || ocrRes?.isAbaReceipt),
       trxId: geminiRes?.trxId || ocrRes?.trxId,
+      referenceId: geminiRes?.referenceId || ocrRes?.referenceId,
       amountUsd:
         geminiRes?.amountUsd !== undefined ? geminiRes.amountUsd : ocrRes?.amountUsd,
       currency: geminiRes?.currency || ocrRes?.currency || 'USD',
@@ -837,44 +894,126 @@ export async function verifyAbaPaymentAndReceipt(params: {
   };
 
   // ============================================================================
-  // CHECK 5: Deterministic Anti-Replay & Duplicate Transaction Check
+  // CHECK 5: Deterministic Anti-Replay, Duplicate Trx/Ref & Old Statement Check
   // ============================================================================
-  const isDupInLedger = resolvedTrxId
-    ? (() => {
-        const res = checkDuplicateTransaction(resolvedTrxId) as boolean | { isDuplicate?: boolean };
-        return typeof res === 'boolean' ? res : Boolean(res?.isDuplicate);
-      })()
-    : false;
   const normResolved = resolvedTrxId.replace(/[^0-9A-Za-z]/g, '').toUpperCase();
-  const dupInTxns = normResolved.length >= 6
-    ? existingTransactions.some(t => {
-        if (!t || (currentTransactionId && t.id === currentTransactionId)) return false;
-        const tRef = normalizeAbaTrxId(t.transactionRef).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
-        const tAiRef = normalizeAbaTrxId(t.aiVerificationReport?.extractedReceipt?.trxId).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
-        const matchesTrx = (tRef && tRef === normResolved) || (tAiRef && tAiRef === normResolved);
-        if (!matchesTrx) return false;
-        return t.status === 'verified' || (t.status === 'pending_verification' && t.userId && userId && t.userId !== userId);
-      })
-    : false;
+  const normRefId = normalizeAbaTrxId(extracted.referenceId).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+  const usedTrxKeySet = new Set<string>(
+    (usedTrxKeys || []).map(k => String(k || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase()).filter(k => k.length >= 6)
+  );
+  const isDupInLedger =
+    (resolvedTrxId
+      ? (() => {
+          const res = checkDuplicateTransaction(resolvedTrxId) as boolean | { isDuplicate?: boolean };
+          return typeof res === 'boolean' ? res : Boolean(res?.isDuplicate);
+        })()
+      : false) ||
+    (normResolved.length >= 6 && usedTrxKeySet.has(normResolved)) ||
+    (normRefId.length >= 8 && usedTrxKeySet.has(normRefId));
 
+  let matchedDuplicateTxn: RegistrationTransaction | undefined;
+  let matchedOldStatementTxn: RegistrationTransaction | undefined;
+  const parsedCurrentReceiptMs = extracted.transactionDate ? parseAbaReceiptDateMs(extracted.transactionDate) : null;
+  const normCurrentSender = (extracted.senderName || '').replace(/[^A-Z]/gi, '').toUpperCase();
+
+  for (const t of allKnownTransactions) {
+    if (!t || (currentTransactionId && t.id === currentTransactionId)) continue;
+    const isActiveOrVerifiedTxn =
+      t.status === 'verified' || t.status === 'pending_verification' || t.status === 'needs_more_info';
+    if (!isActiveOrVerifiedTxn) continue;
+
+    const tRef = normalizeAbaTrxId(t.transactionRef).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+    const tAiRef = normalizeAbaTrxId(t.aiVerificationReport?.extractedReceipt?.trxId)
+      .replace(/[^0-9A-Za-z]/g, '')
+      .toUpperCase();
+    const tAiRefCode = normalizeAbaTrxId(t.aiVerificationReport?.extractedReceipt?.referenceId)
+      .replace(/[^0-9A-Za-z]/g, '')
+      .toUpperCase();
+    const tRawOcr = (t.aiVerificationReport?.extractedReceipt?.rawOcrText || '')
+      .replace(/\s+/g, '')
+      .toUpperCase();
+
+    const matchesTrx =
+      normResolved.length >= 6 &&
+      (tRef === normResolved || tAiRef === normResolved || tAiRefCode === normResolved);
+    const matchesRefCode =
+      normRefId.length >= 8 &&
+      (tRef === normRefId || tAiRef === normRefId || tAiRefCode === normRefId || tRawOcr.includes(normRefId));
+    const matchesProofFingerprint =
+      Boolean(imgFingerprint) &&
+      Boolean(t.paymentProofUrl && t.paymentProofUrl.startsWith('data:image/')) &&
+      computeReceiptImageFingerprint(t.paymentProofUrl!) === imgFingerprint;
+
+    if (matchesTrx || matchesRefCode || matchesProofFingerprint) {
+      matchedDuplicateTxn = t;
+      break;
+    }
+
+    // Check if the uploaded statement timestamp is identical to or older than an already-used statement
+    if (parsedCurrentReceiptMs !== null && !Number.isNaN(parsedCurrentReceiptMs)) {
+      const tReceiptDateStr = t.aiVerificationReport?.extractedReceipt?.transactionDate;
+      const tReceiptMs = parseAbaReceiptDateMs(tReceiptDateStr);
+      const normTSender = (t.aiVerificationReport?.extractedReceipt?.senderName || '')
+        .replace(/[^A-Z]/gi, '')
+        .toUpperCase();
+      const isSameUserOrSender = Boolean(
+        (userId && (t.userId === userId || t.ownerId === userId)) ||
+          (normCurrentSender.length >= 5 &&
+            normTSender.length >= 5 &&
+            (normCurrentSender.includes(normTSender) || normTSender.includes(normCurrentSender)))
+      );
+
+      if (tReceiptMs !== null && !Number.isNaN(tReceiptMs)) {
+        const sameMinuteAndAmount =
+          tReceiptMs === parsedCurrentReceiptMs &&
+          (isSameUserOrSender ||
+            Math.abs((t.amountUsd || 0) - (extracted.amountUsd || expectedAmountUsd)) < 0.05);
+        const olderThanAlreadyUsedStatement =
+          parsedCurrentReceiptMs < tReceiptMs &&
+          isSameUserOrSender &&
+          tReceiptMs - parsedCurrentReceiptMs <= 14 * 24 * 60 * 60 * 1000;
+
+        if (sameMinuteAndAmount || olderThanAlreadyUsedStatement) {
+          matchedOldStatementTxn = t;
+        }
+      }
+    }
+  }
+
+  const dupInTxns = Boolean(matchedDuplicateTxn || matchedOldStatementTxn);
   const dupReceiptImg = isReceiptFingerprintUsed(imgFingerprint, userId);
   const paymentStatusOk = extracted.paymentStatus !== 'pending' && extracted.paymentStatus !== 'failed';
   const notModifiedOrFake = extracted.isModifiedOrFake !== true;
 
+  if (matchedOldStatementTxn && dateCheck.passed) {
+    const priorDateStr =
+      matchedOldStatementTxn.aiVerificationReport?.extractedReceipt?.transactionDate ||
+      matchedOldStatementTxn.createdAt;
+    dateCheck.passed = false;
+    dateCheck.reasonKh = `❌ វិក្កយបត្រនេះជាវិក្កយបត្រចាស់ (${extracted.transactionDate}) ដែលត្រូវបានប្រើប្រាស់រួចហើយ (ឬចាស់ជាងវិក្កយបត្រ ${priorDateStr})! សូមអាប់ឡូតវិក្កយបត្របង់ប្រាក់ថ្មី។`;
+    dateCheck.reasonEn = `❌ This receipt (${extracted.transactionDate}) is an old statement from on or before an already-used receipt (${priorDateStr})! Please upload your new payment receipt.`;
+  }
+
   const antiReplayPassed = !isDupInLedger && !dupInTxns && !dupReceiptImg.used && paymentStatusOk && notModifiedOrFake;
+
+  const priorUsedLabel =
+    matchedDuplicateTxn?.aiVerificationReport?.extractedReceipt?.transactionDate ||
+    matchedOldStatementTxn?.aiVerificationReport?.extractedReceipt?.transactionDate ||
+    extracted.transactionDate ||
+    '';
 
   const antiReplayCheck: AbaVerificationCheckItem = {
     passed: antiReplayPassed,
     expected: 'Unique unused ABA Transaction & Receipt',
     detected: !antiReplayPassed
-      ? `Duplicate (${effectiveTrxId || dupReceiptImg.trxId || 'Used Receipt'})`
+      ? `Duplicate / Old Statement (${effectiveTrxId || dupReceiptImg.trxId || 'Used Receipt'}${priorUsedLabel ? ` • ${priorUsedLabel}` : ''})`
       : 'មិនធ្លាប់ប្រើពីមុន',
     reasonKh: antiReplayPassed
       ? '✅ វិក្កយបត្រ និងលេខប្រតិបត្តិការមិនធ្លាប់ត្រូវបានប្រើប្រាស់ពីមុនទេ'
-      : '❌ វិក្កយបត្រ ឬលេខប្រតិបត្តិការនេះត្រូវបានប្រើប្រាស់រួចម្តងហើយ!',
+      : `❌ វិក្កយបត្រចាស់ ឬលេខប្រតិបត្តិការ ABA (${effectiveTrxId || 'នេះ'}${extracted.transactionDate ? ` • ${extracted.transactionDate}` : ''}) ត្រូវបានប្រើប្រាស់រួចម្តងហើយ! សូមអាប់ឡូតវិក្កយបត្របង់ប្រាក់ថ្មី។`,
     reasonEn: antiReplayPassed
       ? '✅ Transaction ID and receipt image have not been used before'
-      : '❌ This transaction ID or receipt screenshot has already been used!',
+      : `❌ This old receipt or ABA Transaction ID (${effectiveTrxId || 'receipt'}${extracted.transactionDate ? ` • ${extracted.transactionDate}` : ''}) has already been used! Please upload your new payment receipt.`,
   };
 
   // ============================================================================
@@ -974,6 +1113,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
     extractedReceipt: {
       isAbaReceipt: extracted.isAbaReceipt,
       trxId: extracted.trxId,
+      referenceId: extracted.referenceId,
       amountUsd: extracted.amountUsd,
       currency: extracted.currency,
       recipientName: extracted.recipientName,

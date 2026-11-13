@@ -1,4 +1,4 @@
-﻿import { verifyAppCloneIntegrity } from '../utils/appCloneIntegrityGuard';
+import { verifyAppCloneIntegrity } from '../utils/appCloneIntegrityGuard';
 import { verifyVipPurchaseOnServer, claimConsumerTrialOnServer, fetchCentralizedPaymentRegistryAndAudit, adminApproveAndLockTransactionOnServer, adminRejectTransactionOnServer, type UsedAbaTransactionRecord, type PaymentAuditLogRecord } from '../services/vipPurchaseClient';
 import { getDeviceHashForTrialOrPromoClaim, checkDeviceAccountRegistrationEligibility, recordDeviceAccountRegistration } from '../services/deviceIdentityService';
 import {
@@ -13640,19 +13640,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Case 1: Approving an Additional Store Slot ($10 per additional store)
     if (matchedTxn.type === 'additional_store_slot') {
+      recordVerifiedTransaction(normTrxKey);
       if (matchedTxn.transactionRef) {
         recordVerifiedTransaction(matchedTxn.transactionRef);
       }
+      if (matchedTxn.paymentProofUrl && matchedTxn.paymentProofUrl.startsWith('data:image/')) {
+        recordVerifiedReceiptFingerprint(
+          computeReceiptImageFingerprint(matchedTxn.paymentProofUrl),
+          targetUserId || currentUser.id,
+          normTrxKey
+        );
+      }
 
-      setTransactions(prev => prev.map(t => {
-        if (t.id !== txnId) return t;
-        return {
-          ...t,
-          status: 'verified',
-          verifiedAt: verifiedTimestamp,
-          verifiedBy: adminIdentity,
-        };
-      }));
+      setTransactions(prev => {
+        const nextTxns = prev.map(t => {
+          if (t.id !== txnId) return t;
+          return {
+            ...t,
+            transactionRef: normTrxKey || t.transactionRef,
+            status: 'verified' as const,
+            paymentStatus: 'verified' as const,
+            verifiedAt: verifiedTimestamp,
+            verifiedBy: adminIdentity,
+          };
+        });
+        skipNextTransactionsCloudPushRef.current = false;
+        latestSyncStateRef.current.transactions = nextTxns;
+        try {
+          localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+        } catch {}
+        if (isSupabaseConfigured()) {
+          mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+        }
+        return nextTxns;
+      });
 
       try {
         const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
@@ -14546,28 +14567,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       receiptDataUrl: proofDataUrl,
       expectedAmountUsd: matchedTxn.amountUsd || 6.99,
       expectedDurationDays: matchedTxn.durationDays || 30,
-      submittedTrxId: normalizeAbaTrxId(matchedTxn.transactionRef),
+      submittedTrxId: '',
       submittedDate: getCambodiaDateIso(new Date()),
       userId: matchedTxn.userId || currentUser.id,
       currentTransactionId: txnId,
-      existingTransactions: transactions,
+      existingTransactions: latestSyncStateRef.current.transactions || transactions,
+      usedTrxKeys: centralizedUsedTrxRecords.map(u => u.trx_key),
     })
       .then(aiReport => {
         if (!aiReport) return;
-        setTransactions(prev =>
-          prev.map(t => {
+        if (!aiReport.checks.antiReplay.passed) {
+          showToast(
+            tr(
+              language,
+              aiReport.checks.antiReplay.reasonKh,
+              aiReport.checks.antiReplay.reasonEn,
+              aiReport.checks.antiReplay.reasonEn
+            ),
+            'warning'
+          );
+        }
+        setTransactions(prev => {
+          const nextTxns = prev.map(t => {
             if (t.id !== txnId) return t;
-            const effRef =
-              aiReport.extractedReceipt?.trxId && !normalizeAbaTrxId(t.transactionRef)
-                ? aiReport.extractedReceipt.trxId
-                : t.transactionRef;
+            const effRef = aiReport.extractedReceipt?.trxId || t.transactionRef;
             return {
               ...t,
+              status: (!aiReport.checks.antiReplay.passed ? 'needs_more_info' : t.status) as RegistrationTransaction['status'],
               transactionRef: effRef,
               aiVerificationReport: aiReport,
             };
-          })
-        );
+          });
+          latestSyncStateRef.current.transactions = nextTxns;
+          try {
+            localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+          } catch {}
+          if (isSupabaseConfigured()) {
+            mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+          }
+          return nextTxns;
+        });
       })
       .catch(() => {});
 
@@ -15071,9 +15110,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           submittedDate: getCambodiaDateIso(now),
           userId: currentUser.id,
           currentTransactionId: txnId,
-          existingTransactions: transactions,
+          existingTransactions: latestSyncStateRef.current.transactions || transactions,
+          usedTrxKeys: centralizedUsedTrxRecords.map(u => u.trx_key),
         }).catch(() => (serverRes.kind !== 'unavailable' ? (serverRes.report as unknown as AbaReceiptVerificationReport) : undefined));
       }
+    }
+
+    if (aiReport && (!aiReport.checks.antiReplay.passed || aiReport.status === 'rejected_mismatch')) {
+      try {
+        const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+        if (rawVault) {
+          const vault = JSON.parse(rawVault);
+          delete vault[txnId];
+          localStorage.setItem('kft_secure_payment_proofs_vault_v1', JSON.stringify(vault));
+        }
+      } catch {}
+      const rejectKh = !aiReport.checks.antiReplay.passed
+        ? aiReport.checks.antiReplay.reasonKh
+        : aiReport.summaryKh;
+      const rejectEn = !aiReport.checks.antiReplay.passed
+        ? aiReport.checks.antiReplay.reasonEn
+        : aiReport.summaryEn;
+      showToast(tr(language, rejectKh, rejectEn, rejectEn), 'warning');
+      return { success: false, transactionId: '', error: rejectKh };
     }
 
     const effectiveTrxRef =
@@ -15472,9 +15531,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           submittedDate: getCambodiaDateIso(now),
           userId: currentUser.id,
           currentTransactionId: txnId,
-          existingTransactions: transactions,
+          existingTransactions: latestSyncStateRef.current.transactions || transactions,
+          usedTrxKeys: centralizedUsedTrxRecords.map(u => u.trx_key),
         }).catch(() => (serverRes.kind !== 'unavailable' ? (serverRes.report as unknown as AbaReceiptVerificationReport) : undefined));
       }
+    }
+
+    if (aiReport && !aiReport.checks.antiReplay.passed) {
+      try {
+        const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+        if (rawVault) {
+          const vault = JSON.parse(rawVault);
+          delete vault[txnId];
+          localStorage.setItem('kft_secure_payment_proofs_vault_v1', JSON.stringify(vault));
+        }
+      } catch {}
+      showToast(
+        tr(
+          language,
+          aiReport.checks.antiReplay.reasonKh,
+          aiReport.checks.antiReplay.reasonEn,
+          aiReport.checks.antiReplay.reasonEn
+        ),
+        'warning'
+      );
+      return { success: false, transactionId: '', error: aiReport.checks.antiReplay.reasonKh };
     }
 
     const effectiveTrxRef =
@@ -15983,30 +16064,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       typeof submittedAmountUsd === 'number' ? submittedAmountUsd : requiredFee;
     const nextSlotNumber = Math.max(quota.totalAllowedStores + 1, quota.usedStoresCount + 1);
 
-    // Prevent duplicate pending charges for additional store slots; if proof is uploaded, verify & auto-approve immediately
+    // Prevent duplicate pending charges for additional store slots; if proof is uploaded, verify anti-replay & old-statement rules first
     if (quota.pendingAdditionalStoreTransaction) {
       const pendingTxn = quota.pendingAdditionalStoreTransaction;
       if (paymentProofData?.dataUrl) {
+        const recheckReport = await verifyAbaPaymentAndReceipt({
+          receiptDataUrl: paymentProofData.dataUrl,
+          expectedAmountUsd: pendingTxn.amountUsd || effectiveAmount,
+          expectedDurationDays: pendingTxn.durationDays || (effectiveAmount >= 40 ? 365 : 30),
+          submittedTrxId: normalizeAbaTrxId(transactionRef),
+          submittedDate: getCambodiaDateIso(new Date()),
+          userId: currentUser.id,
+          currentTransactionId: pendingTxn.id,
+          existingTransactions: latestSyncStateRef.current.transactions || transactions,
+          usedTrxKeys: centralizedUsedTrxRecords.map(u => u.trx_key),
+        }).catch(() => undefined);
+
+        if (recheckReport && (!recheckReport.checks.antiReplay.passed || recheckReport.status === 'rejected_mismatch')) {
+          const rejectKh = !recheckReport.checks.antiReplay.passed
+            ? recheckReport.checks.antiReplay.reasonKh
+            : recheckReport.summaryKh;
+          const rejectEn = !recheckReport.checks.antiReplay.passed
+            ? recheckReport.checks.antiReplay.reasonEn
+            : recheckReport.summaryEn;
+          showToast(tr(language, rejectKh, rejectEn, rejectEn), 'warning');
+          return {
+            success: false,
+            transactionId: '',
+            autoVerified: false,
+            error: rejectKh,
+          };
+        }
+
         uploadPaymentProofToTransaction(
           pendingTxn.id,
           paymentProofData.dataUrl,
           paymentProofData.fileName || 'aba_store_slot_receipt.png',
           paymentProofData.mimeType || 'image/png'
         );
-        const recheckReport = await verifyAbaPaymentAndReceipt({
-          receiptDataUrl: paymentProofData.dataUrl,
-          expectedAmountUsd: pendingTxn.amountUsd || effectiveAmount,
-          expectedDurationDays: pendingTxn.durationDays || (effectiveAmount >= 40 ? 365 : 30),
-          submittedTrxId: normalizeAbaTrxId(transactionRef || pendingTxn.transactionRef),
-          submittedDate: getCambodiaDateIso(new Date()),
-          userId: currentUser.id,
-          currentTransactionId: pendingTxn.id,
-          existingTransactions: transactions,
-        }).catch(() => undefined);
         const autoApprovedNow = false;
         if (recheckReport) {
-          setTransactions(prev =>
-            prev.map(t =>
+          setTransactions(prev => {
+            const nextTxns = prev.map(t =>
               t.id === pendingTxn.id
                 ? {
                     ...t,
@@ -16014,8 +16113,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                     aiVerificationReport: recheckReport,
                   }
                 : t
-            )
-          );
+            );
+            latestSyncStateRef.current.transactions = nextTxns;
+            try {
+              localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+            } catch {}
+            if (isSupabaseConfigured()) {
+              mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+            }
+            return nextTxns;
+          });
         }
         return {
           success: true,
@@ -16094,8 +16201,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         submittedDate: getCambodiaDateIso(now),
         userId: currentUser.id,
         currentTransactionId: txnId,
-        existingTransactions: transactions,
+        existingTransactions: latestSyncStateRef.current.transactions || transactions,
+        usedTrxKeys: centralizedUsedTrxRecords.map(u => u.trx_key),
       });
+    }
+
+    if (aiReport && (!aiReport.checks.antiReplay.passed || aiReport.status === 'rejected_mismatch')) {
+      try {
+        const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+        if (rawVault) {
+          const vault = JSON.parse(rawVault);
+          delete vault[txnId];
+          localStorage.setItem('kft_secure_payment_proofs_vault_v1', JSON.stringify(vault));
+        }
+      } catch {}
+      const rejectKh = !aiReport.checks.antiReplay.passed
+        ? aiReport.checks.antiReplay.reasonKh
+        : aiReport.summaryKh;
+      const rejectEn = !aiReport.checks.antiReplay.passed
+        ? aiReport.checks.antiReplay.reasonEn
+        : aiReport.summaryEn;
+      showToast(tr(language, rejectKh, rejectEn, rejectEn), 'warning');
+      return { success: false, transactionId: '', autoVerified: false, error: rejectKh };
     }
 
     const effectiveTrxRef =

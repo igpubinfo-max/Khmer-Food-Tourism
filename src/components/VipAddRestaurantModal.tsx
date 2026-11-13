@@ -416,6 +416,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     mimeType?: string;
   } | null>(null);
   const [isSubmittingSlotPayment, setIsSubmittingSlotPayment] = useState(false);
+  const [slotPaymentError, setSlotPaymentError] = useState<string | null>(null);
   const slotFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const targetReplacingStore = useMemo(
@@ -1414,6 +1415,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     }
 
     setIsSubmittingSlotPayment(true);
+    setSlotPaymentError(null);
     try {
       const res = await submitAdditionalStorePaymentRequest(
         slotTrxRef.trim(),
@@ -1422,10 +1424,23 @@ export const VipAddRestaurantModal: React.FC = () => {
         selectedShopPlan.priceUsd
       );
       if (res.success) {
+        setSlotPaymentError(null);
         setSlotTrxRef('');
         setSlotProofData(null);
         setReplacingStoreId(null);
         setActiveTab(res.autoVerified ? 'create_form' : 'my_stores');
+      } else {
+        setSlotProofData(null);
+        setSlotTrxRef('');
+        setSlotPaymentError(
+          res.error ||
+            tr(
+              language,
+              '❌ វិក្កយបត្រចាស់ ឬលេខប្រតិបត្តិការ ABA នេះត្រូវបានប្រើប្រាស់រួចហើយ! សូមអាប់ឡូតវិក្កយបត្របង់ប្រាក់ថ្មី។',
+              '❌ This old receipt or ABA Transaction ID has already been used! Please upload your new payment receipt.',
+              '❌ 该旧收据或 ABA 交易单号已被使用！请上传新的付款收据。'
+            )
+        );
       }
     } finally {
       setIsSubmittingSlotPayment(false);
@@ -2059,6 +2074,14 @@ export const VipAddRestaurantModal: React.FC = () => {
               </button>
             </div>
 
+            {slotPaymentError && (
+              <div
+                role="alert"
+                className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border-2 border-rose-500 text-rose-800 dark:text-rose-200 text-xs font-bold leading-relaxed"
+              >
+                {slotPaymentError}
+              </div>
+            )}
             <input
               ref={slotFileInputRef}
               type="file"
@@ -2068,7 +2091,10 @@ export const VipAddRestaurantModal: React.FC = () => {
             />
             <button
               type="button"
-              onClick={handlePickSlotReceiptFromGallery}
+              onClick={() => {
+                setSlotPaymentError(null);
+                handlePickSlotReceiptFromGallery();
+              }}
               className="w-full py-2.5 px-3 rounded-xl border-2 border-dashed border-emerald-500/60 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer"
             >
               <Upload className="w-4 h-4" />
