@@ -37,6 +37,7 @@ import {
   getShopSubscriptionCatalog,
   getOfficialAbaKhqrImageForPlan,
   getOfficialAbaKhqrDownloadFilename,
+  launchAbaMobileWithDynamicKhqr,
   isShopSubscriptionActive,
   isIosOrIpadAppStoreRuntime,
   isUserVipActive,
@@ -1380,9 +1381,9 @@ export const VipAddRestaurantModal: React.FC = () => {
     try {
       const res = await submitAdditionalStorePaymentRequest(
         slotTrxRef.trim(),
-        `Additional Store Slot #${quota.totalAllowedStores + 1} ($${selectedShopPlan.priceUsd.toFixed(2)} USD ({selectedShopPlan.durationDays} {tr(language, 'ថ្ងៃ', 'Days', '天')}))`,
+        `Additional Store Slot #${quota.totalAllowedStores + 1} (${selectedShopPlan.priceUsd.toFixed(2)} USD (${selectedShopPlan.durationDays} ${tr(language, 'ថ្ងៃ', 'Days', '天')}))`,
         slotProofData || undefined,
-        quota.additionalStoreFeeUsd
+        selectedShopPlan.priceUsd
       );
       if (res.success) {
         setSlotTrxRef('');
@@ -1896,6 +1897,30 @@ export const VipAddRestaurantModal: React.FC = () => {
                 <QrCode className="w-3.5 h-3.5" />
                 <span>ABA KHQR</span>
               </div>
+              <div className="w-full grid grid-cols-2 gap-2">
+                {shopPlanOptions.map((opt) => {
+                  const active = selectedShopPlan.planId === opt.planId;
+                  return (
+                    <button
+                      key={opt.planId}
+                      type="button"
+                      onClick={() => setSelectedShopPlanId(opt.planId as 'shop_30d' | 'shop_earlybird_365d')}
+                      className={`p-2.5 rounded-xl border-2 text-left transition cursor-pointer ${
+                        active
+                          ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40'
+                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900'
+                      }`}
+                    >
+                      <div className="font-black text-xs text-slate-900 dark:text-white">
+                        {opt.durationDays} {tr(language, 'ថ្ងៃ', 'Days', '天')}
+                      </div>
+                      <div className="font-mono font-extrabold text-sm text-emerald-700 dark:text-emerald-400">
+                        ${opt.priceUsd.toFixed(2)} USD
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
               <button
                 type="button"
                 onClick={async () => {
@@ -1914,7 +1939,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                 <img loading="lazy" decoding="async"
                   key={selectedShopQrUrl}
                   src={selectedShopQrUrl}
-                  alt="ABA KHQR — CHEA SAVUTH"
+                  alt={`ABA KHQR — ${selectedShopPlan.priceUsd.toFixed(2)} USD (${selectedShopPlan.durationDays} Days)`}
                   className="w-full h-auto object-contain block bg-white"
                 />
               </button>
@@ -1923,9 +1948,40 @@ export const VipAddRestaurantModal: React.FC = () => {
                   CHEA SAVUTH (USD: 000 056 833 • KHR: 003 787 096)
                 </div>
                 <div className="text-sm font-black text-emerald-700 dark:text-emerald-400 font-mono">
-                  ${quota.additionalStoreFeeUsd.toFixed(2)} USD
+                  ${selectedShopPlan.priceUsd.toFixed(2)} USD ({selectedShopPlan.durationDays} {tr(language, 'ថ្ងៃ', 'Days', '天')})
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await savePngDataUrlToGallery(selectedShopQrUrl, selectedShopQrFilename);
+                  } catch {}
+                  await launchAbaMobileWithDynamicKhqr(selectedShopPlan.priceUsd);
+                  showToast(
+                    tr(
+                      language,
+                      `📲 កំពុងបើក ABA Mobile ជាមួយចំនួនទឹកប្រាក់ ${selectedShopPlan.priceUsd.toFixed(2)} USD ដោយស្វ័យប្រវត្តិ...`,
+                      `📲 Opening ABA Mobile with ${selectedShopPlan.priceUsd.toFixed(2)} USD pre-filled automatically...`,
+                      `📲 正在打开 ABA Mobile，已自动填入金额 ${selectedShopPlan.priceUsd.toFixed(2)} USD...`
+                    ),
+                    'info'
+                  );
+                }}
+                style={{
+                  background: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
+                }}
+                className="w-full py-2.5 px-4 rounded-2xl text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+              >
+                <span>
+                  {tr(
+                    language,
+                    `📲 បង់ប្រាក់ ${selectedShopPlan.priceUsd.toFixed(2)} តាមកម្មវិធី ABA Mobile`,
+                    `📲 Pay ${selectedShopPlan.priceUsd.toFixed(2)} via ABA Mobile`,
+                    `📲 通过 ABA 手机银行支付 ${selectedShopPlan.priceUsd.toFixed(2)}`
+                  )}
+                </span>
+              </button>
             </div>
 
             <input

@@ -217,7 +217,7 @@ export function calculateVipDates(
   if (existingExpiry) {
     const existingTime = parseSafeDateMs(existingExpiry);
     const remainingMs = existingTime - startTime;
-    if (remainingMs > 0 && remainingMs <= 370 * 24 * 60 * 60 * 1000) {
+    if (remainingMs > 0 && remainingMs <= 1825 * 24 * 60 * 60 * 1000) {
       startTime = existingTime;
     }
   }

@@ -13144,8 +13144,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const matchedUserObj = (latestSyncStateRef.current.users || users).find(u =>
       doesUserMatchTarget(u, { id: targetUserId || undefined, email: matchedTxn.userEmail || undefined })
     );
+    const activeExistingExpiry =
+      matchedUserObj?.subscriptionExpiryDate ||
+      matchedUserObj?.vipExpiresAt ||
+      matchedUserObj?.freeTrialExpiresAt;
     const { startDate: calcStart, expiryDate: calcExpiry } = calculateVipDates(
-      matchedUserObj?.subscriptionExpiryDate,
+      activeExistingExpiry,
       durationDays,
       appSettings
     );

@@ -20,6 +20,7 @@ import {
   getShopSubscriptionCatalog,
   getOfficialAbaKhqrImageForPlan,
   getOfficialAbaKhqrDownloadFilename,
+  launchAbaMobileWithDynamicKhqr,
   isShopSubscriptionActive,
   isIosOrIpadAppStoreRuntime,
   parseSafeDateMs,
@@ -2220,14 +2221,28 @@ export const ManageMenuModal: React.FC = () => {
                           <Download className="w-3 h-3 text-emerald-600" />
                           <span>{tr(language, 'រក្សាទុក QR', 'Save QR', '保存二维码')}</span>
                         </button>
-                        <a
-                          href="https://pay.ababank.com/oRF8/tyy7642t"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="ml-1.5 px-2.5 py-1.5 rounded-xl bg-[#004B87] text-white text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer"
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await savePngDataUrlToGallery(activeShopQrUrl, activeShopQrFilename);
+                            } catch {}
+                            await launchAbaMobileWithDynamicKhqr(activeShopPlan.priceUsd);
+                            showToast(
+                              tr(
+                                language,
+                                `📲 កំពុងបើក ABA Mobile (${activeShopPlan.priceUsd.toFixed(2)} USD)...`,
+                                `📲 Opening ABA Mobile (${activeShopPlan.priceUsd.toFixed(2)} USD)...`,
+                                `📲 正在打开 ABA Mobile (${activeShopPlan.priceUsd.toFixed(2)} USD)...`
+                              ),
+                              'info'
+                            );
+                          }}
+                          className="ml-1.5 px-2.5 py-1.5 rounded-xl bg-[#004B87] hover:bg-[#003966] text-white text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer"
                         >
-                          <span>{tr(language, 'បង់តាម ABA Link', 'Pay via ABA Link', '通过 ABA 链接支付')}</span>
-                        </a>
+                          <ExternalLink className="w-3 h-3 shrink-0" />
+                          <span>{tr(language, `បង់ ${activeShopPlan.priceUsd.toFixed(2)} តាម ABA`, `Pay ${activeShopPlan.priceUsd.toFixed(2)} via ABA`, `通过 ABA 支付 ${activeShopPlan.priceUsd.toFixed(2)}`)}</span>
+                        </button>
                       </div>
                     </div>
 

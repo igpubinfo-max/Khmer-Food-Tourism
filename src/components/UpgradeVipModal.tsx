@@ -15,6 +15,8 @@ import {
   getConsumerVipPricingCatalog,
   getOfficialAbaKhqrImageForPlan,
   getOfficialAbaKhqrDownloadFilename,
+  buildAbaDynamicPaymentBundle,
+  launchAbaMobileWithDynamicKhqr,
   isConsumerTrial7dEligible,
   isConsumerPromo099Eligible,
   hasAuthenticatedEmailAccount, hasAuthenticatedPhoneAccount, isAdminAccount, isIosOrIpadAppStoreRuntime
@@ -367,6 +369,11 @@ export const UpgradeVipModal: React.FC = () => {
     setErrorMessage('');
   };
 
+  const activeAbaPaymentBundle = useMemo(
+    () => buildAbaDynamicPaymentBundle(selectedPlan?.priceUsd || 19.99),
+    [selectedPlan?.priceUsd]
+  );
+
   const handleSaveQrImage = async () => {
     try {
       const fileName = getOfficialAbaKhqrDownloadFilename({
@@ -410,56 +417,32 @@ export const UpgradeVipModal: React.FC = () => {
     );
   };
 
-  // Requirement 1: Launch ABA Mobile cleanly WITHOUT unsupported type=payway parameter (Eliminates [MAPP-PW] Invalid Qr Merchant Data)
+  // Launch ABA Mobile with dynamically generated EMVCo KHQR & pre-filled package amount ($2.99, $6.99, $19.99)
   const handleLaunchAbaApp = async () => {
-    // Auto-save clean QR image to device Photos so user can tap "Upload QR" inside ABA Mobile Scan
+    // Auto-save matching package QR image to device Photos as backup
     handleSaveQrImage();
     navigator.clipboard?.writeText('000 056 833').catch(() => {});
 
-    let launchedNatively = false;
-    try {
-      const { Capacitor, registerPlugin } = await import('@capacitor/core');
-      if (Capacitor.isNativePlatform()) {
-        const NativeAbaLauncher = registerPlugin<any>('NativeAbaLauncher');
-        if (NativeAbaLauncher && typeof NativeAbaLauncher.openAbaMobile === 'function') {
-          const res = await NativeAbaLauncher.openAbaMobile({
-            amount: selectedPlan.priceUsd.toString(),
-            paymentUrl: 'https://pay.ababank.com/oRF8/tyy7642t'
-          });
-          if (res?.success) {
-            launchedNatively = true;
-          } else if (res?.reason && res.reason.includes('market')) {
-            showToast(
-              tr(
-                language,
-                '⚠️ មិនទាន់មានកម្មវិធីធនាគារ ABA ក្នុងទូរស័ព្ទឡើយ កំពុងបើក Play Store ដើម្បីដំឡើង...',
-                '⚠️ ABA Mobile not installed, opening Google Play Store...',
-                '⚠️ 尚未安装 ABA Mobile，正在打开应用商店...'
-              ),
-              'info'
-            );
-            return;
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('Native ABA launcher error:', err);
-    }
-
-    if (!launchedNatively) {
-      try {
-        window.open('https://pay.ababank.com/oRF8/tyy7642t', '_blank', 'noopener,noreferrer');
-      } catch {
-        window.location.href = 'https://pay.ababank.com/oRF8/tyy7642t';
-      }
+    const launchRes = await launchAbaMobileWithDynamicKhqr(selectedPlan.priceUsd);
+    if (launchRes.openedMarket) {
+      showToast(
+        tr(
+          language,
+          '⚠️ មិនទាន់មានកម្មវិធីធនាគារ ABA ក្នុងទូរស័ព្ទឡើយ កំពុងបើក Play Store ដើម្បីដំឡើង...',
+          '⚠️ ABA Mobile not installed, opening Google Play Store...',
+          '⚠️ 尚未安装 ABA Mobile，正在打开应用商店...'
+        ),
+        'info'
+      );
+      return;
     }
 
     showToast(
       tr(
         language,
-        '📲 កំពុងបើក ABA Mobile...',
-        '📲 Opening ABA Mobile...',
-        '📲 正在打开 ABA Mobile...'
+        `📲 កំពុងបើក ABA Mobile ជាមួយចំនួនទឹកប្រាក់ ${selectedPlan.priceUsd.toFixed(2)} USD ដោយស្វ័យប្រវត្តិ...`,
+        `📲 Opening ABA Mobile with ${selectedPlan.priceUsd.toFixed(2)} USD pre-filled automatically...`,
+        `📲 正在打开 ABA Mobile，已自动填入金额 ${selectedPlan.priceUsd.toFixed(2)} USD...`
       ),
       'info'
     );
@@ -951,6 +934,24 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
 
               <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsVipRenewMode(true);
+                    setPaymentState('AWAITING_PAYMENT');
+                  }}
+                  className="w-full py-2.5 px-4 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-xs shadow-sm flex items-center justify-center gap-1.5 transition active:scale-98 cursor-pointer"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>
+                    {tr(
+                      language,
+                      `➕ បង់ប្រាក់បន្ថែមថ្ងៃមុនផុតកំណត់ (បូកបន្ថែមពីលើ ${remainingDays} ថ្ងៃដែលនៅសល់)`,
+                      `➕ Renew / Add Days Early (Stacks onto ${remainingDays}d left)`,
+                      `➕ 提前续费叠加天数（直接叠加在剩余 ${remainingDays} 天之上）`
+                    )}
+                  </span>
+                </button>
                 <button
                   onClick={handleClose}
                   style={{
@@ -1482,13 +1483,15 @@ export const UpgradeVipModal: React.FC = () => {
                         )}
                       </div>
                       <a
-                        href="https://pay.ababank.com/oRF8/tyy7642t"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:underline break-all"
+                        href={activeAbaPaymentBundle.paymentUrl}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleLaunchAbaApp();
+                        }}
+                        className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:underline break-all cursor-pointer"
                       >
                         <ExternalLink className="w-3 h-3 shrink-0" />
-                        <span>pay.ababank.com/oRF8/tyy7642t</span>
+                        <span>{tr(language, `បើក ABA Mobile (${selectedPlan.priceUsd.toFixed(2)} USD)`, `Open ABA Mobile (${selectedPlan.priceUsd.toFixed(2)} USD)`, `打开 ABA 支付 (${selectedPlan.priceUsd.toFixed(2)} USD)`)}</span>
                       </a>
                     </div>
                     <div className="grid grid-cols-2 gap-1.5">

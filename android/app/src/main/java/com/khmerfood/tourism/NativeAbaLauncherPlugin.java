@@ -47,9 +47,62 @@ public class NativeAbaLauncherPlugin extends Plugin {
         "com.ababank.mobile"
     };
     private static final String ABA_SCHEME_URI = "abamobilebank://";
+    private static final String ABA_OFFICIAL_P2P_ID = "D08414927BBF";
+    private static final String ABA_OFFICIAL_P2P_CODE = "260824";
+    private static final String ABA_OFFICIAL_USD_ACCOUNT = "000056833";
 
     private long lastSaveTimestampMs = 0;
     private String lastSavedFileName = "";
+
+    private static String formatEmvTlv(String tag, String value) {
+        String len = String.format(java.util.Locale.US, "%02d", value.length());
+        return tag + len + value;
+    }
+
+    private static String computeEmvCoCrc16(String input) {
+        int crc = 0xFFFF;
+        for (int i = 0; i < input.length(); i++) {
+            crc ^= (input.charAt(i) & 0xFF) << 8;
+            for (int bit = 0; bit < 8; bit++) {
+                if ((crc & 0x8000) != 0) {
+                    crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+                } else {
+                    crc = (crc << 1) & 0xFFFF;
+                }
+            }
+        }
+        return String.format(java.util.Locale.US, "%04X", crc & 0xFFFF);
+    }
+
+    private static String generateDynamicAbaKhqrPayload(String normalizedAmountUsd) {
+        long createdMs = System.currentTimeMillis();
+        long expiresMs = createdMs + 31536000000L; // +365 days
+        String createdStr = String.format(java.util.Locale.US, "%013d", createdMs);
+        String expiresStr = String.format(java.util.Locale.US, "%013d", expiresMs);
+
+        String tag29 = formatEmvTlv("00", "abaakhppxxx@abaa")
+            + formatEmvTlv("01", ABA_OFFICIAL_USD_ACCOUNT)
+            + formatEmvTlv("02", "ABA Bank");
+        String tag40 = formatEmvTlv("00", "abaP2P")
+            + formatEmvTlv("01", ABA_OFFICIAL_P2P_ID)
+            + formatEmvTlv("02", ABA_OFFICIAL_USD_ACCOUNT);
+        String tag99 = formatEmvTlv("00", createdStr)
+            + formatEmvTlv("01", expiresStr);
+
+        String payloadWithoutCrc = "000201"
+            + "010212"
+            + formatEmvTlv("29", tag29)
+            + formatEmvTlv("40", tag40)
+            + "52045999"
+            + "5303840"
+            + formatEmvTlv("54", normalizedAmountUsd)
+            + "5802KH"
+            + "5911CHEA SAVUTH"
+            + "6010Phnom Penh"
+            + formatEmvTlv("99", tag99)
+            + "6304";
+        return payloadWithoutCrc + computeEmvCoCrc16(payloadWithoutCrc);
+    }
 
     @PluginMethod
     public void openAbaMobile(PluginCall call) {
@@ -61,21 +114,138 @@ public class NativeAbaLauncherPlugin extends Plugin {
 
         PackageManager pm = context.getPackageManager();
         JSObject ret = new JSObject();
-        String paymentUrl = call.getString("paymentUrl", "https://pay.ababank.com/oRF8/tyy7642t");
+
+        String rawAmount = call.getString("amount", "");
+        String khqrString = call.getString("khqrString", "");
+        String deepLinkUri = call.getString("deepLinkUri", "");
+        String intentUri = call.getString("intentUri", "");
+        String paymentUrl = call.getString("paymentUrl", "");
+        String account = call.getString("account", ABA_OFFICIAL_USD_ACCOUNT);
+        String abaId = call.getString("abaId", ABA_OFFICIAL_P2P_ID);
+        String code = call.getString("code", ABA_OFFICIAL_P2P_CODE);
+
+        String normalizedAmount = "";
+        if (rawAmount != null && !rawAmount.trim().isEmpty()) {
+            try {
+                double parsedAmt = Double.parseDouble(rawAmount.trim());
+                if (parsedAmt > 0) {
+                    normalizedAmount = String.format(java.util.Locale.US, "%.2f", parsedAmt);
+                }
+            } catch (Exception ignored) {
+            }
+        }
 
         try {
-            if (paymentUrl != null && paymentUrl.startsWith("https://pay.ababank.com/")) {
+            // If an exact package amount is selected, generate dynamic KHQR + pre-filled ABA P2P deep link
+            if (!normalizedAmount.isEmpty()) {
+                if (khqrString == null || khqrString.trim().isEmpty()) {
+                    khqrString = generateDynamicAbaKhqrPayload(normalizedAmount);
+                }
+
+                String p2pDeepLink = (deepLinkUri != null && !deepLinkUri.trim().isEmpty())
+                    ? deepLinkUri.trim()
+                    : "abamobilebank://ababank.com?type=p2p"
+                        + "&aba-id=" + Uri.encode(abaId)
+                        + "&id=" + Uri.encode(abaId)
+                        + "&userid=" + Uri.encode(abaId)
+                        + "&code=" + Uri.encode(code)
+                        + "&amount=" + Uri.encode(normalizedAmount)
+                        + "&acc=" + Uri.encode(account)
+                        + "&usdAcc=" + Uri.encode(account)
+                        + "&ccy=USD"
+                        + "&dynamic=true"
+                        + "&link_action=abaqr"
+                        + "&qrcode=" + Uri.encode(khqrString);
+
+                // 1. Direct P2P deep-link targeted to ABA Mobile package (pre-fills exact package amount in USD)
+                for (String pkg : ABA_PACKAGES) {
+                    try {
+                        Intent p2pPkgIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(p2pDeepLink));
+                        p2pPkgIntent.setPackage(pkg);
+                        p2pPkgIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        context.startActivity(p2pPkgIntent);
+                        ret.put("success", true);
+                        ret.put("method", "aba_p2p_deeplink");
+                        ret.put("package", pkg);
+                        ret.put("amount", normalizedAmount);
+                        ret.put("khqrString", khqrString);
+                        ret.put("deepLinkUri", p2pDeepLink);
+                        call.resolve(ret);
+                        return;
+                    } catch (Exception ignored) {
+                    }
+                }
+
+                // 2. Unpackaged abamobilebank://ababank.com?type=p2p&amount=... scheme intent
                 try {
-                    Intent payLinkIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(paymentUrl));
-                    payLinkIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(payLinkIntent);
+                    Intent p2pSchemeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(p2pDeepLink));
+                    p2pSchemeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    context.startActivity(p2pSchemeIntent);
                     ret.put("success", true);
-                    ret.put("method", "aba_paylink");
+                    ret.put("method", "aba_p2p_scheme");
+                    ret.put("amount", normalizedAmount);
+                    ret.put("khqrString", khqrString);
+                    ret.put("deepLinkUri", p2pDeepLink);
+                    call.resolve(ret);
+                    return;
+                } catch (Exception ignored) {
+                }
+
+                // 3. Explicit intent://ababank.com?type=p2p&amount=...#Intent;package=com.paygo24.ibank;scheme=abamobilebank;end;
+                try {
+                    String resolvedIntentUri = (intentUri != null && !intentUri.trim().isEmpty())
+                        ? intentUri.trim()
+                        : "intent://ababank.com?type=p2p"
+                            + "&aba-id=" + Uri.encode(abaId)
+                            + "&id=" + Uri.encode(abaId)
+                            + "&userid=" + Uri.encode(abaId)
+                            + "&code=" + Uri.encode(code)
+                            + "&amount=" + Uri.encode(normalizedAmount)
+                            + "&acc=" + Uri.encode(account)
+                            + "&usdAcc=" + Uri.encode(account)
+                            + "&ccy=USD"
+                            + "&dynamic=true"
+                            + "&link_action=abaqr"
+                            + "&qrcode=" + Uri.encode(khqrString)
+                            + "#Intent;package=" + OFFICIAL_ABA_PACKAGE
+                            + ";scheme=abamobilebank;end;";
+                    Intent parsedP2pIntent = Intent.parseUri(resolvedIntentUri, Intent.URI_INTENT_SCHEME);
+                    parsedP2pIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    context.startActivity(parsedP2pIntent);
+                    ret.put("success", true);
+                    ret.put("method", "aba_p2p_intent_uri");
+                    ret.put("amount", normalizedAmount);
+                    ret.put("khqrString", khqrString);
+                    call.resolve(ret);
+                    return;
+                } catch (Exception ignored) {
+                }
+
+                // 4. Dynamic PayWay web URL with amount pre-filled (never static $0 shortlink)
+                String dynamicPaywayUrl = (paymentUrl != null && paymentUrl.contains("amount="))
+                    ? paymentUrl
+                    : "https://link.payway.com.kh/aba?id=" + Uri.encode(abaId)
+                        + "&aba-id=" + Uri.encode(abaId)
+                        + "&userid=" + Uri.encode(abaId)
+                        + "&code=" + Uri.encode(code)
+                        + "&amount=" + Uri.encode(normalizedAmount)
+                        + "&acc=" + Uri.encode(account)
+                        + "&usdAcc=" + Uri.encode(account)
+                        + "&ccy=USD&link_action=abaqr";
+                try {
+                    Intent paywayWebIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(dynamicPaywayUrl));
+                    paywayWebIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(paywayWebIntent);
+                    ret.put("success", true);
+                    ret.put("method", "aba_payway_dynamic_url");
+                    ret.put("amount", normalizedAmount);
+                    ret.put("khqrString", khqrString);
                     call.resolve(ret);
                     return;
                 } catch (Exception ignored) {
                 }
             }
+
             for (String pkg : ABA_PACKAGES) {
                 try {
                     Intent launchIntent = pm.getLaunchIntentForPackage(pkg);
