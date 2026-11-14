@@ -14,6 +14,7 @@ import {
   VIP_ROTATION_EPOCH_MS,
 } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
+import { loadSeedHotels100 } from '../data/seedHotels100';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 import {
   BedDouble,
@@ -534,9 +535,27 @@ export const HotelView: React.FC = () => {
     [vipAddedHotelDestinations, addedHotelTimestampMap]
   );
 
+  const [fallbackSeedHotels, setFallbackSeedHotels] = useState<TouristDestination[]>([]);
+  useEffect(() => {
+    const hasHotelsInContext = destinations.some((d) => Boolean(d && d.categorySlug === 'hotel'));
+    if (hasHotelsInContext || fallbackSeedHotels.length > 0) return;
+    let cancelled = false;
+    loadSeedHotels100()
+      .then((loaded) => {
+        if (!cancelled && Array.isArray(loaded) && loaded.length > 0) {
+          setFallbackSeedHotels(loaded);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [destinations, fallbackSeedHotels.length]);
+
   // Combine user/owner approved hotels (Earliest Approved First) + deduplicated seed hotels from `destinations`
   const allHotels = useMemo<TouristDestination[]>(() => {
-    const seedHotels = destinations.filter((d) => Boolean(d && d.categorySlug === 'hotel'));
+    const contextHotels = destinations.filter((d) => Boolean(d && d.categorySlug === 'hotel'));
+    const seedHotels = contextHotels.length > 0 ? contextHotels : fallbackSeedHotels;
     const seenIds = new Set(vipAddedHotelDestinations.map((d) => d.id));
     const seenNameKeys = new Set(
       vipAddedHotelDestinations
@@ -552,7 +571,7 @@ export const HotelView: React.FC = () => {
       return true;
     });
     return [...vipAddedHotelDestinations, ...dedupedSeed];
-  }, [destinations, vipAddedHotelDestinations]);
+  }, [destinations, fallbackSeedHotels, vipAddedHotelDestinations]);
 
   const classifyHotelSubCategory = (h: TouristDestination): string => {
     const text = `${h.nameKh || ''} ${h.nameEn || ''} ${h.categoryKh || ''} ${h.categoryEn || ''}`.toLowerCase();
@@ -591,7 +610,10 @@ export const HotelView: React.FC = () => {
   );
 
   const isVerifiedBigHotel = (h: TouristDestination): boolean =>
-    vipHotelIds.has(h.id) || userAddedHotelIds.has(h.id) || Boolean(h.isAdminEdited && h.isFeatured);
+    vipHotelIds.has(h.id) ||
+    userAddedHotelIds.has(h.id) ||
+    Boolean(h.isFeatured) ||
+    (Number(h.rating) || 0) >= 4.8;
 
   const hotelCategoryPills = [
     {
@@ -1672,7 +1694,7 @@ export const HotelView: React.FC = () => {
             )}
           </div>
         ) : (
-          <div ref={hotelListStartRef} id="kft-hotel-list-section" className="py-12 text-center text-slate-500 space-y-2 font-khmer bg-white rounded-2xl border border-slate-200/80 p-6 min-h-[85vh] scroll-mt-2">
+          <div ref={hotelListStartRef} id="kft-hotel-list-section" className="py-8 text-center text-slate-500 space-y-3 font-khmer bg-white rounded-2xl border border-slate-200/80 p-6 scroll-mt-2">
             <BedDouble className="w-10 h-10 mx-auto text-slate-300" strokeWidth={1.75} />
             <p className="text-xs font-bold text-slate-600">
               {debouncedSearchQuery.trim()
@@ -1689,22 +1711,33 @@ export const HotelView: React.FC = () => {
                     '未找到符合筛选条件的酒店'
                   )}
             </p>
-            {debouncedSearchQuery.trim() && (
-              <button
-                type="button"
-                onClick={() =>
-                  openExternalUrlNativeSafe(
-                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                      `${debouncedSearchQuery.trim()} Cambodia`
-                    )}`
-                  )
-                }
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0E5A35] text-white text-xs font-bold cursor-pointer"
-              >
-                <MapPin className="w-3.5 h-3.5" />
-                {tr(language, 'ស្វែងរកនៅលើ Google Maps', 'Search on Google Maps', '在 Google 地图中搜索')}
-              </button>
-            )}
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+              {hasActiveHotelFilters && (
+                <button
+                  type="button"
+                  onClick={resetAllHotelFilters}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold cursor-pointer shadow-xs transition active:scale-95"
+                >
+                  <span>↺ {tr(language, 'បង្ហាញសណ្ឋាគារទាំងអស់ឡើងវិញ', 'Show All Hotels', '显示全部酒店')}</span>
+                </button>
+              )}
+              {debouncedSearchQuery.trim() && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    openExternalUrlNativeSafe(
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        `${debouncedSearchQuery.trim()} Cambodia`
+                      )}`
+                    )
+                  }
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0E5A35] text-white text-xs font-bold cursor-pointer"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  {tr(language, 'ស្វែងរកនៅលើ Google Maps', 'Search on Google Maps', '在 Google 地图中搜索')}
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>

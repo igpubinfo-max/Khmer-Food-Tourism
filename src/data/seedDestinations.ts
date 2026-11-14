@@ -19,10 +19,12 @@ let hasAppendedExtendedToSeed = false;
  */
 export function loadExtendedDestinationsAndHotels(): Promise<TouristDestination[]> {
   if (!extendedLoadedPromise) {
-    extendedLoadedPromise = Promise.all([
+    extendedLoadedPromise = Promise.allSettled([
       loadRacCambodiaTourDestinations(),
       loadSeedHotels100(),
-    ]).then(([racList, hotelList]) => {
+    ]).then(([racRes, hotelRes]) => {
+      const racList = racRes.status === 'fulfilled' ? racRes.value : [];
+      const hotelList = hotelRes.status === 'fulfilled' ? hotelRes.value : [];
       const extended: TouristDestination[] = [
         ...(racList || []),
         ...(hotelList || []),

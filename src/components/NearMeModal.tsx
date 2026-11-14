@@ -251,16 +251,57 @@ export const NearMeModal: React.FC = () => {
     'ខេត្តត្បូងឃ្មុំ': { lat: 11.8891, lng: 105.6540 },
   };
 
+  const locationReqSeqRef = useRef<number>(0);
+
+  const detectClosestProvinceFromCoords = (coords: { lat: number; lng: number }): string => {
+    let bestProv = 'រាជធានីភ្នំពេញ';
+    let bestDist = Infinity;
+    for (const [provName, center] of Object.entries(provinceCenters)) {
+      const d = calculateDistanceMeters(coords.lat, coords.lng, center.lat, center.lng);
+      if (d < bestDist) {
+        bestDist = d;
+        bestProv = provName;
+      }
+    }
+    return bestProv;
+  };
+
   const baseCoords = useMemo(() => {
-    return userCoords || provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
-  }, [userCoords, manualProvince]);
+    return userCoords || readSavedUserGps() || provinceCenters['រាជធានីភ្នំពេញ'];
+  }, [userCoords]);
+
+  const detectedGpsProvince = useMemo(
+    () => detectClosestProvinceFromCoords(baseCoords),
+    [baseCoords]
+  );
+
+  const doesPlaceBelongToProvince = (
+    lat: number,
+    lng: number,
+    declaredProvinceKh: string | undefined,
+    targetProvinceKh: string
+  ): boolean => {
+    const cleanTarget = (targetProvinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim();
+    if (!cleanTarget) return true;
+    const cleanDeclared = (declaredProvinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim();
+    if (cleanDeclared && cleanDeclared !== cleanTarget) {
+      return false;
+    }
+    const closestProv = detectClosestProvinceFromCoords({ lat, lng })
+      .replace(/^(ខេត្ត|រាជធានី)/, '')
+      .trim();
+    if (closestProv !== cleanTarget) {
+      const targetCenter = provinceCenters[targetProvinceKh];
+      if (!targetCenter) return false;
+      const distToProvinceCenter = calculateDistanceMeters(lat, lng, targetCenter.lat, targetCenter.lng);
+      if (distToProvinceCenter > 25000) return false;
+    }
+    return true;
+  };
 
   const handleProvinceChange = (prov: string) => {
+    // Keep userCoords locked to the user's real GPS location; changing province filters results within the user's GPS radius
     setManualProvince(prov);
-    const center = provinceCenters[prov] || provinceCenters['រាជធានីភ្នំពេញ'];
-    setUserCoords(center);
-    setGeoStatus('fallback');
-    void fetchLiveNearby500m(center, false, selectedRadiusMeters);
     scrollToNearbyShopList();
   };
 
@@ -270,6 +311,7 @@ export const NearMeModal: React.FC = () => {
     radiusOverride = selectedRadiusMeters
   ) => {
     if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) return;
+    const reqSeq = locationReqSeqRef.current;
     setIsLoadingNearby(true);
     try {
       const res = await searchNearbyPlacesWithin500m(
@@ -278,37 +320,44 @@ export const NearMeModal: React.FC = () => {
         radiusOverride,
         forceRefresh
       );
+      if (reqSeq !== locationReqSeqRef.current) return;
       setLiveNearbyRestaurants(res.restaurants);
       setLiveNearbyAttractions(res.attractions);
     } catch (err) {
       console.warn('NearMe fetch warning:', err);
     } finally {
-      setIsLoadingNearby(false);
+      if (reqSeq === locationReqSeqRef.current) {
+        setIsLoadingNearby(false);
+      }
     }
   };
 
   // Request GPS without back-to-back duplicate network bursts
   const requestLocation = (forceRefresh = false) => {
+    const reqSeq = ++locationReqSeqRef.current;
     setGeoStatus('requesting');
 
-    const savedGps = userCoords || readSavedUserGps();
+    const savedGps = readSavedUserGps();
     const defaultCenter = provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
     let fetchedCoords: { lat: number; lng: number } | null = null;
 
-    if (savedGps) {
-      if (!userCoords) setUserCoords(savedGps);
+    if (savedGps && !forceRefresh) {
+      setUserCoords(savedGps);
+      setManualProvince(detectClosestProvinceFromCoords(savedGps));
       fetchedCoords = savedGps;
-      fetchLiveNearby500m(savedGps, forceRefresh, selectedRadiusMeters);
+      fetchLiveNearby500m(savedGps, false, selectedRadiusMeters);
     }
 
     if ('geolocation' in navigator) {
       const onSuccess = (position: GeolocationPosition) => {
+        if (reqSeq !== locationReqSeqRef.current) return;
         const nextCoords = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
         saveUserGps(nextCoords);
         setUserCoords(nextCoords);
+        setManualProvince(detectClosestProvinceFromCoords(nextCoords));
         setGeoStatus('granted');
         if (
           !fetchedCoords ||
@@ -321,8 +370,10 @@ export const NearMeModal: React.FC = () => {
       };
 
       const onFinalFallback = () => {
+        if (reqSeq !== locationReqSeqRef.current) return;
         const fallback = savedGps || defaultCenter;
         setUserCoords(fallback);
+        setManualProvince(detectClosestProvinceFromCoords(fallback));
         setGeoStatus('fallback');
         if (!fetchedCoords) {
           fetchedCoords = fallback;
@@ -338,6 +389,7 @@ export const NearMeModal: React.FC = () => {
     } else {
       const fallback = savedGps || defaultCenter;
       setUserCoords(fallback);
+      setManualProvince(detectClosestProvinceFromCoords(fallback));
       setGeoStatus('fallback');
       if (!fetchedCoords) {
         fetchLiveNearby500m(fallback, forceRefresh, selectedRadiusMeters);
@@ -362,17 +414,24 @@ export const NearMeModal: React.FC = () => {
     const mergedMap = new Map<string, Restaurant>();
     const maxCitySearchRadius = Math.max(selectedRadiusMeters, 20000);
 
+    // If the user's real GPS location (`baseCoords`) is outside the selected province (`manualProvince`),
+    // then 0 shops in `manualProvince` exist within the 5km/10km/20km GPS radius around the user.
+    if (!doesPlaceBelongToProvince(baseCoords.lat, baseCoords.lng, detectedGpsProvince, manualProvince)) {
+      return [];
+    }
+
     for (const r of restaurants) {
       if (!verifyShopDataForDisplay(r)) continue;
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
-      if (dist <= maxCitySearchRadius) {
-        mergedMap.set(r.id, r);
-      }
+      if (dist > maxCitySearchRadius) continue;
+      if (!doesPlaceBelongToProvince(r.latitude, r.longitude, r.provinceKh, manualProvince)) continue;
+      mergedMap.set(r.id, r);
     }
 
     for (const gp of liveNearbyRestaurants) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, gp.lat, gp.lng);
       if (dist > maxCitySearchRadius) continue;
+      if (!doesPlaceBelongToProvince(gp.lat, gp.lng, undefined, manualProvince)) continue;
 
       const existingMatch = findDuplicateRestaurantForGooglePlace(gp, Array.from(mergedMap.values()));
       if (existingMatch) {
@@ -395,7 +454,7 @@ export const NearMeModal: React.FC = () => {
       })
       .filter((r) => Number.isFinite(r.distanceMeters) && r.distanceMeters <= maxCitySearchRadius)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [restaurants, liveNearbyRestaurants, baseCoords, selectedRadiusMeters]);
+  }, [restaurants, liveNearbyRestaurants, baseCoords, selectedRadiusMeters, manualProvince, detectedGpsProvince]);
 
   const nearbyRestaurants = useMemo(() => {
     return allVerifiedCityRestaurants
@@ -409,6 +468,9 @@ export const NearMeModal: React.FC = () => {
   }, [allVerifiedCityRestaurants, selectedRadiusMeters]);
 
   const nearbyDestinations = useMemo(() => {
+    if (!doesPlaceBelongToProvince(baseCoords.lat, baseCoords.lng, detectedGpsProvince, manualProvince)) {
+      return [];
+    }
     const mergedMap = new Map<string, TouristDestination>();
 
     for (const d of destinations) {
@@ -486,7 +548,7 @@ export const NearMeModal: React.FC = () => {
       })
       .filter((d) => Number.isFinite(d.distanceMeters) && d.distanceMeters <= selectedRadiusMeters)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [destinations, restaurants, liveNearbyAttractions, baseCoords, selectedRadiusMeters]);
+  }, [destinations, restaurants, liveNearbyAttractions, baseCoords, selectedRadiusMeters, manualProvince, detectedGpsProvince]);
 
   const filteredNearbyRestaurants = useMemo(() => {
     const rawQuery = nearbyQuery.trim();
@@ -654,6 +716,7 @@ export const NearMeModal: React.FC = () => {
   // Keep mounted once visited so GPS results & scroll position persist
 
   const localizedManualProvince = translateProvince(manualProvince, language);
+  const localizedDetectedGpsProvince = translateProvince(detectedGpsProvince, language);
   const meterUnit = tr(language, 'ម៉ែត្រ', 'm', '米');
   const activeRadiusText =
     selectedRadiusMeters === 500
@@ -813,9 +876,9 @@ export const NearMeModal: React.FC = () => {
                 {geoStatus === 'granted'
                   ? tr(
                       language,
-                      `GPS ផ្ទាល់ • ${localizedManualProvince}`,
-                      `Live GPS • ${localizedManualProvince}`,
-                      `实时 GPS • ${localizedManualProvince}`
+                      `GPS ផ្ទាល់ • ${localizedDetectedGpsProvince}`,
+                      `Live GPS • ${localizedDetectedGpsProvince}`,
+                      `实时 GPS • ${localizedDetectedGpsProvince}`
                     )
                   : geoStatus === 'requesting'
                   ? tr(
@@ -824,7 +887,7 @@ export const NearMeModal: React.FC = () => {
                       'Locating GPS...',
                       '正在获取 GPS...'
                     )
-                  : `${localizedManualProvince} • ${activeRadiusText}`}
+                  : `${localizedDetectedGpsProvince} • ${activeRadiusText}`}
               </span>
             </div>
 
@@ -1069,12 +1132,19 @@ export const NearMeModal: React.FC = () => {
                   )}
                 </h4>
                 <p className="text-xs text-slate-500 max-w-xs mx-auto mb-4 leading-relaxed font-khmer">
-                  {tr(
-                    language,
-                    `មិនមានហាង ឬភោជនីយដ្ឋានក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នកឡើយ។ សូមសាកល្បងពង្រីករង្វង់ស្វែងរក ឬចាប់ទីតាំងឡើងវិញ។`,
-                    `No shops or restaurants were found within ${activeRadiusText} of your current GPS location. Try expanding the radius or refreshing your GPS.`,
-                    `您当前 GPS 位置 ${activeRadiusText} 以内暂无餐厅或商铺。请尝试扩大搜索范围或刷新定位。`
-                  )}
+                  {manualProvince !== detectedGpsProvince
+                    ? tr(
+                        language,
+                        `ទីតាំង GPS បច្ចុប្បន្នរបស់អ្នកស្ថិតនៅ «${localizedDetectedGpsProvince}» ដូច្នេះមិនមានហាងក្នុង «${localizedManualProvince}» នៅក្នុងរង្វង់ ${activeRadiusText} ពីអ្នកឡើយ។`,
+                        `Your GPS location is in ${localizedDetectedGpsProvince}, so there are no shops in ${localizedManualProvince} within ${activeRadiusText} of you.`,
+                        `您的 GPS 位于 ${localizedDetectedGpsProvince}，因此在距离您 ${activeRadiusText} 范围内没有 ${localizedManualProvince} 的商铺。`
+                      )
+                    : tr(
+                        language,
+                        `មិនមានហាង ឬភោជនីយដ្ឋានក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នកឡើយ។ សូមសាកល្បងពង្រីករង្វង់ស្វែងរក ឬចាប់ទីតាំងឡើងវិញ។`,
+                        `No shops or restaurants were found within ${activeRadiusText} of your current GPS location. Try expanding the radius or refreshing your GPS.`,
+                        `您当前 GPS 位置 ${activeRadiusText} 以内暂无餐厅或商铺。请尝试扩大搜索范围或刷新定位。`
+                      )}
                 </p>
                 <div className="flex items-center justify-center gap-2 flex-wrap">
                   {selectedRadiusMeters < 20000 && (
