@@ -477,7 +477,12 @@ export const RestaurantView: React.FC = () => {
     const analyzed = effectiveRawQuery ? analyzeSearchQuery(effectiveRawQuery) : null;
 
     const scored: { item: Restaurant; score: number }[] = [];
+    const fallbackUnfilteredScored: { item: Restaurant; score: number }[] = [];
+    const seenIds = new Set<string>();
+    const seenFallbackIds = new Set<string>();
+
     for (const r of preRotatedRestaurants) {
+      if (!r?.id) continue;
       const cleanRestProvince = (r.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim();
       const matchesProvince =
         !effectiveProvince ||
@@ -496,20 +501,27 @@ export const RestaurantView: React.FC = () => {
         const subCatKey = classifyRestaurantCategory(r);
         const extraCatLabels =
           subCatKey === 'cafe_bistro'
-            ? 'កាហ្វេ cafe coffee bistro តែគុជ ភេសជ្ជៈ drinks boba 咖啡 饮品'
+            ? 'កាហ្វេ cafe coffee bistro តែគុជ ភេសជ្ជៈ drinks boba 咖啡 饮品 咖啡馆 奶茶 甜品'
             : subCatKey === 'bbq_grill'
-              ? 'សាច់អាំង bbq grill ភោជនីយដ្ឋាន restaurant 烧烤 餐厅'
+              ? 'សាច់អាំង bbq grill ភោជនីយដ្ឋាន restaurant 烧烤 餐厅 烤肉 火锅'
               : subCatKey === 'seafood_riverside'
-                ? 'គ្រឿងសមុទ្រ seafood មាត់ទន្លេ riverside ភោជនីយដ្ឋាន restaurant 海鲜 餐厅'
-                : 'ភោជនីយដ្ឋាន អាហារដ្ឋាន ហាងអាហារ អាហាររហ័ស restaurant dining fast food 餐厅 快餐';
-        const searchFields = restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name]);
+                ? 'គ្រឿងសមុទ្រ seafood មាត់ទន្លេ riverside ភោជនីយដ្ឋាន restaurant 海鲜 餐厅 河畔 螃蟹 虾 鱼'
+                : 'ភោជនីយដ្ឋាន អាហារដ្ឋាន ហាងអាហារ អាហាររហ័ស restaurant dining fast food 餐厅 快餐 高棉菜 柬埔寨菜';
+        const zhLoc = getLocalizedRestaurant(r, 'zh');
+        const searchFields = restaurantSearchFields(r, [
+          zhLoc.name,
+          ...(zhLoc.signatureDishes || []),
+          zhLoc.province || '',
+          zhLoc.address || '',
+        ]);
         searchFields.categories = [...(searchFields.categories || []), extraCatLabels];
+        searchFields.texts = [...(searchFields.texts || []), zhLoc.description || ''].filter(Boolean);
         const nameDetail = scoreSearchRecord(analyzed, searchFields);
         const productMatch = matchShopToProductQuery(r, effectiveRawQuery);
         relevance = Math.max(nameDetail.score, productMatch.matches ? productMatch.score : 0);
         if (relevance <= 0) {
           const hay = normalizeKhmerSearchText(
-            `${r.nameKh || ''} ${r.nameEn || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.signatureDishesEn || []).join(' ')}`
+            `${r.nameKh || ''} ${r.nameEn || ''} ${zhLoc.name || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${zhLoc.province || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${zhLoc.address || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${zhLoc.description || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.signatureDishesEn || []).join(' ')} ${(zhLoc.signatureDishes || []).join(' ')}`
           );
           if (hay.includes(q)) {
             relevance = 25;
@@ -523,20 +535,31 @@ export const RestaurantView: React.FC = () => {
         }
       }
 
-      if (matchesProvince && matchesPrice && matchesCategory && matchesCuisine && matchesRating && relevance > 0) {
-        scored.push({ item: r, score: relevance });
+      if (relevance > 0) {
+        if (matchesProvince && matchesPrice && matchesCategory && matchesCuisine && matchesRating) {
+          if (!seenIds.has(r.id)) {
+            seenIds.add(r.id);
+            scored.push({ item: r, score: relevance });
+          }
+        }
+        if (q && !seenFallbackIds.has(r.id)) {
+          seenFallbackIds.add(r.id);
+          fallbackUnfilteredScored.push({ item: r, score: relevance });
+        }
       }
     }
 
+    const activeList = q && scored.length === 0 && fallbackUnfilteredScored.length > 0 ? fallbackUnfilteredScored : scored;
+
     if (q) {
-      scored.sort((a, b) => b.score - a.score);
+      activeList.sort((a, b) => b.score - a.score);
     } else if (sortMode === 'nearest') {
-      scored.sort((a, b) => (distanceMap.get(a.item.id) ?? 999) - (distanceMap.get(b.item.id) ?? 999));
+      activeList.sort((a, b) => (distanceMap.get(a.item.id) ?? 999) - (distanceMap.get(b.item.id) ?? 999));
     } else if (sortMode === 'rating') {
-      scored.sort((a, b) => Number(b.item.rating || 0) - Number(a.item.rating || 0));
+      activeList.sort((a, b) => Number(b.item.rating || 0) - Number(a.item.rating || 0));
     }
 
-    return scored.map((entry) => entry.item);
+    return activeList.map((entry) => entry.item);
   }, [
     preRotatedRestaurants,
     cleanSelectedProvince,

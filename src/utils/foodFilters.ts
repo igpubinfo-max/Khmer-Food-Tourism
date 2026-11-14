@@ -7,6 +7,7 @@ import {
   type Restaurant,
 } from '../types';
 import { includesKhmerToken, normalizeKhmerFoodText } from './khmerFoodSearch';
+import { getCulinarySynonyms } from './searchEngine';
 import { getLocalizedRestaurant } from './zhDynamicTranslator';
 import { getDishTagIds } from './dishTags';
 
@@ -1242,8 +1243,8 @@ function getPrecomputedShopProfile(r: Restaurant): PrecomputedShopProfile {
     isVerifiedForDisplay: true,
     shopKind,
     normShopName: normalizeKhmerFoodText(`${r.nameKh || ''} ${r.nameEn || ''} ${zhLoc.name || ''}`),
-    normCategory: normalizeKhmerFoodText(`${r.categoryKh || ''} ${r.categoryEn || ''} ${r.cuisineType || ''} ${r.businessCategory || ''}`),
-    normDescription: normalizeKhmerFoodText(`${r.descriptionKh || ''} ${r.descriptionEn || ''}`),
+    normCategory: normalizeKhmerFoodText(`${r.categoryKh || ''} ${r.categoryEn || ''} ${r.cuisineType || ''} ${r.businessCategory || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${zhLoc.province || ''}`),
+    normDescription: normalizeKhmerFoodText(`${r.descriptionKh || ''} ${r.descriptionEn || ''} ${zhLoc.description || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${zhLoc.address || ''}`),
     normInventoryList: inventoryItemsRaw.map((item) => ({
       raw: item,
       norm: normalizeKhmerFoodText(item),
@@ -1283,9 +1284,11 @@ export function matchShopToProductQuery(
   }
 
   const normQuery = normalizeKhmerFoodText(rawQuery);
+  const querySynonyms = normQuery ? getCulinarySynonyms(normQuery).map((s) => normalizeKhmerFoodText(s)).filter(Boolean) : [];
+  const queryVariants = Array.from(new Set([normQuery, ...querySynonyms].filter((v) => v.length >= 2)));
   const normFoodNameKh = targetFood ? normalizeKhmerFoodText(targetFood.nameKh) : '';
   const normFoodNameEn = targetFood ? normalizeKhmerFoodText(targetFood.nameEn) : '';
-  const combinedSearchText = `${normQuery} ${normFoodNameKh} ${normFoodNameEn}`.trim();
+  const combinedSearchText = [normQuery, ...querySynonyms, normFoodNameKh, normFoodNameEn].filter(Boolean).join(' ').trim();
 
   if (!combinedSearchText) {
     // When no query is typed, still exclude pure bread/cake bakeries from default nearby meal results
@@ -1346,10 +1349,13 @@ export function matchShopToProductQuery(
     }
   };
 
-  // 1. Check direct match of full query or targetFood name in Shop Inventory (`signatureDishesKh` / `menuItems`)
+  // 1. Check direct match of full query (or its trilingual culinary synonyms) or targetFood name in Shop Inventory (`signatureDishesKh` / `menuItems`)
   for (const inv of normInventoryList) {
     if (!inv.norm) continue;
-    if (normQuery.length >= 2 && (includesKhmerToken(inv.norm, normQuery) || inv.norm.includes(normQuery) || normQuery.includes(inv.norm))) {
+    const matchesVariant = queryVariants.some(
+      (qv) => includesKhmerToken(inv.norm, qv) || inv.norm.includes(qv) || (inv.norm.length >= 3 && qv.includes(inv.norm))
+    );
+    if (matchesVariant) {
       score += 160;
       isExactProductMatch = true;
       addMatchedItem(inv.raw);
@@ -1392,14 +1398,14 @@ export function matchShopToProductQuery(
     }
   }
 
-  // 3. Direct shop name or category match (when user searches by shop name or general keyword)
-  if (normQuery.length >= 2) {
-    if (includesKhmerToken(normShopName, normQuery) || normShopName.includes(normQuery)) {
+  // 3. Direct shop name or category match (when user searches by shop name or general keyword in KM/EN/ZH)
+  if (queryVariants.length > 0) {
+    if (queryVariants.some((qv) => includesKhmerToken(normShopName, qv) || normShopName.includes(qv))) {
       score += 140;
       isExactProductMatch = true;
-    } else if (includesKhmerToken(normCategory, normQuery)) {
+    } else if (queryVariants.some((qv) => includesKhmerToken(normCategory, qv) || normCategory.includes(qv))) {
       score += 70;
-    } else if (!primaryGroup && includesKhmerToken(normDescription, normQuery)) {
+    } else if (!primaryGroup && queryVariants.some((qv) => includesKhmerToken(normDescription, qv) || normDescription.includes(qv))) {
       score += 45;
     }
   }

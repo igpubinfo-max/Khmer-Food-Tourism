@@ -24,7 +24,13 @@ const KHMER_SPELLING_VARIANTS: Array<[RegExp, string]> = [
   [/\u17C1\u17B8/g, '\u17BE'],
   [/\u17C1\u17B6/g, '\u17C4'],
   [/\u17C6\u17BB/g, '\u17BB\u17C6'],
+  [/\u17B6\u17C9/g, '\u17C9\u17B6'],
+  [/\u17B6\u17CA/g, '\u17CA\u17B6'],
+  [/\u17D2\u179A\u17D2([\u1780-\u1799\u179B-\u17A2])/g, '\u17D2$1\u17D2\u179A'],
   [/សម្លរ/g, 'សម្ល'],
+  [/ស្ងោ(?!រ)/g, 'ស្ងោរ'],
+  [/ស្ងោរជ្រក(?!់)/g, 'ស្ងោរជ្រក់'],
+  [/ប្រហើ(?!រ)/g, 'ប្រហើរ'],
   [/ហិរ/g, 'ហឹរ'],
   [/ស្រដែក/g, 'សណ្តែក'],
   [/ណ្ដ/g, 'ណ្ត'],
@@ -32,14 +38,37 @@ const KHMER_SPELLING_VARIANTS: Array<[RegExp, string]> = [
   [/ផ្ដ/g, 'ផ្ត'],
   [/ស្ដ/g, 'ស្ត'],
   [/ម្ដ/g, 'ម្ត'],
+  [/ប្ដ/g, 'ប្ត'],
+  [/ឧត្ដ/g, 'ឧត្ត'],
   [/ឆ្ដ/g, 'ឆ្ត'],
   [/ទ្ដ/g, 'ទ្ត'],
+  [/ង្ដ/g, 'ង្ត'],
+  [/ន្ដ/g, 'ន្ត'],
   [/អម្ពិល/g, 'អំពិល'],
   [/ប្ញស្សី|ឬស្សី/g, 'ឫស្សី'],
+  [/ក្រូចឆ្មារ/g, 'ក្រូចឆ្មា'],
+  [/មីសួ(?!រ)/g, 'មីសួរ'],
+  [/ស្លឹកញរ/g, 'ស្លឹកញ'],
+  [/ស្លឹកតើយ/g, 'ស្លឹកតយ'],
   [/នំបុ័ង/g, 'នំប៉័ង'],
-  [/អាមុក/g, 'អាម៉ុក'],
+  [/អាមុក|ហហ្មុក/g, 'អាម៉ុក'],
   [/គុយទៀវ/g, 'គុយទាវ'],
   [/បាញ់ឆេវ/g, 'បាញ់ឆែវ'],
+  [/បាញ់ចុក|បញ្ចក់/g, 'បញ្ចុក'],
+  [/ឡុកឡាក(?!់)/g, 'ឡុកឡាក់'],
+  [/ការ៉ី/g, 'ការី'],
+  [/ម្ចូរ|ម្ជូ(?!រ)/g, 'ម្ជូរ'],
+  [/កកូ(?!រ)/g, 'កកូរ'],
+  [/ខ្ទឹះ/g, 'ខ្ទិះ'],
+  [/ត្រយ៉ូង/g, 'ត្រយូង'],
+  [/កាពិក/g, 'កាពិ'],
+  [/លៀស/g, 'លាស'],
+  [/ស្រុស/g, 'ស្រុះ'],
+  [/ឆ្អឹងជំនី(?!រ)/g, 'ឆ្អឹងជំនីរ'],
+  [/ងាំង៉ូវ/g, 'ង៉ាំង៉ូវ'],
+  [/សាឡាត់/g, 'សាឡាដ'],
+  [/ផាកឡូវ/g, 'ផាក់ឡូវ'],
+  [/មុំា|មំា/g, 'ម៉ាំ'],
 ];
 
 /** Lower-case, strip zero-width chars & Latin accents, unify Khmer spelling variants and punctuation. */
@@ -101,17 +130,97 @@ const BRAND_TRANSLITERATION_GROUPS: string[][] = [
   ['paradise', 'ភែរើដាយ', 'ប៉ារ៉ាដាយ'],
   ['rainforest', 'រេនហ្វរេស'],
   ['cinema', 'រោងកុន', 'ស៊ីនេម៉ា'],
+  // Cambodian signature dishes & culinary terms (Khmer / English / Romanized / Chinese)
+  ['amok', 'ah mok', 'homok', 'fish amok', 'អាម៉ុក', 'អាម៉ុកត្រី', '阿莫克', '阿莫克鱼', '高棉阿莫克'],
+  ['lok lak', 'loklak', 'luc lac', 'beef lok lak', 'ឡុកឡាក់', 'ឡុកឡាក់សាច់គោ', '禄叻', '禄拉克', '摇滚牛肉', '牛肉粒'],
+  ['kuy teav', 'kuyteav', 'koay teow', 'noodle soup', 'គុយទាវ', 'គុយទាវភ្នំពេញ', '粿条', '金边粿条', '河粉', '汤粉'],
+  ['num banh chok', 'nom banh chok', 'banh chok', 'khmer noodles', 'rice vermicelli', 'នំបញ្ចុក', '高棉米粉', '高棉米线', '鱼汤米线', '咖喱米线'],
+  ['samlor korko', 'somlor korko', 'korko', 'សម្លកកូរ', 'កកូរ', '百蔬浓汤', '什锦蔬菜浓汤'],
+  ['samlor machu', 'somlor machu', 'machu', 'sour soup', 'សម្លម្ជូរ', 'ម្ជូរ', 'ម្ជូរគ្រឿង', 'ម្ជូរព្រៃ', 'ស្ងោរជ្រក់', '酸汤', '高棉酸汤', '香茅酸汤'],
+  ['samlor proher', 'somlor proher', 'proher', 'praher', 'សម្លប្រហើរ', 'ប្រហើរ', '草本浓汤', '草本养生汤', '草本汤'],
+  ['samlor kari', 'somlor kari', 'khmer curry', 'curry', 'saraman', 'សម្លការី', 'ការី', 'សារ៉ាម៉ាន់', 'ណាំយ៉ា', '咖喱', '红咖喱', '高棉咖喱', '萨拉曼咖喱'],
+  ['ngam ngov', 'ngam ngouv', 'pickled lime', 'ង៉ាំង៉ូវ', 'ស្ងោរង៉ាំង៉ូវ', '咸柠檬汤', '酸柑鸡汤', '酸柑'],
+  ['prahok', 'prohok', 'prahok ktis', 'ប្រហុក', 'ប្រហុកខ្ទិះ', 'ប្រហុកអាំង', 'ប្រហុកកប់', 'ទឹកប្រហុក', '波罗福', '鱼酱', '高棉鱼酱', '发酵鱼酱', '臭鱼酱'],
+  ['teuk kroeung', 'tuk kreung', 'kroeung', 'ទឹកគ្រឿង', 'គ្រឿង', '香草鱼酱', '鱼肉蘸酱', '香茅'],
+  ['bai sach chrouk', 'bay sach chrouk', 'pork rice', 'grilled pork rice', 'បាយសាច់ជ្រូក', '猪肉饭', '烤猪肉饭', '炭烤猪肉'],
+  ['bai cha', 'bay cha', 'fried rice', 'បាយឆា', '炒饭', '高棉炒饭', '蛋炒饭'],
+  ['borbor', 'bobor', 'porridge', 'congee', 'បបរ', 'បបរគ្រឿង', 'បបរស', 'បបរត្រី', 'បបរមាន់', '粥', '米粥', '肉粥', '鱼粥', '鸡粥'],
+  ['lort cha', 'lot cha', 'pin noodles', 'លតឆា', '银针粉', '炒银针粉'],
+  ['mee cha', 'mi cha', 'fried noodles', 'មីឆា', 'គុយទាវឆា', '炒面', '炒粉', '炒粿条'],
+  ['mee kola', 'mi kola', 'មីកូឡា', '歌拉面', '歌拉米粉', '哥拉族'],
+  ['mi suor', 'mee suor', 'glass noodles', 'មីសួរ', '粉丝', '冬粉'],
+  ['banh chao', 'banh xeo', 'khmer crepe', 'បាញ់ឆែវ', '高棉煎饼', '姜黄煎饼', '脆煎饼', '煎饼'],
+  ['num krok', 'nom krok', 'coconut pancakes', 'នំគ្រក់', '椰浆小米饼', '小米饼', '小煎饼'],
+  ['kralan', 'krolan', 'bamboo sticky rice', 'ក្រឡាន', '竹筒饭', '竹筒糯米饭', '竹筒香糯米饭'],
+  ['num ansom', 'nom ansom', 'ansom', 'អន្សម', 'នំអន្សម', 'អន្សមជ្រូក', 'អន្សមចេក', '高棉粽', '肉粽', '香蕉粽', '长筒粽', '粽'],
+  ['sangkhya', 'sankhya', 'pumpkin custard', 'សង់ខ្យា', 'សង់ខ្យាល្ពៅ', '南瓜布丁', '南瓜炖蛋', '蒸布丁'],
+  ['chek ktis', 'banana coconut', 'ចេកខ្ទិះ', '椰浆西米露炖芭蕉', '椰浆炖香蕉', '椰奶香蕉'],
+  ['bok lhong', 'bok lahong', 'papaya salad', 'បុកល្ហុង', '木瓜沙拉', '青木瓜沙拉'],
+  ['pleah', 'pleah sach ko', 'beef ceviche', 'lime cured beef', 'ភ្លា', 'ភ្លាសាច់គោ', '生拌牛肉', '酸柑生拌牛肉'],
+  ['nham', 'nhoam', 'khmer salad', 'ញាំ', 'សាឡាដ', '沙拉', '凉拌'],
+  ['cha kdao', 'holy basil', 'ឆាក្តៅ', 'ឆាម្រះព្រៅ', 'ឆាគ្រឿង', '九层塔', '辣炒'],
+  ['khor', 'khor ko', 'braised pork', 'braised beef', 'ខសាច់ជ្រូក', 'ខជើងជ្រូក', 'ខគោ', 'ផាក់ឡូវ', '红烧', '红烧猪蹄', '红烧牛腩'],
+  ['pong tea kon', 'balut', 'ពងទាកូន', '毛蛋', '蒸毛蛋', '毛鸭蛋'],
+  ['num pang', 'nom pang', 'baguette', 'sandwich', 'នំប៉័ងប៉ាតេ', 'នំប៉័ង', '法棍', '三明治'],
+  ['beef', 'សាច់គោ', 'គោ', 'ងៀតគោ', 'គោងៀត', 'ពោះគោ', '牛肉', '牛腩', '牛肚', '牛肉干'],
+  ['pork', 'សាច់ជ្រូក', 'ជ្រូក', 'ឆ្អឹងជំនីរ', 'សាច់ក្រក', '猪肉', '五花肉', '排骨', '猪蹄', '香肠', '腊肠'],
+  ['chicken', 'សាច់មាន់', 'មាន់', 'មាន់ដុត', 'មាន់អាំង', '鸡肉', '土鸡', '烤鸡', '走地鸡'],
+  ['duck', 'សាច់ទា', 'ទា', 'ទាអាំង', 'ទាដុត', '鸭', '鸭肉', '烤鸭'],
+  ['fish', 'ត្រី', 'ត្រីរ៉ស់', 'ត្រីអាំង', 'ត្រីដុត', 'ត្រីបំពង', 'ត្រីងៀត', 'ត្រីឆ្អើរ', '鱼', '鲜鱼', '黑鱼', '鲶鱼', '烤鱼', '炸鱼', '鱼干', '烟熏鱼'],
+  ['crab', 'ក្តាម', 'ក្តាមសេះ', 'ក្តាមស្រែ', 'ក្តាមឆាម្រេច', '螃蟹', '蟹', '花蟹', '蓝蟹', '田蟹', '胡椒蟹'],
+  ['shrimp', 'prawn', 'prawns', 'បង្គា', 'បង្កង', 'កំពិស', '虾', '大虾', '河虾', '海虾', '大头虾', '虾米'],
+  ['squid', 'មឹក', 'មឹកអាំង', 'ឆាមឹក', '鱿鱼', '烤鱿鱼', '墨鱼'],
+  ['clam', 'cockle', 'oyster', 'snail', 'ងាវ', 'លាស', 'ខ្យង', 'គ្រំ', 'អយស្ទ័រ', '蛤蜊', '河蚬', '田螺', '生蚝'],
+  ['frog', 'កង្កែប', 'កង្កែបបោក', 'កង្កែបអាំង', '田鸡', '烤田鸡'],
+  ['eel', 'អន្ទង់', '鳝鱼', '田鳝'],
+  ['seafood', 'គ្រឿងសមុទ្រ', '海鲜', '河鲜'],
+  ['vegetarian', 'vegan', 'ម្ហូបបួស', 'បួស', 'តៅហ៊ូ', 'tofu', '素食', '豆腐', 'បន្លែ', '蔬菜'],
+  ['dessert', 'sweet', 'បង្អែម', '甜品', '甜点', '糖水', '糕点'],
+  ['drink', 'beverage', 'smoothie', 'ភេសជ្ជៈ', 'ទឹកក្រឡុក', 'ទឹកអំពៅ', 'ទឹកដូង', 'ទឹកត្នោត', '饮品', '饮料', '冰沙', '甘蔗汁', '椰子', '青椰'],
+  ['grilled', 'bbq', 'roast', 'អាំង', 'ដុត', 'សាច់អាំង', '烧烤', '炭烤', '烤肉', '烤'],
+  ['soup', 'broth', 'សម្ល', 'ស្ងោរ', 'ស៊ុប', '汤', '清汤', '浓汤'],
+  ['stirfry', 'stir fry', 'ឆា', 'លីង', '炒', '小炒', '热炒', '爆炒'],
+  ['spicy', 'chili', 'ហឹរ', 'ម្ទេស', '辣', '香辣', '酸辣'],
 ];
 
 const BRAND_TRANSLIT_MAP = new Map<string, string[]>();
 for (const group of BRAND_TRANSLITERATION_GROUPS) {
-  const normGroup = group.map((w) => normalizeSearchText(w)).filter(Boolean);
-  for (const w of normGroup) {
-    BRAND_TRANSLIT_MAP.set(
-      w,
-      normGroup.filter((other) => other !== w)
-    );
+  const normSet = new Set<string>();
+  for (const rawW of group) {
+    const nw = normalizeSearchText(rawW);
+    if (nw) {
+      normSet.add(nw);
+      if (nw.includes(' ')) {
+        normSet.add(nw.replace(/\s+/g, ''));
+      }
+    }
   }
+  const normGroup = Array.from(normSet);
+  for (const w of normGroup) {
+    const existing = BRAND_TRANSLIT_MAP.get(w) || [];
+    const merged = Array.from(new Set([...existing, ...normGroup.filter((other) => other !== w)]));
+    BRAND_TRANSLIT_MAP.set(w, merged);
+  }
+}
+
+/** Returns normalized multilingual synonyms/transliterations for a word or phrase. */
+const culinarySynonymCache = new Map<string, string[]>();
+
+export function getCulinarySynonyms(term: string): string[] {
+  if (!term) return [];
+  const cached = culinarySynonymCache.get(term);
+  if (cached) return cached;
+  const norm = normalizeSearchText(term);
+  if (!norm) {
+    culinarySynonymCache.set(term, []);
+    return [];
+  }
+  const direct = BRAND_TRANSLIT_MAP.get(norm) || [];
+  const compact = norm.includes(' ') ? BRAND_TRANSLIT_MAP.get(norm.replace(/\s+/g, '')) || [] : [];
+  const res = direct.length > 0 || compact.length > 0 ? Array.from(new Set([...direct, ...compact])) : [];
+  if (culinarySynonymCache.size > 2000) culinarySynonymCache.clear();
+  culinarySynonymCache.set(term, res);
+  return res;
 }
 
 /** Category / business-type words → soft hints (never sufficient on their own when a name is typed). */
@@ -391,9 +500,24 @@ function prepareField(text: string): PreparedField {
  */
 function matchTokenInFieldDirect(tok: string, f: PreparedField, allowFuzzy: boolean): number {
   if (!tok || !f.norm) return 0;
+  if (tok.includes(' ')) {
+    const compactTok = tok.replace(/\s+/g, '');
+    if (f.norm.includes(tok)) return 0.95;
+    if (compactTok.length >= 3 && f.compact.includes(compactTok)) return 0.9;
+    const parts = tok.split(' ').filter((p) => p.length >= 2);
+    if (parts.length > 1 && parts.every((p) => f.norm.includes(p))) return 0.86;
+    return 0;
+  }
   if (isNonLatinScript(tok)) {
     if (khmerSafeIncludes(f.compact, tok)) return f.tokens.includes(tok) ? 1 : 0.9;
-    if (allowFuzzy && KHMER_RX.test(tok) && tok.length >= 4 && f.compact.length <= 160) {
+    // CJK compound query support (e.g. "阿莫克鱼" matching "高棉阿莫克蒸鱼", "牛肉酸汤" matching "高棉香茅酸牛肉汤")
+    if (CJK_RX.test(tok) && tok.length >= 2 && tok.length <= 8) {
+      const chars = Array.from(tok).filter((ch) => CJK_RX.test(ch));
+      if (chars.length >= 2 && chars.every((ch) => f.compact.includes(ch))) {
+        return 0.85;
+      }
+    }
+    if (allowFuzzy && KHMER_RX.test(tok) && tok.length >= 4 && f.compact.length <= 48 && f.compact.includes(tok[0])) {
       const maxD = tok.length >= 8 ? 2 : 1;
       for (let w = tok.length - 1; w <= tok.length + 1; w++) {
         for (let i = 0; i + w <= f.compact.length; i++) {

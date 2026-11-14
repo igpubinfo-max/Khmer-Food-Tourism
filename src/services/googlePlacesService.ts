@@ -5586,7 +5586,13 @@ export function performUnifiedCambodiaSearch(
       })
     : foods;
 
-  const matchedFoods = searchKhmerFoods(provEligibleFoods, query);
+  const provMatchedFoods = searchKhmerFoods(provEligibleFoods, query);
+  const matchedFoods =
+    provMatchedFoods.length > 0
+      ? provMatchedFoods
+      : cleanSelProv
+        ? searchKhmerFoods(foods, smartIntent.coreQuery || query)
+        : [];
   const matchedSpicyOrFlavorDishNames = parsedFoodQuery.isFlavorOnlyQuery
     ? matchedFoods.slice(0, 20).map((f) => normalizeKhmerSearchText(f.nameKh))
     : [];
@@ -5612,7 +5618,7 @@ export function performUnifiedCambodiaSearch(
     const hay = normalizeKhmerSearchText(
       `${r.nameKh || ''} ${r.nameEn || ''} ${rZh.name || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${rZh.description || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${rZh.address || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${rZh.province || ''} ${(r.signatureDishesKh || []).join(' ')} ${(rZh.signatureDishes || []).join(' ')} ${(r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`).join(' ')}`
     );
-    const restFields = restaurantSearchFields(r, [rZh.name]);
+    const restFields = restaurantSearchFields(r, [rZh.name, ...(rZh.signatureDishes || []), rZh.province || '', rZh.address || '']);
     if (isNamedQuery) {
       const nameDetail = scoreSearchRecord(unifiedQa, restFields);
       if (nameDetail.matchedInName && nameDetail.score >= 200) return true;

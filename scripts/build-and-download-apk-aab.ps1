@@ -376,17 +376,17 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
             New-Item -ItemType Directory -Path $ArchiveDir -Force | Out-Null
         }
         if ($ApkOnly) {
-            # In APK-only mode, only keep the newest APK; move older APKs AND any AAB files to Old_Builds
+            # In APK-only mode, keep the newest APK; move only older APKs to Old_Builds (leave existing AAB intact)
             $toArchive = Get-ChildItem -LiteralPath $OutDir -File | Where-Object {
-                ($_.Extension -eq '.apk' -and $_.Name -ne $apkOutName) -or ($_.Extension -eq '.aab')
+                $_.Extension -eq '.apk' -and $_.Name -ne $apkOutName
             }
             foreach ($f in $toArchive) {
                 Move-Item -LiteralPath $f.FullName -Destination (Join-Path $ArchiveDir $f.Name) -Force
             }
         } elseif ($AabOnly) {
-            # In AAB-only mode, only keep the newest AAB; move older AABs AND any APK files to Old_Builds
+            # In AAB-only mode, keep the newest AAB; move only older AABs to Old_Builds (leave existing APK intact)
             $toArchive = Get-ChildItem -LiteralPath $OutDir -File | Where-Object {
-                ($_.Extension -eq '.aab' -and $_.Name -ne $aabOutName) -or ($_.Extension -eq '.apk')
+                $_.Extension -eq '.aab' -and $_.Name -ne $aabOutName
             }
             foreach ($f in $toArchive) {
                 Move-Item -LiteralPath $f.FullName -Destination (Join-Path $ArchiveDir $f.Name) -Force

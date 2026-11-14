@@ -41,6 +41,7 @@ import { tr } from '../utils/i18n';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 import { IconProvinceFood } from './icons/HandcraftedIcons';
 import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
+import { searchKhmerFoods, normalizeKhmerFoodText } from '../utils/khmerFoodSearch';
 import type { Restaurant } from '../types';
 
 type VipAiTasteId = 'all' | 'soup_kroeung' | 'grill_seafood' | 'street_dessert';
@@ -174,33 +175,27 @@ export const DailyDiscoveriesModal: React.FC = () => {
     return counts;
   }, [verifiedDishes]);
 
-  // Filter provinces by optional search query
+  // Pre-compute ranked trilingual search matches across verifiedDishes when query is active
+  const queryMatchedDishes = useMemo(() => {
+    const q = debouncedQuery.trim();
+    if (!q) return verifiedDishes;
+    return searchKhmerFoods(verifiedDishes, q);
+  }, [verifiedDishes, debouncedQuery]);
+
+  // Filter provinces list in horizontal bar if user searches a province name or dish keyword
   const visibleProvinces = useMemo(() => {
-    const q = debouncedQuery.trim().toLowerCase();
-    return DISH_PROVINCES.filter((p) => {
-      if (q) {
-        const matchProvinceMeta =
-          p.kh.toLowerCase().includes(q) ||
-          p.fullKh.toLowerCase().includes(q) ||
-          p.en.toLowerCase().includes(q) ||
-          p.zh.toLowerCase().includes(q) ||
-          p.culinaryTitleKh.toLowerCase().includes(q) ||
-          p.culinaryTitleEn.toLowerCase().includes(q);
-        if (matchProvinceMeta) return true;
-        const hasMatchingDish = verifiedDishes.some((f) => {
-          if (!doesDishBelongToProvince(f, p.id)) return false;
-          const loc = getLocalizedFood(f, language);
-          return (
-            f.nameKh.toLowerCase().includes(q) ||
-            f.nameEn.toLowerCase().includes(q) ||
-            loc.name.toLowerCase().includes(q)
-          );
-        });
-        return hasMatchingDish;
-      }
-      return true;
+    const q = normalizeKhmerFoodText(debouncedQuery);
+    if (!q) return DISH_PROVINCES;
+    const matchedIds = new Set(queryMatchedDishes.map((f) => f.id));
+    const filteredProvs = DISH_PROVINCES.filter((p) => {
+      const provText = normalizeKhmerFoodText(
+        `${p.kh} ${p.fullKh} ${p.en} ${p.zh} ${p.culinaryTitleKh} ${p.culinaryTitleEn} ${p.culinaryTitleZh}`
+      );
+      if (provText.includes(q)) return true;
+      return verifiedDishes.some((f) => matchedIds.has(f.id) && doesDishBelongToProvince(f, p.id));
     });
-  }, [debouncedQuery, verifiedDishes, language]);
+    return filteredProvs.length > 0 ? filteredProvs : DISH_PROVINCES;
+  }, [debouncedQuery, verifiedDishes, queryMatchedDishes]);
 
   // Currently selected province metadata (if a specific province is chosen)
   const activeProvinceMeta: ProvinceFilterOption | null = useMemo(() => {
@@ -211,16 +206,17 @@ export const DailyDiscoveriesModal: React.FC = () => {
   // Filter dishes by selected province, search query, and category button
   const filteredDishes = useMemo(() => {
     try {
-      const q = debouncedQuery.trim().toLowerCase();
+      const q = debouncedQuery.trim();
+      const basePool = q ? queryMatchedDishes : verifiedDishes;
 
-      const list = verifiedDishes.filter((food) => {
-        if (selectedProvinceId !== 'all') {
+      const matchesFilters = (food: FoodItem, enforceProvAndTaste: boolean) => {
+        if (enforceProvAndTaste && selectedProvinceId !== 'all') {
           if (!doesDishBelongToProvince(food, selectedProvinceId)) {
             return false;
           }
         }
 
-        if (vipTasteProfile !== 'all') {
+        if (enforceProvAndTaste && vipTasteProfile !== 'all') {
           const cat = food.categorySlug;
           if (vipTasteProfile === 'soup_kroeung' && cat !== 'soup' && cat !== 'salad') {
             return false;
@@ -240,35 +236,15 @@ export const DailyDiscoveriesModal: React.FC = () => {
           }
         }
 
-        if (q) {
-          const pid = selectedProvinceId !== 'all' ? selectedProvinceId : detectDishProvince(food);
-          const provMeta = getProvinceOptionById(pid);
-          const locFood = getLocalizedFood(food, language);
-          const matchName =
-            food.nameKh.toLowerCase().includes(q) ||
-            food.nameEn.toLowerCase().includes(q) ||
-            locFood.name.toLowerCase().includes(q);
-          const matchDesc =
-            (food.descriptionKh || '').toLowerCase().includes(q) ||
-            (food.descriptionEn || '').toLowerCase().includes(q) ||
-            locFood.description.toLowerCase().includes(q);
-          const matchProv =
-            provMeta.kh.toLowerCase().includes(q) ||
-            provMeta.fullKh.toLowerCase().includes(q) ||
-            provMeta.en.toLowerCase().includes(q) ||
-            provMeta.zh.toLowerCase().includes(q);
-          const matchIng = (food.ingredients || []).some(
-            (ing) =>
-              (ing.nameKh || '').toLowerCase().includes(q) ||
-              (ing.nameEn || '').toLowerCase().includes(q)
-          );
-          if (!matchName && !matchDesc && !matchProv && !matchIng) {
-            return false;
-          }
-        }
-
         return true;
-      });
+      };
+
+      let list = basePool.filter((food) => matchesFilters(food, true));
+      // Fallback: if user typed a search query while inside a specific province/taste filter that has 0 matches,
+      // automatically return matching dishes across all provinces so search never shows a false 0-result screen.
+      if (q && list.length === 0 && basePool.length > 0) {
+        list = basePool;
+      }
 
       // If "All Provinces" is selected and no search query, order so we showcase top signature dishes across all 25 provinces evenly
       if (selectedProvinceId === 'all' && !q) {
@@ -303,9 +279,9 @@ export const DailyDiscoveriesModal: React.FC = () => {
     }
   }, [
     verifiedDishes,
+    queryMatchedDishes,
     selectedProvinceId,
     debouncedQuery,
-    language,
     vipTasteProfile,
   ]);
 

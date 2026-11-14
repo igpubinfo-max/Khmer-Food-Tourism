@@ -1205,7 +1205,7 @@ export function generateConversationalAiResponse(params: {
     !detectedProv &&
     !isBroadRequest &&
     advisor.totalMatchedCount === 0 &&
-    !(advisor.brain && advisor.brain.dishes.length > 0);
+    !(advisor.brain && advisor.brain.entryId !== 'discover' && advisor.brain.dishes.length > 0);
   if (hasNoRealMatch && !outOfCatalogDishName && !pinnedCatalogDish) {
     const reply: AiAssistantMessage = {
       id: `ai-${Date.now()}`,

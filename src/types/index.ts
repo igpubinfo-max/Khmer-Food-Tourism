@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1587;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1588;
 export const APP_RELEASE_DATE = '2026-11-14';
 
 /**
@@ -2073,8 +2073,9 @@ export const inferBusinessTypeAndCategory = (
 
   const hasStrongHotelTextSignal =
     !isExplicitSeedShop &&
-    (/សណ្ឋាគារ|រីសត|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|ប៊ូទិក|វីឡា/.test(combinedText) ||
+    (/សណ្ឋាគារ|រីសត|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|ប៊ូទិក|វីឡា|ឌឺ\s*សឃ្វែរ|ដឹ\s*ស្វែរ/.test(combinedText) ||
       /\b(hotel|resort|guesthouse|guest\s*house|bungalow|boutique\s+hotel|villa|hostel|homestay|lodge|inn)\b/i.test(combinedText) ||
+      (/\bthe\s+square\b/i.test(combinedText) && !/\b24\s*bar\b/i.test(combinedText)) ||
       /check-in|បើកទទួលភ្ញៀវ\s*២៤\s*ម៉ោង/i.test(openHoursKh)) &&
     !(/ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងបាយ|ហាងគុយទាវ|ហាងកាហ្វេ/.test(nameKh) && !hasHotelIdPrefix && !nameKh.startsWith('សណ្ឋាគារ') && !nameKh.startsWith('ផ្ទះសំណាក់') && !nameKh.startsWith('រីសត'));
 
@@ -5805,7 +5806,7 @@ export const getUserStoreQuotaSummary = (
 // VIP SHOP FEATURED ROTATION SYSTEM
 // ============================================================================
 export const DEFAULT_VIP_FEATURED_DURATION_DAYS = 1;
-const VIP_ROTATION_EPOCH_MS = Date.UTC(2026, 0, 1, 0, 0, 0);
+export const VIP_ROTATION_EPOCH_MS = Date.UTC(2026, 0, 1, 0, 0, 0);
 
 /**
  * Admin-scheduled Top Listing slot: pins one specific shop to the top of the directory

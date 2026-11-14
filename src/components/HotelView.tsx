@@ -10,6 +10,8 @@ import {
   inferBusinessTypeAndCategory,
   isHotelBusinessRecord,
   resolveFoodPhotoUrl,
+  getVipFeaturedRotationConfig,
+  VIP_ROTATION_EPOCH_MS,
 } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { smoothScrollToElement } from '../utils/smoothScroll';
@@ -215,29 +217,39 @@ function calculateDistanceKm(
 
 function extractAddedTimestampMs(record: any, fallbackIndex: number): number {
   const candidates = [
+    record?.featuredFromAt,
+    record?.replacedAt,
     record?.approvedAt,
+    record?.updatedAt,
+    record?.adminEditedAt,
+    record?.photoUpdatedAt,
+    record?.pendingUpgradeRequest?.submittedAt,
+    record?.pendingPhotoReplacement?.submittedAt,
     record?.createdAt,
     record?.submittedAt,
     record?.created_at,
-    record?.updatedAt,
-    record?.adminEditedAt,
     record?.locationVerifiedAt,
-    record?.photoUpdatedAt,
   ];
+  let latestMs = 0;
   for (const c of candidates) {
-    if (typeof c === 'number' && Number.isFinite(c) && c > 0) return c;
-    if (typeof c === 'string' && c.trim()) {
+    if (typeof c === 'number' && Number.isFinite(c) && c > latestMs) {
+      latestMs = c;
+    } else if (typeof c === 'string' && c.trim()) {
       const parsed = Date.parse(c);
-      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+      if (Number.isFinite(parsed) && parsed > latestMs) {
+        latestMs = parsed;
+      }
     }
   }
   const idStr = String(record?.id || '');
   const numMatch = idStr.match(/(\d{10,13})/);
   if (numMatch) {
     const num = Number(numMatch[1]);
-    if (Number.isFinite(num) && num > 0) return num;
+    if (Number.isFinite(num) && num > latestMs) {
+      latestMs = num;
+    }
   }
-  // Fallback preserves chronological submission order in array
+  if (latestMs > 0) return latestMs;
   return 1_700_000_000_000 + fallbackIndex * 1000;
 }
 
@@ -251,6 +263,8 @@ export const HotelView: React.FC = () => {
     setSelectedDestination,
     updateDestination,
     deleteDestination,
+    deleteRestaurant,
+    appSettings,
     isBookmarked,
     toggleBookmark,
     setIsVipAddRestaurantModalOpen,
@@ -385,10 +399,19 @@ export const HotelView: React.FC = () => {
     }
   }, []);
 
+  const [nowTickMs, setNowTickMs] = useState<number>(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNowTickMs(Date.now());
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   // Convert any user/owner-added Hotel records (from `restaurants` where `isHotelBusinessRecord(r)`) into TouristDestination format,
-  // sorted EARLIEST APPROVED FIRST (TOP 1 = earliest approved hotel submission)
-  const { vipAddedHotelDestinations, addedHotelTimestampMap } = useMemo(() => {
+  // with 24h Newest-Added Top-1 Boost + Fair VIP Rotation (`វិលជុំ`) matching the Shop Menu (`RestaurantView.tsx`)
+  const { vipAddedHotelDestinations, addedHotelTimestampMap, hotelFeaturedUntilMap } = useMemo(() => {
     const tsMap = new Map<string, number>();
+    const featuredUntilMap = new Map<string, number>();
     const list: TouristDestination[] = [];
     const seenIds = new Set<string>();
     const seenNameKeys = new Set<string>();
@@ -396,59 +419,83 @@ export const HotelView: React.FC = () => {
     restaurants.forEach((r: Restaurant, idx: number) => {
       if (
         !r ||
+        (r as any).isSuspended ||
         !isHotelBusinessRecord(r) ||
-        !(r.status === 'approved' || isAdmin || r.ownerId === currentUser?.id)
+        !(
+          r.status === 'approved' ||
+          isAdmin ||
+          r.ownerId === currentUser?.id ||
+          r.pendingUpgradeRequest?.submittedByUserId === currentUser?.id
+        )
       ) {
         return;
       }
       const idStr = String(r.id || '').trim();
       if (!idStr || seenIds.has(idStr)) return;
-      const normNameKey = `${normalizeKhmerSearchText(r.nameKh || r.nameEn || '')}::${(r.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
+
+      const canPreviewPendingUpgrade = Boolean(
+        r.pendingUpgradeRequest?.proposedChanges &&
+          (isAdmin ||
+            r.ownerId === currentUser?.id ||
+            r.pendingUpgradeRequest.submittedByUserId === currentUser?.id)
+      );
+      const eff: Restaurant = canPreviewPendingUpgrade
+        ? ({ ...r, ...r.pendingUpgradeRequest!.proposedChanges } as Restaurant)
+        : r;
+
+      const normNameKey = `${normalizeKhmerSearchText(eff.nameKh || eff.nameEn || '')}::${(eff.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
       if (normNameKey.length > 3 && seenNameKeys.has(normNameKey)) return;
 
       seenIds.add(idStr);
       if (normNameKey.length > 3) seenNameKeys.add(normNameKey);
 
-      const catInfo = inferBusinessTypeAndCategory(r);
+      const catInfo = inferBusinessTypeAndCategory(eff);
       const ts = extractAddedTimestampMs(r, idx + 1);
       tsMap.set(r.id, ts);
+      if (r.featuredUntilAt) {
+        const untilMs = Date.parse(r.featuredUntilAt);
+        if (Number.isFinite(untilMs) && untilMs > 0) {
+          featuredUntilMap.set(r.id, untilMs);
+        }
+      }
 
       const resolvedPhoto =
-        r.profileImage ||
-        r.photoUrl ||
-        r.thumbnailUrl ||
-        (Array.isArray(r.galleryPhotos) && r.galleryPhotos[0]) ||
+        eff.profileImage ||
+        eff.photoUrl ||
+        eff.thumbnailUrl ||
+        (Array.isArray(eff.galleryPhotos) && eff.galleryPhotos[0]) ||
+        r.pendingPhotoReplacement?.newPhotoUrl ||
         '';
 
       list.push({
         id: r.id,
-        nameKh: r.nameKh,
-        nameEn: r.nameEn || r.nameKh,
+        nameKh: eff.nameKh,
+        nameEn: eff.nameEn || eff.nameKh,
         categorySlug: 'hotel' as const,
-        categoryKh: r.categoryKh || catInfo.shortKh,
-        categoryEn: r.categoryEn || catInfo.shortEn,
-        descriptionKh: r.descriptionKh || `${r.nameKh} — កន្លែងស្នាក់នៅស្អាត និងមានផាសុកភាព។`,
-        descriptionEn: r.descriptionEn || `${r.nameEn || r.nameKh} — Verified accommodation in ${r.provinceEn}.`,
+        categoryKh: eff.categoryKh || catInfo.shortKh,
+        categoryEn: eff.categoryEn || catInfo.shortEn,
+        descriptionKh: eff.descriptionKh || `${eff.nameKh} — កន្លែងស្នាក់នៅស្អាត និងមានផាសុកភាព។`,
+        descriptionEn: eff.descriptionEn || `${eff.nameEn || eff.nameKh} — Verified accommodation in ${eff.provinceEn}.`,
         photoUrl: resolvedPhoto,
-        galleryPhotos: r.galleryPhotos || [],
-        provinceKh: r.provinceKh,
-        provinceEn: r.provinceEn,
-        addressKh: r.addressKh || r.provinceKh,
-        addressEn: r.addressEn || r.provinceEn,
-        phone: r.phone,
-        priceRange: r.priceLevel || '$$',
-        entranceFeeKh: `តម្លៃបន្ទប់៖ ${r.priceLevel || '$'} • ${r.phone || ''}`,
-        entranceFeeEn: `Room Rate: ${r.priceLevel || '$'} • ${r.phone || ''}`,
-        bestTimeToVisitKh: r.openingHoursKh || 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង',
-        bestTimeToVisitEn: r.openingHoursEn || 'Open 24 Hours',
-        mapUrl: r.mapUrl || `https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`,
-        latitude: r.latitude,
-        longitude: r.longitude,
-        googlePlaceId: r.googlePlaceId,
-        rating: r.rating || 4.8,
-        reviewCount: r.reviewCount || 128,
-        highlightsKh: r.signatureDishesKh?.length
-          ? r.signatureDishesKh
+        galleryPhotos: eff.galleryPhotos || [],
+        provinceKh: eff.provinceKh,
+        provinceEn: eff.provinceEn,
+        addressKh: eff.addressKh || eff.provinceKh,
+        addressEn: eff.addressEn || eff.provinceEn,
+        phone: eff.phone,
+        priceRange: eff.priceLevel || '$',
+        entranceFeeKh: `តម្លៃបន្ទប់៖ ${eff.priceLevel || '$'} • ${eff.phone || ''}`,
+        entranceFeeEn: `Room Rate: ${eff.priceLevel || '$'} • ${eff.phone || ''}`,
+        bestTimeToVisitKh: eff.openingHoursKh || 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង',
+        bestTimeToVisitEn: eff.openingHoursEn || 'Open 24 Hours',
+        mapUrl: eff.mapUrl || `https://www.google.com/maps/search/?api=1&query=${eff.latitude},${eff.longitude}`,
+        latitude: eff.latitude,
+        longitude: eff.longitude,
+        googlePlaceId: eff.googlePlaceId,
+        rating: typeof eff.rating === 'number' ? eff.rating : 0,
+        reviewCount: typeof eff.reviewCount === 'number' ? eff.reviewCount : 0,
+        highlightsKh: eff.signatureDishesKh?.length
+          ? eff.signatureDishesKh
           : ['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ Wi-Fi និងចំណតរថយន្តសុវត្ថិភាព'],
         isFeatured: true,
         isCustomPhoto: Boolean(resolvedPhoto),
@@ -456,24 +503,30 @@ export const HotelView: React.FC = () => {
       });
     });
 
-    // Also detect any user/admin newly added or edited hotels in `destinations`
+    // Also detect any genuinely admin-edited or custom-added hotels in `destinations` (excluding untouched seed `hotel-1`..`hotel-378`)
     destinations.forEach((d, idx) => {
       if (!d || d.categorySlug !== 'hotel') return;
-      if (d.isAdminEdited || d.isCustomPhoto || !/^dest-hotel-\d+$/i.test(String(d.id || ''))) {
+      const isSeedHotelId = /^(?:dest-)?hotel-\d+$/i.test(String(d.id || ''));
+      const hasCustomImg = Boolean(hasVerifiedCustomHotelPhoto(d));
+      if (!isSeedHotelId || d.isAdminEdited || hasCustomImg) {
         if (!tsMap.has(d.id)) {
           tsMap.set(d.id, extractAddedTimestampMs(d, idx + 5000));
         }
       }
     });
 
-    // Sort user/owner-added hotels strictly Earliest Approved First (lowest timestamp first -> TOP 1)
+    // Sort user/owner-added hotels Most Recently Added/Updated First (`tsB - tsA`) so newly added hotels (e.g. "The Square") appear first
     list.sort((a, b) => {
-      const diff = (tsMap.get(a.id) || 0) - (tsMap.get(b.id) || 0);
+      const diff = (tsMap.get(b.id) || 0) - (tsMap.get(a.id) || 0);
       if (diff !== 0) return diff;
       return String(a.id).localeCompare(String(b.id));
     });
 
-    return { vipAddedHotelDestinations: list, addedHotelTimestampMap: tsMap };
+    return {
+      vipAddedHotelDestinations: list,
+      addedHotelTimestampMap: tsMap,
+      hotelFeaturedUntilMap: featuredUntilMap,
+    };
   }, [restaurants, destinations, isAdmin, currentUser?.id]);
 
   const userAddedHotelIds = useMemo(
@@ -608,18 +661,71 @@ export const HotelView: React.FC = () => {
     });
   }, [categoryMatchedHotels]);
 
-  // Order: User/business-owner approved hotels FIRST (strictly Earliest Approved First -> TOP 1, never shuffled), then standard hotels
-  const orderedHotels = useMemo(() => {
-    const userSubmitted = allHotels
+  // Deterministic VIP Hotel Rotation + 24-Hour Newest-Added Top-1 Boost (matching Shop Menu getVipFeaturedRotationState)
+  const hotelRotationRankMap = useMemo(() => {
+    const rankMap = new Map<string, number>();
+    const rotationCfg = getVipFeaturedRotationConfig(appSettings);
+    const eligibleQueue = allHotels
       .filter((h) => userAddedHotelIds.has(h.id))
       .sort((a, b) => {
         const diff = (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0);
         if (diff !== 0) return diff;
         return String(a.id).localeCompare(String(b.id));
       });
+
+    if (eligibleQueue.length === 0) return rankMap;
+
+    const orderedIds: string[] = [];
+    const seen = new Set<string>();
+
+    // 1. Newly added / updated VIP hotels within their 24-hour top-pinning window -> pinned at Top 1 (most recently added first!)
+    const newlyBoosted = eligibleQueue
+      .filter((h) => {
+        const ts = addedHotelTimestampMap.get(h.id) || 0;
+        const explicitUntil = hotelFeaturedUntilMap.get(h.id) || 0;
+        const boostEndMs = Math.max(ts > 0 ? ts + rotationCfg.durationMs : 0, explicitUntil);
+        return ts > 0 && nowTickMs < boostEndMs;
+      })
+      .sort((a, b) => (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0));
+
+    for (const h of newlyBoosted) {
+      if (!seen.has(h.id)) {
+        seen.add(h.id);
+        orderedIds.push(h.id);
+      }
+    }
+
+    // 2. Fair VIP rotation slot (វិលជុំ): eligible VIP hotels rotate fairly through Top 1 across slots
+    const elapsedSinceEpoch = Math.max(0, nowTickMs - VIP_ROTATION_EPOCH_MS);
+    const currentSlotIndex = Math.floor(elapsedSinceEpoch / rotationCfg.durationMs);
+    const startIdx = currentSlotIndex % eligibleQueue.length;
+    for (let offset = 0; offset < eligibleQueue.length; offset++) {
+      const h = eligibleQueue[(startIdx + offset) % eligibleQueue.length];
+      if (h && !seen.has(h.id)) {
+        seen.add(h.id);
+        orderedIds.push(h.id);
+      }
+    }
+
+    orderedIds.forEach((id, index) => {
+      rankMap.set(id, index);
+    });
+    return rankMap;
+  }, [allHotels, userAddedHotelIds, addedHotelTimestampMap, hotelFeaturedUntilMap, appSettings, nowTickMs]);
+
+  // Order: User/business-owner VIP hotels FIRST (Newest-Added Top-1 Boost + Fair Rotation), then standard hotels
+  const orderedHotels = useMemo(() => {
+    const userSubmitted = allHotels
+      .filter((h) => userAddedHotelIds.has(h.id))
+      .sort((a, b) => {
+        const rankA = hotelRotationRankMap.get(a.id) ?? 999999;
+        const rankB = hotelRotationRankMap.get(b.id) ?? 999999;
+        if (rankA !== rankB) return rankA - rankB;
+        return (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0);
+      });
     const regularHotels = allHotels.filter((h) => !userAddedHotelIds.has(h.id));
     return [...userSubmitted, ...shuffleForCurrentSession(regularHotels)];
-  }, [allHotels, userAddedHotelIds, addedHotelTimestampMap]);
+  }, [allHotels, userAddedHotelIds, hotelRotationRankMap, addedHotelTimestampMap]);
 
   const distanceMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -670,13 +776,14 @@ export const HotelView: React.FC = () => {
       } else if (sortMode === 'rating') {
         scoped = [...scoped].sort((a, b) => (b.rating || 4.6) - (a.rating || 4.6));
       } else {
-        // Automatic priority sorting: Earliest approved user-submitted hotel gets TOP 1 and appears first
+        // Automatic priority sorting: VIP Rotation + 24h Newest-Added Top-1 Boost appears at TOP 1
         const priorityUserHotels = scoped
           .filter((h) => userAddedHotelIds.has(h.id))
           .sort((a, b) => {
-            const diff = (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0);
-            if (diff !== 0) return diff;
-            return String(a.id).localeCompare(String(b.id));
+            const rankA = hotelRotationRankMap.get(a.id) ?? 999999;
+            const rankB = hotelRotationRankMap.get(b.id) ?? 999999;
+            if (rankA !== rankB) return rankA - rankB;
+            return (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0);
           });
         const restHotels = scoped.filter((h) => !userAddedHotelIds.has(h.id));
         scoped = [...priorityUserHotels, ...restHotels];
@@ -702,7 +809,10 @@ export const HotelView: React.FC = () => {
           if (aUser && !bUser) return -1;
           if (!aUser && bUser) return 1;
           if (aUser && bUser) {
-            return (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0);
+            const rankA = hotelRotationRankMap.get(a.id) ?? 999999;
+            const rankB = hotelRotationRankMap.get(b.id) ?? 999999;
+            if (rankA !== rankB) return rankA - rankB;
+            return (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0);
           }
           return (
             (b.rating || 0) - (a.rating || 0) ||
@@ -720,6 +830,7 @@ export const HotelView: React.FC = () => {
     debouncedSearchQuery,
     distanceMap,
     userAddedHotelIds,
+    hotelRotationRankMap,
     addedHotelTimestampMap,
   ]);
 
@@ -1308,182 +1419,110 @@ export const HotelView: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className={featuredHotels.length === 1 ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 md:grid-cols-2 gap-3'}>
                   {featuredHotels.map((hotel) => {
                     const loc = getLocalizedDestination(hotel, language);
                     const isVipRecord = vipHotelIds.has(hotel.id);
                     const bookmarked = isBookmarked(hotel.id);
-                    const hash = getDeterministicHash(hotel.id);
-                    const displayRating =
-                      hotel.rating && hotel.rating > 0
-                        ? Number(hotel.rating).toFixed(1)
-                        : (4.6 + (hash % 4) * 0.1).toFixed(1);
-                    const displayReviews =
-                      hotel.reviewCount && hotel.reviewCount > 0
-                        ? hotel.reviewCount
-                        : 95 + (hash % 210);
-                    const distanceKm = distanceMap.get(hotel.id) ?? getDeterministicDistanceKm(hotel.id);
-                    const distanceStr = distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm).toString();
-                    const amenityChips = getAmenityChipsForHotel(hotel);
-
-                    const handleCallHotel = (e: React.MouseEvent) => {
-                      e.stopPropagation();
-                      const rawPhone = String(hotel.phone || '').trim();
-                      const firstPhone = rawPhone.split(/[\/,;]/)[0]?.replace(/[^0-9+]/g, '') || '';
-                      if (firstPhone.length >= 6) {
-                        window.location.href = `tel:${firstPhone}`;
-                      } else {
-                        setSelectedDestination(hotel);
-                      }
-                    };
+                    const resolvedHotelPhotoUrl = hasVerifiedCustomHotelPhoto(hotel);
+                    const adminActions = isAdmin ? (
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isVipRecord) {
+                              (window as any).__kft_manage_initial_tab = 'info';
+                              openManageMyVipStore(hotel.id);
+                            } else {
+                              setHotelForImageEdit(hotel);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors active:scale-95 cursor-pointer"
+                          title={tr(language, 'ប្តូររូបភាពសណ្ឋាគារ', 'Change Hotel Photo', '更换酒店图片')}
+                        >
+                          <Camera className="w-3.5 h-3.5" strokeWidth={2} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isVipRecord) {
+                              (window as any).__kft_manage_initial_tab = 'info';
+                              openManageMyVipStore(hotel.id);
+                            } else {
+                              (window as any).__kft_open_dest_edit = true;
+                              setSelectedDestination(hotel);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 transition-colors active:scale-95 cursor-pointer"
+                          title={tr(language, 'កែប្រែព័ត៌មាន & ទីតាំង GPS', 'Edit Info & GPS', '编辑信息与定位')}
+                        >
+                          <Edit2 className="w-3.5 h-3.5" strokeWidth={2} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isVipRecord) {
+                              deleteRestaurant(hotel.id);
+                            } else {
+                              deleteDestination(hotel.id);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-colors active:scale-95 cursor-pointer"
+                          title={tr(language, 'លុបសណ្ឋាគារនេះ (Admin)', 'Delete Hotel (Admin)', '删除酒店（管理员）')}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
+                        </button>
+                      </div>
+                    ) : null;
 
                     return (
-                      <article
+                      <ListingFeaturedCard
                         key={hotel.id}
-                        data-testid={`hotel-featured-${hotel.id}`}
-                        onClick={() => setSelectedDestination(hotel)}
-                        className="bg-white rounded-[22px] p-2.5 border border-slate-200/90 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:border-emerald-500/60 transition flex gap-3 items-stretch cursor-pointer font-khmer text-slate-900"
-                      >
-                        {/* Left Photo Box with Distance Pill & Heart Button */}
-                        <div className="w-[100px] min-[340px]:w-[120px] min-[380px]:w-[144px] sm:w-[156px] min-h-[130px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100 border border-slate-100">
-                          <HotelAvatar
-                            hotel={hotel}
-                            alt={loc.name}
-                            className="w-full h-full object-cover"
-                          />
-
-                          {/* Top-left Distance Badge */}
-                          <span
-                            style={{
-                              background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
-                            }}
-                            className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-white text-[10.5px] font-extrabold inline-flex items-center gap-1 shadow-xs"
-                          >
-                            <MapPin className="w-3 h-3 text-white fill-white/25 shrink-0" />
-                            <span>
-                              {distanceStr} {tr(language, 'km', 'km', '公里')}
-                            </span>
-                          </span>
-
-                          {/* Top-right Heart Bookmark Button */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleBookmark(hotel.id);
-                            }}
-                            aria-label={tr(language, 'រក្សាទុក', 'Bookmark', '收藏')}
-                            className="kft-btn-fav absolute top-2 right-2"
-                          >
-                            <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
-                          </button>
-
-                          {/* Bottom-left VIP Badge */}
-                          <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9.5px] font-extrabold inline-flex items-center gap-1 shadow-xs">
-                            <Crown className="w-2.5 h-2.5 text-slate-950 shrink-0" />
-                            <span>{tr(language, 'សណ្ឋាគារ VIP', 'VIP Hotel', 'VIP 酒店')}</span>
-                          </span>
-                        </div>
-
-                        {/* Right Info Column */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                          <div>
-                            {isCambodiaChoiceEligible(hotel) && (
-                              <div className="mb-1">
-                                <CambodiaChoiceBadge language={language} size="sm" />
-                              </div>
-                            )}
-                            <div className="flex items-start justify-between gap-1.5">
-                              <h4 className="font-extrabold text-sm sm:text-[15px] text-slate-900 leading-[1.6] line-clamp-2 break-words">
-                                {loc.name || hotel.nameKh}
-                              </h4>
-                              {isAdmin && (
-                                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                                  {!isVipRecord && (
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setHotelForImageEdit(hotel);
-                                      }}
-                                      className="p-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white transition-colors active:scale-95 cursor-pointer"
-                                      title={tr(language, 'ប្តូររូបភាពសណ្ឋាគារ', 'Upload / Change Hotel Photo', '更换酒店图片')}
-                                    >
-                                      <Camera className="w-3.5 h-3.5" strokeWidth={2} />
-                                    </button>
-                                  )}
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (isVipRecord) {
-                                        openManageMyVipStore(hotel.id);
-                                      } else {
-                                        (window as any).__kft_open_dest_edit = true;
-                                        setSelectedDestination(hotel);
-                                      }
-                                    }}
-                                    className="p-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 transition-colors active:scale-95 cursor-pointer"
-                                    title={tr(language, 'កែប្រែព័ត៌មាន & ទីតាំង GPS', 'Edit Info & GPS', '编辑信息与定位')}
-                                  >
-                                    <Edit2 className="w-3.5 h-3.5" strokeWidth={2} />
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Rating & Province */}
-                            <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-600 flex-wrap">
-                              <span className="inline-flex items-center gap-1">
-                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                                <strong className="font-extrabold text-slate-900">{displayRating}</strong>
-                                <span className="text-slate-400">({displayReviews})</span>
-                              </span>
-                              <span className="text-slate-300">•</span>
-                              <span className="text-emerald-700 font-bold truncate">
-                                {loc.province || hotel.provinceEn || hotel.provinceKh}
-                              </span>
-                            </div>
-
-                            {/* Amenity Tags */}
-                            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                              {amenityChips.map((chip, idx) => (
-                                <span
-                                  key={idx}
-                                  className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200/80 text-[10.5px] font-bold text-slate-700 inline-flex items-center gap-1"
-                                >
-                                  {renderAmenityIcon(chip.icon)}
-                                  <span>{chip.label}</span>
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Bottom Action Buttons: Call/Details + Map Navigation */}
-                          <div className="grid grid-cols-2 gap-1.5 mt-2.5 pt-2 border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              type="button"
-                              onClick={handleCallHotel}
-                              className="kft-btn-call"
-                            >
-                              <Phone className="w-3.5 h-3.5 text-white fill-white shrink-0" />
-                              <span className="break-words">{tr(language, 'ទូរស័ព្ទ', 'Call', '电话')}</span>
-                            </button>
-
+                        testId={`hotel-featured-${hotel.id}`}
+                        language={language}
+                        coverUrl={resolvedHotelPhotoUrl}
+                        fallbackIcon={BedDouble}
+                        title={loc.name || hotel.nameKh}
+                        province={loc.province || hotel.provinceEn || hotel.provinceKh}
+                        address={loc.address || hotel.addressEn || hotel.addressKh}
+                        description={
+                          loc.description ||
+                          hotel.descriptionKh ||
+                          (hotel.highlightsKh?.length ? hotel.highlightsKh.join(' • ') : '') ||
+                          tr(
+                            language,
+                            'សណ្ឋាគារ និងកន្លែងស្នាក់នៅស្អាត មានផាសុកភាព និងសេវាកម្មល្អ។',
+                            'Comfortable hotel and accommodation with quality amenities.',
+                            '舒适整洁的酒店住宿与优质服务。'
+                          )
+                        }
+                        rating={typeof hotel.rating === 'number' ? Number(hotel.rating) : 0}
+                        reviewCount={hotel.reviewCount}
+                        priceText={hotel.priceRange || '$'}
+                        phone={hotel.phone}
+                        badgeLabel={tr(language, 'ផ្សព្វផ្សាយ • សណ្ឋាគារ VIP', 'Promoted • VIP Hotel', '推广 • VIP 酒店')}
+                        onOpen={() => setSelectedDestination(hotel)}
+                        onOpenMap={() => openDestinationGoogleExternal(hotel, 'maps')}
+                        topRightActions={
+                          <>
+                            {adminActions}
                             <button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                openDestinationGoogleExternal(hotel, 'maps');
+                                toggleBookmark(hotel.id);
                               }}
-                              className="kft-btn-map"
+                              aria-label={tr(language, 'រក្សាទុក', 'Bookmark', '收藏')}
+                              className="kft-btn-fav"
                             >
-                              <Navigation className="w-3.5 h-3.5 text-white shrink-0" strokeWidth={2.2} />
-                              <span className="break-words">{tr(language, 'ផែនទី', 'Map', '地图')}</span>
+                              <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
                             </button>
-                          </div>
-                        </div>
-                      </article>
+                          </>
+                        }
+                      />
                     );
                   })}
                 </div>

@@ -7,13 +7,20 @@ import {
   organizeAndDeduplicateFoods,
 } from '../types';
 import { Utensils, Crown, MapPin, Plus, Search, Filter, X , Flame } from 'lucide-react';
-import { DISH_PROVINCES, doesDishBelongToProvince } from '../utils/foodFilters';
+import {
+  DISH_PROVINCES,
+  doesDishBelongToProvince,
+  resolvePresetCravingChipId,
+  matchesPresetCravingChip,
+} from '../utils/foodFilters';
 import { TAG_FILTERS, matchesTagFilter, TagFilterId, DishTagId } from '../utils/dishTags';
 import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
 import { DishTagIcon } from './icons/HandcraftedIcons';
 import { matchesFoodScreenCategoryTab } from '../utils/cambodianMealHabits';
 import { smoothScrollToElement } from '../utils/smoothScroll';
+import { searchKhmerFoods, normalizeKhmerFoodText } from '../utils/khmerFoodSearch';
+import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 
 const PAGE_BATCH_SIZE = 16;
 
@@ -159,36 +166,82 @@ export const FoodView: React.FC = () => {
     });
   }, [organizedFoods]);
 
-  const filteredFoods = useMemo(() => {
-    const q = foodSearchQuery.trim().toLowerCase();
+  const uniqueOrganizedFoods = useMemo(() => {
     const seenIds = new Set<string>();
     const seenNames = new Set<string>();
-    const matched: FoodItem[] = [];
-
+    const out: FoodItem[] = [];
     for (const food of organizedFoods) {
-      if (!food || !food.id || seenIds.has(food.id)) continue;
-      const nameKey = (food.nameKh || '').trim();
-      if (!nameKey || seenNames.has(nameKey)) continue;
-      if (!matchesFoodScreenCategoryTab(food, selectedCategory)) continue;
-      if (provinceFilter && !doesDishBelongToProvince(food, provinceFilter)) continue;
-      if (!matchesTagFilter(food, tagFilter)) continue;
-      if (q) {
-        const hay = [
-          food.nameKh,
-          food.nameEn,
-          food.descriptionKh,
-          food.descriptionEn,
-          food.categoryKh,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        if (!hay.includes(q)) continue;
-      }
-      seenIds.add(food.id);
+      if (!food || !food.id) continue;
+      const idStr = String(food.id);
+      const nameKey = normalizeKhmerFoodText(food.nameKh || '');
+      if (!nameKey || seenIds.has(idStr) || seenNames.has(nameKey)) continue;
+      seenIds.add(idStr);
       seenNames.add(nameKey);
-      matched.push(food);
+      out.push(food);
     }
+    return out;
+  }, [organizedFoods]);
+
+  const filteredFoods = useMemo(() => {
+    const rawQuery = foodSearchQuery.trim();
+    const matchesActiveFilters = (food: FoodItem): boolean => {
+      if (!matchesFoodScreenCategoryTab(food, selectedCategory)) return false;
+      if (provinceFilter && !doesDishBelongToProvince(food, provinceFilter)) return false;
+      if (!matchesTagFilter(food, tagFilter)) return false;
+      return true;
+    };
+
+    // When user is actively searching by keyword (Khmer, English, or Chinese):
+    // Rank deterministically by relevance and never show false 0-result lockouts due to a previously selected category tab.
+    if (rawQuery) {
+      const chipId = resolvePresetCravingChipId(rawQuery);
+      let searchMatched: FoodItem[];
+      if (chipId) {
+        searchMatched = uniqueOrganizedFoods.filter((f) => matchesPresetCravingChip(f, chipId));
+      } else {
+        searchMatched = searchKhmerFoods(uniqueOrganizedFoods, rawQuery);
+        if (searchMatched.length === 0) {
+          const smartIntent = parseSmartSearchIntent(rawQuery);
+          if (smartIntent.coreQuery && smartIntent.coreQuery !== rawQuery) {
+            searchMatched = searchKhmerFoods(uniqueOrganizedFoods, smartIntent.coreQuery);
+          }
+          if (searchMatched.length === 0 && smartIntent.detectedProvinceKh) {
+            const provObj = DISH_PROVINCES.find(
+              (p) => p.kh === smartIntent.detectedProvinceKh || p.fullKh === smartIntent.detectedProvinceKh
+            );
+            if (provObj) {
+              searchMatched = uniqueOrganizedFoods.filter((f) => doesDishBelongToProvince(f, provObj.id));
+            }
+          }
+        }
+      }
+
+      const filteredWithinActiveTab = searchMatched.filter(matchesActiveFilters);
+      const finalSearchList =
+        filteredWithinActiveTab.length > 0 ? filteredWithinActiveTab : searchMatched;
+
+      if (restoredOrderIds && restoredOrderIds.length > 0) {
+        const byId = new Map(finalSearchList.map((f) => [f.id, f]));
+        const restored: FoodItem[] = [];
+        for (const id of restoredOrderIds) {
+          const item = byId.get(id);
+          if (item) {
+            restored.push(item);
+            byId.delete(id);
+          }
+        }
+        for (const remaining of byId.values()) {
+          restored.push(remaining);
+        }
+        currentRenderedOrderIdsRef.current = restored.map((f) => f.id);
+        return restored;
+      }
+
+      currentRenderedOrderIdsRef.current = finalSearchList.map((f) => f.id);
+      return finalSearchList;
+    }
+
+    const matched = uniqueOrganizedFoods.filter(matchesActiveFilters);
 
     if (matched.length <= 1) {
       currentRenderedOrderIdsRef.current = matched.map((f) => f.id);
@@ -265,7 +318,7 @@ export const FoodView: React.FC = () => {
 
     currentRenderedOrderIdsRef.current = candidate.map((f) => f.id);
     return candidate;
-  }, [organizedFoods, selectedCategory, categoryShuffleNonce, restoredOrderIds, provinceFilter, tagFilter, foodSearchQuery]);
+  }, [uniqueOrganizedFoods, selectedCategory, categoryShuffleNonce, restoredOrderIds, provinceFilter, tagFilter, foodSearchQuery]);
 
   const displayedFoods = useMemo(
     () => filteredFoods.slice(0, visibleCount),
@@ -752,7 +805,14 @@ export const FoodView: React.FC = () => {
           <div className="flex items-center gap-1.5 min-w-0">
             <Flame className="w-5 h-5 text-orange-400 fill-amber-400 shrink-0" />
             <h2 className="font-extrabold text-[15px] sm:text-base text-white leading-[1.65] break-words">
-              {selectedCategory === 'samlor'
+              {foodSearchQuery.trim()
+                ? tr(
+                    language,
+                    `លទ្ធផលស្វែងរក «${foodSearchQuery.trim()}»`,
+                    `Search results for "${foodSearchQuery.trim()}"`,
+                    `“${foodSearchQuery.trim()}”的搜索结果`
+                  )
+                : selectedCategory === 'samlor'
                 ? tr(language, 'សម្លខ្មែរពេញនិយម', 'Popular Khmer Soups', '热门高棉汤羹')
                 : selectedCategory === 'cha'
                 ? tr(language, 'ម្ហូបអាំង និងចៀនពេញនិយម', 'Popular Grill & Stir-Fry', '热门烧烤与煎炸')
