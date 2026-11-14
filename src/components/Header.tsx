@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
+  ArrowLeft,
   Heart,
   Bell,
   QrCode,
@@ -22,6 +23,8 @@ const HeaderInner: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
     language,
     setLanguage,
     setActiveTab,
+    canGoBack,
+    navigateBack,
     setIsSupportModalOpen,
     setIsQrScannerModalOpen,
     setIsAiTripPlannerModalOpen,
@@ -88,6 +91,20 @@ const HeaderInner: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
       style={{ paddingTop: 'var(--kft-safe-top, 0px)' }}
     >
       <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto px-3 py-2 flex items-center justify-between gap-2">
+        {canGoBack && (
+          <button
+            type="button"
+            onClick={navigateBack}
+            className="h-9 px-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-amber-300/50 flex items-center gap-1 shrink-0 cursor-pointer active:scale-95 transition"
+            title={tr(language, 'ត្រឡប់ទៅជំហានមុន', 'Back to previous step', '返回上一步')}
+            aria-label={tr(language, 'ត្រឡប់ទៅជំហានមុន', 'Back to previous step', '返回上一步')}
+          >
+            <ArrowLeft className="w-4 h-4 text-amber-300 shrink-0" />
+            <span className="font-khmer font-bold text-[11px] leading-none text-amber-200 hidden min-[380px]:inline">
+              {tr(language, 'ត្រឡប់', 'Back', '返回')}
+            </span>
+          </button>
+        )}
         {/* Brand Logo & Title */}
         <div
           onClick={() => {

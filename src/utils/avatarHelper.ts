@@ -1,6 +1,7 @@
 import React from 'react';
 
-const AVATAR_CACHE_STORAGE_KEY = 'kft_user_avatar_cache_v1';
+const AVATAR_CACHE_STORAGE_KEY = 'kft_user_avatar_cache_v2';
+const LEGACY_POISONED_AVATAR_CACHE_KEY = 'kft_user_avatar_cache_v1';
 
 /**
  * Generates a crisp, self-contained SVG data-URI avatar badge with the user's initials.
@@ -75,7 +76,8 @@ function splitGraphemes(text: string): string[] {
 const ADMIN_AVATAR_STORAGE_KEY = 'kft_admin_avatar_v1';
 export const DEFAULT_ADMIN_AVATAR_PATH = 'images/admin_profile.png';
 
-const AVATAR_IDB_NAME = 'kft_avatar_vault_idb_v1';
+const AVATAR_IDB_NAME = 'kft_avatar_vault_idb_v2';
+const LEGACY_POISONED_AVATAR_IDB_NAME = 'kft_avatar_vault_idb_v1';
 const AVATAR_IDB_STORE = 'avatars';
 
 let memoryAvatarCacheMap: Record<string, string> | null = null;
@@ -158,6 +160,14 @@ function safeWriteAvatarLocalStorage(key: string, value: string): void {
 function hydrateAvatarVaultFromIdbOnce(): void {
   if (idbHydrationStarted || typeof window === 'undefined') return;
   idbHydrationStarted = true;
+  try {
+    localStorage.removeItem(LEGACY_POISONED_AVATAR_CACHE_KEY);
+  } catch {}
+  try {
+    if (typeof indexedDB !== 'undefined') {
+      indexedDB.deleteDatabase(LEGACY_POISONED_AVATAR_IDB_NAME);
+    }
+  } catch {}
   openAvatarIdb()
     .then((db) => {
       if (!db) return;
@@ -262,18 +272,60 @@ export function saveAdminAvatar(dataUrl: string): void {
 export function isCustomUploadedAvatarDataUrl(url?: string | null): boolean {
   if (!url || typeof url !== 'string') return false;
   const trimmed = url.trim();
+  if (trimmed.includes('ntfy.sh/file/') || trimmed.includes('ntfy.sh/kft_cloud_media_cdn')) {
+    return false;
+  }
   if (trimmed.startsWith('data:image/') && !trimmed.startsWith('data:image/svg')) {
     return true;
   }
   if (
     (trimmed.startsWith('https://') || trimmed.startsWith('http://')) &&
-    (trimmed.includes('/storage/v1/object/public/') ||
-      trimmed.includes('/avatars/') ||
-      trimmed.includes('ntfy.sh/file/'))
+    (trimmed.includes('/storage/v1/object/public/') || trimmed.includes('/avatars/'))
   ) {
     return true;
   }
   return false;
+}
+
+/**
+ * Verifies that an avatar URL is valid AND is not a Cloud Storage avatar belonging to a different user account.
+ * Cloud Storage avatars follow `/avatars/<ownerSafeId>(_revN)?_<timestamp>_<rand>.<ext>`.
+ */
+export function isAvatarOwnedByUser(
+  url?: string | null,
+  user?: {
+    id?: string;
+    email?: string;
+    phone?: string;
+    name?: string;
+    role?: string;
+    legacyIds?: string[];
+  } | null
+): boolean {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  if (isPlaceholderOrInvalidAvatarUrl(trimmed)) return false;
+
+  const avatarsIdx = trimmed.indexOf('/avatars/');
+  if (avatarsIdx !== -1 && user) {
+    const afterAvatars = trimmed.slice(avatarsIdx + '/avatars/'.length).split(/[?#]/)[0];
+    const m = afterAvatars.match(/^(.+?)(?:_rev\d+)?_\d{10,}_[a-z0-9]+\.[a-z0-9]+$/i);
+    if (m && m[1]) {
+      const embeddedOwner = m[1].trim().toLowerCase();
+      if (user.role === 'admin' || user.id === 'admin-authorized-single') {
+        return embeddedOwner === 'admin-authorized-single' || embeddedOwner === 'admin';
+      }
+      const userKeys = getUserAvatarLookupKeys(user);
+      if (userKeys.length > 0) {
+        const matchesOwner = userKeys.some((k) => {
+          const safeK = k.replace(/[^a-z0-9_-]/g, '_');
+          return k === embeddedOwner || safeK === embeddedOwner;
+        });
+        if (!matchesOwner) return false;
+      }
+    }
+  }
+  return true;
 }
 
 export const isCustomUploadedAvatarUrl = isCustomUploadedAvatarDataUrl;
@@ -732,8 +784,10 @@ export function isPlaceholderOrInvalidAvatarUrl(url?: string | null): boolean {
   if (!url || typeof url !== 'string') return true;
   const trimmed = url.trim();
   if (!trimmed || trimmed === 'null' || trimmed === 'undefined') return true;
-  // Known broken or stock Unsplash placeholders from seed data
+  // Known broken, expired ephemeral relay (ntfy.sh/file/), or stock Unsplash placeholders from seed data
   if (
+    trimmed.includes('ntfy.sh/file/') ||
+    trimmed.includes('ntfy.sh/kft_cloud_media_cdn') ||
     trimmed.includes('photo-1534528741775-53994a69daeb') ||
     trimmed.includes('photo-1507003211169-0a1dd7228f2d') ||
     trimmed.includes('photo-1517841905240-472988babdf9') ||
@@ -855,14 +909,11 @@ export function getUserAvatarLookupKeys(user?: {
       add(`user-phone-${digits}`);
     }
   }
-  if (user.name) {
-    add(`name:${user.name}`);
-  }
   return Array.from(keys);
 }
 
 /**
- * Caches a user's avatar across all identity keys for their account.
+ * Caches a user's avatar strictly across unique identity keys for their own account.
  */
 export function cacheUserAvatarForAccount(
   user?: {
@@ -877,17 +928,20 @@ export function cacheUserAvatarForAccount(
   forceOverwrite = false
 ): void {
   if (!user || !avatarUrl) return;
+  if (!isAvatarOwnedByUser(avatarUrl, user)) return;
   if (user.role === 'admin') {
     saveAdminAvatar(avatarUrl);
   }
-  for (const k of getUserAvatarLookupKeys(user)) {
+  const accountKeys = getUserAvatarLookupKeys(user);
+  for (const k of accountKeys) {
     cacheUserAvatar(k, avatarUrl, forceOverwrite);
   }
 }
 
 /**
- * Retrieves the best cached avatar for a user across all their identity keys,
+ * Retrieves the best cached avatar strictly for THIS user across their own identity keys,
  * prioritizing custom uploaded `data:image/` or Cloud Storage avatars over generic URLs.
+ * Never scans or returns avatars belonging to other accounts on the device.
  */
 export function getCachedUserAvatarForAccount(
   user?: {
@@ -895,15 +949,17 @@ export function getCachedUserAvatarForAccount(
     email?: string;
     phone?: string;
     name?: string;
+    role?: string;
     legacyIds?: string[];
   } | null
 ): string | null {
   if (!user) return null;
   const keys = getUserAvatarLookupKeys(user);
+  if (keys.length === 0) return null;
   let fallbackValid: string | null = null;
   for (const k of keys) {
     const cand = getCachedUserAvatar(k);
-    if (!cand) continue;
+    if (!cand || !isAvatarOwnedByUser(cand, user)) continue;
     if (cand.startsWith('data:image/') && !cand.startsWith('data:image/svg')) {
       return cand;
     }
@@ -911,17 +967,6 @@ export function getCachedUserAvatarForAccount(
       fallbackValid = cand;
     } else if (!fallbackValid) {
       fallbackValid = cand;
-    }
-  }
-  // Fallback scan: check kft_user_avatar_cache_v1 for any custom uploaded photo on this device
-  const map = readAvatarCacheMap();
-  for (const [k, v] of Object.entries(map)) {
-    if (k.includes('admin')) continue;
-    if (typeof v === 'string' && v.startsWith('data:image/') && !v.startsWith('data:image/svg')) {
-      return v;
-    }
-    if (!fallbackValid && typeof v === 'string' && isCustomUploadedAvatarDataUrl(v)) {
-      fallbackValid = v;
     }
   }
   return fallbackValid;
@@ -1027,8 +1072,10 @@ export function resolveUserAvatarUrl(
 
   const socialTkAv = (user as any)?.socialAccounts?.tiktok?.avatarUrl;
   const socialFbAv = (user as any)?.socialAccounts?.facebook?.avatarUrl;
-  const normalizedDirect = normalizeAvatarUrl(user.avatar);
-  const normalizedCloud = normalizeAvatarUrl(user.cloudAvatarUrl);
+  const rawDirect = normalizeAvatarUrl(user.avatar);
+  const rawCloud = normalizeAvatarUrl(user.cloudAvatarUrl);
+  const normalizedDirect = rawDirect && isAvatarOwnedByUser(rawDirect, user) ? rawDirect : null;
+  const normalizedCloud = rawCloud && isAvatarOwnedByUser(rawCloud, user) ? rawCloud : null;
   const normalizedSocial = normalizeAvatarUrl(socialTkAv) || normalizeAvatarUrl(socialFbAv);
 
   // If user.avatar is a direct custom data:image/, cache it across all account keys and return immediately

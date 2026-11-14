@@ -97,7 +97,7 @@ export const NotificationsModal: React.FC = () => {
     return list;
   }, [notifications, prefs]);
 
-  if (!isNotificationsModalOpen) return null;
+  // Keep mounted once visited so notification filter & scroll position persist
 
   const unreadCount = activeNotifications.filter((n) => !n.isRead).length;
 
@@ -206,32 +206,25 @@ export const NotificationsModal: React.FC = () => {
     if (n.targetType === 'restaurant' && n.targetId) {
       const r = restaurants.find((x) => x.id === n.targetId) || restaurants[0];
       if (r) {
-        setActiveTab(isHotelBusinessRecord(r) ? 'hotels' : 'restaurants');
         setSelectedRestaurant(r);
-        setIsNotificationsModalOpen(false);
         return;
       }
     }
     if (n.targetType === 'destination' && n.targetId) {
       const d = destinations.find((x) => x.id === n.targetId) || destinations[0];
       if (d) {
-        setActiveTab(d.categorySlug === 'hotel' ? 'hotels' : 'tourism');
         setSelectedDestination(d);
-        setIsNotificationsModalOpen(false);
         return;
       }
     }
     if (n.targetType === 'food' && n.targetId) {
       const f = foods.find((x) => x.id === n.targetId) || foods[0];
       if (f) {
-        setActiveTab('food');
         setSelectedFood(f);
-        setIsNotificationsModalOpen(false);
         return;
       }
     }
     if (n.targetType === 'daily_discovery') {
-      setIsNotificationsModalOpen(false);
       setIsDailyDiscoveriesModalOpen(true);
       return;
     }
@@ -289,7 +282,7 @@ export const NotificationsModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/65 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/65 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
       onClick={() => setIsNotificationsModalOpen(false)}
     >
       <div

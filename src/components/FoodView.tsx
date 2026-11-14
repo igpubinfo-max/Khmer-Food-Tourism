@@ -26,6 +26,9 @@ export const FoodView: React.FC = () => {
     currentUser,
     openUpgradeVipModal,
     setIsAdminOpen,
+    pushNavigationStep,
+    registerModalBackHandler,
+    isRestoringHistoryRef,
   } = useApp();
   const isAdmin = Boolean(
     currentUser?.role === 'admin' ||
@@ -36,6 +39,8 @@ export const FoodView: React.FC = () => {
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categoryShuffleNonce, setCategoryShuffleNonce] = useState<number>(0);
+  const [restoredOrderIds, setRestoredOrderIds] = useState<string[] | null>(null);
+  const currentRenderedOrderIdsRef = useRef<string[]>([]);
   const lastCategoryOrderRef = useRef<Record<string, { firstId: string; topIds: string; fullOrder: string }>>({});
   const [mealTimeFilter, setMealTimeFilter] = useState<MealTimeFilter>('all');
   const [foodSearchQuery, setFoodSearchQuery] = useState<string>('');
@@ -61,15 +66,52 @@ export const FoodView: React.FC = () => {
     });
   };
 
+  const recordFoodStep = (label?: string) => {
+    if (isRestoringHistoryRef.current) return;
+    const snap = {
+      selectedCategory,
+      mealTimeFilter,
+      foodSearchQuery,
+      provinceFilter,
+      tagFilter,
+      visibleCount,
+      orderedIds: [...currentRenderedOrderIdsRef.current],
+    };
+    pushNavigationStep({
+      label: label || 'food-filter',
+      restoreViewStep: () => {
+        setRestoredOrderIds(snap.orderedIds.length > 0 ? snap.orderedIds : null);
+        setSelectedCategory(snap.selectedCategory);
+        setMealTimeFilter(snap.mealTimeFilter);
+        setFoodSearchQuery(snap.foodSearchQuery);
+        setProvinceFilter(snap.provinceFilter);
+        setTagFilter(snap.tagFilter);
+        setVisibleCount(snap.visibleCount);
+        setShowFilterDrawer(false);
+      },
+    });
+  };
+
   useEffect(() => {
-    if (scrollRequestTick === 0) return;
+    registerModalBackHandler('view:food', () => {
+      if (showFilterDrawer) {
+        setShowFilterDrawer(false);
+        return true;
+      }
+      return false;
+    });
+    return () => registerModalBackHandler('view:food', null);
+  }, [registerModalBackHandler, showFilterDrawer]);
+
+  useEffect(() => {
+    if (scrollRequestTick === 0 || isRestoringHistoryRef.current) return;
     smoothScrollToElement(dishListStartRef.current, {
       containerId: 'kft-main-scroll',
       targetId: 'kft-dish-list-section',
       offsetTop: 6,
       delayMs: 25,
     });
-  }, [scrollRequestTick, selectedCategory, categoryShuffleNonce, provinceFilter, tagFilter]);
+  }, [scrollRequestTick]);
 
   const handleExecuteFoodSearch = () => {
     const trimmed = foodSearchQuery.trim();
@@ -97,6 +139,7 @@ export const FoodView: React.FC = () => {
   }, [canUseVip, currentUser]);
 
   useEffect(() => {
+    if (isRestoringHistoryRef.current) return;
     setVisibleCount(PAGE_BATCH_SIZE);
   }, [selectedCategory, categoryShuffleNonce, mealTimeFilter, foodSearchQuery, provinceFilter, tagFilter]);
 
@@ -148,7 +191,25 @@ export const FoodView: React.FC = () => {
     }
 
     if (matched.length <= 1) {
+      currentRenderedOrderIdsRef.current = matched.map((f) => f.id);
       return matched;
+    }
+
+    if (restoredOrderIds && restoredOrderIds.length > 0) {
+      const byId = new Map(matched.map((f) => [f.id, f]));
+      const restored: FoodItem[] = [];
+      for (const id of restoredOrderIds) {
+        const item = byId.get(id);
+        if (item) {
+          restored.push(item);
+          byId.delete(id);
+        }
+      }
+      for (const remaining of byId.values()) {
+        restored.push(remaining);
+      }
+      currentRenderedOrderIdsRef.current = restored.map((f) => f.id);
+      return restored;
     }
 
     const fisherYatesShuffle = (items: FoodItem[]): FoodItem[] => {
@@ -202,8 +263,9 @@ export const FoodView: React.FC = () => {
       fullOrder: candidate.map((f) => f.id).join(','),
     };
 
+    currentRenderedOrderIdsRef.current = candidate.map((f) => f.id);
     return candidate;
-  }, [organizedFoods, selectedCategory, categoryShuffleNonce, provinceFilter, tagFilter, foodSearchQuery]);
+  }, [organizedFoods, selectedCategory, categoryShuffleNonce, restoredOrderIds, provinceFilter, tagFilter, foodSearchQuery]);
 
   const displayedFoods = useMemo(
     () => filteredFoods.slice(0, visibleCount),
@@ -217,6 +279,8 @@ export const FoodView: React.FC = () => {
     foodSearchQuery.trim() !== '';
 
   const resetAllFilters = () => {
+    recordFoodStep('food-reset');
+    setRestoredOrderIds(null);
     setSelectedCategory('all');
     setCategoryShuffleNonce((prev) => prev + 1);
     setMealTimeFilter('all');
@@ -417,7 +481,13 @@ export const FoodView: React.FC = () => {
               type="text"
               size={1}
               value={foodSearchQuery}
-              onChange={(e) => setFoodSearchQuery(e.target.value)}
+              onFocus={() => {
+                if (!foodSearchQuery) recordFoodStep('food-search-focus');
+              }}
+              onChange={(e) => {
+                setRestoredOrderIds(null);
+                setFoodSearchQuery(e.target.value);
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
@@ -435,7 +505,11 @@ export const FoodView: React.FC = () => {
             {foodSearchQuery && (
               <button
                 type="button"
-                onClick={() => setFoodSearchQuery('')}
+                onClick={() => {
+                  recordFoodStep('food-search-clear');
+                  setRestoredOrderIds(null);
+                  setFoodSearchQuery('');
+                }}
                 className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer shrink-0"
                 aria-label="Clear"
               >
@@ -526,6 +600,8 @@ export const FoodView: React.FC = () => {
                   key={cat.id}
                   type="button"
                   onClick={() => {
+                    recordFoodStep('food-cat:' + cat.id);
+                    setRestoredOrderIds(null);
                     setShowFilterDrawer(false);
                     setSelectedCategory(cat.id);
                     setCategoryShuffleNonce((prev) => prev + 1);
@@ -619,6 +695,10 @@ export const FoodView: React.FC = () => {
                       key={t.id}
                       type="button"
                       onClick={() => {
+                        if (tagFilter !== t.id) {
+                          recordFoodStep('food-tag:' + t.id);
+                          setRestoredOrderIds(null);
+                        }
                         setTagFilter(t.id);
                         scrollToDishList();
                       }}
@@ -645,7 +725,12 @@ export const FoodView: React.FC = () => {
               <select
                 value={provinceFilter}
                 onChange={(e) => {
-                  setProvinceFilter(e.target.value);
+                  const val = e.target.value;
+                  if (val !== provinceFilter) {
+                    recordFoodStep('food-prov:' + val);
+                    setRestoredOrderIds(null);
+                  }
+                  setProvinceFilter(val);
                   setShowFilterDrawer(false);
                   scrollToDishList();
                 }}

@@ -557,7 +557,7 @@ export const AdminDashboard: React.FC = () => {
     });
   }, [isAdminOpen, destinations, destLocationFilter, destSearchQuery, destProvinceFilter]);
 
-  if (!isAdminOpen) return null;
+  // Keep mounted once visited so admin search/filter state & scroll position persist
 
   const smartCacheStats = getSmartCacheStats();
 
@@ -1045,7 +1045,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[75] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div 
         className="relative w-full max-w-5xl h-[92vh] bg-slate-50 dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
@@ -3611,7 +3611,6 @@ export const AdminDashboard: React.FC = () => {
                   return;
                 }
                 (window as any).__kft_open_dest_edit = true;
-                setIsAdminOpen(false);
                 setSelectedDestination(hotel);
               }}
               onNavigateToOwnerUser={(query) => {
@@ -3959,8 +3958,7 @@ export const AdminDashboard: React.FC = () => {
                           type="button"
                           onClick={() => {
                             (window as any).__kft_open_dest_edit = true;
-                            setIsAdminOpen(false);
-                            setSelectedDestination(d);
+                setSelectedDestination(d);
                           }}
                           className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-khmer font-bold text-xs flex items-center gap-1 transition active:scale-95 shadow-2xs cursor-pointer"
                         >

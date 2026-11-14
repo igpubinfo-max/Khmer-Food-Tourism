@@ -153,7 +153,7 @@ export const WishlistsModal: React.FC = () => {
     });
   }, [isSavedBookmarksTab, bookmarkedItems, activeWishlist, foods, destinations]);
 
-  if (!isWishlistsModalOpen) return null;
+  // Keep mounted once visited so active list & scroll position persist
 
   const getWishlistDisplayName = (w: { nameKh: string; nameEn: string }) => {
     if (language === 'km') return sanitizeStrictLanguageText(w.nameKh, 'km');
@@ -180,21 +180,18 @@ export const WishlistsModal: React.FC = () => {
       const f = foods.find(x => x.id === item.id);
       if (f) {
         setSelectedFood(f);
-        setIsWishlistsModalOpen(false);
         return;
       }
     } else if (item.type === 'restaurant') {
       const r = restaurants.find(x => x.id === item.id);
       if (r) {
         setSelectedRestaurant(r);
-        setIsWishlistsModalOpen(false);
         return;
       }
     } else if (item.type === 'destination') {
       const d = destinations.find(x => x.id === item.id);
       if (d) {
         setSelectedDestination(d);
-        setIsWishlistsModalOpen(false);
         return;
       }
     }
@@ -218,7 +215,7 @@ export const WishlistsModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
+    <div className={`fixed inset-0 ${targetWishlistItem ? 'z-[92]' : 'z-[60]'} flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200`}>
       <div 
         className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[92vh] flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}

@@ -639,7 +639,7 @@ export const TrendingSocialModal: React.FC = () => {
     return () => observer.disconnect();
   }, [visibleVideoCount, filteredItems.length]);
 
-  if (!isTrendingSocialModalOpen) return null;
+  // Keep mounted once visited so video feed & scroll position persist
 
   // 4 Main Categories + All Trending
   const categories: { id: TrendingFoodCategorySlug; labelKh: string; labelEn: string; labelZh: string; icon: string }[] = [
@@ -988,7 +988,7 @@ export const TrendingSocialModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200 overscroll-none"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200 overscroll-none"
       onClick={() => setIsTrendingSocialModalOpen(false)}
     >
       <div
@@ -1070,7 +1070,6 @@ export const TrendingSocialModal: React.FC = () => {
                 type="button"
                 onClick={() => {
                   const q = searchQuery.trim();
-                  setIsTrendingSocialModalOpen(false);
                   openAiAssistantWithQuery(q, setIsWhatToEatModalOpen);
                 }}
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-800 hover:bg-emerald-700 text-amber-300 text-[11px] font-bold shadow-2xs transition active:scale-95 cursor-pointer font-khmer"

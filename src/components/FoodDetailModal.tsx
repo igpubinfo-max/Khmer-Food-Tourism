@@ -29,7 +29,7 @@ export const FoodDetailModal: React.FC = () => {
   const { 
     selectedFood, setSelectedFood, updateFood, deleteFood, language, 
     isBookmarked, toggleBookmark, showToast, openAddToWishlist,
-    currentUser
+    currentUser, registerModalBackHandler
   } = useApp();
   const isAdmin = Boolean(
     currentUser?.role === 'admin' ||
@@ -43,6 +43,21 @@ export const FoodDetailModal: React.FC = () => {
   const [onlineCandidates, setOnlineCandidates] = useState<OnlineFoodImageCandidate[]>([]);
   const [isEditingAdminFood, setIsEditingAdminFood] = useState(false);
   const [confirmAdminDelete, setConfirmAdminDelete] = useState(false);
+
+  useEffect(() => {
+    registerModalBackHandler('foodDetail', () => {
+      if (isEditingAdminFood) {
+        setIsEditingAdminFood(false);
+        return true;
+      }
+      if (confirmAdminDelete) {
+        setConfirmAdminDelete(false);
+        return true;
+      }
+      return false;
+    });
+    return () => registerModalBackHandler('foodDetail', null);
+  }, [registerModalBackHandler, isEditingAdminFood, confirmAdminDelete]);
 
   // Admin editable fields
   const [editNameKh, setEditNameKh] = useState('');
@@ -434,7 +449,7 @@ export const FoodDetailModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overscroll-none"
+      className="fixed inset-0 z-[85] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overscroll-none"
       onClick={() => {
         if (isSpeaking && typeof window !== 'undefined' && 'speechSynthesis' in window) {
           window.speechSynthesis.cancel();
@@ -454,12 +469,16 @@ export const FoodDetailModal: React.FC = () => {
           <button
             onClick={() => {
               if (isSpeaking) window.speechSynthesis.cancel();
+              if (isEditingAdminFood) {
+                setIsEditingAdminFood(false);
+                return;
+              }
               setSelectedFood(null);
             }}
             className="kft-btn-modal-icon pointer-events-auto"
-            title={tr(language, 'បិទ', 'Close', '关闭')}
+            title={tr(language, 'ត្រឡប់', 'Back', '返回')}
           >
-            <X className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
 
           <div className="flex items-center gap-2 pointer-events-auto">
@@ -545,7 +564,7 @@ export const FoodDetailModal: React.FC = () => {
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto flex-1 min-h-0 overscroll-contain [-webkit-overflow-scrolling:touch] no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+32px)]">
+        <div data-kft-detail-scroll="true" className="overflow-y-auto flex-1 min-h-0 overscroll-contain [-webkit-overflow-scrolling:touch] no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+32px)]">
           {isEditingAdminFood ? (
             /* ADMIN EDIT FOOD FORM */
             <form onSubmit={handleSaveAdminFood} className="p-4 sm:p-6 space-y-4 font-khmer pt-16">

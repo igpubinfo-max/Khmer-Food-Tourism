@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, MapPin, Phone, Star, Clock, ExternalLink, Compass,
+  X, ArrowLeft, MapPin, Phone, Star, Clock, ExternalLink, Compass,
   Send, Share2, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
   BarChart3, Video, Crown, Edit2, MessageSquare, Trash2
 } from 'lucide-react';
@@ -54,10 +54,22 @@ export const RestaurantDetailModal: React.FC = () => {
     deleteRestaurant,
     openAddToWishlist,
     openUpgradeVipModal,
+    registerModalBackHandler,
   } = useApp();
 
   const [activePhoto, setActivePhoto] = useState<string>('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
+  useEffect(() => {
+    registerModalBackHandler('restaurantDetail', () => {
+      if (isImageModalOpen) {
+        setIsImageModalOpen(false);
+        return true;
+      }
+      return false;
+    });
+    return () => registerModalBackHandler('restaurantDetail', null);
+  }, [registerModalBackHandler, isImageModalOpen]);
   const [userReviewStars, setUserReviewStars] = useState<number>(5);
   const [userReviewComment, setUserReviewComment] = useState<string>('');
 
@@ -208,7 +220,7 @@ export const RestaurantDetailModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[65] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overscroll-none"
+      className="fixed inset-0 z-[85] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overscroll-none"
       onClick={() => setSelectedRestaurant(null)}
     >
       <div 
@@ -223,9 +235,9 @@ export const RestaurantDetailModal: React.FC = () => {
           <button
             onClick={() => setSelectedRestaurant(null)}
             className="kft-btn-modal-icon pointer-events-auto"
-            title={tr(language, 'បិទ', 'Close', '关闭')}
+            title={tr(language, 'ត្រឡប់', 'Back', '返回')}
           >
-            <X className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
           
           <div className="flex items-center gap-2 pointer-events-auto">
@@ -249,7 +261,7 @@ export const RestaurantDetailModal: React.FC = () => {
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+24px)]">
+        <div data-kft-detail-scroll="true" className="overflow-y-auto flex-1 no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+24px)]">
           {/* Hero Image or Clean Shop Icon Banner (matching Hotel Detail Modal) */}
           {(() => {
             const rawHeroCandidate = (
@@ -559,7 +571,6 @@ export const RestaurantDetailModal: React.FC = () => {
                       onClick={() => {
                         (window as any).__kft_manage_initial_tab = 'video';
                         const targetShop = selectedRestaurant;
-                        setSelectedRestaurant(null);
                         setManagingRestaurant(targetShop);
                         setIsManageMenuModalOpen(true);
                       }}
@@ -617,7 +628,6 @@ export const RestaurantDetailModal: React.FC = () => {
                     onClick={() => {
                       (window as any).__kft_manage_initial_tab = 'info';
                       const targetShop = selectedRestaurant;
-                      setSelectedRestaurant(null);
                       setManagingRestaurant(targetShop);
                       setIsManageMenuModalOpen(true);
                     }}

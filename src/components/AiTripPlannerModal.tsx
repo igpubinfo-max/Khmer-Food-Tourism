@@ -100,6 +100,8 @@ export const AiTripPlannerModal: React.FC = () => {
   setSelectedDestination,
     setActiveTab,
     openUpgradeVipModal,
+    pushNavigationStep,
+    registerModalBackHandler,
   } = useApp();
 
   const canUseVipLocal = true;
@@ -221,7 +223,25 @@ export const AiTripPlannerModal: React.FC = () => {
     });
   };
 
-  if (!isAiTripPlannerModalOpen) return null;
+  useEffect(() => {
+    if (!isAiTripPlannerModalOpen) return;
+    return registerModalBackHandler('aiTripPlanner', () => {
+      if (assistantTab === 'route_planner' && generatedPlan) {
+        setGeneratedPlan(null);
+        return true;
+      }
+      if (assistantTab === 'food_advisor' && (expandedGoalId !== null || advisorPrompt.trim() !== '')) {
+        setExpandedGoalId(null);
+        setAdvisorPrompt('');
+        return true;
+      }
+      if (assistantTab !== 'food_advisor') {
+        setAssistantTab('food_advisor');
+        return true;
+      }
+      return false;
+    });
+  }, [isAiTripPlannerModalOpen, assistantTab, generatedPlan, expandedGoalId, advisorPrompt, registerModalBackHandler]);
 
   const handleGenerate = () => {
     // 1-Day Trip Plan is FREE for all users; Multi-day (2-3 days) or Luxury mode requires VIP
@@ -318,6 +338,7 @@ export const AiTripPlannerModal: React.FC = () => {
       openUpgradeVipModal();
       return;
     }
+    pushNavigationStep({ label: 'aiTripPlanner->food', reopenModalId: 'aiTripPlanner' });
     setIsAiTripPlannerModalOpen(false);
     setActiveTab('food');
   };
@@ -503,7 +524,7 @@ export const AiTripPlannerModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
       onClick={() => setIsAiTripPlannerModalOpen(false)}
     >
       <div
@@ -835,7 +856,6 @@ export const AiTripPlannerModal: React.FC = () => {
                     language={language}
                     onPickFood={(food) => {
                       setSelectedFood(food);
-                      setIsAiTripPlannerModalOpen(false);
                     }}
                     onChip={(q) => {
                       setAdvisorPrompt(q);
@@ -854,7 +874,6 @@ export const AiTripPlannerModal: React.FC = () => {
                         key={dish.id}
                         onClick={() => {
                           setSelectedFood(dish);
-                          setIsAiTripPlannerModalOpen(false);
                         }}
                         className="p-2.5 rounded-xl bg-white border border-slate-200/90 hover:border-emerald-500 flex items-center justify-between gap-2.5 cursor-pointer transition shadow-2xs"
                       >
@@ -917,7 +936,6 @@ export const AiTripPlannerModal: React.FC = () => {
                           <div
                             onClick={() => {
                               setSelectedRestaurant(shop);
-                              setIsAiTripPlannerModalOpen(false);
                             }}
                             className="min-w-0 flex-1 cursor-pointer"
                           >
@@ -1177,7 +1195,6 @@ export const AiTripPlannerModal: React.FC = () => {
                             type="button"
                             onClick={() => {
                               setSelectedFood(dish);
-                              setIsAiTripPlannerModalOpen(false);
                             }}
                             className="w-full p-2.5 rounded-xl bg-white border border-slate-200/90 hover:border-emerald-500 flex items-center justify-between gap-2.5 cursor-pointer text-left transition shadow-2xs active:scale-[0.99]"
                           >
@@ -1235,7 +1252,6 @@ export const AiTripPlannerModal: React.FC = () => {
                               <div
                                 onClick={() => {
                                   setSelectedRestaurant(shop);
-                                  setIsAiTripPlannerModalOpen(false);
                                 }}
                                 className="min-w-0 flex-1 cursor-pointer"
                               >
@@ -1274,7 +1290,6 @@ export const AiTripPlannerModal: React.FC = () => {
               onViewAll={handleViewAllHealthyTag}
               onOpenFood={(food) => {
                 setSelectedFood(food);
-                setIsAiTripPlannerModalOpen(false);
               }}
               onUpgradeVip={() => openUpgradeVipModal()}
             />

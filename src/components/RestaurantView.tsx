@@ -80,6 +80,9 @@ export const RestaurantView: React.FC = () => {
     unreadNotificationsCount,
     setActiveTab,
     showToast,
+    pushNavigationStep,
+    registerModalBackHandler,
+    isRestoringHistoryRef,
   } = useApp();
 
   const isAdmin = isAdminAccount(currentUser);
@@ -126,15 +129,52 @@ export const RestaurantView: React.FC = () => {
     });
   };
 
+  const recordRestaurantStep = (label?: string) => {
+    if (isRestoringHistoryRef.current) return;
+    const snap = {
+      categoryFilter,
+      sortMode,
+      nearMeActive,
+      showAllFeatured,
+      shopSearchQuery,
+      debouncedShopSearchQuery,
+      visibleCount,
+    };
+    pushNavigationStep({
+      label: label || 'restaurant-filter',
+      restoreViewStep: () => {
+        setCategoryFilter(snap.categoryFilter);
+        setSortMode(snap.sortMode);
+        setNearMeActive(snap.nearMeActive);
+        setShowAllFeatured(snap.showAllFeatured);
+        setShopSearchQuery(snap.shopSearchQuery);
+        setDebouncedShopSearchQuery(snap.debouncedShopSearchQuery);
+        setVisibleCount(snap.visibleCount);
+        setShowFilterDrawer(false);
+      },
+    });
+  };
+
   useEffect(() => {
-    if (scrollRequestTick === 0) return;
+    registerModalBackHandler('view:restaurants', () => {
+      if (showFilterDrawer) {
+        setShowFilterDrawer(false);
+        return true;
+      }
+      return false;
+    });
+    return () => registerModalBackHandler('view:restaurants', null);
+  }, [registerModalBackHandler, showFilterDrawer]);
+
+  useEffect(() => {
+    if (scrollRequestTick === 0 || isRestoringHistoryRef.current) return;
     smoothScrollToElement(shopListStartRef.current, {
       containerId: 'kft-main-scroll',
       targetId: 'kft-shop-list-section',
       offsetTop: 6,
       delayMs: 25,
     });
-  }, [scrollRequestTick, categoryFilter, selectedProvince, nearMeActive, sortMode]);
+  }, [scrollRequestTick]);
 
   const handleExecuteShopSearch = () => {
     setDebouncedShopSearchQuery(shopSearchQuery);
@@ -353,6 +393,7 @@ export const RestaurantView: React.FC = () => {
   ];
 
   useEffect(() => {
+    if (isRestoringHistoryRef.current) return;
     setVisibleCount(RESTAURANT_BATCH_SIZE);
   }, [selectedProvince, priceFilter, categoryFilter, cuisineFilter, ratingFilter, sortMode, shopSearchQuery]);
 
@@ -675,6 +716,9 @@ export const RestaurantView: React.FC = () => {
               type="text"
               size={1}
               value={shopSearchQuery}
+              onFocus={() => {
+                if (!shopSearchQuery) recordRestaurantStep('shop-search-focus');
+              }}
               onChange={(e) => setShopSearchQuery(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -693,7 +737,11 @@ export const RestaurantView: React.FC = () => {
             {shopSearchQuery && (
               <button
                 type="button"
-                onClick={() => setShopSearchQuery('')}
+                onClick={() => {
+                  recordRestaurantStep('shop-search-clear');
+                  setShopSearchQuery('');
+                  setDebouncedShopSearchQuery('');
+                }}
                 className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer shrink-0"
                 aria-label={tr(language, 'សម្អាត', 'Clear', '清除')}
               >
@@ -743,6 +791,7 @@ export const RestaurantView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
+                    recordRestaurantStep('shop-reset');
                     setSelectedProvince('ទាំងអស់');
                     setCategoryFilter('all');
                     setNearMeActive(false);
@@ -768,7 +817,11 @@ export const RestaurantView: React.FC = () => {
               <select
                 value={cleanSelectedProvince}
                 onChange={(e) => {
-                  setSelectedProvince(e.target.value || 'ទាំងអស់');
+                  const val = e.target.value || 'ទាំងអស់';
+                  if (val !== selectedProvince) {
+                    recordRestaurantStep('shop-prov:' + val);
+                  }
+                  setSelectedProvince(val);
                   setShowFilterDrawer(false);
                   scrollToShopList();
                 }}
@@ -806,6 +859,7 @@ export const RestaurantView: React.FC = () => {
                   type="button"
                   id={`kft-shop-cat-${cat.id}-btn`}
                   onClick={() => {
+                    recordRestaurantStep('shop-cat:' + cat.id);
                     setShowFilterDrawer(false);
                     if (cat.id === 'near_me_toggle') {
                       handleToggleNearMe();
@@ -968,7 +1022,10 @@ export const RestaurantView: React.FC = () => {
                   {/* Unified White Rounded Pill "មើលទាំងអស់ >" */}
                   <button
                     type="button"
-                    onClick={() => setShowAllFeatured((prev) => !prev)}
+                    onClick={() => {
+                      recordRestaurantStep('shop-featured-toggle');
+                      setShowAllFeatured((prev) => !prev);
+                    }}
                     className="kft-btn-see-all"
                   >
                     <span>

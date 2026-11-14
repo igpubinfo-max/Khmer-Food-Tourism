@@ -54,7 +54,7 @@ export const ProfileView: React.FC = () => {
     setActiveTab, setIsRestaurantCheckInModalOpen,
     openGoogleMapsSearchModal,
     appSettings, updateAppSettings, getCurrentUserStoreQuota, triggerCloudSyncNow
-  } = useApp();
+  , registerModalBackHandler } = useApp();
 
   const isKm = language === 'km';
   const isAdmin = isAdminAccount(currentUser);
@@ -135,6 +135,25 @@ export const ProfileView: React.FC = () => {
   const [isAvatarEditorOpen, setIsAvatarEditorOpen] = useState(false);
   const [avatarEditorSourceUrl, setAvatarEditorSourceUrl] = useState<string>('');
   const [isAvatarActionSheetOpen, setIsAvatarActionSheetOpen] = useState(false);
+
+  useEffect(() => {
+    registerModalBackHandler('view:profile', () => {
+      if (isPrivacyModalOpen) {
+        setIsPrivacyModalOpen(false);
+        return true;
+      }
+      if (isAvatarEditorOpen) {
+        setIsAvatarEditorOpen(false);
+        return true;
+      }
+      if (isAvatarActionSheetOpen) {
+        setIsAvatarActionSheetOpen(false);
+        return true;
+      }
+      return false;
+    });
+    return () => registerModalBackHandler('view:profile', null);
+  }, [registerModalBackHandler, isPrivacyModalOpen, isAvatarEditorOpen, isAvatarActionSheetOpen]);
   const [, setAvatarCacheTick] = useState(0);
   useEffect(() => {
     const onAv = () => setAvatarCacheTick((t) => t + 1);

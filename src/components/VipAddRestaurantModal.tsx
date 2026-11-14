@@ -307,6 +307,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     restaurants,
     destinations,
     openUpgradeVipModal,
+    registerModalBackHandler,
   } = useApp();
 
   const isKm = language === 'km';
@@ -819,23 +820,49 @@ export const VipAddRestaurantModal: React.FC = () => {
       setFormMode('upgrade_existing');
       setBusinessType('restaurant');
       setBusinessCategory('restaurant');
-    } else {
+      setUpgradingExistingStoreId(null);
+      setReplacingStoreId(null);
+      setClaimingDestinationId(null);
+      setSubmitAttempted(false);
+      setLocationNotice(null);
+      setSubmittedPendingShop(null);
+      setIsPreviewStep(false);
+      const freshQuota = getCurrentUserStoreQuota(currentUser);
+      setActiveTab(!isAdmin && !freshQuota.canCreateNewStoreWithoutPayment ? 'pay_additional_slot' : 'create_form');
+    } else if (!prefillLoc && !nameKh.trim() && !nameEn.trim() && !upgradingExistingStoreId && !replacingStoreId && !claimingDestinationId) {
       setFormMode('add_new');
       setBusinessType('restaurant');
       setBusinessCategory('restaurant');
+      setSubmitAttempted(false);
+      setLocationNotice(null);
+      setSubmittedPendingShop(null);
+      setIsPreviewStep(false);
+      const freshQuota = getCurrentUserStoreQuota(currentUser);
+      setActiveTab(!isAdmin && !freshQuota.canCreateNewStoreWithoutPayment ? 'pay_additional_slot' : 'create_form');
     }
-    setUpgradingExistingStoreId(null);
-    setReplacingStoreId(null);
-    setClaimingDestinationId(null);
-    setSubmitAttempted(false);
-    setLocationNotice(null);
-    setSubmittedPendingShop(null);
-    setIsPreviewStep(false);
-    const freshQuota = getCurrentUserStoreQuota(currentUser);
-    setActiveTab(!isAdmin && !freshQuota.canCreateNewStoreWithoutPayment ? 'pay_additional_slot' : 'create_form');
   }, [isVipAddRestaurantModalOpen]);
 
-  if (!isVipAddRestaurantModalOpen) return null;
+  useEffect(() => {
+    if (!isVipAddRestaurantModalOpen) return;
+    return registerModalBackHandler('vipAddRestaurant', () => {
+      if (isPreviewStep) {
+        setIsPreviewStep(false);
+        return true;
+      }
+      if (upgradingExistingStoreId || claimingDestinationId) {
+        setUpgradingExistingStoreId(null);
+        setClaimingDestinationId(null);
+        return true;
+      }
+      if (activeTab !== 'create_form') {
+        setActiveTab('create_form');
+        return true;
+      }
+      return false;
+    });
+  }, [isVipAddRestaurantModalOpen, isPreviewStep, upgradingExistingStoreId, claimingDestinationId, activeTab, registerModalBackHandler]);
+
+  // Keep mounted once visited so entered shop/hotel form data & scroll persist
 
   // Pick Shop Photo from Gallery with Image Moderation & Validation
   const handlePickFromGallery = async () => {

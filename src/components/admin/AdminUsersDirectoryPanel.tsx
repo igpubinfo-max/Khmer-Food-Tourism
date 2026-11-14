@@ -1530,7 +1530,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
                           )}
                           {rec.txnsCount > 0 && (
                             <span className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold">
-                              💳 {rec.txnsCount} ($&#36;{rec.associations.totalSpentUsd.toFixed(2)})
+                              💳 {rec.txnsCount} (&#36;{rec.associations.totalSpentUsd.toFixed(2)})
                             </span>
                           )}
                         </div>

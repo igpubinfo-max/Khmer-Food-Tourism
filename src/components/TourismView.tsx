@@ -54,6 +54,8 @@ export const TourismView: React.FC = () => {
     selectedProvince,
     setSelectedProvince,
     showToast,
+    pushNavigationStep,
+    isRestoringHistoryRef,
   } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -79,17 +81,43 @@ export const TourismView: React.FC = () => {
     });
   };
 
+  const recordTourismStep = (label?: string) => {
+    if (isRestoringHistoryRef.current) return;
+    const snap = {
+      selectedCategory,
+      selectedProvince,
+      searchQuery,
+      nearMeActive,
+      visibleCount,
+      shuffleSeed,
+      avoidTopIds: new Set(avoidTopIds),
+    };
+    pushNavigationStep({
+      label: label || 'tourism-filter',
+      restoreViewStep: () => {
+        setSelectedCategory(snap.selectedCategory);
+        setSelectedProvince(snap.selectedProvince);
+        setSearchQuery(snap.searchQuery);
+        setNearMeActive(snap.nearMeActive);
+        setShuffleSeed(snap.shuffleSeed);
+        setAvoidTopIds(snap.avoidTopIds);
+        setVisibleCount(snap.visibleCount);
+      },
+    });
+  };
+
   useEffect(() => {
-    if (scrollRequestTick === 0) return;
+    if (scrollRequestTick === 0 || isRestoringHistoryRef.current) return;
     smoothScrollToElement(tourismListStartRef.current, {
       containerId: 'kft-main-scroll',
       targetId: 'kft-tourism-list-section',
       offsetTop: 6,
       delayMs: 25,
     });
-  }, [scrollRequestTick, selectedCategory, selectedProvince, nearMeActive]);
+  }, [scrollRequestTick]);
 
   useEffect(() => {
+    if (isRestoringHistoryRef.current) return;
     setVisibleCount(TOURISM_BATCH_SIZE);
   }, [selectedCategory, selectedProvince, deferredSearchQuery, nearMeActive]);
 
@@ -409,6 +437,7 @@ export const TourismView: React.FC = () => {
     selectedCategory !== 'all' || Boolean(selectedProvince) || Boolean(searchQuery.trim()) || nearMeActive;
 
   const resetAllFilters = () => {
+    recordTourismStep('tourism-reset');
     setSelectedCategory('all');
     setSelectedProvince('');
     setSearchQuery('');
@@ -487,6 +516,9 @@ export const TourismView: React.FC = () => {
               type="text"
               size={1}
               value={searchQuery}
+              onFocus={() => {
+                if (!searchQuery) recordTourismStep('tourism-search-focus');
+              }}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -506,7 +538,10 @@ export const TourismView: React.FC = () => {
             {searchQuery && (
               <button
                 type="button"
-                onClick={() => setSearchQuery('')}
+                onClick={() => {
+                  recordTourismStep('tourism-search-clear');
+                  setSearchQuery('');
+                }}
                 aria-label={tr(language, 'សម្អាតការស្វែងរក', 'Clear search', '清除搜索')}
                 className="p-1 text-slate-400 hover:text-slate-700 shrink-0 cursor-pointer"
               >
@@ -517,6 +552,7 @@ export const TourismView: React.FC = () => {
             <button
               type="button"
               onClick={() => {
+                recordTourismStep('tourism-near-me');
                 handleToggleNearMe();
                 scrollToTourismList();
               }}
@@ -558,6 +594,7 @@ export const TourismView: React.FC = () => {
                   id={`kft-travel-cat-${cat.id}-btn`}
                   type="button"
                   onClick={() => {
+                    recordTourismStep('tourism-cat:' + cat.id);
                     if (selectedCategory === cat.id || cat.id === 'all') {
                       triggerTourismReshuffle();
                     }
@@ -610,7 +647,11 @@ export const TourismView: React.FC = () => {
               <select
                 value={selectedProvince}
                 onChange={(e) => {
-                  setSelectedProvince(e.target.value);
+                  const val = e.target.value;
+                  if (val !== selectedProvince) {
+                    recordTourismStep('tourism-prov:' + val);
+                  }
+                  setSelectedProvince(val);
                   scrollToTourismList();
                 }}
                 aria-label={tr(
@@ -675,7 +716,10 @@ export const TourismView: React.FC = () => {
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
-              onClick={triggerTourismReshuffle}
+              onClick={() => {
+                recordTourismStep('tourism-shuffle');
+                triggerTourismReshuffle();
+              }}
               title={tr(language, 'ប្តូរលំដាប់តំបន់ទេសចរណ៍ថ្មី', 'Shuffle attractions', '随机刷新景点')}
               className="px-2.5 py-1 rounded-full bg-amber-400/95 hover:bg-amber-300 text-slate-950 border border-amber-200 shadow-2xs text-xs font-extrabold inline-flex items-center gap-1 transition active:scale-95 cursor-pointer"
             >

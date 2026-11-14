@@ -1,4 +1,4 @@
-﻿import { computeUserIntegritySealSync } from '../utils/securityIntegrityGuard';
+import { computeUserIntegritySealSync } from '../utils/securityIntegrityGuard';
 import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 /**
  * Supabase Cloud Database & Storage Synchronization Service (Free Tier Compatible)
@@ -48,8 +48,10 @@ import {
 } from './cloudImageStorageService';
 import {
   isCustomUploadedAvatarDataUrl,
+  isAvatarOwnedByUser,
   cacheUserAvatarForAccount,
   getCachedUserAvatarForAccount,
+  clearCachedUserAvatarForAccount,
   createCompactSyncAvatarDataUrl,
 } from '../utils/avatarHelper';
 import { applyFoodWatermarkOnce, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
@@ -3049,54 +3051,67 @@ export function mergeTwoUserRecordsCanonical(rawFirst: User, rawSecond: User): U
       ? 'owner'
       : 'user';
 
-  const isCustomAvatar = (av?: string) => isCustomUploadedAvatarDataUrl(av);
+  const targetOwnerHint = {
+    id: canonicalId,
+    email: (second.email || first.email || '').trim().toLowerCase(),
+    phone: second.phone || first.phone,
+    role: mergedRole,
+    legacyIds: legacyIdSet.size > 0 ? Array.from(legacyIdSet) : undefined,
+  };
+  const isCustomAvatar = (av?: string) =>
+    isCustomUploadedAvatarDataUrl(av) && isAvatarOwnedByUser(av, targetOwnerHint);
   const isValidNonStockAvatar = (av?: string) =>
     Boolean(
       av &&
+        isAvatarOwnedByUser(av, targetOwnerHint) &&
         !av.includes('photo-1535713875002') &&
         !av.includes('photo-1534528741775') &&
         !av.includes('photo-1507003211169') &&
         !av.includes('photo-1517841905240')
     );
 
-  const firstHasCustomAvatar = isCustomAvatar(first.avatar) || isCustomAvatar(first.cloudAvatarUrl);
-  const secondHasCustomAvatar = isCustomAvatar(second.avatar) || isCustomAvatar(second.cloudAvatarUrl);
+  const cleanFirstCloudAv = isCustomAvatar(first.cloudAvatarUrl) ? first.cloudAvatarUrl : undefined;
+  const cleanSecondCloudAv = isCustomAvatar(second.cloudAvatarUrl) ? second.cloudAvatarUrl : undefined;
+
+  const firstHasCustomAvatar = isCustomAvatar(first.avatar) || Boolean(cleanFirstCloudAv);
+  const secondHasCustomAvatar = isCustomAvatar(second.avatar) || Boolean(cleanSecondCloudAv);
   const firstAvatarMs = parseValidMs(first.avatarUpdatedAt);
   const secondAvatarMs = parseValidMs(second.avatarUpdatedAt);
 
   let chosenAvatar = '';
-  let chosenCloudAvatarUrl = second.cloudAvatarUrl || first.cloudAvatarUrl;
-  let chosenAvatarUpdatedAt = second.avatarUpdatedAt || first.avatarUpdatedAt;
+  let chosenCloudAvatarUrl = cleanSecondCloudAv || cleanFirstCloudAv;
+  let chosenAvatarUpdatedAt = (firstHasCustomAvatar || secondHasCustomAvatar)
+    ? (second.avatarUpdatedAt || first.avatarUpdatedAt)
+    : undefined;
 
   if (firstHasCustomAvatar && secondHasCustomAvatar) {
     if (firstAvatarMs > 0 && secondAvatarMs > 0 && firstAvatarMs > secondAvatarMs) {
-      chosenAvatar = isCustomAvatar(first.avatar) ? first.avatar! : first.cloudAvatarUrl!;
-      chosenCloudAvatarUrl = first.cloudAvatarUrl || second.cloudAvatarUrl;
+      chosenAvatar = isCustomAvatar(first.avatar) ? first.avatar! : cleanFirstCloudAv!;
+      chosenCloudAvatarUrl = cleanFirstCloudAv || cleanSecondCloudAv;
       chosenAvatarUpdatedAt = first.avatarUpdatedAt;
     } else if (secondAvatarMs > 0 && firstAvatarMs === 0) {
-      chosenAvatar = isCustomAvatar(second.avatar) ? second.avatar! : second.cloudAvatarUrl!;
-      chosenCloudAvatarUrl = second.cloudAvatarUrl || first.cloudAvatarUrl;
+      chosenAvatar = isCustomAvatar(second.avatar) ? second.avatar! : cleanSecondCloudAv!;
+      chosenCloudAvatarUrl = cleanSecondCloudAv || cleanFirstCloudAv;
       chosenAvatarUpdatedAt = second.avatarUpdatedAt;
     } else if (firstAvatarMs > 0 && secondAvatarMs === 0) {
-      chosenAvatar = isCustomAvatar(first.avatar) ? first.avatar! : first.cloudAvatarUrl!;
-      chosenCloudAvatarUrl = first.cloudAvatarUrl || second.cloudAvatarUrl;
+      chosenAvatar = isCustomAvatar(first.avatar) ? first.avatar! : cleanFirstCloudAv!;
+      chosenCloudAvatarUrl = cleanFirstCloudAv || cleanSecondCloudAv;
       chosenAvatarUpdatedAt = first.avatarUpdatedAt;
     } else {
-      // Equal or no timestamps: prefer full data:image/ if one side is a remote URL and the other is data:image/, otherwise prefer second
-      chosenAvatar = isCustomAvatar(second.avatar) ? second.avatar! : isCustomAvatar(first.avatar) ? first.avatar! : (second.cloudAvatarUrl || first.cloudAvatarUrl || '');
-      chosenCloudAvatarUrl = second.cloudAvatarUrl || first.cloudAvatarUrl;
+      chosenAvatar = isCustomAvatar(second.avatar) ? second.avatar! : isCustomAvatar(first.avatar) ? first.avatar! : (cleanSecondCloudAv || cleanFirstCloudAv || '');
+      chosenCloudAvatarUrl = cleanSecondCloudAv || cleanFirstCloudAv;
       chosenAvatarUpdatedAt = second.avatarUpdatedAt || first.avatarUpdatedAt;
     }
   } else if (secondHasCustomAvatar) {
-    chosenAvatar = isCustomAvatar(second.avatar) ? second.avatar! : second.cloudAvatarUrl!;
-    chosenCloudAvatarUrl = second.cloudAvatarUrl || (second.avatar?.startsWith('http') ? second.avatar : first.cloudAvatarUrl);
+    chosenAvatar = isCustomAvatar(second.avatar) ? second.avatar! : cleanSecondCloudAv!;
+    chosenCloudAvatarUrl = cleanSecondCloudAv || (isCustomAvatar(second.avatar) && second.avatar?.startsWith('http') ? second.avatar : cleanFirstCloudAv);
     chosenAvatarUpdatedAt = second.avatarUpdatedAt || first.avatarUpdatedAt;
   } else if (firstHasCustomAvatar) {
-    chosenAvatar = isCustomAvatar(first.avatar) ? first.avatar! : first.cloudAvatarUrl!;
-    chosenCloudAvatarUrl = first.cloudAvatarUrl || (first.avatar?.startsWith('http') ? first.avatar : second.cloudAvatarUrl);
+    chosenAvatar = isCustomAvatar(first.avatar) ? first.avatar! : cleanFirstCloudAv!;
+    chosenCloudAvatarUrl = cleanFirstCloudAv || (isCustomAvatar(first.avatar) && first.avatar?.startsWith('http') ? first.avatar : cleanSecondCloudAv);
     chosenAvatarUpdatedAt = first.avatarUpdatedAt || second.avatarUpdatedAt;
   } else {
-    const cachedAvatar = getCachedUserAvatarForAccount(second) || getCachedUserAvatarForAccount(first);
+    const cachedAvatar = getCachedUserAvatarForAccount(targetOwnerHint);
     if (cachedAvatar && isCustomAvatar(cachedAvatar)) {
       chosenAvatar = cachedAvatar;
     } else if (isValidNonStockAvatar(second.avatar)) {
@@ -3104,7 +3119,7 @@ export function mergeTwoUserRecordsCanonical(rawFirst: User, rawSecond: User): U
     } else if (isValidNonStockAvatar(first.avatar)) {
       chosenAvatar = first.avatar!;
     } else {
-      chosenAvatar = second.avatar || first.avatar || '';
+      chosenAvatar = '';
     }
   }
 
@@ -3554,13 +3569,27 @@ export function deduplicateAndNormalizeUsers(
 
     if (!existingKey || !canonicalMap.has(existingKey)) {
       const legacyIds = item.id && item.id !== targetCanonicalId ? [item.id] : item.legacyIds;
-      let resolvedFirstAvatar = item.avatar || '';
+      const ownerCandidate = {
+        ...item,
+        id: targetCanonicalId,
+        email: cleanEmail || item.email || '',
+        legacyIds: legacyIds && legacyIds.length > 0 ? Array.from(new Set(legacyIds)) : undefined,
+      };
+      const cleanDirectAv =
+        item.avatar && isAvatarOwnedByUser(item.avatar, ownerCandidate) ? item.avatar : '';
+      const cleanCloudAv =
+        item.cloudAvatarUrl &&
+        isCustomUploadedAvatarDataUrl(item.cloudAvatarUrl) &&
+        isAvatarOwnedByUser(item.cloudAvatarUrl, ownerCandidate)
+          ? item.cloudAvatarUrl
+          : undefined;
+      let resolvedFirstAvatar = cleanDirectAv;
       if (!isCustomUploadedAvatarDataUrl(resolvedFirstAvatar)) {
-        if (isCustomUploadedAvatarDataUrl(item.cloudAvatarUrl)) {
-          resolvedFirstAvatar = item.cloudAvatarUrl!;
+        if (cleanCloudAv) {
+          resolvedFirstAvatar = cleanCloudAv;
         } else {
-          const cached = getCachedUserAvatarForAccount({ ...item, id: targetCanonicalId });
-          if (cached && isCustomUploadedAvatarDataUrl(cached)) {
+          const cached = getCachedUserAvatarForAccount(ownerCandidate);
+          if (cached && isCustomUploadedAvatarDataUrl(cached) && isAvatarOwnedByUser(cached, ownerCandidate)) {
             resolvedFirstAvatar = cached;
           }
         }
@@ -3570,21 +3599,20 @@ export function deduplicateAndNormalizeUsers(
         id: targetCanonicalId,
         email: cleanEmail || item.email || '',
         avatar: resolvedFirstAvatar,
+        cloudAvatarUrl: cleanCloudAv,
+        avatarUpdatedAt:
+          isCustomUploadedAvatarDataUrl(resolvedFirstAvatar) || cleanCloudAv
+            ? item.avatarUpdatedAt
+            : undefined,
         createdAt: item.createdAt || '2026-01-01',
         registeredAtIso: item.registeredAtIso || item.createdAt || '2026-01-01T00:00:00.000Z',
         legacyIds: legacyIds && legacyIds.length > 0 ? Array.from(new Set(legacyIds)) : undefined,
       });
-      if (isCustomUploadedAvatarDataUrl(normalized.avatar)) {
-        cacheUserAvatarForAccount(normalized, normalized.avatar, false);
-      }
       canonicalMap.set(normalized.id, normalized);
       indexUser(normalized);
     } else {
       const existing = canonicalMap.get(existingKey)!;
       const merged = mergeTwoUserRecordsCanonical(existing, item);
-      if (isCustomUploadedAvatarDataUrl(merged.avatar)) {
-        cacheUserAvatarForAccount(merged, merged.avatar, false);
-      }
       if (existingKey !== merged.id) {
         canonicalMap.delete(existingKey);
       }
@@ -3593,7 +3621,55 @@ export function deduplicateAndNormalizeUsers(
     }
   }
 
-  return Array.from(canonicalMap.values());
+  const dedupedList = Array.from(canonicalMap.values());
+
+  // Cross-account duplicate custom avatar guard: two distinct users can never legitimately share the exact same
+  // uploaded base64 data:image/ or /avatars/ URL. If legacy contamination duplicated one user's photo onto other
+  // accounts, retain it ONLY on the true owner (the account with a valid avatarUpdatedAt or matching /avatars/ prefix).
+  const byCustomAv = new Map<string, number[]>();
+  for (let i = 0; i < dedupedList.length; i++) {
+    const u = dedupedList[i];
+    const sig =
+      (isCustomUploadedAvatarDataUrl(u.cloudAvatarUrl) && u.cloudAvatarUrl) ||
+      (isCustomUploadedAvatarDataUrl(u.avatar) && u.avatar) ||
+      '';
+    if (!sig) continue;
+    const arr = byCustomAv.get(sig);
+    if (arr) arr.push(i);
+    else byCustomAv.set(sig, [i]);
+  }
+  for (const [, indices] of byCustomAv.entries()) {
+    if (indices.length <= 1) continue;
+    let ownerIdx = -1;
+    let bestMs = 0;
+    for (const idx of indices) {
+      const u = dedupedList[idx];
+      const ms = parseSafeDateMs(u.avatarUpdatedAt);
+      if (ms > 0 && (ownerIdx === -1 || ms < bestMs)) {
+        ownerIdx = idx;
+        bestMs = ms;
+      }
+    }
+    for (const idx of indices) {
+      if (idx === ownerIdx) continue;
+      const polluted = dedupedList[idx];
+      clearCachedUserAvatarForAccount(polluted);
+      dedupedList[idx] = {
+        ...polluted,
+        avatar: '',
+        cloudAvatarUrl: undefined,
+        avatarUpdatedAt: undefined,
+      };
+    }
+  }
+
+  for (const u of dedupedList) {
+    if (isCustomUploadedAvatarDataUrl(u.avatar) && isAvatarOwnedByUser(u.avatar, u)) {
+      cacheUserAvatarForAccount(u, u.avatar, false);
+    }
+  }
+
+  return dedupedList;
 }
 
 export const AVATAR_RECORD_PREFIX = 'kft_avatar_';
@@ -4671,7 +4747,22 @@ export async function syncAllAppDataWithSupabase(localState: {
             (Array.isArray(usr.legacyIds) && usr.legacyIds.includes(rec.userId)) ||
             (recEmail && usrEmail && recEmail === usrEmail) ||
             (recPhone.length >= 7 && usrPhone.length >= 7 && recPhone === usrPhone);
-          if (!matched) continue;
+          if (!matched) {
+            if (
+              (rec.dataUrl && usr.avatar === rec.dataUrl) ||
+              (rec.cloudAvatarUrl && (usr.avatar === rec.cloudAvatarUrl || usr.cloudAvatarUrl === rec.cloudAvatarUrl)) ||
+              (rec.avatarUrl && (usr.avatar === rec.avatarUrl || usr.cloudAvatarUrl === rec.avatarUrl))
+            ) {
+              clearCachedUserAvatarForAccount(usr);
+              mergedUsers[i] = {
+                ...usr,
+                avatar: '',
+                cloudAvatarUrl: undefined,
+                avatarUpdatedAt: undefined,
+              };
+            }
+            continue;
+          }
 
           const usrMs = parseSafeDateMs(usr.avatarUpdatedAt);
           if (!isCustomUploadedAvatarDataUrl(usr.avatar) || (recMs > 0 && recMs >= usrMs)) {

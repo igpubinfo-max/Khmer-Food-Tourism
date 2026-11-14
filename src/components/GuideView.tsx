@@ -223,16 +223,49 @@ export const GuideView: React.FC = () => {
     bookmarks, toggleBookmark, setSelectedFood, setSelectedRestaurant, setSelectedDestination,
     trackRestaurantView, selectedProvince, setSelectedProvince, setActiveTab, showToast,
     setIsAiTripPlannerModalOpen, setIsNearMeModalOpen,
+    pushNavigationStep,
+    isRestoringHistoryRef,
   } = useApp();
 
   const lang = language as Language;
   const isAdmin = isAdminAccount(currentUser);
   const isVip = isUserVipActive(currentUser);
 
-  const [tab, setTab] = useState<GuideTab>('foryou');
-  const [mealOverride, setMealOverride] = useState<MealSlotId | null>(null);
-  const [provinceKey, setProvinceKey] = useState<string>(() => stripProvincePrefix(selectedProvince));
-  const [tipFilter, setTipFilter] = useState<TipCategory | 'all'>('all');
+  const [tab, setTabRaw] = useState<GuideTab>('foryou');
+  const [mealOverride, setMealOverrideRaw] = useState<MealSlotId | null>(null);
+  const [provinceKey, setProvinceKeyRaw] = useState<string>(() => stripProvincePrefix(selectedProvince));
+  const [tipFilter, setTipFilterRaw] = useState<TipCategory | 'all'>('all');
+
+  const recordGuideStep = (label?: string) => {
+    if (isRestoringHistoryRef.current) return;
+    const snap = { tab, mealOverride, provinceKey, tipFilter };
+    pushNavigationStep({
+      label: label || 'guide-step',
+      restoreViewStep: () => {
+        setTabRaw(snap.tab);
+        setMealOverrideRaw(snap.mealOverride);
+        setProvinceKeyRaw(snap.provinceKey);
+        setTipFilterRaw(snap.tipFilter);
+      },
+    });
+  };
+
+  const setTab = (next: GuideTab) => {
+    if (next !== tab) recordGuideStep('guide-tab:' + next);
+    setTabRaw(next);
+  };
+  const setMealOverride = (next: MealSlotId | null) => {
+    if (next !== mealOverride) recordGuideStep('guide-meal:' + String(next));
+    setMealOverrideRaw(next);
+  };
+  const setProvinceKey = (next: string) => {
+    if (next !== provinceKey) recordGuideStep('guide-prov:' + next);
+    setProvinceKeyRaw(next);
+  };
+  const setTipFilter = (next: TipCategory | 'all') => {
+    if (next !== tipFilter) recordGuideStep('guide-tip:' + next);
+    setTipFilterRaw(next);
+  };
   const [bigPhraseId, setBigPhraseId] = useState<string | null>(null);
   const guideContentStartRef = useRef<HTMLDivElement | null>(null);
   const mealPicksSectionRef = useRef<HTMLElement | null>(null);
@@ -254,7 +287,7 @@ export const GuideView: React.FC = () => {
   };
 
   useEffect(() => {
-    if (scrollRequestTick === 0) return;
+    if (scrollRequestTick === 0 || isRestoringHistoryRef.current) return;
     const target = lastTargetRef.current || guideContentStartRef.current;
     smoothScrollToElement(target, {
       containerId: 'kft-main-scroll',
@@ -262,7 +295,7 @@ export const GuideView: React.FC = () => {
       offsetTop: 6,
       delayMs: 25,
     });
-  }, [scrollRequestTick, tab, mealOverride, provinceKey, tipFilter]);
+  }, [scrollRequestTick]);
 
   const now = useMemo(() => new Date(), []);
   const hour = now.getHours();

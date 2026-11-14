@@ -214,6 +214,11 @@ interface AppContextType {
   setLanguage: (lang: Language) => void;
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
+  canGoBack: boolean;
+  navigateBack: () => void;
+  pushNavigationStep: (step?: { restoreViewStep?: () => void; label?: string; reopenModalId?: string }) => void;
+  registerModalBackHandler: (id: string, handler: (() => boolean) | null) => void;
+  isRestoringHistoryRef: React.MutableRefObject<boolean>;
   
   // Auth & Users
   currentUser: User | null;
@@ -619,15 +624,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useChineseDomTranslation(language);
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
+  const [activeTab, setActiveTabRaw] = useState<ActiveTab>(() => {
     try {
       const p = new URLSearchParams(window.location.search).get('tab') as ActiveTab | null;
-      if (p && ['home', 'food', 'restaurants', 'tourism', 'guide', 'profile'].includes(p)) {
+      if (p && ['home', 'food', 'restaurants', 'hotels', 'tourism', 'guide', 'profile'].includes(p)) {
         return p;
       }
     } catch {}
     return 'home';
   });
+
+  const isRestoringHistoryRef = useRef<boolean>(false);
+  const tabScrollPositionsRef = useRef<Record<string, number>>({});
+  const mainNavStackRef = useRef<Array<{
+    id: string;
+    tab: ActiveTab;
+    scrollTop: number;
+    selectedProvince: string;
+    searchQuery: string;
+    restoreViewStep?: () => void;
+    reopenModalId?: string;
+    label?: string;
+  }>>([]);
+  const [navHistoryDepth, setNavHistoryDepth] = useState<number>(0);
+  const modalBackHandlersRef = useRef<Map<string, () => boolean>>(new Map());
+  const registerModalBackHandler = useCallback((id: string, handler: (() => boolean) | null) => {
+    if (!handler) {
+      modalBackHandlersRef.current.delete(id);
+    } else {
+      modalBackHandlersRef.current.set(id, handler);
+    }
+  }, []);
   
   const [deletedUsers, setDeletedUsers] = useState<DeletedUserRecord[]>(() => {
     try {
@@ -2485,26 +2512,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const [isQrScannerModalOpen, setIsQrScannerModalOpen] = useState(false);
-  const [isVipAddRestaurantModalOpen, setIsVipAddRestaurantModalOpen] = useState(false);
+  const [isVipAddRestaurantModalOpen, setIsVipAddRestaurantModalOpenRaw] = useState(false);
   const [pendingDeleteRestaurant, setPendingDeleteRestaurant] = useState<Restaurant | null>(null);
   const [isAiFoodDiscoveryModalOpen, setIsAiFoodDiscoveryModalOpen] = useState(false);
   const [isGoogleMapsSearchModalOpen, setIsGoogleMapsSearchModalOpenRaw] = useState(false);
   const [googleMapsSearchInitialTab, setGoogleMapsSearchInitialTab] = useState<'restaurant' | 'tourism' | 'all'>('all');
-  const setIsGoogleMapsSearchModalOpen = (open: boolean) => {
-    if (open) {
-      setSelectedFoodRaw(null);
-      setSelectedRestaurantRaw(null);
-      setSelectedDestinationRaw(null);
-    }
-    setIsGoogleMapsSearchModalOpenRaw(open);
-  };
-  const openGoogleMapsSearchModal = (initialTab: 'restaurant' | 'tourism' | 'all' = 'all') => {
-    setSelectedFoodRaw(null);
-    setSelectedRestaurantRaw(null);
-    setSelectedDestinationRaw(null);
-    setGoogleMapsSearchInitialTab(initialTab);
-    setIsGoogleMapsSearchModalOpenRaw(true);
-  };
   const [isRestaurantCheckInModalOpen, setIsRestaurantCheckInModalOpenRaw] = useState(false);
   const setIsRestaurantCheckInModalOpen = (open: boolean) => {
     if (open && currentUser?.role !== 'admin') {
@@ -2640,70 +2652,204 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
+  const [targetWishlistItem, setTargetWishlistItem] = useState<WishlistItem | null>(null);
+
+  type DetailStackEntry = {
+    type: 'food' | 'restaurant' | 'destination';
+    item: FoodItem | Restaurant | TouristDestination;
+    scrollTop: number;
+  };
+  const detailHistoryStackRef = useRef<DetailStackEntry[]>([]);
+  const activeDetailEntryRef = useRef<{ type: 'food' | 'restaurant' | 'destination'; item: any } | null>(null);
+  const justClosedDetailSyncRef = useRef<{
+    entry: DetailStackEntry;
+    stackSnapshot: DetailStackEntry[];
+    timestamp: number;
+  } | null>(null);
+
+  const getDetailScrollTop = (): number => {
+    if (typeof document === 'undefined') return 0;
+    const el = document.querySelector('[data-kft-detail-scroll="true"]') as HTMLElement | null;
+    return el ? el.scrollTop : 0;
+  };
+
+  const restoreDetailScrollTop = (scrollTop: number) => {
+    if (typeof document === 'undefined') return;
+    const apply = () => {
+      const el = document.querySelector('[data-kft-detail-scroll="true"]') as HTMLElement | null;
+      if (el) el.scrollTop = scrollTop;
+    };
+    apply();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(apply);
+    }
+    window.setTimeout(apply, 30);
+  };
+
+  type SuspendedOverlaySnapshot = {
+    targetModalId: string;
+    selectedFood: FoodItem | null;
+    selectedRestaurant: Restaurant | null;
+    selectedDestination: TouristDestination | null;
+    detailStack: DetailStackEntry[];
+    detailScrollTop: number;
+    whatToEat: boolean;
+    nearMe: boolean;
+    dailyDiscoveries: boolean;
+    aiTripPlanner: boolean;
+    googleMapsSearch: boolean;
+  };
+  const modalReturnStackRef = useRef<SuspendedOverlaySnapshot[]>([]);
+  const isTransitioningModalRef = useRef<boolean>(false);
+
+  const suspendActiveOverlaysForModal = (targetModalId: string) => {
+    const curFood = activeDetailEntryRef.current?.type === 'food' ? (activeDetailEntryRef.current.item as FoodItem) : selectedFood;
+    const curRest = activeDetailEntryRef.current?.type === 'restaurant' ? (activeDetailEntryRef.current.item as Restaurant) : selectedRestaurant;
+    const curDest = activeDetailEntryRef.current?.type === 'destination' ? (activeDetailEntryRef.current.item as TouristDestination) : selectedDestination;
+
+    const hasDetail = Boolean(curFood || curRest || curDest);
+    const otherWhatToEat = targetModalId !== 'whatToEat' && isWhatToEatModalOpen;
+    const otherNearMe = targetModalId !== 'nearMe' && isNearMeModalOpen;
+    const otherDaily = targetModalId !== 'dailyDiscoveries' && isDailyDiscoveriesModalOpen;
+    const otherTrip = targetModalId !== 'aiTripPlanner' && isAiTripPlannerModalOpen;
+    const otherGmaps = targetModalId !== 'googleMapsSearch' && isGoogleMapsSearchModalOpen;
+
+    if (hasDetail || otherWhatToEat || otherNearMe || otherDaily || otherTrip || otherGmaps) {
+      modalReturnStackRef.current.push({
+        targetModalId,
+        selectedFood: curFood || null,
+        selectedRestaurant: curRest || null,
+        selectedDestination: curDest || null,
+        detailStack: [...detailHistoryStackRef.current],
+        detailScrollTop: getDetailScrollTop(),
+        whatToEat: otherWhatToEat,
+        nearMe: otherNearMe,
+        dailyDiscoveries: otherDaily,
+        aiTripPlanner: otherTrip,
+        googleMapsSearch: otherGmaps,
+      });
+    }
+
+    isTransitioningModalRef.current = true;
+    activeDetailEntryRef.current = null;
+    detailHistoryStackRef.current = [];
+    setSelectedFoodRaw(null);
+    setSelectedRestaurantRaw(null);
+    setSelectedDestinationRaw(null);
+    if (targetModalId !== 'whatToEat') setIsWhatToEatModalOpenRaw(false);
+    if (targetModalId !== 'nearMe') setIsNearMeModalOpenRaw(false);
+    if (targetModalId !== 'dailyDiscoveries') setIsDailyDiscoveriesModalOpenRaw(false);
+    if (targetModalId !== 'aiTripPlanner') setIsAiTripPlannerModalOpenRaw(false);
+    if (targetModalId !== 'googleMapsSearch') setIsGoogleMapsSearchModalOpenRaw(false);
+    isTransitioningModalRef.current = false;
+  };
+
+  const restoreSuspendedOverlaysForModal = (targetModalId: string) => {
+    if (isTransitioningModalRef.current) return;
+    const stack = modalReturnStackRef.current;
+    for (let i = stack.length - 1; i >= 0; i--) {
+      if (stack[i].targetModalId === targetModalId) {
+        const [snap] = stack.splice(i, 1);
+        if (snap.whatToEat) setIsWhatToEatModalOpenRaw(true);
+        if (snap.nearMe) setIsNearMeModalOpenRaw(true);
+        if (snap.dailyDiscoveries) setIsDailyDiscoveriesModalOpenRaw(true);
+        if (snap.aiTripPlanner) setIsAiTripPlannerModalOpenRaw(true);
+        if (snap.googleMapsSearch) setIsGoogleMapsSearchModalOpenRaw(true);
+        detailHistoryStackRef.current = snap.detailStack;
+        if (snap.selectedFood) {
+          activeDetailEntryRef.current = { type: 'food', item: snap.selectedFood };
+          setSelectedFoodRaw(snap.selectedFood);
+          restoreDetailScrollTop(snap.detailScrollTop);
+        } else if (snap.selectedRestaurant) {
+          activeDetailEntryRef.current = { type: 'restaurant', item: snap.selectedRestaurant };
+          setSelectedRestaurantRaw(snap.selectedRestaurant);
+          restoreDetailScrollTop(snap.detailScrollTop);
+        } else if (snap.selectedDestination) {
+          activeDetailEntryRef.current = { type: 'destination', item: snap.selectedDestination };
+          setSelectedDestinationRaw(snap.selectedDestination);
+          restoreDetailScrollTop(snap.detailScrollTop);
+        }
+        break;
+      }
+    }
+  };
+
+  const setIsGoogleMapsSearchModalOpen = (open: boolean) => {
+    if (open) {
+      if (!isGoogleMapsSearchModalOpen) suspendActiveOverlaysForModal('googleMapsSearch');
+      setIsGoogleMapsSearchModalOpenRaw(true);
+    } else {
+      setIsGoogleMapsSearchModalOpenRaw(false);
+      restoreSuspendedOverlaysForModal('googleMapsSearch');
+    }
+  };
+
+  const openGoogleMapsSearchModal = (initialTab: 'restaurant' | 'tourism' | 'all' = 'all') => {
+    if (!isGoogleMapsSearchModalOpen) suspendActiveOverlaysForModal('googleMapsSearch');
+    setGoogleMapsSearchInitialTab(initialTab);
+    setIsGoogleMapsSearchModalOpenRaw(true);
+  };
+
+  const setIsVipAddRestaurantModalOpen = (open: boolean) => {
+    if (open) {
+      if (!isVipAddRestaurantModalOpen) suspendActiveOverlaysForModal('vipAddRestaurant');
+      setIsVipAddRestaurantModalOpenRaw(true);
+    } else {
+      setIsVipAddRestaurantModalOpenRaw(false);
+      restoreSuspendedOverlaysForModal('vipAddRestaurant');
+    }
+  };
+
   const setIsWhatToEatModalOpen = (open: boolean) => {
     if (open) {
-      setSelectedFoodRaw(null);
-      setSelectedRestaurantRaw(null);
-      setSelectedDestinationRaw(null);
-      setIsDailyDiscoveriesModalOpenRaw(false);
-      setIsNearMeModalOpenRaw(false);
-      setIsGoogleMapsSearchModalOpenRaw(false);
+      if (!isWhatToEatModalOpen) suspendActiveOverlaysForModal('whatToEat');
+      setIsWhatToEatModalOpenRaw(true);
+    } else {
+      setIsWhatToEatModalOpenRaw(false);
+      restoreSuspendedOverlaysForModal('whatToEat');
     }
-    setIsWhatToEatModalOpenRaw(open);
   };
 
   const setIsNearMeModalOpen = (open: boolean) => {
     if (open) {
-      setSelectedFoodRaw(null);
-      setSelectedRestaurantRaw(null);
-      setSelectedDestinationRaw(null);
-      setIsWhatToEatModalOpenRaw(false);
-      setIsDailyDiscoveriesModalOpenRaw(false);
-      setIsAiTripPlannerModalOpenRaw(false);
-      setIsGoogleMapsSearchModalOpenRaw(false);
+      if (!isNearMeModalOpen) suspendActiveOverlaysForModal('nearMe');
+      setIsNearMeModalOpenRaw(true);
+    } else {
+      setIsNearMeModalOpenRaw(false);
+      restoreSuspendedOverlaysForModal('nearMe');
     }
-    setIsNearMeModalOpenRaw(open);
   };
 
   const setIsDailyDiscoveriesModalOpen = (open: boolean) => {
     if (open) {
-      setSelectedFoodRaw(null);
-      setSelectedRestaurantRaw(null);
-      setSelectedDestinationRaw(null);
-      setIsWhatToEatModalOpenRaw(false);
-      setIsNearMeModalOpenRaw(false);
-      setIsAiTripPlannerModalOpenRaw(false);
-      setIsGoogleMapsSearchModalOpenRaw(false);
+      if (!isDailyDiscoveriesModalOpen) suspendActiveOverlaysForModal('dailyDiscoveries');
+      setIsDailyDiscoveriesModalOpenRaw(true);
+    } else {
+      setIsDailyDiscoveriesModalOpenRaw(false);
+      restoreSuspendedOverlaysForModal('dailyDiscoveries');
     }
-    setIsDailyDiscoveriesModalOpenRaw(open);
   };
 
   const setIsWishlistsModalOpen = (open: boolean) => {
-    if (open) {
-      setSelectedFoodRaw(null);
-      setSelectedRestaurantRaw(null);
-      setSelectedDestinationRaw(null);
+    if (!open) {
+      setTargetWishlistItem(null);
     }
     setIsWishlistsModalOpenRaw(open);
   };
 
   const setIsAiTripPlannerModalOpen = (open: boolean) => {
     if (open) {
-      setSelectedFoodRaw(null);
-      setSelectedRestaurantRaw(null);
-      setSelectedDestinationRaw(null);
-      setIsWhatToEatModalOpenRaw(false);
-      setIsDailyDiscoveriesModalOpenRaw(false);
-      setIsNearMeModalOpenRaw(false);
-      setIsGoogleMapsSearchModalOpenRaw(false);
+      if (!isAiTripPlannerModalOpen) suspendActiveOverlaysForModal('aiTripPlanner');
+      setIsAiTripPlannerModalOpenRaw(true);
+    } else {
+      setIsAiTripPlannerModalOpenRaw(false);
+      restoreSuspendedOverlaysForModal('aiTripPlanner');
     }
-    setIsAiTripPlannerModalOpenRaw(open);
   };
 
   const setIsNotificationsModalOpen = (open: boolean) => {
     setIsNotificationsModalOpenRaw(open);
   };
-  const [targetWishlistItem, setTargetWishlistItem] = useState<WishlistItem | null>(null);
 
   // User–Admin Support & Payment Reply State
   const [supportTickets, setSupportTickets] = useState<SupportTicket[]>(() => {
@@ -2796,65 +2942,117 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedTrendingFood, setSelectedTrendingFood] = useState<TrendingFoodItem | null>(null);
   const [isTrendingFoodDetailModalOpen, setIsTrendingFoodDetailModalOpen] = useState<boolean>(false);
 
-  // Single-level detail navigation stack wrappers so opening a shop/food/destination never leaves another detail modal open underneath.
-  // ALL shops (registered and unregistered) are openable inside the app by all users without VIP restrictions.
+  // Multi-level detail navigation stack wrappers so opening a shop/food/destination from another detail modal
+  // or from any feature modal (WhatToEat, NearMe, DailyDiscoveries, Wishlists, AiTripPlanner, etc.)
+  // preserves the full step-by-step back navigation trail and scroll positions.
+  const openDetailEntry = (type: 'food' | 'restaurant' | 'destination', item: FoodItem | Restaurant | TouristDestination) => {
+    const now = Date.now();
+    const cur = activeDetailEntryRef.current;
+    if (cur && cur.item && (cur.type !== type || cur.item.id !== item.id)) {
+      detailHistoryStackRef.current.push({
+        type: cur.type,
+        item: cur.item,
+        scrollTop: getDetailScrollTop(),
+      });
+    } else if (!cur && justClosedDetailSyncRef.current && now - justClosedDetailSyncRef.current.timestamp < 50) {
+      const rescued = justClosedDetailSyncRef.current;
+      justClosedDetailSyncRef.current = null;
+      if (rescued.entry.type !== type || rescued.entry.item.id !== item.id) {
+        detailHistoryStackRef.current = [...rescued.stackSnapshot, rescued.entry];
+      }
+    }
+    justClosedDetailSyncRef.current = null;
+    activeDetailEntryRef.current = { type, item };
+
+    if (targetWishlistItem !== null) {
+      setTargetWishlistItem(null);
+      setIsWishlistsModalOpenRaw(false);
+    }
+
+    setSelectedFoodRaw(type === 'food' ? (item as FoodItem) : null);
+    setSelectedRestaurantRaw(type === 'restaurant' ? (item as Restaurant) : null);
+    setSelectedDestinationRaw(type === 'destination' ? (item as TouristDestination) : null);
+    restoreDetailScrollTop(0);
+  };
+
+  const closeActiveDetailOrPopPrevious = (closingType: 'food' | 'restaurant' | 'destination') => {
+    const cur = activeDetailEntryRef.current;
+    if (cur && cur.type === closingType) {
+      justClosedDetailSyncRef.current = {
+        entry: {
+          type: cur.type,
+          item: cur.item,
+          scrollTop: getDetailScrollTop(),
+        },
+        stackSnapshot: [...detailHistoryStackRef.current],
+        timestamp: Date.now(),
+      };
+    }
+
+    if (detailHistoryStackRef.current.length > 0) {
+      const prev = detailHistoryStackRef.current.pop()!;
+      activeDetailEntryRef.current = { type: prev.type, item: prev.item };
+      setSelectedFoodRaw(prev.type === 'food' ? (prev.item as FoodItem) : null);
+      setSelectedRestaurantRaw(prev.type === 'restaurant' ? (prev.item as Restaurant) : null);
+      setSelectedDestinationRaw(prev.type === 'destination' ? (prev.item as TouristDestination) : null);
+      restoreDetailScrollTop(prev.scrollTop);
+      return;
+    }
+
+    activeDetailEntryRef.current = null;
+    if (closingType === 'food') setSelectedFoodRaw(null);
+    if (closingType === 'restaurant') setSelectedRestaurantRaw(null);
+    if (closingType === 'destination') setSelectedDestinationRaw(null);
+  };
+
   const setSelectedRestaurant = (r: Restaurant | null | ((prev: Restaurant | null) => Restaurant | null)) => {
     if (typeof r === 'function') {
-      setSelectedRestaurantRaw(r);
+      setSelectedRestaurantRaw((prev) => {
+        const next = r(prev);
+        if (next) activeDetailEntryRef.current = { type: 'restaurant', item: next };
+        return next;
+      });
       return;
     }
     if (r !== null) {
-      setSelectedFoodRaw(null);
-      setSelectedDestinationRaw(null);
-      setIsTrendingFoodDetailModalOpen(false);
-      setIsNearMeModalOpenRaw(false);
-      setIsWhatToEatModalOpenRaw(false);
-      setIsDailyDiscoveriesModalOpenRaw(false);
-      setIsWishlistsModalOpenRaw(false);
-      setIsAiTripPlannerModalOpenRaw(false);
-      setIsGoogleMapsSearchModalOpenRaw(false);
+      openDetailEntry('restaurant', r);
+    } else {
+      closeActiveDetailOrPopPrevious('restaurant');
     }
-    setSelectedRestaurantRaw(r);
   };
 
   const setSelectedFood = (f: FoodItem | null | ((prev: FoodItem | null) => FoodItem | null)) => {
     if (typeof f === 'function') {
-      setSelectedFoodRaw(f);
+      setSelectedFoodRaw((prev) => {
+        const next = f(prev);
+        if (next) activeDetailEntryRef.current = { type: 'food', item: next };
+        return next;
+      });
       return;
     }
     if (f !== null) {
-      setSelectedRestaurantRaw(null);
-      setSelectedDestinationRaw(null);
-      setIsTrendingFoodDetailModalOpen(false);
-      setIsNearMeModalOpenRaw(false);
-      setIsWhatToEatModalOpenRaw(false);
-      setIsDailyDiscoveriesModalOpenRaw(false);
-      setIsWishlistsModalOpenRaw(false);
-      setIsAiTripPlannerModalOpenRaw(false);
-      setIsGoogleMapsSearchModalOpenRaw(false);
+      openDetailEntry('food', f);
+    } else {
+      closeActiveDetailOrPopPrevious('food');
     }
-    setSelectedFoodRaw(f);
   };
 
   const setSelectedDestination = (
     d: TouristDestination | null | ((prev: TouristDestination | null) => TouristDestination | null)
   ) => {
     if (typeof d === 'function') {
-      setSelectedDestinationRaw(d);
+      setSelectedDestinationRaw((prev) => {
+        const next = d(prev);
+        if (next) activeDetailEntryRef.current = { type: 'destination', item: next };
+        return next;
+      });
       return;
     }
     if (d !== null) {
-      setSelectedFoodRaw(null);
-      setSelectedRestaurantRaw(null);
-      setIsTrendingFoodDetailModalOpen(false);
-      setIsNearMeModalOpenRaw(false);
-      setIsWhatToEatModalOpenRaw(false);
-      setIsDailyDiscoveriesModalOpenRaw(false);
-      setIsWishlistsModalOpenRaw(false);
-      setIsAiTripPlannerModalOpenRaw(false);
-      setIsGoogleMapsSearchModalOpenRaw(false);
+      openDetailEntry('destination', d);
+    } else {
+      closeActiveDetailOrPopPrevious('destination');
     }
-    setSelectedDestinationRaw(d);
   };
 
   // AI Smart Check-in State
@@ -3175,6 +3373,99 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Global search & filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('');
+
+  const activeTabRef = useRef<ActiveTab>(activeTab);
+  activeTabRef.current = activeTab;
+  const searchQueryRef = useRef<string>(searchQuery);
+  searchQueryRef.current = searchQuery;
+  const selectedProvinceRef = useRef<string>(selectedProvince);
+  selectedProvinceRef.current = selectedProvince;
+
+  const getMainScrollTop = useCallback((): number => {
+    if (typeof document === 'undefined') return 0;
+    const el = document.getElementById('kft-main-scroll');
+    return el ? el.scrollTop : 0;
+  }, []);
+
+  const restoreMainScrollTop = useCallback((scrollTop: number) => {
+    if (typeof document === 'undefined') return;
+    const apply = () => {
+      const el = document.getElementById('kft-main-scroll');
+      if (el) el.scrollTop = scrollTop;
+    };
+    apply();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(apply);
+    }
+    window.setTimeout(apply, 35);
+  }, []);
+
+  const pushBrowserHistoryGuard = useCallback(() => {
+    if (typeof window === 'undefined' || !window.history || typeof window.history.pushState !== 'function') return;
+    try {
+      const curState = window.history.state;
+      if (!curState || !curState.__kftBackGuard) {
+        window.history.pushState({ ...(curState || {}), __kftBackGuard: true, t: Date.now() }, '');
+      }
+    } catch {}
+  }, []);
+
+  const pushNavigationStep = useCallback(
+    (step?: { restoreViewStep?: () => void; label?: string; reopenModalId?: string }) => {
+      if (isRestoringHistoryRef.current) return;
+      const currentScroll = getMainScrollTop();
+      tabScrollPositionsRef.current[activeTabRef.current] = currentScroll;
+      mainNavStackRef.current.push({
+        id: `nav_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        tab: activeTabRef.current,
+        scrollTop: currentScroll,
+        selectedProvince: selectedProvinceRef.current,
+        searchQuery: searchQueryRef.current,
+        restoreViewStep: step?.restoreViewStep,
+        reopenModalId: step?.reopenModalId,
+        label: step?.label,
+      });
+      if (mainNavStackRef.current.length > 80) {
+        mainNavStackRef.current.shift();
+      }
+      setNavHistoryDepth(mainNavStackRef.current.length);
+      pushBrowserHistoryGuard();
+    },
+    [getMainScrollTop, pushBrowserHistoryGuard]
+  );
+
+  const setActiveTab = useCallback(
+    (nextTab: ActiveTab) => {
+      const prevTab = activeTabRef.current;
+      const currentScroll = getMainScrollTop();
+      tabScrollPositionsRef.current[prevTab] = currentScroll;
+
+      if (!isRestoringHistoryRef.current && nextTab !== prevTab) {
+        mainNavStackRef.current.push({
+          id: `tab_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          tab: prevTab,
+          scrollTop: currentScroll,
+          selectedProvince: selectedProvinceRef.current,
+          searchQuery: searchQueryRef.current,
+          label: `tab:${prevTab}->${nextTab}`,
+        });
+        if (mainNavStackRef.current.length > 80) {
+          mainNavStackRef.current.shift();
+        }
+        setNavHistoryDepth(mainNavStackRef.current.length);
+        pushBrowserHistoryGuard();
+      }
+
+      activeTabRef.current = nextTab;
+      setActiveTabRaw(nextTab);
+
+      if (!isRestoringHistoryRef.current && nextTab !== prevTab) {
+        const savedScroll = tabScrollPositionsRef.current[nextTab] ?? 0;
+        restoreMainScrollTop(savedScroll);
+      }
+    },
+    [getMainScrollTop, pushBrowserHistoryGuard, restoreMainScrollTop]
+  );
   
   // Toast notifications
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' | 'error' } | null>(null);
@@ -5932,8 +6223,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             };
             cacheUserAvatarForAccount(avUser, bestAv, true);
             setUsers(prev => {
+              const hasMatch = prev.some(u => doesUserMatchTarget(u, avUser));
+              if (!hasMatch) return prev;
               const liveDel = latestSyncStateRef.current.deletedUsers || [];
-              const next = deduplicateAndNormalizeUsers([...prev, avUser], liveDel);
+              const next = deduplicateAndNormalizeUsers(
+                prev.map(u =>
+                  doesUserMatchTarget(u, avUser)
+                    ? { ...u, avatar: bestAv, cloudAvatarUrl: rec.cloudAvatarUrl || u.cloudAvatarUrl, avatarUpdatedAt: rec.updatedAt || u.avatarUpdatedAt }
+                    : u
+                ),
+                liveDel
+              );
               latestSyncStateRef.current.users = next;
               safeSetCriticalAccountStorage('kft_users_v5', next);
               return next;
@@ -6074,6 +6374,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     selectedFood,
     selectedRestaurant,
     selectedDestination,
+    targetWishlistItem,
     isAuthModalOpen,
     isAddRestaurantModalOpen,
     isVipAddRestaurantModalOpen,
@@ -6108,6 +6409,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       selectedFood,
       selectedRestaurant,
       selectedDestination,
+      targetWishlistItem,
       isAuthModalOpen,
       isAddRestaurantModalOpen,
       isVipAddRestaurantModalOpen,
@@ -6135,7 +6437,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       activeTab,
     };
   }, [
-    currentUser, isExitModalOpen, selectedFood, selectedRestaurant, selectedDestination,
+    currentUser, isExitModalOpen, selectedFood, selectedRestaurant, selectedDestination, targetWishlistItem,
     isAuthModalOpen, isAddRestaurantModalOpen, isVipAddRestaurantModalOpen,
     isManageMenuModalOpen, managingRestaurant, isAdminOpen, isAdminLoginModalOpen,
     isInstallModalOpen, isSupportModalOpen, isWhatToEatModalOpen, isNearMeModalOpen,
@@ -6157,8 +6459,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Android Hardware Back Button Listener & Confirm Before Exit
+  const canGoBack = Boolean(
+    navHistoryDepth > 0 ||
+    activeTab !== 'home' ||
+    selectedFood ||
+    selectedRestaurant ||
+    selectedDestination ||
+    isWhatToEatModalOpen ||
+    isNearMeModalOpen ||
+    isDailyDiscoveriesModalOpen ||
+    isWishlistsModalOpen ||
+    isAiTripPlannerModalOpen ||
+    isNotificationsModalOpen ||
+    isTrendingSocialModalOpen ||
+    isTrendingFoodDetailModalOpen ||
+    isGoogleMapsSearchModalOpen ||
+    isVipAddRestaurantModalOpen ||
+    isUpgradeVipModalOpen ||
+    isSupportTicketModalOpen ||
+    isAdminOpen ||
+    isManageMenuModalOpen
+  );
+  const canGoBackRef = useRef<boolean>(canGoBack);
+  canGoBackRef.current = canGoBack;
+
+  const navigateBackRef = useRef<() => void>(() => {});
+
+  const navigateBack = useCallback(() => {
+    navigateBackRef.current();
+  }, []);
+
+  // Unified Hardware Back Button, Browser History Popstate, Escape Key & On-Screen Back Handler
   useEffect(() => {
+    const tryRunModalSubStep = (id: string): boolean => {
+      const handler = modalBackHandlersRef.current.get(id);
+      if (!handler) return false;
+      try {
+        return Boolean(handler());
+      } catch (err) {
+        console.warn('Modal sub-step back handler error for ' + id, err);
+        return false;
+      }
+    };
+
     const handleBackButtonAction = () => {
       const state = appNavStateRef.current;
 
@@ -6168,7 +6511,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return;
       }
 
-      // 2. If any modal or detail screen is open, close the active modal first without exiting
+      // 2. Top-most overlays & confirmation dialogs (ordered by visual z-index)
       if (state.pendingDeleteRestaurant) {
         setPendingDeleteRestaurant(null);
         return;
@@ -6181,106 +6524,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         window.dispatchEvent(new CustomEvent('kft:close-guide-overlay'));
         return;
       }
-      if (state.isManageMenuModalOpen) {
-        setIsManageMenuModalOpen(false);
-        setManagingRestaurant(null);
-        return;
-      }
-      if (state.selectedRestaurant) {
-        setSelectedRestaurant(null);
-        return;
-      }
-      if (state.selectedFood) {
-        setSelectedFood(null);
-        return;
-      }
-      if (state.selectedDestination) {
-        setSelectedDestination(null);
-        return;
-      }
-      if (state.isTrendingFoodDetailModalOpen) {
-        setIsTrendingFoodDetailModalOpen(false);
-        setSelectedTrendingFood(null);
-        return;
-      }
-      if (state.isTrendingSocialModalOpen) {
-        setIsTrendingSocialModalOpen(false);
-        return;
-      }
-      if (state.isSupportTicketModalOpen) {
-        setIsSupportTicketModalOpen(false);
-        return;
-      }
-      if (state.isUpgradeVipModalOpen) {
-        setIsUpgradeVipModalOpen(false);
-        return;
-      }
-      if (state.isVipAddRestaurantModalOpen) {
-        setIsVipAddRestaurantModalOpen(false);
-        return;
-      }
-      if (state.isGoogleMapsSearchModalOpen) {
-        setIsGoogleMapsSearchModalOpen(false);
-        return;
-      }
       if (state.isQrScannerModalOpen) {
         setIsQrScannerModalOpen(false);
-        return;
-      }
-      if (state.isAiCheckInModalOpen) {
-        setIsAiCheckInModalOpen(false);
-        return;
-      }
-      if (state.isRestaurantCheckInModalOpen) {
-        setIsRestaurantCheckInModalOpen(false);
-        return;
-      }
-      if (state.isWhatToEatModalOpen) {
-        setIsWhatToEatModalOpen(false);
-        return;
-      }
-      if (state.isNearMeModalOpen) {
-        setIsNearMeModalOpen(false);
-        return;
-      }
-      if (state.isDailyDiscoveriesModalOpen) {
-        setIsDailyDiscoveriesModalOpen(false);
-        return;
-      }
-      if (state.isWishlistsModalOpen) {
-        setIsWishlistsModalOpen(false);
-        return;
-      }
-      if (state.isAiTripPlannerModalOpen) {
-        setIsAiTripPlannerModalOpen(false);
-        return;
-      }
-      if (state.isNotificationsModalOpen) {
-        setIsNotificationsModalOpen(false);
-        return;
-      }
-      if (state.isAdminLoginModalOpen) {
-        setIsAdminLoginModalOpen(false);
-        return;
-      }
-      if (state.isAuthModalOpen) {
-        if (!state.currentUser) {
-          exitAppNow();
-          return;
-        }
-        setIsAuthModalOpen(false);
-        return;
-      }
-      if (state.isAddRestaurantModalOpen) {
-        setIsAddRestaurantModalOpen(false);
-        return;
-      }
-      if (state.isAdminLoginModalOpen) {
-        setIsAdminLoginModalOpen(false);
-        return;
-      }
-      if (state.isAdminOpen) {
-        setIsAdminOpen(false);
         return;
       }
       if (state.isInstallModalOpen) {
@@ -6291,14 +6536,191 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsSupportModalOpen(false);
         return;
       }
-
-      // 3. If on another tab than 'home', navigate back to 'home'
-      if (state.activeTab !== 'home') {
-        setActiveTab('home');
+      if (state.isAdminLoginModalOpen) {
+        if (tryRunModalSubStep('adminLogin')) return;
+        setIsAdminLoginModalOpen(false);
+        return;
+      }
+      if (state.isAuthModalOpen) {
+        if (tryRunModalSubStep('auth')) return;
+        if (!state.currentUser) {
+          exitAppNow();
+          return;
+        }
+        setIsAuthModalOpen(false);
+        return;
+      }
+      if (state.isSupportTicketModalOpen) {
+        if (tryRunModalSubStep('supportTicket')) return;
+        setIsSupportTicketModalOpen(false);
+        return;
+      }
+      if (state.isUpgradeVipModalOpen) {
+        if (tryRunModalSubStep('upgradeVip')) return;
+        setIsUpgradeVipModalOpen(false);
+        return;
+      }
+      // Wishlists modal opened via openAddToWishlist renders at z-[92] above Detail Modals
+      if (state.isWishlistsModalOpen && state.targetWishlistItem !== null) {
+        if (tryRunModalSubStep('wishlists')) return;
+        setIsWishlistsModalOpen(false);
+        return;
+      }
+      if (state.isManageMenuModalOpen) {
+        if (tryRunModalSubStep('manageMenu')) return;
+        setIsManageMenuModalOpen(false);
+        setManagingRestaurant(null);
         return;
       }
 
-      // 4. On main 'home' screen:
+      // 3. Detail Modals (z-[85]) — closing automatically pops previous detail from detailHistoryStackRef if any
+      if (state.selectedRestaurant) {
+        if (tryRunModalSubStep('restaurantDetail')) return;
+        setSelectedRestaurant(null);
+        return;
+      }
+      if (state.selectedFood) {
+        if (tryRunModalSubStep('foodDetail')) return;
+        setSelectedFood(null);
+        return;
+      }
+      if (state.selectedDestination) {
+        if (tryRunModalSubStep('destinationDetail')) return;
+        setSelectedDestination(null);
+        return;
+      }
+
+      // 4. Admin, Business & Feature Modals (z-[60] - z-[80])
+      if (state.isAddRestaurantModalOpen) {
+        setIsAddRestaurantModalOpen(false);
+        return;
+      }
+      if (state.isAiCheckInModalOpen) {
+        setIsAiCheckInModalOpen(false);
+        return;
+      }
+      if (state.isRestaurantCheckInModalOpen) {
+        setIsRestaurantCheckInModalOpen(false);
+        return;
+      }
+      if (state.isAdminOpen) {
+        if (tryRunModalSubStep('admin')) return;
+        setIsAdminOpen(false);
+        return;
+      }
+      if (state.isVipAddRestaurantModalOpen) {
+        if (tryRunModalSubStep('vipAddRestaurant')) return;
+        setIsVipAddRestaurantModalOpen(false);
+        return;
+      }
+      if (state.isGoogleMapsSearchModalOpen) {
+        if (tryRunModalSubStep('googleMapsSearch')) return;
+        setIsGoogleMapsSearchModalOpen(false);
+        return;
+      }
+      if (state.isTrendingFoodDetailModalOpen) {
+        if (tryRunModalSubStep('trendingFoodDetail')) return;
+        setIsTrendingFoodDetailModalOpen(false);
+        setSelectedTrendingFood(null);
+        return;
+      }
+      if (state.isTrendingSocialModalOpen) {
+        if (tryRunModalSubStep('trendingSocial')) return;
+        setIsTrendingSocialModalOpen(false);
+        return;
+      }
+      if (state.isWhatToEatModalOpen) {
+        if (tryRunModalSubStep('whatToEat')) return;
+        setIsWhatToEatModalOpen(false);
+        return;
+      }
+      if (state.isNearMeModalOpen) {
+        if (tryRunModalSubStep('nearMe')) return;
+        setIsNearMeModalOpen(false);
+        return;
+      }
+      if (state.isDailyDiscoveriesModalOpen) {
+        if (tryRunModalSubStep('dailyDiscoveries')) return;
+        setIsDailyDiscoveriesModalOpen(false);
+        return;
+      }
+      if (state.isWishlistsModalOpen) {
+        if (tryRunModalSubStep('wishlists')) return;
+        setIsWishlistsModalOpen(false);
+        return;
+      }
+      if (state.isAiTripPlannerModalOpen) {
+        if (tryRunModalSubStep('aiTripPlanner')) return;
+        setIsAiTripPlannerModalOpen(false);
+        return;
+      }
+      if (state.isNotificationsModalOpen) {
+        if (tryRunModalSubStep('notifications')) return;
+        setIsNotificationsModalOpen(false);
+        return;
+      }
+
+      // 5. Active View Sub-Overlays (e.g. filter drawers, big phrase cards, image editor)
+      if (tryRunModalSubStep('view:' + state.activeTab)) {
+        return;
+      }
+
+      // 6. Step-by-step Main Navigation History Stack (restores previous tab, filters, search, order & scroll position)
+      if (mainNavStackRef.current.length > 0) {
+        const step = mainNavStackRef.current.pop()!;
+        setNavHistoryDepth(mainNavStackRef.current.length);
+        isRestoringHistoryRef.current = true;
+        tabScrollPositionsRef.current[activeTabRef.current] = getMainScrollTop();
+
+        activeTabRef.current = step.tab;
+        setActiveTabRaw(step.tab);
+        selectedProvinceRef.current = step.selectedProvince;
+        setSelectedProvince(step.selectedProvince);
+        searchQueryRef.current = step.searchQuery;
+        setSearchQuery(step.searchQuery);
+
+        if (step.restoreViewStep) {
+          try {
+            step.restoreViewStep();
+          } catch (err) {
+            console.warn('Failed to restore view step:', err);
+          }
+        }
+
+        if (step.reopenModalId) {
+          if (step.reopenModalId === 'whatToEat') setIsWhatToEatModalOpenRaw(true);
+          else if (step.reopenModalId === 'nearMe') setIsNearMeModalOpenRaw(true);
+          else if (step.reopenModalId === 'dailyDiscoveries') setIsDailyDiscoveriesModalOpenRaw(true);
+          else if (step.reopenModalId === 'wishlists') setIsWishlistsModalOpenRaw(true);
+          else if (step.reopenModalId === 'aiTripPlanner') setIsAiTripPlannerModalOpenRaw(true);
+          else if (step.reopenModalId === 'notifications') setIsNotificationsModalOpenRaw(true);
+          else if (step.reopenModalId === 'trendingSocial') setIsTrendingSocialModalOpen(true);
+          else if (step.reopenModalId === 'googleMapsSearch') setIsGoogleMapsSearchModalOpenRaw(true);
+        }
+
+        tabScrollPositionsRef.current[step.tab] = step.scrollTop;
+        restoreMainScrollTop(step.scrollTop);
+
+        window.setTimeout(() => {
+          isRestoringHistoryRef.current = false;
+        }, 80);
+        return;
+      }
+
+      // 7. Fallback if user landed directly on a non-home tab with an empty stack
+      if (state.activeTab !== 'home') {
+        isRestoringHistoryRef.current = true;
+        tabScrollPositionsRef.current[state.activeTab] = getMainScrollTop();
+        activeTabRef.current = 'home';
+        setActiveTabRaw('home');
+        restoreMainScrollTop(tabScrollPositionsRef.current['home'] ?? 0);
+        window.setTimeout(() => {
+          isRestoringHistoryRef.current = false;
+        }, 80);
+        return;
+      }
+
+      // 8. On main 'home' screen with empty navigation history:
       // Double back within 2 seconds exits immediately; otherwise display confirmation modal
       const now = Date.now();
       if (now - lastBackPressRef.current < 2000) {
@@ -6309,6 +6731,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     };
 
+    navigateBackRef.current = handleBackButtonAction;
+
     let backListenerHandle: { remove: () => void } | null = null;
     CapApp.addListener('backButton', () => {
       handleBackButtonAction();
@@ -6317,6 +6741,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }).catch(err => {
       console.log('Native back-button listener not available in standard web view', err);
     });
+
+    const handlePopState = () => {
+      if (canGoBackRef.current) {
+        handleBackButtonAction();
+        if (canGoBackRef.current) {
+          pushBrowserHistoryGuard();
+        }
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
 
     // Also support keyboard Escape for desktop/emulator testing
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -6330,9 +6764,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (backListenerHandle && backListenerHandle.remove) {
         backListenerHandle.remove();
       }
+      window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [getMainScrollTop, pushBrowserHistoryGuard, restoreMainScrollTop]);
 
   // Bookmarking (Account-Isolated per User)
   const bookmarkSet = useMemo(() => new Set(bookmarks), [bookmarks]);
@@ -17659,6 +18094,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setLanguage,
         activeTab,
         setActiveTab,
+        canGoBack,
+        navigateBack,
+        pushNavigationStep,
+        registerModalBackHandler,
+        isRestoringHistoryRef,
         currentUser,
         users,
         deletedUsers,

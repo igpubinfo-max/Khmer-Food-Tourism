@@ -69,6 +69,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
     setSelectedProvince: setGlobalProvince,
     setActiveTab,
     showToast,
+    pushNavigationStep,
+    registerModalBackHandler,
   } = useApp();
 
   const isKm = language === 'km';
@@ -104,15 +106,18 @@ export const DailyDiscoveriesModal: React.FC = () => {
   }, [searchQuery]);
 
   useEffect(() => {
-    if (isDailyDiscoveriesModalOpen) {
-      setSelectedProvinceId('all');
-      setSearchQuery('');
-      setDebouncedQuery('');
-      setVipTasteProfile('all');
-      setVisibleDishCount(PROVINCIAL_DISH_BATCH_SIZE);
-      setLoadError(null);
-    }
-  }, [isDailyDiscoveriesModalOpen]);
+    if (!isDailyDiscoveriesModalOpen) return;
+    return registerModalBackHandler('dailyDiscoveries', () => {
+      if (selectedProvinceId !== 'all' || searchQuery.trim() !== '' || vipTasteProfile !== 'all') {
+        setSelectedProvinceId('all');
+        setSearchQuery('');
+        setDebouncedQuery('');
+        setVipTasteProfile('all');
+        return true;
+      }
+      return false;
+    });
+  }, [isDailyDiscoveriesModalOpen, selectedProvinceId, searchQuery, vipTasteProfile, registerModalBackHandler]);
 
   useEffect(() => {
     setVisibleDishCount(PROVINCIAL_DISH_BATCH_SIZE);
@@ -337,7 +342,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
     return () => observer.disconnect();
   }, [isDailyDiscoveriesModalOpen, visibleDishCount, filteredDishes.length]);
 
-  if (!isDailyDiscoveriesModalOpen) return null;
+  // Keep mounted once visited so province selection & scroll position persist
 
   const getProvinceDisplayName = (p: ProvinceFilterOption) => {
     if (isKm) return p.fullKh;
@@ -426,6 +431,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
   };
 
   const handleViewProvinceRestaurants = (prov: ProvinceFilterOption) => {
+    pushNavigationStep({ label: 'dailyDiscoveries->restaurants', reopenModalId: 'dailyDiscoveries' });
     setGlobalProvince(prov.kh);
     setActiveTab('restaurants');
     setIsDailyDiscoveriesModalOpen(false);
@@ -481,7 +487,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-stretch md:items-center justify-center bg-black/60 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none"
+      className="fixed inset-0 z-[60] flex items-stretch md:items-center justify-center bg-black/60 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none"
       onClick={() => setIsDailyDiscoveriesModalOpen(false)}
     >
       <div
@@ -987,7 +993,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
                       <div
                         onClick={() => {
                           setSelectedFood(food);
-                          setIsDailyDiscoveriesModalOpen(false);
                         }}
                         className="relative aspect-16/9 w-full overflow-hidden bg-slate-100 cursor-pointer group"
                       >
@@ -1093,9 +1098,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                                     type="button"
                                     data-testid={`dish-matched-rest-${food.id}-${rest.id}`}
                                     onClick={() => {
-                                      setActiveTab('restaurants');
                                       setSelectedRestaurant(rest);
-                                      setIsDailyDiscoveriesModalOpen(false);
                                     }}
                                     className="px-2.5 py-1 rounded-xl bg-white hover:border-emerald-500 border border-slate-200 text-[10.5px] font-extrabold text-slate-800 flex items-center gap-1 shadow-2xs transition cursor-pointer"
                                   >
@@ -1114,7 +1117,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
                             type="button"
                             onClick={() => {
                               setSelectedFood(food);
-                              setIsDailyDiscoveriesModalOpen(false);
                             }}
                             style={{
                               background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',

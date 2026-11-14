@@ -43,7 +43,7 @@ import {
 export const HomeView: React.FC = () => {
   const {
     foods, restaurants, destinations, setActiveTab,
-    language, selectedProvince, setSelectedProvince,
+    language, selectedProvince, setSelectedProvince: setSelectedProvinceCtx,
     currentUser, users, appSettings, setIsAuthModalOpen,
     setSelectedDestination,
     setIsWhatToEatModalOpen,
@@ -54,12 +54,13 @@ export const HomeView: React.FC = () => {
     trendingFoods, setSelectedTrendingFood, setIsTrendingFoodDetailModalOpen,
     showToast,
     setIsRestaurantCheckInModalOpen,
-    searchQuery: globalSearchQuery, setSearchQuery: setGlobalSearchQuery,
+    searchQuery: globalSearchQuery, setSearchQuery: setGlobalSearchQueryCtx,
     setSelectedFood, setSelectedRestaurant,
     setIsVipAddRestaurantModalOpen,
     getOwnedRestaurantsForUser, getCurrentUserStoreQuota, openManageMyVipStore, activeManagedShopId,
     openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal, setIsAdminOpen,
-    transactions, supportTickets, triggerCloudSyncNow, bookmarks, toggleBookmark
+    transactions, supportTickets, triggerCloudSyncNow, bookmarks, toggleBookmark,
+    pushNavigationStep, isRestoringHistoryRef
   } = useApp();
 
   const isVip = isUserVipActive(currentUser);
@@ -71,7 +72,7 @@ export const HomeView: React.FC = () => {
   }, [restaurants, currentUser, activeManagedShopId, getOwnedRestaurantsForUser]);
 
   // Search results tab filter, radius filter, and pagination when global search is active
-  const [searchTab, setSearchTab] = useState<'all' | 'food' | 'restaurants' | 'tourism' | 'external'>('all');
+  const [searchTab, setSearchTabRaw] = useState<'all' | 'food' | 'restaurants' | 'tourism' | 'external'>('all');
   const [searchRadiusMeters, setSearchRadiusMeters] = useState<number>(0); // 0 = All Cambodia
   const [userGpsLocation, setUserGpsLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isGettingSearchGps, setIsGettingSearchGps] = useState<boolean>(false);
@@ -260,14 +261,66 @@ export const HomeView: React.FC = () => {
   const [selectedMealSlot, setSelectedMealSlot] = useState<MealSlot>(() => getMealSlot());
   const [mealShuffleCount, setMealShuffleCount] = useState(0);
 
+  const recordHomeStep = useCallback(
+    (label?: string) => {
+      if (isRestoringHistoryRef.current) return;
+      const snap = {
+        searchTab,
+        searchRadiusMeters,
+        searchVisibleCount,
+        selectedMealSlot,
+        mealShuffleCount,
+      };
+      pushNavigationStep({
+        label: label || 'home-step',
+        restoreViewStep: () => {
+          setSearchTabRaw(snap.searchTab);
+          setSearchRadiusMeters(snap.searchRadiusMeters);
+          setSearchVisibleCount(snap.searchVisibleCount);
+          setSelectedMealSlot(snap.selectedMealSlot);
+          setMealShuffleCount(snap.mealShuffleCount);
+        },
+      });
+    },
+    [isRestoringHistoryRef, pushNavigationStep, searchTab, searchRadiusMeters, searchVisibleCount, selectedMealSlot, mealShuffleCount]
+  );
+
+  const setSearchTab = useCallback(
+    (next: 'all' | 'food' | 'restaurants' | 'tourism' | 'external') => {
+      if (next !== searchTab) recordHomeStep('home-search-tab:' + next);
+      setSearchTabRaw(next);
+    },
+    [recordHomeStep, searchTab]
+  );
+
+  const setSelectedProvince = useCallback(
+    (next: string) => {
+      if (next !== selectedProvince) recordHomeStep('home-prov:' + next);
+      setSelectedProvinceCtx(next);
+    },
+    [recordHomeStep, selectedProvince, setSelectedProvinceCtx]
+  );
+
+  const setGlobalSearchQuery = useCallback(
+    (next: string) => {
+      if (next !== globalSearchQuery && (!globalSearchQuery || !next)) {
+        recordHomeStep('home-search-query');
+      }
+      setGlobalSearchQueryCtx(next);
+    },
+    [recordHomeStep, globalSearchQuery, setGlobalSearchQueryCtx]
+  );
+
   const handleSelectMealSlot = useCallback((slot: MealSlot) => {
+    if (slot !== selectedMealSlot) recordHomeStep('home-meal:' + slot);
     setSelectedMealSlot(slot);
     setMealShuffleCount(0);
-  }, []);
+  }, [recordHomeStep, selectedMealSlot]);
 
   const handleShuffleMealDishes = useCallback(() => {
+    recordHomeStep('home-meal-shuffle');
     setMealShuffleCount((c) => c + 1);
-  }, []);
+  }, [recordHomeStep]);
 
   const forYouFoods = useMemo(() => {
     const authenticPool = getAuthenticCambodianDishesForMealTime(foods, selectedMealSlot);

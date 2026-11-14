@@ -475,7 +475,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     showToast(`✅ បានកំណត់កូតា Google Maps API ប្រចាំថ្ងៃត្រឹម ${parsed} ដង/ថ្ងៃ`, 'success');
   };
 
-  if (!isGoogleMapsSearchModalOpen) return null;
+  // Keep mounted once visited so Google Maps search results & scroll position persist
 
   return (
     <div className="fixed inset-0 z-[55] flex flex-col sm:items-center sm:justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm overflow-hidden">

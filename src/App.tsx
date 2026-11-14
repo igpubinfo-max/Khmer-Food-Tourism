@@ -87,12 +87,48 @@ const MainScreen: React.FC = () => {
 
   const mainScrollRef = useRef<HTMLElement | null>(null);
 
-  // Reset main scroll position cleanly to the top whenever switching bottom navigation tabs
+  // Keep visited main views & feature modals mounted so filter, search, scroll, and input state are preserved across back/forward navigation
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(() => new Set(['home', activeTab]));
   useEffect(() => {
-    if (mainScrollRef.current) {
-      mainScrollRef.current.scrollTop = 0;
-    }
+    setVisitedTabs((prev) => {
+      if (prev.has(activeTab)) return prev;
+      const next = new Set(prev);
+      next.add(activeTab);
+      return next;
+    });
   }, [activeTab]);
+
+  const [visitedModals, setVisitedModals] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    setVisitedModals((prev) => {
+      const updates: Record<string, boolean> = {};
+      if (isWhatToEatModalOpen && !prev.whatToEat) updates.whatToEat = true;
+      if (isNearMeModalOpen && !prev.nearMe) updates.nearMe = true;
+      if (isDailyDiscoveriesModalOpen && !prev.dailyDiscoveries) updates.dailyDiscoveries = true;
+      if (isWishlistsModalOpen && !prev.wishlists) updates.wishlists = true;
+      if (isAiTripPlannerModalOpen && !prev.aiTripPlanner) updates.aiTripPlanner = true;
+      if (isNotificationsModalOpen && !prev.notifications) updates.notifications = true;
+      if (isTrendingSocialModalOpen && !prev.trendingSocial) updates.trendingSocial = true;
+      if (isTrendingFoodDetailModalOpen && !prev.trendingFoodDetail) updates.trendingFoodDetail = true;
+      if (isVipAddRestaurantModalOpen && !prev.vipAddRestaurant) updates.vipAddRestaurant = true;
+      if (isGoogleMapsSearchModalOpen && !prev.googleMapsSearch) updates.googleMapsSearch = true;
+      if (isAdminOpen && !prev.admin) updates.admin = true;
+      if (Object.keys(updates).length === 0) return prev;
+      return { ...prev, ...updates };
+    });
+  }, [
+    isWhatToEatModalOpen,
+    isNearMeModalOpen,
+    isDailyDiscoveriesModalOpen,
+    isWishlistsModalOpen,
+    isAiTripPlannerModalOpen,
+    isNotificationsModalOpen,
+    isTrendingSocialModalOpen,
+    isTrendingFoodDetailModalOpen,
+    isVipAddRestaurantModalOpen,
+    isGoogleMapsSearchModalOpen,
+    isAdminOpen,
+  ]);
 
   // Intellectual Property & Anti-Clone Domain/Merchant Signature Verification
   const ownershipCheck = useMemo(
@@ -260,13 +296,39 @@ const MainScreen: React.FC = () => {
             </div>
           }
         >
-          {activeTab === 'home' && <HomeView />}
-          {activeTab === 'food' && <FoodView />}
-          {activeTab === 'restaurants' && <RestaurantView />}
-          {activeTab === 'hotels' && <HotelView />}
-          {activeTab === 'tourism' && <TourismView />}
-          {activeTab === 'guide' && <GuideView />}
-          {activeTab === 'profile' && <ProfileView />}
+          <div className={activeTab === 'home' ? 'block w-full min-h-full' : 'hidden'} aria-hidden={activeTab !== 'home'}>
+            <HomeView />
+          </div>
+          {(visitedTabs.has('food') || activeTab === 'food') && (
+            <div className={activeTab === 'food' ? 'block w-full min-h-full' : 'hidden'} aria-hidden={activeTab !== 'food'}>
+              <FoodView />
+            </div>
+          )}
+          {(visitedTabs.has('restaurants') || activeTab === 'restaurants') && (
+            <div className={activeTab === 'restaurants' ? 'block w-full min-h-full' : 'hidden'} aria-hidden={activeTab !== 'restaurants'}>
+              <RestaurantView />
+            </div>
+          )}
+          {(visitedTabs.has('hotels') || activeTab === 'hotels') && (
+            <div className={activeTab === 'hotels' ? 'block w-full min-h-full' : 'hidden'} aria-hidden={activeTab !== 'hotels'}>
+              <HotelView />
+            </div>
+          )}
+          {(visitedTabs.has('tourism') || activeTab === 'tourism') && (
+            <div className={activeTab === 'tourism' ? 'block w-full min-h-full' : 'hidden'} aria-hidden={activeTab !== 'tourism'}>
+              <TourismView />
+            </div>
+          )}
+          {(visitedTabs.has('guide') || activeTab === 'guide') && (
+            <div className={activeTab === 'guide' ? 'block w-full min-h-full' : 'hidden'} aria-hidden={activeTab !== 'guide'}>
+              <GuideView />
+            </div>
+          )}
+          {(visitedTabs.has('profile') || activeTab === 'profile') && (
+            <div className={activeTab === 'profile' ? 'block w-full min-h-full' : 'hidden'} aria-hidden={activeTab !== 'profile'}>
+              <ProfileView />
+            </div>
+          )}
         </Suspense>
       </main>
 
@@ -279,27 +341,71 @@ const MainScreen: React.FC = () => {
       <Suspense fallback={null}>
         {isSmartHubOpen && hasVipAccess && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
         {isAddRestaurantModalOpen && <AddRestaurantModal />}
-        {isAdminOpen && <AdminDashboard />}
+        {(visitedModals.admin || isAdminOpen) && (
+          <div className={isAdminOpen ? 'contents' : 'hidden'} aria-hidden={!isAdminOpen}>
+            <AdminDashboard />
+          </div>
+        )}
         {isAdminLoginModalOpen && <AdminLoginModal />}
         {isSupportModalOpen && <SupportModal />}
         {isExitModalOpen && <ExitConfirmModal />}
 
         {/* Personalized Account Features & Daily/Notification Modals */}
-        {isWhatToEatModalOpen && <WhatToEatModal />}
-        {isNearMeModalOpen && <NearMeModal />}
-        {isDailyDiscoveriesModalOpen && <DailyDiscoveriesModal />}
-        {isWishlistsModalOpen && <WishlistsModal />}
-        {isAiTripPlannerModalOpen && <AiTripPlannerModal />}
-        {isNotificationsModalOpen && <NotificationsModal />}
+        {(visitedModals.whatToEat || isWhatToEatModalOpen) && (
+          <div className={isWhatToEatModalOpen ? 'contents' : 'hidden'} aria-hidden={!isWhatToEatModalOpen}>
+            <WhatToEatModal />
+          </div>
+        )}
+        {(visitedModals.nearMe || isNearMeModalOpen) && (
+          <div className={isNearMeModalOpen ? 'contents' : 'hidden'} aria-hidden={!isNearMeModalOpen}>
+            <NearMeModal />
+          </div>
+        )}
+        {(visitedModals.dailyDiscoveries || isDailyDiscoveriesModalOpen) && (
+          <div className={isDailyDiscoveriesModalOpen ? 'contents' : 'hidden'} aria-hidden={!isDailyDiscoveriesModalOpen}>
+            <DailyDiscoveriesModal />
+          </div>
+        )}
+        {(visitedModals.wishlists || isWishlistsModalOpen) && (
+          <div className={isWishlistsModalOpen ? 'contents' : 'hidden'} aria-hidden={!isWishlistsModalOpen}>
+            <WishlistsModal />
+          </div>
+        )}
+        {(visitedModals.aiTripPlanner || isAiTripPlannerModalOpen) && (
+          <div className={isAiTripPlannerModalOpen ? 'contents' : 'hidden'} aria-hidden={!isAiTripPlannerModalOpen}>
+            <AiTripPlannerModal />
+          </div>
+        )}
+        {(visitedModals.notifications || isNotificationsModalOpen) && (
+          <div className={isNotificationsModalOpen ? 'contents' : 'hidden'} aria-hidden={!isNotificationsModalOpen}>
+            <NotificationsModal />
+          </div>
+        )}
         {isAiCheckInModalOpen && <AiCheckInModal />}
         {isRestaurantCheckInModalOpen && <RestaurantCheckInModal />}
         {isSupportTicketModalOpen && <PaymentSupportModal />}
         {isQrScannerModalOpen && <QrScannerModal />}
-        {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
-        {isGoogleMapsSearchModalOpen && <GoogleMapsPlaceSearchModal />}
+        {(visitedModals.vipAddRestaurant || isVipAddRestaurantModalOpen) && (
+          <div className={isVipAddRestaurantModalOpen ? 'contents' : 'hidden'} aria-hidden={!isVipAddRestaurantModalOpen}>
+            <VipAddRestaurantModal />
+          </div>
+        )}
+        {(visitedModals.googleMapsSearch || isGoogleMapsSearchModalOpen) && (
+          <div className={isGoogleMapsSearchModalOpen ? 'contents' : 'hidden'} aria-hidden={!isGoogleMapsSearchModalOpen}>
+            <GoogleMapsPlaceSearchModal />
+          </div>
+        )}
         {isManageMenuModalOpen && managingRestaurant && <ManageMenuModal />}
-        {isTrendingSocialModalOpen && <TrendingSocialModal />}
-        {isTrendingFoodDetailModalOpen && <TrendingFoodDetailModal />}
+        {(visitedModals.trendingSocial || isTrendingSocialModalOpen) && (
+          <div className={isTrendingSocialModalOpen ? 'contents' : 'hidden'} aria-hidden={!isTrendingSocialModalOpen}>
+            <TrendingSocialModal />
+          </div>
+        )}
+        {(visitedModals.trendingFoodDetail || isTrendingFoodDetailModalOpen) && (
+          <div className={isTrendingFoodDetailModalOpen ? 'contents' : 'hidden'} aria-hidden={!isTrendingFoodDetailModalOpen}>
+            <TrendingFoodDetailModal />
+          </div>
+        )}
         {selectedFood && <FoodDetailModal />}
         {selectedRestaurant && <RestaurantDetailModal />}
         {selectedDestination && <TouristDetailModal />}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, Heart, MapPin, Calendar, ExternalLink, 
+  X, ArrowLeft, Heart, MapPin, Calendar, ExternalLink, 
   Send, Share2, Compass, Camera, Bookmark, Edit2, Save, Phone
 } from 'lucide-react';
 import { TouristImageModal } from './TouristImageModal';
@@ -28,11 +28,27 @@ export const TouristDetailModal: React.FC = () => {
   const { 
     selectedDestination, setSelectedDestination, updateDestination,
     language, isBookmarked, toggleBookmark, showToast, currentUser,
-    openAddToWishlist
+    openAddToWishlist,
+    registerModalBackHandler
   } = useApp();
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isEditingAdminDest, setIsEditingAdminDest] = useState(false);
+
+  useEffect(() => {
+    registerModalBackHandler('destinationDetail', () => {
+      if (isImageModalOpen) {
+        setIsImageModalOpen(false);
+        return true;
+      }
+      if (isEditingAdminDest) {
+        setIsEditingAdminDest(false);
+        return true;
+      }
+      return false;
+    });
+    return () => registerModalBackHandler('destinationDetail', null);
+  }, [registerModalBackHandler, isImageModalOpen, isEditingAdminDest]);
 
   // Admin editable destination fields
   const [editNameKh, setEditNameKh] = useState('');
@@ -214,7 +230,7 @@ export const TouristDetailModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[65] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overscroll-none"
+      className="fixed inset-0 z-[85] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overscroll-none"
       onClick={() => setSelectedDestination(null)}
     >
       <div 
@@ -227,11 +243,17 @@ export const TouristDetailModal: React.FC = () => {
           className="absolute left-3 right-3 z-20 flex items-center justify-between gap-2 pointer-events-none"
         >
           <button
-            onClick={() => setSelectedDestination(null)}
+            onClick={() => {
+              if (isEditingAdminDest) {
+                setIsEditingAdminDest(false);
+                return;
+              }
+              setSelectedDestination(null);
+            }}
             className="kft-btn-modal-icon pointer-events-auto"
-            title="បិទ"
+            title={tr(language, 'ត្រឡប់', 'Back', '返回')}
           >
-            <X className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
 
           <div className="flex items-center gap-2 pointer-events-auto">
@@ -279,7 +301,7 @@ export const TouristDetailModal: React.FC = () => {
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+24px)]">
+        <div data-kft-detail-scroll="true" className="overflow-y-auto flex-1 no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+24px)]">
           {isEditingAdminDest ? (
             /* ADMIN EDIT DESTINATION FORM */
             <form onSubmit={handleSaveAdminDestination} className="p-4 sm:p-6 space-y-4 font-khmer pt-16">

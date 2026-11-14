@@ -280,6 +280,7 @@ export const WhatToEatModal: React.FC = () => {
     setIsTrendingFoodDetailModalOpen,
     updateRestaurant,
     openManageMyVipStore,
+    registerModalBackHandler,
   } = useApp();
 
   const isAdmin = Boolean(
@@ -396,6 +397,32 @@ export const WhatToEatModal: React.FC = () => {
   const comparePanelRef = useRef<HTMLDivElement>(null);
   const sendConversationalMessageRef = useRef<((rawText: string) => void) | null>(null);
   useBodyScrollLock(isWhatToEatModalOpen);
+
+  useEffect(() => {
+    if (!isWhatToEatModalOpen) return;
+    return registerModalBackHandler('whatToEat', () => {
+      if (comparedDishIds.length > 0) {
+        setComparedDishIds([]);
+        return true;
+      }
+      if (openGroup !== null) {
+        setOpenGroup(null);
+        return true;
+      }
+      if (drinkMode) {
+        setDrinkMode(false);
+        return true;
+      }
+      if (categoryFilter !== 'all' || mealSlotFilter !== 'auto' || vipDietFilter !== 'none' || cravingQuery.trim() !== '') {
+        setCategoryFilter('all');
+        setMealSlotFilter('auto');
+        setVipDietFilter('none');
+        setCravingQuery('');
+        return true;
+      }
+      return false;
+    });
+  }, [isWhatToEatModalOpen, comparedDishIds.length, openGroup, drinkMode, categoryFilter, mealSlotFilter, vipDietFilter, cravingQuery, registerModalBackHandler]);
 
   const toggleCompareDish = (dishId: string) => {
     setComparedDishIds((prev) => {
@@ -998,7 +1025,7 @@ export const WhatToEatModal: React.FC = () => {
     return getMatchingRestaurantsForDish(currentDish, restaurants, 2);
   }, [restaurants, currentDish]);
 
-  if (!isWhatToEatModalOpen) return null;
+  // Keep mounted once visited so scroll position & chat/wheel state persist
 
   /** Everything that must happen after an assistant reply is shown (cards, photos, drink mode, memory). */
   const applyReplyEffects = (reply: AiAssistantMessage, nextMemory: AiConversationMemory | null, cleanText: string) => {
@@ -1535,7 +1562,6 @@ export const WhatToEatModal: React.FC = () => {
       (window as any).__kft_near_me_initial_tab = 'restaurants';
       (window as any).__kft_near_me_initial_query = currentDish.nameKh;
       (window as any).__kft_near_me_initial_food = currentDish;
-      setIsWhatToEatModalOpen(false);
       setIsNearMeModalOpen(true);
     } else {
       window.open(googleUrl, '_blank', 'noopener,noreferrer');
@@ -1625,7 +1651,7 @@ export const WhatToEatModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-stretch md:items-center justify-center bg-black/70 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none"
+      className="fixed inset-0 z-[60] flex items-stretch md:items-center justify-center bg-black/70 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none"
       onClick={() => setIsWhatToEatModalOpen(false)}
     >
       <div
@@ -2091,7 +2117,6 @@ export const WhatToEatModal: React.FC = () => {
                                       type="button"
                                       onClick={() => {
                                         setSelectedFood(dish);
-                                        setIsWhatToEatModalOpen(false);
                                       }}
                                       className="py-1.5 px-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
                                     >
@@ -2238,7 +2263,6 @@ export const WhatToEatModal: React.FC = () => {
                               onClick={() => {
                                 if (rpFood) {
                                   setSelectedFood(rpFood);
-                                  setIsWhatToEatModalOpen(false);
                                 }
                               }}
                               className="w-full mt-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
@@ -2286,7 +2310,6 @@ export const WhatToEatModal: React.FC = () => {
                                     type="button"
                                     onClick={() => {
                                       setSelectedFood(sim);
-                                      setIsWhatToEatModalOpen(false);
                                     }}
                                     className="p-1.5 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 flex items-center gap-2 text-left transition cursor-pointer"
                                   >
@@ -2505,7 +2528,6 @@ export const WhatToEatModal: React.FC = () => {
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      setIsWhatToEatModalOpen(false);
                                       setIsAiTripPlannerModalOpen(true);
                                     }}
                                     className="py-2 px-3 rounded-xl bg-white border border-emerald-400 text-[#064E3B] text-xs font-extrabold cursor-pointer"
@@ -2535,10 +2557,8 @@ export const WhatToEatModal: React.FC = () => {
                                       onClick={() => {
                                         if (h.restaurantRecord) {
                                           setSelectedRestaurant(h.restaurantRecord);
-                                          setIsWhatToEatModalOpen(false);
                                         } else if (h.destinationRecord) {
                                           setSelectedDestination(h.destinationRecord);
-                                          setIsWhatToEatModalOpen(false);
                                         }
                                       }}
                                       className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer"
@@ -2694,7 +2714,6 @@ export const WhatToEatModal: React.FC = () => {
                                     type="button"
                                     onClick={() => {
                                       setSelectedTrendingFood(item);
-                                      setIsWhatToEatModalOpen(false);
                                       setIsTrendingFoodDetailModalOpen(true);
                                     }}
                                     className="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-extrabold shrink-0 cursor-pointer"
@@ -2706,7 +2725,6 @@ export const WhatToEatModal: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setIsWhatToEatModalOpen(false);
                                   setIsTrendingSocialModalOpen(true);
                                 }}
                                 className="w-full py-1.5 px-3 rounded-xl border border-rose-300 text-rose-700 text-[11px] font-extrabold cursor-pointer"
@@ -2775,7 +2793,6 @@ export const WhatToEatModal: React.FC = () => {
                                   type="button"
                                   onClick={() => {
                                     setSelectedDestination(dest);
-                                    setIsWhatToEatModalOpen(false);
                                   }}
                                   className="w-full p-2 rounded-xl bg-emerald-50/70 border border-emerald-200/80 hover:border-emerald-500 flex items-center gap-2.5 text-left transition cursor-pointer"
                                 >
@@ -2820,7 +2837,6 @@ export const WhatToEatModal: React.FC = () => {
                                     type="button"
                                     onClick={() => {
                                       setSelectedRestaurant(r);
-                                      setIsWhatToEatModalOpen(false);
                                     }}
                                     className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
                                   >
@@ -3457,7 +3473,6 @@ export const WhatToEatModal: React.FC = () => {
                               type="button"
                               onClick={() => {
                                 setSelectedFood(food);
-                                setIsWhatToEatModalOpen(false);
                               }}
                               className="group rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-xs text-left active:scale-[0.97] transition cursor-pointer"
                             >
@@ -3669,7 +3684,6 @@ export const WhatToEatModal: React.FC = () => {
                                 type="button"
                                 onClick={() => {
                                   setSelectedRestaurant(r);
-                                  setIsWhatToEatModalOpen(false);
                                 }}
                                 className="w-full flex items-center gap-2.5 text-xs text-slate-700 hover:text-emerald-600 py-1.5 cursor-pointer"
                               >
@@ -3692,7 +3706,6 @@ export const WhatToEatModal: React.FC = () => {
                           type="button"
                           onClick={() => {
                             setSelectedFood(currentDish);
-                            setIsWhatToEatModalOpen(false);
                           }}
                           className="flex-1 min-w-[110px] py-2.5 px-2.5 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer leading-[1.6]"
                         >
@@ -3761,7 +3774,6 @@ export const WhatToEatModal: React.FC = () => {
                                 setCurrentDishId(d.id);
                                 seenDishIdsRef.current.add(d.id);
                                 setSelectedFood(d);
-                                setIsWhatToEatModalOpen(false);
                               }}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
@@ -3769,7 +3781,6 @@ export const WhatToEatModal: React.FC = () => {
                                   setCurrentDishId(d.id);
                                   seenDishIdsRef.current.add(d.id);
                                   setSelectedFood(d);
-                                  setIsWhatToEatModalOpen(false);
                                 }
                               }}
                               className="group rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-xs text-left active:scale-[0.98] transition cursor-pointer"
@@ -3912,7 +3923,6 @@ export const WhatToEatModal: React.FC = () => {
                           type="button"
                           onClick={() => {
                             setSelectedFood(cDish);
-                            setIsWhatToEatModalOpen(false);
                           }}
                           className="w-full py-1 px-2 rounded-lg bg-[#064E3B] text-white text-[10px] font-bold text-center cursor-pointer"
                         >

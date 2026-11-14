@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
+  ArrowLeft,
   Send,
   X,
 } from 'lucide-react';
@@ -27,6 +28,8 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
     language,
     setLanguage,
     setActiveTab,
+    canGoBack,
+    navigateBack,
     currentUser,
     users,
     setIsAuthModalOpen,
@@ -138,8 +141,25 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
 
       {/* Top Overlay Header Row: Official App Logo on Left + Title + Bell + Profile */}
       <div className="relative z-10 px-2.5 min-[360px]:px-3.5 sm:px-5 pt-2.5 flex items-start justify-between gap-1.5 min-[360px]:gap-2.5 max-w-6xl mx-auto">
-        {/* Left: Official Rounded-Square Gold-Bordered App Logo + Khmer Title & English Subtitle */}
-        <div className="flex items-center gap-2 min-[380px]:gap-2.5 min-w-0 flex-1">
+        {/* Left: Step-by-Step Back Button (when history exists) + Official Rounded-Square Gold-Bordered App Logo + Khmer Title & English Subtitle */}
+        <div className="flex items-center gap-1.5 min-[380px]:gap-2 min-w-0 flex-1">
+          {canGoBack && (
+            <button
+              type="button"
+              onClick={navigateBack}
+              style={{
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45)',
+              }}
+              className="h-9 px-2.5 rounded-xl bg-slate-900/75 hover:bg-slate-900/90 text-white border border-amber-300/60 flex items-center gap-1 shrink-0 cursor-pointer active:scale-95 transition backdrop-blur-md"
+              title={tr(language, 'ត្រឡប់ទៅជំហានមុន', 'Back to previous step', '返回上一步')}
+              aria-label={tr(language, 'ត្រឡប់ទៅជំហានមុន', 'Back to previous step', '返回上一步')}
+            >
+              <ArrowLeft className="w-4 h-4 text-amber-300 shrink-0" />
+              <span className="font-khmer font-extrabold text-[11px] leading-none text-amber-200 hidden min-[390px]:inline">
+                {tr(language, 'ត្រឡប់', 'Back', '返回')}
+              </span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => {

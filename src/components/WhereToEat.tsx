@@ -57,7 +57,6 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
       (window as any).__kft_near_me_initial_query = food.nameKh;
       (window as any).__kft_near_me_initial_food = food;
     }
-    setSelectedFood(null);
     setIsNearMeModalOpen(true);
   };
 
@@ -79,7 +78,6 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
                 key={r.id}
                 type="button"
                 onClick={() => {
-                  setSelectedFood(null);
                   setSelectedRestaurant(r);
                 }}
                 className="w-full min-h-[52px] flex items-center gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/60 text-left active:scale-[0.98] transition cursor-pointer"

@@ -265,6 +265,9 @@ export const HotelView: React.FC = () => {
     unreadNotificationsCount,
     setIsNotificationsModalOpen,
     showToast,
+    pushNavigationStep,
+    registerModalBackHandler,
+    isRestoringHistoryRef,
   } = useApp();
 
   const isAdmin = isAdminAccount(currentUser);
@@ -310,15 +313,51 @@ export const HotelView: React.FC = () => {
     });
   };
 
+  const recordHotelStep = (label?: string) => {
+    if (isRestoringHistoryRef.current) return;
+    const snap = {
+      categoryFilter,
+      ratingFilter,
+      sortMode,
+      showAllFeatured,
+      hotelSearchQuery,
+      debouncedSearchQuery,
+      visibleCount,
+    };
+    pushNavigationStep({
+      label: label || 'hotel-filter',
+      restoreViewStep: () => {
+        setCategoryFilter(snap.categoryFilter);
+        setRatingFilter(snap.ratingFilter);
+        setSortMode(snap.sortMode);
+        setShowAllFeatured(snap.showAllFeatured);
+        setHotelSearchQuery(snap.hotelSearchQuery);
+        setDebouncedSearchQuery(snap.debouncedSearchQuery);
+        setVisibleCount(snap.visibleCount);
+      },
+    });
+  };
+
   useEffect(() => {
-    if (scrollRequestTick === 0) return;
+    registerModalBackHandler('view:hotels', () => {
+      if (hotelForImageEdit) {
+        setHotelForImageEdit(null);
+        return true;
+      }
+      return false;
+    });
+    return () => registerModalBackHandler('view:hotels', null);
+  }, [registerModalBackHandler, hotelForImageEdit]);
+
+  useEffect(() => {
+    if (scrollRequestTick === 0 || isRestoringHistoryRef.current) return;
     smoothScrollToElement(hotelListStartRef.current, {
       containerId: 'kft-main-scroll',
       targetId: 'kft-hotel-list-section',
       offsetTop: 6,
       delayMs: 25,
     });
-  }, [scrollRequestTick, categoryFilter, selectedProvince, sortMode, ratingFilter]);
+  }, [scrollRequestTick]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -328,6 +367,7 @@ export const HotelView: React.FC = () => {
   }, [hotelSearchQuery]);
 
   useEffect(() => {
+    if (isRestoringHistoryRef.current) return;
     setVisibleCount(HOTEL_BATCH_SIZE);
   }, [selectedProvince, categoryFilter, ratingFilter, sortMode, hotelSearchQuery]);
 
@@ -925,9 +965,11 @@ export const HotelView: React.FC = () => {
     sortMode === 'nearest';
 
   const resetAllHotelFilters = () => {
+    recordHotelStep('hotel-reset');
     setCategoryFilter('all');
     setSelectedProvince('');
     setHotelSearchQuery('');
+    setDebouncedSearchQuery('');
     setRatingFilter('all');
     setSortMode('newest');
     scrollToHotelList();
@@ -987,6 +1029,9 @@ export const HotelView: React.FC = () => {
               type="text"
               size={1}
               value={hotelSearchQuery}
+              onFocus={() => {
+                if (!hotelSearchQuery) recordHotelStep('hotel-search-focus');
+              }}
               onChange={(e) => setHotelSearchQuery(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -1006,7 +1051,11 @@ export const HotelView: React.FC = () => {
             {hotelSearchQuery.trim() ? (
               <button
                 type="button"
-                onClick={() => setHotelSearchQuery('')}
+                onClick={() => {
+                  recordHotelStep('hotel-search-clear');
+                  setHotelSearchQuery('');
+                  setDebouncedSearchQuery('');
+                }}
                 className="p-1 text-slate-400 hover:text-slate-700 shrink-0 cursor-pointer"
                 title={tr(language, 'សម្អាត', 'Clear', '清除')}
               >
@@ -1017,6 +1066,7 @@ export const HotelView: React.FC = () => {
             <button
               type="button"
               onClick={() => {
+                recordHotelStep('hotel-near-me');
                 if (sortMode === 'nearest') {
                   setSortMode('newest');
                 } else {
@@ -1062,6 +1112,9 @@ export const HotelView: React.FC = () => {
                   type="button"
                   id={`kft-hotel-cat-${cat.id}-btn`}
                   onClick={() => {
+                    if (categoryFilter !== cat.id) {
+                      recordHotelStep('hotel-cat:' + cat.id);
+                    }
                     setCategoryFilter(cat.id);
                     scrollToHotelList(true);
                   }}
@@ -1111,7 +1164,11 @@ export const HotelView: React.FC = () => {
               <select
                 value={selectedProvince}
                 onChange={(e) => {
-                  setSelectedProvince(e.target.value);
+                  const val = e.target.value;
+                  if (val !== selectedProvince) {
+                    recordHotelStep('hotel-prov:' + val);
+                  }
+                  setSelectedProvince(val);
                   scrollToHotelList();
                 }}
                 aria-label={tr(language, 'ជ្រើសរើសខេត្ត-ក្រុងទាំង ២៥', 'Select Province (25 Provinces)', '选择省份（25个省市）')}
@@ -1236,7 +1293,10 @@ export const HotelView: React.FC = () => {
 
                   <button
                     type="button"
-                    onClick={() => setShowAllFeatured((prev) => !prev)}
+                    onClick={() => {
+                      recordHotelStep('hotel-featured-toggle');
+                      setShowAllFeatured((prev) => !prev);
+                    }}
                     className="kft-btn-see-all"
                   >
                     <span>

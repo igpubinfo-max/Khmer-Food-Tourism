@@ -133,8 +133,6 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
   const handleOpenFullRecipe = () => {
     if (!matchedFood) return;
-    setIsTrendingFoodDetailModalOpen(false);
-    setSelectedTrendingFood(null);
     setSelectedFood(matchedFood);
   };
 
@@ -168,7 +166,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[62] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
       onClick={handleClose}
       role="dialog"
       aria-modal="true"

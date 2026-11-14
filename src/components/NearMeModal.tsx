@@ -135,6 +135,8 @@ export const NearMeModal: React.FC = () => {
     setSelectedRestaurant,
     setSelectedDestination,
     setActiveTab,
+    pushNavigationStep,
+    registerModalBackHandler,
   } = useApp();
 
   const [activeType, setActiveType] = useState<'restaurants' | 'destinations'>('restaurants');
@@ -167,25 +169,45 @@ export const NearMeModal: React.FC = () => {
 
   useEffect(() => {
     if (isNearMeModalOpen && typeof window !== 'undefined') {
-      (window as any).__kft_near_me_initial_tab = undefined;
-      setActiveType('restaurants');
+      const initTab = (window as any).__kft_near_me_initial_tab;
       const initFood = (window as any).__kft_near_me_initial_food;
-      if (initFood && typeof initFood === 'object') {
-        setTargetFood(initFood as FoodItem);
-        (window as any).__kft_near_me_initial_food = undefined;
-      } else {
-        setTargetFood(null);
-      }
       const initQuery = (window as any).__kft_near_me_initial_query;
-      if (typeof initQuery === 'string') {
-        setNearbyQuery(initQuery);
-        (window as any).__kft_near_me_initial_query = undefined;
-      } else {
-        setNearbyQuery('');
+      if (initTab !== undefined || initFood !== undefined || initQuery !== undefined) {
+        (window as any).__kft_near_me_initial_tab = undefined;
+        setActiveType(initTab === 'destinations' ? 'destinations' : 'restaurants');
+        if (initFood && typeof initFood === 'object') {
+          setTargetFood(initFood as FoodItem);
+          (window as any).__kft_near_me_initial_food = undefined;
+        } else {
+          setTargetFood(null);
+        }
+        if (typeof initQuery === 'string') {
+          setNearbyQuery(initQuery);
+          (window as any).__kft_near_me_initial_query = undefined;
+        } else {
+          setNearbyQuery('');
+        }
+        setQuickFilterId('all');
       }
-      setQuickFilterId('all');
     }
   }, [isNearMeModalOpen]);
+
+  useEffect(() => {
+    if (!isNearMeModalOpen) return;
+    return registerModalBackHandler('nearMe', () => {
+      if (quickFilterId !== 'all' || nearbyQuery.trim() !== '' || targetFood !== null) {
+        setQuickFilterId('all');
+        setNearbyQuery('');
+        setTargetFood(null);
+        return true;
+      }
+      if (activeType !== 'restaurants') {
+        setActiveType('restaurants');
+        return true;
+      }
+      return false;
+    });
+  }, [isNearMeModalOpen, quickFilterId, nearbyQuery, targetFood, activeType, registerModalBackHandler]);
 
   const [geoStatus, setGeoStatus] = useState<'idle' | 'requesting' | 'granted' | 'fallback'>('idle');
   const [manualProvince, setManualProvince] = useState<string>('រាជធានីភ្នំពេញ');
@@ -580,7 +602,7 @@ export const NearMeModal: React.FC = () => {
     });
   }, [nearbyDestinations, nearbyQuery, quickFilterId, language]);
 
-  if (!isNearMeModalOpen) return null;
+  // Keep mounted once visited so GPS results & scroll position persist
 
   const localizedManualProvince = translateProvince(manualProvince, language);
   const meterUnit = tr(language, 'ម៉ែត្រ', 'm', '米');
@@ -668,7 +690,7 @@ export const NearMeModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-stretch md:items-center justify-center bg-black/60 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none"
+      className="fixed inset-0 z-[60] flex items-stretch md:items-center justify-center bg-black/60 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none"
       onClick={() => setIsNearMeModalOpen(false)}
     >
       <div
@@ -823,7 +845,6 @@ export const NearMeModal: React.FC = () => {
                 type="button"
                 onClick={() => {
                   const q = nearbyQuery.trim();
-                  setIsNearMeModalOpen(false);
                   openAiAssistantWithQuery(q, setIsWhatToEatModalOpen);
                 }}
                 style={{
@@ -862,6 +883,7 @@ export const NearMeModal: React.FC = () => {
                         if (typeof window !== 'undefined') {
                           (window as any).__kft_tourism_near_me = true;
                         }
+                        pushNavigationStep({ label: 'nearMe->tourism', reopenModalId: 'nearMe' });
                         setIsNearMeModalOpen(false);
                         setActiveTab('tourism');
                         return;
@@ -1004,7 +1026,6 @@ export const NearMeModal: React.FC = () => {
                       key={r.id}
                       onClick={() => {
                         setSelectedRestaurant(r);
-                        setIsNearMeModalOpen(false);
                       }}
                       className={`kft-cv-card p-3 bg-white rounded-[22px] border transition space-y-2.5 cursor-pointer ${
                         isVipShop
@@ -1038,7 +1059,6 @@ export const NearMeModal: React.FC = () => {
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setSelectedRestaurant(r);
-                                  setIsNearMeModalOpen(false);
                                 }}
                                 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.65] line-clamp-2 break-words cursor-pointer hover:text-emerald-700"
                               >
@@ -1115,7 +1135,6 @@ export const NearMeModal: React.FC = () => {
                         <button
                           onClick={() => {
                             setSelectedRestaurant(r);
-                            setIsNearMeModalOpen(false);
                           }}
                           className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition cursor-pointer"
                           title={tr(language, 'ព័ត៌មានលម្អិត', 'Details', '查看详情')}
@@ -1240,7 +1259,6 @@ export const NearMeModal: React.FC = () => {
                                 return;
                               }
                               setSelectedDestination(d);
-                              setIsNearMeModalOpen(false);
                             }}
                             className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.65] line-clamp-2 break-words cursor-pointer hover:text-emerald-700"
                           >
@@ -1294,7 +1312,6 @@ export const NearMeModal: React.FC = () => {
                             return;
                           }
                           setSelectedDestination(d);
-                          setIsNearMeModalOpen(false);
                         }}
                         className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition cursor-pointer"
                         title={tr(language, 'ព័ត៌មានលម្អិត', 'Details', '查看详情')}
