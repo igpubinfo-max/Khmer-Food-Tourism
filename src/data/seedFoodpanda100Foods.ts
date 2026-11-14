@@ -2313,66 +2313,79 @@ export const foodpanda100Foods: FoodItem[] = [
   {
     "id": "food-263",
     "nameKh": "ស្ងោរជ្រក់ក្រៅឆ្នាំង",
-    "nameEn": "Cambodian Flash-Poached Beef Sour Herb Soup \"Outside the Pot\" (Sngor Chhruk Krao Chhnang)",
-    "nameZh": "柬式“锅外”酸辣鲜烫牛肉汤",
+    "nameEn": "Cambodian Dried Fish, Boiled Egg & Green Mango Sour Soup \"Outside the Pot\" (Sngor Chhruk Krao Chhnang)",
+    "nameZh": "柬式“锅外”咸鱼鸭蛋青芒酸汤",
     "categorySlug": "soup",
     "categoryKh": "សម្ល និង ស៊ុប",
     "categoryEn": "Soups & Stews",
     "categoryZh": "汤羹与炖菜",
-    "descriptionKh": "សាច់គោស្រស់ហាន់ស្តើងៗរៀបក្នុងចានជាមួយជីរ ស្រោចទឹកស៊ុបគល់ស្លឹកគ្រៃក្ដៅពុះពីលើឱ្យឆ្អិនផ្អែមទន់ភ្លាមៗ។",
-    "descriptionEn": "Paper-thin raw beef slices arranged in a bowl with aromatic herbs and flash-poached tableside by pouring boiling lemongrass-lime broth right over the meat.",
-    "descriptionZh": "薄切鲜牛肉片配香草铺于碗中，直接冲入滚烫的香茅青柠酸辣高汤，鲜嫩无比。",
+    "descriptionKh": "ម្ហូបបុរាណខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ដែលយកត្រីងៀតអាំងឬចៀនបេះជាដុំៗ ពងទាស្ងោរ ស្វាយខ្ចីឈូស ត្រសក់ហាន់ស្តើងៗ ខ្ទឹមក្រហម ម្ទេស និងជីរគ្រប់មុខ រៀបដាក់ក្នុងចាន រួចស្រោចទឹកដាំពុះក្តៅៗលាយទឹកត្រី និងទឹកក្រូចឆ្មារពីលើក្រៅឆ្នាំងភ្លាមៗ។",
+    "descriptionEn": "Traditional Cambodian 'outside-the-pot' sour soup made by arranging roasted or crispy fried sun-dried fish (Trei Ngiet), boiled duck eggs, shredded green mango, sliced cucumber, shallots, chilies, and fresh herbs in a deep bowl, then pouring boiling hot water seasoned with fish sauce and fresh lime juice directly over top.",
+    "descriptionZh": "地道柬埔寨传统“锅外酸汤”，将烤香或煎脆的咸鱼块（Trei Ngiet）、水煮鸭蛋、青芒果丝、黄瓜片、红葱头、辣椒和新鲜香草铺在深碗中，直接冲入滚水并调入鱼露与鲜青柠汁即成。",
     "photoUrl": "/foods/food-263.jpg",
     "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
+    "cookTime": "20 នាទី",
     "servings": "4 នាក់",
+    "calories": 285,
     "difficulty": "easy",
-    "priceRiel": 51000,
-    "priceUsd": 12.75,
+    "priceRiel": 24000,
+    "priceUsd": 6.0,
     "ingredients": [
       {
-        "nameKh": "សាច់គោផុយហាន់ស្តើងៗ ៣០០ ក្រាម",
-        "nameEn": "Beef tenderloin sliced paper-thin 300 g",
-        "nameZh": "牛里脊切薄片 300克",
+        "nameKh": "ត្រីងៀតអាំង ឬចៀនឱ្យឈ្ងុយ បេះជាដុំៗគ្មានឆ្អឹង ២៥០ ក្រាម",
+        "nameEn": "Roasted or crispy fried Cambodian sun-dried fish (Trei Ngiet), deboned & flaked 250 g",
+        "nameZh": "烤香或煎脆的柬埔寨咸鱼（去骨撕块） 250克",
+        "amount": "២៥០ ក្រាម / 250 g"
+      },
+      {
+        "nameKh": "ពងទាស្ងោរ ឬពងមាន់ស្ងោរ បកសំបកពុះជាដុំ ៣ គ្រាប់",
+        "nameEn": "Hard-boiled duck or chicken eggs, peeled & quartered 3 pcs",
+        "nameZh": "水煮鸭蛋或鸡蛋（去壳切瓣） 3颗",
+        "amount": "៣ គ្រាប់ / 3 pcs"
+      },
+      {
+        "nameKh": "ស្វាយខ្ចីឈូសសរសៃ និងត្រសក់ស្រួយហាន់ស្តើងៗ ១ ចាន",
+        "nameEn": "Shredded green mango & thinly sliced crisp cucumber 1 bowl",
+        "nameZh": "青芒果丝与脆黄瓜薄片 1碗",
+        "amount": "១ ចាន / 1 bowl"
+      },
+      {
+        "nameKh": "ខ្ទឹមក្រហមហាន់ស្តើង ខ្ទឹមស និងម្ទេសខ្មាំង ៣ ស្លាបព្រាបាយ",
+        "nameEn": "Sliced shallots, garlic & bird's eye chilies 3 tbsp",
+        "nameZh": "红葱头薄片、大蒜与小米辣 3汤匙",
+        "amount": "៣ ស្លាបព្រាបាយ / 3 tbsp"
+      },
+      {
+        "nameKh": "ទឹកត្រី ទឹកក្រូចឆ្មារស្រស់ អំបិល និងស្ករសបន្តិច",
+        "nameEn": "Fish sauce, fresh lime juice, salt & a pinch of sugar",
+        "nameZh": "鱼露、鲜青柠汁、盐及少许白糖",
         "amount": "តាមចំណូលចិត្ត / To taste"
       },
       {
-        "nameKh": "គល់ស្លឹកគ្រៃ រំដេង និងស្លឹកក្រូចសើច ១ ដុំ",
-        "nameEn": "Lemongrass, galangal & kaffir lime leaves 1 bundle",
-        "nameZh": "香茅、南姜与柠檬叶 1束",
-        "amount": "តាមចំណូលចិត្ត / To taste"
-      },
-      {
-        "nameKh": "ទឹកក្រូចឆ្មារ ទឹកត្រី និងម្ទេសបុក ៣ ស្លាបព្រាបាយ",
-        "nameEn": "Fresh lime juice, fish sauce & pounded chilies 3 tbsp",
-        "nameZh": "鲜青柠汁、鱼露与捣碎辣椒 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
-      },
-      {
-        "nameKh": "ជីរណា ជីរនាងវង និងខ្ទឹមបំពង ១ ចាន",
-        "nameEn": "Sawtooth coriander, Thai basil & crispy garlic 1 bowl",
-        "nameZh": "刺芫荽、罗勒与炸蒜酥 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "nameKh": "ជីររណារ ជីរនាងវង ស្លឹកខ្ទឹម និងទឹកដាំពុះក្តៅៗ ១ ចានគោម",
+        "nameEn": "Sawtooth coriander, sweet basil, spring onion & boiling hot water 1 large bowl",
+        "nameZh": "刺芫荽、罗勒、葱花与滚水 1大碗",
+        "amount": "១ ចានគោម / 1 large bowl"
       }
     ],
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "រៀបសាច់គោហាន់ស្តើងៗដាក់ក្នុងចានគោមធំ រួចដាក់ជីរណា ជីរនាងវង និងម្ទេសពីលើ។",
-        "instructionEn": "Arrange the paper-thin beef slices in a deep serving bowl and top with sawtooth herb, basil, and chilies.",
-        "instructionZh": "将薄牛肉片铺在大汤碗中，放上刺芫荽、罗勒与辣椒。"
+        "instructionKh": "យកត្រីងៀតទៅអាំង ឬចៀនឱ្យឆ្អិនឈ្ងុយល្អ រួចបេះយកតែសាច់ជាដុំល្មមៗ ហើយស្ងោរពងទាឱ្យឆ្អិន បកសំបកពុះជា ៤ ដុំ។",
+        "instructionEn": "Grill or pan-fry the dried fish (Trei Ngiet) until golden and fragrant, flake into bite-sized pieces, and quarter the hard-boiled duck eggs.",
+        "instructionZh": "将咸鱼烤香或煎至金黄酥香后撕成适口小块，水煮鸭蛋剥壳切成四瓣。"
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដាំទឹកស៊ុបជាមួយគល់ស្លឹកគ្រៃ រំដេង និងស្លឹកក្រូចសើចឱ្យពុះខ្លាំង រួចបង់ទឹកត្រីនិងទឹកក្រូចឆ្មារ។",
-        "instructionEn": "Boil stock with lemongrass, galangal, and kaffir lime leaves at a rolling boil, then season with fish sauce and lime juice.",
-        "instructionZh": "锅中加香茅、南姜和柠檬叶大火煮沸，调入鱼露与青柠汁。"
+        "instructionKh": "រៀបស្វាយខ្ចីឈូស ត្រសក់ហាន់ស្តើងៗ ខ្ទឹមក្រហមហាន់ ម្ទេស ត្រីងៀត ពងទាស្ងោរ និងជីរគ្រប់មុខ (ជីររណារ ជីរនាងវង ស្លឹកខ្ទឹម) ដាក់ចូលក្នុងចានគោមធំ។",
+        "instructionEn": "Arrange the shredded green mango, sliced cucumber, shallots, chilies, flaked dried fish, boiled egg wedges, and fresh herbs in a deep serving bowl.",
+        "instructionZh": "将青芒果丝、黄瓜薄片、红葱头、辣椒、咸鱼块、水煮蛋和新鲜香草铺入深汤碗中。"
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ដួសទឹកស៊ុបកំពុងពុះស្រោចពីលើសាច់គោក្នុងចានឱ្យឆ្អិនស្រពាប់ រោយខ្ទឹមបំពង រួចញ៉ាំភ្លាមៗ។",
-        "instructionEn": "Ladle the boiling broth directly over the raw beef in the bowl to flash-poach it, top with crispy garlic, and serve.",
-        "instructionZh": "将滚烫酸汤直接冲入碗中烫熟牛肉，撒炸蒜酥即可享用。"
+        "instructionKh": "ដាំទឹកឱ្យពុះខ្លាំង រួចចាក់ស្រោចពីលើគ្រឿងក្នុងចានក្រៅឆ្នាំង ផ្សំរសជាតិដោយទឹកត្រី និងច្របាច់ទឹកក្រូចឆ្មារស្រស់ ភ្លក្សឱ្យជូរប្រៃឈ្ងុយឆ្ងាញ់ រួចពិសាភ្លាមៗ។",
+        "instructionEn": "Pour rolling boiling water directly into the bowl ('outside the pot'), season with fish sauce and fresh lime juice to a bright tangy-savory balance, and serve immediately.",
+        "instructionZh": "将滚沸开水直接冲入碗中（“锅外冲汤”），调入鱼露与鲜青柠汁至酸香鲜美，趁热即食。"
       }
     ],
     "rating": 4.7,
@@ -2380,7 +2393,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
+    "photoUpdatedAt": "2026-11-14T10:40:00.000Z"
   },
   {
     "id": "food-264",

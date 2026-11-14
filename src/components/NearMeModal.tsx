@@ -40,6 +40,8 @@ import {
   TouristDestination,
   isPlaceLocationVerified,
   isShopSubscriptionActive,
+  isHotelBusinessRecord,
+  inferBusinessTypeAndCategory,
   openRestaurantGoogleExternal,
   openDestinationGoogleExternal,
 } from '../types';
@@ -80,15 +82,14 @@ export function calculateDistanceMeters(lat1: number, lon1: number, lat2: number
   return Math.round(R * c);
 }
 
-export const MAX_NEARBY_RADIUS_METERS = 500;
+export const MAX_NEARBY_RADIUS_METERS = 5000;
 const NEARBY_BATCH_SIZE = 24;
 const LAST_KNOWN_GPS_STORAGE_KEY = 'kft_last_known_user_gps_v1';
 
 const RADIUS_OPTIONS: { value: number; labelKh: string; labelEn: string; labelZh: string }[] = [
-  { value: 500, labelKh: '៥០០ ម៉ែត្រ', labelEn: '500m', labelZh: '500米' },
-  { value: 1000, labelKh: '១ គ.ម', labelEn: '1km', labelZh: '1公里' },
-  { value: 2000, labelKh: '២ គ.ម', labelEn: '2km', labelZh: '2公里' },
-  { value: 5000, labelKh: '៥ គ.ម', labelEn: '5km', labelZh: '5公里' },
+  { value: 5000, labelKh: '៥ គ.ម (5km)', labelEn: '5 km', labelZh: '5 公里' },
+  { value: 10000, labelKh: '១០ គ.ម (10km)', labelEn: '10 km', labelZh: '10 公里' },
+  { value: 20000, labelKh: '២០ គ.ម (20km)', labelEn: '20 km', labelZh: '20 公里' },
 ];
 
 function readSavedUserGps(): { lat: number; lng: number } | null {
@@ -359,7 +360,7 @@ export const NearMeModal: React.FC = () => {
   // Merge & deduplicate verified Supabase restaurants + Google Maps/Live nearby places within user's location
   const allVerifiedCityRestaurants = useMemo(() => {
     const mergedMap = new Map<string, Restaurant>();
-    const maxCitySearchRadius = Math.max(selectedRadiusMeters, 15000);
+    const maxCitySearchRadius = Math.max(selectedRadiusMeters, 20000);
 
     for (const r of restaurants) {
       if (!verifyShopDataForDisplay(r)) continue;
@@ -411,12 +412,60 @@ export const NearMeModal: React.FC = () => {
     const mergedMap = new Map<string, TouristDestination>();
 
     for (const d of destinations) {
-      if (!d || d.categorySlug === 'hotel') continue;
+      if (!d) continue;
       if (!isPlaceLocationVerified(d)) continue;
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, d.latitude, d.longitude);
       if (dist <= selectedRadiusMeters) {
         mergedMap.set(d.id, d);
       }
+    }
+
+    for (const r of restaurants) {
+      if (!r || !isHotelBusinessRecord(r) || (r.status && r.status !== 'approved')) continue;
+      if (!isPlaceLocationVerified(r)) continue;
+      const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
+      if (dist > selectedRadiusMeters || mergedMap.has(r.id)) continue;
+      const catInfo = inferBusinessTypeAndCategory(r);
+      const resolvedPhoto =
+        r.profileImage ||
+        r.photoUrl ||
+        r.thumbnailUrl ||
+        (Array.isArray(r.galleryPhotos) && r.galleryPhotos[0]) ||
+        '';
+      mergedMap.set(r.id, {
+        id: r.id,
+        nameKh: r.nameKh,
+        nameEn: r.nameEn || r.nameKh,
+        categorySlug: 'hotel',
+        categoryKh: r.categoryKh || catInfo.shortKh,
+        categoryEn: r.categoryEn || catInfo.shortEn,
+        descriptionKh: r.descriptionKh || `${r.nameKh} — កន្លែងស្នាក់នៅស្អាត និងមានផាសុកភាព។`,
+        descriptionEn: r.descriptionEn || `${r.nameEn || r.nameKh} — Verified accommodation in ${r.provinceEn}.`,
+        photoUrl: resolvedPhoto,
+        galleryPhotos: r.galleryPhotos || [],
+        provinceKh: r.provinceKh,
+        provinceEn: r.provinceEn,
+        addressKh: r.addressKh || r.provinceKh,
+        addressEn: r.addressEn || r.provinceEn,
+        phone: r.phone,
+        priceRange: r.priceLevel || '$$',
+        entranceFeeKh: `តម្លៃបន្ទប់៖ ${r.priceLevel || '$'} • ${r.phone || ''}`,
+        entranceFeeEn: `Room Rate: ${r.priceLevel || '$'} • ${r.phone || ''}`,
+        bestTimeToVisitKh: r.openingHoursKh || 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង',
+        bestTimeToVisitEn: r.openingHoursEn || 'Open 24 Hours',
+        mapUrl: r.mapUrl || `https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`,
+        latitude: r.latitude,
+        longitude: r.longitude,
+        googlePlaceId: r.googlePlaceId,
+        rating: r.rating || 4.7,
+        reviewCount: r.reviewCount || 64,
+        highlightsKh: r.signatureDishesKh?.length
+          ? r.signatureDishesKh
+          : ['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ Wi-Fi និងចំណតរថយន្តសុវត្ថិភាព'],
+        isFeatured: Boolean(r.isPromoted),
+        isCustomPhoto: Boolean(resolvedPhoto),
+        locationVerificationStatus: 'verified',
+      });
     }
 
     for (const gp of liveNearbyAttractions) {
@@ -437,7 +486,7 @@ export const NearMeModal: React.FC = () => {
       })
       .filter((d) => Number.isFinite(d.distanceMeters) && d.distanceMeters <= selectedRadiusMeters)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [destinations, liveNearbyAttractions, baseCoords, selectedRadiusMeters]);
+  }, [destinations, restaurants, liveNearbyAttractions, baseCoords, selectedRadiusMeters]);
 
   const filteredNearbyRestaurants = useMemo(() => {
     const rawQuery = nearbyQuery.trim();
@@ -484,7 +533,7 @@ export const NearMeModal: React.FC = () => {
       return nearbyRestaurants
         .filter((r) => {
           if (!passesQuickFilter(r)) return false;
-          if (quickFilterId !== 'coffee' && classifyShopBusinessKind(r) === 'bakery_bread') {
+          if (quickFilterId !== 'all' && quickFilterId !== 'coffee' && classifyShopBusinessKind(r) === 'bakery_bread') {
             return false;
           }
           return true;
@@ -610,10 +659,14 @@ export const NearMeModal: React.FC = () => {
     selectedRadiusMeters === 500
       ? tr(language, '៥០០ ម៉ែត្រ', '500m', '500 米')
       : selectedRadiusMeters === 1000
-      ? tr(language, '១ គ.ម', '1km', '1 公里')
+      ? tr(language, '១ គ.ម (1km)', '1 km', '1 公里')
       : selectedRadiusMeters === 2000
-      ? tr(language, '២ គ.ម', '2km', '2 公里')
-      : tr(language, '៥ គ.ម', '5km', '5 公里');
+      ? tr(language, '២ គ.ម (2km)', '2 km', '2 公里')
+      : selectedRadiusMeters === 10000
+      ? tr(language, '១០ គ.ម (10km)', '10 km', '10 公里')
+      : selectedRadiusMeters === 20000
+      ? tr(language, '២០ គ.ម (20km)', '20 km', '20 公里')
+      : tr(language, '៥ គ.ម (5km)', '5 km', '5 公里');
 
   const formatDistanceLabel = (distMeters: number) => {
     if (distMeters <= 2000) {
@@ -803,6 +856,53 @@ export const NearMeModal: React.FC = () => {
             </div>
           </div>
 
+          {/* Row 1.5: Search Radius Selector (5 km Default, Expandable to 10 km or 20 km) */}
+          <div className="flex items-center justify-between gap-2 flex-wrap px-2.5 py-1.5 rounded-2xl bg-slate-800/85 border border-slate-700/90">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] font-extrabold text-emerald-300 flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span>{tr(language, 'រង្វង់ស្វែងរក៖', 'Radius:', '搜索范围：')}</span>
+              </span>
+              {RADIUS_OPTIONS.map((opt) => {
+                const isSelected = selectedRadiusMeters === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => handleSelectRadius(opt.value)}
+                    style={
+                      isSelected
+                        ? { background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)' }
+                        : undefined
+                    }
+                    className={`px-2.5 py-1 rounded-full text-[10.5px] font-extrabold transition cursor-pointer active:scale-95 ${
+                      isSelected
+                        ? 'text-white shadow-xs border border-emerald-300/60'
+                        : 'bg-slate-700/80 text-slate-200 hover:bg-slate-700 border border-slate-600'
+                    }`}
+                  >
+                    {tr(language, opt.labelKh, opt.labelEn, opt.labelZh)}
+                  </button>
+                );
+              })}
+            </div>
+            <span className="text-[10.5px] font-bold text-amber-300/95">
+              {activeType === 'restaurants'
+                ? tr(
+                    language,
+                    `ឃើញ ${filteredNearbyRestaurants.length} ហាង`,
+                    `${filteredNearbyRestaurants.length} shops`,
+                    `共 ${filteredNearbyRestaurants.length} 家`
+                  )
+                : tr(
+                    language,
+                    `ឃើញ ${filteredNearbyDestinations.length} ទីតាំង`,
+                    `${filteredNearbyDestinations.length} places`,
+                    `共 ${filteredNearbyDestinations.length} 处`
+                  )}
+            </span>
+          </div>
+
           {/* Row 2: Clean White Rounded Search Shops Input */}
           <div className="relative">
             <Search className="w-4 h-4 text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -880,12 +980,9 @@ export const NearMeModal: React.FC = () => {
                     id={`kft-nearme-cat-${card.id}-btn`}
                     onClick={() => {
                       if (card.type === 'destinations') {
-                        if (typeof window !== 'undefined') {
-                          (window as any).__kft_tourism_near_me = true;
-                        }
-                        pushNavigationStep({ label: 'nearMe->tourism', reopenModalId: 'nearMe' });
-                        setIsNearMeModalOpen(false);
-                        setActiveTab('tourism');
+                        setActiveType('destinations');
+                        setQuickFilterId('all');
+                        scrollToNearbyShopList(true);
                         return;
                       }
                       setActiveType('restaurants');
@@ -980,20 +1077,20 @@ export const NearMeModal: React.FC = () => {
                   )}
                 </p>
                 <div className="flex items-center justify-center gap-2 flex-wrap">
-                  {selectedRadiusMeters < 5000 && (
+                  {selectedRadiusMeters < 20000 && (
                     <button
                       onClick={() =>
                         handleSelectRadius(
-                          selectedRadiusMeters === 500 ? 1000 : selectedRadiusMeters === 1000 ? 2000 : 5000
+                          selectedRadiusMeters < 10000 ? 10000 : 20000
                         )
                       }
                       className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-extrabold font-khmer rounded-full transition cursor-pointer"
                     >
                       <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                       <span>
-                        {selectedRadiusMeters === 500
-                          ? tr(language, 'ពង្រីកទៅ ១ គ.ម (1km)', 'Expand to 1km', '扩大至 1公里')
-                          : tr(language, 'ពង្រីកទៅ ២ គ.ម (2km)', 'Expand to 2km', '扩大至 2公里')}
+                        {selectedRadiusMeters < 10000
+                          ? tr(language, 'ពង្រីកទៅ ១០ គ.ម (10km)', 'Expand to 10 km', '扩大至 10公里')
+                          : tr(language, 'ពង្រីកទៅ ២០ គ.ម (20km)', 'Expand to 20 km', '扩大至 20公里')}
                       </span>
                     </button>
                   )}
@@ -1146,8 +1243,8 @@ export const NearMeModal: React.FC = () => {
                   );
                 })}
               </div>
-              {visibleNearbyCount < filteredNearbyRestaurants.length && (
-                <div className="pt-3 flex justify-center">
+              <div className="pt-3 flex items-center justify-center gap-2.5 flex-wrap">
+                {visibleNearbyCount < filteredNearbyRestaurants.length && (
                   <button
                     type="button"
                     onClick={() => setVisibleNearbyCount((prev) => prev + NEARBY_BATCH_SIZE)}
@@ -1162,8 +1259,22 @@ export const NearMeModal: React.FC = () => {
                       )}
                     </span>
                   </button>
-                </div>
-              )}
+                )}
+                {selectedRadiusMeters < 20000 && (
+                  <button
+                    type="button"
+                    onClick={() => handleSelectRadius(selectedRadiusMeters < 10000 ? 10000 : 20000)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 text-xs font-extrabold font-khmer rounded-full shadow-xs transition cursor-pointer active:scale-95"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                    <span>
+                      {selectedRadiusMeters < 10000
+                        ? tr(language, 'ពង្រីករង្វង់ទៅ ១០ គ.ម (10km)', 'Expand Radius to 10 km', '扩大范围至 10公里')
+                        : tr(language, 'ពង្រីករង្វង់ទៅ ២០ គ.ម (20km)', 'Expand Radius to 20 km', '扩大范围至 20公里')}
+                    </span>
+                  </button>
+                )}
+              </div>
               </>
             )
           ) : filteredNearbyDestinations.length === 0 ? (
@@ -1188,20 +1299,20 @@ export const NearMeModal: React.FC = () => {
                 )}
               </p>
               <div className="flex items-center justify-center gap-2 flex-wrap">
-                {selectedRadiusMeters < 5000 && (
+                {selectedRadiusMeters < 20000 && (
                   <button
                     onClick={() =>
                       handleSelectRadius(
-                        selectedRadiusMeters === 500 ? 1000 : selectedRadiusMeters === 1000 ? 2000 : 5000
+                        selectedRadiusMeters < 10000 ? 10000 : 20000
                       )
                     }
                     className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-extrabold font-khmer rounded-full transition cursor-pointer"
                   >
                     <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                     <span>
-                      {selectedRadiusMeters === 500
-                        ? tr(language, 'ពង្រីកទៅ ១ គ.ម (1km)', 'Expand to 1km', '扩大至 1公里')
-                        : tr(language, 'ពង្រីកទៅ ២ គ.ម (2km)', 'Expand to 2km', '扩大至 2公里')}
+                      {selectedRadiusMeters < 10000
+                        ? tr(language, 'ពង្រីកទៅ ១០ គ.ម (10km)', 'Expand to 10 km', '扩大至 10公里')
+                        : tr(language, 'ពង្រីកទៅ ២០ គ.ម (20km)', 'Expand to 20 km', '扩大至 20公里')}
                     </span>
                   </button>
                 )}
@@ -1323,8 +1434,8 @@ export const NearMeModal: React.FC = () => {
                 );
               })}
             </div>
-            {visibleNearbyCount < filteredNearbyDestinations.length && (
-              <div className="pt-3 flex justify-center">
+            <div className="pt-3 flex items-center justify-center gap-2.5 flex-wrap">
+              {visibleNearbyCount < filteredNearbyDestinations.length && (
                 <button
                   type="button"
                   onClick={() => setVisibleNearbyCount((prev) => prev + NEARBY_BATCH_SIZE)}
@@ -1339,8 +1450,22 @@ export const NearMeModal: React.FC = () => {
                     )}
                   </span>
                 </button>
-              </div>
-            )}
+              )}
+              {selectedRadiusMeters < 20000 && (
+                <button
+                  type="button"
+                  onClick={() => handleSelectRadius(selectedRadiusMeters < 10000 ? 10000 : 20000)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-amber-400/50 text-amber-300 text-xs font-extrabold font-khmer rounded-full shadow-xs transition cursor-pointer active:scale-95"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                  <span>
+                    {selectedRadiusMeters < 10000
+                      ? tr(language, 'ពង្រីករង្វង់ទៅ ១០ គ.ម (10km)', 'Expand Radius to 10 km', '扩大范围至 10公里')
+                      : tr(language, 'ពង្រីករង្វង់ទៅ ២០ គ.ម (20km)', 'Expand Radius to 20 km', '扩大范围至 20公里')}
+                  </span>
+                </button>
+              )}
+            </div>
             </>
           )}
         </div>

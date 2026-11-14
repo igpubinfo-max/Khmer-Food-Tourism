@@ -1131,7 +1131,7 @@ export const FoodDetailModal: React.FC = () => {
                 <Utensils className="w-4 h-4 mx-auto text-orange-500 mb-1" />
                 <p className="text-[11px] text-slate-400">{tr(language, 'ថាមពល', 'Energy', '热量')}</p>
                 <p className="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-slate-200">
-                  {selectedFood.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}
+                  {selectedFood.calories || 285} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}
                 </p>
               </div>
 

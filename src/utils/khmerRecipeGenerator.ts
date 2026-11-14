@@ -329,11 +329,11 @@ function detectMainIngredient(nameKh: string, nameEn: string): ProteinMatch {
       amount: '២៥០ ក្រាម',
     };
   }
-  if (kh.includes('ត្រីងៀត') || kh.includes('ត្រីប្រម៉ា') || en.includes('dried fish') || en.includes('salted fish')) {
+  if (kh.includes('ត្រីងៀត') || kh.includes('ត្រីប្រម៉ា') || kh.includes('ក្រៅឆ្នាំង') || en.includes('dried fish') || en.includes('salted fish')) {
     return {
-      mainKh: 'ត្រីងៀត ឬត្រីប្រម៉ាខ្មែរសាច់ណែនលាងទឹកសម្រស់ស្ងួត',
-      mainEn: 'Cambodian sun-dried or salted fish rinsed and patted dry',
-      amount: '៣០០ ក្រាម',
+      mainKh: 'ត្រីងៀតខ្មែរអាំង ឬចៀនឱ្យឈ្ងុយបេះជាដុំៗគ្មានឆ្អឹង',
+      mainEn: 'Roasted or crispy fried Cambodian sun-dried fish (Trei Ngiet), deboned & flaked',
+      amount: '២៥០ ក្រាម',
     };
   }
   const specificFishMatch = kh.match(/ត្រី(?:រ៉ស់|ផ្ទក់|អណ្តែង|ប្រា|ពោធិ៍|ឆ្ពិន|ក្រាញ់|ឆ្លាំង|កេះ|ក្រាយ|កញ្ចុះ|សណ្តាយ|សាម៉ុន|សាលម៉ុន|ធូណា)/);

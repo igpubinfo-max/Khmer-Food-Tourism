@@ -2537,6 +2537,27 @@ export function applyFoodOverrides(
       : filteredBaseFoods;
   let anyChanged = baseList.length !== foods.length || synthesizedAdminFoods.length > 0;
   const mapped = baseList.map((f) => {
+    const seedFoodFor263 = f.id === 'food-263' || (f.nameKh || '').includes('ជ្រក់ក្រៅឆ្នាំង') ? IMMUTABLE_SEED_FOOD_MAP.get('food-263') : undefined;
+    const hasStaleBeefOn263 = Boolean(
+      seedFoodFor263 &&
+        (/សាច់គោ|beef|牛肉/i.test(`${f.nameEn || ''} ${f.nameZh || ''} ${f.descriptionKh || ''} ${f.descriptionEn || ''}`) ||
+          (Array.isArray(f.ingredients) && f.ingredients.some((ing) => /សាច់គោ|beef|牛肉/i.test(`${ing.nameKh || ''} ${ing.nameEn || ''}`))))
+    );
+    if (hasStaleBeefOn263 && seedFoodFor263) {
+      anyChanged = true;
+      f = {
+        ...f,
+        nameEn: seedFoodFor263.nameEn,
+        nameZh: seedFoodFor263.nameZh,
+        descriptionKh: seedFoodFor263.descriptionKh,
+        descriptionEn: seedFoodFor263.descriptionEn,
+        descriptionZh: seedFoodFor263.descriptionZh,
+        cookTime: seedFoodFor263.cookTime,
+        calories: seedFoodFor263.calories || 285,
+        ingredients: seedFoodFor263.ingredients,
+        steps: seedFoodFor263.steps,
+      };
+    }
     const cleanedBaseDescKh = stripLegacyFoodPhraseKh(f.descriptionKh);
     const ov = safeOverrides[f.id];
     if (!ov || !ov.photoUrl || isRejectedLegacyFoodOverridePhoto(f.id, ov)) {
@@ -2581,8 +2602,13 @@ export function applyFoodOverrides(
     const TRILINGUAL_RECIPE_AUDIT_BASELINE_MS = Date.parse('2026-11-01T14:30:00.000Z');
     const isPreAuditOverride = ovTime > 0 && ovTime < TRILINGUAL_RECIPE_AUDIT_BASELINE_MS;
     const isPreBakeOverride = ovTime > 0 && ovTime <= BAKED_STATIC_FOOD_ASSETS_MS && !ov.isCustomPhoto;
+    const isStaleBeefOverrideOn263 = Boolean(
+      (f.id === 'food-263' || (ov.nameKh || f.nameKh || '').includes('ជ្រក់ក្រៅឆ្នាំង')) &&
+        (/សាច់គោ|beef|牛肉/i.test(`${ov.nameEn || ''} ${ov.descriptionKh || ''} ${ov.descriptionEn || ''}`) ||
+          (Array.isArray(ov.ingredients) && ov.ingredients.some((ing) => /សាច់គោ|beef|牛肉/i.test(`${ing.nameKh || ''} ${ing.nameEn || ''}`))))
+    );
     const hasDeprecatedFoodMeta = Boolean(
-      seedFood && isDeprecatedStaleFoodMetadata(f.id, ov.nameKh, ov.categorySlug)
+      seedFood && (isDeprecatedStaleFoodMetadata(f.id, ov.nameKh, ov.categorySlug) || isStaleBeefOverrideOn263)
     );
 
     const nextPhotoUrl =

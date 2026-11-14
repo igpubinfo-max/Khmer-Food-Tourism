@@ -4969,7 +4969,7 @@ function buildSeedDirectoryNearbyCandidates(
 export async function searchNearbyPlacesWithin500m(
   lat: number,
   lng: number,
-  radiusMeters: number = 500,
+  radiusMeters: number = 5000,
   forceRefresh: boolean = false
 ): Promise<{
   restaurants: GooglePlaceCachedItem[];
@@ -4981,8 +4981,8 @@ export async function searchNearbyPlacesWithin500m(
     return { restaurants: [], attractions: [], providerUsed: 'smart_cache', fromCache: true };
   }
 
-  const effectiveRadius = Math.max(radiusMeters, 100);
-  const gridKey = `v3_${lat.toFixed(4)}_${lng.toFixed(4)}_${effectiveRadius}`;
+  const effectiveRadius = Math.min(50000, Math.max(radiusMeters, 500));
+  const gridKey = `v4_${lat.toFixed(4)}_${lng.toFixed(4)}_${effectiveRadius}`;
   const cachedMem = nearby500mMemoryCache.get(gridKey);
   if (
     !forceRefresh &&
@@ -5016,7 +5016,8 @@ export async function searchNearbyPlacesWithin500m(
   if (isGoogleMapsConfigured() && !isGooglePlacesV1CurrentlyBlocked() && stats.dailyApiCallsCount < stats.dailyApiLimit) {
     const fetchGoogleNearbyGroup = async (
       includedTypes: string[],
-      groupKind: 'food' | 'tourism'
+      groupKind: 'food' | 'tourism',
+      rankPref: 'DISTANCE' | 'POPULARITY' = 'DISTANCE'
     ): Promise<GooglePlaceCachedItem[]> => {
       try {
         const controller = new AbortController();
@@ -5032,7 +5033,7 @@ export async function searchNearbyPlacesWithin500m(
           body: JSON.stringify({
             includedTypes,
             maxResultCount: 20,
-            rankPreference: 'DISTANCE',
+            rankPreference: rankPref,
             locationRestriction: {
               circle: {
                 center: { latitude: lat, longitude: lng },
@@ -5137,50 +5138,55 @@ export async function searchNearbyPlacesWithin500m(
       }
     };
 
-    const [foodPlaces, tourismPlaces] = await Promise.all([
-      fetchGoogleNearbyGroup(['restaurant', 'cafe', 'meal_takeaway'], 'food'),
+    const googleRequests: Promise<GooglePlaceCachedItem[]>[] = [
+      fetchGoogleNearbyGroup(['restaurant', 'cafe', 'meal_takeaway', 'bakery'], 'food', 'DISTANCE'),
       fetchGoogleNearbyGroup(
-        ['tourist_attraction', 'museum', 'park', 'place_of_worship', 'historical_landmark'],
-        'tourism'
+        ['tourist_attraction', 'museum', 'park', 'place_of_worship', 'historical_landmark', 'lodging', 'hotel'],
+        'tourism',
+        'DISTANCE'
       ),
-    ]);
-    googleItems.push(...foodPlaces, ...tourismPlaces);
+    ];
+    if (effectiveRadius >= 2000) {
+      googleRequests.push(
+        fetchGoogleNearbyGroup(['restaurant', 'cafe', 'meal_takeaway'], 'food', 'POPULARITY'),
+        fetchGoogleNearbyGroup(
+          ['tourist_attraction', 'museum', 'park', 'place_of_worship', 'lodging', 'hotel'],
+          'tourism',
+          'POPULARITY'
+        )
+      );
+    }
+    const googleGroups = await Promise.all(googleRequests);
+    for (const grp of googleGroups) {
+      googleItems.push(...grp);
+    }
   }
 
-  // 3. Multi-Engine Live Cambodia Street GPS Discovery (Nominatim Bounded Viewbox + Photon Komoot BBox)
+  // 3. Multi-Engine Live Cambodia Street GPS Discovery (Nominatim Bounded Viewbox + ArcGIS/Photon BBox across full 5km/10km/20km radius)
   const liveMapItems: GooglePlaceCachedItem[] = [];
-  if (googleItems.length < 15) {
-    // Scale bounding box dynamically to match effectiveRadius (500m -> ~0.0055 deg, 1km -> ~0.0105 deg, 2km -> ~0.021 deg)
-    const radiusDelta = Math.max(0.0055, (effectiveRadius / 111000) * 1.18);
-    const tightDelta = Math.min(0.006, radiusDelta);
+  if (googleItems.length < 80) {
+    // Scale bounding box dynamically to match effectiveRadius (5km -> ~0.053 deg, 10km -> ~0.106 deg, 20km -> ~0.212 deg)
+    const radiusDelta = Math.max(0.008, (effectiveRadius / 111000) * 1.15);
     const activeViewbox = `${(lng - radiusDelta).toFixed(5)},${(lat + radiusDelta).toFixed(5)},${(
       lng + radiusDelta
     ).toFixed(5)},${(lat - radiusDelta).toFixed(5)}`;
-    const tightViewbox = `${(lng - tightDelta).toFixed(5)},${(lat + tightDelta).toFixed(5)},${(
-      lng + tightDelta
-    ).toFixed(5)},${(lat - tightDelta).toFixed(5)}`;
     const photonBbox = `${(lng - radiusDelta).toFixed(5)},${(lat - radiusDelta).toFixed(5)},${(
       lng + radiusDelta
     ).toFixed(5)},${(lat + radiusDelta).toFixed(5)}`;
 
     const nominatimSpecs: { q: string; vbox: string; forceCat?: GooglePlaceCachedItem['category'] }[] = [
-      { q: '[restaurant]', vbox: tightViewbox, forceCat: 'restaurant' },
-      { q: '[cafe]', vbox: tightViewbox, forceCat: 'cafe' },
-      { q: '[fast_food]', vbox: tightViewbox, forceCat: 'restaurant' },
-      { q: '[tourism]', vbox: tightViewbox, forceCat: 'tourism' },
-      ...(effectiveRadius > 500
-        ? [
-            { q: '[restaurant]', vbox: activeViewbox, forceCat: 'restaurant' as const },
-            { q: '[cafe]', vbox: activeViewbox, forceCat: 'cafe' as const },
-            { q: '[tourism]', vbox: activeViewbox, forceCat: 'tourism' as const },
-          ]
-        : []),
+      { q: '[restaurant]', vbox: activeViewbox, forceCat: 'restaurant' },
+      { q: '[cafe]', vbox: activeViewbox, forceCat: 'cafe' },
+      { q: '[fast_food]', vbox: activeViewbox, forceCat: 'restaurant' },
+      { q: '[hotel]', vbox: activeViewbox, forceCat: 'tourism' },
+      { q: '[tourism]', vbox: activeViewbox, forceCat: 'tourism' },
     ];
 
     const photonSpecs: { q: string; forceCat?: GooglePlaceCachedItem['category'] }[] = [
       { q: 'restaurant', forceCat: 'restaurant' },
       { q: 'cafe', forceCat: 'cafe' },
       { q: 'coffee', forceCat: 'cafe' },
+      { q: 'hotel', forceCat: 'tourism' },
       { q: 'pagoda', forceCat: 'tourism' },
       { q: 'museum', forceCat: 'tourism' },
       { q: 'park', forceCat: 'tourism' },
