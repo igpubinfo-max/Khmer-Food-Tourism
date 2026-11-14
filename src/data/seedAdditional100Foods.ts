@@ -94,7 +94,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Whole scallion bulbs, cut green scallions, and sliced red chilies',
   },
   {
-    nameKh: 'សម្លឆ្អឹងជំនីរជ្រូកស្ងោរជ្រក់ផ្សិត',
+    nameKh: 'ស្ងោរជ្រក់ឆ្អឹងជំនីរជ្រូកផ្សិត',
     nameEn: 'Hot & Sour Pork Rib Soup with Straw Mushrooms',
     cat: 'soup',
     catKh: 'ម្ហូបសម្ល / ស្ងោរជ្រក់',
@@ -133,7 +133,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Scallions, cilantro, golden fried garlic, and ground Kampot pepper',
   },
   {
-    nameKh: 'សម្លស្ងោរម្រះញាត់សាច់ជ្រូកមីសួរ',
+    nameKh: 'ស្ងោរម្រះញាត់សាច់ជ្រូក',
     nameEn: 'Stuffed Bitter Melon & Glass Noodle Clear Soup',
     cat: 'soup',
     catKh: 'ម្ហូបសម្ល / ស្ងោរម្រះ',
@@ -172,7 +172,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Bruised lemongrass and lemon basil',
   },
   {
-    nameKh: 'សម្លស្ងោរជ្រក់មាន់ស្លឹកគ្រៃក្រូចសើច',
+    nameKh: 'ស្ងោរជ្រក់មាន់ស្រែ',
     nameEn: 'Hot & Sour Free-Range Chicken Soup with Lemongrass & Kaffir Lime',
     cat: 'soup',
     catKh: 'ម្ហូបសម្ល / ស្ងោរជ្រក់មាន់',
@@ -737,7 +737,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Fresh mint, sweet basil, crushed roasted peanuts, and crispy garlic',
   },
   {
-    nameKh: 'ទឹកគ្រឿងខ្មែរពិសេសបន្លែស្រស់',
+    nameKh: 'ទឹកគ្រឿងខ្មែរពិសេស',
     nameEn: 'Traditional Khmer Fish Herb Dip with Fresh Garden Vegetables (Teuk Kroeung)',
     cat: 'salad',
     catKh: 'ទឹកជ្រលក់ & បន្លែ / ទឹកគ្រឿង',
@@ -750,7 +750,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Cucumber, Thai eggplant, cabbage, water lily stems, and water mimosa',
   },
   {
-    nameKh: 'ប្រហុកខ្ទិះសាច់ជ្រូកចិញ្ច្រាំបន្លែស្រស់',
+    nameKh: 'ប្រហុកខ្ទិះ',
     nameEn: 'Creamy Coconut & Minced Pork Prahok Dip with Fresh Crudités',
     cat: 'salad',
     catKh: 'ទឹកជ្រលក់ & បន្លែ / ប្រហុកខ្ទិះ',
@@ -1133,7 +1133,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Fresh green garlic chives',
   },
   {
-    nameKh: 'ពងទាកូនចំហុយជីរពងទាកូនអំបិលម្រេចកំពត',
+    nameKh: 'ពងទាកូនចំហុយអំបិលម្រេចកំពត',
     nameEn: 'Steamed Duck Embryo Egg with Vietnamese Coriander & Kampot Pepper Lime (Pong Tea Kon)',
     cat: 'streetfood',
     catKh: 'អាហារសម្រន់ / ពងទាកូនចំហុយ',

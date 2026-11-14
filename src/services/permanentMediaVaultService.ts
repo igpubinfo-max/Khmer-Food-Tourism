@@ -97,6 +97,26 @@ export { SEED_FOOD_PHOTO_BASELINE_ISO, SEED_FOOD_PHOTO_BASELINE_MS };
 const BAKED_STATIC_FOOD_ASSETS_MS = SEED_FOOD_PHOTO_BASELINE_MS;
 
 export const DEPRECATED_STALE_FOOD_NAMES_KH = new Set<string>([
+  'សម្លស្ងោរង៉ាំង៉ូវសាច់មាន់',
+  'សម្លស្ងោរជ្រក់សាច់មាន់',
+  'សម្លស្ងោរជ្រក់ត្រីរ៉ស់',
+  'លាសឆាអំពិលទុំ',
+  'ពោះជ្រូកអាំងទឹកឃ្មុំ',
+  'សម្លស្ងោរជ្រក់មឹក និងងាវបន្លែបៃតង',
+  'សម្លស្ងោរម្រះញាត់សាច់ជ្រូក',
+  'សម្លឆ្អឹងជំនីរជ្រូកស្ងោរជ្រក់ផ្សិត',
+  'សម្លស្ងោរម្រះញាត់សាច់ជ្រូកមីសួរ',
+  'សម្លស្ងោរជ្រក់មាន់ស្លឹកគ្រៃក្រូចសើច',
+  'ទឹកគ្រឿងខ្មែរពិសេសបន្លែស្រស់',
+  'ប្រហុកខ្ទិះសាច់ជ្រូកចិញ្ច្រាំបន្លែស្រស់',
+  'ពងទាកូនចំហុយជីរពងទាកូនអំបិលម្រេចកំពត',
+  'ស្ងោរផ្ទីសាច់ជ្រូកកញ្រ្ជាំ',
+  'ឆាមុំាពោះតាន់',
+  'មុំាឆៅពោះតាន់',
+  'ខមុំា',
+  'ភ្លាបង្គាឆៅទឹកក្រហុកក្រូចឆ្មា',
+  'មំាល្ហុង',
+  'ពងទាស្ងោរជូហឹរ',
   'បបរគ្រឿងសាច់ជ្រូកខ្មែរ',
   'នំផ្លែអាយស្ករត្នោត',
   'ក្រឡានប្ញស្សីថ្មគោលបាត់ដំបង',
@@ -2556,6 +2576,23 @@ export function applyFoodOverrides(
         calories: seedFoodFor263.calories || 285,
         ingredients: seedFoodFor263.ingredients,
         steps: seedFoodFor263.steps,
+      };
+    }
+    const seedFoodBase = IMMUTABLE_SEED_FOOD_MAP.get(f.id);
+    if (seedFoodBase && isDeprecatedStaleFoodMetadata(f.id, f.nameKh, f.categorySlug)) {
+      anyChanged = true;
+      f = {
+        ...f,
+        nameKh: seedFoodBase.nameKh,
+        nameEn: seedFoodBase.nameEn,
+        nameZh: seedFoodBase.nameZh || f.nameZh,
+        categoryKh: seedFoodBase.categoryKh,
+        categoryEn: seedFoodBase.categoryEn,
+        categorySlug: seedFoodBase.categorySlug,
+        descriptionKh: seedFoodBase.descriptionKh,
+        descriptionEn: seedFoodBase.descriptionEn,
+        ingredients: seedFoodBase.ingredients,
+        steps: seedFoodBase.steps,
       };
     }
     const cleanedBaseDescKh = stripLegacyFoodPhraseKh(f.descriptionKh);

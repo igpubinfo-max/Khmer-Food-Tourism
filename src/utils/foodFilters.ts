@@ -557,7 +557,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     culinaryTitleEn: 'Stung Treng Mee Kola Noodles, Pickled Lime Chicken Soup & Four-Rivers Specialties',
     culinaryTitleZh: '上丁传统歌拉拌面 (Mee Kola)、酸柑炖土鸡汤、牛肚香茅酸汤与四河交汇河鲜',
     historyKh:
-      'ខេត្តស្ទឹងត្រែង គឺជាចំណុចប្រសព្វនៃទន្លេធំៗបួន (មេគង្គ សេកុង សេសាន និងស្រែពក)។ មុខម្ហូបល្បីប្រចាំខេត្តគឺ «មីកូឡាស្ទឹងត្រែង» សម្លស្ងោរង៉ាំង៉ូវសាច់មាន់ សម្លម្ជូរគ្រឿងពោះគោ និងសម្លម្ជូរត្រឡាចត្រីទន្លេ។',
+      'ខេត្តស្ទឹងត្រែង គឺជាចំណុចប្រសព្វនៃទន្លេធំៗបួន (មេគង្គ សេកុង សេសាន និងស្រែពក)។ មុខម្ហូបល្បីប្រចាំខេត្តគឺ «មីកូឡាស្ទឹងត្រែង» ស្ងោរង៉ាំង៉ូវសាច់មាន់ សម្លម្ជូរគ្រឿងពោះគោ និងសម្លម្ជូរត្រឡាចត្រីទន្លេ។',
     historyEn:
       'Where the Sekong, Sesan, and Srepok rivers meet the mighty Mekong, Stung Treng is home to signature steamed Mee Kola rice noodles with dried shrimp and peanut sauce, tangy Ngam Ngov pickled-lime chicken soup, and river fish broths.',
     historyZh:
@@ -1668,7 +1668,7 @@ export function isSoupOrCurryDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn'
   }
   const kh = (food.nameKh || '').trim();
   if (
-    /^(គុយទាវ|មី|លត|បាញ់កាញ់|បាញ់ស៊ុង|បាញ់ហយ|នំបញ្ចុក|បបរ|បាយ|ប្រហុក|ទឹកគ្រឿង|កាពិ|ផាក់ឡូវ|ផាកឡូវ|ទាផាក់ឡូវ|ត្រី.*ចំហុយ|ខួរជ្រូកខ|ខមុំា|ខត្រី|ខសាច់|ខជើងជ្រូក|ខប្រហុក|ខកង្កែប|អណ្តាតជ្រូកខ|ក្រពះខ|ហុងជើងជ្រូក)/i.test(
+    /^(គុយទាវ|មី|លត|បាញ់កាញ់|បាញ់ស៊ុង|បាញ់ហយ|នំបញ្ចុក|បបរ|បាយ|ប្រហុក|ទឹកគ្រឿង|កាពិ|ផាក់ឡូវ|ផាកឡូវ|ទាផាក់ឡូវ|ត្រី.*ចំហុយ|ខួរជ្រូកខ|ខម៉ាំ|ខត្រី|ខសាច់|ខជើងជ្រូក|ខប្រហុក|ខកង្កែប|អណ្តាតជ្រូកខ|ក្រពះខ|ហុងជើងជ្រូក)/i.test(
       kh
     )
   ) {

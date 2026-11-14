@@ -8,14 +8,14 @@ import { FoodItem } from '../types';
 export const foodpanda100Foods: FoodItem[] = [
   {
     "id": "food-231",
-    "nameKh": "ស្ងោរផ្ទីសាច់ជ្រូកកញ្រ្ជាំ",
+    "nameKh": "ស្ងោរផ្ទីសាច់ជ្រូកចិញ្ច្រាំ",
     "nameEn": "Khmer Amaranth Greens Clear Soup with Minced Pork (Sngor Pti Sach Chrouk Kanhchram)",
     "nameZh": "高棉苋菜猪肉末清汤",
     "categorySlug": "soup",
     "categoryKh": "សម្ល និងម្ជូរ",
     "categoryEn": "Khmer Soups & Stews",
     "categoryZh": "高棉汤品与酸汤",
-    "descriptionKh": "សម្លស្ងោរស្លឹកផ្ទីខ្មែរស្រស់ៗជាមួយសាច់ជ្រូកចិញ្ច្រាំ ឈ្ងុយខ្ទឹមសបំពង ទឹកស៊ុបផ្អែមត្រជាក់ក្នុងខ្លួន។",
+    "descriptionKh": "ស្ងោរស្លឹកផ្ទីខ្មែរស្រស់ៗជាមួយសាច់ជ្រូកចិញ្ច្រាំ ឈ្ងុយខ្ទឹមសបំពង ទឹកស៊ុបផ្អែមត្រជាក់ក្នុងខ្លួន។",
     "descriptionEn": "Comforting Cambodian clear soup simmered with tender amaranth greens, seasoned minced pork balls, and golden fried garlic.",
     "descriptionZh": "清甜滋润的柬埔寨家常苋菜肉末汤，配手捏猪肉丸与金黄炸蒜酥，营养健康。",
     "photoUrl": "/foods/food-231.jpg",
@@ -1664,7 +1664,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-254",
-    "nameKh": "ឆាមុំាពោះតាន់",
+    "nameKh": "ឆាម៉ាំពោះតាន់",
     "nameEn": "Stir-Fried Fermented Fish Mam with Pork Chitterlings (Chha Mam Pouh Tan)",
     "nameZh": "柬式腌鱼酱爆炒猪粉肠",
     "categorySlug": "stirfry",
@@ -1736,7 +1736,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-255",
-    "nameKh": "មុំាឆៅពោះតាន់",
+    "nameKh": "ម៉ាំឆៅពោះតាន់",
     "nameEn": "Savory Raw Fermented Fish Mam Relish with Boiled Pork Chitterlings (Mam Chhao Pouh Tan)",
     "nameZh": "凉拌生腌鱼配白灼猪粉肠",
     "categorySlug": "salad",
@@ -1952,7 +1952,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-258",
-    "nameKh": "ខមុំា",
+    "nameKh": "ខម៉ាំ",
     "nameEn": "Cambodian Braised Fermented Fish Mam Stew with Pork Belly & Vegetables (Khor Mam)",
     "nameZh": "柬式腌鱼酱焖五花肉杂蔬煲",
     "categorySlug": "specialty",
@@ -2757,7 +2757,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-269",
-    "nameKh": "ភ្លាបង្គាឆៅទឹកក្រហុកក្រូចឆ្មា",
+    "nameKh": "ភ្លាបង្គាឆៅទឹកប្រហុកក្រូចឆ្មារ",
     "nameEn": "Fresh Raw Prawn Ceviche with Spicy Lime & Prahok Sauce (Phlea Bangkea Chhao)",
     "nameZh": "青柠臭鱼露生腌鲜虾沙拉",
     "categorySlug": "salad",
@@ -3412,7 +3412,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryKh": "សម្ល និង ស៊ុប",
     "categoryEn": "Soups & Stews",
     "categoryZh": "汤羹与炖菜",
-    "descriptionKh": "សម្លស្ងោរត្រឡាចខ្ចីជាមួយសាច់ជ្រូកចិញ្ច្រាំនិងបង្គាក្រៀម ទឹកស៊ុបថ្លាត្រជាក់ចិត្ត រោយស្លឹកខ្ទឹមនិងម្រេច។",
+    "descriptionKh": "ស្ងោរត្រឡាចខ្ចីជាមួយសាច់ជ្រូកចិញ្ច្រាំនិងបង្គាក្រៀម ទឹកស៊ុបថ្លាត្រជាក់ចិត្ត រោយស្លឹកខ្ទឹមនិងម្រេច។",
     "descriptionEn": "Soothing Cambodian clear broth simmered with tender winter melon slices, seasoned minced pork balls, and dried shrimp.",
     "descriptionZh": "鲜嫩冬瓜片配猪肉丸与虾米慢煮清汤，清甜润燥，撒葱花与胡椒。",
     "photoUrl": "/foods/food-278.jpg",
@@ -3477,7 +3477,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-279",
-    "nameKh": "មំាល្ហុង",
+    "nameKh": "ម៉ាំល្ហុង",
     "nameEn": "Cambodian Fermented Fish & Crunchy Green Papaya Relish (Mam Lahong)",
     "nameZh": "柬式脆木瓜腌鱼酱（Mam Lahong）",
     "categorySlug": "salad",
@@ -4125,7 +4125,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-288",
-    "nameKh": "ពងទាស្ងោរជូហឹរ",
+    "nameKh": "ពងទាស្ងោរជូរហឹរ",
     "nameEn": "Boiled Duck Eggs in Spicy & Sour Lemongrass Tamarind Broth (Pong Tea Sngor Chou Haer)",
     "nameZh": "酸辣香茅罗望子煮鸭蛋汤",
     "categorySlug": "soup",

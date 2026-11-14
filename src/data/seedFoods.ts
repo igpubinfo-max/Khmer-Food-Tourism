@@ -196,12 +196,12 @@ export const seedFoods: FoodItem[] = [
   },
   {
     id: 'food-6',
-    nameKh: 'សម្លស្ងោរង៉ាំង៉ូវសាច់មាន់',
+    nameKh: 'ស្ងោរង៉ាំង៉ូវសាច់មាន់',
     nameEn: 'Pickled Lime Chicken Soup (Ngam Ngov)',
     categorySlug: 'soup',
     categoryKh: 'ម្ហូបស្ងោរ / ប្រពៃណី',
     categoryEn: 'Soup / Pickled Lime',
-    descriptionKh: 'សម្លស្ងោរង៉ាំង៉ូវ មានរសជាតិជូរល្វីងស្រាលៗ និងក្លិនក្រអូបពិសេសពីក្រូចង៉ាំង៉ូវតាំងពីបុរាណ។ សាច់មាន់ស្រែទន់ផ្អែម ទឹកស៊ុបថ្លាក្តៅៗ ជួយបំបាត់ផ្តាសាយ និងសម្រួលបំពង់ក។',
+    descriptionKh: 'ស្ងោរង៉ាំង៉ូវសាច់មាន់ មានរសជាតិជូរល្វីងស្រាលៗ និងក្លិនក្រអូបពិសេសពីក្រូចង៉ាំង៉ូវតាំងពីបុរាណ។ សាច់មាន់ស្រែទន់ផ្អែម ទឹកស៊ុបថ្លាក្តៅៗ ជួយបំបាត់ផ្តាសាយ និងសម្រួលបំពង់ក។',
     descriptionEn: 'A soul-soothing Cambodian soup with clear chicken broth infused with preserved whole limes, cilantro, and crispy shallots.',
     photoUrl: '/foods/food-6.jpg',
     imageAuditStatus: 'verified',
@@ -340,7 +340,7 @@ export const seedFoods: FoodItem[] = [
     categorySlug: 'soup',
     categoryKh: 'ម្ហូបស្ងោរ / ប្រពៃណី',
     categoryEn: 'Soup / Bamboo Shoots',
-    descriptionKh: 'ស្ងោរទំពាំងជើងជ្រូក ជាសម្លស្ងោរទឹកថ្លាដ៏ឈ្ងុយឆ្ងាញ់ ចម្អិនពីជើងជ្រូកកាប់ដុំរម្ងាស់ឱ្យផុយទន់ផ្អែមទឹកស៊ុប ជាមួយទំពាំងស្រស់ស្ងោរអស់ជាតិហាង ខ្ទឹមស ខ្ទឹមក្រហម រោយម្រេចកំពត ស្លឹកខ្ទឹម និងជីរវ៉ាន់ស៊ុយ។',
+    descriptionKh: 'ស្ងោរទំពាំងជើងជ្រូក ជាម្ហូបស្ងោរទឹកថ្លាដ៏ឈ្ងុយឆ្ងាញ់ ចម្អិនពីជើងជ្រូកកាប់ដុំរម្ងាស់ឱ្យផុយទន់ផ្អែមទឹកស៊ុប ជាមួយទំពាំងស្រស់ស្ងោរអស់ជាតិហាង ខ្ទឹមស ខ្ទឹមក្រហម រោយម្រេចកំពត ស្លឹកខ្ទឹម និងជីរវ៉ាន់ស៊ុយ។',
     descriptionEn: 'Comforting Cambodian clear broth soup of tender slow-simmered pork trotters and sweet parboiled fresh bamboo shoots, infused with garlic, shallots, Kampot black pepper, scallions, and cilantro.',
     photoUrl: '/foods/food-10.jpg',
     imageAuditStatus: 'verified',
@@ -474,7 +474,7 @@ export const seedFoods: FoodItem[] = [
   },
   {
     id: 'food-14',
-    nameKh: 'សម្លស្ងោរជ្រក់សាច់មាន់',
+    nameKh: 'ស្ងោរជ្រក់សាច់មាន់',
     nameEn: 'Sour Lemon Herb Chicken Soup (Chhruk Moan)',
     categorySlug: 'soup',
     categoryKh: 'ម្ហូបស្ងោរ / រសជាតិជូរស្រាល',
@@ -582,12 +582,12 @@ export const seedFoods: FoodItem[] = [
   },
   {
     id: 'food-17',
-    nameKh: 'សម្លស្ងោរជ្រក់ត្រីរ៉ស់',
+    nameKh: 'ស្ងោរជ្រក់ត្រីរ៉ស់',
     nameEn: 'Snakehead Fish Sour Herb Soup (Sngor Chhruk Trei Ros)',
     categorySlug: 'soup',
     categoryKh: 'ម្ហូបស្ងោរ / ស្ងោរជ្រក់',
     categoryEn: 'Soup / Lime Herb Fish',
-    descriptionKh: 'សម្លស្ងោរជ្រក់ត្រីរ៉ស់ មានទឹកស៊ុបថ្លាឈ្ងុយគល់ស្លឹកគ្រៃ រំដេង ស្លឹកក្រូចសើច និងខ្ទឹមសបំពង ចម្អិនជាមួយសាច់ត្រីរ៉ស់ស្រស់ផ្អែម ស្រក់ទឹកក្រូចឆ្មាស្រស់ និងបង់ជីរគ្រប់មុខ រសជាតិជូរស្រស់ស្រាយ។',
+    descriptionKh: 'ស្ងោរជ្រក់ត្រីរ៉ស់ មានទឹកស៊ុបថ្លាឈ្ងុយគល់ស្លឹកគ្រៃ រំដេង ស្លឹកក្រូចសើច និងខ្ទឹមសបំពង ចម្អិនជាមួយសាច់ត្រីរ៉ស់ស្រស់ផ្អែម ស្រក់ទឹកក្រូចឆ្មាស្រស់ និងបង់ជីរគ្រប់មុខ រសជាតិជូរស្រស់ស្រាយ។',
     descriptionEn: 'Refreshing clear Cambodian sour fish soup simmered with fresh snakehead fish steaks, lemongrass, galangal, kaffir lime leaves, straw mushrooms, fresh lime juice, crispy garlic, and aromatic herbs.',
     photoUrl: '/foods/food-17.jpg',
     imageAuditStatus: 'verified',
@@ -619,12 +619,12 @@ export const seedFoods: FoodItem[] = [
   },
   {
     id: 'food-18',
-    nameKh: 'លាសឆាអំពិលទុំ',
+    nameKh: 'លៀសឆាអំពិលទុំ',
     nameEn: 'Stir-Fried Freshwater Clams with Tamarind & Basil (Leas Cha Ampil Tum)',
     categorySlug: 'stirfry',
     categoryKh: 'ម្ហូបឆា / គ្រឿងសមុទ្រ & ទន្លេ',
     categoryEn: 'Stir-fry / Tamarind Clams',
-    descriptionKh: 'លាសឆាអំពិលទុំ ជាមុខម្ហូប និងអាហារសម្រន់ដ៏ពេញនិយម ប្រើលាសទឹកសាបស្រស់ៗឆាលើភ្លើងខ្លាំងជាមួយទឹកអំពិលទុំ ស្ករត្នោត ខ្ទឹមសបំពង ម្ទេស និងស្លឹកជីរនាងវង មានរសជាតិជូរផ្អែមហឹរតិចៗឈ្ងុយឆ្ងាញ់។',
+    descriptionKh: 'លៀសឆាអំពិលទុំ ជាមុខម្ហូប និងអាហារសម្រន់ដ៏ពេញនិយម ប្រើលៀសទឹកសាបស្រស់ៗឆាលើភ្លើងខ្លាំងជាមួយទឹកអំពិលទុំ ស្ករត្នោត ខ្ទឹមសបំពង ម្ទេស និងស្លឹកជីរនាងវង មានរសជាតិជូរផ្អែមហឹរតិចៗឈ្ងុយឆ្ងាញ់។',
     descriptionEn: 'Popular Cambodian wok-tossed freshwater clams glazed in a tangy-sweet ripe tamarind sauce with crispy garlic, fresh bird-eye chilies, and aromatic Thai basil.',
     photoUrl: '/foods/food-18.jpg',
     imageAuditStatus: 'verified',
@@ -640,15 +640,15 @@ export const seedFoods: FoodItem[] = [
     rating: 4.8,
     reviewCount: 96,
     ingredients: [
-      { nameKh: 'លាសទឹកសាបស្រស់ត្រាំលាងស្អាត', nameEn: 'Fresh freshwater clams, purged and scrubbed', amount: '៥០០ ក្រាម' },
+      { nameKh: 'លៀសទឹកសាបស្រស់ត្រាំលាងស្អាត', nameEn: 'Fresh freshwater clams, purged and scrubbed', amount: '៥០០ ក្រាម' },
       { nameKh: 'ទឹកអំពិលទុំខាប់ និងស្ករត្នោត', nameEn: 'Thick ripe tamarind pulp and palm sugar', amount: '៣ ស្លាបព្រាបាយ' },
       { nameKh: 'ខ្ទឹមសចិញ្ច្រាំ ខ្ទឹមក្រហម និងម្ទេសស្រស់', nameEn: 'Minced garlic, shallots, and fresh red chilies', amount: '២ ស្លាបព្រាបាយ' },
       { nameKh: 'ស្លឹកជីរនាងវង និងទឹកត្រី', nameEn: 'Fresh sweet basil leaves and fish sauce', amount: '១ ក្តាប់' },
     ],
     steps: [
-      { stepNumber: 1, instructionKh: 'ត្រាំលាសក្នុងទឹកលាយម្ទេសបន្តិចឱ្យខ្ជាក់ដីខ្សាច់ចេញអស់ រួចដុសលាងសំបកឱ្យស្អាត និងសម្រស់ទឹក។', instructionEn: 'Soak clams in water with a sliced chili to purge sand, then scrub shells clean and drain.' },
+      { stepNumber: 1, instructionKh: 'ត្រាំលៀសក្នុងទឹកលាយម្ទេសបន្តិចឱ្យខ្ជាក់ដីខ្សាច់ចេញអស់ រួចដុសលាងសំបកឱ្យស្អាត និងសម្រស់ទឹក។', instructionEn: 'Soak clams in water with a sliced chili to purge sand, then scrub shells clean and drain.' },
       { stepNumber: 2, instructionKh: 'ដាក់ប្រេងក្នុងខ្ទះឱ្យក្តៅ បំពងខ្ទឹមស ខ្ទឹមក្រហម និងម្ទេសឱ្យឡើងក្លិនឈ្ងុយ រួចចាក់ទឹកអំពិលទុំ ស្ករត្នោត និងទឹកត្រីចូលកូរឱ្យខាប់។', instructionEn: 'Sauté garlic, shallots, and chilies in hot oil until fragrant, then stir in tamarind juice, palm sugar, and fish sauce until glossy.' },
-      { stepNumber: 3, instructionKh: 'ចាក់លាសចូលឆាត្រឡប់លើភ្លើងខ្លាំងរហូតដល់លាសហាមាត់ឆ្អិន និងស្រូបទឹកជ្រលក់អំពិលទុំសព្វ។', instructionEn: 'Toss in the clams over high heat until shells pop open and are coated in the tangy tamarind glaze.' },
+      { stepNumber: 3, instructionKh: 'ចាក់លៀសចូលឆាត្រឡប់លើភ្លើងខ្លាំងរហូតដល់លៀសហាមាត់ឆ្អិន និងស្រូបទឹកជ្រលក់អំពិលទុំសព្វ។', instructionEn: 'Toss in the clams over high heat until shells pop open and are coated in the tangy tamarind glaze.' },
       { stepNumber: 4, instructionKh: 'បង់ស្លឹកជីរនាងវងឆាត្រឡប់មួយភ្លែត រួចដួសដាក់ចានទទួលទានក្តៅៗ។', instructionEn: 'Fold in fresh sweet basil leaves, toss briefly, and serve immediately.' },
     ],
   },
@@ -832,12 +832,12 @@ export const seedFoods: FoodItem[] = [
   },
   {
     id: 'food-24',
-    nameKh: 'ពោះជ្រូកអាំងទឹកឃ្មុំ',
+    nameKh: 'សាច់ជ្រូកបីជាន់អាំងទឹកឃ្មុំ',
     nameEn: 'Honey Pepper Roasted Pork Belly',
     categorySlug: 'grilled',
     categoryKh: 'ម្ហូបអាំង / អាហារសម្រន់',
     categoryEn: 'Grilled / Pork',
-    descriptionKh: 'ពោះជ្រូកបីជាន់ប្រឡាក់ទឹកឃ្មុំព្រៃ ខ្ទឹមស និងម្រេចកំពត អាំងលើធ្យូងឱ្យស្រួយស្បែក ខ្លាញ់ស្រក់ឈ្ងុយៗ ទទួលទានជាមួយជ្រក់ត្រសក់។',
+    descriptionKh: 'សាច់ជ្រូកបីជាន់ប្រឡាក់ទឹកឃ្មុំព្រៃ ខ្ទឹមស និងម្រេចកំពត អាំងលើធ្យូងឱ្យស្រួយស្បែក ខ្លាញ់ស្រក់ឈ្ងុយៗ ទទួលទានជាមួយជ្រក់ត្រសក់។',
     descriptionEn: 'Crispy charcoal-roasted pork belly glazed with wild honey and cracked Kampot black pepper, served alongside quick pickled cucumbers.',
     photoUrl: '/foods/food-24.jpg',
     imageAuditStatus: 'verified',
@@ -863,7 +863,7 @@ export const seedFoods: FoodItem[] = [
       { stepNumber: 1, instructionKh: 'លាងសម្អាតសាច់ជ្រូកបីជាន់ ជូតឱ្យស្ងួត រួចយកសមចាក់ទម្លុះស្បែកជ្រូកឱ្យសព្វដើម្បីឱ្យពេលអាំងឡើងស្រួយល្អ។', instructionEn: 'Wash and pat dry the pork belly, then prick the skin all over so it renders crisp over the coals.' },
       { stepNumber: 2, instructionKh: 'ប្រឡាក់សាច់ជាមួយទឹកឃ្មុំព្រៃ ទឹកស៊ីអ៊ីវ ប្រេងខ្យង ខ្ទឹមសចិញ្ច្រាំ និងម្រេចខ្មៅកំពត ផ្អាប់ទុករយៈពេល ៣០ នាទីឱ្យចូលជាតិ។', instructionEn: 'Marinate the pork belly thoroughly with wild honey, soy sauce, oyster sauce, garlic, and cracked Kampot pepper for 30 minutes.' },
       { stepNumber: 3, instructionKh: 'អាំងលើរងើកភ្លើងធ្យូងកម្តៅមធ្យម ឧស្សាហ៍ប្រែសងខាង និងលាបទឹកឃ្មុំបន្ថែមរហូតដល់ស្បែកឡើងពណ៌មាសស្រួយ ឯសាច់ខាងក្នុងផុយឈ្ងុយ។', instructionEn: 'Grill over medium charcoal embers, turning regularly and basting with honey glaze until the skin crackles golden-brown and the meat is juicy.' },
-      { stepNumber: 4, instructionKh: 'ហាន់ពោះជ្រូកអាំងជាចំណិតស្តើងៗ រៀបដាក់ចានទទួលទានក្តៅៗផ្ទាប់ជាមួយជ្រក់ត្រសក់ការ៉ុត និងទឹកជ្រលក់ម្ទេស។', instructionEn: 'Slice the honey-roasted pork belly neatly and serve hot alongside crisp pickled cucumber and chili dip.' },
+      { stepNumber: 4, instructionKh: 'ហាន់សាច់ជ្រូកបីជាន់អាំងជាចំណិតស្តើងៗ រៀបដាក់ចានទទួលទានក្តៅៗផ្ទាប់ជាមួយជ្រក់ត្រសក់ការ៉ុត និងទឹកជ្រលក់ម្ទេស។', instructionEn: 'Slice the honey-roasted pork belly neatly and serve hot alongside crisp pickled cucumber and chili dip.' },
     ],
   },
   {
@@ -1942,12 +1942,12 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-53": {
-    "nameKh": "សម្លស្ងោរជ្រក់មឹក និងងាវបន្លែបៃតង",
-    "nameEn": "Clear Sour Squid & Clam Herbal Soup",
+    "nameKh": "ស្ងោរជ្រក់គ្រឿងសមុទ្រ",
+    "nameEn": "Cambodian Seafood Sour Herb Soup (Sngor Chhruk Kroeung Samot)",
     "cat": "soup",
-    "catKh": "ម្ហូបសម្ល / ស្ងោរជ្រក់គ្រឿងសមុទ្រ",
-    "catEn": "Soup / Sour Squid & Clam Soup",
-    "descKh": "សម្លស្ងោរជ្រក់មឹក និងងាវបន្លែបៃតង ជាសម្លខ្មែររសជាតិជូរស្រស់ស្រាយ ចម្អិនពីមឹកស្រស់ឆូតផ្កា ងាវសមុទ្រផ្អែម គល់ស្លឹកគ្រៃ ម្ទេសក្រហម បន្លែបៃតង និងរោយខ្ទឹមក្រហមបំពងឈ្ងុយ។",
+    "catKh": "ម្ហូបស្ងោរ / ស្ងោរជ្រក់គ្រឿងសមុទ្រ",
+    "catEn": "Soup / Seafood Sour Herb Soup",
+    "descKh": "ស្ងោរជ្រក់គ្រឿងសមុទ្រ ជាម្ហូបស្ងោរទឹកថ្លារសជាតិជូរហឹរស្រស់ស្រាយ ចម្អិនពីមឹកស្រស់ឆូតក្រឡា ផ្សិតចំបើង គល់ស្លឹកគ្រៃ ស្លឹកក្រូចសើច ម្ទេសក្រហម ជីរគ្រប់មុខ និងរោយខ្ទឹមក្រហមបំពងឈ្ងុយ។",
     "descEn": "Refreshing Cambodian clear sour seafood soup simmered with scored fresh squid, sweet clams, bruised lemongrass, leafy greens, fresh red chilies, and crispy fried shallots.",
     "prepTime": "១៥ នាទី",
     "cookTime": "២០ នាទី",
@@ -2073,12 +2073,12 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-55": {
-    "nameKh": "សម្លស្ងោរម្រះញាត់សាច់ជ្រូក",
+    "nameKh": "ស្ងោរម្រះញាត់សាច់ជ្រូក",
     "nameEn": "Bitter Melon Stuffed with Pork Soup",
     "cat": "soup",
     "catKh": "ម្ហូបស្ងោរ / ស៊ុប",
     "catEn": "Soup / Clear Broth",
-    "descKh": "សម្លស្ងោរម្រះញាត់សាច់ជ្រូក ប្រើម្រះខ្ចីឆ្កៀលគ្រាប់ ញាត់សាច់ជ្រូកចិញ្ច្រាំលាយមីសួរ និងផ្សិតត្រចៀកកណ្តុរ រម្ងាស់ក្នុងទឹកស៊ុបឆ្អឹងជ្រូកថ្លាឈ្ងុយម្រេចកំពត មានគុណប្រយោជន៍ត្រជាក់ក្នុងខ្លួន។",
+    "descKh": "ស្ងោរម្រះញាត់សាច់ជ្រូក ប្រើម្រះខ្ចីឆ្កៀលគ្រាប់ ញាត់សាច់ជ្រូកចិញ្ច្រាំលាយមីសួរ និងផ្សិតត្រចៀកកណ្តុរ រម្ងាស់ក្នុងទឹកស៊ុបឆ្អឹងជ្រូកថ្លាឈ្ងុយម្រេចកំពត មានគុណប្រយោជន៍ត្រជាក់ក្នុងខ្លួន។",
     "descEn": "Classic clear comforting soup of bitter melon rings stuffed with seasoned minced pork, glass noodles, and wood ear mushrooms.",
     "prepTime": "២៥ នាទី",
     "cookTime": "៣៥ នាទី",
@@ -5160,7 +5160,7 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 4.5
   },
   {
-    "nameKh": "សម្លស្ងោរម្រះញាត់សាច់ជ្រូក",
+    "nameKh": "ស្ងោរម្រះញាត់សាច់ជ្រូក",
     "nameEn": "Bitter Melon Stuffed with Pork Soup",
     "cat": "soup",
     "priceR": 14000,
@@ -5209,7 +5209,7 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 3.5
   },
   {
-    "nameKh": "សម្លស្ងោរជ្រក់មាន់ស្រែ",
+    "nameKh": "ស្ងោរជ្រក់មាន់ស្រែ",
     "nameEn": "Country Chicken Lime & Lemongrass Soup",
     "cat": "soup",
     "priceR": 20000,
@@ -5230,7 +5230,7 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 5.5
   },
   {
-    "nameKh": "សម្លស្ងោរប្រហិតត្រីស្លឹកបាស",
+    "nameKh": "ស្ងោរប្រហិតត្រីស្លឹកបាស",
     "nameEn": "Fish Ball Soup with Ivy Gourd Leaves",
     "cat": "soup",
     "priceR": 14000,
@@ -5258,7 +5258,7 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 3.5
   },
   {
-    "nameKh": "សម្លស្ងោរមាន់ត្រឡាច",
+    "nameKh": "ស្ងោរត្រឡាចសាច់មាន់",
     "nameEn": "Winter Melon Chicken Soup",
     "cat": "soup",
     "priceR": 18000,
@@ -5286,7 +5286,7 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 4
   },
   {
-    "nameKh": "សម្លស្ងោរឆ្អឹងជំនីរជ្រូកស្ពៃរើស",
+    "nameKh": "ស្ងោរស្ពៃជ្រក់ឆ្អឹងជំនីរជ្រូក",
     "nameEn": "Pork Rib Pickled Mustard Green Soup",
     "cat": "soup",
     "priceR": 16000,
@@ -5307,7 +5307,7 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 3.75
   },
   {
-    "nameKh": "សម្លស្ងោរមឹកញាត់សាច់ជ្រូក",
+    "nameKh": "ស្ងោរមឹកញាត់សាច់ជ្រូក",
     "nameEn": "Stuffed Squid Clear Broth Soup",
     "cat": "soup",
     "priceR": 22000,

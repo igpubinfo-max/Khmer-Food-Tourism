@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1592;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1593;
 export const APP_RELEASE_DATE = '2026-11-14';
 
 /**
@@ -69,7 +69,7 @@ export const DUPLICATE_FOOD_PHOTO_CANONICAL_MAP: Readonly<Record<string, string>
   '/foods/food-92.jpg': '/foods/food-190.jpg',
   '/foods/food-96.jpg': '/foods/food-144.jpg',
   '/foods/food-99.jpg': '/foods/food-185.jpg',
-  '/foods/food-110.jpg': '/foods/food-53.jpg',
+  '/foods/food-110.jpg': '/foods/food-5.jpg',
   '/foods/food-111.jpg': '/foods/food-14.jpg',
   '/foods/food-121.jpg': '/foods/food-23.jpg',
   '/foods/food-122.jpg': '/foods/food-25.jpg',
