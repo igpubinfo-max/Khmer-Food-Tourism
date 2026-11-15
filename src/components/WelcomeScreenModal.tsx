@@ -88,7 +88,7 @@ export const WelcomeScreenModal: React.FC<WelcomeScreenModalProps> = ({ onComple
 
   return (
     <div
-      className={`fixed inset-0 z-[120] bg-[#031B38] font-khmer transition-opacity duration-200 motion-reduce:transition-none ${
+      className={`fixed inset-0 z-[120] bg-[#12151C] font-khmer transition-opacity duration-200 motion-reduce:transition-none ${
         isExiting ? 'opacity-0' : 'opacity-100'
       }`}
     >

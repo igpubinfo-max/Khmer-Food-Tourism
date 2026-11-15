@@ -519,17 +519,22 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
            ANGKOR WAT + AI ROBOT CYAN GLOW LOGIN CARD (935x1024)
            ========================================================== */
         <div
-          className="relative w-full max-w-[400px] aspect-[935/1024] rounded-[28px] overflow-hidden shadow-[0_0_45px_rgba(14,165,233,0.4)] select-none my-auto animate-in fade-in zoom-in-95 duration-200 bg-[#031B38]"
+          style={{
+            width: 'min(calc(100vw - 24px), calc((100dvh - 24px) * 0.913), 420px)',
+            aspectRatio: '935 / 1024',
+            containerType: 'inline-size',
+          }}
+          className="relative shrink-0 rounded-[28px] overflow-hidden shadow-[0_0_45px_rgba(14,165,233,0.4)] select-none my-auto animate-in fade-in zoom-in-95 duration-200 bg-[#031B38]"
         >
-          {/* Clean Artwork Template Background (935x1024) */}
+          {/* Clean Artwork Template Background (935x1024) — No Logo or Program Title overlay */}
           <img
-            src="/welcome/auth-login-bg.jpg"
+            src="/welcome/auth-login-bg.jpg?v=2.7.1"
             alt="Cambodia Flavors & Tourism Sign In"
             width={935}
             height={1024}
             fetchPriority="high"
             decoding="async"
-            className="pointer-events-none absolute inset-0 w-full h-full object-fill select-none"
+            className="pointer-events-none absolute inset-0 w-full h-full object-contain select-none"
           />
 
           {/* Top-Right Close (X) Button Overlay aligned with the glowing cyan X circle in the artwork */}
@@ -548,37 +553,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
             />
           )}
 
-          {/* Title & Subtitle ("រសជាតិ និងទេសចរណ៍កម្ពុជា" / "Cambodia Flavors & Tourism") above the golden arc */}
-          <div
-            style={{
-              top: '25.8%',
-              left: '38.0%',
-              right: '3.2%',
-              height: '13.5%',
-            }}
-            className="absolute z-20 flex flex-col items-center justify-center text-center px-1 pointer-events-none"
-          >
-            <h2
-              className="font-khmer font-extrabold text-white tracking-wide leading-[1.35] whitespace-nowrap"
-              style={{
-                fontSize: 'clamp(14.5px, 4.5vw, 20.5px)',
-                textShadow: '0 2px 10px rgba(0, 12, 32, 0.95), 0 0 18px rgba(56, 189, 248, 0.55)',
-              }}
-            >
-              រសជាតិ និងទេសចរណ៍កម្ពុជា
-            </h2>
-            <p
-              className="font-extrabold text-white/95 tracking-wide leading-tight mt-0.5 whitespace-nowrap"
-              style={{
-                fontSize: 'clamp(10.5px, 3.2vw, 14.5px)',
-                textShadow: '0 2px 8px rgba(0, 12, 32, 0.95)',
-              }}
-            >
-              {language === 'zh' ? '柬埔寨风味与旅游 • Cambodia Flavors & Tourism' : 'Cambodia Flavors & Tourism'}
-            </p>
-          </div>
-
-          {/* Optional VIP / Signed-In status badge if triggered from VIP upgrade */}
+          {/* Optional VIP status notice if triggered from VIP upgrade */}
           {authModalInitialView.requireEmailForVip && (
             <div
               style={{
@@ -586,7 +561,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 left: '7%',
                 right: '7%',
               }}
-              className="absolute z-20 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-300/60 text-amber-200 text-[10px] font-bold flex items-center justify-center gap-1.5 backdrop-blur-xs"
+              className="absolute z-20 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-300/60 text-amber-200 text-[10px] font-bold flex items-center justify-center gap-1.5"
             >
               <Crown className="w-3.5 h-3.5 text-amber-300 shrink-0" />
               <span className="truncate">
@@ -618,14 +593,17 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
           >
             <span className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
               {/* Glowing Cyan Circle Phone Icon */}
-              <span className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 border-cyan-300/90 bg-cyan-400/15 shadow-[0_0_14px_rgba(56,189,248,0.65)] flex items-center justify-center shrink-0">
+              <span
+                style={{ width: '9.8cqw', height: '9.8cqw', minWidth: '34px', minHeight: '34px', maxWidth: '42px', maxHeight: '42px' }}
+                className="rounded-full border-2 border-cyan-300/90 bg-cyan-400/15 shadow-[0_0_14px_rgba(56,189,248,0.65)] flex items-center justify-center shrink-0"
+              >
                 <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
               </span>
               <span className="text-left min-w-0 flex-1">
                 <span
                   className="block font-khmer font-extrabold text-white leading-snug truncate"
                   style={{
-                    fontSize: 'clamp(13px, 3.9vw, 17.5px)',
+                    fontSize: 'clamp(12.5px, 3.85cqw, 17px)',
                     textShadow: '0 2px 6px rgba(0, 10, 28, 0.95)',
                   }}
                 >
@@ -639,7 +617,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 <span
                   className="block font-khmer font-medium text-cyan-100/95 leading-tight truncate mt-0.5"
                   style={{
-                    fontSize: 'clamp(9.8px, 2.85vw, 12.5px)',
+                    fontSize: 'clamp(9.5px, 2.8cqw, 12.2px)',
                     textShadow: '0 1px 4px rgba(0, 10, 28, 0.95)',
                   }}
                 >
@@ -695,7 +673,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
               <span
                 className="font-khmer font-extrabold text-white tracking-wide whitespace-nowrap"
                 style={{
-                  fontSize: 'clamp(13px, 3.9vw, 17.5px)',
+                  fontSize: 'clamp(12.5px, 3.85cqw, 17px)',
                   textShadow: '0 2px 6px rgba(0, 10, 28, 0.95)',
                 }}
               >
@@ -704,85 +682,66 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
             </button>
           )}
 
-          {/* 3. Bottom Action Row Separated by the 2 Vertical Cyan Divider Lines (y = 70.3% .. 75.8%) */}
-          {/* Slot 1 (Left of x=35.61%): មិនទាន់មានគណនីមែនទេ? */}
-          <button
-            type="button"
-            onClick={() => {
-              setPhoneTab('register');
-              setAuthMode('phone');
-            }}
+          {/* 3. Clean Bottom Action Row (y = 70.2% .. 76.8%): មិនទាន់មានគណនីមែនទេ? បង្កើតគណនីថ្មី | ✉️ អ៊ីមែល */}
+          <div
             style={{
-              top: '70.0%',
-              left: '4.5%',
-              width: '30.8%',
-              height: '6.0%',
+              top: '70.2%',
+              left: '6.0%',
+              right: '6.0%',
+              height: '6.5%',
             }}
-            className="absolute z-20 flex items-center justify-center px-1 rounded-lg hover:bg-white/5 transition cursor-pointer"
+            className="absolute z-20 flex items-center justify-center gap-2 sm:gap-3"
           >
-            <span
-              className="font-khmer font-semibold text-white/95 text-center leading-tight whitespace-nowrap"
-              style={{
-                fontSize: 'clamp(9.2px, 2.65vw, 12.5px)',
-                textShadow: '0 1px 4px rgba(0,0,0,0.95)',
+            <button
+              type="button"
+              onClick={() => {
+                setPhoneTab('register');
+                setAuthMode('phone');
               }}
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
             >
-              {tr(language, 'មិនទាន់មានគណនីមែនទេ?', 'No account yet?', '还没有账号？')}
-            </span>
-          </button>
+              <span
+                className="font-khmer font-medium text-white/95 whitespace-nowrap"
+                style={{
+                  fontSize: 'clamp(10px, 3.0cqw, 13.5px)',
+                  textShadow: '0 1px 4px rgba(0,0,0,0.95)',
+                }}
+              >
+                {tr(language, 'មិនទាន់មានគណនីមែនទេ?', 'No account yet?', '还没有账号？')}
+              </span>
+              <span
+                className="font-khmer font-extrabold text-cyan-300 whitespace-nowrap"
+                style={{
+                  fontSize: 'clamp(10.5px, 3.15cqw, 14px)',
+                  textShadow: '0 0 10px rgba(34, 211, 238, 0.7), 0 1px 4px rgba(0,0,0,0.95)',
+                }}
+              >
+                {tr(language, 'បង្កើតគណនីថ្មី', 'Create Account', '创建新账号')}
+              </span>
+            </button>
 
-          {/* Slot 2 (Between x=35.61% and x=64.49%): បង្កើតគណនីថ្មី */}
-          <button
-            type="button"
-            onClick={() => {
-              setPhoneTab('register');
-              setAuthMode('phone');
-            }}
-            style={{
-              top: '70.0%',
-              left: '35.8%',
-              width: '28.4%',
-              height: '6.0%',
-            }}
-            className="absolute z-20 flex items-center justify-center px-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
-          >
-            <span
-              className="font-khmer font-extrabold text-cyan-300 text-center leading-tight whitespace-nowrap"
-              style={{
-                fontSize: 'clamp(10px, 2.9vw, 13.5px)',
-                textShadow: '0 0 10px rgba(34, 211, 238, 0.65), 0 1px 4px rgba(0,0,0,0.95)',
-              }}
-            >
-              {tr(language, 'បង្កើតគណនីថ្មី', 'Create Account', '创建新账号')}
-            </span>
-          </button>
+            <span className="h-5 w-px bg-cyan-300/60 shrink-0" aria-hidden="true" />
 
-          {/* Slot 3 (Right of x=64.49%): ✉️ អ៊ីមែល */}
-          <button
-            type="button"
-            onClick={() => {
-              setEmailTab('login');
-              setAuthMode('email');
-            }}
-            style={{
-              top: '70.0%',
-              left: '64.7%',
-              width: '29.5%',
-              height: '6.0%',
-            }}
-            className="absolute z-20 flex items-center justify-center gap-1.5 px-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
-          >
-            <Mail className="w-4 h-4 text-white/95 shrink-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]" />
-            <span
-              className="font-khmer font-bold text-white/95 leading-tight whitespace-nowrap"
-              style={{
-                fontSize: 'clamp(10px, 2.9vw, 13.5px)',
-                textShadow: '0 1px 4px rgba(0,0,0,0.95)',
+            <button
+              type="button"
+              onClick={() => {
+                setEmailTab('login');
+                setAuthMode('email');
               }}
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
             >
-              {tr(language, 'អ៊ីមែល', 'Email', '邮箱登录')}
-            </span>
-          </button>
+              <Mail className="w-4 h-4 text-white/95 shrink-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]" />
+              <span
+                className="font-khmer font-bold text-white/95 whitespace-nowrap"
+                style={{
+                  fontSize: 'clamp(10.5px, 3.15cqw, 14px)',
+                  textShadow: '0 1px 4px rgba(0,0,0,0.95)',
+                }}
+              >
+                {tr(language, 'អ៊ីមែល', 'Email', '邮箱登录')}
+              </span>
+            </button>
+          </div>
 
           {isMandatoryGate && (
             <div

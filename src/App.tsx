@@ -442,8 +442,8 @@ export default function App() {
   return (
     <AppProvider>
       {/* Locked Full-Screen Native Mobile App Shell (Zero dual scrollbars, Edge-to-Edge Safe Area aware) */}
-      <div className="w-full max-w-[100vw] min-w-0 h-full max-h-[100dvh] overflow-hidden bg-[#0F172A] text-[#F8FAFC] flex justify-center">
-        <div className="w-full max-w-full min-w-0 lg:max-w-6xl h-full max-h-[100dvh] flex flex-col overflow-hidden bg-[#0F172A] text-[#F8FAFC] relative shadow-none lg:shadow-xl lg:border-x lg:border-slate-800">
+      <div className="w-full max-w-[100vw] min-w-0 h-full max-h-[100dvh] overflow-hidden bg-[#12151C] text-[#F8FAFC] flex justify-center">
+        <div className="w-full max-w-[480px] min-w-0 h-full max-h-[100dvh] flex flex-col overflow-hidden bg-[#0F172A] text-[#F8FAFC] relative shadow-none min-[481px]:shadow-[0_0_50px_rgba(0,0,0,0.85)] min-[481px]:border-x min-[481px]:border-white/10">
           <MainScreen />
         </div>
       </div>

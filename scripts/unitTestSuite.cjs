@@ -508,4 +508,34 @@ test('13. Food menu loads all 277+ dishes on Show All without 36-item filter/pag
   );
 });
 
+// 14. Responsive Screen & Layout Optimization (Phone & Tablet Aspect-Ratio Lock + Solid Dark Charcoal Backdrop)
+test('14. Welcome Screen, Auth Modal, and App Shell maintain original aspect ratio without stretching on phones/tablets', () => {
+  const welcomeSlidesSrc = fs.readFileSync(path.join(ROOT, 'src/components/welcome/WelcomeSlides.tsx'), 'utf8');
+  const authModalSrc = fs.readFileSync(path.join(ROOT, 'src/components/AuthModal.tsx'), 'utf8');
+  const appSrc = fs.readFileSync(path.join(ROOT, 'src/App.tsx'), 'utf8');
+
+  assert.ok(
+    welcomeSlidesSrc.includes("aspectRatio: '3 / 4'") && welcomeSlidesSrc.includes("containerType: 'inline-size'"),
+    'WelcomeSlides must lock stage to aspect-ratio 3/4 with inline-size container queries'
+  );
+  assert.ok(
+    !welcomeSlidesSrc.includes('blur-2xl'),
+    'WelcomeSlides must not render a stretched/blurred duplicate background image on iPads and tablets'
+  );
+  assert.ok(
+    welcomeSlidesSrc.includes('bg-[#12151C]') && appSrc.includes('bg-[#12151C]') && appSrc.includes('max-w-[480px]'),
+    'App and WelcomeSlides must center mobile layout at max-w-[480px] with a solid dark charcoal (#12151C) background on tablets/iPads'
+  );
+  assert.ok(
+    welcomeSlidesSrc.includes('ស្វែងរកទីកន្លែងដើរលេងសម្រាប់ថ្ងៃនេះ') &&
+      welcomeSlidesSrc.includes('មុខម្ហូបគួរឱ្យចង់ញ៉ាំថ្ងៃនេះ') &&
+      welcomeSlidesSrc.includes('WELCOME_LABELS.offlineBadge[language]'),
+    'WelcomeSlides must include updated Khmer labels and offline readiness badge'
+  );
+  assert.ok(
+    authModalSrc.includes("aspectRatio: '935 / 1024'") && authModalSrc.includes('/welcome/auth-login-bg.jpg'),
+    'AuthModal must use /welcome/auth-login-bg.jpg locked to 935/1024 aspect ratio'
+  );
+});
+
 console.log(`\nAll ${passed} unit test suites passed successfully!`);
