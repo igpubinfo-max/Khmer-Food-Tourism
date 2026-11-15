@@ -474,41 +474,133 @@ export function requestCambodiaGpsLocation(options: {
  * Category Classifiers to strictly isolate Shop vs Hotel vs Tourism in Near Me
  */
 const HOTEL_KEYWORD_REGEX =
-  /សណ្ឋាគារ|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|បឹងកាឡូ|រីសត|វីឡា|ប៊ូទិក|រេស៊ីដង់|រ៉េស៊ីដិន|អាផាតមិន|\b(hotel|hotels|guesthouse|guest\s*house|hostel|motel|homestay|bungalow|lodging|inn|suites?|resort|resorts|villa|villas|boutique|residence|apartment)\b/i;
+  /សណ្ឋាគារ|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|បឹងកាឡូ|រីសត|អេកូរីសត|អេកូឡច|វីឡា|ប៊ូទិក|រេស៊ីដង់|រ៉េស៊ីដិន|អាផាតមិន|ស្វីត|ភូមិគ្រឹះ|ហូមស្ទេ|ហូស្តេល|ឡច|\b(hotel|hotels|guesthouse|guest\s*house|hostel|motel|homestay|home\s*stay|bungalow|bungalows|lodge|lodging|inn|suites?|resort|resorts|eco-resort|eco-lodge|villa|villas|boutique|residence|residences|apartment|apartments|retreat|glamping)\b/i;
 
 const FOOD_SHOP_KEYWORD_REGEX =
   /ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងកាហ្វេ|ហាងបាយ|គុយទាវ|មីឆា|នំបញ្ចុក|សាច់អាំង|ស៊ុប|តែគុជ|នំប៉័ង|ម្ហូបបួស|អាហារបួស|អាហារព្រឹក|\b(restaurant|cafe|café|coffee|bakery|bistro|eatery|noodle|noodles|bbq|hotpot|grill|pizza|burger|boba|vegetarian|vegan|breakfast)\b/i;
 
 const TOURISM_ONLY_KEYWORD_REGEX =
-  /ប្រាសាទ|វត្ត|ទឹកធ្លាក់|សារមន្ទីរ|ភ្នំ|ឆ្នេរ|កោះ|ឧទ្យានជាតិ|រមណីយដ្ឋាន|\b(temple|pagoda|wat\b|museum|waterfall|national\s*park|monument|palace|sanctuary|beach|island|mountain)\b/i;
+  /ប្រាសាទ|វត្ត|ទឹកធ្លាក់|សារមន្ទីរ|ភ្នំ|ឆ្នេរ|កោះ|ឧទ្យានជាតិ|រមណីយដ្ឋាន|ពហុកីឡដ្ឋាន|កីឡដ្ឋាន|សួនសត្វ|វិមានឯករាជ្យ|ស្តូប|រូបសំណាក|ផ្សារធំថ្មី|ផ្សារទួលទំពូង|ផ្សាររាត្រី|ផ្លូវថ្មើរជើង|មជ្ឈមណ្ឌលប្រល័យពូជសាសន៍|ទួលស្លែង|ជើងឯក|\b(temple|pagoda|wat\b|museum|waterfall|national\s*park|monument|palace|sanctuary|beach|island|mountain|stadium|zoo|safari\s*world|genocide|memorial\s*statue|walk\s*street|promenade)\b/i;
+
+const STRICT_NON_HOTEL_ATTRACTION_REGEX =
+  /ពហុកីឡដ្ឋាន|កីឡដ្ឋាន|សារមន្ទីរ|ប្រាសាទ|វត្ត|សួនសត្វ|វិមានឯករាជ្យ|ស្តូប|រូបសំណាក|ផ្សារធំថ្មី|ផ្សារទួលទំពូង|ផ្សាររាត្រី|ផ្លូវថ្មើរជើង|មជ្ឈមណ្ឌលប្រល័យពូជសាសន៍|ទួលស្លែង|ជើងឯក|សួនមាត់ទន្លេ|វិថីមាត់ទន្លេ|កោះពេជ្រ\s*ទីក្រុងរណប|ឧទ្យានជាតិ|ក្លឹបហាត់ប្រាណ|សាលាគុន|\b(stadium|museum|pagoda|wat\b|zoo|safari\s*world|monument|memorial\s*statue|genocide|central\s*market|russian\s*market|night\s*market|walk\s*street|promenade|national\s*park|martial\s*arts|boxing\s*gym|fitness\s*gym|crossfit)\b/i;
+
+export function inferHotelCategoryLabels(text: string): { categoryKh: string; categoryEn: string } {
+  const lower = String(text || '').toLowerCase();
+  if (
+    /ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|បឹងកាឡូ|ហូមស្ទេ|ហូស្តេល|\b(guesthouse|guest\s*house|homestay|home\s*stay|hostel|motel|bungalow|bungalows)\b/i.test(
+      lower
+    ) &&
+    !/សណ្ឋាគារ|រីសត|វីឡា|ប៊ូទិក|រេស៊ីដង់|រ៉េស៊ីដិន|អាផាតមិន|ស្វីត|\b(hotel|hotels|resort|resorts|villa|villas|boutique|residence|residences|apartment|apartments|suite|suites)\b/i.test(
+      lower
+    )
+  ) {
+    return { categoryKh: 'ផ្ទះសំណាក់ & បឹងហ្គាឡូ', categoryEn: 'Guesthouse & Bungalow' };
+  }
+  if (/រីសត|អេកូរីសត|អេកូឡច|\b(resort|resorts|eco-resort|eco\s*resort|eco-lodge|eco\s*lodge|retreat|glamping)\b/i.test(lower)) {
+    return { categoryKh: 'សណ្ឋាគារ & រីសត', categoryEn: 'Hotel & Resort' };
+  }
+  if (/វីឡា|ប៊ូទិក|រេស៊ីដង់|រ៉េស៊ីដិន|អាផាតមិន|ស្វីត|\b(villa|villas|boutique|suite|suites|residence|residences|apartment|apartments)\b/i.test(lower)) {
+    return { categoryKh: 'វីឡា & ប៊ូទិក', categoryEn: 'Boutique & Villa' };
+  }
+  return { categoryKh: 'សណ្ឋាគារ & កន្លែងស្នាក់នៅ', categoryEn: 'Hotel & Stay' };
+}
+
+export function isStrictHotelDestination(d: Partial<TouristDestination> | null | undefined): boolean {
+  if (!d || d.categorySlug !== 'hotel') return false;
+  const rawId = String(d.id || '').trim();
+  // Reject any seed tourism destination ID (e.g. dest-145, gmap-dest-dest-145, gmap-seed-dest-dest-145, rac-k01006, gmap-kandal-kbal-koh-ecotourism)
+  if (
+    /^(?:gmap-(?:seed-)?dest-(?!hotel-)|(?:dest|rac)-[a-z0-9_-]+|gmap-kandal-kbal-koh-ecotourism)/i.test(rawId) &&
+    !/^(?:dest-)?hotel-\d+$/i.test(rawId)
+  ) {
+    return false;
+  }
+  const nameText = `${d.nameKh || ''} ${d.nameEn || ''}`;
+  const catText = `${d.categoryKh || ''} ${d.categoryEn || ''}`;
+  if (/\b(martial\s*arts|boxing\s*gym|fitness\s*gym|crossfit)\b|ក្លឹបហាត់ប្រាណ|សាលាគុន|ពហុកីឡដ្ឋាន|កីឡដ្ឋាន|\bstadium\b/i.test(nameText)) {
+    return false;
+  }
+  if (STRICT_NON_HOTEL_ATTRACTION_REGEX.test(nameText) && !HOTEL_KEYWORD_REGEX.test(nameText)) {
+    return false;
+  }
+  if (
+    /^\s*រមណីយដ្ឋាន/.test(d.nameKh || '') &&
+    !/សណ្ឋាគារ|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|បឹងកាឡូ|រីសត|វីឡា|ប៊ូទិក|រេស៊ីដង់|រ៉េស៊ីដិន|អាផាតមិន|ហូមស្ទេ|ហូស្តេល/.test(
+      d.nameKh || ''
+    )
+  ) {
+    return false;
+  }
+  if (!HOTEL_KEYWORD_REGEX.test(nameText)) {
+    if (TOURISM_ONLY_KEYWORD_REGEX.test(nameText) || FOOD_SHOP_KEYWORD_REGEX.test(nameText)) {
+      return false;
+    }
+    if (!HOTEL_KEYWORD_REGEX.test(catText)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 export function isHotelGooglePlace(gp: GooglePlaceCachedItem): boolean {
   if (!gp) return false;
-  if (gp.subCategorySlug === 'hotel' || gp.subCategorySlug === 'resort') return true;
-  const types = (gp.types || []).map((t) => String(t).toLowerCase());
+  const pid = String(gp.placeId || gp.googlePlaceId || '').trim();
+  // Never classify a seed tourism attraction (dest-*, rac-*, gmap-dest-*, gmap-seed-dest-*) as a hotel
   if (
-    types.some((t) =>
-      [
-        'hotel',
-        'lodging',
-        'motel',
-        'guest_house',
-        'guesthouse',
-        'hostel',
-        'bed_and_breakfast',
-        'resort_hotel',
-        'resort',
-        'extended_stay_hotel',
-        'inn',
-        'cottage',
-        'villa',
-      ].includes(t)
+    /^(?:gmap-(?:seed-)?dest-(?!hotel-)|(?:dest|rac)-[a-z0-9_-]+|gmap-kandal-kbal-koh-ecotourism)/i.test(pid) &&
+    !/^(?:gmap-(?:seed-)?dest-)?(?:dest-)?hotel-\d+$/i.test(pid)
+  ) {
+    return false;
+  }
+  const nameText = `${gp.nameKh || ''} ${gp.nameEn || ''}`;
+  const text = `${nameText} ${gp.primaryTypeDisplayName || ''}`;
+  if (/\b(martial\s*arts|boxing\s*gym|fitness\s*gym|crossfit)\b|ក្លឹបហាត់ប្រាណ|សាលាគុន|ពហុកីឡដ្ឋាន|កីឡដ្ឋាន|\bstadium\b/i.test(nameText)) {
+    return false;
+  }
+  if (STRICT_NON_HOTEL_ATTRACTION_REGEX.test(nameText) && !HOTEL_KEYWORD_REGEX.test(nameText)) {
+    return false;
+  }
+  if (
+    /^\s*រមណីយដ្ឋាន/.test(gp.nameKh || '') &&
+    !/សណ្ឋាគារ|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|បឹងកាឡូ|រីសត|វីឡា|ប៊ូទិក|រេស៊ីដង់|រ៉េស៊ីដិន|អាផាតមិន|ហូមស្ទេ|ហូស្តេល/.test(
+      gp.nameKh || ''
     )
   ) {
+    return false;
+  }
+  if (gp.subCategorySlug === 'hotel') return true;
+  if (gp.subCategorySlug && gp.subCategorySlug !== 'resort') {
+    return false;
+  }
+  const types = (gp.types || []).map((t) => String(t).toLowerCase());
+  const hasStrictLodgingType = types.some((t) =>
+    [
+      'hotel',
+      'lodging',
+      'motel',
+      'guest_house',
+      'guesthouse',
+      'hostel',
+      'bed_and_breakfast',
+      'resort_hotel',
+      'extended_stay_hotel',
+      'inn',
+      'cottage',
+      'villa',
+    ].includes(t)
+  );
+  if (hasStrictLodgingType && !FOOD_SHOP_KEYWORD_REGEX.test(nameText)) {
     return true;
   }
-  const text = `${gp.nameKh || ''} ${gp.nameEn || ''} ${gp.primaryTypeDisplayName || ''}`;
-  if (HOTEL_KEYWORD_REGEX.test(text) && !FOOD_SHOP_KEYWORD_REGEX.test(text)) {
+  if (HOTEL_KEYWORD_REGEX.test(nameText) && !FOOD_SHOP_KEYWORD_REGEX.test(nameText)) {
+    return true;
+  }
+  if (
+    HOTEL_KEYWORD_REGEX.test(text) &&
+    !FOOD_SHOP_KEYWORD_REGEX.test(text) &&
+    !TOURISM_ONLY_KEYWORD_REGEX.test(nameText)
+  ) {
     return true;
   }
   return false;
@@ -623,7 +715,7 @@ export function mergeNearbyHotels(params: {
   const seenNameKeys = new Set<string>();
 
   for (const h of allHotels) {
-    if (!h || h.categorySlug !== 'hotel') continue;
+    if (!isStrictHotelDestination(h)) continue;
     const dist = calculateDistanceMeters(refCoords.lat, refCoords.lng, h.latitude, h.longitude);
     if (dist > radiusMeters) continue;
     if (!doesPlaceBelongToProvince(h.latitude, h.longitude, h.provinceKh, targetProvinceKh)) continue;
@@ -641,12 +733,14 @@ export function mergeNearbyHotels(params: {
 
     const existingMatch = findDuplicateDestinationForGooglePlace(gp, Array.from(mergedMap.values()));
     if (!existingMatch) {
+      const inferredLabels = inferHotelCategoryLabels(`${gp.nameKh || ''} ${gp.nameEn || ''} ${gp.primaryTypeDisplayName || ''}`);
       const converted: TouristDestination = {
         ...convertGooglePlaceToDestination({ ...gp, subCategorySlug: 'hotel' }),
         categorySlug: 'hotel',
-        categoryKh: 'សណ្ឋាគារ & ផ្ទះសំណាក់',
-        categoryEn: 'Hotel & Guesthouse',
+        categoryKh: inferredLabels.categoryKh,
+        categoryEn: inferredLabels.categoryEn,
       };
+      if (!isStrictHotelDestination(converted)) continue;
       const normKey = `${normalizeKhmerSearchText(converted.nameKh || converted.nameEn || '')}::${(converted.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
       if (normKey.length > 3 && seenNameKeys.has(normKey)) continue;
       mergedMap.set(converted.id, converted);

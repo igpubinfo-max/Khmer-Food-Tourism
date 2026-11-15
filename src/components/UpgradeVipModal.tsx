@@ -1446,9 +1446,9 @@ export const UpgradeVipModal: React.FC = () => {
                     <span>
                       {tr(
                         language,
-                        `ចាប់ផ្តើមសាកល្បងឥតគិតថ្លៃ ${consumerCatalog.trialPlan.durationDays} ថ្ងៃឥឡូវនេះ`,
-                        `Start Free ${consumerCatalog.trialPlan.durationDays}-Day Trial Now`,
-                        `立即开启 ${consumerCatalog.trialPlan.durationDays} 天免费试用`
+                        `🎁 ចាប់ផ្តើមសាកល្បងឥតគិតថ្លៃ ${consumerCatalog.trialPlan.durationDays} ថ្ងៃ ($0)`,
+                        `🎁 Start Free ${consumerCatalog.trialPlan.durationDays}-Day Trial ($0)`,
+                        `🎁 立即开启 ${consumerCatalog.trialPlan.durationDays} 天免费试用 ($0)`
                       )}
                     </span>
                   </button>

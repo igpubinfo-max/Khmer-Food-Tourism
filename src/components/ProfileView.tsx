@@ -39,6 +39,7 @@ import {
   isUserVipActive,
   isUserOnConsumerFreeTrial,
   isUserPaidVipActive,
+  isConsumerTrial7dEligible,
   getConsumerVipPricingCatalog,
   getVipAccountState,
   getVipRemainingDays,
@@ -64,6 +65,7 @@ import {
   sanitizeLegacyVipTransactionPricing,
 } from '../types';
 import { tr } from '../utils/i18n';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 import { resolveUserAvatarUrl, handleAvatarImageError, isCustomUploadedAvatarDataUrl } from '../utils/avatarHelper';
 import { AvatarEditorModal } from './AvatarEditorModal';
 import {
@@ -94,6 +96,7 @@ export const ProfileView: React.FC = () => {
     deleteUserAccount,
     resetAllData, showToast, updateCurrentUserProfile,
     openUpgradeVipModal,
+    claimConsumerFreeTrial,
     configureVipAutoRenew,
     cancelVipAutoRenew,
     retryFailedVipAutoRenew,
@@ -117,6 +120,21 @@ export const ProfileView: React.FC = () => {
   const isFreeTrial7d = isUserOnConsumerFreeTrial(currentUser);
   const isPaidVip = isUserPaidVipActive(currentUser);
   const consumerCatalog = getConsumerVipPricingCatalog(appSettings);
+  const canClaimTrial7d = Boolean(
+    consumerCatalog.consumerVipEnabled &&
+      consumerCatalog.trialPlan.enabled &&
+      isConsumerTrial7dEligible(currentUser)
+  );
+  const [isClaimingTrial, setIsClaimingTrial] = useState(false);
+  const handleClaimFreeTrial = async () => {
+    if (isClaimingTrial) return;
+    setIsClaimingTrial(true);
+    try {
+      await claimConsumerFreeTrial();
+    } finally {
+      setIsClaimingTrial(false);
+    }
+  };
   const shopCatalog = getShopSubscriptionCatalog(appSettings);
   const vipAccountState = getVipAccountState(currentUser);
   const storeQuota = getCurrentUserStoreQuota();
@@ -183,6 +201,56 @@ export const ProfileView: React.FC = () => {
   const [isAvatarEditorOpen, setIsAvatarEditorOpen] = useState(false);
   const [avatarEditorSourceUrl, setAvatarEditorSourceUrl] = useState<string>('');
   const [isAvatarActionSheetOpen, setIsAvatarActionSheetOpen] = useState(false);
+  const subTabContentRef = useRef<HTMLDivElement>(null);
+  const vipBenefitsPanelRef = useRef<HTMLDivElement>(null);
+  const shopBenefitsPanelRef = useRef<HTMLDivElement>(null);
+  const vipPowerDetailRef = useRef<HTMLDivElement>(null);
+  const membershipRenewalCardRef = useRef<HTMLDivElement>(null);
+  const adminRotationStatusRef = useRef<HTMLDivElement>(null);
+  const settingsCardRef = useRef<HTMLDivElement>(null);
+  const [highlightedSection, setHighlightedSection] = useState<string | null>(null);
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const triggerSectionHighlight = (sectionKey: string) => {
+    setHighlightedSection(sectionKey);
+    if (highlightTimerRef.current) {
+      clearTimeout(highlightTimerRef.current);
+    }
+    highlightTimerRef.current = setTimeout(() => {
+      setHighlightedSection((prev) => (prev === sectionKey ? null : prev));
+    }, 1150);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimerRef.current) {
+        clearTimeout(highlightTimerRef.current);
+      }
+    };
+  }, []);
+
+  const scrollToProfileSection = (
+    targetEl: HTMLElement | null,
+    targetId: string,
+    sectionKey?: string,
+    offsetTop = 12
+  ) => {
+    if (sectionKey) {
+      triggerSectionHighlight(sectionKey);
+    }
+    smoothScrollToElement(targetEl, {
+      targetId,
+      offsetTop,
+      delayMs: 40,
+    });
+  };
+
+  const selectAndScrollSubTab = (
+    nextTab: 'bookmarks' | 'wishlists' | 'tripplans' | 'settings' | 'myrestaurant' | 'membership'
+  ) => {
+    setActiveSubTab(nextTab);
+    scrollToProfileSection(subTabContentRef.current, 'profile-subtab-content', 'subtab', 10);
+  };
 
   useEffect(() => {
     registerModalBackHandler('view:profile', () => {
@@ -500,7 +568,7 @@ export const ProfileView: React.FC = () => {
                     setManagingRestaurant(myRestaurants[0]);
                     setIsManageMenuModalOpen(true);
                   } else {
-                    setActiveSubTab('myrestaurant');
+                    selectAndScrollSubTab('myrestaurant');
                   }
                 }}
                 className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition cursor-pointer active:scale-95 ${
@@ -520,10 +588,12 @@ export const ProfileView: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setSelectedVipPowerPanel('analytics');
-                  if (myRestaurants[0]) {
+                  if (myRestaurants[0] && !isShopSubscriptionActive(myRestaurants[0])) {
                     (window as any).__kft_manage_initial_tab = 'analytics';
                     setManagingRestaurant(myRestaurants[0]);
                     setIsManageMenuModalOpen(true);
+                  } else {
+                    scrollToProfileSection(vipPowerDetailRef.current, 'profile-vip-power-detail', 'vip-power', 14);
                   }
                 }}
                 className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition cursor-pointer active:scale-95 ${
@@ -544,6 +614,12 @@ export const ProfileView: React.FC = () => {
                 onClick={() => {
                   setSelectedVipPowerPanel('rank');
                   setActiveSubTab('membership');
+                  scrollToProfileSection(
+                    membershipRenewalCardRef.current || vipPowerDetailRef.current || subTabContentRef.current,
+                    'profile-membership-renewal-card',
+                    'membership-renewal',
+                    12
+                  );
                 }}
                 className="p-2.5 rounded-xl bg-amber-50/90 dark:bg-slate-800 border border-amber-300/70 dark:border-amber-500/40 hover:border-amber-400 flex items-center gap-2 text-left transition cursor-pointer active:scale-95"
               >
@@ -583,11 +659,7 @@ export const ProfileView: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setSelectedVipPowerPanel('reels');
-                  if (myRestaurants[0]) {
-                    (window as any).__kft_manage_initial_tab = 'info';
-                    setManagingRestaurant(myRestaurants[0]);
-                    setIsManageMenuModalOpen(true);
-                  }
+                  scrollToProfileSection(vipPowerDetailRef.current, 'profile-vip-power-detail', 'vip-power', 14);
                 }}
                 className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition cursor-pointer active:scale-95 ${
                   selectedVipPowerPanel === 'reels'
@@ -623,6 +695,13 @@ export const ProfileView: React.FC = () => {
             </div>
 
             {/* Interactive VIP Live Analytics & Food Video Reels Quick Panel (Requires Active Paid Shop Package) */}
+            <div
+              id="profile-vip-power-detail"
+              ref={vipPowerDetailRef}
+              className={`rounded-2xl transition-all duration-300 ${
+                highlightedSection === 'vip-power' ? 'ring-2 ring-amber-400 shadow-md' : ''
+              }`}
+            >
             {selectedVipPowerPanel === 'analytics' && isShopSubscriptionActive(myRestaurants[0]) && (
               <div className="mt-2 p-3.5 rounded-2xl bg-white border border-emerald-200 shadow-xs space-y-2.5 animate-fade-in">
                 <div className="flex items-center justify-between">
@@ -788,6 +867,7 @@ export const ProfileView: React.FC = () => {
                 )}
               </div>
             )}
+            </div>
           </div>
         </div>
   );
@@ -835,11 +915,21 @@ export const ProfileView: React.FC = () => {
           role="button"
           tabIndex={0}
           aria-expanded={isVip10BenefitsExpanded}
-          onClick={() => setIsVip10BenefitsExpanded((prev) => !prev)}
+          onClick={() => {
+            const next = !isVip10BenefitsExpanded;
+            setIsVip10BenefitsExpanded(next);
+            if (next) {
+              scrollToProfileSection(vipBenefitsPanelRef.current, 'profile-vip-benefits-panel', 'vip-benefits', 14);
+            }
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              setIsVip10BenefitsExpanded((prev) => !prev);
+              const next = !isVip10BenefitsExpanded;
+              setIsVip10BenefitsExpanded(next);
+              if (next) {
+                scrollToProfileSection(vipBenefitsPanelRef.current, 'profile-vip-benefits-panel', 'vip-benefits', 14);
+              }
             }
           }}
           className="flex items-start justify-between gap-2.5 cursor-pointer select-none group"
@@ -879,13 +969,19 @@ export const ProfileView: React.FC = () => {
         </div>
 
         {isVip10BenefitsExpanded && (
-          <div className="p-3 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-3 animate-fade-in">
+          <div
+            id="profile-vip-benefits-panel"
+            ref={vipBenefitsPanelRef}
+            className={`p-3 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-3 animate-fade-in transition-all duration-300 ${
+              highlightedSection === 'vip-benefits' ? 'ring-2 ring-amber-400 shadow-md' : ''
+            }`}
+          >
             <div className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11.5px] font-extrabold leading-[1.6]">
               {tr(
                 language,
-                '🎁 សាកល្បង VIP ឥតគិតថ្លៃ ៧ ថ្ងៃ សម្រាប់អ្នកប្រើគ្រប់គ្នា ក្រោយទាញយក App ហើយចុះឈ្មោះដោយ Email ឬលេខទូរស័ព្ទ',
-                '🎁 7-day free VIP trial for every user after downloading the app and registering with email or phone',
-                '🎁 所有用户下载应用并使用邮箱或手机号注册后，即可免费试用 VIP 7 天'
+                '🎁 Free Trial ៧ ថ្ងៃ៖ ទទួលបានដោយគ្រាន់តែចូលតាមគណនី Google ឬលេខទូរស័ព្ទ មិនចាំបាច់ចុះឈ្មោះជា VIP',
+                '🎁 7-Day Free Trial: Claim simply by signing in with Google or Phone — no VIP registration required',
+                '🎁 7 天免费试用：仅需使用 Google 账号或手机号登录即可领取，无需注册付费 VIP'
               )}
             </div>
             {renderBenefitGroups(VIP_BENEFIT_GROUPS, VIP_MEMBER_BENEFITS)}
@@ -911,7 +1007,7 @@ export const ProfileView: React.FC = () => {
             </div>
             <button
               type="button"
-              onClick={() => setActiveSubTab('membership')}
+              onClick={() => selectAndScrollSubTab('membership')}
               className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#059669] via-[#10B981] to-[#047857] hover:from-[#047857] hover:to-[#065F46] text-white font-extrabold text-xs sm:text-[13px] shadow-[0_6px_16px_rgba(5,150,105,0.25)] flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer leading-[1.55]"
             >
               <Crown className="w-4 h-4 fill-white shrink-0" />
@@ -926,21 +1022,62 @@ export const ProfileView: React.FC = () => {
             </button>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => openUpgradeVipModal()}
-            className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#F59E0B] via-[#F97316] to-[#EA580C] hover:from-[#D97706] hover:to-[#C2410C] text-white font-extrabold text-xs sm:text-[13px] shadow-[0_6px_16px_rgba(234,88,12,0.25)] flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer leading-[1.55]"
-          >
-            <Crown className="w-4 h-4 fill-white shrink-0" />
-            <span>
-              {tr(
-                language,
-                'ដំឡើងទៅជាសមាជិក VIP ឥឡូវនេះ',
-                'Upgrade to VIP Membership Now',
-                '立即升级 VIP 会员'
-              )}
-            </span>
-          </button>
+          <div className="space-y-2">
+            {isFreeTrial7d && (
+              <div className="px-3 py-2 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-between gap-2 text-[11.5px] font-bold text-amber-900">
+                <span>
+                  {tr(
+                    language,
+                    `🎁 កំពុងប្រើ Free Trial ៧ ថ្ងៃ (សល់ ${remainingDays} ថ្ងៃ)`,
+                    `🎁 7-Day Free Trial Active (${remainingDays}d left)`,
+                    `🎁 7 天免费试用生效中（剩余 ${remainingDays} 天）`
+                  )}
+                </span>
+                {vipExpiryShort && (
+                  <span className="font-mono text-[10.5px] text-amber-800">
+                    {tr(language, `ផុតកំណត់៖ ${vipExpiryShort}`, `Exp: ${vipExpiryShort}`, `到期：${vipExpiryShort}`)}
+                  </span>
+                )}
+              </div>
+            )}
+            {canClaimTrial7d && (
+              <button
+                type="button"
+                disabled={isClaimingTrial}
+                onClick={handleClaimFreeTrial}
+                className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#10B981] via-[#059669] to-[#047857] hover:from-[#047857] hover:to-[#065F46] text-white font-extrabold text-xs sm:text-[13px] shadow-[0_6px_16px_rgba(5,150,105,0.25)] flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer disabled:opacity-60 leading-[1.55]"
+              >
+                {isClaimingTrial ? (
+                  <RefreshCw className="w-4 h-4 animate-spin shrink-0" />
+                ) : (
+                  <Crown className="w-4 h-4 fill-white shrink-0" />
+                )}
+                <span>
+                  {tr(
+                    language,
+                    `🎁 ចាប់ផ្តើមសាកល្បងឥតគិតថ្លៃ ${consumerCatalog.trialPlan.durationDays} ថ្ងៃ ($0)`,
+                    `🎁 Start Free ${consumerCatalog.trialPlan.durationDays}-Day Trial ($0)`,
+                    `🎁 立即开启 ${consumerCatalog.trialPlan.durationDays} 天免费试用 ($0)`
+                  )}
+                </span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => openUpgradeVipModal()}
+              className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#F59E0B] via-[#F97316] to-[#EA580C] hover:from-[#D97706] hover:to-[#C2410C] text-white font-extrabold text-xs sm:text-[13px] shadow-[0_6px_16px_rgba(234,88,12,0.25)] flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer leading-[1.55]"
+            >
+              <Crown className="w-4 h-4 fill-white shrink-0" />
+              <span>
+                {tr(
+                  language,
+                  'ដំឡើងទៅជាសមាជិក VIP ឥឡូវនេះ',
+                  'Upgrade to VIP Membership Now',
+                  '立即升级 VIP 会员'
+                )}
+              </span>
+            </button>
+          </div>
         )}
       </div>
 
@@ -950,11 +1087,21 @@ export const ProfileView: React.FC = () => {
           role="button"
           tabIndex={0}
           aria-expanded={isShopHotelBenefitsExpanded}
-          onClick={() => setIsShopHotelBenefitsExpanded((prev) => !prev)}
+          onClick={() => {
+            const next = !isShopHotelBenefitsExpanded;
+            setIsShopHotelBenefitsExpanded(next);
+            if (next) {
+              scrollToProfileSection(shopBenefitsPanelRef.current, 'profile-shop-benefits-panel', 'shop-benefits', 14);
+            }
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              setIsShopHotelBenefitsExpanded((prev) => !prev);
+              const next = !isShopHotelBenefitsExpanded;
+              setIsShopHotelBenefitsExpanded(next);
+              if (next) {
+                scrollToProfileSection(shopBenefitsPanelRef.current, 'profile-shop-benefits-panel', 'shop-benefits', 14);
+              }
             }
           }}
           className="flex items-start justify-between gap-2.5 cursor-pointer select-none group"
@@ -994,7 +1141,13 @@ export const ProfileView: React.FC = () => {
         </div>
 
         {isShopHotelBenefitsExpanded && (
-          <div className="p-3 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-3 animate-fade-in">
+          <div
+            id="profile-shop-benefits-panel"
+            ref={shopBenefitsPanelRef}
+            className={`p-3 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-3 animate-fade-in transition-all duration-300 ${
+              highlightedSection === 'shop-benefits' ? 'ring-2 ring-emerald-400 shadow-md' : ''
+            }`}
+          >
             {renderBenefitGroups(SHOP_BENEFIT_GROUPS, SHOP_PACKAGE_BENEFITS)}
             <div className="pt-2 border-t border-emerald-200/70 text-[10.5px] font-bold text-emerald-900 leading-[1.65]">
               {tr(
@@ -1464,6 +1617,7 @@ export const ProfileView: React.FC = () => {
                   updateAppSettings({
                     vipFeaturedRotationEnabled: !rotationCfg.enabled,
                   });
+                  scrollToProfileSection(adminRotationStatusRef.current, 'profile-admin-rotation-status', 'admin-rotation', 16);
                 }}
                 className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border transition cursor-pointer ${
                   rotationCfg.enabled
@@ -1493,6 +1647,7 @@ export const ProfileView: React.FC = () => {
                         updateAppSettings({
                           vipFeaturedDurationDays: daysOpt,
                         });
+                        scrollToProfileSection(adminRotationStatusRef.current, 'profile-admin-rotation-status', 'admin-rotation', 16);
                       }}
                       className={`px-3 py-1.5 rounded-xl font-mono font-bold text-xs border transition cursor-pointer ${
                         rotationCfg.durationDays === daysOpt
@@ -1506,7 +1661,13 @@ export const ProfileView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/60 space-y-1">
+              <div
+                id="profile-admin-rotation-status"
+                ref={adminRotationStatusRef}
+                className={`p-3 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/60 space-y-1 transition-all duration-300 ${
+                  highlightedSection === 'admin-rotation' ? 'ring-2 ring-emerald-500 shadow-md' : ''
+                }`}
+              >
                 <div className="text-[11px] font-bold text-emerald-900 dark:text-emerald-300">
                   {tr(language, 'ហាងកំពុងបង្ហាញលើគេបច្ចុប្បន្ន (Active Top Slot)៖', 'Currently Featured VIP Shop:', '当前置顶展示的 VIP 店铺：')}
                 </div>
@@ -1547,7 +1708,7 @@ export const ProfileView: React.FC = () => {
             type="button"
             role="tab"
             aria-selected={activeSubTab === 'myrestaurant'}
-            onClick={() => setActiveSubTab('myrestaurant')}
+            onClick={() => selectAndScrollSubTab('myrestaurant')}
             className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FF9F43] via-[#F97316] to-[#D9530F] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'myrestaurant'
                 ? 'border-white ring-3 ring-orange-500/50 shadow-[0_6px_16px_rgba(234,88,12,0.34)] scale-[1.01]'
@@ -1567,7 +1728,7 @@ export const ProfileView: React.FC = () => {
             role="tab"
             data-testid="profile-grid-wishlists"
             aria-selected={activeSubTab === 'wishlists'}
-            onClick={() => setActiveSubTab('wishlists')}
+            onClick={() => selectAndScrollSubTab('wishlists')}
             className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#34D399] via-[#16A34A] to-[#146C32] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'wishlists'
                 ? 'border-white ring-3 ring-emerald-500/50 shadow-[0_6px_16px_rgba(22,163,74,0.34)] scale-[1.01]'
@@ -1592,7 +1753,7 @@ export const ProfileView: React.FC = () => {
                 setIsAiTripPlannerModalOpen(true);
                 return;
               }
-              setActiveSubTab('tripplans');
+              selectAndScrollSubTab('tripplans');
             }}
             className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FB7185] via-[#E11D48] to-[#BE123C] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'tripplans'
@@ -1616,7 +1777,7 @@ export const ProfileView: React.FC = () => {
             role="tab"
             data-testid="profile-grid-saved"
             aria-selected={activeSubTab === 'bookmarks'}
-            onClick={() => setActiveSubTab('bookmarks')}
+            onClick={() => selectAndScrollSubTab('bookmarks')}
             className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#60A5FA] via-[#2563EB] to-[#1D4ED8] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'bookmarks'
                 ? 'border-white ring-3 ring-blue-500/50 shadow-[0_6px_16px_rgba(37,99,235,0.34)] scale-[1.01]'
@@ -1638,7 +1799,7 @@ export const ProfileView: React.FC = () => {
             type="button"
             role="tab"
             aria-selected={activeSubTab === 'membership'}
-            onClick={() => setActiveSubTab('membership')}
+            onClick={() => selectAndScrollSubTab('membership')}
             className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FBBF24] via-[#D97706] to-[#B45309] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'membership'
                 ? 'border-white ring-3 ring-amber-500/50 shadow-[0_6px_16px_rgba(217,119,6,0.34)] scale-[1.01]'
@@ -1657,7 +1818,7 @@ export const ProfileView: React.FC = () => {
             type="button"
             role="tab"
             aria-selected={activeSubTab === 'settings'}
-            onClick={() => setActiveSubTab('settings')}
+            onClick={() => selectAndScrollSubTab('settings')}
             className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#2DD4BF] via-[#0D9488] to-[#115E59] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'settings'
                 ? 'border-white ring-3 ring-teal-500/50 shadow-[0_6px_16px_rgba(13,148,136,0.34)] scale-[1.01]'
@@ -1673,7 +1834,13 @@ export const ProfileView: React.FC = () => {
         </div>
       )}
 
-      <div className="space-y-3 pb-3">
+      <div
+        id="profile-subtab-content"
+        ref={subTabContentRef}
+        className={`space-y-3 pb-3 scroll-mt-3 rounded-3xl transition-all duration-300 ${
+          highlightedSection === 'subtab' ? 'ring-2 ring-emerald-400/90 ring-offset-2 ring-offset-transparent' : ''
+        }`}
+      >
       {/* Tab: My Restaurant (Shop Owner Portal - Consumer VIP Only) */}
       {!isAdmin && activeSubTab === 'myrestaurant' && (
         <div className="space-y-3 font-khmer">
@@ -1929,6 +2096,30 @@ export const ProfileView: React.FC = () => {
                 )}
               </div>
 
+              {/* 1-Click Free 7-Day Trial CTA */}
+              {canClaimTrial7d && (
+                <button
+                  type="button"
+                  disabled={isClaimingTrial}
+                  onClick={handleClaimFreeTrial}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#10B981] to-[#047857] hover:from-[#059669] hover:to-[#065F46] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-60"
+                >
+                  {isClaimingTrial ? (
+                    <RefreshCw className="w-4 h-4 animate-spin shrink-0" />
+                  ) : (
+                    <Crown className="w-4 h-4 fill-white" />
+                  )}
+                  <span>
+                    {tr(
+                      language,
+                      `🎁 ចាប់ផ្តើមសាកល្បងឥតគិតថ្លៃ ${consumerCatalog.trialPlan.durationDays} ថ្ងៃ ($0)`,
+                      `🎁 Start Free ${consumerCatalog.trialPlan.durationDays}-Day Trial ($0)`,
+                      `🎁 立即开启 ${consumerCatalog.trialPlan.durationDays} 天免费试用 ($0)`
+                    )}
+                  </span>
+                </button>
+              )}
+
               {/* Manual Renew / Upgrade CTA */}
               <button
                 type="button"
@@ -2081,7 +2272,13 @@ export const ProfileView: React.FC = () => {
             }
 
             return (
-              <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3.5">
+              <div
+                id="profile-membership-renewal-card"
+                ref={membershipRenewalCardRef}
+                className={`p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3.5 transition-all duration-300 ${
+                  highlightedSection === 'membership-renewal' ? 'ring-2 ring-amber-400 shadow-md' : ''
+                }`}
+              >
                 {/* Alert Banner when automatic renewal payment is not confirmed or subscription expired */}
                 {isPaymentFailedOrWaiting && (
                   <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 space-y-2.5">
@@ -2206,6 +2403,12 @@ export const ProfileView: React.FC = () => {
                             explicitConsent: true,
                           });
                         }
+                        scrollToProfileSection(
+                          membershipRenewalCardRef.current,
+                          'profile-membership-renewal-card',
+                          'membership-renewal',
+                          14
+                        );
                       }}
                       className={`relative inline-flex h-7 w-13 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                         isAutoRenewOn ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
@@ -2610,7 +2813,13 @@ export const ProfileView: React.FC = () => {
 
       {/* Tab: Settings (Always visible for Admin as System & General Preferences Card, or when Settings tab selected) */}
       {(isAdmin || activeSubTab === 'settings') && (
-        <div className="p-4 sm:p-5 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/90 dark:border-slate-700 space-y-3.5 text-xs font-khmer shadow-xs">
+        <div
+          id="profile-settings-card"
+          ref={settingsCardRef}
+          className={`p-4 sm:p-5 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/90 dark:border-slate-700 space-y-3.5 text-xs font-khmer shadow-xs transition-all duration-300 ${
+            highlightedSection === 'settings' ? 'ring-2 ring-teal-400 shadow-md' : ''
+          }`}
+        >
           {isAdmin && (
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-700">
               <div className="flex items-center gap-2.5">
@@ -2643,7 +2852,18 @@ export const ProfileView: React.FC = () => {
                 <button
                   key={langOpt}
                   type="button"
-                  onClick={() => setLanguage(langOpt)}
+                  onClick={() => {
+                    setLanguage(langOpt);
+                    scrollToProfileSection(settingsCardRef.current, 'profile-settings-card', 'settings', 12);
+                    showToast(
+                      langOpt === 'km'
+                        ? 'បានប្តូរភាសាទៅជា ភាសាខ្មែរ'
+                        : langOpt === 'zh'
+                        ? '语言已切换为 中文'
+                        : 'Language switched to English',
+                      'success'
+                    );
+                  }}
                   className={`px-2.5 py-1 rounded-xl font-bold text-[11px] border transition cursor-pointer ${
                     language === langOpt
                       ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-2xs'
@@ -2721,7 +2941,17 @@ export const ProfileView: React.FC = () => {
               </p>
             </div>
             <button
-              onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+              onClick={() => {
+                const next = !notificationsEnabled;
+                setNotificationsEnabled(next);
+                scrollToProfileSection(settingsCardRef.current, 'profile-settings-card', 'settings', 12);
+                showToast(
+                  next
+                    ? tr(language, 'បានបើកការជូនដំណឹងជោគជ័យ', 'Notifications enabled', '已开启消息通知')
+                    : tr(language, 'បានបិទការជូនដំណឹង', 'Notifications turned off', '已关闭消息通知'),
+                  'info'
+                );
+              }}
               className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 cursor-pointer ${
                 notificationsEnabled ? 'bg-[#064E3B]' : 'bg-slate-300 dark:bg-slate-600'
               }`}

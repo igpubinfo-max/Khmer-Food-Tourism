@@ -70,6 +70,9 @@ const BottomNavInner: React.FC = () => {
                 type="button"
                 aria-current={isActive ? 'page' : undefined}
                 onClick={() => {
+                  if (item.id === 'food' && typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('kft:food-menu-reset'));
+                  }
                   if (activeTab === item.id) {
                     const mainEl = document.getElementById('kft-main-scroll');
                     if (mainEl) mainEl.scrollTop = 0;

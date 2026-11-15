@@ -2,11 +2,9 @@ import type { Language } from '../../types';
 
 export interface WelcomeSlide {
   id: 'food' | 'places' | 'passport';
-  /** WebP photo (full-bleed, object-cover) */
   image: string;
   imageWidth: number;
   imageHeight: number;
-  /** CSS object-position so each slide shows a different part of the photo */
   objectPosition: string;
   headline: Record<Language, string>;
   tagline: Record<Language, string>;
@@ -14,11 +12,12 @@ export interface WelcomeSlide {
 }
 
 export const WELCOME_IMAGES = {
-  hero: { src: '/welcome/hero-bg.webp', width: 1264, height: 848 },
+  hero: { src: '/welcome/welcome-robot-bg.jpg', width: 768, height: 1024 },
+  authBg: { src: '/welcome/auth-login-bg.jpg', width: 935, height: 1024 },
   places: { src: '/welcome/places.webp', width: 1280, height: 714 },
-  logo: '/welcome/welcome-hero-icon.png?v=2.5.4',
-  /** Existing app icon used if the welcome logo fails to load */
-  logoFallback: '/icon-192.png?v=2.5.4',
+  logo: '/welcome/welcome-hero-icon.png?v=2.7.0',
+  logoFallback: '/icon-192.png?v=2.7.0',
+  robotHead: '/welcome/welcome-robot-head.png?v=2.7.0',
 } as const;
 
 export const WELCOME_SLIDES: WelcomeSlide[] = [
@@ -27,7 +26,7 @@ export const WELCOME_SLIDES: WelcomeSlide[] = [
     image: WELCOME_IMAGES.hero.src,
     imageWidth: WELCOME_IMAGES.hero.width,
     imageHeight: WELCOME_IMAGES.hero.height,
-    objectPosition: '88% 50%',
+    objectPosition: 'center center',
     headline: {
       km: 'រសជាតិ និងទេសចរណ៍កម្ពុជា',
       en: 'Cambodia Flavors & Tourism',
@@ -49,7 +48,7 @@ export const WELCOME_SLIDES: WelcomeSlide[] = [
 export const WELCOME_LABELS = {
   skip: { km: 'រំលង', en: 'Skip', zh: '跳过' },
   next: { km: 'បន្ទាប់', en: 'Next', zh: '下一步' },
-  start: { km: 'ចាប់ផ្តើមស្វែងរក', en: 'Start Exploring', zh: '开始探索' },
+  start: { km: 'ចាប់ផ្តើមប្រើប្រាស់', en: 'Get Started', zh: '开始使用' },
   appName: {
     km: 'រសជាតិ និងទេសចរណ៍កម្ពុជា',
     en: 'Cambodia Flavors & Tourism',

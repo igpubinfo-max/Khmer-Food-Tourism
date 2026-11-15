@@ -58,6 +58,8 @@ import {
   handleFoodImageError,
   inferBusinessTypeAndCategory,
   isHotelBusinessRecord,
+  APP_BUILD_CODE,
+  APP_VERSION_NAME,
 } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
@@ -223,6 +225,12 @@ export const AdminDashboard: React.FC = () => {
   // Form states for Settings & Promotional pricing
   const [playStoreUrl, setPlayStoreUrl] = useState(appSettings.playStoreUrl);
   const [appStoreUrl, setAppStoreUrl] = useState(appSettings.appStoreUrl);
+  const [forceAppUpdateInput, setForceAppUpdateInput] = useState<boolean>(() => Boolean(appSettings.forceAppUpdate));
+  const [latestAppVersionInput, setLatestAppVersionInput] = useState<string>(() => appSettings.latestAppVersion || APP_VERSION_NAME);
+  const [latestAppBuildCodeInput, setLatestAppBuildCodeInput] = useState<string>(() => String(appSettings.latestAppBuildCode || APP_BUILD_CODE));
+  const [minRequiredBuildCodeInput, setMinRequiredBuildCodeInput] = useState<string>(() => String(appSettings.minRequiredBuildCode || ''));
+  const [updateReleaseNotesKhInput, setUpdateReleaseNotesKhInput] = useState<string>(() => appSettings.updateReleaseNotesKh || '');
+  const [updateReleaseNotesEnInput, setUpdateReleaseNotesEnInput] = useState<string>(() => appSettings.updateReleaseNotesEn || '');
   const [supportQrUrl, setSupportQrUrl] = useState(appSettings.supportQrImageUrl);
   const [bankName, setBankName] = useState(appSettings.supportBankName);
   const [accountName, setAccountName] = useState(appSettings.supportAccountName);
@@ -288,6 +296,12 @@ export const AdminDashboard: React.FC = () => {
     const rotCfg = getVipFeaturedRotationConfig(s);
     setPlayStoreUrl(s.playStoreUrl);
     setAppStoreUrl(s.appStoreUrl);
+    setForceAppUpdateInput(Boolean(s.forceAppUpdate));
+    setLatestAppVersionInput(s.latestAppVersion || APP_VERSION_NAME);
+    setLatestAppBuildCodeInput(String(s.latestAppBuildCode || APP_BUILD_CODE));
+    setMinRequiredBuildCodeInput(s.minRequiredBuildCode ? String(s.minRequiredBuildCode) : '');
+    setUpdateReleaseNotesKhInput(s.updateReleaseNotesKh || '');
+    setUpdateReleaseNotesEnInput(s.updateReleaseNotesEn || '');
     setSupportQrUrl(s.supportQrImageUrl);
     setBankName(s.supportBankName);
     setAccountName(s.supportAccountName);
@@ -988,10 +1002,31 @@ export const AdminDashboard: React.FC = () => {
       showToast(tr(language, '⚠️ តំណភ្ជាប់ត្រូវចាប់ផ្តើមដោយ https://', '⚠️ The link must start with https://', '⚠️ 链接必须以 https:// 开头'), 'warning');
       return;
     }
-    const res = await saveSettingsSubset({ apkDownloadUrl: '', playStoreUrl: url, appStoreUrl: appStoreUrl.trim() });
+    const parsedLatestBuild = parseInt(latestAppBuildCodeInput.trim(), 10);
+    const parsedMinBuild = parseInt(minRequiredBuildCodeInput.trim(), 10);
+    const res = await saveSettingsSubset({
+      apkDownloadUrl: '',
+      playStoreUrl: url,
+      appStoreUrl: appStoreUrl.trim(),
+      forceAppUpdate: forceAppUpdateInput,
+      latestAppVersion: latestAppVersionInput.trim() || APP_VERSION_NAME,
+      latestAppBuildCode: Number.isFinite(parsedLatestBuild) && parsedLatestBuild > 0 ? parsedLatestBuild : APP_BUILD_CODE,
+      minRequiredBuildCode: Number.isFinite(parsedMinBuild) && parsedMinBuild > 0 ? parsedMinBuild : undefined,
+      updateReleaseNotesKh: updateReleaseNotesKhInput.trim() || undefined,
+      updateReleaseNotesEn: updateReleaseNotesEnInput.trim() || undefined,
+    });
     if (res?.ok && res.settings) {
       isSupportFormDirtyRef.current = false;
       setPlayStoreUrl(res.settings.playStoreUrl);
+      showToast(
+        tr(
+          language,
+          '✅ បានរក្សាទុកតំណភ្ជាប់ Google Play Store និងការកំណត់បង្ខំឱ្យអាប់ដេត (Force Update) ជោគជ័យ!',
+          '✅ Saved Google Play Store link & Force Update settings!',
+          '✅ 已保存 Google Play Store 链接与强制更新设置！'
+        ),
+        'success'
+      );
     }
   };
 
@@ -5366,9 +5401,9 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <form onSubmit={handleSavePlayStore} className="space-y-3 font-khmer">
+                <form onSubmit={handleSavePlayStore} className="space-y-4 font-khmer">
                   <div>
-                    <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
+                    <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300 text-xs">
                       {tr(language, 'តំណភ្ជាប់ផ្លូវការ Google Play Store', 'Official Google Play Store URL', '官方 Google Play Store URL')}
                     </label>
                     <input
@@ -5379,11 +5414,139 @@ export const AdminDashboard: React.FC = () => {
                     />
                   </div>
 
+                  {/* Remote App Version & Mandatory Force-Update Control */}
+                  <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-300/80 dark:border-amber-700/60 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h5 className="font-extrabold text-stone-900 dark:text-amber-200 text-xs flex items-center gap-1.5">
+                          <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                          <span>
+                            {tr(
+                              language,
+                              'ប្រព័ន្ធបង្ខំឱ្យអាប់ដេតកម្មវិធីពីចម្ងាយ (Remote Force Update Lock)',
+                              'Remote Mandatory App Update Lock (Force Update)',
+                              '远程强制更新锁 (Force Update)'
+                            )}
+                          </span>
+                        </h5>
+                        <p className="text-[11px] text-stone-600 dark:text-stone-300 mt-0.5 leading-relaxed">
+                          {tr(
+                            language,
+                            `កំណែបច្ចុប្បន្នក្នុងម៉ាស៊ីន៖ v${APP_VERSION_NAME} (Build ${APP_BUILD_CODE})។ នៅពេលបើក «បង្ខំឱ្យអាប់ដេត» ឬកំណត់ Build អប្បបរមាខ្ពស់ជាងកំណែចាស់ អ្នកប្រើកំណែចាស់នឹងត្រូវជាប់សោពេញអេក្រង់ រហូតដល់ពួកគេចុចអាប់ដេតទៅកំណែថ្មី។`,
+                            `Current installed build: v${APP_VERSION_NAME} (Build ${APP_BUILD_CODE}). Enabling Force Update or setting a higher Minimum Required Build locks older app versions with a full-screen modal until they update.`,
+                            `当前构建版本：v${APP_VERSION_NAME} (Build ${APP_BUILD_CODE})。开启强制更新或设置更高的最低 Build 后，旧版应用将显示全屏锁定弹窗，直到用户更新至最新版。`
+                          )}
+                        </p>
+                      </div>
+
+                      <label className="inline-flex items-center gap-2 cursor-pointer shrink-0 select-none">
+                        <input
+                          type="checkbox"
+                          checked={forceAppUpdateInput}
+                          onChange={e => {
+                            isSupportFormDirtyRef.current = true;
+                            setForceAppUpdateInput(e.target.checked);
+                          }}
+                          className="w-4 h-4 accent-amber-600 rounded cursor-pointer"
+                        />
+                        <span className="text-xs font-extrabold text-amber-900 dark:text-amber-200">
+                          {forceAppUpdateInput
+                            ? tr(language, 'កំពុងបង្ខំ (ON)', 'Force ON', '已开启')
+                            : tr(language, 'បិទ (OFF)', 'OFF', '已关闭')}
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      <div>
+                        <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300 text-[11px]">
+                          {tr(language, 'កំណែថ្មី (Latest Version)', 'Latest Version Name', '最新版本号')}
+                        </label>
+                        <input
+                          type="text"
+                          placeholder={APP_VERSION_NAME}
+                          value={latestAppVersionInput}
+                          onChange={e => {
+                            isSupportFormDirtyRef.current = true;
+                            setLatestAppVersionInput(e.target.value);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-xl border bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300 text-[11px]">
+                          {tr(language, 'លេខ Build ថ្មី (Latest Build)', 'Latest Build Code', '最新 Build 号')}
+                        </label>
+                        <input
+                          type="number"
+                          placeholder={String(APP_BUILD_CODE)}
+                          value={latestAppBuildCodeInput}
+                          onChange={e => {
+                            isSupportFormDirtyRef.current = true;
+                            setLatestAppBuildCodeInput(e.target.value);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-xl border bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300 text-[11px]">
+                          {tr(language, 'Build អប្បបរមាដែលអនុញ្ញាត (Min Build)', 'Min Required Build (Lock <)', '最低允许 Build')}
+                        </label>
+                        <input
+                          type="number"
+                          placeholder={tr(language, 'ឧ. 1605 (ទទេ = មិនកំណត់)', 'e.g. 1605 (optional)', '如 1605（留空不限）')}
+                          value={minRequiredBuildCodeInput}
+                          onChange={e => {
+                            isSupportFormDirtyRef.current = true;
+                            setMinRequiredBuildCodeInput(e.target.value);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-xl border bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 font-mono text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300 text-[11px]">
+                          {tr(language, 'សារជូនដំណឹងអាប់ដេត (ភាសាខ្មែរ)', 'Update Message (Khmer)', '更新提示信息（高棉语）')}
+                        </label>
+                        <input
+                          type="text"
+                          placeholder={tr(language, 'សូមអាប់ដេតទៅកំណែថ្មីដើម្បីបន្តប្រើប្រាស់មុខងារថ្មី...', 'Optional custom Khmer message...', '可选自定义高棉语提示...')}
+                          value={updateReleaseNotesKhInput}
+                          onChange={e => {
+                            isSupportFormDirtyRef.current = true;
+                            setUpdateReleaseNotesKhInput(e.target.value);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-xl border bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 text-xs"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300 text-[11px]">
+                          {tr(language, 'សារជូនដំណឹងអាប់ដេត (English)', 'Update Message (English)', '更新提示信息（英语）')}
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Please update to the latest version to continue..."
+                          value={updateReleaseNotesEnInput}
+                          onChange={e => {
+                            isSupportFormDirtyRef.current = true;
+                            setUpdateReleaseNotesEnInput(e.target.value);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-xl border bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
                     className="px-5 py-2.5 bg-gradient-to-r bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs active:scale-95"
                   >
-                    {tr(language, 'រក្សាទុកតំណភ្ជាប់ Google Play Store', 'Save Google Play Store Link', '保存 Google Play Store 链接')}
+                    {tr(language, 'រក្សាទុកតំណភ្ជាប់ Google Play Store & ការកំណត់អាប់ដេត', 'Save Play Store Link & Update Settings', '保存 Play Store 链接与更新设置')}
                   </button>
                 </form>
               </div>

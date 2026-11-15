@@ -163,21 +163,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
   }, [foods]);
 
   // Count dishes per province across all 25 provinces & capital city
-  const provinceDishCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const p of DISH_PROVINCES) {
-      counts[p.id] = 0;
-    }
-    for (const f of verifiedDishes) {
-      for (const p of DISH_PROVINCES) {
-        if (doesDishBelongToProvince(f, p.id)) {
-          counts[p.id] += 1;
-        }
-      }
-    }
-    return counts;
-  }, [verifiedDishes]);
-
   // Pre-compute ranked trilingual search matches across verifiedDishes when query is active
   const queryMatchedDishes = useMemo(() => {
     const q = debouncedQuery.trim();
@@ -674,18 +659,10 @@ export const DailyDiscoveriesModal: React.FC = () => {
             >
               <MapPin className={`w-3.5 h-3.5 ${selectedProvinceId === 'all' ? 'text-white' : 'text-emerald-600'}`} />
               <span>{tr(language, 'ទាំង ២៥ ខេត្ត-ក្រុង', 'All 25 Provinces', '全部 25 省市')}</span>
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[9.5px] font-mono ${
-                  selectedProvinceId === 'all' ? 'bg-white/25 text-white' : 'bg-white text-emerald-700'
-                }`}
-              >
-                25
-              </span>
             </button>
 
             {visibleProvinces.map((prov) => {
               const active = selectedProvinceId === prov.id;
-              const count = provinceDishCounts[prov.id] || 0;
               return (
                 <button
                   key={prov.id}
@@ -707,13 +684,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 >
                   <MapPin className={`w-3 h-3 ${active ? 'text-white' : 'text-emerald-600'}`} />
                   <span>{getProvinceShortName(prov)}</span>
-                  <span
-                    className={`px-1.5 py-0.2 rounded-full text-[9.5px] font-mono ${
-                      active ? 'bg-white/25 text-white' : 'bg-white text-slate-600'
-                    }`}
-                  >
-                    {count}
-                  </span>
                 </button>
               );
             })}
@@ -736,9 +706,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   <ArrowLeft className="w-3.5 h-3.5 text-emerald-700" />
                   <span>{tr(language, 'បញ្ជីរាជធានី-ខេត្តទាំង ២៥', 'All 25 Provinces', '返回全部 25 省市')}</span>
                 </button>
-                <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold font-mono shrink-0">
-                  {filteredDishes.length} {tr(language, 'មុខម្ហូប', 'Dishes', '道代表菜')}
-                </span>
               </div>
 
               <div>
@@ -814,9 +781,9 @@ export const DailyDiscoveriesModal: React.FC = () => {
                     <div className="font-extrabold text-slate-900 leading-[1.65] break-words">
                       {tr(
                         language,
-                        `បញ្ជីរាជធានី-ខេត្តទាំង ២៥ (${visibleProvinces.length}/25 ទីតាំង • ${filteredDishes.length} មុខម្ហូប)`,
-                        `All 25 Cambodian Provinces & Capital (${visibleProvinces.length}/25)`,
-                        `柬埔寨全部 25 个省市列表（${visibleProvinces.length}/25）`
+                        'បញ្ជីរាជធានី-ខេត្តទាំង ២៥',
+                        'All 25 Cambodian Provinces & Capital',
+                        '柬埔寨全部 25 个省市列表'
                       )}
                     </div>
                     <div className="text-[11px] text-slate-500 leading-[1.55] break-words">
@@ -836,7 +803,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 {visibleProvinces.map((prov) => {
                   const globalIndex = DISH_PROVINCES.findIndex((p) => p.id === prov.id);
                   const globalNumber = globalIndex + 1;
-                  const dishCount = provinceDishCounts[prov.id] || 0;
                   const badgeGradient =
                     PROVINCE_BADGE_GRADIENTS[globalIndex % PROVINCE_BADGE_GRADIENTS.length];
 
@@ -872,10 +838,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-[10.5px] font-extrabold font-mono">
-                          {dishCount} {tr(language, 'មុខ', 'dishes', '道')}
-                        </span>
+                      <div className="flex items-center shrink-0">
                         <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition" />
                       </div>
                     </button>
@@ -949,9 +912,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
                       )}
                 </h4>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700 text-[11px] font-extrabold font-mono shadow-2xs shrink-0">
-                {filteredDishes.length} {tr(language, 'មុខ', 'dishes', '道')}
-              </span>
             </div>
           )}
 

@@ -12,6 +12,7 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
+  ChevronRight,
   ArrowLeft,
   ShieldCheck,
   Loader2,
@@ -53,7 +54,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   } = useApp();
 
   const [authMode, setAuthMode] = useState<'main' | 'phone' | 'email' | 'google_quick'>(
-    authModalInitialView.mode || 'main'
+    authModalInitialView.mode === 'phone' ? 'phone' : 'main'
   );
   const [phoneTab, setPhoneTab] = useState<'register' | 'login'>(
     authModalInitialView.emailTab || 'register'
@@ -64,7 +65,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
   useEffect(() => {
     if (isAuthModalOpen) {
-      setAuthMode(authModalInitialView.mode || 'main');
+      setAuthMode(authModalInitialView.mode === 'phone' ? 'phone' : 'main');
       setPhoneTab(authModalInitialView.emailTab || 'register');
       setEmailTab(authModalInitialView.emailTab || 'login');
     }
@@ -512,177 +513,331 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     currentUser && (hasAuthenticatedEmailAccount(currentUser) || hasAuthenticatedPhoneAccount(currentUser));
 
   return (
-    <div className="fixed inset-0 z-[115] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto font-sans">
-      <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
-        {/* Top Header Banner */}
-        <div className="kft-khmer-login-header relative p-5 pb-5 text-white text-center">
-          <div className="w-12 h-12 mx-auto rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-2 shadow-inner">
-            <Utensils className="w-6 h-6 text-emerald-300" />
-          </div>
-          <h2 className="text-lg font-bold font-moul tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.75)]">
-            {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
-          </h2>
-          <p className="text-[11px] text-white font-khmer mt-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]">
-            {tr(
-              language,
-              'ការមើលម្ហូប ហាង សណ្ឋាគារ តំបន់ទេសចរណ៍ និងផែនទី គឺ FREE ជារៀងរហូត',
-              'Browsing foods, shops, hotels, attractions & maps is FREE forever',
-              '浏览美食、餐厅、酒店、景点与地图导航永久免费'
-            )}
-          </p>
+    <div className="fixed inset-0 z-[115] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto font-khmer">
+      {authMode === 'main' ? (
+        /* ==========================================================
+           ANGKOR WAT + AI ROBOT CYAN GLOW LOGIN CARD (935x1024)
+           ========================================================== */
+        <div
+          className="relative w-full max-w-[400px] aspect-[935/1024] rounded-[28px] overflow-hidden shadow-[0_0_45px_rgba(14,165,233,0.4)] select-none my-auto animate-in fade-in zoom-in-95 duration-200 bg-[#031B38]"
+        >
+          {/* Clean Artwork Template Background (935x1024) */}
+          <img
+            src="/welcome/auth-login-bg.jpg"
+            alt="Cambodia Flavors & Tourism Sign In"
+            width={935}
+            height={1024}
+            fetchPriority="high"
+            decoding="async"
+            className="pointer-events-none absolute inset-0 w-full h-full object-fill select-none"
+          />
 
+          {/* Top-Right Close (X) Button Overlay aligned with the glowing cyan X circle in the artwork */}
           {!isMandatoryGate && (
             <button
+              type="button"
               onClick={() => setIsAuthModalOpen(false)}
-              className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition cursor-pointer"
+              style={{
+                top: '3.3%',
+                right: '3.3%',
+                width: '8.8%',
+                height: '8.0%',
+              }}
+              className="absolute z-30 rounded-full bg-transparent hover:bg-cyan-400/15 active:scale-95 transition cursor-pointer"
               aria-label="Close"
+            />
+          )}
+
+          {/* Title & Subtitle ("រសជាតិ និងទេសចរណ៍កម្ពុជា" / "Cambodia Flavors & Tourism") above the golden arc */}
+          <div
+            style={{
+              top: '25.8%',
+              left: '38.0%',
+              right: '3.2%',
+              height: '13.5%',
+            }}
+            className="absolute z-20 flex flex-col items-center justify-center text-center px-1 pointer-events-none"
+          >
+            <h2
+              className="font-khmer font-extrabold text-white tracking-wide leading-[1.35] whitespace-nowrap"
+              style={{
+                fontSize: 'clamp(14.5px, 4.5vw, 20.5px)',
+                textShadow: '0 2px 10px rgba(0, 12, 32, 0.95), 0 0 18px rgba(56, 189, 248, 0.55)',
+              }}
             >
-              <X className="w-4 h-4" />
+              រសជាតិ និងទេសចរណ៍កម្ពុជា
+            </h2>
+            <p
+              className="font-extrabold text-white/95 tracking-wide leading-tight mt-0.5 whitespace-nowrap"
+              style={{
+                fontSize: 'clamp(10.5px, 3.2vw, 14.5px)',
+                textShadow: '0 2px 8px rgba(0, 12, 32, 0.95)',
+              }}
+            >
+              {language === 'zh' ? '柬埔寨风味与旅游 • Cambodia Flavors & Tourism' : 'Cambodia Flavors & Tourism'}
+            </p>
+          </div>
+
+          {/* Optional VIP / Signed-In status badge if triggered from VIP upgrade */}
+          {authModalInitialView.requireEmailForVip && (
+            <div
+              style={{
+                top: '39.8%',
+                left: '7%',
+                right: '7%',
+              }}
+              className="absolute z-20 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-300/60 text-amber-200 text-[10px] font-bold flex items-center justify-center gap-1.5 backdrop-blur-xs"
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <span className="truncate">
+                {tr(
+                  language,
+                  'សូមចូលគណនីតាមលេខទូរស័ព្ទ ឬ Google ដើម្បីបន្ត',
+                  'Sign in with Phone or Google to continue',
+                  '请使用手机号或 Google 登录以继续'
+                )}
+              </span>
+            </div>
+          )}
+
+          {/* 1. First Glowing Cyan Pill Button: ចូលប្រើដោយលេខទូរស័ព្ទ (y = 46.88% .. 56.05%) */}
+          <button
+            type="button"
+            onClick={() => {
+              setPhoneTab('login');
+              setAuthMode('phone');
+            }}
+            data-testid="auth-primary-phone"
+            style={{
+              top: '46.88%',
+              left: '5.78%',
+              width: '88.45%',
+              height: '9.18%',
+            }}
+            className="absolute z-20 rounded-full px-3.5 sm:px-4 flex items-center justify-between gap-2.5 bg-transparent hover:bg-cyan-400/10 active:scale-[0.99] transition cursor-pointer group"
+          >
+            <span className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+              {/* Glowing Cyan Circle Phone Icon */}
+              <span className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 border-cyan-300/90 bg-cyan-400/15 shadow-[0_0_14px_rgba(56,189,248,0.65)] flex items-center justify-center shrink-0">
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
+              </span>
+              <span className="text-left min-w-0 flex-1">
+                <span
+                  className="block font-khmer font-extrabold text-white leading-snug truncate"
+                  style={{
+                    fontSize: 'clamp(13px, 3.9vw, 17.5px)',
+                    textShadow: '0 2px 6px rgba(0, 10, 28, 0.95)',
+                  }}
+                >
+                  {tr(
+                    language,
+                    'ចូលប្រើដោយលេខទូរស័ព្ទ',
+                    'Sign in with Phone Number',
+                    '使用手机号码登录'
+                  )}
+                </span>
+                <span
+                  className="block font-khmer font-medium text-cyan-100/95 leading-tight truncate mt-0.5"
+                  style={{
+                    fontSize: 'clamp(9.8px, 2.85vw, 12.5px)',
+                    textShadow: '0 1px 4px rgba(0, 10, 28, 0.95)',
+                  }}
+                >
+                  {tr(
+                    language,
+                    'បញ្ចូលលេខទូរស័ព្ទ • ទទួលលេខកូដ (SMS)',
+                    'Enter phone number • Receive verification code',
+                    '输入手机号码 • 获取安全验证码'
+                  )}
+                </span>
+              </span>
+            </span>
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white/95 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+
+          {/* 2. Second Glowing Cyan Pill Button: ចូលប្រើដោយគណនី Google (y = 58.59% .. 67.77%) */}
+          {!isNativeIosApp() && (
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isGoogleLoading}
+              data-testid="auth-primary-google"
+              style={{
+                top: '58.59%',
+                left: '5.78%',
+                width: '88.45%',
+                height: '9.18%',
+              }}
+              className="absolute z-20 rounded-full px-4 flex items-center justify-center gap-2.5 sm:gap-3 bg-transparent hover:bg-cyan-400/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-60"
+            >
+              {isGoogleLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin text-cyan-300" />
+              ) : (
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
+                </svg>
+              )}
+              <span
+                className="font-khmer font-extrabold text-white tracking-wide whitespace-nowrap"
+                style={{
+                  fontSize: 'clamp(13px, 3.9vw, 17.5px)',
+                  textShadow: '0 2px 6px rgba(0, 10, 28, 0.95)',
+                }}
+              >
+                {tr(language, 'ចូលប្រើដោយគណនី Google', 'Continue with Google', '使用 Google 账号登录')}
+              </span>
             </button>
           )}
-        </div>
 
-        {/* Modal Body */}
-        <div className="p-4 sm:p-5 space-y-4">
-          {authMode === 'main' ? (
-            <div className="space-y-3.5 font-khmer">
-              {authModalInitialView.requireEmailForVip && (
-                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/35 border border-amber-300 dark:border-amber-700/70 text-[11px] text-amber-900 dark:text-amber-200 flex items-start gap-2.5 shadow-2xs">
-                  <Crown className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <div className="space-y-0.5 leading-relaxed">
-                    <div className="font-bold">
-                      {tr(
-                        language,
-                        'សូមចូលគណនីតាមលេខទូរស័ព្ទ ឬ Google មុនបន្ត',
-                        'Sign in with Phone or Google to continue',
-                        '请先使用手机号或 Google 登录以继续'
-                      )}
-                    </div>
-                    <div className="text-[10.5px] opacity-90">
-                      {tr(
-                        language,
-                        'សិទ្ធិសមាជិក និងហាងរបស់អ្នកត្រូវភ្ជាប់ជាមួយគណនី Cloud ដើម្បីប្តូរទូរស័ព្ទថ្មីក៏នៅតែប្រើបានធម្មតា។',
-                        'Your membership and shops are linked to your cloud account so you can switch phones anytime.',
-                        '您的会员与店铺权益绑定云端账号，更换新手机后登录即可继续使用。'
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+          {/* 3. Bottom Action Row Separated by the 2 Vertical Cyan Divider Lines (y = 70.3% .. 75.8%) */}
+          {/* Slot 1 (Left of x=35.61%): មិនទាន់មានគណនីមែនទេ? */}
+          <button
+            type="button"
+            onClick={() => {
+              setPhoneTab('register');
+              setAuthMode('phone');
+            }}
+            style={{
+              top: '70.0%',
+              left: '4.5%',
+              width: '30.8%',
+              height: '6.0%',
+            }}
+            className="absolute z-20 flex items-center justify-center px-1 rounded-lg hover:bg-white/5 transition cursor-pointer"
+          >
+            <span
+              className="font-khmer font-semibold text-white/95 text-center leading-tight whitespace-nowrap"
+              style={{
+                fontSize: 'clamp(9.2px, 2.65vw, 12.5px)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.95)',
+              }}
+            >
+              {tr(language, 'មិនទាន់មានគណនីមែនទេ?', 'No account yet?', '还没有账号？')}
+            </span>
+          </button>
 
-              {isAlreadySignedIn && currentUser && (
-                <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between gap-2 text-xs">
-                  <div className="min-w-0">
-                    <div className="font-bold text-emerald-900 dark:text-emerald-200 truncate">
-                      {currentUser.name}
-                    </div>
-                    <div className="text-[11px] text-emerald-700 dark:text-emerald-400 truncate">
-                      {currentUser.phone || currentUser.email}
-                    </div>
-                  </div>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                </div>
-              )}
+          {/* Slot 2 (Between x=35.61% and x=64.49%): បង្កើតគណនីថ្មី */}
+          <button
+            type="button"
+            onClick={() => {
+              setPhoneTab('register');
+              setAuthMode('phone');
+            }}
+            style={{
+              top: '70.0%',
+              left: '35.8%',
+              width: '28.4%',
+              height: '6.0%',
+            }}
+            className="absolute z-20 flex items-center justify-center px-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
+          >
+            <span
+              className="font-khmer font-extrabold text-cyan-300 text-center leading-tight whitespace-nowrap"
+              style={{
+                fontSize: 'clamp(10px, 2.9vw, 13.5px)',
+                textShadow: '0 0 10px rgba(34, 211, 238, 0.65), 0 1px 4px rgba(0,0,0,0.95)',
+              }}
+            >
+              {tr(language, 'បង្កើតគណនីថ្មី', 'Create Account', '创建新账号')}
+            </span>
+          </button>
 
-              {/* PRIMARY 1: PHONE NUMBER (+ PASSWORD, ZERO SMS) */}
+          {/* Slot 3 (Right of x=64.49%): ✉️ អ៊ីមែល */}
+          <button
+            type="button"
+            onClick={() => {
+              setEmailTab('login');
+              setAuthMode('email');
+            }}
+            style={{
+              top: '70.0%',
+              left: '64.7%',
+              width: '29.5%',
+              height: '6.0%',
+            }}
+            className="absolute z-20 flex items-center justify-center gap-1.5 px-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
+          >
+            <Mail className="w-4 h-4 text-white/95 shrink-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]" />
+            <span
+              className="font-khmer font-bold text-white/95 leading-tight whitespace-nowrap"
+              style={{
+                fontSize: 'clamp(10px, 2.9vw, 13.5px)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.95)',
+              }}
+            >
+              {tr(language, 'អ៊ីមែល', 'Email', '邮箱登录')}
+            </span>
+          </button>
+
+          {isMandatoryGate && (
+            <div
+              style={{
+                bottom: '2.5%',
+                left: '15%',
+                right: '15%',
+              }}
+              className="absolute z-20 text-center font-khmer"
+            >
               <button
                 type="button"
-                onClick={() => {
-                  setPhoneTab('register');
-                  setAuthMode('phone');
-                }}
-                data-testid="auth-primary-phone"
-                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:brightness-110 text-white font-bold text-xs shadow-md shadow-emerald-950/25 transition active:scale-98 flex items-center justify-between gap-2.5 cursor-pointer"
+                onClick={exitAppNow}
+                className="w-full py-2 px-3 rounded-full bg-rose-950/80 hover:bg-rose-900/90 text-rose-200 text-xs font-bold transition flex items-center justify-center gap-2 border border-rose-400/40 shadow-md cursor-pointer"
               >
-                <span className="flex items-center gap-2.5">
-                  <span className="w-7 h-7 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-                    <Phone className="w-4 h-4 text-emerald-200" />
-                  </span>
-                  <span className="text-left">
-                    <span className="block text-[13px] font-bold">
-                      {tr(
-                        language,
-                        'ចុះឈ្មោះ / ចូលតាមលេខទូរស័ព្ទ',
-                        'Continue with Phone Number',
-                        '使用手机号码注册 / 登录'
-                      )}
-                    </span>
-                    <span className="block text-[10.5px] text-emerald-100/85 font-normal">
-                      {tr(
-                        language,
-                        'លេខទូរស័ព្ទ + លេខសម្ងាត់ • រហ័ស មិនបាច់រង់ចាំសារ SMS',
-                        'Phone + password • Instant, no SMS wait',
-                        '手机号 + 密码 • 即刻完成，无需等待短信验证码'
-                      )}
-                    </span>
-                  </span>
-                </span>
-                <ArrowRight className="w-4 h-4 text-emerald-200 shrink-0" />
+                <LogOut className="w-3.5 h-3.5" />
+                <span>{tr(language, 'ចាកចេញពីកម្មវិធី', 'Exit Application', '退出应用')}</span>
               </button>
-
-              {/* PRIMARY 2: GOOGLE OAUTH (Hidden in native iOS WebView per Apple Guideline 4.8 / verifyIosReview.mjs) */}
-              {!isNativeIosApp() && (
-                <button
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  disabled={isGoogleLoading}
-                  data-testid="auth-primary-google"
-                  className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-900 dark:text-white font-bold text-xs border-2 border-slate-200 dark:border-slate-700 shadow-xs transition active:scale-98 flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-60"
-                >
-                  {isGoogleLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-[#059669]" />
-                  ) : (
-                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        fill="#4285F4"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      />
-                      <path
-                        fill="#34A853"
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      />
-                      <path
-                        fill="#FBBC05"
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      />
-                      <path
-                        fill="#EA4335"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      />
-                    </svg>
-                  )}
-                  <span className="text-[13px]">
-                    {tr(language, 'បន្តជាមួយគណនី Google', 'Continue with Google', '使用 Google 账号继续')}
-                  </span>
-                </button>
-              )}
-
-              {/* Secondary link for existing Email accounts */}
-              <div className="pt-1 flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPhoneTab('login');
-                    setAuthMode('phone');
-                  }}
-                  className="font-bold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
-                >
-                  {tr(language, 'មានគណនីលេខទូរស័ព្ទរួចហើយ? ចូលគណនី', 'Have a phone account? Sign in', '已有手机账号？登录')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmailTab('login');
-                    setAuthMode('email');
-                  }}
-                  className="inline-flex items-center gap-1 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
-                >
-                  <Mail className="w-3.5 h-3.5" />
-                  <span>{tr(language, 'អ៊ីមែល', 'Email', '邮箱')}</span>
-                </button>
-              </div>
             </div>
-          ) : authMode === 'phone' ? (
+          )}
+        </div>
+      ) : (
+        <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+          {/* Top Header Banner for sub-views (Phone / Email forms) */}
+          <div className="kft-khmer-login-header relative p-5 pb-5 text-white text-center">
+            <div className="w-12 h-12 mx-auto rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-2 shadow-inner">
+              <Utensils className="w-6 h-6 text-emerald-300" />
+            </div>
+            <h2 className="text-lg font-bold font-moul tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.75)]">
+              {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
+            </h2>
+            <p className="text-[11px] text-white font-khmer mt-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]">
+              {tr(
+                language,
+                'ការមើលម្ហូប ហាង សណ្ឋាគារ តំបន់ទេសចរណ៍ និងផែនទី គឺ FREE ជារៀងរហូត',
+                'Browsing foods, shops, hotels, attractions & maps is FREE forever',
+                '浏览美食、餐厅、酒店、景点与地图导航永久免费'
+              )}
+            </p>
+
+            {!isMandatoryGate && (
+              <button
+                onClick={() => setIsAuthModalOpen(false)}
+                className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition cursor-pointer"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Modal Body */}
+          <div className="p-4 sm:p-5 space-y-4">
+            {authMode === 'phone' ? (
+
             /* ==========================================================
                PHONE NUMBER REGISTRATION & SIGN-IN (+855 CANONICAL, ZERO SMS)
                ========================================================== */
@@ -1205,8 +1360,9 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
               </button>
             </div>
           )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

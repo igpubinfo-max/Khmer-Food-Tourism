@@ -1278,9 +1278,6 @@ export const RestaurantView: React.FC = () => {
                       {tr(language, 'បញ្ជីហាងបន្ថែម', 'More Shops Directory', '更多店铺列表')}
                     </h3>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-extrabold text-slate-800 font-mono shadow-2xs">
-                    {directoryRestaurants.length}
-                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
@@ -1305,9 +1302,9 @@ export const RestaurantView: React.FC = () => {
                     >
                       {tr(
                         language,
-                        `បង្ហាញហាងបន្ថែម (${displayedDirectoryRestaurants.length} / ${directoryRestaurants.length})`,
-                        `Show More Restaurants (${displayedDirectoryRestaurants.length} / ${directoryRestaurants.length})`,
-                        `加载更多餐厅 (${displayedDirectoryRestaurants.length} / ${directoryRestaurants.length})`
+                        'បង្ហាញហាងបន្ថែម',
+                        'Show More Restaurants',
+                        '加载更多餐厅'
                       )}
                     </button>
                   </div>

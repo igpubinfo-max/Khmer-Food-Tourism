@@ -52,6 +52,7 @@ export interface RemoteVersionManifest {
   version?: string;
   versionName?: string;
   buildCode?: number;
+  minRequiredBuildCode?: number;
   releasedAt?: string;
   playStoreUrl?: string;
   releaseNotesKh?: string;
@@ -168,18 +169,25 @@ export async function checkLiveAppUpdate(appSettings?: Partial<AppSettings> | nu
   let releaseNotesKh = appSettings?.updateReleaseNotesKh;
   let releaseNotesEn = appSettings?.updateReleaseNotesEn;
 
-  // 1. Check Cloud AppSettings (Admin-published version metadata)
+  // 1. Check Cloud AppSettings (Admin-published version metadata & Minimum Required Build Lock)
   const cloudBuild = Number(appSettings?.latestAppBuildCode || 0);
+  const minRequiredBuild = Number(appSettings?.minRequiredBuildCode || 0);
   const cloudVer = appSettings?.latestAppVersion?.trim();
+  const isBelowMinRequired = minRequiredBuild > 0 && currentBuildCode < minRequiredBuild;
   const isCloudNewer =
-    cloudBuild > 0
+    isBelowMinRequired ||
+    (cloudBuild > 0
       ? cloudBuild > latestBuildCode
-      : Boolean(cloudVer && compareSemver(cloudVer, APP_VERSION_NAME) > 0);
+      : Boolean(cloudVer && compareSemver(cloudVer, APP_VERSION_NAME) > 0));
   if (isCloudNewer) {
     hasUpdate = true;
     source = 'cloud_settings';
-    if (cloudBuild > latestBuildCode) latestBuildCode = cloudBuild;
+    const targetBuild = Math.max(cloudBuild, minRequiredBuild);
+    if (targetBuild > latestBuildCode) latestBuildCode = targetBuild;
     if (cloudVer) latestVersion = cloudVer.startsWith('v') ? cloudVer : `v${cloudVer}`;
+  }
+  if (isBelowMinRequired) {
+    forceUpdate = true;
   }
 
   // 2. Check Live Remote Manifest (`version.json`)
@@ -197,6 +205,12 @@ export async function checkLiveAppUpdate(appSettings?: Partial<AppSettings> | nu
       if (remoteVerRaw) {
         latestVersion = remoteVerRaw.startsWith('v') ? remoteVerRaw : `v${remoteVerRaw}`;
       }
+    }
+    const remoteMinBuild = Number(manifest.minRequiredBuildCode || 0);
+    if (remoteMinBuild > 0 && currentBuildCode < remoteMinBuild) {
+      hasUpdate = true;
+      forceUpdate = true;
+      if (remoteMinBuild > latestBuildCode) latestBuildCode = remoteMinBuild;
     }
     if (manifest.forceUpdate) forceUpdate = true;
     if (!releaseNotesKh && manifest.releaseNotesKh) releaseNotesKh = manifest.releaseNotesKh;
@@ -258,8 +272,11 @@ export async function triggerAutoAppUpdate(
   appSettings?: Partial<AppSettings> | null,
   latestVersion?: string
 ): Promise<void> {
-  // Always snooze this build/version when user clicks Update Now so it never loops or nags repeatedly
-  snoozeUpdateAlert(latestBuildCode || APP_BUILD_CODE, latestVersion);
+  // Snooze optional updates when user clicks Update Now so it never nags repeatedly; never snooze mandatory force-updates
+  const isMandatory = Boolean(appSettings?.forceAppUpdate) || (Number(appSettings?.minRequiredBuildCode || 0) > APP_BUILD_CODE);
+  if (!isMandatory) {
+    snoozeUpdateAlert(latestBuildCode || APP_BUILD_CODE, latestVersion);
+  }
 
   const platform = Capacitor.getPlatform();
   const playStoreUrl = appSettings?.playStoreUrl || OFFICIAL_PLAY_STORE_URL;

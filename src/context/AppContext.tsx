@@ -2603,9 +2603,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(
       tr(
         language,
-        '🔒 សូមចូលគណនីដោយប្រើ Google ឬអ៊ីមែល ជាមុនសិន មុននឹងបន្តទៅទំព័រដំឡើង VIP និងបង្ហាញ ABA QR!',
-        '🔒 Please sign in with Google or your email account first before proceeding to the VIP payment page or viewing the ABA QR code!',
-        '🔒 请先使用 Google 或电子邮箱账号登录，然后再进入 VIP 升级付款页面及查看 ABA 二维码！'
+        '🔒 សូមចូលគណនីដោយប្រើលេខទូរស័ព្ទ ឬបន្តជាមួយ Google ជាមុនសិន!',
+        '🔒 Please sign in with your Phone number or Continue with Google first!',
+        '🔒 请先使用手机号或 Google 账号登录！'
       ),
       'warning'
     );
@@ -10119,7 +10119,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { ok: true };
   };
 
-  const registerWithEmail = async (params: {
+  const registerWithEmail = async (_params: {
     name: string;
     email: string;
     password: string;
@@ -10127,190 +10127,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     phone?: string;
     restaurantName?: string;
   }): Promise<{ ok: boolean; error?: string }> => {
-    const cleanEmail = String(params.email || '').trim().toLowerCase();
-    if (!cleanEmail || !hasAuthenticatedEmailAccount({ email: cleanEmail }) || isDisposableEmailAddress(cleanEmail)) {
-      const msg = tr(
-        language,
-        'សូមវាយបញ្ចូលអាសយដ្ឋានអ៊ីមែលពិតប្រាកដ (ឧ. name@gmail.com)',
-        'Please enter a valid non-disposable email address (e.g. name@gmail.com)',
-        '请输入真实有效的电子邮箱地址（如 name@gmail.com）'
-      );
-      showToast(msg, 'warning');
-      return { ok: false, error: msg };
-    }
-    const cleanPass = String(params.password || '').trim();
-    if (cleanPass.length < 6) {
-      const msg = tr(
-        language,
-        'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ',
-        'Password must be at least 6 characters',
-        '密码至少需要 6 个字符'
-      );
-      showToast(msg, 'warning');
-      return { ok: false, error: msg };
-    }
-
-    let validatedPhone: string | undefined = undefined;
-    if (params.phone && params.phone.trim()) {
-      const phoneCheck = validateCambodiaPhoneForRegistration(params.phone.trim());
-      if (!phoneCheck.valid || !phoneCheck.canonicalPhone) {
-        const msg = (language === 'km' ? phoneCheck.messageKh : phoneCheck.messageEn) || 'Invalid phone number';
-        showToast(msg, 'warning');
-        return { ok: false, error: msg };
-      }
-      validatedPhone = phoneCheck.canonicalPhone;
-    }
-
-    const normIdentity = normalizeEmailForIdentity(cleanEmail)?.canonical || cleanEmail;
-    const safeRole: UserRole = params.role === 'owner' ? 'owner' : 'user';
-    const displayName = String(params.name || '').trim() || cleanEmail.split('@')[0];
-    const canonicalId = getCanonicalUserId({
-      email: cleanEmail,
-      phone: validatedPhone,
-      role: safeRole,
-      authProvider: 'email',
-    });
-    const emailSlug = cleanEmail.replace(/[^a-z0-9]/g, '_');
-    const candidateCloudKeys = [
-      `${USER_RECORD_PREFIX}${canonicalId}`,
-      `${USER_RECORD_PREFIX}user-${emailSlug}`,
-      `${USER_RECORD_PREFIX}google-${emailSlug}`,
-    ];
-
-    const { mergedDeletedUsers, validPulledUsers, foundRevokedAtomicDoc } =
-      await fetchAndMergeDeletedUsersForAuthCheck(candidateCloudKeys);
-
-    const cloudExisting: User | null = validPulledUsers[0] || null;
-    const localExisting = (latestSyncStateRef.current.users || users).find((u) => {
-      const uNormE = normalizeEmailForIdentity(u.email)?.canonical || String(u.email || '').trim().toLowerCase();
-      return (
-        doesUserMatchTarget(u, { id: canonicalId, email: cleanEmail, phone: validatedPhone }) ||
-        (uNormE && uNormE === normIdentity)
-      );
-    });
-    const rawExisting = cloudExisting || localExisting || null;
-
-    // Option A: If this email's previous account was deleted, allow registering a brand-new account from scratch!
-    const wasPreviouslyDeleted =
-      foundRevokedAtomicDoc ||
-      checkIsUserDeleted({ id: canonicalId, email: cleanEmail, phone: validatedPhone }, mergedDeletedUsers) ||
-      Boolean(rawExisting && (isRevokedOrDeletedUserRecord(rawExisting) || checkIsUserDeleted(rawExisting, mergedDeletedUsers)));
-
-    let activeDeletedUsers = mergedDeletedUsers;
-    let existing: User | null = rawExisting;
-
-    if (wasPreviouslyDeleted) {
-      purgeDeletedCandidateFromLocalUsers({ id: canonicalId, email: cleanEmail, phone: validatedPhone }, mergedDeletedUsers);
-      activeDeletedUsers = clearDeletedTombstonesForFreshRegistration(
-        { id: canonicalId, email: cleanEmail, phone: validatedPhone },
-        mergedDeletedUsers
-      );
-      existing = null;
-    }
-
-    if (existing) {
-      if (existing.isDisabled) {
-        const msg = tr(
-          language,
-          '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin។',
-          '⚠️ This account has been disabled. Please contact Admin.',
-          '⚠️ 该账号已被暂停，请联系管理员。'
-        );
-        showToast(msg, 'warning');
-        return { ok: false, error: msg };
-      }
-      const msg = tr(
-        language,
-        '⚠️ អ៊ីមែលនេះមានគណនីរួចហើយ! សូមចុចផ្ទាំង «ចូលគណនី» ហើយវាយលេខសម្ងាត់របស់អ្នក។',
-        '⚠️ This email address is already registered! Please switch to Sign In and enter your password.',
-        '⚠️ 该邮箱已注册！请切换到“登录”并输入您的密码。'
-      );
-      showToast(msg, 'warning');
-      return { ok: false, error: msg };
-    }
-
-    const devElig = await checkDeviceAccountRegistrationEligibility({
-      candidateAccountKey: normIdentity,
-      existingUsers: latestSyncStateRef.current.users || users,
-    });
-    if (!devElig.allowed) {
-      const msg = (language === 'km' ? devElig.messageKh : devElig.messageEn) || 'Device account limit reached';
-      showToast(msg, 'warning');
-      return { ok: false, error: msg };
-    }
-    const registeredDeviceHash = devElig.deviceHash || undefined;
-    await recordDeviceAccountRegistration(normIdentity, devElig.deviceHash);
-
-    const pwHash = await hashPasswordPBKDF2(cleanPass);
-    const nowIso = new Date().toISOString();
-
-    const newCachedAv = getCachedUserAvatarForAccount({
-      id: canonicalId,
-      email: cleanEmail,
-      phone: validatedPhone,
-      name: displayName,
-    });
-
-    const savedUser: User = {
-      id: canonicalId,
-      name: displayName,
-      email: cleanEmail,
-      phone: validatedPhone,
-      passwordHash: pwHash,
-      role: safeRole,
-      restaurantName: params.restaurantName?.trim() || undefined,
-      authProvider: 'email',
-      linkedProviders: ['email'],
-      isVerified: true,
-      verifiedAt: nowIso,
-      avatar: newCachedAv || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      createdAt: nowIso.split('T')[0],
-      registeredAtIso: nowIso,
-      restoredAt: nowIso,
-      lastLoginAt: nowIso,
-      lastActiveAt: nowIso,
-      registeredDeviceHash,
-      membershipTier: 'free',
-      isDeleted: false,
-      permanentlyDeleted: false,
-      isDisabled: false,
-    };
-
-    setUsers((prev) => {
-      const next = deduplicateAndNormalizeUsers(
-        [...prev.filter((u) => !doesUserMatchTarget(u, savedUser)), savedUser],
-        activeDeletedUsers
-      );
-      latestSyncStateRef.current.users = next;
-      safeSetCriticalAccountStorage('kft_users_v5', next);
-      return next;
-    });
-    setCurrentUser(savedUser);
-    latestSyncStateRef.current.currentUser = savedUser;
-    safeSetCriticalAccountStorage('kft_current_user_v5', savedUser);
-    if (isSupabaseConfigured()) {
-      if (wasPreviouslyDeleted) {
-        const updatedDel = await reRegisterFreshUserAfterDeletionInCloud({
-          newUser: savedUser,
-          candidateKeys: candidateCloudKeys,
-          cleanedDeletedUsers: activeDeletedUsers,
-        });
-        activeDeletedUsers = updatedDel;
-        latestSyncStateRef.current.deletedUsers = updatedDel;
-        setDeletedUsers(updatedDel);
-      } else {
-        upsertSingleUserToCloud(savedUser, activeDeletedUsers).catch(() => {});
-      }
-    }
-    showToast(
-      tr(language, `សូមស្វាគមន៍ ${savedUser.name}!`, `Welcome, ${savedUser.name}!`, `欢迎，${savedUser.name}！`),
-      'success'
+    const blockedMsg = tr(
+      language,
+      '🔒 ដើម្បីការពារគណនីក្លែងក្លាយ សូមចុចប៊ូតុង «បន្តជាមួយគណនី Google» ឬចុះឈ្មោះតាមលេខទូរស័ព្ទ!',
+      '🔒 To prevent fake email accounts, please use "Continue with Google" or register with your Phone number!',
+      '🔒 为防止虚假邮箱账号，请点击“使用 Google 账号继续”或使用手机号注册！'
     );
-    if (!completePendingVipRedirectAfterEmailAuth(savedUser)) {
-      setIsAuthModalOpen(false);
-    }
-    syncLoggedInUserFromCloud(savedUser);
-    return { ok: true };
+    showToast(blockedMsg, 'warning');
+    return { ok: false, error: blockedMsg };
   };
 
   const loginWithEmail = async (params: {

@@ -268,9 +268,9 @@ const MainScreen: React.FC = () => {
   if (showWelcomeScreen) {
     return (
       <WelcomeScreenModal
-        onComplete={() => {
+        onComplete={(targetSection) => {
           setShowWelcomeScreen(false);
-          setActiveTab('home');
+          setActiveTab(targetSection || 'home');
         }}
       />
     );

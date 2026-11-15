@@ -263,13 +263,13 @@ export function getCulinarySynonyms(term: string): string[] {
 /** Category / business-type words → soft hints (never sufficient on their own when a name is typed). */
 const CATEGORY_SYNONYM_GROUPS: string[][] = [
   // 0: hotel
-  ['hotel', 'hotels', 'lodging', 'accommodation', 'motel', 'សណ្ឋាគារ', 'ផ្ទះសំណាក់និងសណ្ឋាគារ', '酒店', '宾馆', '饭店'],
+  ['hotel', 'hotels', 'lodging', 'accommodation', 'សណ្ឋាគារ', '酒店', '宾馆', '饭店'],
   // 1: resort
   ['resort', 'resorts', 'resort_hotel', 'រីសត', 'រមណីយដ្ឋាន', '度假村'],
   // 2: guesthouse
-  ['guesthouse', 'guesthouses', 'guest', 'hostel', 'hostels', 'inn', 'lodge', 'homestay', 'bungalow', 'bungalows', 'ផ្ទះសំណាក់', 'បឹងហ្គាឡូ', '客栈', '民宿', '旅馆'],
+  ['guesthouse', 'guesthouses', 'guest', 'hostel', 'hostels', 'inn', 'lodge', 'homestay', 'bungalow', 'bungalows', 'motel', 'ផ្ទះសំណាក់', 'ផ្ទះស្នាក់', 'បឹងហ្គាឡូ', 'បឹងកាឡូ', 'ហូមស្ទេ', 'ហូស្តេល', '客栈', '民宿', '旅馆'],
   // 3: villa
-  ['villa', 'villas', 'boutique', 'suites', 'suite', 'residence', 'apartment', 'apartments', 'វីឡា', '别墅'],
+  ['villa', 'villas', 'boutique', 'suites', 'suite', 'residence', 'apartment', 'apartments', 'វីឡា', 'ប៊ូទិក', 'រេស៊ីដង់', 'រ៉េស៊ីដិន', 'អាផាតមិន', 'ស្វីត', '别墅'],
   // 4: restaurant / general dining & Khmer cuisine
   ['restaurant', 'restaurants', 'eatery', 'dining', 'bistro', 'kitchen', 'food', 'foods', 'canteen', 'diner', 'lunch', 'dinner', 'supper', 'meal', 'meals', 'khmer', 'cambodian', 'ភោជនីយដ្ឋាន', 'អាហារដ្ឋាន', 'ហាងអាហារ', 'ហាងបាយ', 'ផ្ទះបាយ', 'អាហារខ្មែរ', 'ម្ហូបខ្មែរ', 'ហាងម្ហូបខ្មែរ', 'ភោជនីយដ្ឋានខ្មែរ', 'អាហារថ្ងៃត្រង់', 'អាហារពេលល្ងាច', 'អាហារយប់', 'អាហារ', 'ម្ហូប', 'មុខម្ហូប', '餐厅', '餐馆', '美食', '饭馆', '午餐', '晚餐', '高棉菜', '柬埔寨菜'],
   // 5: cafe / coffee

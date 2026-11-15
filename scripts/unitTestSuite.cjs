@@ -456,4 +456,56 @@ test('11. Authentic Cambodian Meal-Time Classification (Breakfast, Lunch, Snack,
   assert.equal(isAuthenticCambodianDishForMealTime(claypotBeef, 'breakfast'), false);
 });
 
+// 12. Profile Settings Menu Auto-Scroll & Visual Section Highlight Verification
+test('12. Profile Settings Menu buttons automatically scroll to and highlight the corresponding result section', () => {
+  const profileSrc = fs.readFileSync(path.join(ROOT, 'src/components/ProfileView.tsx'), 'utf8');
+  assert.ok(
+    profileSrc.includes("import { smoothScrollToElement } from '../utils/smoothScroll'"),
+    'ProfileView must import smoothScrollToElement'
+  );
+  const requiredTargetIds = [
+    'profile-subtab-content',
+    'profile-vip-benefits-panel',
+    'profile-shop-benefits-panel',
+    'profile-vip-power-detail',
+    'profile-membership-renewal-card',
+    'profile-admin-rotation-status',
+    'profile-settings-card',
+  ];
+  for (const id of requiredTargetIds) {
+    assert.ok(
+      profileSrc.includes(`id="${id}"`),
+      `ProfileView must define scroll target id="${id}"`
+    );
+  }
+  const requiredSubTabs = ['myrestaurant', 'wishlists', 'tripplans', 'bookmarks', 'membership', 'settings'];
+  for (const tab of requiredSubTabs) {
+    assert.ok(
+      profileSrc.includes(`selectAndScrollSubTab('${tab}')`),
+      `ProfileView must call selectAndScrollSubTab('${tab}') when tapping the ${tab} menu button`
+    );
+  }
+});
+
+// 13. Food Menu Show All (All 277 Dishes) & Removal of Heading Count Badge Verification
+test('13. Food menu loads all 277+ dishes on Show All without 36-item filter/pagination lock and removes heading count badge', () => {
+  const foodViewSrc = fs.readFileSync(path.join(ROOT, 'src/components/FoodView.tsx'), 'utf8');
+  const { canonicalKhmerFoods } = require(path.join(ROOT, 'src/data/seedFoods.ts'));
+  const { organizeAndDeduplicateFoods } = require(path.join(ROOT, 'src/types/index.ts'));
+  const org = organizeAndDeduplicateFoods(canonicalKhmerFoods);
+  assert.ok(org.length >= 277, 'Organized food catalog must contain all 277 deduplicated dishes');
+  assert.ok(
+    foodViewSrc.includes('const PAGE_BATCH_SIZE = 500;'),
+    'FoodView PAGE_BATCH_SIZE must be >= 500 so all 277+ dishes load without pagination cutoff'
+  );
+  assert.ok(
+    foodViewSrc.includes("if (cat.id === 'all')") && foodViewSrc.includes("setTagFilter('all')"),
+    'Clicking Show All (គ្រប់មុខម្ហូប) must reset tagFilter, provinceFilter, and mealTimeFilter'
+  );
+  assert.ok(
+    !foodViewSrc.includes('filteredFoods.length} មុខម្ហូប'),
+    'Total food count badge on the right side of the Food menu heading must be removed'
+  );
+});
+
 console.log(`\nAll ${passed} unit test suites passed successfully!`);

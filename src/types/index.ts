@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1604;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1605;
 export const APP_RELEASE_DATE = '2026-11-15';
 
 /**
@@ -1096,7 +1096,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 9,
-    titleKh: 'ស្វែងរកទីតាំងលើ Google Maps និងកំណត់ត្រាម្ហូបបានភ្លក់',
+    titleKh: 'ស្វែងរកទីតាំងលើ Google Maps និងកត់ត្រាម្ហូបដែលបានភ្លក់រួច',
     titleEn: 'Google Maps Place Search & Food Passport',
     descriptionKh: 'ស្វែងរកហាង ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ទូទាំងកម្ពុជា ព្រមទាំងកត់ត្រាម្ហូបដែលបានភ្លក់ក្នុងកំណត់ត្រាផ្ទាល់ខ្លួន',
     descriptionEn: 'Search restaurants and attractions across Cambodia and keep a personal passport of the dishes you tried.',
@@ -4798,6 +4798,7 @@ export interface AppSettings {
   // Live In-App Auto-Update Alert Metadata (optional cloud override in addition to version.json & Google Play In-App Update)
   latestAppBuildCode?: number;
   latestAppVersion?: string;
+  minRequiredBuildCode?: number;
   updateReleaseNotesKh?: string;
   updateReleaseNotesEn?: string;
   forceAppUpdate?: boolean;
@@ -5060,7 +5061,7 @@ export const VIP_MEMBER_BENEFITS: ReadonlyArray<PackageBenefit> = [
   {
     id: 4,
     group: 'search',
-    km: '🛂 Food Passport|កត់ត្រាម្ហូប និងកន្លែងដែលអ្នកបានភ្លក់ទុកជាអនុស្សាវរីយ៍ផ្ទាល់ខ្លួន',
+    km: '🛂 កត់ត្រាម្ហូបដែលបានភ្លក់រួច|កត់ត្រាម្ហូប និងកន្លែងដែលអ្នកបានភ្លក់ទុកជាអនុស្សាវរីយ៍ផ្ទាល់ខ្លួន',
     en: '🛂 Food Passport|Keep a personal record of the dishes and places you have tasted',
     zh: '🛂 美食护照|记录你品尝过的美食与地点，留作个人纪念',
   },

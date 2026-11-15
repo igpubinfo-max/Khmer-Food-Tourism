@@ -21,8 +21,9 @@ import { matchesFoodScreenCategoryTab } from '../utils/cambodianMealHabits';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 import { searchKhmerFoods, normalizeKhmerFoodText } from '../utils/khmerFoodSearch';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
+import { canonicalKhmerFoods } from '../data/seedFoods';
 
-const PAGE_BATCH_SIZE = 16;
+const PAGE_BATCH_SIZE = 500;
 
 type MealTimeFilter = 'all' | 'breakfast' | 'lunch' | 'dinner';
 
@@ -141,8 +142,23 @@ export const FoodView: React.FC = () => {
       setSelectedCategory('all');
       setProvinceFilter('');
     };
+    const onResetAll = () => {
+      consumePendingTagFilter(currentUser);
+      setRestoredOrderIds(null);
+      setSelectedCategory('all');
+      setMealTimeFilter('all');
+      setProvinceFilter('');
+      setTagFilter('all');
+      setFoodSearchQuery('');
+      setShowFilterDrawer(false);
+      setVisibleCount(PAGE_BATCH_SIZE);
+    };
     window.addEventListener(TAG_FILTER_EVENT, onTag);
-    return () => window.removeEventListener(TAG_FILTER_EVENT, onTag);
+    window.addEventListener('kft:food-menu-reset', onResetAll);
+    return () => {
+      window.removeEventListener(TAG_FILTER_EVENT, onTag);
+      window.removeEventListener('kft:food-menu-reset', onResetAll);
+    };
   }, [canUseVip, currentUser]);
 
   useEffect(() => {
@@ -150,7 +166,17 @@ export const FoodView: React.FC = () => {
     setVisibleCount(PAGE_BATCH_SIZE);
   }, [selectedCategory, categoryShuffleNonce, mealTimeFilter, foodSearchQuery, provinceFilter, tagFilter]);
 
-  const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
+  const organizedFoods = useMemo(() => {
+    const merged: FoodItem[] = Array.isArray(foods) && foods.length > 0 ? [...foods] : [];
+    const seenIds = new Set(merged.map((f) => f?.id).filter(Boolean));
+    for (const seed of canonicalKhmerFoods) {
+      if (seed && seed.id && !seenIds.has(seed.id)) {
+        seenIds.add(seed.id);
+        merged.push(seed);
+      }
+    }
+    return organizeAndDeduplicateFoods(merged);
+  }, [foods]);
   const provinceOptions = useMemo(() => {
     return DISH_PROVINCES.map((p) => {
       let count = 0;
@@ -367,7 +393,7 @@ export const FoodView: React.FC = () => {
           setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE));
         }
       },
-      { root: null, rootMargin: '320px 0px', threshold: 0.01 }
+      { root: typeof document !== 'undefined' ? document.getElementById('kft-main-scroll') : null, rootMargin: '480px 0px', threshold: 0.01 }
     );
 
     observer.observe(node);
@@ -670,24 +696,24 @@ export const FoodView: React.FC = () => {
                     if (foodSearchQuery.trim()) {
                       setFoodSearchQuery('');
                     }
-                    if (
-                      tagFilter !== 'all' &&
-                      !uniqueOrganizedFoods.some(
-                        (f) => matchesFoodScreenCategoryTab(f, cat.id) && matchesTagFilter(f, tagFilter)
-                      )
-                    ) {
+                    if (cat.id === 'all') {
                       setTagFilter('all');
-                    }
-                    if (
-                      provinceFilter &&
-                      !uniqueOrganizedFoods.some(
-                        (f) => matchesFoodScreenCategoryTab(f, cat.id) && doesDishBelongToProvince(f, provinceFilter)
-                      )
-                    ) {
                       setProvinceFilter('');
+                      setMealTimeFilter('all');
+                    } else {
+                      setTagFilter('all');
+                      setMealTimeFilter('all');
+                      if (
+                        provinceFilter &&
+                        !uniqueOrganizedFoods.some(
+                          (f) => matchesFoodScreenCategoryTab(f, cat.id) && doesDishBelongToProvince(f, provinceFilter)
+                        )
+                      ) {
+                        setProvinceFilter('');
+                      }
                     }
                     setCategoryShuffleNonce((prev) => prev + 1);
-                    setVisibleCount(PAGE_BATCH_SIZE);
+                    setVisibleCount(Math.max(PAGE_BATCH_SIZE, uniqueOrganizedFoods.length));
                     scrollToDishList();
                   }}
                   aria-pressed={active}
@@ -859,15 +885,6 @@ export const FoodView: React.FC = () => {
                 : tr(language, 'មុខម្ហូបខ្មែរពេញនិយម', 'Popular Cambodian Dishes', '热门柬埔寨美食')}
             </h2>
           </div>
-
-          <span className="px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-xs font-extrabold text-slate-800 shrink-0">
-            {tr(
-              language,
-              `${filteredFoods.length} មុខម្ហូប`,
-              `${filteredFoods.length} dishes`,
-              `${filteredFoods.length} 道美食`
-            )}
-          </span>
         </div>
 
         {/* 6. Food Listing Cards */}
@@ -895,7 +912,7 @@ export const FoodView: React.FC = () => {
               <div ref={loadMoreTriggerRef} className="col-span-full pt-2 flex justify-center">
                 <button
                   type="button"
-                  onClick={() => setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE))}
+                  onClick={() => setVisibleCount(filteredFoods.length)}
                   className="kft-btn-load-more"
                 >
                   {tr(

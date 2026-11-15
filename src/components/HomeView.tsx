@@ -402,7 +402,12 @@ export const HomeView: React.FC = () => {
   const handleMapNavigation = useCallback(() => openGoogleMapsSearchModal('all'), [openGoogleMapsSearchModal]);
 
   const handleSmartAiAssistant = useCallback(() => setIsAiTripPlannerModalOpen(true), [setIsAiTripPlannerModalOpen]);
-  const handleSeeAllFoods = useCallback(() => setActiveTab('food'), [setActiveTab]);
+  const handleSeeAllFoods = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('kft:food-menu-reset'));
+    }
+    setActiveTab('food');
+  }, [setActiveTab]);
   const handleSeeAllRestaurants = useCallback(() => setActiveTab('restaurants'), [setActiveTab]);
   const handleSeeAllTourism = useCallback(() => setActiveTab('tourism'), [setActiveTab]);
   const handleExploreAllTrending = useCallback(() => setIsTrendingSocialModalOpen(true), [setIsTrendingSocialModalOpen]);
