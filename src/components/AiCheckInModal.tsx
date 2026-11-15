@@ -4,6 +4,12 @@ import {
   X, Camera, Image as ImageIcon, MapPin, ShieldCheck, CheckCircle2, 
   AlertCircle, RefreshCw, Send, Store, Utensils, Phone, Info 
 } from 'lucide-react';
+import {
+  isNativeAndroidOrIosPlatform,
+  takePhotoUsingNativeAndroidCamera,
+  pickImageUsingNativeAndroidGallery,
+  dataUrlToFile,
+} from '../utils/androidMediaHelper';
 import { 
   compressImage, captureCurrentLocation, analyzeCheckInPhotoWithAi, 
   LocationCoordinates, getProvinceFromGps, checkSubmissionRateLimit 
@@ -81,9 +87,44 @@ export const AiCheckInModal: React.FC = () => {
     setStep('pick_photo');
   };
 
+  const handleTakePhotoWithCamera = async () => {
+    if (isNativeAndroidOrIosPlatform()) {
+      try {
+        const res = await takePhotoUsingNativeAndroidCamera(1200, 0.85);
+        if (res.cancelled) return;
+        if (res.success && res.dataUrl) {
+          const file = dataUrlToFile(res.dataUrl, res.fileName || `checkin_cam_${Date.now()}.jpg`);
+          await processCheckInFile(file);
+          return;
+        }
+      } catch {}
+    }
+    cameraInputRef.current?.click();
+  };
+
+  const handlePickPhotoFromGallery = async () => {
+    if (isNativeAndroidOrIosPlatform()) {
+      try {
+        const res = await pickImageUsingNativeAndroidGallery(1200, 0.85);
+        if (res.cancelled) return;
+        if (res.success && res.dataUrl) {
+          const file = dataUrlToFile(res.dataUrl, res.fileName || `checkin_gal_${Date.now()}.jpg`);
+          await processCheckInFile(file);
+          return;
+        }
+      } catch {}
+    }
+    galleryInputRef.current?.click();
+  };
+
   const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
+    await processCheckInFile(file);
+  };
+
+  const processCheckInFile = async (file: File) => {
 
     if (!currentUser) {
       showToast(tr(language, 'សូមចូលគណនី Administrator ជាមុនសិន!', 'Please sign in with an Administrator account first!', '请先使用管理员账户登录！'), 'warning');
@@ -260,7 +301,7 @@ export const AiCheckInModal: React.FC = () => {
               <div className="grid grid-cols-2 gap-3 pt-2">
                 {/* Take Photo directly with Camera */}
                 <button
-                  onClick={() => cameraInputRef.current?.click()}
+                  onClick={() => void handleTakePhotoWithCamera()}
                   className="p-6 rounded-3xl bg-gradient-to-br from-[#064E3B] to-[#047857] text-white flex flex-col items-center justify-center gap-2.5 shadow-md hover:scale-[1.02] active:scale-95 transition"
                 >
                   <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center shadow-inner">
@@ -273,7 +314,7 @@ export const AiCheckInModal: React.FC = () => {
 
                 {/* Pick from Gallery */}
                 <button
-                  onClick={() => galleryInputRef.current?.click()}
+                  onClick={() => void handlePickPhotoFromGallery()}
                   className="p-6 rounded-3xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center gap-2.5 shadow-xs hover:scale-[1.02] active:scale-95 transition"
                 >
                   <div className="w-14 h-14 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">

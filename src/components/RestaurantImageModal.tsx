@@ -14,6 +14,7 @@ import {
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
+  takePhotoUsingNativeAndroidCamera,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { useApp } from '../context/AppContext';
@@ -147,6 +148,36 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleCaptureShopGalleryPhotoWithCamera = async () => {
+    if (isNativeAndroidOrIosPlatform()) {
+      setIsProcessing(true);
+      setErrorMsg('');
+      try {
+        const res = await takePhotoUsingNativeAndroidCamera(1200, 0.85);
+        if (res.cancelled) {
+          setIsProcessing(false);
+          return;
+        }
+        if (res.success && res.dataUrl) {
+          const capturedUrl = res.dataUrl;
+          setShopPhotos((prev) => {
+            const next = Array.from(new Set([...(photoUrl ? [photoUrl] : []), ...prev, capturedUrl])).slice(0, 20);
+            if (!photoUrl && next.length > 0) {
+              setPhotoUrl(next[0]);
+            }
+            return next;
+          });
+          setIsProcessing(false);
+          return;
+        }
+      } catch {
+        // Fallback below
+      }
+      setIsProcessing(false);
+    }
+    shopGalleryCameraInputRef.current?.click();
   };
 
   const handleShopGalleryFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -430,7 +461,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
               type="file"
               ref={profileCameraInputRef}
               onChange={handleProfileFileChange}
-              accept="image/jpeg,image/jpg,image/png"
+              accept="image/*"
               capture="environment"
               className="hidden"
             />
@@ -446,7 +477,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
               type="file"
               ref={shopGalleryCameraInputRef}
               onChange={handleShopGalleryFilesChange}
-              accept="image/jpeg,image/jpg,image/png"
+              accept="image/*"
               capture="environment"
               className="hidden"
             />
@@ -462,7 +493,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => shopGalleryCameraInputRef.current?.click()}
+                onClick={() => void handleCaptureShopGalleryPhotoWithCamera()}
                 className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-1.5 font-bold text-xs transition cursor-pointer"
               >
                 <Camera className="w-4 h-4" />

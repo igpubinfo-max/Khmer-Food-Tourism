@@ -29,6 +29,7 @@ import { tr } from '../utils/i18n';
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
+  takePhotoUsingNativeAndroidCamera,
   savePngDataUrlToGallery,
 } from '../utils/androidMediaHelper';
 import { validateAndModerateShopImage } from '../utils/imageModeration';
@@ -271,6 +272,41 @@ export const ManageMenuModal: React.FC = () => {
   const shareableUrl = `${origin}/?restaurant=${managingRestaurant.id}`;
 
   // Single Shop Photo Picker & Moderation Handlers
+  const handleTakeSingleShopPhotoWithCamera = async () => {
+    setShopPhotoModerationWarning(null);
+    if (!isNativeAndroidOrIosPlatform()) {
+      shopPhotoCameraRef.current?.click();
+      return;
+    }
+
+    setIsUploadingShopPhoto(true);
+    try {
+      const nativeCam = await takePhotoUsingNativeAndroidCamera(1200, 0.85);
+      if (nativeCam?.cancelled) {
+        setIsUploadingShopPhoto(false);
+        return;
+      }
+      if (nativeCam?.dataUrl) {
+        const modRes = await validateAndModerateShopImage(nativeCam.dataUrl, language);
+        if (!modRes.valid || !modRes.dataUrl) {
+          setShopPhotoModerationWarning(modRes.reason || null);
+          showToast(modRes.reason || (tr(language, '⚠️ រូបភាពមិនត្រឹមត្រូវ', '⚠️ Invalid shop photo', '⚠️ 店铺照片无效')), 'warning');
+          setIsUploadingShopPhoto(false);
+          return;
+        }
+        setStagedReplacementPhoto(modRes.dataUrl);
+        showToast(
+          tr(language, '✅ បានថតរូបហាងថ្មីរួចរាល់! សូមចុចប៊ូតុងដាក់ស្នើខាងក្រោម។', '✅ New shop photo captured! Tap Submit below.', '✅ 新店铺照片已拍摄！请点击下方提交按钮。'),
+          'info'
+        );
+        setIsUploadingShopPhoto(false);
+        return;
+      }
+    } catch {}
+    setIsUploadingShopPhoto(false);
+    shopPhotoCameraRef.current?.click();
+  };
+
   const handlePickSingleShopPhotoFromGallery = async () => {
     setShopPhotoModerationWarning(null);
     if (!isNativeAndroidOrIosPlatform()) {
@@ -1739,7 +1775,7 @@ export const ManageMenuModal: React.FC = () => {
                   <button
                     type="button"
                     disabled={isUploadingShopPhoto}
-                    onClick={() => shopPhotoCameraRef.current?.click()}
+                    onClick={() => void handleTakeSingleShopPhotoWithCamera()}
                     className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer disabled:opacity-50"
                   >
                     <Camera className="w-4 h-4" />

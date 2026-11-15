@@ -32,6 +32,7 @@ import {
   ProvinceFilterOption,
   detectDishProvince,
   doesDishBelongToProvince,
+  getProvinceDishRank,
   getProvinceOptionById,
   getMatchingRestaurantsForProvinceDish,
   getDishSpecificWhereToFind,
@@ -271,6 +272,14 @@ export const DailyDiscoveriesModal: React.FC = () => {
           round++;
         }
         return interleaved;
+      }
+
+      // Rank by curated authentic province signature order (e.g. coastal seafood leads Sihanoukville)
+      if (selectedProvinceId !== 'all' && !q) {
+        return list
+          .map((food, idx) => ({ food, idx, rank: getProvinceDishRank(food, selectedProvinceId) }))
+          .sort((x, y) => x.rank - y.rank || x.idx - y.idx)
+          .map((x) => x.food);
       }
 
       return list;

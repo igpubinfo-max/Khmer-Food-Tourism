@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FoodItem, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
 import { 
-  X, Upload, Image as ImageIcon, Check, RefreshCw, 
+  X, Upload, Camera, Image as ImageIcon, Check, RefreshCw, 
   AlertTriangle, CheckCircle2, Eye, Sliders, Smartphone, Search, Globe 
 } from 'lucide-react';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
@@ -9,6 +9,7 @@ import { normalizeAndValidateImage } from './TouristImageModal';
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
+  takePhotoUsingNativeAndroidCamera,
 } from '../utils/androidMediaHelper';
 import { applyFoodWatermarkOnce } from '../utils/foodWatermark';
 import { useApp } from '../context/AppContext';
@@ -47,6 +48,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
 }) => {
   const { language } = useApp();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   
   const [photoUrl, setPhotoUrl] = useState('');
   const [auditStatus, setAuditStatus] = useState<'verified' | 'flagged_review' | 'replaced'>('verified');
@@ -96,6 +98,49 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
       setErrorMsg(err.message || (tr(language, 'មិនអាចស្វែងរករូបភាពពី Online បានទេ', 'Failed to search online food images', '无法搜索在线美食图片')));
     } finally {
       setIsSearchingOnline(false);
+    }
+  };
+
+  const handleTakeCameraPhoto = async () => {
+    if (!isNativeAndroidOrIosPlatform()) {
+      cameraInputRef.current?.click();
+      return;
+    }
+
+    setErrorMsg('');
+    setIsProcessing(true);
+    try {
+      const cam = await takePhotoUsingNativeAndroidCamera(1400, 0.88);
+      if (cam.cancelled) {
+        return;
+      }
+      if (cam.dataUrl) {
+        const wmRes = await applyFoodWatermarkOnce(cam.dataUrl, { maxWidth: 2400, maxHeight: 2400, quality: 0.94, outputMimeType: 'image/jpeg' });
+        cam.dataUrl = wmRes.dataUrl;
+        const note = tr(language, `រូបភាពថតផ្ទាល់ដោយរដ្ឋបាល (${(cam.dataUrl.length / 1024).toFixed(0)} KB)`, `Camera photo captured by admin (${(cam.dataUrl.length / 1024).toFixed(0)} KB)`, `管理员拍摄的照片 (${(cam.dataUrl.length / 1024).toFixed(0)} KB)`);
+        setPhotoUrl(cam.dataUrl);
+        setUrlInput('');
+        setHasUnappliedUrlDraft(false);
+        setAuditStatus('verified');
+        setAuditNote(note);
+        const nowIso = new Date().toISOString();
+        onSave({
+          ...food,
+          photoUrl: cam.dataUrl,
+          isCustomPhoto: true,
+          photoUpdatedAt: nowIso,
+          updatedAt: nowIso,
+          adminApprovedAt: nowIso,
+          imageAuditStatus: 'verified',
+          imageAuditNote: note,
+        });
+        return;
+      }
+      cameraInputRef.current?.click();
+    } catch {
+      cameraInputRef.current?.click();
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -360,20 +405,39 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               onChange={handleFileChange}
               className="hidden" 
             />
+            <input 
+              type="file" 
+              ref={cameraInputRef}
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              className="hidden" 
+            />
 
-            <button
-              type="button"
-              disabled={isProcessing}
-              onClick={handlePickGalleryPhoto}
-              className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 transition active:scale-98 disabled:opacity-50"
-            >
-              <Upload className="w-4 h-4 text-emerald-300" />
-              <span>
-                {isProcessing 
-                  ? (tr(language, 'កំពុងដំណើរការ និងបង្រួមរូបភាព...', 'Optimizing image...', '正在优化图片...')) 
-                  : (tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册'))}
-              </span>
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                disabled={isProcessing}
+                onClick={() => void handleTakeCameraPhoto()}
+                className="py-3 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold flex items-center justify-center gap-1.5 shadow-sm transition active:scale-98 disabled:opacity-50 cursor-pointer"
+              >
+                <Camera className="w-4 h-4" />
+                <span>{tr(language, 'ថតរូបផ្ទាល់ (Camera)', 'Take Photo', '拍照（相机）')}</span>
+              </button>
+              <button
+                type="button"
+                disabled={isProcessing}
+                onClick={handlePickGalleryPhoto}
+                className="py-3 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/20 transition active:scale-98 disabled:opacity-50 cursor-pointer"
+              >
+                <Upload className="w-4 h-4 text-emerald-300" />
+                <span>
+                  {isProcessing 
+                    ? (tr(language, 'កំពុងដំណើរការ...', 'Optimizing...', '优化中...')) 
+                    : (tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册'))}
+                </span>
+              </button>
+            </div>
             <p className="text-[10px] text-slate-500 text-center">
               {tr(language, 'ប្រព័ន្ធនឹងបង្រួមទំហំរូបភាពស្វ័យប្រវត្ត (WebP/JPEG) ដើម្បីឱ្យកម្មវិធីដំណើរការលឿននិងមិនគាំង', 'Auto-compressed to high-performance WebP for fast offline loading', '已自动压缩为高性能 WebP，加载更快、支持离线')}
             </p>

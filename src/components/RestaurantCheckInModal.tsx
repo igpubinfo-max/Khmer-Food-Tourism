@@ -6,6 +6,11 @@ import {
   X, Camera, Image as ImageIcon, MapPin, CheckCircle2, 
   AlertCircle, Star, Navigation, Send, Store, ShieldCheck, PlusCircle, Search
 } from 'lucide-react';
+import {
+  isNativeAndroidOrIosPlatform,
+  takePhotoUsingNativeAndroidCamera,
+  pickImageUsingNativeAndroidGallery,
+} from '../utils/androidMediaHelper';
 import { 
   getCurrentDeviceLocation, 
   findNearbyRestaurants, 
@@ -142,6 +147,34 @@ export const RestaurantCheckInModal: React.FC = () => {
 
   const handleClose = () => {
     setIsRestaurantCheckInModalOpen(false);
+  };
+
+  const handleTakePhotoWithCamera = async () => {
+    if (isNativeAndroidOrIosPlatform()) {
+      try {
+        const res = await takePhotoUsingNativeAndroidCamera(1200, 0.84);
+        if (res.cancelled) return;
+        if (res.success && res.dataUrl) {
+          setPhotoDataUrl(res.dataUrl);
+          return;
+        }
+      } catch {}
+    }
+    cameraInputRef.current?.click();
+  };
+
+  const handlePickPhotoFromGallery = async () => {
+    if (isNativeAndroidOrIosPlatform()) {
+      try {
+        const res = await pickImageUsingNativeAndroidGallery(1200, 0.84);
+        if (res.cancelled) return;
+        if (res.success && res.dataUrl) {
+          setPhotoDataUrl(res.dataUrl);
+          return;
+        }
+      } catch {}
+    }
+    galleryInputRef.current?.click();
   };
 
   const handlePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -464,14 +497,14 @@ export const RestaurantCheckInModal: React.FC = () => {
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
                     <button
-                      onClick={() => cameraInputRef.current?.click()}
+                      onClick={() => void handleTakePhotoWithCamera()}
                       className="p-3 rounded-2xl border-2 border-dashed border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex flex-col items-center justify-center gap-1 transition cursor-pointer"
                     >
                       <Camera className="w-5 h-5 text-emerald-600" />
                       <span>{tr(language, 'ថតរូបភ្លាមៗ', 'Take Photo', '拍照')}</span>
                     </button>
                     <button
-                      onClick={() => galleryInputRef.current?.click()}
+                      onClick={() => void handlePickPhotoFromGallery()}
                       className="p-3 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex flex-col items-center justify-center gap-1 transition cursor-pointer"
                     >
                       <ImageIcon className="w-5 h-5 text-amber-500" />

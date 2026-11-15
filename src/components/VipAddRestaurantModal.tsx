@@ -53,6 +53,7 @@ import {
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
+  takePhotoUsingNativeAndroidCamera,
   savePngDataUrlToGallery,
 } from '../utils/androidMediaHelper';
 import { validateAndModerateShopImage } from '../utils/imageModeration';
@@ -865,6 +866,40 @@ export const VipAddRestaurantModal: React.FC = () => {
   // Keep mounted once visited so entered shop/hotel form data & scroll persist
 
   // Pick Shop Photo from Gallery with Image Moderation & Validation
+  const handleTakePhotoWithCamera = async () => {
+    setModerationWarning(null);
+    if (!isNativeAndroidOrIosPlatform()) {
+      cameraInputRef.current?.click();
+      return;
+    }
+    setIsUploadingPhoto(true);
+    try {
+      const nativeCam = await takePhotoUsingNativeAndroidCamera(1200, 0.85);
+      if (nativeCam?.cancelled) {
+        setIsUploadingPhoto(false);
+        return;
+      }
+      if (nativeCam?.dataUrl) {
+        const modRes = await validateAndModerateShopImage(nativeCam.dataUrl, language);
+        if (!modRes.valid || !modRes.dataUrl) {
+          setModerationWarning(modRes.reason || null);
+          showToast(modRes.reason || (tr(language, '⚠️ រូបភាពមិនត្រឹមត្រូវ', '⚠️ Invalid shop photo', '⚠️ 照片无效')), 'warning');
+          setIsUploadingPhoto(false);
+          return;
+        }
+        setShopPhoto(modRes.dataUrl);
+        showToast(
+          tr(language, '✅ បានថតរូបហាងជោគជ័យ!', '✅ Shop photo captured!', '✅ 拍照成功！'),
+          'success'
+        );
+        setIsUploadingPhoto(false);
+        return;
+      }
+    } catch {}
+    setIsUploadingPhoto(false);
+    cameraInputRef.current?.click();
+  };
+
   const handlePickFromGallery = async () => {
     setModerationWarning(null);
     if (!isNativeAndroidOrIosPlatform()) {
@@ -3275,7 +3310,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                       <button
                         type="button"
                         disabled={isUploadingPhoto}
-                        onClick={() => cameraInputRef.current?.click()}
+                        onClick={() => void handleTakePhotoWithCamera()}
                         className="min-h-[44px] py-2 px-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition cursor-pointer disabled:opacity-50"
                       >
                         <Camera className="w-3.5 h-3.5 shrink-0" />

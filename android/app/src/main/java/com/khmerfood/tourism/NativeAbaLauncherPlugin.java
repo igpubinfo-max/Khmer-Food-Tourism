@@ -25,7 +25,11 @@ import androidx.activity.result.ActivityResult;
 import androidx.core.content.FileProvider;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
+import android.Manifest;
+import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
+import com.getcapacitor.annotation.Permission;
+import com.getcapacitor.annotation.PermissionCallback;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.ActivityCallback;
@@ -38,7 +42,12 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-@CapacitorPlugin(name = "NativeAbaLauncher")
+@CapacitorPlugin(
+    name = "NativeAbaLauncher",
+    permissions = {
+        @Permission(strings = { Manifest.permission.CAMERA }, alias = "camera")
+    }
+)
 public class NativeAbaLauncherPlugin extends Plugin {
 
     private static final String OFFICIAL_ABA_PACKAGE = "com.paygo24.ibank";
@@ -52,6 +61,8 @@ public class NativeAbaLauncherPlugin extends Plugin {
     private static final String ABA_OFFICIAL_USD_ACCOUNT = "000056833";
 
     private long lastSaveTimestampMs = 0;
+    private File pendingCameraFile = null;
+    private Uri pendingCameraUri = null;
     private String lastSavedFileName = "";
 
     private static String formatEmvTlv(String tag, String value) {
@@ -439,6 +450,145 @@ public class NativeAbaLauncherPlugin extends Plugin {
      * Opens the native Android Photo Picker / Gallery to select an existing image (such as a saved QR code or food photo)
      * and returns its Base64 data URL safely.
      */
+
+    /**
+     * Opens the device's native Camera app directly (MediaStore.ACTION_IMAGE_CAPTURE)
+     * so users can take a photo immediately without opening the gallery picker.
+     */
+    @PluginMethod
+    public void takePhotoWithCamera(PluginCall call) {
+        if (getPermissionState("camera") != PermissionState.GRANTED) {
+            requestPermissionForAlias("camera", call, "handleCameraPermissionResult");
+            return;
+        }
+        launchDirectCameraCapture(call);
+    }
+
+    @PermissionCallback
+    private void handleCameraPermissionResult(PluginCall call) {
+        if (call == null) {
+            return;
+        }
+        if (getPermissionState("camera") == PermissionState.GRANTED) {
+            launchDirectCameraCapture(call);
+        } else {
+            JSObject cancelledRet = new JSObject();
+            cancelledRet.put("success", false);
+            cancelledRet.put("cancelled", true);
+            call.resolve(cancelledRet);
+        }
+    }
+
+    private void launchDirectCameraCapture(PluginCall call) {
+        Context context = getContext();
+        if (context == null) {
+            call.reject("Context is null");
+            return;
+        }
+        try {
+            File captureDir = new File(context.getCacheDir(), "camera_captures");
+            if (!captureDir.exists()) {
+                captureDir.mkdirs();
+            }
+            // Clean up old temp captures (> 30 mins)
+            File[] oldFiles = captureDir.listFiles();
+            long now = System.currentTimeMillis();
+            if (oldFiles != null) {
+                for (File f : oldFiles) {
+                    if (now - f.lastModified() > 1800_000L) {
+                        f.delete();
+                    }
+                }
+            }
+
+            File photoFile = new File(captureDir, "kft_cam_" + now + ".jpg");
+            Uri photoUri = FileProvider.getUriForFile(
+                context,
+                context.getPackageName() + ".fileprovider",
+                photoFile
+            );
+            pendingCameraFile = photoFile;
+            pendingCameraUri = photoUri;
+
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+            takePictureIntent.setClipData(ClipData.newUri(context.getContentResolver(), "Captured Photo", photoUri));
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivityForResult(call, takePictureIntent, "handleCameraCaptureResult");
+        } catch (Exception e) {
+            call.reject("Could not launch camera: " + e.getMessage());
+        }
+    }
+
+    @ActivityCallback
+    private void handleCameraCaptureResult(PluginCall call, ActivityResult result) {
+        if (call == null) {
+            return;
+        }
+        if (result.getResultCode() != Activity.RESULT_OK) {
+            if (pendingCameraFile != null && pendingCameraFile.exists()) {
+                pendingCameraFile.delete();
+            }
+            pendingCameraFile = null;
+            pendingCameraUri = null;
+            JSObject cancelledRet = new JSObject();
+            cancelledRet.put("success", false);
+            cancelledRet.put("cancelled", true);
+            call.resolve(cancelledRet);
+            return;
+        }
+
+        Context context = getContext();
+        if (context == null) {
+            call.reject("Context is null");
+            return;
+        }
+
+        int maxDim = call.getInt("maxDimension", 1200);
+        String dataUrl = null;
+        try {
+            if (pendingCameraUri != null) {
+                dataUrl = processUriToDataUrl(context, pendingCameraUri, maxDim);
+            }
+            if (dataUrl == null && result.getData() != null && result.getData().getData() != null) {
+                dataUrl = processUriToDataUrl(context, result.getData().getData(), maxDim);
+            }
+            if (dataUrl == null && result.getData() != null && result.getData().getExtras() != null) {
+                Object rawExtra = result.getData().getExtras().get("data");
+                if (rawExtra instanceof Bitmap) {
+                    Bitmap bmp = (Bitmap) rawExtra;
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 88, baos);
+                    String base64 = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);
+                    dataUrl = "data:image/jpeg;base64," + base64;
+                }
+            }
+        } catch (Exception ignored) {
+        } finally {
+            if (pendingCameraFile != null && pendingCameraFile.exists()) {
+                pendingCameraFile.delete();
+            }
+            pendingCameraFile = null;
+            pendingCameraUri = null;
+        }
+
+        if (dataUrl == null) {
+            JSObject cancelledRet = new JSObject();
+            cancelledRet.put("success", false);
+            cancelledRet.put("cancelled", true);
+            call.resolve(cancelledRet);
+            return;
+        }
+
+        JSObject ret = new JSObject();
+        ret.put("success", true);
+        ret.put("cancelled", false);
+        ret.put("dataUrl", dataUrl);
+        ret.put("fileName", "camera_photo_" + System.currentTimeMillis() + ".jpg");
+        ret.put("mimeType", "image/jpeg");
+        call.resolve(ret);
+    }
+
     @PluginMethod
     public void pickImageFromGallery(PluginCall call) {
         try {

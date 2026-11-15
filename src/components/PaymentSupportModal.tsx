@@ -4,6 +4,7 @@ import {
   MessageSquare,
   Send,
   Upload,
+  Camera,
   CheckCircle2,
   Clock,
   Crown,
@@ -23,6 +24,7 @@ import { getDynamicVipPlans, getConsumerVipPricingCatalog, isConsumerPromo099Eli
 import { tr } from '../utils/i18n';
 import {
   pickImageUsingNativeAndroidGallery,
+  takePhotoUsingNativeAndroidCamera,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { verifyAbaPaymentAndReceipt } from '../services/aiPaymentVerificationService';
@@ -111,7 +113,9 @@ export const PaymentSupportModal: React.FC = () => {
   const [replyAttachmentUrl, setReplyAttachmentUrl] = useState<string>('');
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const replyFileInputRef = useRef<HTMLInputElement | null>(null);
+  const replyCameraInputRef = useRef<HTMLInputElement | null>(null);
 
   const myTickets = supportTickets.filter(
     (t) => currentUser && t.userId === currentUser.id
@@ -206,6 +210,46 @@ export const PaymentSupportModal: React.FC = () => {
   ]);
 
   if (!isSupportTicketModalOpen || !currentUser) return null;
+
+  const handleCaptureReceiptCamera = async (isReply: boolean = false) => {
+    if (Capacitor.isNativePlatform()) {
+      setIsUploading(true);
+      try {
+        const res = await takePhotoUsingNativeAndroidCamera(1200, 0.84);
+        if (!res.cancelled && res.dataUrl) {
+          if (isReply) {
+            setReplyAttachmentUrl(res.dataUrl);
+          } else {
+            setReceiptDataUrl(res.dataUrl);
+          }
+          showToast(
+            tr(
+              language,
+              '✅ បានថតរូបវិក្កយបត្រដោយជោគជ័យ!',
+              '✅ Captured receipt photo!',
+              '✅ 已成功拍摄付款凭证照片！'
+            ),
+            'success'
+          );
+          setIsUploading(false);
+          return;
+        }
+        if (res.cancelled) {
+          setIsUploading(false);
+          return;
+        }
+      } catch {
+        // Fallback to standard camera input below
+      }
+      setIsUploading(false);
+    }
+
+    if (isReply) {
+      replyCameraInputRef.current?.click();
+    } else {
+      cameraInputRef.current?.click();
+    }
+  };
 
   const handleChooseReceipt = async (isReply: boolean = false) => {
     if (Capacitor.isNativePlatform()) {
@@ -505,6 +549,22 @@ export const PaymentSupportModal: React.FC = () => {
           onChange={(e) => handleFileInputChange(e, true)}
           className="hidden"
         />
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={(e) => handleFileInputChange(e, false)}
+          className="hidden"
+        />
+        <input
+          ref={replyCameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={(e) => handleFileInputChange(e, true)}
+          className="hidden"
+        />
 
         {/* Body */}
         <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4">
@@ -729,32 +789,30 @@ export const PaymentSupportModal: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    disabled={isUploading}
-                    onClick={() => handleChooseReceipt(false)}
-                    className="w-full py-4 px-4 rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50/40 hover:bg-amber-50 text-amber-800 flex flex-col items-center justify-center gap-1.5 transition"
-                  >
-                    <Upload className="w-6 h-6 text-amber-600" />
-                    <span className="text-xs sm:text-sm font-extrabold">
-                      {isUploading
-                        ? tr(language, 'កំពុងអានរូបភាព...', 'Loading image...', '正在读取图片...')
-                        : tr(
-                            language,
-                            '📸 រូបភាពរបស់ខ្ញុំ (ជ្រើសរើសរូបភាពវិក្កយបត្របង់ប្រាក់)',
-                            '📸 My Photos (ABA Payment Receipt)',
-                            '📸 我的照片 (ABA 付款凭证)'
-                          )}
-                    </span>
-                    <span className="text-[11px] text-gray-500">
-                      {tr(
-                        language,
-                        'គាំទ្រឯកសាររូបភាពគ្រប់ប្រភេទ',
-                        'Supports JPG, JPEG, PNG',
-                        '支持 JPG、JPEG、PNG 格式'
-                      )}
-                    </span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      disabled={isUploading}
+                      onClick={() => void handleCaptureReceiptCamera(false)}
+                      className="py-3.5 px-3 rounded-2xl border-2 border-amber-400 bg-amber-100/80 hover:bg-amber-200/70 text-amber-900 flex flex-col items-center justify-center gap-1.5 transition cursor-pointer"
+                    >
+                      <Camera className="w-6 h-6 text-amber-700" />
+                      <span className="text-xs font-extrabold text-center">
+                        {tr(language, 'ថតរូបវិក្កយបត្រ (Camera)', 'Take Photo (Camera)', '拍照上传凭证')}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isUploading}
+                      onClick={() => void handleChooseReceipt(false)}
+                      className="py-3.5 px-3 rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50/40 hover:bg-amber-50 text-amber-800 flex flex-col items-center justify-center gap-1.5 transition cursor-pointer"
+                    >
+                      <Upload className="w-6 h-6 text-amber-600" />
+                      <span className="text-xs font-extrabold text-center">
+                        {tr(language, 'រូបភាពរបស់ខ្ញុំ (Gallery)', 'My Photos (Gallery)', '我的照片（相册）')}
+                      </span>
+                    </button>
+                  </div>
                 )}
               </div>
 

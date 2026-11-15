@@ -8,7 +8,7 @@ import {
   User as UserIcon, Heart, Shield, Store, 
   Globe, LogOut, RefreshCw, ShieldCheck, CheckCircle2,
   Bell, Compass, Bookmark, Plus, Trash2, ChevronRight, ChevronDown,
-  Edit2, Check, X as CloseIcon, Crown, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera, RotateCw, RotateCcw
+  Edit2, Check, X as CloseIcon, Crown, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera, Image as ImageIcon, RotateCw, RotateCcw
 } from 'lucide-react';
 import {
   isRestaurantPremiumActive, isUserVipActive, isUserOnConsumerFreeTrial, isUserPaidVipActive, getConsumerVipPricingCatalog, getVipAccountState, getVipRemainingDays, resolveUserActualVipPlanDays,
@@ -23,6 +23,7 @@ import { AvatarEditorModal } from './AvatarEditorModal';
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
+  takePhotoUsingNativeAndroidCamera,
 } from '../utils/androidMediaHelper';
 import { requestManualUpdateCheck } from '../services/appUpdateService';
 import { verifyUserVipStatusFromBackend } from '../services/supabaseService';
@@ -131,6 +132,7 @@ export const ProfileView: React.FC = () => {
   const [isVip10BenefitsExpanded, setIsVip10BenefitsExpanded] = useState(false);
   const [isShopHotelBenefitsExpanded, setIsShopHotelBenefitsExpanded] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const avatarCameraInputRef = useRef<HTMLInputElement>(null);
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const [isAvatarEditorOpen, setIsAvatarEditorOpen] = useState(false);
   const [avatarEditorSourceUrl, setAvatarEditorSourceUrl] = useState<string>('');
@@ -193,11 +195,7 @@ export const ProfileView: React.FC = () => {
 
   const handleAvatarClick = () => {
     if (!currentUser || isSavingAvatar) return;
-    if (hasCustomAvatar) {
-      setIsAvatarActionSheetOpen(true);
-    } else {
-      handleTriggerAvatarPicker();
-    }
+    setIsAvatarActionSheetOpen(true);
   };
 
   const handleOpenCurrentAvatarEditor = () => {
@@ -205,6 +203,31 @@ export const ProfileView: React.FC = () => {
     setIsAvatarActionSheetOpen(false);
     setAvatarEditorSourceUrl(currentUser.avatar);
     setIsAvatarEditorOpen(true);
+  };
+
+  const handleTriggerAvatarCamera = async () => {
+    setIsAvatarActionSheetOpen(false);
+    if (!currentUser || isSavingAvatar) return;
+    if (isNativeAndroidOrIosPlatform()) {
+      setIsSavingAvatar(true);
+      try {
+        const nativeCam = await takePhotoUsingNativeAndroidCamera(1080, 0.88);
+        if (nativeCam?.cancelled) {
+          setIsSavingAvatar(false);
+          return;
+        }
+        if (nativeCam?.dataUrl) {
+          setAvatarEditorSourceUrl(nativeCam.dataUrl);
+          setIsAvatarEditorOpen(true);
+          setIsSavingAvatar(false);
+          return;
+        }
+      } catch {
+        // Fallback to standard camera input below
+      }
+      setIsSavingAvatar(false);
+    }
+    avatarCameraInputRef.current?.click();
   };
 
   const handleTriggerAvatarPicker = async () => {
@@ -964,10 +987,13 @@ export const ProfileView: React.FC = () => {
                   />
                   <button
                     type="button"
-                    onClick={handleAvatarClick}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void handleTriggerAvatarCamera();
+                    }}
                     disabled={isSavingAvatar}
-                    aria-label={tr(language, 'ប្តូររូបភាពប្រូហ្វាល់', 'Change profile photo', '更换头像')}
-                    title={tr(language, 'ប្តូររូបភាពប្រូហ្វាល់', 'Change profile photo', '更换头像')}
+                    aria-label={tr(language, 'ថតរូបប្រូហ្វាល់ផ្ទាល់ (Camera)', 'Take profile photo (Camera)', '拍照设置头像（相机）')}
+                    title={tr(language, 'ថតរូបប្រូហ្វាល់ផ្ទាល់ (Camera)', 'Take profile photo (Camera)', '拍照设置头像（相机）')}
                     className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white border-2 border-white dark:border-slate-800 shadow-sm flex items-center justify-center cursor-pointer active:scale-90 transition disabled:opacity-60"
                   >
                     <Camera className="w-3 h-3" />
@@ -988,6 +1014,14 @@ export const ProfileView: React.FC = () => {
                     </button>
                   )}
 
+                  <input
+                    ref={avatarCameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handleAvatarPicked}
+                  />
                   <input
                     ref={avatarInputRef}
                     type="file"
@@ -2754,14 +2788,27 @@ export const ProfileView: React.FC = () => {
             </div>
 
             <div className="space-y-2">
+              {hasCustomAvatar && (
+                <button
+                  type="button"
+                  onClick={handleOpenCurrentAvatarEditor}
+                  className="w-full py-2.5 px-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-400/40 font-bold text-xs flex items-center gap-2.5 transition cursor-pointer"
+                >
+                  <RotateCw className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span className="flex-1 text-left">
+                    {tr(language, '🔄 បង្វិល 90° & កែតម្រង់រូបនេះ', 'Rotate 90° & Adjust Photo', '旋转 90° 并调整当前头像')}
+                  </span>
+                </button>
+              )}
+
               <button
                 type="button"
-                onClick={handleOpenCurrentAvatarEditor}
-                className="w-full py-2.5 px-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-400/40 font-bold text-xs flex items-center gap-2.5 transition cursor-pointer"
+                onClick={() => void handleTriggerAvatarCamera()}
+                className="w-full py-2.5 px-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2.5 shadow-xs transition cursor-pointer"
               >
-                <RotateCw className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <Camera className="w-4 h-4 text-emerald-100 shrink-0" />
                 <span className="flex-1 text-left">
-                  {tr(language, '🔄 បង្វិល 90° & កែតម្រង់រូបនេះ', 'Rotate 90° & Adjust Photo', '旋转 90° 并调整当前头像')}
+                  {tr(language, '📸 ថតរូបផ្ទាល់ (Camera)', '📸 Take Photo (Camera)', '📸 拍照（相机）')}
                 </span>
               </button>
 
@@ -2770,9 +2817,9 @@ export const ProfileView: React.FC = () => {
                 onClick={handleTriggerAvatarPicker}
                 className="w-full py-2.5 px-3 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-400/40 font-bold text-xs flex items-center gap-2.5 transition cursor-pointer"
               >
-                <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <ImageIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span className="flex-1 text-left">
-                  {tr(language, '📷 ជ្រើសរូបថ្មីពី រូបភាពរបស់ខ្ញុំ', '📷 My Photos', '📷 我的照片')}
+                  {tr(language, '🖼️ ជ្រើសរូបពី រូបភាពរបស់ខ្ញុំ', '🖼️ Choose from My Photos (Gallery)', '🖼️ 从我的照片选择（相册）')}
                 </span>
               </button>
 

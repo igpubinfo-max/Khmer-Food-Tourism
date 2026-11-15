@@ -28,6 +28,7 @@ import {
   Soup,
   Salad,
   Camera,
+  Image as ImageIcon,
   ChevronRight,
   Plus,
   Check,
@@ -42,6 +43,12 @@ import {
   tryExecuteAiAgentTurn,
 } from '../services/aiAgentPlatformService';
 import { verifyUserVipStatusFromBackend } from '../services/supabaseService';
+import {
+  isNativeAndroidOrIosPlatform,
+  takePhotoUsingNativeAndroidCamera,
+  pickImageUsingNativeAndroidGallery,
+  dataUrlToFile,
+} from '../utils/androidMediaHelper';
 import {
   IconFoodPicks,
   IconBeveragePairing,
@@ -325,6 +332,8 @@ export const WhatToEatModal: React.FC = () => {
   const userGpsRef = useRef<{ lat: number; lng: number } | null>(null);
   const canUseAiAssistant = true;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const triggerCameraCaptureRef = useRef<(() => void) | null>(null);
 
   const userSessionKey = useMemo(
     () => String(currentUser?.id || currentUser?.email || currentUser?.username || 'guest'),
@@ -524,7 +533,11 @@ export const WhatToEatModal: React.FC = () => {
     if ((window as any).__kft_wte_open_camera) {
       (window as any).__kft_wte_open_camera = false;
       setTimeout(() => {
-        fileInputRef.current?.click();
+        if (triggerCameraCaptureRef.current) {
+          triggerCameraCaptureRef.current();
+        } else {
+          cameraInputRef.current?.click();
+        }
       }, 120);
     }
     const pendingAiQuery = typeof window !== 'undefined' ? String((window as any).__kft_pending_ai_query || '').trim() : '';
@@ -1415,6 +1428,90 @@ export const WhatToEatModal: React.FC = () => {
       .finally(() => setIsAiThinking(false));
   };
 
+  const processSelectedFoodFile = async (file: File) => {
+    if (!file) return;
+    setImageError('');
+    setIsPreparingImage(true);
+    try {
+      setPendingImage(await prepareFoodImage(file));
+    } catch (err) {
+      const code = err instanceof FoodImageError ? err.code : 'decode_failed';
+      setPendingImage(null);
+      setImageError(
+        code === 'not_image'
+          ? tr(language, 'សូមជ្រើសរើសឯកសាររូបភាព (JPG/PNG)។', 'Please choose an image file (JPG/PNG).', '请选择图片文件（JPG/PNG）。')
+          : code === 'too_large'
+            ? tr(language, 'រូបភាពធំពេក (អតិបរមា 25MB)។', 'The image is too large (max 25 MB).', '图片过大（最大 25MB）。')
+            : tr(
+                language,
+                'មិនអាចបើករូបភាពនេះបានទេ។ សូមសាកល្បងរូប JPG ឬ PNG ផ្សេង។',
+                'This image could not be opened. Please try another JPG or PNG.',
+                '无法打开该图片，请尝试其他 JPG 或 PNG 图片。'
+              )
+      );
+    } finally {
+      setIsPreparingImage(false);
+    }
+  };
+
+  const handleTriggerCameraCapture = async () => {
+    if (!canUseAiAssistant) {
+      promptVipUpgradeForAiAssistant();
+      return;
+    }
+    if (isNativeAndroidOrIosPlatform()) {
+      setImageError('');
+      setIsPreparingImage(true);
+      try {
+        const res = await takePhotoUsingNativeAndroidCamera(1200, 0.85);
+        if (res.cancelled) {
+          setIsPreparingImage(false);
+          return;
+        }
+        if (res.success && res.dataUrl) {
+          const camFile = dataUrlToFile(res.dataUrl, res.fileName || `food_camera_${Date.now()}.jpg`);
+          await processSelectedFoodFile(camFile);
+          return;
+        }
+      } catch {
+        // Fallback to HTML camera input below
+      }
+      setIsPreparingImage(false);
+    }
+    cameraInputRef.current?.click();
+  };
+
+  triggerCameraCaptureRef.current = () => {
+    void handleTriggerCameraCapture();
+  };
+
+  const handleTriggerGalleryPick = async () => {
+    if (!canUseAiAssistant) {
+      promptVipUpgradeForAiAssistant();
+      return;
+    }
+    if (isNativeAndroidOrIosPlatform()) {
+      setImageError('');
+      setIsPreparingImage(true);
+      try {
+        const res = await pickImageUsingNativeAndroidGallery(1200, 0.85);
+        if (res.cancelled) {
+          setIsPreparingImage(false);
+          return;
+        }
+        if (res.success && res.dataUrl) {
+          const galFile = dataUrlToFile(res.dataUrl, res.fileName || `food_gallery_${Date.now()}.jpg`);
+          await processSelectedFoodFile(galFile);
+          return;
+        }
+      } catch {
+        // Fallback to HTML file input below
+      }
+      setIsPreparingImage(false);
+    }
+    fileInputRef.current?.click();
+  };
+
   const handleImagePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -1805,6 +1902,15 @@ export const WhatToEatModal: React.FC = () => {
             <>
             <form onSubmit={handleCravingSubmit} className="relative flex items-center gap-1.5">
               <input
+                ref={cameraInputRef}
+                id="kft-wte-camera-input"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleImagePicked}
+              />
+              <input
                 ref={fileInputRef}
                 id="kft-wte-photo-input"
                 type="file"
@@ -1815,19 +1921,24 @@ export const WhatToEatModal: React.FC = () => {
               <button
                 id="kft-wte-photo-btn"
                 type="button"
-                onClick={() => {
-                  if (!canUseAiAssistant) {
-                    promptVipUpgradeForAiAssistant();
-                    return;
-                  }
-                  fileInputRef.current?.click();
-                }}
+                onClick={() => void handleTriggerCameraCapture()}
                 disabled={isAiThinking || isPreparingImage}
-                aria-label={tr(language, 'ថតរូប ឬជ្រើសរើសរូបម្ហូប', 'Take or choose a food photo', '拍摄或选择美食照片')}
-                title={tr(language, 'ថតរូប ឬជ្រើសរើសរូបម្ហូប', 'Take or choose a food photo', '拍摄或选择美食照片')}
-                className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200:bg-amber-900/60 transition active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label={tr(language, 'ថតរូបម្ហូបផ្ទាល់ (Camera)', 'Take food photo (Camera)', '拍照识别美食（相机）')}
+                title={tr(language, 'ថតរូបម្ហូបផ្ទាល់ (Camera)', 'Take food photo (Camera)', '拍照识别美食（相机）')}
+                className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 transition active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Camera className="w-5 h-5" />
+              </button>
+              <button
+                id="kft-wte-gallery-btn"
+                type="button"
+                onClick={() => void handleTriggerGalleryPick()}
+                disabled={isAiThinking || isPreparingImage}
+                aria-label={tr(language, 'ជ្រើសរើសរូបពី រូបភាពរបស់ខ្ញុំ', 'Choose food photo from Gallery', '从相册选择美食照片')}
+                title={tr(language, 'ជ្រើសរើសរូបពី រូបភាពរបស់ខ្ញុំ', 'Choose food photo from Gallery', '从相册选择美食照片')}
+                className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center bg-slate-800 border border-slate-600 text-emerald-300 hover:bg-slate-700 transition active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ImageIcon className="w-5 h-5" />
               </button>
               <div className="relative flex-1 min-w-0">
                 <Search className="w-4 h-4 text-emerald-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />

@@ -25,6 +25,7 @@ import {
   savePngDataUrlToGallery,
   shareQrImageNativeOrWeb,
   pickImageUsingNativeAndroidGallery,
+  takePhotoUsingNativeAndroidCamera,
 } from '../utils/androidMediaHelper';
 import { Capacitor } from '@capacitor/core';
 import { tr } from '../utils/i18n';
@@ -318,6 +319,41 @@ export const UpgradeVipModal: React.FC = () => {
       paymentRef: userLatestVipTxn?.transactionRef || customTxnRef,
       receiptUrl: paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl,
     });
+  };
+
+  const handleCaptureReceiptFromCamera = async () => {
+    if (Capacitor.isNativePlatform()) {
+      setIsProcessingProofImage(true);
+      try {
+        const res = await takePhotoUsingNativeAndroidCamera(1200, 0.85);
+        if (!res.cancelled && res.dataUrl) {
+          setPaymentProofDraft({
+            dataUrl: res.dataUrl,
+            fileName: `aba_receipt_cam_${Date.now()}.jpg`,
+            mimeType: 'image/jpeg',
+          });
+          setIsProcessingProofImage(false);
+          showToast(
+            tr(
+              language,
+              '✅ បានថតរូបវិក្កយបត្រដោយជោគជ័យ!',
+              '✅ Captured payment receipt photo!',
+              '✅ 已成功拍摄付款凭证照片！'
+            ),
+            'success'
+          );
+          return;
+        }
+        if (res.cancelled) {
+          setIsProcessingProofImage(false);
+          return;
+        }
+      } catch {
+        // Fallback to standard camera input below
+      }
+      setIsProcessingProofImage(false);
+    }
+    proofCameraInputRef.current?.click();
   };
 
   const handlePickReceiptFromGallery = async () => {
@@ -751,7 +787,7 @@ export const UpgradeVipModal: React.FC = () => {
       <input
         ref={proofCameraInputRef}
         type="file"
-        accept="image/jpeg,image/jpg,image/png"
+        accept="image/*"
         capture="environment"
         onChange={handleSelectPaymentProofFile}
         className="hidden"
@@ -1039,7 +1075,7 @@ export const UpgradeVipModal: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => proofCameraInputRef.current?.click()}
+                    onClick={() => void handleCaptureReceiptFromCamera()}
                     style={{
                       background: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
                     }}
@@ -1646,7 +1682,7 @@ export const UpgradeVipModal: React.FC = () => {
 
                   <button
                     type="button"
-                    onClick={() => proofCameraInputRef.current?.click()}
+                    onClick={() => void handleCaptureReceiptFromCamera()}
                     disabled={isProcessingProofImage}
                     style={{
                       background: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',

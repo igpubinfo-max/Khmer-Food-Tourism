@@ -59,7 +59,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ផ្សារធំថ្មី ផ្សារទួលទំពូង ផ្សារអូរឫស្សី និងតាមបណ្តោយមាត់ទន្លេចតុមុខ រាជធានីភ្នំពេញ',
     whereToFindEn: 'Central Market (Phsar Thmei), Russian Market, Orussey Market & Sisowath Riverside, Phnom Penh',
     whereToFindZh: '金边中央市场、俄罗斯市场、乌亚西市场及四臂湾河畔美食街',
-    signatureDishIds: ['food-36', 'food-158', 'food-160', 'food-41', 'food-179', 'food-49', 'food-165', 'food-194'],
+    signatureDishIds: ['food-36', 'food-158', 'food-160', 'food-41', 'food-49', 'food-165', 'food-179', 'food-194'],
   },
   {
     id: 'siem_reap',
@@ -82,7 +82,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ស្ទឹងសៀមរាប ផ្សារចាស់ ភូមិវប្បធម៌ និងជើងភ្នំគូលែន ខេត្តសៀមរាប',
     whereToFindEn: 'Siem Reap Riverside, Old Market (Phsar Chas), Wat Damnak area & Kulen Foothills, Siem Reap',
     whereToFindZh: '暹粒河畔餐饮走廊、老市场 (Phsar Chas)、Wat Damnak 街区及荔枝山脚景区',
-    signatureDishIds: ['food-1', 'food-120', 'food-82', 'food-144', 'food-118', 'food-37', 'food-154', 'food-47'],
+    signatureDishIds: ['food-1', 'food-82', 'food-96', 'food-22', 'food-120', 'food-144', 'food-118', 'food-37', 'food-47'],
   },
   {
     id: 'battambang',
@@ -105,7 +105,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ផ្សារណាត់ មាត់ស្ទឹងសង្កែ និងស្រុកថ្មគោល (ផ្លូវក្រឡាន) ខេត្តបាត់ដំបង',
     whereToFindEn: 'Psar Nat Central Market, Sangker Riverfront & Thmor Kol Kralan Road, Battambang',
     whereToFindZh: '马德望中央市场 (Psar Nat)、桑岐河畔及特莫戈竹筒饭一条街',
-    signatureDishIds: ['food-45', 'food-64', 'food-78', 'food-97', 'food-178', 'food-181', 'food-83', 'food-155'],
+    signatureDishIds: ['food-45', 'food-178', 'food-97', 'food-175', 'food-78', 'food-64', 'food-181'],
   },
   {
     id: 'kampot',
@@ -128,7 +128,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ព្រែកកំពត រមណីយដ្ឋានទឹកឈូ និងចម្ការម្រេចភ្នំវោរ ខេត្តកំពត',
     whereToFindEn: 'Kampot Old Riverfront, Teuk Chhou Rapids & Phnom Vor Pepper Plantations, Kampot',
     whereToFindZh: '贡布老桥河畔、德楚溪流景区及贡布胡椒庄园周边餐厅',
-    signatureDishIds: ['food-118', 'food-26', 'food-27', 'food-50', 'food-136', 'food-164', 'food-176', 'food-150'],
+    signatureDishIds: ['food-27', 'food-136', 'food-164', 'food-26', 'food-21', 'food-129'],
   },
   {
     id: 'kep',
@@ -151,7 +151,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ផ្សារក្តាមខេត្តកែប ឆ្នេរកែប និងកោះទន្សាយ ខេត្តកែប',
     whereToFindEn: 'Kep Crab Market (Phsar Kdam), Kep Beach Promenade & Koh Tonsay Pier, Kep',
     whereToFindZh: '白马螃蟹市场 (Kep Crab Market)、白马海滩步道及兔子岛码头',
-    signatureDishIds: ['food-25', 'food-162', 'food-149', 'food-167', 'food-23', 'food-125', 'food-159', 'food-27'],
+    signatureDishIds: ['food-27', 'food-167', 'food-43', 'food-25', 'food-162', 'food-125', 'food-23', 'food-149'],
   },
   {
     id: 'sihanoukville',
@@ -162,19 +162,19 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     region: 'coastal',
     lat: 10.6275,
     lng: 103.5221,
-    culinaryTitleKh: 'គ្រឿងសមុទ្រស្រស់ឆ្នេរអូរឈើទាល ភ្លាបង្គាសមុទ្រ និងនំបញ្ចុកទឹកត្រីផ្អែម',
-    culinaryTitleEn: 'Oceanfront Fresh Prawns, Spicy Basil Squid & Coastal Khmer Noodles',
-    culinaryTitleZh: '西哈努克海滨鲜虾、圣罗勒炒鱿鱼、苦瓜生虾沙拉与海滨风味小吃',
+    culinaryTitleKh: 'គ្រឿងសមុទ្រស្រស់ឆ្នេរអូរឈើទាល មឹកឆាម្រះព្រៅ ភ្លាបង្គាស្រស់ និងគ្រំសមុទ្រអាំង',
+    culinaryTitleEn: 'Fresh Ocean Seafood: Basil Squid, Prawn Ceviche, Seafood Glass Noodle Salad & Grilled Mussels',
+    culinaryTitleZh: '西哈努克新鲜海鲜：圣罗勒炒鱿鱼、青柠生虾、海鲜粉丝沙拉与炭烤青口贝',
     historyKh:
-      'ខេត្តព្រះសីហនុ សម្បូរទៅដោយធនធានសមុទ្រទឹកជ្រៅ និងកោះធម្មជាតិ។ ម្ហូបប្រចាំតំបន់រួមមានភ្លាបង្គាស្រស់ ឆាក្តៅមឹកម្ទេសម្រះព្រៅ គុយទាវឆាគ្រឿងសមុទ្រ និងដូងក្រអូបត្រជាក់តាមឆ្នេរខ្សាច់។',
+      'ខេត្តព្រះសីហនុ សម្បូរទៅដោយធនធានសមុទ្រទឹកជ្រៅ និងកោះធម្មជាតិ។ ម្ហូបប្រចាំតំបន់រួមមានភ្លាបង្គាស្រស់ ឆាក្តៅមឹកម្ទេសម្រះព្រៅ ញាំមីសួរគ្រឿងសមុទ្រ និងគ្រំសមុទ្រអាំង ជាមុខម្ហូបគ្រឿងសមុទ្រជាអាទិភាព។',
     historyEn:
-      'Blessed with deep-water ocean fisheries and tropical islands, Preah Sihanouk’s coastal cuisine celebrates ultra-fresh ocean prawns, wok-seared holy basil squid, lime-cured shrimp ceviche, and chilled fragrant young coconuts by the beach.',
+      'Blessed with deep-water ocean fisheries and tropical islands, Preah Sihanouk’s coastal cuisine celebrates ultra-fresh ocean prawns, wok-seared holy basil squid, lime-cured prawn ceviche, seafood glass noodle salad and grilled green mussels — seafood always leads the recommendations.',
     historyZh:
       '西哈努克省拥有丰富的深海渔业资源与海岛风光，当地美食主打现捕海虾、九层塔爆炒鲜鱿、青柠苦瓜生虾刺生以及海滩冰镇芳香椰子。',
     whereToFindKh: 'ឆ្នេរអូរឈើទាល ឆ្នេរអូត្រេះ ផ្សារលើ និងកោះរ៉ុង ខេត្តព្រះសីហនុ',
     whereToFindEn: 'Ochheuteal Beach, Otres Beach, Phsar Leu Market & Koh Rong Island, Preah Sihanouk',
     whereToFindZh: '奥彻迭海滩、奥特斯海滩、西港上市场 (Phsar Leu) 及高龙岛',
-    signatureDishIds: ['food-67', 'food-68', 'food-144', 'food-151', 'food-163', 'food-197', 'food-84', 'food-182'],
+    signatureDishIds: ['food-68', 'food-151', 'food-149', 'food-159', 'food-125', 'food-23', 'food-25', 'food-197'],
   },
   {
     id: 'koh_kong',
@@ -185,19 +185,19 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     region: 'coastal',
     lat: 11.6153,
     lng: 102.9838,
-    culinaryTitleKh: 'មឹកអាំងទឹកត្រីកោះកុង បាញ់កាញ់ទឹកខ្ទិះ និងបុកល្ហុងក្តាមប្រៃមាត់ព្រែក',
-    culinaryTitleEn: 'Grilled Squid with Signature Koh Kong Chili-Lime Sauce & Mangrove Seafood',
-    culinaryTitleZh: '国公秘制酸辣海鲜蘸酱烤鱿鱼、椰汁粗米粉与红树林海鲜',
+    culinaryTitleKh: 'មឹកអាំងទឹកត្រីកោះកុង ត្រីបំពងទឹកត្រីស្វាយខ្ចី និងគ្រឿងសមុទ្រព្រៃកោងកាង',
+    culinaryTitleEn: 'Koh Kong Chili-Lime Sauce Squid, Crispy Fried Fish & Mangrove Seafood',
+    culinaryTitleZh: '国公秘制酸辣蘸酱烤鱿鱼、脆炸鱼配青芒果鱼露与红树林海鲜',
     historyKh:
       'ខេត្តកោះកុង ល្បីល្បាញទូទាំងប្រទេសលើរូបមន្ត «ទឹកត្រីកោះកុង» ដែលមានរសជាតិជូរ ហឹរ ផ្អែម និងឈ្ងុយខ្ទឹមស ជីរវ៉ាន់ស៊ុយ សម្រាប់ជ្រលក់ជាមួយមឹកអាំង ត្រីបំពង និងគ្រឿងសមុទ្រព្រៃកោងកាង។',
     historyEn:
-      'Nestled between the Cardamom Mountains and mangrove estuaries, Koh Kong created Cambodia’s iconic “Teuk Trei Koh Kong” (garlic-chili-lime seafood dipping sauce), paired with charcoal-grilled squid, Banh Kanh coconut noodles, and crab papaya salad.',
+      'Nestled between the Cardamom Mountains and mangrove estuaries, Koh Kong created Cambodia’s iconic “Teuk Trei Koh Kong” (garlic-chili-lime seafood dipping sauce), paired with charcoal-grilled squid, crispy fried fish and fresh mangrove seafood.',
     historyZh:
-      '国公省背靠豆蔻山脉、面朝红树林海湾，创造了风靡全柬的“国公酸辣蒜香海鲜蘸酱”，搭配炭烤整鱿鱼、椰奶粗米粉及咸蟹木瓜沙拉最为地道。',
+      '国公省背靠豆蔻山脉、面朝红树林海湾，创造了风靡全柬的“国公酸辣蒜香海鲜蘸酱”，搭配炭烤整鱿鱼、脆炸鱼与红树林鲜海产最为地道。',
     whereToFindKh: 'មាត់ព្រែកកោះប៉ោ ផ្សារដងទង់ និងតំបន់ព្រៃកោងកាងពាមក្រសោប ខេត្តកោះកុង',
     whereToFindEn: 'Koh Pao Riverfront, Dong Tong Market & Peam Krasop Mangrove Eco-Area, Koh Kong',
     whereToFindZh: '国公河畔步道、东通市场 (Dong Tong Market) 及红树林生态区',
-    signatureDishIds: ['food-23', 'food-54', 'food-148', 'food-156', 'food-59', 'food-166', 'food-183', 'food-200'],
+    signatureDishIds: ['food-121', 'food-23', 'food-59', 'food-125', 'food-126'],
   },
   {
     id: 'mondulkiri',
@@ -220,7 +220,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ក្រុងសែនមនោរម្យ ទឹកជ្រោះប៊ូស្រា និងចម្ការកាហ្វេ-ផ្លែបឺរ ខេត្តមណ្ឌលគិរី',
     whereToFindEn: 'Sen Monorom Town, Bousra Waterfall Eco-Village & Highland Plantations, Mondulkiri',
     whereToFindZh: '森莫诺隆市中心、布斯拉瀑布生态村及蒙多基里高山咖啡牛油果庄园',
-    signatureDishIds: ['food-101', 'food-196', 'food-198', 'food-10', 'food-24', 'food-58', 'food-115', 'food-185'],
+    signatureDishIds: ['food-101', 'food-115', 'food-10', 'food-24', 'food-196', 'food-198'],
   },
   {
     id: 'ratanakiri',
@@ -243,7 +243,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ក្រុងបានលុង បឹងយក្សឡោម និងផ្សារបានលុង ខេត្តរតនគិរី',
     whereToFindEn: 'Banlung Town, Yeak Laom Volcanic Lake & Banlung Central Market, Ratanakiri',
     whereToFindZh: '邦隆市中心、夜萝姆火山湖景区及邦隆中央市场',
-    signatureDishIds: ['food-106', 'food-7', 'food-19', 'food-147', 'food-72', 'food-120', 'food-132', 'food-175'],
+    signatureDishIds: ['food-7', 'food-147', 'food-19', 'food-175', 'food-132', 'food-72'],
   },
   {
     id: 'kampong_cham',
@@ -266,7 +266,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ទន្លេកំពង់ចាម ស្ពានឫស្សីកោះប៉ែន និងផ្សារធំកំពង់ចាម ខេត្តកំពង់ចាម',
     whereToFindEn: 'Kampong Cham Mekong Riverfront, Koh Paen Bamboo Bridge & Boeng Kok Market, Kampong Cham',
     whereToFindZh: '磅湛湄公河畔大道、竹桥渡口及磅湛中央市场',
-    signatureDishIds: ['food-16', 'food-39', 'food-91', 'food-187', 'food-48', 'food-100', 'food-191', 'food-90'],
+    signatureDishIds: ['food-16', 'food-91', 'food-187', 'food-191', 'food-39', 'food-48', 'food-100'],
   },
   {
     id: 'kampong_thom',
@@ -289,7 +289,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ស្ទឹងសែន ផ្សារស្ទឹងសែន និងតំបន់ប្រាសាទសំបូរព្រៃគុក ខេត្តកំពង់ធំ',
     whereToFindEn: 'Stung Sen Riverfront, Kampong Thom Market & Sambor Prei Kuk Heritage Area, Kampong Thom',
     whereToFindZh: '森河河畔、磅同中心市场及三波坡雷古世界遗产景区周边',
-    signatureDishIds: ['food-2', 'food-18', 'food-34', 'food-98', 'food-119', 'food-143', 'food-88', 'food-5'],
+    signatureDishIds: ['food-2', 'food-18', 'food-98', 'food-34', 'food-143', 'food-119', 'food-88'],
   },
   {
     id: 'kampong_chhnang',
@@ -312,7 +312,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ផ្សារលើកំពង់ឆ្នាំង កំពង់ផែផ្សារក្រោម (ភូមិបណ្តែតទឹក) ខេត្តកំពង់ឆ្នាំង',
     whereToFindEn: 'Phsar Leu Market, Phsar Krom Tonle Sap Pier & Floating Village Eateries, Kampong Chhnang',
     whereToFindZh: '磅清扬上市场、下市场码头及洞里萨河水上渔村餐馆',
-    signatureDishIds: ['food-5', 'food-17', 'food-154', 'food-89', 'food-117', 'food-127', 'food-74', 'food-65'],
+    signatureDishIds: ['food-17', 'food-5', 'food-117', 'food-127', 'food-89', 'food-170'],
   },
   {
     id: 'kampong_speu',
@@ -335,7 +335,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ស្រុកឧដុង្គ ស្រុកសំរោងទង និងតាមបណ្តោយផ្លូវជាតិលេខ ៤ (ឧទ្យានជាតិគិរីរម្យ) ខេត្តកំពង់ស្ពឺ',
     whereToFindEn: 'Oudong District, Samraong Tong Palm Groves & Kirirom Foothills along NH4, Kampong Speu',
     whereToFindZh: '乌栋古都区、森隆通糖棕林带及4号公路基里隆国家公园沿线',
-    signatureDishIds: ['food-44', 'food-188', 'food-93', 'food-94', 'food-107', 'food-123', 'food-140', 'food-195'],
+    signatureDishIds: ['food-195', 'food-94', 'food-44', 'food-188', 'food-123', 'food-140', 'food-93'],
   },
   {
     id: 'takeo',
@@ -358,7 +358,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់បឹងតាកែវ ក្រុងដូនកែវ និងតំបន់ភ្នំដា-អង្គរបុរី ខេត្តតាកែវ',
     whereToFindEn: 'Takeo Lakefront (Doun Kaev), Phsar Takeo & Angkor Borei / Phnom Da area, Takeo',
     whereToFindZh: '茶胶湖畔长廊 (敦胶市)、茶胶市场及吴哥博雷古迹区周边',
-    signatureDishIds: ['food-25', 'food-8', 'food-104', 'food-129', 'food-174', 'food-50', 'food-188', 'food-191'],
+    signatureDishIds: ['food-129', 'food-104', 'food-57', 'food-126', 'food-8', 'food-174'],
   },
   {
     id: 'kratie',
@@ -381,7 +381,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ទន្លេក្រចេះ អន្លង់ផ្សោតកាំពី និងកោះទ្រង់ ខេត្តក្រចេះ',
     whereToFindEn: 'Kratie Mekong Promenade, Kampi Dolphin Pool Riverside & Koh Trong Island, Kratie',
     whereToFindZh: '桔井湄公河滨江大道、甘比江豚观赏区河畔及笼岛 (Koh Trong)',
-    signatureDishIds: ['food-112', 'food-146', 'food-32', 'food-77', 'food-152', 'food-95', 'food-7'],
+    signatureDishIds: ['food-9', 'food-112', 'food-146', 'food-32', 'food-152', 'food-77', 'food-95'],
   },
   {
     id: 'pailin',
@@ -404,7 +404,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ផ្សារប៉ាហ៊ី ជើងភ្នំយ៉ាត និងរមណីយដ្ឋានទឹកធ្លាក់ភ្នំខៀវ ខេត្តប៉ៃលិន',
     whereToFindEn: 'Phsar Pahi Market, Phnom Yat Cultural Hill & Phnom Khiev Waterfall Area, Pailin',
     whereToFindZh: '拜林帕希市场 (Phsar Pahi)、雅山文化景区及青山瀑布周边餐馆',
-    signatureDishIds: ['food-28', 'food-102', 'food-113', 'food-131', 'food-147', 'food-148', 'food-189', 'food-192'],
+    signatureDishIds: ['food-28', 'food-102', 'food-113', 'food-148', 'food-131', 'food-189', 'food-192'],
   },
   {
     id: 'pursat',
@@ -427,7 +427,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ស្ទឹងពោធិ៍សាត់ ភូមិបណ្តែតទឹកកំពង់ហ្លួង និងស្រុកវាលវែង ខេត្តពោធិ៍សាត់',
     whereToFindEn: 'Pursat Riverbank Market, Kampong Luong Floating Town & Veal Veng Highlands, Pursat',
     whereToFindZh: '菩萨河畔夜市、贡邦鲁水上渔村及维旺高山景区',
-    signatureDishIds: ['food-65', 'food-74', 'food-103', 'food-133', 'food-142', 'food-190', 'food-90'],
+    signatureDishIds: ['food-65', 'food-74', 'food-103', 'food-142', 'food-190', 'food-90'],
   },
   {
     id: 'preah_vihear',
@@ -450,7 +450,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ក្រុងព្រះវិហារ ផ្លូវឡើងប្រាសាទព្រះវិហារ (ស្រអែម) និងតំបន់ប្រាសាទកោះកេរ ខេត្តព្រះវិហារ',
     whereToFindEn: 'Preah Vihear Town (Tbeng Meanchey), Sra Aem Temple Gateway & Koh Ker Area, Preah Vihear',
     whereToFindZh: '柏威夏市 (Tbeng Meanchey)、斯拉艾姆景区入口及贡开古寺周边餐厅',
-    signatureDishIds: ['food-3', 'food-13', 'food-14', 'food-60', 'food-72', 'food-172', 'food-101', 'food-19'],
+    signatureDishIds: ['food-111', 'food-14', 'food-172', 'food-3', 'food-13', 'food-60'],
   },
   {
     id: 'banteay_meanchey',
@@ -473,7 +473,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ក្រុងសិរីសោភ័ណ ផ្សារសិរីសោភ័ណ និងតំបន់ប្រាសាទបន្ទាយឆ្មារ ខេត្តបន្ទាយមានជ័យ',
     whereToFindEn: 'Serei Saophoan (Sisophon) Night Market, Central Park & Banteay Chhmar Temple Area, Banteay Meanchey',
     whereToFindZh: '诗梳风夜市、中心公园美食街及班迭奇马寺古迹周边',
-    signatureDishIds: ['food-40', 'food-41', 'food-61', 'food-85', 'food-86', 'food-87', 'food-161', 'food-180'],
+    signatureDishIds: ['food-40', 'food-161', 'food-180', 'food-85', 'food-86', 'food-87', 'food-61'],
   },
   {
     id: 'svay_rieng',
@@ -496,7 +496,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ទន្លេវ៉ៃគោ ផ្សារវាលយន្ត និងក្រុងស្វាយរៀង ខេត្តស្វាយរៀង',
     whereToFindEn: 'Vai Ko Riverfront, Veal Yon Market & Svay Rieng Town Dining Street, Svay Rieng',
     whereToFindZh: '柴桢威哥河畔、维욘中央市场 (Veal Yon Market) 及柴桢市美食街',
-    signatureDishIds: ['food-106', 'food-62', 'food-63', 'food-124', 'food-128', 'food-137', 'food-119', 'food-143'],
+    signatureDishIds: ['food-106', 'food-12', 'food-62', 'food-63', 'food-137', 'food-56', 'food-124'],
   },
   {
     id: 'prey_veng',
@@ -519,7 +519,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់បឹងកំពង់ពពិល ផ្សារព្រៃវែង និងតំបន់អ្នកលឿង ខេត្តព្រៃវែង',
     whereToFindEn: 'Prey Veng Lakefront, Prey Veng Market & Neak Loeung Mekong Crossing Hub, Prey Veng',
     whereToFindZh: '波罗勉湖畔、波罗勉市场及乃良 (Neak Loeung) 湄公河大桥美食区',
-    signatureDishIds: ['food-11', 'food-103', 'food-52', 'food-66', 'food-70', 'food-80', 'food-104', 'food-114'],
+    signatureDishIds: ['food-156', 'food-70', 'food-51', 'food-52', 'food-66', 'food-11'],
   },
   {
     id: 'kandal',
@@ -542,7 +542,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ទន្លេតាខ្មៅ កោះឧកញ៉ាតី ស្រុកកៀនស្វាយ និងស្រុកពញាឮ ខេត្តកណ្តាល',
     whereToFindEn: 'Ta Khmau Riverfront, Koh Dach Silk Island, Kien Svay & Ponhea Lueu, Kandal',
     whereToFindZh: '大金欧河畔、丝绸岛 (Koh Dach)、见檖水上凉亭区及波尼亚吕区',
-    signatureDishIds: ['food-4', 'food-42', 'food-76', 'food-81', 'food-88', 'food-157', 'food-177', 'food-37'],
+    signatureDishIds: ['food-81', 'food-157', 'food-4', 'food-169', 'food-177', 'food-42', 'food-76'],
   },
   {
     id: 'stung_treng',
@@ -565,7 +565,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ទន្លេសេកុង-មេគង្គ ផ្សារស្ទឹងត្រែង និងតំបន់ព្រះរំកិល ខេត្តស្ទឹងត្រែង',
     whereToFindEn: 'Sekong-Mekong Confluence Promenade, Stung Treng Market & Preah Rumkel Eco-Area, Stung Treng',
     whereToFindZh: '公河与湄公河交汇滨江步道、上丁市场及普雷伦基生态区',
-    signatureDishIds: ['food-38', 'food-6', 'food-15', 'food-29', 'food-105', 'food-109', 'food-130', 'food-150'],
+    signatureDishIds: ['food-38', 'food-6', 'food-133', 'food-109', 'food-130', 'food-105'],
   },
   {
     id: 'tboung_khmum',
@@ -588,7 +588,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ក្រុងសួង ផ្សារសួង និងតំបន់ហ្លួងព្រះស្តេចកន ខេត្តត្បូងឃ្មុំ',
     whereToFindEn: 'Suong Town, Phsar Suong Market & Ponhea Krek / Memot Dining Hubs, Tboung Khmum',
     whereToFindZh: '苏翁市中心、苏翁市场 (Phsar Suong) 及棉末区传统餐馆',
-    signatureDishIds: ['food-135', 'food-73', 'food-108', 'food-116', 'food-138', 'food-193', 'food-29', 'food-15'],
+    signatureDishIds: ['food-108', 'food-15', 'food-138', 'food-116', 'food-193', 'food-29', 'food-73'],
   },
   {
     id: 'oddar_meanchey',
@@ -611,7 +611,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'ក្រុងសំរោង ផ្សារសំរោង និងតំបន់អន្លង់វែង ខេត្តឧត្តរមានជ័យ',
     whereToFindEn: 'Samraong Town, Phsar Samraong Market & Anlong Veng Center, Oddar Meanchey',
     whereToFindZh: '森隆市中心、森隆市场 (Phsar Samraong) 及安隆汶中心街区',
-    signatureDishIds: ['food-134', 'food-135', 'food-139', 'food-141', 'food-145', 'food-171', 'food-173', 'food-199'],
+    signatureDishIds: ['food-145', 'food-141', 'food-171', 'food-139', 'food-134', 'food-135', 'food-199'],
   },
 ];
 
@@ -674,6 +674,14 @@ export function detectDishProvince(food: FoodItem): string | null {
   return found;
 }
 
+/** Rank of a dish inside a province's curated signature list (0 = top). Non-signature dishes rank after all signatures. */
+export function getProvinceDishRank(food: FoodItem, provinceId: string | null | undefined): number {
+  if (!food || !provinceId || provinceId === 'all') return 0;
+  const prov = PROVINCE_BY_ID_MAP.get(provinceId);
+  if (!prov) return 0;
+  const idx = prov.signatureDishIds.indexOf(food.id);
+  return idx >= 0 ? idx : 1000;
+}
 export function getProvinceOptionById(provinceId: string | null | undefined): ProvinceFilterOption {
   if (provinceId && PROVINCE_BY_ID_MAP.has(provinceId)) {
     return PROVINCE_BY_ID_MAP.get(provinceId)!;

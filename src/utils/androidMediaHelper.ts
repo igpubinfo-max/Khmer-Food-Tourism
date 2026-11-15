@@ -10,6 +10,13 @@ interface NativeMediaLauncherPlugin {
     fileName?: string;
     message?: string;
   }>;
+  takePhotoWithCamera(options?: { maxDimension?: number }): Promise<{
+    success?: boolean;
+    cancelled: boolean;
+    dataUrl?: string;
+    fileName?: string;
+    mimeType?: string;
+  }>;
   pickImageFromGallery(): Promise<{
     cancelled: boolean;
     dataUrl?: string;
@@ -264,6 +271,59 @@ export function isNativeAndroidOrIosPlatform(): boolean {
  * Opens the native Android Photo/Gallery picker when running on Android and returns a Data URL.
  * Returns { cancelled: true } safely if the user closes the picker without choosing an image.
  */
+/**
+ * Converts a Base64 Data URL into a standard File object so existing File-based handlers
+ * (e.g. prepareFoodImage, validateAndModerateShopImage, processAndCompressImageFile) work seamlessly.
+ */
+export function dataUrlToFile(dataUrl: string, fileName: string = 'camera_photo.jpg'): File {
+  const parts = dataUrl.split(',');
+  const mimeMatch = parts[0]?.match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+  const bstr = atob(parts[1] || '');
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], fileName, { type: mime });
+}
+
+/**
+ * Opens the native Android Camera directly (MediaStore.ACTION_IMAGE_CAPTURE) so the user
+ * can take a photo immediately without opening the gallery picker.
+ */
+export async function takePhotoUsingNativeAndroidCamera(
+  maxDimension: number = 1200,
+  quality: number = 0.84
+): Promise<{
+  success?: boolean;
+  cancelled: boolean;
+  dataUrl?: string;
+  fileName?: string;
+  mimeType?: string;
+}> {
+  if (!isNativeAndroidOrIosPlatform()) {
+    return { success: false, cancelled: false };
+  }
+  try {
+    const res = await NativeMediaLauncher.takePhotoWithCamera({ maxDimension });
+    if (!res || res.cancelled || !res.dataUrl) {
+      return { success: false, cancelled: true };
+    }
+    const optimizedUrl = await compressDataUrlIfLarge(res.dataUrl, maxDimension, quality);
+    return {
+      success: true,
+      cancelled: false,
+      dataUrl: optimizedUrl,
+      fileName: res.fileName || `camera_${Date.now()}.jpg`,
+      mimeType: res.mimeType || 'image/jpeg',
+    };
+  } catch (err) {
+    console.warn('Native takePhotoWithCamera error:', err);
+    return { success: false, cancelled: false };
+  }
+}
+
 export async function pickImageUsingNativeAndroidGallery(
   _maxDimension?: number,
   _quality?: number

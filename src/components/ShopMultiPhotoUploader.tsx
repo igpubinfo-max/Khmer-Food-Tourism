@@ -8,6 +8,7 @@ import {
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
+  takePhotoUsingNativeAndroidCamera,
 } from '../utils/androidMediaHelper';
 import { validateAndModerateShopImage } from '../utils/imageModeration';
 import { DefaultShopIcon } from './icons/DefaultShopIcon';
@@ -41,6 +42,41 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
 
   const toast = (msg: string, type: 'success' | 'warning' | 'info' | 'error' = 'info') => {
     if (onToast) onToast(msg, type);
+  };
+
+  const handleTakePhotoWithCamera = async () => {
+    setModerationWarning(null);
+    if (!isNativeAndroidOrIosPlatform()) {
+      cameraInputRef.current?.click();
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const nativeCam = await takePhotoUsingNativeAndroidCamera(1200, 0.85);
+      if (nativeCam?.cancelled) {
+        setIsProcessing(false);
+        return;
+      }
+      if (nativeCam?.dataUrl) {
+        const modRes = await validateAndModerateShopImage(nativeCam.dataUrl, isKm ? 'km' : 'en');
+        if (!modRes.valid || !modRes.dataUrl) {
+          setModerationWarning(modRes.reason || null);
+          toast(modRes.reason || (tr(language, '⚠️ រូបភាពមិនត្រឹមត្រូវ', '⚠️ Invalid shop image', '⚠️ 店铺图片无效')), 'warning');
+          setIsProcessing(false);
+          return;
+        }
+        onChangePhotos([modRes.dataUrl]);
+        toast(
+          tr(language, '✅ បានថតរូបភាពតំណាងហាង ១ សន្លឹកជោគជ័យ!', '✅ Single shop photo captured & verified!', '✅ 已成功拍摄并验证 1 张店铺图片！'),
+          'success'
+        );
+        setIsProcessing(false);
+        return;
+      }
+    } catch {}
+    setIsProcessing(false);
+    cameraInputRef.current?.click();
   };
 
   const handlePickFromGallery = async () => {
@@ -171,7 +207,7 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
             <button
               type="button"
               disabled={isProcessing}
-              onClick={() => cameraInputRef.current?.click()}
+              onClick={() => void handleTakePhotoWithCamera()}
               className="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer disabled:opacity-50"
             >
               <Camera className="w-3.5 h-3.5" />

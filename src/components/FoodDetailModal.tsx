@@ -8,6 +8,7 @@ import {
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
+  takePhotoUsingNativeAndroidCamera,
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
@@ -76,6 +77,7 @@ export const FoodDetailModal: React.FC = () => {
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isSavingAdminFood, setIsSavingAdminFood] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (selectedFood) {
@@ -184,6 +186,46 @@ export const FoodDetailModal: React.FC = () => {
       tr(language, '✅ បានរក្សាទុករូបភាពម្ហូបពី Online រួចរាល់!', '✅ Online food photo saved!', '✅ 在线美食照片已保存！'),
       'success'
     );
+  };
+
+  const handleTakeCameraPhoto = async () => {
+    if (!isNativeAndroidOrIosPlatform()) {
+      cameraInputRef.current?.click();
+      return;
+    }
+    setIsUploadingPhoto(true);
+    try {
+      const cam = await takePhotoUsingNativeAndroidCamera(1400, 0.88);
+      if (cam.cancelled) return;
+      if (cam.dataUrl && selectedFood) {
+        const wmPick = await applyFoodWatermarkOnce(cam.dataUrl, { maxWidth: 2400, maxHeight: 2400, quality: 0.94, outputMimeType: 'image/jpeg' });
+        cam.dataUrl = wmPick.dataUrl;
+        const nowIso = new Date().toISOString();
+        const updated = {
+          ...selectedFood,
+          photoUrl: cam.dataUrl,
+          isCustomPhoto: true,
+          photoUpdatedAt: nowIso,
+          updatedAt: nowIso,
+          adminApprovedAt: nowIso,
+          imageAuditStatus: 'verified' as const,
+          imageAuditNote: 'រូបភាពថតផ្ទាល់ពីកាមេរ៉ា (Admin Verified)',
+        };
+        setEditPhotoUrl(cam.dataUrl);
+        updateFood(updated);
+        setSelectedFood(updated);
+        showToast(
+          tr(language, '✅ បានថត និងរក្សាទុករូបភាពពីកាមេរ៉ារួចរាល់!', '✅ Photo from camera saved permanently!', '✅ 相机拍摄的照片已永久保存！'),
+          'success'
+        );
+        return;
+      }
+      cameraInputRef.current?.click();
+    } catch {
+      cameraInputRef.current?.click();
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
 
   const handlePickDevicePhoto = async () => {
@@ -569,6 +611,7 @@ export const FoodDetailModal: React.FC = () => {
             /* ADMIN EDIT FOOD FORM */
             <form onSubmit={handleSaveAdminFood} className="p-4 sm:p-6 space-y-4 font-khmer pt-16">
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+              <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
 
               <div className="p-3.5 rounded-2xl bg-amber-500/15 border-2 border-amber-400/60 flex items-center justify-between">
                 <div>
@@ -629,12 +672,21 @@ export const FoodDetailModal: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={handlePickDevicePhoto}
+                    onClick={() => void handleTakeCameraPhoto()}
                     disabled={isUploadingPhoto}
                     className="py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Camera className="w-3.5 h-3.5" />
-                    <span>{tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的照片')}</span>
+                    <span>{tr(language, 'ថតរូបផ្ទាល់', 'Take Photo', '拍照')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePickDevicePhoto}
+                    disabled={isUploadingPhoto}
+                    className="col-span-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>{tr(language, 'ជ្រើសរើសពី រូបភាពរបស់ខ្ញុំ', 'My Photos (Gallery)', '我的照片（相册）')}</span>
                   </button>
                 </div>
                 {editPhotoUrl && editPhotoUrl !== selectedFood.photoUrl && (

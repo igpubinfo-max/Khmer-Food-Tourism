@@ -3,11 +3,12 @@ import { TouristDestination, type Language } from '../types';
 import { useApp } from '../context/AppContext';
 import { tr } from '../utils/i18n';
 import { 
-  X, Upload, Image as ImageIcon, Check, RefreshCw, 
+  X, Upload, Camera, Image as ImageIcon, Check, RefreshCw, 
   MapPin, Smartphone, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import {
   pickImageUsingNativeAndroidGallery,
+  takePhotoUsingNativeAndroidCamera,
   isNativeAndroidOrIosPlatform,
 } from '../utils/androidMediaHelper';
 
@@ -187,6 +188,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
 }) => {
   const { language } = useApp();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   
   const [photoUrl, setPhotoUrl] = useState('');
   const [urlInput, setUrlInput] = useState('');
@@ -256,6 +258,49 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
       setIsProcessing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handleOpenDeviceCamera = async () => {
+    if (isNativeAndroidOrIosPlatform()) {
+      setErrorMsg('');
+      setIsProcessing(true);
+      try {
+        const camRes = await takePhotoUsingNativeAndroidCamera(1400, 0.88);
+        if (camRes && camRes.cancelled) {
+          return;
+        }
+        if (camRes && camRes.dataUrl) {
+          const pickedDataUrl = camRes.dataUrl;
+          const finalUrl =
+            pickedDataUrl.length > 55000 ? await compressDataUrl(pickedDataUrl) : pickedDataUrl;
+          const compKb = ((finalUrl.length * 0.75) / 1024).toFixed(0);
+          setPhotoUrl(finalUrl);
+          setUrlInput('');
+          setFileDetails({
+            origSize: tr(language, 'កាមេរ៉ាផ្ទាល់', 'Camera', '相机拍摄'),
+            compSize: `${compKb} KB`,
+          });
+          const nowIso = new Date().toISOString();
+          await Promise.resolve(
+            onSave({
+              ...destination,
+              photoUrl: finalUrl,
+              galleryPhotos: [finalUrl],
+              isCustomPhoto: true,
+              photoUpdatedAt: nowIso,
+              isAdminEdited: true,
+              adminEditedAt: nowIso,
+            })
+          );
+          return;
+        }
+      } catch {
+        // Fallback below
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+    cameraInputRef.current?.click();
   };
 
   const handleOpenDeviceGallery = async () => {
@@ -502,16 +547,35 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
               className="hidden" 
               onChange={handleFileChange} 
             />
+            <input 
+              ref={cameraInputRef}
+              type="file" 
+              accept="image/*" 
+              capture="environment"
+              className="hidden" 
+              onChange={handleFileChange} 
+            />
 
-            <button
-              type="button"
-              disabled={isProcessing}
-              onClick={handleOpenDeviceGallery}
-              className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 transition active:scale-[0.99] disabled:opacity-50 cursor-pointer"
-            >
-              <Upload className="w-4 h-4 text-emerald-300" />
-              <span>{tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册')}</span>
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                disabled={isProcessing}
+                onClick={() => void handleOpenDeviceCamera()}
+                className="py-3 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition active:scale-[0.99] disabled:opacity-50 cursor-pointer"
+              >
+                <Camera className="w-4 h-4" />
+                <span>{tr(language, 'ថតរូបផ្ទាល់ (Camera)', 'Take Photo', '拍照（相机）')}</span>
+              </button>
+              <button
+                type="button"
+                disabled={isProcessing}
+                onClick={handleOpenDeviceGallery}
+                className="py-3 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/20 transition active:scale-[0.99] disabled:opacity-50 cursor-pointer"
+              >
+                <Upload className="w-4 h-4 text-emerald-300" />
+                <span>{tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的相册')}</span>
+              </button>
+            </div>
             <p className="text-[10px] text-slate-500 font-khmer text-center">
               {isKm 
                 ? 'រូបភាពនឹងត្រូវបង្រួមទំហំស្វ័យប្រវត្តិកម្រិត HD ដើម្បីផ្ទុកលឿន និងសន្សំទំហំទូរស័ព្ទ' 
