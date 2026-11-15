@@ -97,8 +97,8 @@ export interface CloudApiConfig {
 const CLOUD_API_CONFIG_STORAGE_KEY = 'kft_cloud_api_config_v1';
 
 // Official Production Supabase Free-Tier Project (Southeast Asia - Singapore)
-export const DEFAULT_SUPABASE_URL = 'https://ryvltobwuwuulazqjnza.supabase.co';
-export const DEFAULT_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
+import { DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_PUBLISHABLE_KEY } from '../config/appConstants';
+export { DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_PUBLISHABLE_KEY };
 // SECURITY: no Google Maps / Gemini key is bundled in the app any more (the old ones were extractable from the APK).
 // Both keys now live ONLY in Supabase secrets behind the `places-proxy` and `food-ai` Edge Functions.
 // A device may still hold its own key (Admin -> Cloud API settings or VITE_* env) as a fall-back for outages.
@@ -257,6 +257,7 @@ function getSupabaseHeaders(preferRepresentation = false): Record<string, string
     Authorization: `Bearer ${cfg.supabaseAnonKey}`,
     'Content-Type': 'application/json',
     ...getAppAttestationHeaders(),
+    ...adminTokenHeaders(),
   };
   if (preferRepresentation) {
     headers['Prefer'] = 'resolution=merge-duplicates,return=representation';
@@ -2320,9 +2321,6 @@ export async function deleteCloudDocument(key: string, timeoutMs = 8000, opts: C
     return eligibleForFailover;
   }
 
-  if (false) {
-    return eligibleForFailover;
-  }
 
   try {
     const res = await fetchWithTimeout(
@@ -5397,7 +5395,13 @@ DROP POLICY IF EXISTS "kft_kv_delete_policy" ON public.kft_app_kv_store;
 CREATE POLICY "kft_kv_select_policy"
   ON public.kft_app_kv_store
   FOR SELECT
-  USING (key LIKE 'kft\\_%' ESCAPE '\\');
+  USING (
+    key LIKE 'kft\\_%' ESCAPE '\\'
+    AND (
+      key NOT LIKE 'kft\\_user\\_%' ESCAPE '\\'
+      OR coalesce((current_setting('request.headers', true)::json)->>'x-kft-app-id', '') = 'com.khmerfood.tourism'
+    )
+  );
 
 CREATE POLICY "kft_kv_insert_policy"
   ON public.kft_app_kv_store
@@ -5421,8 +5425,12 @@ CREATE POLICY "kft_kv_update_policy"
 CREATE POLICY "kft_kv_delete_policy"
   ON public.kft_app_kv_store
   FOR DELETE
-  TO service_role
-  USING (true);
+  USING (
+    key LIKE 'kft\\_ov\\_%' ESCAPE '\\'
+    OR key LIKE 'kft\\_media\\_%' ESCAPE '\\'
+    OR key LIKE 'kft\\_avatar\\_%' ESCAPE '\\'
+    OR coalesce((current_setting('request.headers', true)::json)->>'x-kft-allow-destructive', '') IN ('1', 'true')
+  );
 
 CREATE INDEX IF NOT EXISTS idx_kft_app_kv_updated_at ON public.kft_app_kv_store(updated_at DESC);
 

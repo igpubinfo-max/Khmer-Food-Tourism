@@ -66,7 +66,7 @@ BEGIN
   IF TG_OP = 'DELETE' THEN
     -- Allow authenticated user self-deletion of their own `kft_user_*` record when x-kft-allow-destructive is sent with matching x-kft-prev-pw-hash
     IF OLD.key LIKE 'kft\_user\_%' ESCAPE '\'
-       AND coalesce(headers_json->>'x-kft-allow-destructive', '') IN ('1', 'true')
+       AND coalesce((hdrs::json)->>'x-kft-allow-destructive', '') IN ('1', 'true')
        AND (
          coalesce(OLD.payload->>'passwordHash', '') = ''
          OR (coalesce(v_prev_pw_hash, '') <> '' AND v_prev_pw_hash = (OLD.payload->>'passwordHash'))

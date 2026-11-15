@@ -502,7 +502,7 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
               className="px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-[11px] font-medium outline-none"
             >
               <option value="ទាំងអស់">
-                🌏 {tr(language, 'ទូទាំងប្រទេសកម្ពុជា (២៥ ខេត្ត/រាជធានី)', 'All Cambodia (25 Provinces)', '全柬埔寨（25个省市）')}
+                🌏 {tr(language, 'ទូទាំងប្រទេសកម្ពុជា', 'All Cambodia', '全柬埔寨')}
               </option>
               {CAMBODIA_PROVINCE_GEO_LIST.map((p) => (
                 <option key={p.kh} value={p.kh}>

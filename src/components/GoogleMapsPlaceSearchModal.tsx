@@ -28,6 +28,11 @@ import {
 import { tr, translateProvinceName } from '../utils/i18n';
 import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
+  detectUserGpsCoordinate,
+  readCachedUserGps,
+  calculateDistanceKm,
+} from '../utils/nearMeEngine';
+import {
   GooglePlaceCachedItem,
   GooglePlaceSearchCategory,
   searchGoogleMapsPlacesAdvanced,
@@ -209,6 +214,18 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       if (selectedProvince && selectedProvince !== 'ទាំងអស់') {
         setProvince(selectedProvince);
       }
+      const cachedGps = readCachedUserGps();
+      if (cachedGps && isValidCambodiaCoordinates(cachedGps.lat, cachedGps.lng)) {
+        setGpsLocation(prev => prev || { lat: cachedGps.lat, lng: cachedGps.lng });
+      } else {
+        detectUserGpsCoordinate(false)
+          .then(res => {
+            if (res.coord && isValidCambodiaCoordinates(res.coord.lat, res.coord.lng)) {
+              setGpsLocation(prev => prev || { lat: res.coord!.lat, lng: res.coord!.lng });
+            }
+          })
+          .catch(() => {});
+      }
     }
   }, [isGoogleMapsSearchModalOpen, googleMapsSearchInitialTab, selectedProvince]);
 
@@ -226,14 +243,18 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     const activeQuery = overrideParams?.q !== undefined ? overrideParams.q : query;
     const activeCat = overrideParams?.cat !== undefined ? overrideParams.cat : category;
     const activeProv = overrideParams?.prov !== undefined ? overrideParams.prov : province;
-    const activeLoc = overrideParams?.loc !== undefined ? overrideParams.loc : gpsLocation;
+    const cachedGps = readCachedUserGps();
+    const activeLoc =
+      overrideParams?.loc !== undefined
+        ? overrideParams.loc
+        : gpsLocation || (cachedGps ? { lat: cachedGps.lat, lng: cachedGps.lng } : null);
     const activeScope = overrideParams?.scope !== undefined
       ? overrideParams.scope
-      : activeLoc
+      : searchScope === 'nearby'
       ? 'nearby'
       : activeProv && activeProv !== 'ទាំងអស់'
       ? 'province'
-      : searchScope;
+      : 'nationwide';
     const activeRadiusMeters = (overrideParams?.radiusKm ?? gpsRadiusKm) * 1000;
     const token = overrideParams?.pageToken;
     const isAppend = Boolean(overrideParams?.append);
@@ -259,10 +280,16 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         province: activeScope === 'nationwide' ? 'ទាំងអស់' : activeProv,
         provinceFilter: activeScope === 'nationwide' ? 'ទាំងអស់' : activeProv,
         searchScope: activeScope,
-        location: activeLoc ? { lat: activeLoc.lat, lng: activeLoc.lng, radiusMeters: activeRadiusMeters } : undefined,
+        location: activeLoc
+          ? {
+              lat: activeLoc.lat,
+              lng: activeLoc.lng,
+              radiusMeters: activeScope === 'nearby' ? activeRadiusMeters : undefined,
+            }
+          : undefined,
         lat: activeLoc?.lat,
         lng: activeLoc?.lng,
-        radiusMeters: activeRadiusMeters,
+        radiusMeters: activeScope === 'nearby' ? activeRadiusMeters : undefined,
         pageToken: token,
         pageSize: 20,
         language,
@@ -308,35 +335,40 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     }
   };
 
-  const handleUseMyGpsLocation = () => {
-    if (!navigator.geolocation) {
-      showToast(
-        tr(language, 'ឧបករណ៍របស់អ្នកមិនគាំទ្រការចាប់ទីតាំង GPS ទេ', 'Geolocation is not supported on this device', '此设备不支持地理定位'),
-        'warning'
-      );
-      return;
-    }
+  const handleUseMyGpsLocation = async () => {
     setGpsLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    try {
+      const detected = await detectUserGpsCoordinate(true);
+      const coord = detected.coord || readCachedUserGps();
+      if (coord && isValidCambodiaCoordinates(coord.lat, coord.lng)) {
+        const coords = { lat: coord.lat, lng: coord.lng };
         setGpsLocation(coords);
         setSearchScope('nearby');
         setGpsLoading(false);
         showToast(
-          tr(language, `📍 បានចាប់ទីតាំង GPS របស់អ្នក (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`, `📍 GPS Location locked (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`, `📍 GPS 定位已锁定 (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`),
+          tr(
+            language,
+            `📍 បានចាប់ទីតាំង GPS របស់អ្នក (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`,
+            `📍 GPS Location locked (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`,
+            `📍 GPS 定位已锁定 (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`
+          ),
           'success'
         );
-        executeSearch({ loc: coords, scope: 'nearby' });
-      },
-      () => {
-        setGpsLoading(false);
-        showToast(
-          tr(language, '⚠️ មិនអាចចាប់ទីតាំង GPS បានទេ។ សូមអនុញ្ញាតសិទ្ធិ Location លើឧបករណ៍របស់អ្នក។', '⚠️ Unable to get GPS location. Please enable Location permission.', '⚠️ 无法获取 GPS 位置。请启用定位权限。'),
-          'warning'
-        );
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 120000 }
+        executeSearch({ loc: coords, scope: 'nearby', radiusKm: gpsRadiusKm });
+        return;
+      }
+    } catch {
+      // ignore and show toast below
+    }
+    setGpsLoading(false);
+    showToast(
+      tr(
+        language,
+        '⚠️ មិនអាចចាប់ទីតាំង GPS បានទេ។ សូមអនុញ្ញាតសិទ្ធិ Location លើឧបករណ៍របស់អ្នក។',
+        '⚠️ Unable to get GPS location. Please enable Location permission.',
+        '⚠️ 无法获取 GPS 位置。请启用定位权限。'
+      ),
+      'warning'
     );
   };
 
@@ -584,19 +616,42 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleUseMyGpsLocation}
-                  disabled={gpsLoading || isLoading}
-                  className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
-                    gpsLocation || searchScope === 'nearby'
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                      : 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-                  }`}
-                >
-                  <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? 'animate-ping' : ''}`} />
-                  <span>{tr(language, '🎯 ហាងជិតខ្ញុំ (GPS)', '🎯 Near Me (GPS)', '🎯 我附近 (GPS)')}</span>
-                </button>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleUseMyGpsLocation}
+                    disabled={gpsLoading || isLoading}
+                    className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                      searchScope === 'nearby'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                        : 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                    }`}
+                  >
+                    <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? 'animate-ping' : ''}`} />
+                    <span>{tr(language, '🎯 ហាងជិតខ្ញុំ (GPS)', '🎯 Near Me (GPS)', '🎯 我附近 (GPS)')}</span>
+                  </button>
+                  {searchScope === 'nearby' && gpsLocation && (
+                    <div className="inline-flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-xl border border-slate-200">
+                      {[5, 10, 15, 25].map(rKm => (
+                        <button
+                          key={rKm}
+                          type="button"
+                          onClick={() => {
+                            setGpsRadiusKm(rKm);
+                            executeSearch({ loc: gpsLocation, scope: 'nearby', radiusKm: rKm });
+                          }}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold transition cursor-pointer ${
+                            gpsRadiusKm === rKm
+                              ? 'bg-emerald-600 text-white shadow-2xs'
+                              : 'text-slate-600 hover:bg-white'
+                          }`}
+                        >
+                          {rKm}km
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <form
@@ -604,10 +659,10 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   e.preventDefault();
                   executeSearch();
                 }}
-                className="grid grid-cols-2 sm:grid-cols-12 gap-2"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5"
               >
                 {/* Keyword Input */}
-                <div className="col-span-2 sm:col-span-5 relative">
+                <div className="col-span-1 sm:col-span-2 lg:col-span-4 relative">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     ref={searchInputRef}
@@ -634,7 +689,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 </div>
 
                 {/* Category Selector */}
-                <div className="col-span-1 sm:col-span-3">
+                <div className="col-span-1 sm:col-span-1 lg:col-span-3">
                   <select
                     value={category}
                     onChange={e => {
@@ -655,7 +710,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 </div>
 
                 {/* Province Selector */}
-                <div className="col-span-1 sm:col-span-2">
+                <div className="col-span-1 sm:col-span-1 lg:col-span-3">
                   <select
                     value={province}
                     onChange={e => {
@@ -683,7 +738,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 </div>
 
                 {/* Search Submit Button */}
-                <div className="col-span-2 sm:col-span-2 flex gap-1.5">
+                <div className="col-span-1 sm:col-span-2 lg:col-span-2 flex gap-1.5">
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -706,6 +761,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 </span>
                 {[
                   { q: 'អាហារខ្មែរ Khmer Restaurant', kh: '🍲 អាហារខ្មែរ', en: '🍲 Khmer Food', zh: '🍲 柬式餐厅', cat: 'restaurant' as const },
+                  { q: 'ម្ហូបបួស Vegetarian Restaurant', kh: '🥗 ម្ហូបបួស/សុខភាព', en: '🥗 Vegetarian & Healthy', zh: '🥗 素食/健康餐', cat: 'restaurant' as const },
                   { q: 'គុយទាវ Noodles Breakfast', kh: '🍜 គុយទាវ/អាហារព្រឹក', en: '🍜 Noodles', zh: '🍜 粿条/早餐', cat: 'restaurant' as const },
                   { q: 'Coffee Cafe ហាងកាហ្វេ', kh: '☕ ហាងកាហ្វេ', en: '☕ Coffee & Café', zh: '☕ 咖啡馆', cat: 'restaurant' as const },
                   { q: 'Seafood BBQ គ្រឿងសមុទ្រ សាច់អាំង', kh: '🦐 គ្រឿងសមុទ្រ/សាច់អាំង', en: '🦐 Seafood & BBQ', zh: '🦐 海鲜与烧烤', cat: 'restaurant' as const },
@@ -927,6 +983,10 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   const hasValidPlaceCoords = isValidCambodiaCoordinates(rawLat, rawLng);
                   const safeLat = hasValidPlaceCoords ? rawLat : 11.5564;
                   const safeLng = hasValidPlaceCoords ? rawLng : 104.9282;
+                  const distanceKm =
+                    gpsLocation && hasValidPlaceCoords
+                      ? calculateDistanceKm(gpsLocation.lat, gpsLocation.lng, safeLat, safeLng)
+                      : null;
                   const safeRating = Number(place.rating ?? 0);
                   const safeRatingCount = Number(place.userRatingCount ?? place.reviewCount ?? 0);
                   const placeMapsHref = hasValidPlaceCoords
@@ -994,6 +1054,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                               📍 {translateProvinceName(place.provinceKh, place.provinceEn || place.provinceKh, language)}
                             </span>
                           )}
+                          {distanceKm !== null && Number.isFinite(distanceKm) && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-600/95 text-white shadow-2xs">
+                              🧭 {distanceKm < 1 ? `${Math.max(10, Math.round(distanceKm * 1000))} m` : `${distanceKm.toFixed(1)} km`}
+                            </span>
+                          )}
                         </div>
 
                         {/* Duplicate Status Badge */}
@@ -1016,9 +1081,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                             <h3 className="font-extrabold text-sm sm:text-base leading-snug truncate drop-shadow">
                               {displayTitle}
                             </h3>
-                            {place.nameKh && place.nameKh !== displayTitle && (
-                              <p className="text-[11px] text-white/85 truncate">{place.nameKh}</p>
-                            )}
+                            {place.nameEn && place.nameEn !== displayTitle && !displayTitle.includes(place.nameEn) ? (
+                              <p className="text-[11px] text-white/90 font-semibold truncate">{place.nameEn}</p>
+                            ) : place.nameKh && place.nameKh !== displayTitle && !displayTitle.includes(place.nameKh) ? (
+                              <p className="text-[11px] text-white/90 font-semibold truncate">{place.nameKh}</p>
+                            ) : null}
                           </div>
 
                           <div className="shrink-0 flex flex-col items-end">

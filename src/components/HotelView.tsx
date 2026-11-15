@@ -1246,8 +1246,10 @@ export const HotelView: React.FC = () => {
 
   const hasActiveHotelFilters =
     categoryFilter !== 'all' ||
+    ratingFilter !== 'all' ||
     Boolean(selectedProvince && selectedProvince !== 'ទាំងអស់' && selectedProvince.toLowerCase() !== 'all') ||
     Boolean(hotelSearchQuery.trim()) ||
+    Boolean(debouncedSearchQuery.trim()) ||
     sortMode === 'nearest';
 
   const resetAllHotelFilters = () => {
@@ -1465,7 +1467,7 @@ export const HotelView: React.FC = () => {
                 </option>
                 {provinceOptions.map((p) => (
                   <option key={p.id} value={p.value}>
-                    {tr(language, p.fullKh, p.en, p.zh)} ({p.count})
+                    {tr(language, p.fullKh, p.en, p.zh)}
                   </option>
                 ))}
               </select>
@@ -1742,8 +1744,8 @@ export const HotelView: React.FC = () => {
                       {tr(language, 'បញ្ជីសណ្ឋាគារបន្ថែម', 'More Hotels Directory', '更多酒店列表')}
                     </h3>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-extrabold text-slate-800 font-mono shadow-2xs">
-                    {directoryHotels.length}
+                  <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-extrabold text-slate-800 shadow-2xs">
+                    {tr(language, `${directoryHotels.length} សណ្ឋាគារ`, `${directoryHotels.length} hotels`, `${directoryHotels.length} 家酒店`)}
                   </span>
                 </div>
 
@@ -1890,15 +1892,13 @@ export const HotelView: React.FC = () => {
                   )}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-              {hasActiveHotelFilters && (
-                <button
-                  type="button"
-                  onClick={resetAllHotelFilters}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold cursor-pointer shadow-xs transition active:scale-95"
-                >
-                  <span>↺ {tr(language, 'បង្ហាញសណ្ឋាគារទាំងអស់ឡើងវិញ', 'Show All Hotels', '显示全部酒店')}</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={resetAllHotelFilters}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold cursor-pointer shadow-xs transition active:scale-95"
+              >
+                <span>↺ {tr(language, 'បង្ហាញសណ្ឋាគារទាំងអស់ឡើងវិញ', 'Show All Hotels', '显示全部酒店')}</span>
+              </button>
               {debouncedSearchQuery.trim() && (
                 <button
                   type="button"

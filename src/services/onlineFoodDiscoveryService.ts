@@ -1,3 +1,4 @@
+import { DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_PUBLISHABLE_KEY } from '../config/appConstants';
 import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { FoodItem, TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
@@ -7608,9 +7609,9 @@ export interface SearchSocialResult extends OnlineDiscoveryFeedResult {
 
 import { parseKhmerFoodSearchQuery, stripNegatedSpicePhrases } from '../utils/khmerFoodSearch';
 
-const SUPABASE_BASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://ryvltobwuwuulazqjnza.supabase.co';
+const SUPABASE_BASE_URL = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
 const SUPABASE_ANON_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
+  import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_PUBLISHABLE_KEY;
 
 /**
  * Reuses the Home Screen's normalizeKhmerSearchText and expandMultilingualPlaceQuery

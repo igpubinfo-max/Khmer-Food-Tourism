@@ -132,6 +132,42 @@ export function readSavedUserGps(): { lat: number; lng: number } | null {
   return null;
 }
 
+export const readCachedUserGps = readSavedUserGps;
+export const calculateDistanceKm = calculateDistanceKmRounded;
+
+export async function detectUserGpsCoordinate(
+  forceHighAccuracy = false
+): Promise<{ coord: { lat: number; lng: number } | null; error?: string }> {
+  if (typeof navigator === 'undefined' || !('geolocation' in navigator)) {
+    return { coord: readSavedUserGps(), error: 'Geolocation not supported' };
+  }
+  return new Promise((resolve) => {
+    let resolved = false;
+    const finish = (lat?: number, lng?: number, error?: string) => {
+      if (resolved) return;
+      resolved = true;
+      if (typeof lat === 'number' && typeof lng === 'number' && isValidCambodiaGps(lat, lng)) {
+        saveUserGps({ lat, lng });
+        resolve({ coord: { lat, lng } });
+      } else {
+        resolve({ coord: readSavedUserGps(), error });
+      }
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => finish(pos.coords.latitude, pos.coords.longitude),
+      () => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => finish(pos.coords.latitude, pos.coords.longitude),
+          (err) => finish(undefined, undefined, err.message),
+          { enableHighAccuracy: false, timeout: 3500, maximumAge: 180000 }
+        );
+      },
+      { enableHighAccuracy: forceHighAccuracy, timeout: 4000, maximumAge: forceHighAccuracy ? 0 : 60000 }
+    );
+  });
+}
+
 export function saveUserGps(coords: { lat: number; lng: number }): void {
   if (!isValidCambodiaGps(coords?.lat, coords?.lng)) return;
   try {

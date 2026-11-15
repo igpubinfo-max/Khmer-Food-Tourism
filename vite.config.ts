@@ -132,7 +132,6 @@ export default defineConfig({
             { name: 'd-seed', test: /src[\\/]data[\\/]seed(Rac|Hotels|Dest|Rest)Part\d+/, maxSize: 480 * 1024 },
             { name: 'f-seed', test: /src[\\/]data[\\/]seed(Foods|Additional|Foodpanda|Vegetarian)/, maxSize: 480 * 1024 },
             { name: 'v0', test: /node_modules[\\/](react|scheduler)/ },
-            { name: 'v1', test: /node_modules[\\/](firebase|@firebase)/, maxSize: 480 * 1024 },
             { name: 'v2', test: /node_modules[\\/]tesseract\.js/, maxSize: 480 * 1024 },
             { name: 'v3', test: /node_modules[\\/]lucide-react/, maxSize: 480 * 1024 },
             { name: 'k5', test: /src[\\/](data[\\/]zhCompleteTranslations|utils[\\/]zhDynamicTranslator)/, maxSize: 480 * 1024 },

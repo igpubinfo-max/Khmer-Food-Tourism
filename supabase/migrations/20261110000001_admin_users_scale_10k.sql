@@ -198,6 +198,6 @@ BEGIN
     'offset', p_offset
   );
 END;
-$;
+;
 REVOKE ALL ON FUNCTION public.kft_query_users_paginated(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.kft_query_users_paginated(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER) TO service_role;

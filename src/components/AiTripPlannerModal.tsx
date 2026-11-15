@@ -1349,7 +1349,6 @@ export const AiTripPlannerModal: React.FC = () => {
                     >
                       {ALL_25_CAMBODIA_PROVINCES.map((prov, idx) => (
                         <option key={prov.id} value={prov.id}>
-                          {idx + 1}.{' '}
                           {language === 'km'
                             ? prov.nameKh
                             : language === 'zh'

@@ -11,9 +11,8 @@ import {
   sanitizeRestaurantShopPhoto,
 } from '../types';
 
-const SUPABASE_URL = 'https://ryvltobwuwuulazqjnza.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
-const KV_TABLE = 'kft_app_kv_store';
+import { DEFAULT_SUPABASE_URL as SUPABASE_URL, DEFAULT_SUPABASE_PUBLISHABLE_KEY as SUPABASE_KEY, SUPABASE_KV_TABLE as KV_TABLE } from '../config/appConstants';
+import { getAppAttestationHeaders } from '../utils/appCloneIntegrityGuard';
 
 const DAILY_CACHE_KEY = 'kft_daily_discoveries_cache_v2';
 const SEEN_ITEMS_KEY = 'kft_daily_seen_items_v2';
@@ -613,11 +612,12 @@ export async function fetchDynamicDailyDiscoveries(params: {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 5000);
     const supRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/${KV_TABLE}?select=key,updated_at&order=updated_at.desc&limit=8`,
+      `${SUPABASE_URL}/rest/v1/${KV_TABLE}?key=like.kft_ov_dest_*&select=key,updated_at&order=updated_at.desc&limit=8`,
       {
         headers: {
           apikey: SUPABASE_KEY,
           Authorization: `Bearer ${SUPABASE_KEY}`,
+          ...getAppAttestationHeaders(),
         },
         signal: controller.signal,
       }

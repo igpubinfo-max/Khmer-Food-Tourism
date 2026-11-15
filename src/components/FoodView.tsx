@@ -818,7 +818,7 @@ export const FoodView: React.FC = () => {
                 <option value="">{tr(language, 'គ្រប់ខេត្តទាំងអស់', 'All Provinces', '全部省份')}</option>
                 {provinceOptions.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {tr(language, p.kh, p.en, p.zh)} ({p.count})
+                    {tr(language, p.kh, p.en, p.zh)}
                   </option>
                 ))}
               </select>

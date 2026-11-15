@@ -1,3 +1,4 @@
+import { openNearMeModal } from '../utils/nearMeNavigation';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
@@ -1704,10 +1705,7 @@ export const WhatToEatModal: React.FC = () => {
       `${currentDish.nameKh} ${currentDish.nameEn} restaurant near me Cambodia`
     )}`;
     if (servingRestaurants.length > 0) {
-      (window as any).__kft_near_me_initial_tab = 'restaurants';
-      (window as any).__kft_near_me_initial_query = currentDish.nameKh;
-      (window as any).__kft_near_me_initial_food = currentDish;
-      setIsNearMeModalOpen(true);
+      openNearMeModal(setIsNearMeModalOpen, { tab: 'restaurants', query: currentDish.nameKh, food: currentDish });
     } else {
       window.open(googleUrl, '_blank', 'noopener,noreferrer');
     }

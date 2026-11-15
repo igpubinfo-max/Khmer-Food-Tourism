@@ -15130,118 +15130,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const effectiveDurationDays = durationDays ?? resolvedPlan.durationDays;
 
     // STRICT PAYMENT RULE: Route all VIP upgrade requests through pending Admin verification
-    const requireManualAdminApproval = Boolean(1);
-    if (requireManualAdminApproval) {
-      const subRes = await submitVipUpgradeRequest(
-        effectiveDurationDays,
-        effectiveAmountUsd,
-        transactionRef,
-        `VIP Upgrade Request (${resolvedPlan.nameEn} - ${effectiveAmountUsd.toFixed(2)} / ${effectiveDurationDays} days via ${paymentMethod}) — Awaiting Admin Approval`
-      );
-      return { success: subRes.success, error: subRes.error };
-    }
-
-    try {
-      const req: PaymentVerificationRequest = {
-        userId: currentUser.id,
-        userEmail: currentUser.email,
-        userName: currentUser.name,
-        paymentMethod,
-        transactionRef,
-        amountUsd: effectiveAmountUsd,
-        durationDays: effectiveDurationDays,
-        planType: resolvedPlan.id,
-        nonce: `vip_nonce_${Date.now()}`,
-        timestamp: Date.now(),
-        paymentToken: last4 ? `card_${last4}` : undefined
-      };
-
-      const result = await verifyPaymentOnBackend(req, latestSettings);
-      if (!result.success) {
-        const failedTxn: RegistrationTransaction = {
-          id: `TXN-VIP-FAIL-${Date.now().toString(36).toUpperCase()}`,
-          type: 'user_vip_upgrade',
-          userId: currentUser.id,
-          userName: currentUser.name,
-          userEmail: currentUser.email,
-          amountUsd: effectiveAmountUsd,
-          durationDays: effectiveDurationDays,
-          membershipTier: 'premium_vip',
-          status: 'failed',
-          paymentMethod,
-          transactionRef,
-          createdAt: new Date().toISOString(),
-          notes: result.error || 'Payment verification failed'
-        };
-        setTransactions(prev => [failedTxn, ...prev]);
-
-        showToast(
-          tr(
-            language,
-            `ការផ្ទៀងផ្ទាត់មិនជោគជ័យ៖ ${result.error || 'សូមព្យាយាមម្តងទៀត'}`,
-            `Verification failed: ${result.error || 'Please try again'}`,
-            `验证失败：${result.error || '请重试'}`
-          ),
-          'warning'
-        );
-        return { success: false, error: result.error };
-      }
-
-      // Upgrade existing account & persist across local + cloud registries
-      persistApprovedVipUserAndCloud({
-        targetId: currentUser.id,
-        targetEmail: currentUser.email,
-        targetName: currentUser.name,
-        targetPhone: currentUser.phone,
-        startDate: result.startDate,
-        expiryDate: result.expiryDate,
-        durationDays: result.durationDays,
-        planType: resolvedPlan.id,
-        paymentMethod,
-        transactionRef: result.transactionRef,
-      });
-
-      // Record verified transaction securely
-      const verifiedTxn: RegistrationTransaction = {
-        id: `TXN-VIP-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`,
-        type: 'user_vip_upgrade',
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userEmail: currentUser.email,
-        ownerId: currentUser.id,
-        ownerName: currentUser.name,
-        planType: resolvedPlan.id,
-        amountUsd: resolvedPlan.priceUsd,
-        durationDays: result.durationDays,
-        membershipTier: 'premium_vip',
-        status: 'verified',
-        paymentMethod,
-        transactionRef: result.transactionRef,
-        verificationSignature: result.verificationSignature,
-        createdAt: result.startDate,
-        expiresAt: result.expiryDate,
-        verifiedAt: new Date().toISOString(),
-        verifiedBy: paymentMethod === 'GooglePlayBilling' ? 'Google Play Billing Server' : 'Secure ABA KHQR Payment Engine',
-        notes: `${result.durationDays}-day Premium VIP membership activated successfully ($${resolvedPlan.priceUsd.toFixed(2)} USD)`
-      };
-
-      setTransactions(prev => [verifiedTxn, ...prev]);
-
-      showToast(
-        tr(
-          language,
-          `អបអរសាទរ! គណនីរបស់អ្នកត្រូវបានដំឡើងទៅជាសមាជិក VIP (${result.durationDays} ថ្ងៃ) ដោយជោគជ័យ! 🎉`,
-          `Congratulations! Your account has been upgraded to VIP (${result.durationDays} days)! 🎉`,
-          `恭喜！您的账户已成功升级为 VIP 会员（${result.durationDays} 天）！🎉`
-        ),
-        'success'
-      );
-
-      return { success: true };
-    } catch (e: any) {
-      console.error('Upgrade to VIP error:', e);
-      return { success: false, error: e?.message || 'Unexpected payment error' };
-    }
+    const subRes = await submitVipUpgradeRequest(
+      effectiveDurationDays,
+      effectiveAmountUsd,
+      transactionRef,
+      `VIP Upgrade Request (${resolvedPlan.nameEn} - ${effectiveAmountUsd.toFixed(2)} / ${effectiveDurationDays} days via ${paymentMethod}) — Awaiting Admin Approval`
+    );
+    return { success: subRes.success, error: subRes.error };
   };
 
   const renewCurrentUserVip = async (
@@ -18095,7 +17990,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  const unreadNotificationsCount = notificationsEnabled ? notifications.filter(n => !n.isRead && n.type !== 'promo' && n.type !== 'discount' && !n.discountPercent).length : 0;
+  const unreadNotificationsCount = useMemo(() => notificationsEnabled ? notifications.filter(n => !n.isRead && n.type !== 'promo' && n.type !== 'discount' && !n.discountPercent).length : 0, [notificationsEnabled, notifications]);
 
   const resetAllData = () => {
     // Strictly preserve permanent Admin-approved media overrides, revision ledger, pending cloud queue,
@@ -18137,9 +18032,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  return (
-    <AppContext.Provider
-      value={{
+  const contextValue = useMemo(
+    () => ({
         language,
         setLanguage,
         activeTab,
@@ -18396,8 +18290,80 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         googleMapsSearchInitialTab,
         openGoogleMapsSearchModal,
         importGooglePlaceToApp,
-      }}
-    >
+      }),
+    [
+      language,
+      activeTab,
+      canGoBack,
+      currentUser,
+      users,
+      deletedUsers,
+      appSettings,
+      isRefreshingSettings,
+      settingsSyncError,
+      foods,
+      restaurants,
+      destinations,
+      transactions,
+      centralizedUsedTrxRecords,
+      centralizedPaymentAuditLogs,
+      isSyncingUsers,
+      lastUsersSyncedAt,
+      isExitModalOpen,
+      isQrScannerModalOpen,
+      isVipAddRestaurantModalOpen,
+      isAiFoodDiscoveryModalOpen,
+      isRestaurantCheckInModalOpen,
+      bookmarks,
+      savedVideos,
+      pendingDeleteRestaurant,
+      isManageMenuModalOpen,
+      managingRestaurant,
+      activeManagedShopId,
+      selectedFood,
+      selectedRestaurant,
+      selectedDestination,
+      isAuthModalOpen,
+      authModalInitialView,
+      isAddRestaurantModalOpen,
+      isAdminOpen,
+      isAdminLoginModalOpen,
+      isInstallModalOpen,
+      installPlatformTab,
+      isSupportModalOpen,
+      searchQuery,
+      selectedProvince,
+      toast,
+      wishlists,
+      tripPlans,
+      notifications,
+      notificationsEnabled,
+      unreadNotificationsCount,
+      isWhatToEatModalOpen,
+      isNearMeModalOpen,
+      isDailyDiscoveriesModalOpen,
+      isWishlistsModalOpen,
+      isAiTripPlannerModalOpen,
+      isNotificationsModalOpen,
+      isTrendingSocialModalOpen,
+      targetWishlistItem,
+      isUpgradeVipModalOpen,
+      isVipRenewMode,
+      supportTickets,
+      isSupportTicketModalOpen,
+      supportModalPrefill,
+      trendingFoods,
+      selectedTrendingFood,
+      isTrendingFoodDetailModalOpen,
+      aiCheckIns,
+      isAiCheckInModalOpen,
+      isGoogleMapsSearchModalOpen,
+      googleMapsSearchInitialTab,
+    ]
+  );
+
+  return (
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

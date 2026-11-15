@@ -1,3 +1,4 @@
+import { openNearMeModal } from '../utils/nearMeNavigation';
 import React, { useMemo } from 'react';
 import { Navigation, Store } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -52,12 +53,7 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
   );
 
   const openNearMe = () => {
-    if (typeof window !== 'undefined') {
-      (window as any).__kft_near_me_initial_tab = 'restaurants';
-      (window as any).__kft_near_me_initial_query = food.nameKh;
-      (window as any).__kft_near_me_initial_food = food;
-    }
-    setIsNearMeModalOpen(true);
+    openNearMeModal(setIsNearMeModalOpen, { tab: 'restaurants', query: food.nameKh, food });
   };
 
   return (

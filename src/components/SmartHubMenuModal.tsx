@@ -1,3 +1,4 @@
+import { openNearMeModal } from '../utils/nearMeNavigation';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   X, Compass, Navigation, Heart, BadgeCheck, Wifi, WifiOff, Route, ChevronDown, Lock, Utensils, CheckCircle2,
@@ -133,9 +134,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               className={rowCls}
               onClick={() => {
                 onClose();
-                (window as any).__kft_near_me_initial_tab = 'restaurants';
-                window.dispatchEvent(new CustomEvent('kft:near-me-tab', { detail: 'restaurants' }));
-                setIsNearMeModalOpen(true);
+                openNearMeModal(setIsNearMeModalOpen, { tab: 'restaurants' });
               }}
             >
               <span className={`${iconBox} bg-emerald-100 text-emerald-700`}><Navigation className="w-5 h-5" /></span>

@@ -1,3 +1,4 @@
+import { consumeNearMeInitialState } from '../utils/nearMeNavigation';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
@@ -175,25 +176,12 @@ export const NearMeModal: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (isNearMeModalOpen && typeof window !== 'undefined') {
-      const initTab = (window as any).__kft_near_me_initial_tab;
-      const initFood = (window as any).__kft_near_me_initial_food;
-      const initQuery = (window as any).__kft_near_me_initial_query;
-      if (initTab !== undefined || initFood !== undefined || initQuery !== undefined) {
-        (window as any).__kft_near_me_initial_tab = undefined;
-        setActiveType(initTab === 'destinations' ? 'destinations' : 'restaurants');
-        if (initFood && typeof initFood === 'object') {
-          setTargetFood(initFood as FoodItem);
-          (window as any).__kft_near_me_initial_food = undefined;
-        } else {
-          setTargetFood(null);
-        }
-        if (typeof initQuery === 'string') {
-          setNearbyQuery(initQuery);
-          (window as any).__kft_near_me_initial_query = undefined;
-        } else {
-          setNearbyQuery('');
-        }
+    if (isNearMeModalOpen) {
+      const init = consumeNearMeInitialState();
+      if (init.hasState) {
+        setActiveType(init.tab);
+        setTargetFood(init.food);
+        setNearbyQuery(init.query);
         setQuickFilterId('all');
       }
     }

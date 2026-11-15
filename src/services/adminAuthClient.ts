@@ -68,10 +68,10 @@ export function clearAdminToken(): void {
 }
 
 /** Header carrying the admin token for writes to admin-only documents (empty object otherwise). */
-export function adminTokenHeaders(key: string): Record<string, string> {
+export function adminTokenHeaders(key?: string): Record<string, string> {
+  if (key !== undefined &&
   // Admin-only documents, protected aggregate lists, and per-user rows (an admin can grant / adjust VIP or delete accounts
   // from the Admin portal; the database guards accept those writes/deletes only with a valid admin token).
-  if (
     !ADMIN_ONLY_KV_KEYS.includes(key) &&
     !key.startsWith('kft_user_') &&
     key !== 'kft_cloud_users_v1' &&
@@ -278,4 +278,32 @@ export function resetAdminAuthClientState(): void {
   pinTicket = null;
   lastVerifiedPin = null;
   statusCache = null;
+}
+/**
+ * SEC-01 / CHG-06: Fetch atomic user rows via the server-authenticated `admin-auth` Edge Function.
+ * Requires a valid signed Admin session token. Returns `null` if the Edge Function is unreachable.
+ */
+export async function adminServerListUsers(
+  limit = 200,
+  offset = 0
+): Promise<Array<{ key: string; payload: unknown; updated_at?: string }> | null> {
+  const token = getAdminToken();
+  if (!token) return null;
+  const r = await callAdminAuth({ action: 'list_users', token, limit, offset }, 6000);
+  if (r.kind === 'response' && r.status === 200 && r.data?.ok && Array.isArray(r.data.rows)) {
+    return r.data.rows as Array<{ key: string; payload: unknown; updated_at?: string }>;
+  }
+  return null;
+}
+
+/**
+ * SEC-01 / CHG-06: Fetch a single user record by exact `kft_user_<id>` key via `admin-auth` Edge Function.
+ */
+export async function adminServerGetUserProfile(userKey: string): Promise<unknown | null> {
+  if (!userKey || !userKey.startsWith('kft_user_')) return null;
+  const r = await callAdminAuth({ action: 'get_user_profile', userKey }, 4500);
+  if (r.kind === 'response' && r.status === 200 && r.data?.ok) {
+    return r.data.payload ?? null;
+  }
+  return null;
 }

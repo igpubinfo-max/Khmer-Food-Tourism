@@ -90,7 +90,7 @@ export type ServerTrialClaimOutcome =
     }
   | { kind: 'unavailable' };
 
-export async function verifyVipPurchaseOnServer(params: {
+export async function verifyVipPurchaseOnServer(_params: {
   userId: string;
   durationDays: number;
   receiptDataUrl: string;
@@ -102,39 +102,8 @@ export async function verifyVipPurchaseOnServer(params: {
   deviceHash?: string | null;
   identityHashes?: string[];
 }): Promise<ServerPurchaseOutcome> {
-  // STRICT RULE: Never call remote auto-grant on receipt submission; all payments must remain PENDING until Admin approval.
-  if (Boolean(1)) return { kind: 'unavailable' };
-  if (isAppCloneTampered()) return { kind: 'unavailable' };
-  const cfg = getCloudApiConfig();
-  if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || typeof fetch === 'undefined') return { kind: 'unavailable' };
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 60_000); // vision model + database writes
-  try {
-    const res = await fetch(`${cfg.supabaseUrl.replace(/\/+$/, '')}/functions/v1/vip-purchase`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: cfg.supabaseAnonKey,
-        Authorization: `Bearer ${cfg.supabaseAnonKey}`,
-        'x-kft-user-id': params.userId,
-        ...getAppAttestationHeaders(),
-      },
-      body: JSON.stringify(params),
-      signal: controller.signal,
-    });
-    if (res.headers.get('x-vip-purchase') !== '1' || res.status !== 200) return { kind: 'unavailable' };
-    const data = await res.json().catch(() => null);
-    if (!data || data.ok !== true || !data.report || typeof data.report !== 'object') return { kind: 'unavailable' };
-    if (data.decision === 'verified' && data.grant && typeof data.grant.expiryIso === 'string') {
-      return { kind: 'verified', report: data.report, grant: data.grant as ServerVipGrant };
-    }
-    if (data.decision === 'rejected') return { kind: 'rejected', report: data.report };
-    return { kind: 'pending', report: data.report };
-  } catch {
-    return { kind: 'unavailable' };
-  } finally {
-    clearTimeout(timer);
-  }
+  // STRICT RULE: Never call remote auto-grant on receipt submission; all payments remain PENDING until Admin approval.
+  return { kind: 'unavailable' };
 }
 
 export async function claimConsumerTrialOnServer(params: {

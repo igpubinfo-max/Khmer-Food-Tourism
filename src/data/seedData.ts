@@ -1,5 +1,5 @@
 import { FoodItem, Restaurant, TouristDestination, User, AppSettings, RegistrationTransaction, TEN_VIP_BENEFITS } from '../types';
-import { initial100Foods } from './seedFoods';
+import { canonicalKhmerFoods, initial100Foods } from './seedFoods';
 import { initial100Restaurants } from './seedRestaurants';
 import { youthBrandedCafes30 } from './seedYouthBrandedCafes';
 import { initial100Destinations } from './seedDestinations';
@@ -64,7 +64,8 @@ export const initialAppSettings: AppSettings = {
 };
 
 // 100+ Authentic Khmer Dishes
-export const initialFoods: FoodItem[] = initial100Foods;
+export const initialFoods: FoodItem[] = canonicalKhmerFoods;
+export { canonicalKhmerFoods, initial100Foods };
 
 // 100+ Cambodian Restaurants & Food Shops
 export const initialRestaurants: Restaurant[] = [...youthBrandedCafes30, ...initial100Restaurants];

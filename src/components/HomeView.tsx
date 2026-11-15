@@ -1,3 +1,4 @@
+import { openNearMeModal } from '../utils/nearMeNavigation';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { TrendingFoodItem, isUserVipActive, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, resolveFoodPhotoUrl, handleFoodImageError, isStrictVerifiedCambodiaRestaurant } from '../types';
@@ -349,9 +350,7 @@ export const HomeView: React.FC = () => {
   }, [setIsAdminOpen]);
 
   const handleNearbyFoodSearch = useCallback(() => {
-    (window as any).__kft_near_me_initial_tab = 'restaurants';
-    window.dispatchEvent(new CustomEvent('kft:near-me-tab', { detail: 'restaurants' }));
-    setIsNearMeModalOpen(true);
+    openNearMeModal(setIsNearMeModalOpen, { tab: 'restaurants' });
   }, [setIsNearMeModalOpen]);
 
   const handleNearbyPlaces = useCallback(() => {

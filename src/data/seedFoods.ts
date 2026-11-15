@@ -6444,8 +6444,11 @@ export const generateFull100Foods = (): FoodItem[] => {
   );
 };
 
-export const initial100Foods: FoodItem[] = generateFull100Foods();
-export const initial200Foods: FoodItem[] = initial100Foods;
-export const initial230Foods: FoodItem[] = initial100Foods;
-export const initial330Foods: FoodItem[] = initial100Foods;
+/** Canonical deduplicated 277-dish Khmer food dataset (CHG-14 / DUP-05) */
+export const canonicalKhmerFoods: FoodItem[] = generateFull100Foods();
+/** Legacy aliases retained for 100% backward compatibility */
+export const initial100Foods: FoodItem[] = canonicalKhmerFoods;
+export const initial200Foods: FoodItem[] = canonicalKhmerFoods;
+export const initial230Foods: FoodItem[] = canonicalKhmerFoods;
+export const initial330Foods: FoodItem[] = canonicalKhmerFoods;
 export { vegetarian30Foods, foodpanda100Foods };

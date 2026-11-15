@@ -336,17 +336,42 @@ export const TourismView: React.FC = () => {
   // Exclude hotels, blurry/scraped RAC records, and duplicate fallback photos so every displayed attraction
   // has a verified, clear, authentic, 100% unique photograph matching the actual tourist destination.
   const scenicDestinationsOnly = useMemo(() => {
-    const verified = destinations.filter((d) => {
-      if (!d || d.categorySlug === 'hotel') return false;
+    const primary290: typeof destinations = [];
+    const primaryIds = new Set<string>();
+
+    for (const d of destinations) {
+      if (!d || d.categorySlug === 'hotel') continue;
       const hasPhoto = Boolean(d.photoUrl && d.photoUrl.trim());
-      if (!hasPhoto) return false;
       const isCustomAdmin = Boolean(d.isAdminEdited || d.isCustomPhoto);
-      if (d.id.startsWith('rac-') && !isCustomAdmin) return false;
-      if (d.isFeatured === false && !isCustomAdmin) return false;
-      return true;
-    });
-    // Deduplicate strictly by ID, normalized Khmer/English names, and clean photoUrl
-    return shuffleTourismByRatingTiers(verified, shuffleSeed, avoidTopIds);
+      if (hasPhoto && (!d.id.startsWith('rac-') || isCustomAdmin) && (d.isFeatured !== false || isCustomAdmin)) {
+        if (!primaryIds.has(d.id)) {
+          primaryIds.add(d.id);
+          primary290.push(d);
+        }
+      }
+    }
+
+    // Randomize the first 290 clear-photo destinations whenever the menu opens or Shuffle is clicked
+    const shuffledPrimary = shuffleTourismByRatingTiers(primary290, shuffleSeed, avoidTopIds);
+    const shuffledPrimaryIds = new Set(shuffledPrimary.map((d) => d.id));
+    for (const d of primary290) {
+      if (!shuffledPrimaryIds.has(d.id)) {
+        shuffledPrimary.push(d);
+        shuffledPrimaryIds.add(d.id);
+      }
+    }
+
+    // Append all remaining non-hotel destinations (positions 291 to 1,464) without dropping or skipping any record
+    const remaining: typeof destinations = [];
+    const seenIds = new Set<string>(shuffledPrimaryIds);
+    for (const d of destinations) {
+      if (!d || d.categorySlug === 'hotel') continue;
+      if (seenIds.has(d.id)) continue;
+      seenIds.add(d.id);
+      remaining.push(d);
+    }
+
+    return [...shuffledPrimary, ...remaining];
   }, [destinations, shuffleSeed, avoidTopIds]);
 
   const nearbyMergedDestinations = useMemo(() => {
@@ -392,6 +417,9 @@ export const TourismView: React.FC = () => {
       if (selectedCategory === 'trending_social') return Boolean(d.isTrendingSocial);
       if (selectedCategory === 'cultural') {
         return d.categorySlug === 'cultural' || d.categorySlug === 'resort' || Boolean(d.isTrendingSocial);
+      }
+      if (selectedCategory === 'nature') {
+        return d.categorySlug === 'nature' || d.categorySlug === 'ecotourism' || d.categorySlug === 'waterfall';
       }
       if (selectedCategory !== 'all') return d.categorySlug === selectedCategory;
       return true;
@@ -493,6 +521,8 @@ export const TourismView: React.FC = () => {
         if (!d.isTrendingSocial) return false;
       } else if (selectedCategory === 'cultural') {
         if (d.categorySlug !== 'cultural' && d.categorySlug !== 'resort' && !d.isTrendingSocial) return false;
+      } else if (selectedCategory === 'nature') {
+        if (d.categorySlug !== 'nature' && d.categorySlug !== 'ecotourism' && d.categorySlug !== 'waterfall') return false;
       } else if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {
         return false;
       } else if (selectedCategory === 'all' && mappedSemanticCat && d.categorySlug !== mappedSemanticCat) {
@@ -806,7 +836,7 @@ export const TourismView: React.FC = () => {
                 </option>
                 {provinceOptions.map((p) => (
                   <option key={p.id} value={p.value}>
-                    {tr(language, p.fullKh, p.en, p.zh)} ({p.count})
+                    {tr(language, p.fullKh, p.en, p.zh)}
                   </option>
                 ))}
               </select>
@@ -860,14 +890,7 @@ export const TourismView: React.FC = () => {
               <RefreshCw className="w-3.5 h-3.5 text-slate-950 shrink-0" strokeWidth={2.4} />
               <span>{tr(language, 'ប្តូរថ្មី', 'Shuffle', '换一批')}</span>
             </button>
-            <span className="px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-xs font-extrabold text-slate-800 shrink-0">
-              {tr(
-                language,
-                `${filteredDestinations.length} កន្លែង`,
-                `${filteredDestinations.length} places`,
-                `${filteredDestinations.length} 处景点`
-              )}
-            </span>
+
           </div>
         </div>
 
@@ -931,9 +954,9 @@ export const TourismView: React.FC = () => {
                 >
                   {tr(
                     language,
-                    `បង្ហាញតំបន់ទេសចរណ៍បន្ថែម (${displayedDestinations.length} / ${filteredDestinations.length})`,
-                    `Show More Destinations (${displayedDestinations.length} / ${filteredDestinations.length})`,
-                    `加载更多旅游景点 (${displayedDestinations.length} / ${filteredDestinations.length})`
+                    'បង្ហាញតំបន់ទេសចរណ៍បន្ថែម',
+                    'Show More Destinations',
+                    '加载更多旅游景点'
                   )}
                 </button>
               </div>

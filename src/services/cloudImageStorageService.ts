@@ -1,3 +1,4 @@
+import { DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_PUBLISHABLE_KEY } from '../config/appConstants';
 /**
  * Permanent Cloud Image Storage, WebP Compression, Thumbnail Generation & CDN Delivery Service
  * ============================================================================================
@@ -481,8 +482,8 @@ export async function uploadBlobToSecondaryCloudCdn(
   return null;
 }
 
-const FALLBACK_SUPABASE_URL = 'https://ryvltobwuwuulazqjnza.supabase.co';
-const FALLBACK_SUPABASE_ANON_KEY = 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
+const FALLBACK_SUPABASE_URL = DEFAULT_SUPABASE_URL;
+const FALLBACK_SUPABASE_ANON_KEY = DEFAULT_SUPABASE_PUBLISHABLE_KEY;
 
 function resolveSupabaseStorageCredentials(): { supabaseUrl: string; supabaseAnonKey: string } {
   let cfgUrl = '';

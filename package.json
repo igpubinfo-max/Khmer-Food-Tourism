@@ -24,8 +24,9 @@
     "test:users:migration": "node scripts/verify_update_migration_audit.mjs",
     "test:edge": "npx tsx scripts/verifyEdgeFunctions.mjs",
     "test:ios": "node scripts/verifyIosReview.mjs",
-    "predeploy:users": "npm run test:users:safety && npm run test:edge && npm run test:users:migration && npm run backup:users && npm run test:users:restore",
-    "build:release": "npm run predeploy:users && vite build"
+    "predeploy:users": "npm run test:unit && npm run test:users:safety && npm run test:edge && npm run test:users:migration && npm run backup:users && npm run test:users:restore",
+    "build:release": "npm run predeploy:users && vite build",
+    "test:unit": "node scripts/unitTestSuite.cjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.0.0",
@@ -33,10 +34,7 @@
     "@capacitor/device": "^8.0.0",
     "@capacitor/local-notifications": "^8.3.1",
     "@types/qrcode": "^1.5.6",
-    "bakong-khqr": "^1.0.20",
     "clsx": "^2.1.1",
-    "exceljs": "^4.4.0",
-    "firebase": "^13.0.0",
     "lucide-react": "^1.59.0",
     "qrcode": "^1.5.4",
     "react": "^19.3.1",
@@ -59,6 +57,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
     "vite": "^8.3.4",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "exceljs": "^4.4.0"
   }
 }

@@ -1056,14 +1056,14 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
             className="px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-xs font-bold cursor-pointer"
           >
             <option value="all">
-              {tr(language, `គ្រប់រាជធានី-ខេត្តទាំង ២៥ (${allHotels.length})`, `All 25 Provinces (${allHotels.length})`, `全部 25 省市 (${allHotels.length})`)}
+              {tr(language, 'គ្រប់រាជធានី-ខេត្តទាំង ២៥', 'All 25 Provinces', '全部 25 省市')}
             </option>
             {DISH_PROVINCES.map((p) => {
               const clean = p.kh.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
               const c = allHotels.filter((h) => (h.provinceKh || '').includes(clean)).length;
               return (
                 <option key={p.id} value={p.kh}>
-                  {p.fullKh} ({c})
+                  {p.fullKh}
                 </option>
               );
             })}

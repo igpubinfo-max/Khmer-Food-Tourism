@@ -1,6 +1,6 @@
 import { FoodItem } from '../types';
 import { getLocalizedFood } from './zhDynamicTranslator';
-import { analyzeSearchQuery, scoreSearchRecord, getCulinarySynonyms, SearchableFields } from './searchEngine';
+import { analyzeSearchQuery, scoreSearchRecord, getCulinarySynonyms, applyKhmerSpellingVariants, SearchableFields } from './searchEngine';
 import { detectDishProvince, getProvinceOptionById } from './foodFilters';
 
 export type KhmerFlavorIntent =
@@ -164,59 +164,7 @@ const SPICY_BODY_RE =
  */
 export function normalizeKhmerFoodText(input?: string): string {
   if (!input) return '';
-  return String(input)
-    .normalize('NFC')
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')
-    .toLowerCase()
-    // Reorder decomposed Khmer vowel/diacritic & double-subscript sequences typed on mobile keyboards
-    .replace(/\u17C1\u17B6/g, '\u17C4') // េ + ា -> ោ
-    .replace(/\u17C1\u17B8/g, '\u17BE') // េ + ី -> ើ
-    .replace(/\u17C6\u17BB/g, '\u17BB\u17C6') // ំ + ុ -> ុំ
-    .replace(/\u17B6\u17C9/g, '\u17C9\u17B6') // ា + ៉ -> ៉ា
-    .replace(/\u17B6\u17CA/g, '\u17CA\u17B6') // ា + ៊ -> ៊ា
-    .replace(/\u17D2\u179A\u17D2([\u1780-\u1799\u179B-\u17A2])/g, '\u17D2$1\u17D2\u179A') // អង្រ្កង -> អង្ក្រង
-    // Normalize common Khmer culinary spelling variations
-    .replace(/សម្លរ/g, 'សម្ល')
-    .replace(/ស្ងោ(?!រ)/g, 'ស្ងោរ')
-    .replace(/ស្ងោរជ្រក(?!់)/g, 'ស្ងោរជ្រក់')
-    .replace(/ប្រហើ(?!រ)/g, 'ប្រហើរ')
-    .replace(/អាមុក|ហហ្មុក/g, 'អាម៉ុក')
-    .replace(/បាញ់ចុក|បញ្ចក់/g, 'បញ្ចុក')
-    .replace(/គុយទៀវ/g, 'គុយទាវ')
-    .replace(/បាញ់ឆេវ/g, 'បាញ់ឆែវ')
-    .replace(/ឡុកឡាក(?!់)/g, 'ឡុកឡាក់')
-    .replace(/ការ៉ី/g, 'ការី')
-    .replace(/ម្ចូរ|ម្ជូ(?!រ)/g, 'ម្ជូរ')
-    .replace(/កកូ(?!រ)/g, 'កកូរ')
-    .replace(/ខ្ទឹះ/g, 'ខ្ទិះ')
-    .replace(/ហិរ/g, 'ហឹរ')
-    .replace(/ត្រយ៉ូង/g, 'ត្រយូង')
-    .replace(/ស្រដែក/g, 'សណ្តែក')
-    .replace(/ណ្ដ/g, 'ណ្ត')
-    .replace(/ក្ដ/g, 'ក្ត')
-    .replace(/ផ្ដ/g, 'ផ្ត')
-    .replace(/ស្ដ/g, 'ស្ត')
-    .replace(/ម្ដ/g, 'ម្ត')
-    .replace(/ប្ដ/g, 'ប្ត')
-    .replace(/ឧត្ដ/g, 'ឧត្ត')
-    .replace(/ឆ្ដ/g, 'ឆ្ត')
-    .replace(/ង្ដ/g, 'ង្ត')
-    .replace(/ន្ដ/g, 'ន្ត')
-    .replace(/អម្ពិល/g, 'អំពិល')
-    .replace(/ប្ញស្សី|ឬស្សី/g, 'ឫស្សី')
-    .replace(/ក្រូចឆ្មារ/g, 'ក្រូចឆ្មា')
-    .replace(/មីសួ(?!រ)/g, 'មីសួរ')
-    .replace(/ស្លឹកញរ/g, 'ស្លឹកញ')
-    .replace(/ស្លឹកតើយ/g, 'ស្លឹកតយ')
-    .replace(/នំបុ័ង/g, 'នំប៉័ង')
-    .replace(/កាពិក/g, 'កាពិ')
-    .replace(/លៀស/g, 'លាស')
-    .replace(/ស្រុស/g, 'ស្រុះ')
-    .replace(/ឆ្អឹងជំនី(?!រ)/g, 'ឆ្អឹងជំនីរ')
-    .replace(/ងាំង៉ូវ/g, 'ង៉ាំង៉ូវ')
-    .replace(/សាឡាត់/g, 'សាឡាដ')
-    .replace(/ផាកឡូវ/g, 'ផាក់ឡូវ')
-    .replace(/មុំា|មំា/g, 'ម៉ាំ')
+  return applyKhmerSpellingVariants(input)
     .replace(/[.,/#!$%^&*;:{}=\-_`~()?"'«»៖។]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();

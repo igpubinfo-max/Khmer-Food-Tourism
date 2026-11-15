@@ -71,11 +71,18 @@ const KHMER_SPELLING_VARIANTS: Array<[RegExp, string]> = [
   [/មុំា|មំា/g, 'ម៉ាំ'],
 ];
 
+/** Shared Khmer/English/Chinese base normalizer: NFC, strip zero-width chars, lowercase, and unify Khmer spelling variants (CHG-12). */
+export function applyKhmerSpellingVariants(input?: string | null): string {
+  if (!input) return '';
+  let s = String(input).normalize('NFC').replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '').toLowerCase();
+  for (const [rx, rep] of KHMER_SPELLING_VARIANTS) s = s.replace(rx, rep);
+  return s;
+}
+
 /** Lower-case, strip zero-width chars & Latin accents, unify Khmer spelling variants and punctuation. */
 export function normalizeSearchText(input?: string | null): string {
   if (!input) return '';
-  let s = String(input).replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '').toLowerCase();
-  for (const [rx, rep] of KHMER_SPELLING_VARIANTS) s = s.replace(rx, rep);
+  let s = applyKhmerSpellingVariants(input);
   s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   s = s
     .replace(/['’‘`´]/g, '')
@@ -130,6 +137,36 @@ const BRAND_TRANSLITERATION_GROUPS: string[][] = [
   ['paradise', 'ភែរើដាយ', 'ប៉ារ៉ាដាយ'],
   ['rainforest', 'រេនហ្វរេស'],
   ['cinema', 'រោងកុន', 'ស៊ីនេម៉ា'],
+  ['vitking', 'vitking house', 'វីតឃីង', 'វីតឃីងហោវ', 'វីតឃីងហាវ', 'វីតឃីងហៅស៍', 'វីតឃីង ហៅស៍', 'វីតឃីង ហោវ'],
+  ['mercy', 'mercy vegetarian', 'ឆីស៊ីញ', 'ធីស៊ីញ', 'ហាងម្ហូបបួស ឆីស៊ីញ', 'ហាងម្ហូបបួស ធីស៊ីញ'],
+  ['maitreya', 'មេត្រី', 'ម្ហូបបួស មេត្រី'],
+  ['mi chay', 'មីឆាយ', 'ទួនហ្វា', 'tuon hoa'],
+  ['bong bonlai', 'បងបន្លែ'],
+  ['surn yi', 'ស៊ឺនយី'],
+  ['jian kang', 'ជានខាង', 'ជាន ខាង', '健康素食', '健康素食馆'],
+  ['zhong xin', 'ចុងស៊ីញ', 'ចុង ស៊ីញ', '中信蔬食', '中信蔬食馆'],
+  ['sun immixon', 'ស៊ុនអ៊ីម៉ីស៊ឺគ័ន'],
+  ['park cafe', 'ផាកកាហ្វេ', 'ផាក កាហ្វេ'],
+  ['tube coffee', 'ធូបកាហ្វេ', 'ធូប កាហ្វេ'],
+  ['amazon', 'cafe amazon', 'អាម៉ាហ្សូន', 'កាហ្វេអាម៉ាហ្សូន'],
+  ['starbucks', 'ស្តាបាក់'],
+  ['koi', 'koi the', 'កយ', 'កយតេ'],
+  ['one more', 'វ័នម៉រ'],
+  ['tonle bassac', 'ទន្លេបាសាក់'],
+  ['bayon', 'បាយ័ន'],
+  ['samdoo', 'សាំឌូ'],
+  ['khema', 'ខេមា'],
+  ['aeon', 'aeon mall', 'អេអន', 'ផ្សារទំនើបអេអន', '永旺'],
+  ['chip mong', 'ជីបម៉ុង', 'ជីប ម៉ុង', 'ផ្សារទំនើបជីបម៉ុង'],
+  ['koh pich', 'diamond island', 'កោះពេជ្រ'],
+  ['central market', 'phsar thmei', 'ផ្សារធំថ្មី', 'ផ្សារថ្មី', '中央市场'],
+  ['russian market', 'toul tompong', 'tuol tompoung', 'ទួលទំពូង', 'ផ្សារទួលទំពូង', '俄罗斯市场'],
+  ['wat phnom', 'វត្តភ្នំ', '塔山寺'],
+  ['boat noodle', 'boat noodles', 'គុយទាវទូក', 'មីទូក', '船面'],
+  ['spicy noodle', 'spicy noodles', 'មីហឹរ', 'មីហិរ', '辣面', '火鸡面'],
+  ['chicken rice', 'hainanese chicken rice', 'បាយមាន់', 'បាយមាន់ហៃណាំ', '海南鸡饭', '鸡饭'],
+  ['roast duck', 'បាយទាខ្វៃ', 'ទាខ្វៃ', 'ទាអាំង', '烧鸭', '烤鸭饭'],
+  ['dim sum', 'dimsum', 'ឌីមសាំ', 'ហាកាវ', 'សៀវម៉ៃ', '点心', '早茶', '粤菜'],
   // Cambodian signature dishes & culinary terms (Khmer / English / Romanized / Chinese)
   ['amok', 'ah mok', 'homok', 'fish amok', 'អាម៉ុក', 'អាម៉ុកត្រី', '阿莫克', '阿莫克鱼', '高棉阿莫克'],
   ['lok lak', 'loklak', 'luc lac', 'beef lok lak', 'ឡុកឡាក់', 'ឡុកឡាក់សាច់គោ', '禄叻', '禄拉克', '摇滚牛肉', '牛肉粒'],
@@ -174,7 +211,7 @@ const BRAND_TRANSLITERATION_GROUPS: string[][] = [
   ['frog', 'កង្កែប', 'កង្កែបបោក', 'កង្កែបអាំង', '田鸡', '烤田鸡'],
   ['eel', 'អន្ទង់', '鳝鱼', '田鳝'],
   ['seafood', 'គ្រឿងសមុទ្រ', '海鲜', '河鲜'],
-  ['vegetarian', 'vegan', 'ម្ហូបបួស', 'បួស', 'តៅហ៊ូ', 'tofu', '素食', '豆腐', 'បន្លែ', '蔬菜'],
+  ['vegetarian', 'vegetarians', 'vegeterian', 'vegan', 'veggie', 'plant based', 'plantbased', 'health food', 'healthy food', 'vegetarian restaurant', 'vegan restaurant', 'vegetarian cafe', 'ម្ហូបបួស', 'អាហារបួស', 'ហាងបួស', 'ហាងម្ហូបបួស', 'ហាងអាហារបួស', 'ភោជនីយដ្ឋានបួស', 'ភោជនីយដ្ឋានអាហារបួស', 'ភោជនីយដ្ឋានម្ហូបបួស', 'ភោជនីយដ្ឋានអ្នកតមសាច់', 'ភោជនីយដ្ឋានអាហារជំនួយសុខភាព', 'អ្នកតមសាច់', 'តមសាច់', 'បួស', 'អាហារសុខភាព', 'ម្ហូបសុខភាព', 'បាយបួស', 'មីបួស', 'គុយទាវបួស', 'ស៊ុបបួស', 'ប៊ូហ្វេបួស', 'តៅហ៊ូ', 'tofu', 'បន្លែ', 'chay', 'quan chay', '素食', '素菜', '斋', '斋菜', '蔬食', '素食馆', '素食餐厅', '健康素食', '豆腐', '蔬菜'],
   ['dessert', 'sweet', 'បង្អែម', '甜品', '甜点', '糖水', '糕点'],
   ['drink', 'beverage', 'smoothie', 'ភេសជ្ជៈ', 'ទឹកក្រឡុក', 'ទឹកអំពៅ', 'ទឹកដូង', 'ទឹកត្នោត', '饮品', '饮料', '冰沙', '甘蔗汁', '椰子', '青椰'],
   ['grilled', 'bbq', 'roast', 'អាំង', 'ដុត', 'សាច់អាំង', '烧烤', '炭烤', '烤肉', '烤'],

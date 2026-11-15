@@ -1,3 +1,4 @@
+import { openNearMeModal } from '../utils/nearMeNavigation';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { FoodItem, Language, Restaurant, TouristDestination } from '../types';
@@ -755,9 +756,7 @@ export const GuideView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  (window as any).__kft_near_me_initial_tab = 'restaurants';
-                  window.dispatchEvent(new CustomEvent('kft:near-me-tab', { detail: 'restaurants' }));
-                  setIsNearMeModalOpen(true);
+                  openNearMeModal(setIsNearMeModalOpen, { tab: 'restaurants' });
                 }}
                 className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2.5 text-left transition active:scale-[0.98] cursor-pointer"
               >

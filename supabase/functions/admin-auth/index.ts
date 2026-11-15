@@ -15,7 +15,7 @@
 
 import { hashSecretPBKDF2, safeSecretEqual, signToken, verifySecretPBKDF2, verifyToken } from '../_shared/admin-token.ts';
 import { WindowLimiter, envInt, resolveAllowedOrigin, verifyClientAppIntegrity } from '../_shared/common.ts';
-import { background, getSecurityConfig, logUsage, setSecurityConfig, usageClear, usageGet, usageHit } from '../_shared/supa.ts';
+import { background, getSecurityConfig, logUsage, readUserDoc, restSelectRows, setSecurityConfig, usageClear, usageGet, usageHit } from '../_shared/supa.ts';
 
 declare const Deno: {
   serve: (handler: (req: Request) => Promise<Response> | Response) => void;
