@@ -15,10 +15,14 @@ interface Props {
 /**
  * Fully Responsive Angkor AI Robot Welcome / Launch Screen:
  * - Strictly preserves the original 3:4 (768x1024) artwork aspect ratio on ALL phones, foldables, iPads, and tablets.
- * - App Logo reduced by 40% (13.2% width, 1:1 square) with proportional Title & Subtitle below it.
- * - Recognizable Angkor Wat 3-spire landmark icon for Tourism.
- * - Middle AI bar removed per user design.
- * - Only the "ចាប់ផ្តើមប្រើប្រាស់ >" (Get Started) button is clickable; all other tiles are non-interactive display elements.
+ * - Matches the exact reference layout:
+ *   1. Top-Right Language Switcher (ខ្មែរ | EN | 中文)
+ *   2. 3D Gold-Framed App Logo above Title & Subtitle
+ *   3. 4 Feature Cards (ម្ហូបខ្មែរ, ទេសចរណ៍ with Hiker/Mountain/Sun icon, ចំណូលចិត្ត, ផែនទី)
+ *   4. Primary "ចាប់ផ្តើមប្រើប្រាស់ >" (Get Started) button directly below the 4 feature cards
+ *   5. 3-Column Feature Strip below the Get Started button
+ *   6. Transparent Offline Mode notice at the bottom over the glowing wave background
+ * - Only the "ចាប់ផ្តើមប្រើប្រាស់ >" (Get Started) button (and language switcher) is clickable; all other tiles are non-interactive display elements.
  */
 export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish }) => {
   return (
@@ -54,34 +58,30 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
         {/* Top-Right Language Badge (ខ្មែរ | EN | 中文) */}
         <WelcomeTopBar language={language} onLanguage={onLanguage} />
 
-        {/* 1. App Logo Reduced by 40% inside Glowing Gold 1:1 Square (Right of Robot, Above Title) */}
+        {/* 1. App Logo (3D Gold-Framed PNG, Right of Robot, Above Title) */}
         <div
           style={{
-            top: '23.4%',
-            left: '58.2%',
-            width: '13.0%',
+            top: '26.1%',
+            left: '60.4%',
+            width: '14.2%',
             aspectRatio: '1 / 1',
           }}
           className="pointer-events-none absolute z-20 flex items-center justify-center"
         >
-          <div className="w-full h-full rounded-[22%] p-[2px] bg-gradient-to-b from-[#FEF08A] via-[#FACC15] to-[#D97706] shadow-[0_0_18px_rgba(250,204,21,0.85),0_4px_12px_rgba(0,0,0,0.5)]">
-            <div className="w-full h-full rounded-[20%] overflow-hidden bg-[#06281E] flex items-center justify-center">
-              <img
-                src={WELCOME_IMAGES.logo}
-                alt="Cambodia Flavors & Tourism Logo"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = WELCOME_IMAGES.logoFallback;
-                }}
-              />
-            </div>
-          </div>
+          <img
+            src={WELCOME_IMAGES.logo}
+            alt="Cambodia Flavors & Tourism Logo"
+            className="w-full h-full object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.6)]"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = WELCOME_IMAGES.logoFallback;
+            }}
+          />
         </div>
 
         {/* 2. Proportional Khmer Title & English/Chinese Subtitle (Above the Golden Arc) */}
         <div
           style={{
-            top: '37.2%',
+            top: '38.0%',
             left: '36.5%',
             right: '3.0%',
             height: '8.0%',
@@ -91,7 +91,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           <h1
             className="font-khmer font-extrabold text-white tracking-wide leading-[1.32] whitespace-nowrap"
             style={{
-              fontSize: 'clamp(11px, 3.55cqw, 17.5px)',
+              fontSize: 'clamp(11px, 3.6cqw, 18px)',
               textShadow: '0 2px 10px rgba(0, 15, 40, 0.95), 0 0 16px rgba(56, 189, 248, 0.45)',
             }}
           >
@@ -100,195 +100,182 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           <p
             className="font-extrabold text-white/95 tracking-wide leading-tight mt-0.5 whitespace-nowrap"
             style={{
-              fontSize: 'clamp(8.5px, 2.5cqw, 12.2px)',
+              fontSize: 'clamp(9.5px, 2.95cqw, 14.5px)',
               textShadow: '0 2px 8px rgba(0, 15, 40, 0.95)',
             }}
           >
-            {language === 'zh' ? '柬埔寨风味与旅游 • Cambodia Flavors & Tourism' : 'Cambodia Flavors & Tourism'}
+            {language === 'zh' ? '柬埔寨风味与旅游' : 'Cambodia Flavors & Tourism'}
           </p>
         </div>
 
-        {/* 3. Four Glowing Cyan Square Feature Tiles (y = 51.17% .. 63.28%, Non-Clickable Visual Preview) */}
-        {/* Tile 1: ម្ហូបខ្មែរ (Food) */}
+        {/* 3. Row 1: 4 Feature Cards (Non-clickable display elements aligned inside the 4 cyan boxes) */}
+        {/* Card 1: ម្ហូបខ្មែរ (Khmer Food) */}
         <div
-          style={{
-            top: '51.17%',
-            left: '9.38%',
-            width: '17.71%',
-            height: '12.11%',
-          }}
-          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
+          style={{ top: '51.2%', left: '9.6%', width: '17.8%', height: '12.1%' }}
+          className="pointer-events-none absolute z-20 rounded-2xl flex flex-col items-center justify-between py-[10%] px-1"
         >
           <svg
-            className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
+            style={{ width: '7.5cqw', height: '7.5cqw', minWidth: '24px', minHeight: '24px', maxWidth: '38px', maxHeight: '38px' }}
+            className="drop-shadow-[0_2px_6px_rgba(250,204,21,0.55)] shrink-0"
             viewBox="0 0 36 36"
             fill="none"
           >
-            <path d="M13 6c0 2.2-1.8 2.8-1.8 5M18 5c0 2.2-1.8 2.8-1.8 5M23 6c0 2.2-1.8 2.8-1.8 5" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" />
-            <path d="M6 15h24c0 7.2-5.2 12.5-12 12.5S6 22.2 6 15Z" fill="currentColor" fillOpacity="0.88" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-            <path d="M12 29.5h12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M13 7c0 2-1.5 3-1.5 5M18 6c0 2-1.5 3-1.5 5M23 7c0 2-1.5 3-1.5 5" stroke="#FACC15" strokeWidth="2.2" strokeLinecap="round" />
+            <path d="M6 15h24c0 7.5-5.2 13-12 13S6 22.5 6 15Z" fill="url(#goldGrad1)" />
+            <rect x="12" y="28.5" width="12" height="2.6" rx="1.3" fill="#FACC15" />
+            <defs>
+              <linearGradient id="goldGrad1" x1="18" y1="15" x2="18" y2="28" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#FEF08A" />
+                <stop offset="1" stopColor="#EAB308" />
+              </linearGradient>
+            </defs>
           </svg>
           <span
-            className="font-khmer font-extrabold text-white leading-tight text-center whitespace-nowrap"
+            className="font-khmer font-extrabold text-white tracking-wide leading-[1.25] text-center truncate w-full"
             style={{
-              fontSize: 'clamp(9.5px, 2.75cqw, 13.5px)',
-              textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+              fontSize: 'clamp(9.5px, 2.95cqw, 14px)',
+              textShadow: '0 2px 6px rgba(0,0,0,0.9)',
             }}
           >
-            {tr(language, 'ម្ហូបខ្មែរ', 'Food', '高棉美食')}
+            {tr(language, 'ម្ហូបខ្មែរ', 'Khmer Food', '高棉美食')}
           </span>
         </div>
 
-        {/* Tile 2: ទេសចរណ៍ (Tourism — Recognizable Angkor Wat 3-Tower Landmark Icon) */}
+        {/* Card 2: ទេសចរណ៍ (Tourism — Hiker, Mountain Trail & Sun Icon) */}
         <div
-          style={{
-            top: '51.17%',
-            left: '30.99%',
-            width: '17.58%',
-            height: '12.11%',
-          }}
-          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
+          style={{ top: '51.2%', left: '31.0%', width: '17.8%', height: '12.1%' }}
+          className="pointer-events-none absolute z-20 rounded-2xl flex flex-col items-center justify-between py-[9%] px-1"
         >
-          <svg
-            className="w-[40%] h-[40%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            {/* Stepped temple foundation & gallery */}
-            <path d="M2.5 20h19" />
-            <path d="M4 20v-4.5h16V20" fill="currentColor" fillOpacity="0.18" />
-            {/* Central Angkor lotus tower */}
-            <path d="M9.5 15.5V9l2.5-5 2.5 5v6.5" fill="currentColor" fillOpacity="0.22" />
-            <path d="M12 2.5V4" />
-            {/* Left lotus tower */}
-            <path d="M5 15.5v-4.2l2.2-3.5 2.3 3.5v4.2" />
-            {/* Right lotus tower */}
-            <path d="M14.5 15.5v-4.2l2.3-3.5 2.2 3.5v4.2" />
-            {/* Central sanctuary entrance */}
-            <path d="M11 20v-2.4a1 1 0 0 1 2 0V20" />
-          </svg>
+          <img
+            src={WELCOME_IMAGES.tourismIcon}
+            alt="Tourism"
+            style={{ width: '9.6cqw', height: '7.4cqw', minWidth: '30px', minHeight: '22px', maxWidth: '48px', maxHeight: '36px' }}
+            className="object-contain drop-shadow-[0_2px_6px_rgba(250,204,21,0.55)] shrink-0"
+          />
           <span
-            className="font-khmer font-extrabold text-white leading-tight text-center whitespace-nowrap"
+            className="font-khmer font-extrabold text-white tracking-wide leading-[1.25] text-center truncate w-full"
             style={{
-              fontSize: 'clamp(9.5px, 2.75cqw, 13.5px)',
-              textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+              fontSize: 'clamp(9.5px, 2.95cqw, 14px)',
+              textShadow: '0 2px 6px rgba(0,0,0,0.9)',
             }}
           >
             {tr(language, 'ទេសចរណ៍', 'Tourism', '旅游景点')}
           </span>
         </div>
 
-        {/* Tile 3: ចំណូលចិត្ត (Favorites / Heart) */}
+        {/* Card 3: ចំណូលចិត្ត (Favorites) */}
         <div
-          style={{
-            top: '51.17%',
-            left: '52.47%',
-            width: '17.58%',
-            height: '12.11%',
-          }}
-          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
+          style={{ top: '51.2%', left: '52.3%', width: '17.8%', height: '12.1%' }}
+          className="pointer-events-none absolute z-20 rounded-2xl flex flex-col items-center justify-between py-[10%] px-1"
         >
           <svg
-            className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
-            viewBox="0 0 24 24"
+            style={{ width: '7.5cqw', height: '7.5cqw', minWidth: '24px', minHeight: '24px', maxWidth: '38px', maxHeight: '38px' }}
+            className="drop-shadow-[0_2px_6px_rgba(250,204,21,0.55)] shrink-0"
+            viewBox="0 0 36 36"
             fill="none"
-            stroke="currentColor"
-            strokeWidth="2.3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
           >
-            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+            <path
+              d="M18 30s-11-6.8-11-14.5C7 11.2 10.4 8 14.5 8c2.4 0 4.5 1.2 5.5 3 1-1.8 3.1-3 5.5-3 4.1 0 7.5 3.2 7.5 7.5C29 23.2 18 30 18 30Z"
+              stroke="url(#goldGrad3)"
+              strokeWidth="2.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <defs>
+              <linearGradient id="goldGrad3" x1="18" y1="8" x2="18" y2="30" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#FEF08A" />
+                <stop offset="1" stopColor="#EAB308" />
+              </linearGradient>
+            </defs>
           </svg>
           <span
-            className="font-khmer font-extrabold text-white leading-tight text-center whitespace-nowrap"
+            className="font-khmer font-extrabold text-white tracking-wide leading-[1.25] text-center truncate w-full"
             style={{
-              fontSize: 'clamp(9.5px, 2.75cqw, 13.5px)',
-              textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+              fontSize: 'clamp(9.5px, 2.95cqw, 14px)',
+              textShadow: '0 2px 6px rgba(0,0,0,0.9)',
             }}
           >
             {tr(language, 'ចំណូលចិត្ត', 'Favorites', '我的收藏')}
           </span>
         </div>
 
-        {/* Tile 4: ផែនទី (Map / Near Me) */}
+        {/* Card 4: ផែនទី (Map) */}
         <div
-          style={{
-            top: '51.17%',
-            left: '73.96%',
-            width: '17.58%',
-            height: '12.11%',
-          }}
-          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
+          style={{ top: '51.2%', left: '73.8%', width: '17.8%', height: '12.1%' }}
+          className="pointer-events-none absolute z-20 rounded-2xl flex flex-col items-center justify-between py-[10%] px-1"
         >
           <svg
-            className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
-            viewBox="0 0 24 24"
+            style={{ width: '7.5cqw', height: '7.5cqw', minWidth: '24px', minHeight: '24px', maxWidth: '38px', maxHeight: '38px' }}
+            className="drop-shadow-[0_2px_6px_rgba(250,204,21,0.55)] shrink-0"
+            viewBox="0 0 36 36"
             fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
           >
-            <path d="M12 2a6 6 0 0 0-6 6c0 4.5 6 10 6 10s6-5.5 6-10a6 6 0 0 0-6-6Z" />
-            <circle cx="12" cy="8" r="2.2" />
-            <path d="M4 16l-2 5 6-1.5 4 1.5 4-1.5 6 1.5-2-5" />
+            <path
+              d="M18 6c-4.4 0-8 3.4-8 7.6 0 5.2 8 12.4 8 12.4s8-7.2 8-12.4C26 9.4 22.4 6 18 6Zm0 10.2a2.8 2.8 0 1 1 0-5.6 2.8 2.8 0 0 1 0 5.6Z"
+              stroke="#FACC15"
+              strokeWidth="2.5"
+            />
+            <path
+              d="M9 24l-3 5.5 7.5-1.5 4.5 2 4.5-2 7.5 1.5L27 24"
+              stroke="#EAB308"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           <span
-            className="font-khmer font-extrabold text-white leading-tight text-center whitespace-nowrap"
+            className="font-khmer font-extrabold text-white tracking-wide leading-[1.25] text-center truncate w-full"
             style={{
-              fontSize: 'clamp(9.5px, 2.75cqw, 13.5px)',
-              textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+              fontSize: 'clamp(9.5px, 2.95cqw, 14px)',
+              textShadow: '0 2px 6px rgba(0,0,0,0.9)',
             }}
           >
-            {tr(language, 'ផែនទី', 'Map', '附近地图')}
+            {tr(language, 'ផែនទី', 'Map', '地图探索')}
           </span>
         </div>
 
-        {/* 4. ONLY Functional Button: Glowing Blue-Purple "ចាប់ផ្តើមប្រើប្រាស់ >" (Get Started) CTA Pill (y = 65.82% .. 74.61%) */}
+        {/* 4. ONLY Active Button: ចាប់ផ្តើមប្រើប្រាស់ > (Get Started — Directly below the 4 Feature Cards) */}
         <button
           type="button"
           onClick={() => onFinish('home')}
+          aria-label={WELCOME_LABELS.start[language]}
           style={{
-            top: '65.82%',
-            left: '15.89%',
-            width: '68.22%',
-            height: '8.79%',
+            top: '66.0%',
+            left: '15.1%',
+            right: '14.3%',
+            height: '8.6%',
           }}
-          className="
-            absolute z-30 rounded-full flex items-center justify-center gap-1.5 px-4
-            bg-transparent hover:bg-white/5 active:scale-[0.98] transition cursor-pointer group
-          "
+          className="absolute z-20 rounded-full flex items-center justify-center gap-2 transition-transform active:scale-[0.98] hover:brightness-110 focus:outline-none cursor-pointer group"
         >
           <span
-            className="font-khmer font-extrabold text-white tracking-wide whitespace-nowrap"
+            className="font-khmer font-extrabold text-white tracking-wide leading-[1.3]"
             style={{
-              fontSize: 'clamp(14px, 4.3cqw, 21px)',
+              fontSize: 'clamp(13.5px, 4.35cqw, 21px)',
               textShadow: '0 2px 8px rgba(15, 23, 42, 0.85)',
             }}
           >
             {WELCOME_LABELS.start[language]}
           </span>
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.8] shrink-0 group-hover:translate-x-1 transition-transform" />
+          <ChevronRight
+            style={{ width: '5.5cqw', height: '5.5cqw', minWidth: '18px', minHeight: '18px', maxWidth: '26px', maxHeight: '26px' }}
+            className="text-white stroke-[3] drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] group-hover:translate-x-1 transition-transform"
+          />
         </button>
 
-        {/* 5. Three Non-Interactive Feature Highlights with Crisp CSS Cyan Dividers (y = 76.2% .. 83.6%) */}
+        {/* 5. 3-Column Feature Strip (Below Get Started Button — Non-clickable display row) */}
         <div
           style={{
-            top: '76.2%',
-            left: '4.8%',
-            right: '4.8%',
-            height: '7.4%',
+            top: '75.5%',
+            left: '3.0%',
+            right: '3.0%',
+            height: '7.5%',
           }}
-          className="pointer-events-none absolute z-20 grid grid-cols-[1fr_1.08fr_1.18fr] items-center divide-x divide-cyan-300/45"
+          className="pointer-events-none absolute z-20 grid grid-cols-3 items-center divide-x divide-sky-300/35"
         >
           {/* Column 1: សុខភាព និងអាហារូបត្ថម្ភ */}
-          <div className="h-full flex flex-col items-center justify-center gap-0.5 px-1">
+          <div className="h-full flex flex-col items-center justify-center gap-1 px-1">
             <svg
-              style={{ width: '4.6cqw', height: '4.6cqw', minWidth: '16px', minHeight: '16px', maxWidth: '22px', maxHeight: '22px' }}
+              style={{ width: '4.8cqw', height: '4.8cqw', minWidth: '16px', minHeight: '16px', maxWidth: '23px', maxHeight: '23px' }}
               className="text-white shrink-0 drop-shadow-[0_1px_4px_rgba(56,189,248,0.6)]"
               viewBox="0 0 24 24"
               fill="none"
@@ -297,8 +284,8 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-              <path d="M3.5 12h4l2-3 3 6 2-3h5" />
+              <path d="M19.5 12.572 12 20l-7.5-7.428A5 5 0 1 1 12 6.006a5 5 0 1 1 7.5 6.572" />
+              <path d="M8 12h2l1.5-3 2 5 1.5-2h2" />
             </svg>
             <span
               className="font-khmer font-bold text-white leading-[1.28] text-center whitespace-nowrap"
@@ -312,9 +299,9 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           </div>
 
           {/* Column 2: មុខម្ហូបគួរឱ្យចង់ញ៉ាំថ្ងៃនេះ */}
-          <div className="h-full flex flex-col items-center justify-center gap-0.5 px-1">
+          <div className="h-full flex flex-col items-center justify-center gap-1 px-1">
             <svg
-              style={{ width: '4.6cqw', height: '4.6cqw', minWidth: '16px', minHeight: '16px', maxWidth: '22px', maxHeight: '22px' }}
+              style={{ width: '4.8cqw', height: '4.8cqw', minWidth: '16px', minHeight: '16px', maxWidth: '23px', maxHeight: '23px' }}
               className="text-white shrink-0 drop-shadow-[0_1px_4px_rgba(56,189,248,0.6)]"
               viewBox="0 0 24 24"
               fill="none"
@@ -331,7 +318,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
             <span
               className="font-khmer font-bold text-white leading-[1.28] text-center whitespace-nowrap"
               style={{
-                fontSize: 'clamp(7.4px, 2.05cqw, 10.5px)',
+                fontSize: 'clamp(7.5px, 2.1cqw, 10.8px)',
                 textShadow: '0 1px 4px rgba(0,0,0,0.95)',
               }}
             >
@@ -340,15 +327,15 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           </div>
 
           {/* Column 3: ស្វែងរកទីកន្លែងដើរលេងសម្រាប់ថ្ងៃនេះ */}
-          <div className="h-full flex flex-col items-center justify-center gap-0.5 px-1">
+          <div className="h-full flex flex-col items-center justify-center gap-1 px-1">
             <Compass
-              style={{ width: '4.6cqw', height: '4.6cqw', minWidth: '16px', minHeight: '16px', maxWidth: '22px', maxHeight: '22px' }}
+              style={{ width: '4.8cqw', height: '4.8cqw', minWidth: '16px', minHeight: '16px', maxWidth: '23px', maxHeight: '23px' }}
               className="text-white shrink-0 drop-shadow-[0_1px_4px_rgba(56,189,248,0.6)]"
             />
             <span
               className="font-khmer font-bold text-white leading-[1.28] text-center whitespace-nowrap"
               style={{
-                fontSize: 'clamp(7.1px, 1.95cqw, 10px)',
+                fontSize: 'clamp(7.2px, 2.0cqw, 10.3px)',
                 textShadow: '0 1px 4px rgba(0,0,0,0.95)',
               }}
             >
@@ -362,31 +349,38 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           </div>
         </div>
 
-        {/* 6. Offline Mode Readiness Badge ("ប្រើបានទោះគ្មានអ៊ីនធឺណិត") */}
+        {/* 6. Offline Mode Readiness Notice (Transparent over the wave background, matching first attachment) */}
         <div
           style={{
             top: '85.2%',
-            left: '6.5%',
-            right: '6.5%',
+            left: '9.8%',
+            right: '9.2%',
           }}
-          className="pointer-events-none absolute z-20 inline-flex flex-col gap-0.5 rounded-2xl bg-[#042f2e]/92 border border-emerald-400/45 px-2.5 py-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.55)]"
+          className="pointer-events-none absolute z-20 flex flex-col gap-1"
         >
           <div
-            style={{ fontSize: 'clamp(9.5px, 2.7cqw, 13px)' }}
-            className="flex items-center gap-1.5 text-emerald-300 font-extrabold leading-tight"
+            style={{
+              fontSize: 'clamp(10px, 2.9cqw, 14px)',
+              textShadow: '0 2px 6px rgba(0, 12, 32, 0.9)',
+            }}
+            className="flex items-center gap-2 text-[#6EE7B7] font-extrabold leading-tight"
           >
-            <span
-              style={{ width: '4.6cqw', height: '4.6cqw', minWidth: '18px', minHeight: '18px', maxWidth: '24px', maxHeight: '24px' }}
-              className="inline-flex items-center justify-center rounded-full bg-emerald-500/25 border border-emerald-400/40 shrink-0"
-            >
-              <WifiOff className="w-3 h-3 text-emerald-300" />
-            </span>
+            <WifiOff
+              style={{ width: '4.0cqw', height: '4.0cqw', minWidth: '14px', minHeight: '14px', maxWidth: '19px', maxHeight: '19px' }}
+              className="text-[#6EE7B7] shrink-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]"
+            />
             <span className="truncate">{WELCOME_LABELS.offlineBadge[language]}</span>
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 ml-auto" />
+            <CheckCircle2
+              style={{ width: '3.8cqw', height: '3.8cqw', minWidth: '13px', minHeight: '13px', maxWidth: '18px', maxHeight: '18px' }}
+              className="text-[#6EE7B7]/85 shrink-0 ml-auto drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]"
+            />
           </div>
           <p
-            style={{ fontSize: 'clamp(8px, 2.15cqw, 10.8px)' }}
-            className="text-emerald-100/95 leading-snug pl-6 line-clamp-2"
+            style={{
+              fontSize: 'clamp(8px, 2.15cqw, 10.8px)',
+              textShadow: '0 1px 5px rgba(0, 10, 28, 0.95)',
+            }}
+            className="text-slate-100/90 font-semibold leading-snug pl-[5.2cqw] whitespace-nowrap overflow-hidden text-ellipsis"
           >
             {WELCOME_LABELS.offlineSub[language]}
           </p>

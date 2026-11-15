@@ -663,56 +663,30 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
             </button>
           )}
 
-          {/* 3. Clean Bottom Action Row (y = 70.2% .. 76.8%): បង្កើតគណនីថ្មី | ✉️ អ៊ីមែល */}
+          {/* 3. Offline Readiness Text Notice (y = 70.2% .. 76.8%) */}
           <div
             style={{
               top: '70.2%',
-              left: '8.0%',
-              right: '8.0%',
+              left: '5.5%',
+              right: '5.5%',
               height: '6.5%',
             }}
-            className="absolute z-20 flex items-center justify-center gap-5 sm:gap-6"
+            className="pointer-events-none absolute z-20 flex items-center justify-center text-center px-2"
           >
-            <button
-              type="button"
-              onClick={() => {
-                setPhoneTab('register');
-                setAuthMode('phone');
+            <p
+              className="font-khmer font-bold text-cyan-200/95 leading-snug whitespace-nowrap"
+              style={{
+                fontSize: 'clamp(10px, 3.05cqw, 14px)',
+                textShadow: '0 0 10px rgba(34, 211, 238, 0.55), 0 1px 4px rgba(0, 0, 0, 0.95)',
               }}
-              className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
             >
-              <span
-                className="font-khmer font-extrabold text-cyan-300 whitespace-nowrap"
-                style={{
-                  fontSize: 'clamp(11.5px, 3.4cqw, 15px)',
-                  textShadow: '0 0 10px rgba(34, 211, 238, 0.7), 0 1px 4px rgba(0,0,0,0.95)',
-                }}
-              >
-                {tr(language, 'បង្កើតគណនីថ្មី', 'Create Account', '创建新账号')}
-              </span>
-            </button>
-
-            <span className="h-5 w-px bg-cyan-300/60 shrink-0" aria-hidden="true" />
-
-            <button
-              type="button"
-              onClick={() => {
-                setEmailTab('login');
-                setAuthMode('email');
-              }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
-            >
-              <Mail className="w-4 h-4 text-white/95 shrink-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]" />
-              <span
-                className="font-khmer font-bold text-white/95 whitespace-nowrap"
-                style={{
-                  fontSize: 'clamp(11.5px, 3.4cqw, 15px)',
-                  textShadow: '0 1px 4px rgba(0,0,0,0.95)',
-                }}
-              >
-                {tr(language, 'អ៊ីមែល', 'Email', '邮箱登录')}
-              </span>
-            </button>
+              {tr(
+                language,
+                'អ្នកអាចប្រើប្រាស់កម្មវិធីនេះបាន ទោះគ្មានអ៊ីនធឺណិតក៏ដោយ',
+                'You can use this app even without internet',
+                '即使没有网络，您也可以使用本应用'
+              )}
+            </p>
           </div>
 
           {isMandatoryGate && (
