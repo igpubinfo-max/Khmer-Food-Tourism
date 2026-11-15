@@ -100,7 +100,11 @@ import {
   pairingKindsLabel,
   type DrinkKindFilter,
 } from '../utils/drinkPairing';
-import { isAuthenticCambodianDishForMealTime } from '../utils/cambodianMealHabits';
+import {
+  isAuthenticCambodianDishForMealTime,
+  scoreCambodianDishForCategoryAndMealTime,
+  scoreCambodianDishForMealTime,
+} from '../utils/cambodianMealHabits';
 import { RichAnswerText } from './RichAnswerText';
 import { prepareFoodImage, FoodImageError, type PreparedFoodImage } from '../utils/foodImageUpload';
 import {
@@ -230,9 +234,13 @@ function matchesCategoryStrict(food: FoodItem, categoryFilter: string): boolean 
 function matchesMealSlotStrict(
   food: FoodItem,
   _mealSlotFilter: MealSlotFilter,
-  effectiveMealSlot: Exclude<MealSlotFilter, 'auto'>
+  effectiveMealSlot: Exclude<MealSlotFilter, 'auto'>,
+  categoryFilter: string = 'all'
 ): boolean {
   const slot = effectiveMealSlot === 'afternoon' ? 'snack' : effectiveMealSlot;
+  if (categoryFilter === 'dessert') {
+    return scoreCambodianDishForCategoryAndMealTime(food, slot) > 0;
+  }
   return isAuthenticCambodianDishForMealTime(food, slot);
 }
 
@@ -828,30 +836,49 @@ export const WhatToEatModal: React.FC = () => {
     // Otherwise searching "ស្ងោរជ្រក់ត្រី" or "សម្លកកូរ" at 3:45 PM (afternoon snack slot) would discard soups!
     const shouldEnforceMealSlot =
       mealSlotFilter !== 'auto' || (!qTrim && categoryFilter === 'all' && vipDietFilter === 'none');
+    const activeCambodianSlot = effectiveMealSlot === 'afternoon' ? 'snack' : effectiveMealSlot;
+
+    const sortByMealSlotScore = (list: FoodItem[]): FoodItem[] => {
+      if (!shouldEnforceMealSlot) return list;
+      const scorer =
+        categoryFilter === 'dessert'
+          ? scoreCambodianDishForCategoryAndMealTime
+          : scoreCambodianDishForMealTime;
+      return [...list].sort(
+        (a, b) =>
+          scorer(b, activeCambodianSlot) - scorer(a, activeCambodianSlot) ||
+          (b.rating || 0) - (a.rating || 0)
+      );
+    };
 
     // 1. Strict 4-way intersection (Craving + Category + MealSlot + Diet)
     const strictAll = basePool.filter(
       (food) =>
         matchesCategoryStrict(food, categoryFilter) &&
-        (!shouldEnforceMealSlot || matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot)) &&
+        (!shouldEnforceMealSlot ||
+          matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot, categoryFilter)) &&
         matchesDietStrict(food, vipDietFilter)
     );
-    if (strictAll.length > 0) return withCustomLead(strictAll);
+    if (strictAll.length > 0) return withCustomLead(sortByMealSlotScore(strictAll));
 
-    // 2. If MealSlot made a narrow Craving+Category+Diet combination empty, relax MealSlot while keeping Craving+Category+Diet strict
-    const strictWithoutMealSlot = basePool.filter(
-      (food) =>
-        matchesCategoryStrict(food, categoryFilter) &&
-        matchesDietStrict(food, vipDietFilter)
-    );
-    if (strictWithoutMealSlot.length > 0) return withCustomLead(strictWithoutMealSlot);
+    // 2. Only relax automatic clock-based MealSlot when the user did NOT explicitly select a meal time chip.
+    //    When mealSlotFilter !== 'auto', NEVER relax MealSlot to return dishes from the wrong time of day!
+    if (mealSlotFilter === 'auto') {
+      const strictWithoutMealSlot = basePool.filter(
+        (food) =>
+          matchesCategoryStrict(food, categoryFilter) &&
+          matchesDietStrict(food, vipDietFilter)
+      );
+      if (strictWithoutMealSlot.length > 0) return withCustomLead(strictWithoutMealSlot);
+    }
 
-    // 3b. A selected dietary chip, category, or craving is a HARD rule: never fall back to dishes that do not satisfy it.
+    // 3b. A selected meal time chip, dietary chip, category, or craving is a HARD rule: never fall back to dishes that do not satisfy it.
+    if (mealSlotFilter !== 'auto') return [];
     if (vipDietFilter !== 'none') return [];
     if (categoryFilter !== 'all') return [];
     if (presetChipId || qTrim) return [];
 
-    return withCustomLead(basePool);
+    return withCustomLead(sortByMealSlotScore(basePool));
   }, [
     foods,
     cravingQuery,
@@ -872,7 +899,7 @@ export const WhatToEatModal: React.FC = () => {
     ? []
     : matchingFoods.length > 0
     ? matchingFoods
-    : cravingQuery.trim() || vipDietFilter !== 'none' || categoryFilter !== 'all'
+    : cravingQuery.trim() || vipDietFilter !== 'none' || categoryFilter !== 'all' || mealSlotFilter !== 'auto'
     ? []
     : foods;
 
@@ -1011,7 +1038,11 @@ export const WhatToEatModal: React.FC = () => {
       const verifiedFoods = foods.filter((f) => !isGeneratedDishId(f.id));
       // A selected dietary chip / dish type is a HARD rule: when nothing matches, show the empty state,
       // never an unrelated dish from the full catalog.
-      const hasHardFilter = vipDietFilter !== 'none' || categoryFilter !== 'all' || Boolean(cravingQuery.trim());
+      const hasHardFilter =
+        mealSlotFilter !== 'auto' ||
+        vipDietFilter !== 'none' ||
+        categoryFilter !== 'all' ||
+        Boolean(cravingQuery.trim());
       const rawSource = activeDishList.length > 0 ? activeDishList : hasHardFilter ? [] : verifiedFoods;
       const sourcePool = rawSource.filter((f) => !isGeneratedDishId(f.id));
       if (sourcePool.length === 0 && (hasHardFilter || verifiedFoods.length === 0)) return [];
@@ -1053,7 +1084,7 @@ export const WhatToEatModal: React.FC = () => {
     } catch {
       return [];
     }
-  }, [activeDishList, foods, isMedicalRefusalActive, spinCount, vipDietFilter, categoryFilter]);
+  }, [activeDishList, foods, isMedicalRefusalActive, spinCount, vipDietFilter, categoryFilter, mealSlotFilter, effectiveMealSlot, cravingQuery, hasStructuredFilter]);
 
   const alternativeDishes = useMemo(() => {
     if (isMedicalRefusalActive || recommendedTenDishes.length <= 1) return [];
@@ -3422,9 +3453,45 @@ export const WhatToEatModal: React.FC = () => {
                             onClick={() => {
                               setShowVipAiUpgradeNotice(false);
                               setRecommendationError('');
+                              const targetEffective = slot.id === 'auto' ? currentMealInfo.slug : slot.id;
+                              if (slot.id !== 'auto') {
+                                if (
+                                  categoryFilter !== 'all' &&
+                                  !foods.some(
+                                    (f) =>
+                                      matchesCategoryStrict(f, categoryFilter) &&
+                                      matchesMealSlotStrict(f, slot.id, targetEffective, categoryFilter)
+                                  )
+                                ) {
+                                  setCategoryFilter('all');
+                                }
+                                if (
+                                  vipDietFilter !== 'none' &&
+                                  !foods.some(
+                                    (f) =>
+                                      matchesDietStrict(f, vipDietFilter) &&
+                                      matchesMealSlotStrict(f, slot.id, targetEffective, categoryFilter)
+                                  )
+                                ) {
+                                  setVipDietFilter('none');
+                                }
+                                if (cravingQuery.trim()) {
+                                  const activeChipId = resolvePresetCravingChipId(cravingQuery);
+                                  if (
+                                    activeChipId &&
+                                    !foods.some(
+                                      (f) =>
+                                        matchesPresetCravingChip(f, activeChipId) &&
+                                        matchesMealSlotStrict(f, slot.id, targetEffective, categoryFilter)
+                                    )
+                                  ) {
+                                    setCravingQuery('');
+                                  }
+                                }
+                              }
                               setMealSlotFilter(slot.id);
                               setDrinkMode(false);
-                              setSpinCount((c) => c + 1);
+                              setSpinCount((c) => (slot.id !== mealSlotFilter ? 0 : c + 1));
                               setOpenGroup(null);
                               scrollToResultsSection();
                             }}
@@ -3466,7 +3533,7 @@ export const WhatToEatModal: React.FC = () => {
                                 }
                                 if (
                                   mealSlotFilter !== 'auto' &&
-                                  !foods.some((f) => matchesCategoryStrict(f, c.id) && matchesMealSlotStrict(f, mealSlotFilter, effectiveMealSlot))
+                                  !foods.some((f) => matchesCategoryStrict(f, c.id) && matchesMealSlotStrict(f, mealSlotFilter, effectiveMealSlot, c.id))
                                 ) {
                                   setMealSlotFilter('auto');
                                 }

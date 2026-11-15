@@ -14,6 +14,7 @@ export interface ParsedSmartSearchIntent {
     | 'hotel'
     | 'resort'
     | 'guesthouse'
+    | 'villa'
     | 'waterfall'
     | 'temple'
     | 'beach'
@@ -102,11 +103,13 @@ export function parseSmartSearchIntent(rawQuery: string): ParsedSmartSearchInten
     semanticCategory = 'bbq';
   } else if (/បួស|\bvegetarian\b|\bvegan\b|素食/i.test(trimmed)) {
     semanticCategory = 'vegetarian';
-  } else if (/រីសត|\bresort\b|度假村/i.test(trimmed)) {
+  } else if (/រីសត|\bresort\b|\bresorts\b|度假村/i.test(trimmed)) {
     semanticCategory = 'resort';
-  } else if (/ផ្ទះសំណាក់|បឹងហ្គាឡូ|\bguesthouse\b|\bbungalow\b|\bhostel\b|客栈|民宿/i.test(trimmed)) {
+  } else if (/វីឡា|ប៊ូទិក|រេស៊ីដង់|រ៉េស៊ីដិន|អាផាតមិន|\bvilla\b|\bvillas\b|\bboutique\b|\bsuite\b|\bsuites\b|\bresidence\b|别墅|精品/i.test(trimmed)) {
+    semanticCategory = 'villa';
+  } else if (/ផ្ទះសំណាក់|ផ្ទះស្នាក់នៅ|ផ្ទះស្នាក់|បឹងហ្គាឡូ|បឹងកាឡូ|\bguesthouse\b|\bguest\s*house\b|\bbungalow\b|\bhostel\b|\bhomestay\b|\blodge\b|客栈|民宿/i.test(trimmed)) {
     semanticCategory = 'guesthouse';
-  } else if (/សណ្ឋាគារ|កន្លែងគេង|កន្លែងស្នាក់នៅ|\bhotel\b|\bstay\b|酒店|住宿/i.test(trimmed)) {
+  } else if (/សណ្ឋាគារ|កន្លែងគេង|កន្លែងស្នាក់នៅ|\bhotel\b|\bhotels\b|\bstay\b|酒店|住宿/i.test(trimmed)) {
     semanticCategory = 'hotel';
   } else if (/ទឹកធ្លាក់|ជ្រោះ|\bwaterfall\b|瀑布/i.test(trimmed)) {
     semanticCategory = 'waterfall';

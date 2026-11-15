@@ -1,4 +1,5 @@
 import { openNearMeModal } from '../utils/nearMeNavigation';
+import { readSavedUserGps, compareByGpsDistanceAscending } from '../utils/nearMeEngine';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { TrendingFoodItem, isUserVipActive, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, resolveFoodPhotoUrl, handleFoodImageError, isStrictVerifiedCambodiaRestaurant } from '../types';
@@ -82,7 +83,25 @@ export const HomeView: React.FC = () => {
   // Search results tab filter, radius filter, and pagination when global search is active
   const [searchTab, setSearchTabRaw] = useState<'all' | 'food' | 'restaurants' | 'tourism' | 'external'>('all');
   const [searchRadiusMeters, setSearchRadiusMeters] = useState<number>(0); // 0 = All Cambodia
-  const [userGpsLocation, setUserGpsLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [userGpsLocation, setUserGpsLocation] = useState<{ lat: number; lng: number } | null>(() => readSavedUserGps());
+
+  useEffect(() => {
+    if (!readSavedUserGps()) {
+      getCurrentDeviceLocation()
+        .then((loc) => {
+          if (loc) setUserGpsLocation({ lat: loc.lat, lng: loc.lng });
+        })
+        .catch(() => {});
+    }
+    const onGpsUpdated = (e: Event) => {
+      const detail = (e as CustomEvent<{ lat: number; lng: number }>).detail;
+      if (detail && Number.isFinite(detail.lat) && Number.isFinite(detail.lng)) {
+        setUserGpsLocation({ lat: detail.lat, lng: detail.lng });
+      }
+    };
+    window.addEventListener('kft:gps-updated', onGpsUpdated);
+    return () => window.removeEventListener('kft:gps-updated', onGpsUpdated);
+  }, []);
   const [isGettingSearchGps, setIsGettingSearchGps] = useState<boolean>(false);
   const [searchVisibleCount, setSearchVisibleCount] = useState<number>(12);
 
@@ -141,8 +160,8 @@ export const HomeView: React.FC = () => {
           provinceFilter: useGpsRadius ? '' : selectedProvince || 'ទាំងអស់',
           typeFilter: 'all',
           searchScope: useGpsRadius ? 'nearby' : undefined,
-          lat: useGpsRadius ? userGpsLocation!.lat : undefined,
-          lng: useGpsRadius ? userGpsLocation!.lng : undefined,
+          lat: userGpsLocation?.lat,
+          lng: userGpsLocation?.lng,
           radiusMeters: useGpsRadius ? searchRadiusMeters : undefined,
           language,
         });
@@ -670,17 +689,20 @@ export const HomeView: React.FC = () => {
                   | { kind: 'external'; item: GooglePlaceCachedItem };
 
                 const combinedRows: UnifiedRow[] = [];
-                if (searchTab === 'all' || searchTab === 'food') {
-                  searchResults.foods.forEach((f) => combinedRows.push({ kind: 'food', item: f }));
-                }
+                const locationRows: UnifiedRow[] = [];
                 if (searchTab === 'all' || searchTab === 'restaurants') {
-                  searchResults.restaurants.forEach((r) => combinedRows.push({ kind: 'restaurant', item: r }));
+                  searchResults.restaurants.forEach((r) => locationRows.push({ kind: 'restaurant', item: r }));
                 }
                 if (searchTab === 'all' || searchTab === 'tourism') {
-                  searchResults.destinations.forEach((d) => combinedRows.push({ kind: 'destination', item: d }));
+                  searchResults.destinations.forEach((d) => locationRows.push({ kind: 'destination', item: d }));
                 }
                 if (searchTab === 'all' || searchTab === 'external') {
-                  searchResults.externalPlaces.forEach((p) => combinedRows.push({ kind: 'external', item: p }));
+                  searchResults.externalPlaces.forEach((p) => locationRows.push({ kind: 'external', item: p }));
+                }
+                locationRows.sort((a, b) => compareByGpsDistanceAscending(a.item, b.item, userGpsLocation));
+                combinedRows.push(...locationRows);
+                if (searchTab === 'all' || searchTab === 'food') {
+                  searchResults.foods.forEach((f) => combinedRows.push({ kind: 'food', item: f }));
                 }
 
                 const visibleRows = combinedRows.slice(0, searchVisibleCount);

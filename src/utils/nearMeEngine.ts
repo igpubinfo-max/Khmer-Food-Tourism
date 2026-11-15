@@ -474,28 +474,40 @@ export function requestCambodiaGpsLocation(options: {
  * Category Classifiers to strictly isolate Shop vs Hotel vs Tourism in Near Me
  */
 const HOTEL_KEYWORD_REGEX =
-  /សណ្ឋាគារ|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|បឹងកាឡូ|(hotel|hotels|guesthouse|guests*house|hostel|motel|homestay|bungalow|lodging|inn|suites?)/i;
+  /សណ្ឋាគារ|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|បឹងកាឡូ|រីសត|វីឡា|ប៊ូទិក|រេស៊ីដង់|រ៉េស៊ីដិន|អាផាតមិន|\b(hotel|hotels|guesthouse|guest\s*house|hostel|motel|homestay|bungalow|lodging|inn|suites?|resort|resorts|villa|villas|boutique|residence|apartment)\b/i;
 
 const FOOD_SHOP_KEYWORD_REGEX =
-  /ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងកាហ្វេ|ហាងបាយ|គុយទាវ|មីឆា|នំបញ្ចុក|សាច់អាំង|ស៊ុប|តែគុជ|នំប៉័ង|(restaurant|cafe|café|coffee|bakery|bistro|eatery|noodle|bbq|hotpot|grill|pizza|burger|boba)/i;
+  /ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងកាហ្វេ|ហាងបាយ|គុយទាវ|មីឆា|នំបញ្ចុក|សាច់អាំង|ស៊ុប|តែគុជ|នំប៉័ង|ម្ហូបបួស|អាហារបួស|អាហារព្រឹក|\b(restaurant|cafe|café|coffee|bakery|bistro|eatery|noodle|noodles|bbq|hotpot|grill|pizza|burger|boba|vegetarian|vegan|breakfast)\b/i;
 
 const TOURISM_ONLY_KEYWORD_REGEX =
-  /ប្រាសាទ|វត្ត|ទឹកធ្លាក់|សារមន្ទីរ|ភ្នំ|ឆ្នេរ|កោះ|ឧទ្យានជាតិ|រមណីយដ្ឋាន|(temple|pagoda|wat|museum|waterfall|nationals*park|monument|palace|sanctuary|beach|island|mountain)/i;
+  /ប្រាសាទ|វត្ត|ទឹកធ្លាក់|សារមន្ទីរ|ភ្នំ|ឆ្នេរ|កោះ|ឧទ្យានជាតិ|រមណីយដ្ឋាន|\b(temple|pagoda|wat\b|museum|waterfall|national\s*park|monument|palace|sanctuary|beach|island|mountain)\b/i;
 
 export function isHotelGooglePlace(gp: GooglePlaceCachedItem): boolean {
   if (!gp) return false;
-  if (gp.subCategorySlug === 'hotel') return true;
+  if (gp.subCategorySlug === 'hotel' || gp.subCategorySlug === 'resort') return true;
   const types = (gp.types || []).map((t) => String(t).toLowerCase());
   if (
     types.some((t) =>
-      ['hotel', 'lodging', 'motel', 'guest_house', 'guesthouse', 'hostel', 'bed_and_breakfast', 'resort_hotel'].includes(
-        t
-      )
+      [
+        'hotel',
+        'lodging',
+        'motel',
+        'guest_house',
+        'guesthouse',
+        'hostel',
+        'bed_and_breakfast',
+        'resort_hotel',
+        'resort',
+        'extended_stay_hotel',
+        'inn',
+        'cottage',
+        'villa',
+      ].includes(t)
     )
   ) {
     return true;
   }
-  const text = `${gp.nameKh || ''} ${gp.nameEn || ''}`;
+  const text = `${gp.nameKh || ''} ${gp.nameEn || ''} ${gp.primaryTypeDisplayName || ''}`;
   if (HOTEL_KEYWORD_REGEX.test(text) && !FOOD_SHOP_KEYWORD_REGEX.test(text)) {
     return true;
   }

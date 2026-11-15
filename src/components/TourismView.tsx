@@ -240,6 +240,9 @@ export const TourismView: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!readSavedUserGps()) {
+      requestLocation(false);
+    }
     const onGpsUpdated = (e: Event) => {
       const detail = (e as CustomEvent<{ lat: number; lng: number }>).detail;
       if (detail && Number.isFinite(detail.lat) && Number.isFinite(detail.lng)) {
@@ -536,6 +539,8 @@ export const TourismView: React.FC = () => {
 
     let results = scoped;
 
+    const hasActiveUserGps = Boolean(userCoords || readSavedUserGps());
+
     if (trimmedQuery) {
       const qa = analyzeSearchQuery(trimmedQuery);
       if (!(qa.distinctive.length === 0 && (smartIntent?.detectedProvinceKh || mappedSemanticCat))) {
@@ -545,6 +550,9 @@ export const TourismView: React.FC = () => {
           (d) => searchIndexById.get(d.id)?.fields || destinationSearchFields(d),
           {
             bucketSize: 80,
+            getDistanceMeters: (d) =>
+              hasActiveUserGps || nearMeActive ? (distanceMetersMap.get(d.id) ?? Infinity) : Infinity,
+            sortByDistanceFirst: true,
             tieBreak: (a, b) => (b.rating || 0) - (a.rating || 0),
           }
         );
@@ -572,11 +580,16 @@ export const TourismView: React.FC = () => {
       }
     }
 
-    if (nearMeActive) {
+    // Global Rule: Sort search and category results by actual GPS distance ascending (closest to farthest)
+    // when GPS is available; use rating/session order as fallback when GPS is unavailable or tied.
+    if (nearMeActive || trimmedQuery || selectedCategory !== 'all' || hasActiveUserGps) {
       return [...results].sort((a, b) => {
-        const distA = distanceMetersMap.get(a.id) ?? 9999999;
-        const distB = distanceMetersMap.get(b.id) ?? 9999999;
-        return distA - distB;
+        if (hasActiveUserGps || nearMeActive) {
+          const distA = distanceMetersMap.get(a.id) ?? 9999999;
+          const distB = distanceMetersMap.get(b.id) ?? 9999999;
+          if (distA !== distB) return distA - distB;
+        }
+        return (b.rating || 0) - (a.rating || 0);
       });
     }
 
@@ -590,6 +603,7 @@ export const TourismView: React.FC = () => {
     deferredSearchQuery,
     searchIndexById,
     distanceMetersMap,
+    userCoords,
   ]);
 
   const displayedDestinations = useMemo(

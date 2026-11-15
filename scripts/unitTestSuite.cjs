@@ -131,7 +131,8 @@ test('9. 3-Language Food Content Integrity & Anti-Duplication Audit (KM, EN, ZH)
     return origResolve.call(this, req, parent, isMain, opts);
   };
   require.extensions['.ts'] = function (mod, filename) {
-    const { outputText } = ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
+    const rawTs = fs.readFileSync(filename, 'utf8').replace(/import\.meta/g, '({ env: {} })');
+    const { outputText } = ts.transpileModule(rawTs, {
       compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, esModuleInterop: true },
       fileName: filename,
     });
@@ -205,6 +206,254 @@ test('9. 3-Language Food Content Integrity & Anti-Duplication Audit (KM, EN, ZH)
     const zhTrendName = sanitizeStrictLanguageText(translateDynamicTextToZh(tf.foodNameEn), 'zh');
     assert.ok(!/[A-Za-z]{2,}/.test(zhTrendName), 'Untranslated trending ZH name on ' + tf.id + ': ' + zhTrendName);
   }
+});
+
+test('10. Global GPS Distance-First Sorting System across KM/EN/ZH searches, Google Places, and Local DB', () => {
+  const {
+    calculateDistanceMeters,
+    compareByGpsDistanceAscending,
+    sortResultsByGpsDistance,
+  } = require(path.join(ROOT, 'src/utils/nearMeEngine.ts'));
+  const {
+    rankBySearchRelevance,
+    restaurantSearchFields,
+    destinationSearchFields,
+  } = require(path.join(ROOT, 'src/utils/searchEngine.ts'));
+  const {
+    matchShopToProductQuery,
+    getMatchingRestaurantsForDish,
+  } = require(path.join(ROOT, 'src/utils/foodFilters.ts'));
+  const {
+    performUnifiedCambodiaSearch,
+  } = require(path.join(ROOT, 'src/services/googlePlacesService.ts'));
+  const { canonicalKhmerFoods } = require(path.join(ROOT, 'src/data/seedFoods.ts'));
+
+  const userGps = { lat: 11.5564, lng: 104.9282 };
+
+  // 1. Verify exact coffee shop scenario from user screenshot (785m < 956m < 1556m < 1764m < 1878m < 2200m < 4300m)
+  const coffeeCandidates = [
+    { id: 'c1', nameKh: 'ហាងកាហ្វេ ប្រោន កោះពេជ្រ', nameEn: 'Brown Coffee Koh Pich', distanceMeters: 4300, _matchScore: 260, _isExactProductMatch: true, rating: 4.5 },
+    { id: 'c2', nameKh: 'ចកកាហ្វេ', nameEn: 'Chok Coffee', distanceMeters: 785, _matchScore: 180, _isExactProductMatch: true, rating: 4.7 },
+    { id: 'c3', nameKh: 'ខាល់ធើកាហ្វេ', nameEn: 'Culture Coffee', distanceMeters: 2200, _matchScore: 230, _isExactProductMatch: true, rating: 4.5 },
+    { id: 'c4', nameKh: 'ហាងកាហ្វេ ០០៧១', nameEn: 'Coffee 0071', distanceMeters: 1764, _matchScore: 190, _isExactProductMatch: true, rating: 4.8 },
+    { id: 'c5', nameKh: 'លី កាហ្វេ', nameEn: 'Ly Coffee', distanceMeters: 956, _matchScore: 175, _isExactProductMatch: true, rating: 4.5 },
+    { id: 'c6', nameKh: 'កាហ្វេអាមេរិខេណូ', nameEn: 'Americano Coffee', distanceMeters: 1556, _matchScore: 170, _isExactProductMatch: true, rating: 4.5 },
+    { id: 'c7', nameKh: 'ធូបកាហ្វេ', nameEn: 'Tube Coffee', distanceMeters: 1878, _matchScore: 165, _isExactProductMatch: true, rating: 4.5 },
+  ];
+
+  const sortedCoffee = [...coffeeCandidates].sort((a, b) => compareByGpsDistanceAscending(a, b, userGps));
+  const sortedDistances = sortedCoffee.map((c) => c.distanceMeters);
+  assert.deepEqual(
+    sortedDistances,
+    [785, 956, 1556, 1764, 1878, 2200, 4300],
+    'Coffee search results must be sorted strictly by ascending GPS distance (closest to farthest)'
+  );
+
+  // 2. Verify fallback sorting when GPS is unavailable (null coordinates and no precomputed distance)
+  const noGpsItems = [
+    { id: 'n1', nameKh: 'ហាង ក', _matchScore: 150, _isExactProductMatch: false, rating: 4.2 },
+    { id: 'n2', nameKh: 'ហាង ខ', _matchScore: 280, _isExactProductMatch: true, rating: 4.9 },
+    { id: 'n3', nameKh: 'ហាង គ', _matchScore: 220, _isExactProductMatch: true, rating: 4.6 },
+  ];
+  const sortedNoGps = sortResultsByGpsDistance(noGpsItems, null);
+  assert.deepEqual(sortedNoGps.map((x) => x.id), ['n2', 'n3', 'n1'], 'Fallback sorting when GPS is unavailable must prioritize exact match, score, and rating');
+
+  // 3. Verify rankBySearchRelevance sorts nearest first across Khmer, English, and Chinese queries when GPS is available
+  const sampleShops = [
+    {
+      id: 's_far_exact',
+      nameKh: 'ហាងកាហ្វេ ប្រោន',
+      nameEn: 'Brown Coffee',
+      categoryKh: 'ហាងកាហ្វេ',
+      categoryEn: 'Cafe & Coffee',
+      latitude: 11.5950, // ~4.3km
+      longitude: 104.9282,
+      rating: 4.9,
+      isVerified: true,
+      status: 'approved',
+      signatureDishesKh: ['កាហ្វេដុតថ្មី'],
+      signatureDishesEn: ['Fresh Roasted Coffee'],
+    },
+    {
+      id: 's_near',
+      nameKh: 'ចកកាហ្វេ',
+      nameEn: 'Chok Coffee',
+      categoryKh: 'ហាងកាហ្វេ',
+      categoryEn: 'Cafe & Coffee',
+      latitude: 11.5630, // ~730m
+      longitude: 104.9282,
+      rating: 4.5,
+      isVerified: true,
+      status: 'approved',
+      signatureDishesKh: ['កាហ្វេដុតថ្មី'],
+      signatureDishesEn: ['Fresh Roasted Coffee'],
+    },
+    {
+      id: 's_mid',
+      nameKh: 'លី កាហ្វេ',
+      nameEn: 'Ly Coffee Shop',
+      categoryKh: 'ហាងកាហ្វេ',
+      categoryEn: 'Cafe & Coffee',
+      latitude: 11.5700, // ~1.5km
+      longitude: 104.9282,
+      rating: 4.6,
+      isVerified: true,
+      status: 'approved',
+      signatureDishesKh: ['កាហ្វេទឹកដោះគោ'],
+      signatureDishesEn: ['Iced Latte Coffee'],
+    },
+  ];
+
+  for (const queryStr of ['កាហ្វេ', 'coffee']) {
+    const ranked = rankBySearchRelevance(sampleShops, queryStr, (r) => restaurantSearchFields(r), {
+      userCoords: userGps,
+    });
+    assert.equal(ranked.length, 3, 'All relevant shops must be preserved for query: ' + queryStr);
+    assert.deepEqual(
+      ranked.map((r) => r.id),
+      ['s_near', 's_mid', 's_far_exact'],
+      'rankBySearchRelevance must sort closest to farthest for query: ' + queryStr
+    );
+  }
+
+  // 4. Verify matchShopToProductQuery does not leak Chinese characters into Khmer matchedInventoryItems
+  const matchKh = matchShopToProductQuery(sampleShops[1], 'កាហ្វេ');
+  assert.ok(matchKh.matches, 'Khmer coffee query should match shop');
+  for (const item of matchKh.matchedInventoryItems) {
+    assert.ok(!/[\u4e00-\u9fff]/.test(item), 'Khmer matchedInventoryItems must not leak CJK text: ' + item);
+  }
+
+  // 5. Verify performUnifiedCambodiaSearch sorts restaurants, destinations, and externalPlaces by GPS distance ascending
+  const sampleDestinations = [
+    {
+      id: 'd_far',
+      nameKh: 'ប្រាសាទឆ្ងាយ',
+      nameEn: 'Far Temple',
+      categorySlug: 'temple',
+      categoryKh: 'ប្រាសាទបុរាណ',
+      categoryEn: 'Ancient Temple',
+      provinceKh: 'រាជធានីភ្នំពេញ',
+      latitude: 11.6200,
+      longitude: 104.9282,
+      rating: 4.9,
+      isVerified: true,
+    },
+    {
+      id: 'd_near',
+      nameKh: 'ប្រាសាទជិត',
+      nameEn: 'Near Temple',
+      categorySlug: 'temple',
+      categoryKh: 'ប្រាសាទបុរាណ',
+      categoryEn: 'Ancient Temple',
+      provinceKh: 'រាជធានីភ្នំពេញ',
+      latitude: 11.5600,
+      longitude: 104.9282,
+      rating: 4.5,
+      isVerified: true,
+    },
+  ];
+
+  const unifiedRes = performUnifiedCambodiaSearch({
+    query: 'ប្រាសាទ',
+    foods: canonicalKhmerFoods.slice(0, 5),
+    restaurants: [],
+    destinations: sampleDestinations,
+    smartCachePlaces: [],
+    userLat: userGps.lat,
+    userLng: userGps.lng,
+  });
+  assert.deepEqual(
+    unifiedRes.destinations.map((d) => d.id),
+    ['d_near', 'd_far'],
+    'performUnifiedCambodiaSearch must sort matching destinations nearest-first'
+  );
+});
+
+
+test('11. Authentic Cambodian Meal-Time Classification (Breakfast, Lunch, Snack, Dinner — zero cross-meal mixing)', () => {
+  const { canonicalKhmerFoods } = require(path.join(ROOT, 'src/data/seedFoods.ts'));
+  const {
+    isAuthenticCambodianDishForMealTime,
+    getAuthenticCambodianDishesForMealTime,
+    scoreCambodianDishForMealTime,
+  } = require(path.join(ROOT, 'src/utils/cambodianMealHabits.ts'));
+
+  const breakfastList = getAuthenticCambodianDishesForMealTime(canonicalKhmerFoods, 'breakfast');
+  const lunchList = getAuthenticCambodianDishesForMealTime(canonicalKhmerFoods, 'lunch');
+  const dinnerList = getAuthenticCambodianDishesForMealTime(canonicalKhmerFoods, 'dinner');
+
+  assert.ok(breakfastList.length >= 35, 'Should have at least 35 authentic Cambodian breakfast dishes');
+  assert.ok(lunchList.length >= 120, 'Should have at least 120 authentic Cambodian lunch dishes');
+  assert.ok(dinnerList.length >= 120, 'Should have at least 120 authentic Cambodian dinner dishes');
+
+  // 1. Iconic Breakfast dishes must be in Breakfast and top-scored (100)
+  for (const id of ['food-36', 'food-37', 'food-39', 'food-41', 'food-49', 'food-88', 'food-89', 'food-165', 'food-172']) {
+    const dish = canonicalKhmerFoods.find((f) => f.id === id);
+    assert.ok(dish, 'Dish must exist: ' + id);
+    assert.equal(scoreCambodianDishForMealTime(dish, 'breakfast'), 100, 'Iconic breakfast dish must score 100: ' + dish.nameKh);
+  }
+
+  // 2. Lunch/Dinner stir-fries, stews, curries, and soups must NEVER appear in Breakfast
+  const forbiddenInBreakfast = [
+    'food-139', // ឆាបន្លែគ្រប់មុខ
+    'food-140', // ខជើងជ្រូកពងទាស្ករត្នោត
+    'food-141', // ឆាផ្សិតសាច់មាន់
+    'food-145', // ឆាផ្សិត
+    'food-1',   // អាម៉ុកត្រីស្លឹកញ
+    'food-2',   // សម្លកកូរខ្មែរ
+    'food-3',   // សម្លម្ជូរគ្រឿងសាច់គោ
+    'food-4',   // សម្លការីសាច់មាន់ខ្មែរ
+    'food-5',   // សម្លប្រហើរត្រីរ៉ស់
+    'food-8',   // ខសាច់ជ្រូកពងទា
+    'food-17',  // ស្ងោរជ្រក់ត្រីរ៉ស់
+    'food-19',  // សាច់គោអាំងទឹកប្រហុក
+    'food-26',  // ឡុកឡាក់សាច់គោម្រេចកំពត
+    'food-29',  // ឆាខ្ញីសាច់គោ
+    'food-50',  // ពងទាកូនទឹកម្រេចក្រូចឆ្មា
+    'food-236', // ស៊ុបគោឆ្នាំងដី
+  ];
+  for (const id of forbiddenInBreakfast) {
+    const dish = canonicalKhmerFoods.find((f) => f.id === id);
+    assert.ok(dish, 'Dish must exist: ' + id);
+    assert.equal(
+      isAuthenticCambodianDishForMealTime(dish, 'breakfast'),
+      false,
+      'Lunch/Dinner dish must NEVER be classified as Breakfast: ' + dish.nameKh
+    );
+  }
+
+  // 3. Morning-only breakfast dishes must NEVER appear in Lunch or Dinner
+  const morningOnlyIds = [
+    'food-36',  // គុយទាវភ្នំពេញពិសេស
+    'food-37',  // នំបញ្ចុកសម្លខ្មែរ
+    'food-39',  // គុយទាវខសាច់គោ
+    'food-41',  // បាយសាច់ជ្រូកអាំងពងទាចៀន
+    'food-42',  // គុយទាវគ្រឿងក្នុង
+    'food-49',  // នំប៉័ងប៉ាតេពិសេស
+    'food-88',  // បបរមាន់ស្រែស្លឹកខ្ទឹម
+    'food-89',  // បបរត្រីរ៉ស់ខ្ញីស្រស់
+    'food-165', // ខគោនំប៉័ង
+    'food-172', // បាយមាន់ស្ងោរទឹកត្រីខ្ញីពិសេស
+  ];
+  for (const id of morningOnlyIds) {
+    const dish = canonicalKhmerFoods.find((f) => f.id === id);
+    assert.equal(
+      isAuthenticCambodianDishForMealTime(dish, 'lunch'),
+      false,
+      'Morning-only dish must NEVER appear in Lunch: ' + dish.nameKh
+    );
+    assert.equal(
+      isAuthenticCambodianDishForMealTime(dish, 'dinner'),
+      false,
+      'Morning-only dish must NEVER appear in Dinner: ' + dish.nameKh
+    );
+  }
+
+  // 4. Evening claypot hotpots must appear in Dinner (100) and NEVER in Breakfast or Lunch
+  const claypotBeef = canonicalKhmerFoods.find((f) => f.id === 'food-236');
+  assert.equal(scoreCambodianDishForMealTime(claypotBeef, 'dinner'), 100);
+  assert.equal(isAuthenticCambodianDishForMealTime(claypotBeef, 'lunch'), false);
+  assert.equal(isAuthenticCambodianDishForMealTime(claypotBeef, 'breakfast'), false);
 });
 
 console.log(`\nAll ${passed} unit test suites passed successfully!`);

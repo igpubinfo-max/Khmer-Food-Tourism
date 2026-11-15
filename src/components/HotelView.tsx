@@ -42,6 +42,9 @@ import { ListingFeaturedCard } from './listing/ListingUI';
 import {
   normalizeKhmerSearchText,
   searchNearbyPlacesWithin500m,
+  searchGoogleMapsPlacesAdvanced,
+  getLocalSmartCache,
+  convertGooglePlaceToDestination,
   GooglePlaceCachedItem,
 } from '../services/googlePlacesService';
 import { NearMeControlBar } from './common/NearMeControlBar';
@@ -54,6 +57,7 @@ import {
   resolveActiveNearMeCoords,
   requestCambodiaGpsLocation,
   mergeNearbyHotels,
+  isHotelGooglePlace,
 } from '../utils/nearMeEngine';
 import { TouristImageModal } from './TouristImageModal';
 import { rankBySearchRelevance, destinationSearchFields, analyzeSearchQuery } from '../utils/searchEngine';
@@ -651,9 +655,11 @@ export const HotelView: React.FC = () => {
   );
 
   const [fallbackSeedHotels, setFallbackSeedHotels] = useState<TouristDestination[]>([]);
+  const [liveCategoryGoogleHotels, setLiveCategoryGoogleHotels] = useState<TouristDestination[]>([]);
+
+  // Always load all 359 verified seed hotels so allHotels is complete even when destinations only has partial/edited records
   useEffect(() => {
-    const hasHotelsInContext = destinations.some((d) => Boolean(d && d.categorySlug === 'hotel'));
-    if (hasHotelsInContext || fallbackSeedHotels.length > 0) return;
+    if (fallbackSeedHotels.length > 0) return;
     let cancelled = false;
     loadSeedHotels100()
       .then((loaded) => {
@@ -665,48 +671,117 @@ export const HotelView: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [destinations, fallbackSeedHotels.length]);
+  }, [fallbackSeedHotels.length]);
 
-  // Combine user/owner approved hotels (Earliest Approved First) + deduplicated seed hotels from `destinations`
+  // Also query live Google Places / Cambodia Map directory when a category button or search query is active
+  useEffect(() => {
+    const trimmedQ = debouncedSearchQuery.trim();
+    const catQueryMap: Record<string, string> = {
+      hotel_stay: 'សណ្ឋាគារ Hotel',
+      verified_big: 'សណ្ឋាគារប្រណីត Luxury Hotel',
+      guesthouse: 'ផ្ទះសំណាក់ Guesthouse Homestay Hostel',
+      luxury_resort: 'រីសត Resort Spa',
+      boutique_villa: 'វីឡា ប៊ូទិក Boutique Hotel Villa',
+    };
+    const effectiveQuery = trimmedQ || catQueryMap[categoryFilter] || '';
+    if (!effectiveQuery) return;
+
+    let cancelled = false;
+    const provFilter =
+      selectedProvince && selectedProvince !== 'ទាំងអស់' && selectedProvince.toLowerCase() !== 'all'
+        ? selectedProvince
+        : 'ទាំងអស់';
+
+    searchGoogleMapsPlacesAdvanced({
+      query: effectiveQuery,
+      categoryFilter: categoryFilter === 'luxury_resort' ? 'resort' : 'tourism',
+      typeFilter: 'tourism',
+      provinceFilter: provFilter,
+      searchScope: provFilter === 'ទាំងអស់' ? 'nationwide' : 'province',
+      language,
+    })
+      .then((res) => {
+        if (cancelled || !res || !Array.isArray(res.places)) return;
+        const convertedList: TouristDestination[] = [];
+        for (const gp of res.places) {
+          if (!isHotelGooglePlace(gp)) continue;
+          const conv = convertGooglePlaceToDestination({ ...gp, subCategorySlug: 'hotel' });
+          convertedList.push({
+            ...conv,
+            categorySlug: 'hotel',
+            categoryKh: conv.categoryKh || 'សណ្ឋាគារ & ផ្ទះសំណាក់',
+            categoryEn: conv.categoryEn || 'Hotel & Guesthouse',
+          });
+        }
+        if (convertedList.length > 0) {
+          setLiveCategoryGoogleHotels((prev) => {
+            const byId = new Map<string, TouristDestination>(prev.map((d) => [d.id, d]));
+            let changed = false;
+            for (const item of convertedList) {
+              if (!byId.has(item.id)) {
+                byId.set(item.id, item);
+                changed = true;
+              }
+            }
+            return changed ? Array.from(byId.values()) : prev;
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [categoryFilter, debouncedSearchQuery, selectedProvince, language]);
+
+  // Combine user/owner approved hotels + context hotels + all 359 seed hotels + Smart Cache hotels + live search hotels
   const allHotels = useMemo<TouristDestination[]>(() => {
     const contextHotels = destinations.filter((d) => Boolean(d && d.categorySlug === 'hotel'));
-    const seedHotels = contextHotels.length > 0 ? contextHotels : fallbackSeedHotels;
+    const smartCacheHotels: TouristDestination[] = [];
+    try {
+      const cachedPlaces = getLocalSmartCache();
+      for (const gp of cachedPlaces) {
+        if (!isHotelGooglePlace(gp)) continue;
+        const conv = convertGooglePlaceToDestination({ ...gp, subCategorySlug: 'hotel' });
+        smartCacheHotels.push({
+          ...conv,
+          categorySlug: 'hotel',
+          categoryKh: conv.categoryKh || 'សណ្ឋាគារ & ផ្ទះសំណាក់',
+          categoryEn: conv.categoryEn || 'Hotel & Guesthouse',
+        });
+      }
+    } catch {
+      // ignore cache read error
+    }
+
+    const combinedCandidates = [
+      ...contextHotels,
+      ...fallbackSeedHotels,
+      ...smartCacheHotels,
+      ...liveCategoryGoogleHotels,
+    ];
     const seenIds = new Set(vipAddedHotelDestinations.map((d) => d.id));
+    const seenGpids = new Set(
+      vipAddedHotelDestinations.map((d) => (d.googlePlaceId || '').trim()).filter((g) => g.length > 5)
+    );
     const seenNameKeys = new Set(
       vipAddedHotelDestinations
         .map((d) => `${normalizeKhmerSearchText(d.nameKh || d.nameEn || '')}::${(d.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`)
         .filter((k) => k.length > 3)
     );
-    const dedupedSeed = seedHotels.filter((d) => {
+    const dedupedRest = combinedCandidates.filter((d) => {
       if (!d || seenIds.has(d.id)) return false;
+      const gpid = (d.googlePlaceId || '').trim();
+      if (gpid.length > 5 && seenGpids.has(gpid)) return false;
       const normKey = `${normalizeKhmerSearchText(d.nameKh || d.nameEn || '')}::${(d.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
       if (normKey.length > 3 && seenNameKeys.has(normKey)) return false;
       seenIds.add(d.id);
+      if (gpid.length > 5) seenGpids.add(gpid);
       if (normKey.length > 3) seenNameKeys.add(normKey);
       return true;
     });
-    return [...vipAddedHotelDestinations, ...dedupedSeed];
-  }, [destinations, fallbackSeedHotels, vipAddedHotelDestinations]);
-
-  const classifyHotelSubCategory = (h: TouristDestination): string => {
-    const text = `${h.nameKh || ''} ${h.nameEn || ''} ${h.categoryKh || ''} ${h.categoryEn || ''}`.toLowerCase();
-    if (text.includes('រីសត') || text.includes('resort') || h.priceRange === '$$$$' || h.priceRange === '$$$') {
-      return 'luxury_resort';
-    }
-    if (text.includes('វីឡា') || text.includes('villa') || text.includes('ប៊ូទិក') || text.includes('boutique')) {
-      return 'boutique_villa';
-    }
-    if (
-      text.includes('ផ្ទះសំណាក់') ||
-      text.includes('guesthouse') ||
-      text.includes('ផ្ទះស្នាក់') ||
-      text.includes('homestay') ||
-      text.includes('hostel')
-    ) {
-      return 'guesthouse';
-    }
-    return 'hotel_stay';
-  };
+    return [...vipAddedHotelDestinations, ...dedupedRest];
+  }, [destinations, fallbackSeedHotels, vipAddedHotelDestinations, liveCategoryGoogleHotels]);
 
   // All user/business-owner added hotels or active VIP hotels get top priority
   const vipHotelIds = useMemo(
@@ -724,11 +799,226 @@ export const HotelView: React.FC = () => {
     [restaurants, isAdmin, currentUser?.id]
   );
 
-  const isVerifiedBigHotel = (h: TouristDestination): boolean =>
-    vipHotelIds.has(h.id) ||
-    userAddedHotelIds.has(h.id) ||
-    Boolean(h.isFeatured) ||
-    (Number(h.rating) || 0) >= 4.8;
+  const isVerifiedBigHotel = (h: TouristDestination): boolean => {
+    const price = (h.priceRange || '').trim();
+    const numPriceMatch = price.match(/\$([0-9]+(?:\.[0-9]+)?)/);
+    const numPrice = numPriceMatch ? parseFloat(numPriceMatch[1]) : 0;
+    const rating = Number(h.rating) || 0;
+    const reviews = Number(h.reviewCount) || 0;
+    return (
+      vipHotelIds.has(h.id) ||
+      userAddedHotelIds.has(h.id) ||
+      Boolean(h.isFeatured) ||
+      isCambodiaChoiceEligible(h) ||
+      rating >= 4.5 ||
+      price === '$$$$' ||
+      price === '$$$' ||
+      numPrice >= 45 ||
+      reviews >= 80
+    );
+  };
+
+  const classifyHotelSubCategory = (h: TouristDestination): string => {
+    const nameText = `${h.nameKh || ''} ${h.nameEn || ''}`.toLowerCase();
+    const catText = `${h.categoryKh || ''} ${h.categoryEn || ''}`.toLowerCase();
+    const text = `${nameText} ${catText}`;
+    if (
+      text.includes('ផ្ទះសំណាក់') ||
+      text.includes('ផ្ទះស្នាក់') ||
+      text.includes('បឹងហ្គាឡូ') ||
+      text.includes('បឹងកាឡូ') ||
+      text.includes('guesthouse') ||
+      text.includes('guest house') ||
+      text.includes('homestay') ||
+      text.includes('hostel') ||
+      text.includes('lodge') ||
+      text.includes('bungalow')
+    ) {
+      return 'guesthouse';
+    }
+    if (
+      text.includes('វីឡា') ||
+      text.includes('villa') ||
+      text.includes('ប៊ូទិក') ||
+      text.includes('boutique') ||
+      nameText.includes('suite') ||
+      nameText.includes('residence') ||
+      nameText.includes('រេស៊ីដង់') ||
+      nameText.includes('រ៉េស៊ីដិន')
+    ) {
+      return 'boutique_villa';
+    }
+    if (
+      nameText.includes('រីសត') ||
+      nameText.includes('resort') ||
+      ((catText.includes('រីសត') || catText.includes('resort')) && !nameText.includes('hotel'))
+    ) {
+      return 'luxury_resort';
+    }
+    return 'hotel_stay';
+  };
+
+  /**
+   * Non-exclusive comprehensive category matcher using the same keyword groups & search engine logic
+   * as the main search bar so all 5 category buttons return complete, consistent results.
+   */
+  const doesHotelMatchCategory = (h: TouristDestination, catId: string): boolean => {
+    if (!h || h.categorySlug !== 'hotel') return false;
+    if (!catId || catId === 'all') return true;
+    if (catId === 'verified_big') return isVerifiedBigHotel(h);
+
+    const nameAndCat = `${h.nameKh || ''} ${h.nameEn || ''} ${h.categoryKh || ''} ${h.categoryEn || ''}`.toLowerCase();
+    const highlightsText = `${(h.highlightsKh || []).join(' ')}`.toLowerCase();
+    const fullText = `${nameAndCat} ${h.descriptionKh || ''} ${h.descriptionEn || ''} ${highlightsText}`.toLowerCase();
+    const price = (h.priceRange || '').trim();
+    const numPriceMatch = price.match(/\$([0-9]+(?:\.[0-9]+)?)/);
+    const numPrice = numPriceMatch ? parseFloat(numPriceMatch[1]) : 0;
+
+    if (catId === 'guesthouse') {
+      const hasExplicitGuesthouseTerm =
+        fullText.includes('ផ្ទះសំណាក់') ||
+        fullText.includes('ផ្ទះស្នាក់') ||
+        fullText.includes('បឹងហ្គាឡូ') ||
+        fullText.includes('បឹងកាឡូ') ||
+        fullText.includes('guesthouse') ||
+        fullText.includes('guest house') ||
+        fullText.includes('homestay') ||
+        fullText.includes('hostel') ||
+        fullText.includes('lodge') ||
+        fullText.includes('motel') ||
+        fullText.includes('bungalow') ||
+        /\binn\b/.test(fullText) ||
+        fullText.includes('airbnb') ||
+        fullText.includes('ផាសុកភាពតម្លៃសមរម្យ');
+      const isAffordableStay =
+        (price === '$' || price === '$$' || (numPrice > 0 && numPrice <= 40)) &&
+        price !== '$$$$' &&
+        price !== '$$$' &&
+        numPrice < 65;
+      return hasExplicitGuesthouseTerm || isAffordableStay;
+    }
+
+    if (catId === 'luxury_resort') {
+      return (
+        fullText.includes('រីសត') ||
+        fullText.includes('រមណីយដ្ឋាន') ||
+        fullText.includes('resort') ||
+        /\bspa\b/.test(fullText) ||
+        fullText.includes('ស្ប៉ា') ||
+        fullText.includes('អេកូ') ||
+        fullText.includes('eco-') ||
+        fullText.includes('beachfront') ||
+        fullText.includes('island') ||
+        fullText.includes('មាត់ទន្លេ') ||
+        fullText.includes('មាត់សមុទ្រ') ||
+        fullText.includes('អាងហែលទឹក') ||
+        /\bpool\b/.test(fullText) ||
+        price === '$$$$' ||
+        price === '$$$' ||
+        numPrice >= 55
+      );
+    }
+
+    if (catId === 'boutique_villa') {
+      return (
+        fullText.includes('វីឡា') ||
+        fullText.includes('ប៊ូទិក') ||
+        fullText.includes('ភូមិគ្រឹះ') ||
+        fullText.includes('រេស៊ីដង់') ||
+        fullText.includes('រ៉េស៊ីដិន') ||
+        fullText.includes('អាផាតមិន') ||
+        fullText.includes('villa') ||
+        fullText.includes('boutique') ||
+        fullText.includes('suite') ||
+        fullText.includes('residence') ||
+        fullText.includes('apartment') ||
+        fullText.includes('palace') ||
+        fullText.includes('mansion') ||
+        fullText.includes('heritage') ||
+        fullText.includes('urban') ||
+        fullText.includes('បែបធម្មជាតិ') ||
+        fullText.includes('ស្ថាបត្យកម្ម')
+      );
+    }
+
+    if (catId === 'hotel_stay') {
+      const isPureHostelOrHomestayOnly =
+        (nameAndCat.includes('hostel') || nameAndCat.includes('homestay')) &&
+        !nameAndCat.includes('សណ្ឋាគារ') &&
+        !nameAndCat.includes('hotel');
+      return !isPureHostelOrHomestayOnly;
+    }
+
+    return true;
+  };
+
+  /**
+   * Returns a priority tier (2 = explicit name/category match, 1 = broader feature/price match)
+   * so explicit category matches always rank at the top of each category button view.
+   */
+  const getHotelCategoryMatchTier = (h: TouristDestination, catId: string): number => {
+    if (!catId || catId === 'all') return 2;
+    const nameAndCat = `${h.nameKh || ''} ${h.nameEn || ''} ${h.categoryKh || ''} ${h.categoryEn || ''}`.toLowerCase();
+    if (catId === 'verified_big') {
+      if (vipHotelIds.has(h.id) || userAddedHotelIds.has(h.id) || h.isFeatured || (Number(h.rating) || 0) >= 4.8) {
+        return 3;
+      }
+      return 2;
+    }
+    if (catId === 'guesthouse') {
+      if (
+        nameAndCat.includes('ផ្ទះសំណាក់') ||
+        nameAndCat.includes('ផ្ទះស្នាក់') ||
+        nameAndCat.includes('បឹងហ្គាឡូ') ||
+        nameAndCat.includes('បឹងកាឡូ') ||
+        nameAndCat.includes('guesthouse') ||
+        nameAndCat.includes('guest house') ||
+        nameAndCat.includes('homestay') ||
+        nameAndCat.includes('hostel') ||
+        nameAndCat.includes('lodge') ||
+        nameAndCat.includes('bungalow')
+      ) {
+        return 2;
+      }
+      return 1;
+    }
+    if (catId === 'luxury_resort') {
+      if (
+        nameAndCat.includes('រីសត') ||
+        nameAndCat.includes('រមណីយដ្ឋាន') ||
+        nameAndCat.includes('resort') ||
+        /\bspa\b/.test(nameAndCat)
+      ) {
+        return 2;
+      }
+      return 1;
+    }
+    if (catId === 'boutique_villa') {
+      if (
+        nameAndCat.includes('វីឡា') ||
+        nameAndCat.includes('ប៊ូទិក') ||
+        nameAndCat.includes('រេស៊ីដង់') ||
+        nameAndCat.includes('រ៉េស៊ីដិន') ||
+        nameAndCat.includes('អាផាតមិន') ||
+        nameAndCat.includes('villa') ||
+        nameAndCat.includes('boutique') ||
+        nameAndCat.includes('suite') ||
+        nameAndCat.includes('residence') ||
+        nameAndCat.includes('apartment') ||
+        nameAndCat.includes('palace')
+      ) {
+        return 2;
+      }
+      return 1;
+    }
+    if (catId === 'hotel_stay') {
+      if (nameAndCat.includes('សណ្ឋាគារ') || nameAndCat.includes('hotel')) {
+        return 2;
+      }
+      return 1;
+    }
+    return 1;
+  };
 
   const hotelCategoryPills = [
     {
@@ -754,7 +1044,7 @@ export const HotelView: React.FC = () => {
     },
     {
       id: 'guesthouse',
-      nameKh: 'ផ្ទះស្នាក់នៅ',
+      nameKh: 'ផ្ទះសំណាក់',
       nameEn: 'Guesthouses',
       nameZh: '客栈',
       icon: 'home' as const,
@@ -777,12 +1067,8 @@ export const HotelView: React.FC = () => {
 
   // Filter by category first so the 25-Province Dropdown shows accurate counts
   const categoryMatchedHotels = useMemo(() => {
-    return allHotels.filter((h) => {
-      if (categoryFilter === 'verified_big') return isVerifiedBigHotel(h);
-      if (categoryFilter !== 'all') return classifyHotelSubCategory(h) === categoryFilter;
-      return true;
-    });
-  }, [allHotels, categoryFilter]);
+    return allHotels.filter((h) => doesHotelMatchCategory(h, categoryFilter));
+  }, [allHotels, categoryFilter, vipHotelIds, userAddedHotelIds]);
 
   const provinceOptions = useMemo(() => {
     return DISH_PROVINCES.map((p) => {
@@ -917,19 +1203,37 @@ export const HotelView: React.FC = () => {
 
     const basePool: TouristDestination[] = isNearMe ? nearbyMergedHotels : orderedHotels;
 
+    const qa = trimmedQ ? analyzeSearchQuery(trimmedQ) : null;
+    const isGenericAccommodationSearchOnly = Boolean(
+      trimmedQ &&
+        qa &&
+        qa.distinctive.length === 0 &&
+        (smartIntent?.semanticCategory === 'hotel' ||
+          smartIntent?.semanticCategory === 'resort' ||
+          smartIntent?.semanticCategory === 'guesthouse' ||
+          smartIntent?.semanticCategory === 'villa' ||
+          /^(?:សណ្ឋាគារ|សណ្ឋាគារ\s*vip|vip|ផ្ទះសំណាក់|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|រីសត|វីឡា|ប៊ូទិក|វីឡា\/ប៊ូទិក|កន្លែងស្នាក់នៅ|hotel|hotels|guesthouse|guesthouses|guest\s*house|resort|resorts|villa|villas|boutique|homestay|hostel)$/i.test(
+            trimmedQ
+          ))
+    );
+
+    const semanticCatFilter =
+      categoryFilter !== 'all'
+        ? categoryFilter
+        : smartIntent?.semanticCategory === 'resort'
+        ? 'luxury_resort'
+        : smartIntent?.semanticCategory === 'guesthouse'
+        ? 'guesthouse'
+        : smartIntent?.semanticCategory === 'villa'
+        ? 'boutique_villa'
+        : smartIntent?.semanticCategory === 'hotel'
+        ? 'hotel_stay'
+        : 'all';
+
     let scoped = basePool.filter((h) => {
       if (!h || h.categorySlug !== 'hotel') return false;
-      if (categoryFilter === 'verified_big' && !isVerifiedBigHotel(h)) return false;
-      if (
-        categoryFilter !== 'all' &&
-        categoryFilter !== 'verified_big' &&
-        classifyHotelSubCategory(h) !== categoryFilter
-      ) {
+      if (semanticCatFilter !== 'all' && !doesHotelMatchCategory(h, semanticCatFilter)) {
         return false;
-      }
-      if (categoryFilter === 'all' && smartIntent?.semanticCategory) {
-        if (smartIntent.semanticCategory === 'resort' && classifyHotelSubCategory(h) !== 'luxury_resort') return false;
-        if (smartIntent.semanticCategory === 'guesthouse' && classifyHotelSubCategory(h) !== 'guesthouse') return false;
       }
       if (!isNearMe && cleanSelProv && !(h.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
         return false;
@@ -942,16 +1246,24 @@ export const HotelView: React.FC = () => {
 
     const hasActiveUserGps = Boolean(userCoords || readSavedUserGps());
 
-    if (!trimmedQ) {
-      if (isNearMe || ((categoryFilter !== 'all' || hasActiveUserGps) && sortMode !== 'rating')) {
+    if (!trimmedQ || isGenericAccommodationSearchOnly) {
+      if (isNearMe || ((semanticCatFilter !== 'all' || hasActiveUserGps) && sortMode !== 'rating')) {
         scoped = [...scoped].sort((a, b) => {
+          const tierA = getHotelCategoryMatchTier(a, semanticCatFilter);
+          const tierB = getHotelCategoryMatchTier(b, semanticCatFilter);
+          if (tierA !== tierB) return tierB - tierA;
           const dA = distanceMetersMap.get(a.id) ?? 9999999;
           const dB = distanceMetersMap.get(b.id) ?? 9999999;
           if (dA !== dB) return dA - dB;
           return (b.rating || 4.6) - (a.rating || 4.6);
         });
       } else if (sortMode === 'rating') {
-        scoped = [...scoped].sort((a, b) => (b.rating || 4.6) - (a.rating || 4.6));
+        scoped = [...scoped].sort((a, b) => {
+          const tierA = getHotelCategoryMatchTier(a, semanticCatFilter);
+          const tierB = getHotelCategoryMatchTier(b, semanticCatFilter);
+          if (tierA !== tierB) return tierB - tierA;
+          return (b.rating || 4.6) - (a.rating || 4.6);
+        });
       } else {
         // Fallback when GPS is unavailable: VIP Rotation + 24h Newest-Added Top-1 Boost appears at TOP 1
         const priorityUserHotels = scoped
@@ -962,14 +1274,20 @@ export const HotelView: React.FC = () => {
             if (rankA !== rankB) return rankA - rankB;
             return (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0);
           });
-        const restHotels = scoped.filter((h) => !userAddedHotelIds.has(h.id));
+        const restHotels = scoped
+          .filter((h) => !userAddedHotelIds.has(h.id))
+          .sort((a, b) => {
+            const tierA = getHotelCategoryMatchTier(a, semanticCatFilter);
+            const tierB = getHotelCategoryMatchTier(b, semanticCatFilter);
+            if (tierA !== tierB) return tierB - tierA;
+            return 0;
+          });
         scoped = [...priorityUserHotels, ...restHotels];
       }
       return scoped;
     }
 
-    const qa = analyzeSearchQuery(trimmedQ);
-    if (qa.distinctive.length === 0 && (smartIntent?.detectedProvinceKh || smartIntent?.semanticCategory)) {
+    if (qa && qa.distinctive.length === 0 && (smartIntent?.detectedProvinceKh || smartIntent?.semanticCategory)) {
       if (isNearMe || hasActiveUserGps) {
         return [...scoped].sort(
           (a, b) => (distanceMetersMap.get(a.id) ?? 9999999) - (distanceMetersMap.get(b.id) ?? 9999999)
@@ -1094,7 +1412,7 @@ export const HotelView: React.FC = () => {
     }
     if (subCat === 'guesthouse') {
       return [
-        { icon: 'home', label: tr(language, 'ផ្ទះស្នាក់នៅ', 'Guesthouse', '客栈') },
+        { icon: 'home', label: tr(language, 'ផ្ទះសំណាក់', 'Guesthouse', '客栈') },
         { icon: 'dining', label: tr(language, 'អាហារដ្ឋាន', 'Dining', '餐饮') },
       ];
     }
@@ -1212,7 +1530,7 @@ export const HotelView: React.FC = () => {
     },
     {
       id: 'guesthouse',
-      nameKh: 'ផ្ទះស្នាក់នៅ',
+      nameKh: 'ផ្ទះសំណាក់',
       nameEn: 'Guesthouses',
       nameZh: '民宿客栈',
       icon: Home,
@@ -1403,6 +1721,16 @@ export const HotelView: React.FC = () => {
                   onClick={() => {
                     if (categoryFilter !== cat.id) {
                       recordHotelStep('hotel-cat:' + cat.id);
+                    }
+                    const curQ = hotelSearchQuery.trim();
+                    if (
+                      curQ &&
+                      /^(?:សណ្ឋាគារ|សណ្ឋាគារ\s*vip|vip|ផ្ទះសំណាក់|ផ្ទះស្នាក់នៅ|ផ្ទះស្នាក់|បឹងហ្គាឡូ|រីសត|វីឡា|ប៊ូទិក|វីឡា\/ប៊ូទិក|កន្លែងស្នាក់នៅ|hotel|hotels|guesthouse|guesthouses|guest\s*house|resort|resorts|villa|villas|boutique|homestay|hostel)$/i.test(
+                        curQ
+                      )
+                    ) {
+                      setHotelSearchQuery('');
+                      setDebouncedSearchQuery('');
                     }
                     setCategoryFilter(cat.id);
                     scrollToHotelList(true);

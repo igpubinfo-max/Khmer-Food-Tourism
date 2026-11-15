@@ -1135,22 +1135,49 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
   if (parsed.occasionIntents && parsed.occasionIntents.length > 0) {
     for (const occ of parsed.occasionIntents) {
       if (occ === 'breakfast') {
-        if (/បាយសាច់ជ្រូក|គុយទាវ|នំបញ្ចុក|បបរ|មីគោក|មីទឹក|បាញ់កាញ់|លតឆា|កាហ្វេ/i.test(titleNorm)) {
-          score += 295;
-        } else if (food.categorySlug === 'noodles' || food.categorySlug === 'rice') {
-          score += 210;
+        const isStrictMorningDish =
+          !/^មីឆាគ្រឿងសមុទ្រ|^មីសួរឆាក្តាម|^បាយឆាក្តាម|^បាយឆាឡុកឡាក់|^បាយឆាម្រះព្រៅ|^បាយឆាយ៉ាងចូវ|^បាយឆាសាច់ជ្រូកស្រួយ|^បាយក្តាំង/i.test(
+            titleNorm
+          ) &&
+          /^បាយសាច់ជ្រូក|^គុយទាវ|^នំបញ្ចុក|^បបរ(?!ត្នោត|ត្រាវ)|^បាយមាន់|^បាយខជើងជ្រូក|^បាយគោងៀត|^នំប៉័ង|^ខគោនំប៉័ង|^អូម៉ាឡែត|^មីគោក|^មីស៊ុប|^មីទឹក|^មីកូឡា|^មីលាក់ខ្លួន|^មីសួរសាច់មាន់|^មីខគោ|^មីក្រឡុក|^បាញ់កាញ់|^បាញ់ហយ|^លតឆា|^មីឆាសាច់គោ|^មីឆាបួស|^បាយឆាអំបិល|^បាយឆាបួសខ្ចប់ពងមាន់|^នំអន្សម|^កាហ្វេ|^ទឹកសណ្តែក/i.test(
+            titleNorm
+          );
+        if (isStrictMorningDish) {
+          score += 320;
+        } else if (parsed.isOccasionOnlyQuery) {
+          return -1000;
         }
       } else if (occ === 'lunch') {
-        if (/សម្លម្ជូរ|សម្លកកូរ|អាម៉ុក|ប្រហុកខ្ទិះ|ទឹកគ្រឿង|ឡុកឡាក់|បាយឆា|ឆាម្រះព្រៅ|ត្រីដុត/i.test(titleNorm)) {
-          score += 285;
-        } else if (food.categorySlug === 'soup' || food.categorySlug === 'stirfry' || food.categorySlug === 'salad') {
-          score += 210;
+        const isWrongForLunch =
+          /^គុយទាវ(?!ឆា)|^នំបញ្ចុក|^បបរ|^បាយសាច់ជ្រូក|^នំប៉័ង|^ខគោនំប៉័ង|^អូម៉ាឡែត|^បាញ់កាញ់|^បាញ់ហយ|^មីកូឡា|^មីគោក|^មីស៊ុប|^មីលាក់ខ្លួន|ឆ្នាំងភ្លើង|យ៉ាវហន|ស៊ុបគោឆ្នាំងដី|^ពងទាកូន|^ពងក្រួចកូន|^លៀសហាល|^នំអន្សម/i.test(
+            titleNorm
+          );
+        if (isWrongForLunch) {
+          if (parsed.isOccasionOnlyQuery) return -1000;
+        } else if (
+          /សម្លម្ជូរ|សម្លកកូរ|សម្លប្រហើរ|សម្លការី|អាម៉ុក|ប្រហុកខ្ទិះ|ទឹកគ្រឿង|ខសាច់ជ្រូក|ខជើងជ្រូក|ស្ងោរជ្រក់|ស្ងោរង៉ាំង៉ូវ|ឡុកឡាក់|បាយឆា|ឆាត្រកួន|ឆាបន្លែ|ឆាផ្សិត|ឆាក្តៅ|ឆាខ្ញី|ត្រីចៀន|ត្រីបំពង/i.test(
+            titleNorm
+          )
+        ) {
+          score += 310;
+        } else if (!isSweetOrBeverageFood(food)) {
+          score += 220;
         }
       } else if (occ === 'dinner') {
-        if (/សម្ល|ស៊ុប|ស្ងោរជ្រក់|ត្រីដុត|មាន់ដុត|សាច់គោអាំង|ឡុកឡាក់|អាម៉ុក|ក្តាមឆាម្រេច/i.test(titleNorm)) {
-          score += 285;
-        } else if (food.categorySlug === 'soup' || food.categorySlug === 'grilled' || food.categorySlug === 'stirfry') {
-          score += 210;
+        const isWrongForDinner =
+          /^គុយទាវ(?!ឆា)|^នំបញ្ចុក|^បបរ|^បាយសាច់ជ្រូក|^បាយមាន់ស្ងោរ|^បាយគោងៀត|^បាយខជើងជ្រូក|^បាយឆាអំបិល|^នំប៉័ង|^ខគោនំប៉័ង|^អូម៉ាឡែត|^បាញ់កាញ់|^បាញ់ហយ|^មីកូឡា|^មីគោក|^មីស៊ុប|^មីលាក់ខ្លួន|^ពងទាកូន|^ពងក្រួចកូន|^លៀសហាល|^នំអន្សម/i.test(
+            titleNorm
+          );
+        if (isWrongForDinner) {
+          if (parsed.isOccasionOnlyQuery) return -1000;
+        } else if (
+          /ស៊ុបគោឆ្នាំងដី|ឆ្នាំងភ្លើង|យ៉ាវហន|ស៊ុបឆ្អឹងជំនី|ស៊ុបជើងមាន់|មាន់ដុត|ទាអាំង|មឹកអាំង|បង្គាអាំង|ក្តាមសេះឆា|ឆាបង្កង|បង្កងឆា|ត្រីដុត|ត្រីតុកកែចំហុយ|សាច់គោអាំង|ឡុកឡាក់|អាម៉ុក|ស្ងោរជ្រក់|សម្ល/i.test(
+            titleNorm
+          )
+        ) {
+          score += 310;
+        } else if (!isSweetOrBeverageFood(food)) {
+          score += 220;
         }
       } else if (occ === 'rainy') {
         if (/សម្លម្ជូរ|សម្លកកូរ|ស៊ុប|បបរ|ស្ងោរជ្រក់|គុយទាវ|តុំយ៉ាំ|សម្លប្រហុក|សម្លការី/i.test(titleNorm)) {

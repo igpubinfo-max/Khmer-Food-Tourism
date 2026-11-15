@@ -54,6 +54,7 @@ import {
 } from '../utils/searchEngine';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { initial100Restaurants as SEED_RESTAURANTS } from '../data/seedRestaurants';
+import { youthBrandedCafes30 } from '../data/seedYouthBrandedCafes';
 import { initial100Destinations as SEED_DESTINATIONS, loadExtendedDestinationsAndHotels } from '../data/seedDestinations';
 import { isRestaurantIdDeleted, loadDeletedRestaurantIdsMap } from './permanentMediaVaultService';
 import { stripForeignScripts } from '../utils/i18n';
@@ -360,7 +361,7 @@ function isNonBusinessInstitutionName(name: string, category?: string): boolean 
       /(បឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលាបឋម|សាលារៀន|មន្ទីរពេទ្យ|មណ្ឌលសុខភាព|សាលាឃុំ|សាលាសង្កាត់|សាលាស្រុក|ប៉ុស្តិ៍នគរបាល|primary school|high school|secondary school|hospital|health center|police station|commune hall)/i.test(
         lower
       ) &&
-      !/(cooking school|culinary|cafe|coffee|restaurant|kitchen|bistro|bakery)/i.test(lower)
+      !/(cooking school|culinary|cafe|coffee|restaurant|kitchen|bistro|bakery|noodle|food|tea|bbq|grill|hotpot|hotel|resort|guesthouse|គុយទាវ|មី|បាយ|កាហ្វេ|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាង|ស៊ុប|សាច់អាំង|បង្អែម|នំប៉័ង|នំបញ្ចុក|លតឆា|បបរ|ម្ហូប|អាហារ|តែគុជ|សណ្ឋាគារ|ផ្ទះសំណាក់|រីសត|រមណីយដ្ឋាន)/i.test(lower)
     ) {
       return true;
     }
@@ -1130,6 +1131,238 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
   },
+  {
+    placeId: 'gmap-ChIJw2kDZhdRCTERvF4dIhDY_rI',
+    googlePlaceId: 'ChIJw2kDZhdRCTERvF4dIhDY_rI',
+    nameKh: 'គុយទាវ គន់ គឹមស៊ា (គុយទាវអូរឡាំពិច)',
+    nameEn: 'Kun Kimsea Olympic Kuy Teav Noodle Restaurant',
+    nameZh: '金边奥林匹克粿条馆 (Kun Kimsea)',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Noodle shop • ហាងគុយទាវ និងអាហារព្រឹក',
+    editorialSummary: 'គុយទាវភ្នំពេញ គុយទាវទូក មីស៊ុប និងអាហារព្រឹក • Phnom Penh Kuy Teav Noodles & Breakfast',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: '372 Preah Sihanouk Blvd (274), Phnom Penh',
+    addressKh: 'ផ្ទះលេខ ៣៧២ មហាវិថីព្រះសីហនុ (២៧៤) រាជធានីភ្នំពេញ',
+    lat: 11.5554915,
+    lng: 104.9117076,
+    phone: '089 644 366',
+    openHours: '06:00 AM - 02:00 PM',
+    priceLevel: '$',
+    rating: 4.3,
+    reviewCount: 119,
+    photoUrl: 'https://lh3.googleusercontent.com/grass-cs/AABkmLee7JLIlw8c8VdlwYuu0Fiv_CTDtYeh_vlmq9cOIXlMeQSpnFvKA7itZE-sbWYlRo9Q-_0cWEpXQwG2z75uwNQrSvdlhV8JMkMoHck9mKHZjE2IIFZ2cINxHbwrWpIjYu6sqrY=w800-h600-k-no',
+    photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLee7JLIlw8c8VdlwYuu0Fiv_CTDtYeh_vlmq9cOIXlMeQSpnFvKA7itZE-sbWYlRo9Q-_0cWEpXQwG2z75uwNQrSvdlhV8JMkMoHck9mKHZjE2IIFZ2cINxHbwrWpIjYu6sqrY=w800-h600-k-no'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5554915,104.9117076&query_place_id=ChIJw2kDZhdRCTERvF4dIhDY_rI',
+    types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-15T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-ChIJfRQkrztRCTERxr6wxv5pW_c',
+    googlePlaceId: 'ChIJfRQkrztRCTERxr6wxv5pW_c',
+    nameKh: 'ភោជនីយដ្ឋានគុយទាវឆ្ងាញ់ កូនហេង (Kaun Heng Noodle Restaurant)',
+    nameEn: 'Kaun Heng Noodle Restaurant',
+    nameZh: '金边坤兴粿条面馆 (Kaun Heng Noodle)',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Noodle shop • ភោជនីយដ្ឋានគុយទាវ និងអាហារព្រឹក',
+    editorialSummary: 'គុយទាវភ្នំពេញ មីគោក មីស៊ុប និងអាហារព្រឹក • Kuy Teav Noodles & Breakfast',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'Oknha Pich St. (242), Daun Penh, Phnom Penh 12207',
+    addressKh: 'ផ្លូវឧកញ៉ាពេជ្រ (២៤២) ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
+    lat: 11.5576287,
+    lng: 104.9236688,
+    phone: '085 500 241',
+    openHours: '06:00 AM - 08:30 PM',
+    priceLevel: '$$',
+    rating: 4.1,
+    reviewCount: 243,
+    photoUrl: 'https://lh3.googleusercontent.com/grass-cs/AABkmLeMiT2l7zXr2a2330tIvEk010JyS7Q7UhBAX46oeabkwFndRMPnIU2DrRXr7vnL2d7gZf40McILzBFSK1ZOkAV-M396iAz5Krq1b33A2Y4ikstuhYhEFafm8dgtldE5hhauuUg0Wg=w800-h600-k-no',
+    photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLeMiT2l7zXr2a2330tIvEk010JyS7Q7UhBAX46oeabkwFndRMPnIU2DrRXr7vnL2d7gZf40McILzBFSK1ZOkAV-M396iAz5Krq1b33A2Y4ikstuhYhEFafm8dgtldE5hhauuUg0Wg=w800-h600-k-no'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5576287,104.9236688&query_place_id=ChIJfRQkrztRCTERxr6wxv5pW_c',
+    types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-15T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-ChIJqacEuhBRCTERb8R-Mo7-uYI',
+    googlePlaceId: 'ChIJqacEuhBRCTERb8R-Mo7-uYI',
+    nameKh: 'ពៅអូរឡាំពិច គុយទាវឆ្ងាញ់ (Pov Olympic Restaurant)',
+    nameEn: 'Pov Olympic Restaurant (Kuy Teav & Breakfast)',
+    nameZh: '金边奥林匹克宝记粿条早餐馆',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Breakfast restaurant • ហាងគុយទាវ និងអាហារព្រឹក',
+    editorialSummary: 'គុយទាវ បាយព្រឹក មីស៊ុប និងកាហ្វេ • Noodles & Breakfast Restaurant',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: '#36 St 286, Sangkat Olympic, Phnom Penh 12309',
+    addressKh: 'ផ្ទះលេខ ៣៦ ផ្លូវ ២៨៦ សង្កាត់អូរឡាំពិច រាជធានីភ្នំពេញ',
+    lat: 11.5561063,
+    lng: 104.9089341,
+    phone: '012 926 262',
+    openHours: '06:00 AM - 03:00 PM',
+    priceLevel: '$',
+    rating: 4.0,
+    reviewCount: 169,
+    photoUrl: 'https://lh3.googleusercontent.com/grass-cs/AABkmLds4qszGNJz7Wv6jRGIKqy3BEPIc6oi-m2I8RP3n1DyunVMcYOvq4MQnZPgD80SHrCEj2Bhv6DiJ9mstTEE1uYVvuk6a-udX42MhQaGqfNujK_ibE6QqvuuI77hTbKn0mQvFy1hWw=w800-h600-k-no',
+    photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLds4qszGNJz7Wv6jRGIKqy3BEPIc6oi-m2I8RP3n1DyunVMcYOvq4MQnZPgD80SHrCEj2Bhv6DiJ9mstTEE1uYVvuk6a-udX42MhQaGqfNujK_ibE6QqvuuI77hTbKn0mQvFy1hWw=w800-h600-k-no'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5561063,104.9089341&query_place_id=ChIJqacEuhBRCTERb8R-Mo7-uYI',
+    types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-15T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-ChIJK3fbkuFQCTER8tXbm27p9ZU',
+    googlePlaceId: 'ChIJK3fbkuFQCTER8tXbm27p9ZU',
+    nameKh: 'គុយទាវឆ្ងាញ់ ៣ជំនាន់ (3 Generations Kuy Teav)',
+    nameEn: '3 Generations Kuy Teav Noodle Shop',
+    nameZh: '三代传承金边粿条店',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Noodle shop • ហាងគុយទាវ ៣ជំនាន់',
+    editorialSummary: 'គុយទាវភ្នំពេញ មីស៊ុប បបរ និងអាហារព្រឹក • Noodles & Breakfast',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: '170 Street 175, Toul Tum Poung II, Phnom Penh 12311',
+    addressKh: 'ផ្ទះលេខ ១៧០ ផ្លូវ ១៧៥ សង្កាត់ទួលទំពូងទី២ រាជធានីភ្នំពេញ',
+    lat: 11.5424561,
+    lng: 104.910579,
+    phone: '070 386 789',
+    openHours: '06:00 AM - 02:00 PM',
+    priceLevel: '$',
+    rating: 4.2,
+    reviewCount: 145,
+    photoUrl: 'https://lh3.googleusercontent.com/grass-cs/AABkmLfYmDzeZiSjGCEt28xYRIzF4VRWAZcrSKkQzMppxx2GRvf316NAivQYefQoWXUsU9d0dyYZLmaIUD0haOuzN3zsQCAERcoEdUCHEMheR-X2PlfdqHotUsZDFRwe4OMOgZKxH8Ndaw=w800-h600-k-no',
+    photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLfYmDzeZiSjGCEt28xYRIzF4VRWAZcrSKkQzMppxx2GRvf316NAivQYefQoWXUsU9d0dyYZLmaIUD0haOuzN3zsQCAERcoEdUCHEMheR-X2PlfdqHotUsZDFRwe4OMOgZKxH8Ndaw=w800-h600-k-no'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5424561,104.910579&query_place_id=ChIJK3fbkuFQCTER8tXbm27p9ZU',
+    types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-15T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-ChIJKzjn025PCTER_B69KB0qxro',
+    googlePlaceId: 'ChIJKzjn025PCTER_B69KB0qxro',
+    nameKh: 'រ៉េ គុយទាវ (Re Kuyteav)',
+    nameEn: 'Re Kuyteav Noodle Restaurant',
+    nameZh: 'Re Kuyteav 金边粿条餐厅',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Noodle shop • ហាងគុយទាវ និងអាហារព្រឹក',
+    editorialSummary: 'គុយទាវ មីស៊ុប មីគោក និងអាហារព្រឹក • Noodles & Breakfast',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'Street 51 (Pasteur), Daun Penh, Phnom Penh 12208',
+    addressKh: 'ផ្លូវលេខ ៥១ (ប៉ាស្ទ័រ) ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
+    lat: 11.5686649,
+    lng: 104.9232088,
+    phone: '093 817 777',
+    openHours: '06:00 AM - 08:00 PM',
+    priceLevel: '$',
+    rating: 4.2,
+    reviewCount: 67,
+    photoUrl: 'https://lh3.googleusercontent.com/grass-proxy/AIM7gW1aCZjXYwGkxs9Pcpcp760-AHlIUaYE8AQ6CfSxiQvHUVB8XbaWE8r_Il2HGiTr5IeXqPrzO2dHRxgjh1vOiolGm5YxR-7QBEL5NjDSL-yVFAPKjpaAE-ReWSo6_rFfmgDcT0MH2mQOmFOJ8249aZj8ceJ9gWs-5exl_wtLRr0xxXcR74aUonxq3g=w800-h600-k-no',
+    photoUrls: ['https://lh3.googleusercontent.com/grass-proxy/AIM7gW1aCZjXYwGkxs9Pcpcp760-AHlIUaYE8AQ6CfSxiQvHUVB8XbaWE8r_Il2HGiTr5IeXqPrzO2dHRxgjh1vOiolGm5YxR-7QBEL5NjDSL-yVFAPKjpaAE-ReWSo6_rFfmgDcT0MH2mQOmFOJ8249aZj8ceJ9gWs-5exl_wtLRr0xxXcR74aUonxq3g=w800-h600-k-no'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5686649,104.9232088&query_place_id=ChIJKzjn025PCTER_B69KB0qxro',
+    types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-15T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-ChIJTwJ34GVRCTERw2uLuf_JE48',
+    googlePlaceId: 'ChIJTwJ34GVRCTERw2uLuf_JE48',
+    nameKh: 'គុយទាវប្រហិតធំ យុគន្ធរ (Yukanthor Big Meatball Kuy Teav)',
+    nameEn: 'Yukanthor Kuy Teav Noodle Shop',
+    nameZh: '金边大肉丸粿条店',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Noodle shop • ហាងគុយទាវប្រហិតធំ និងអាហារព្រឹក',
+    editorialSummary: 'គុយទាវប្រហិតសាច់គោ មីស៊ុប និងអាហារព្រឹក • Beef Meatball Kuy Teav Noodles & Breakfast',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'Sangkat Boeng Keng Kang, Phnom Penh',
+    addressKh: 'ក្បែរវិទ្យាល័យព្រះយុគន្ធរ សង្កាត់បឹងកេងកង រាជធានីភ្នំពេញ',
+    lat: 11.5552449,
+    lng: 104.9191337,
+    phone: '012 855 321',
+    openHours: '06:00 AM - 01:30 PM',
+    priceLevel: '$',
+    rating: 4.2,
+    reviewCount: 45,
+    photoUrl: 'https://lh3.googleusercontent.com/grass-cs/AABkmLfR1I1PYV1GQCYak9_c1H-9hER_Lx-gD9fcw2mmaysMYM1-Ah62aUSTg5Rx-r-f-hEVSHxHqc-fbA4Jrf8HGDPTSHzQKz3-83vySGCyVsYcmjqRky05HkdMiiyL7LHPX49fcuGekA=w800-h600-k-no',
+    photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLfR1I1PYV1GQCYak9_c1H-9hER_Lx-gD9fcw2mmaysMYM1-Ah62aUSTg5Rx-r-f-hEVSHxHqc-fbA4Jrf8HGDPTSHzQKz3-83vySGCyVsYcmjqRky05HkdMiiyL7LHPX49fcuGekA=w800-h600-k-no'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5552449,104.9191337&query_place_id=ChIJTwJ34GVRCTERw2uLuf_JE48',
+    types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-15T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-ChIJLa64WmJRCTERI6BHiQbD1Nc',
+    googlePlaceId: 'ChIJLa64WmJRCTERI6BHiQbD1Nc',
+    nameKh: 'គុយទាវ បឹងកេត (Boeung Ket Kuy Teav)',
+    nameEn: 'Boeung Ket Kuy Teav Noodle Shop',
+    nameZh: '万吉粿条店 (Boeung Ket Kuy Teav)',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Noodle shop • ហាងគុយទាវ និងអាហារព្រឹក',
+    editorialSummary: 'គុយទាវភ្នំពេញ មីស៊ុប និងអាហារព្រឹក • Noodles & Breakfast',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: '169BC, Street 182, Phnom Penh 12153',
+    addressKh: 'ផ្ទះលេខ ១៦៩BC ផ្លូវ ១៨២ រាជធានីភ្នំពេញ',
+    lat: 11.5631108,
+    lng: 104.9050693,
+    phone: '012 718 290',
+    openHours: '06:00 AM - 02:00 PM',
+    priceLevel: '$',
+    rating: 4.8,
+    reviewCount: 29,
+    photoUrl: 'https://lh3.googleusercontent.com/grass-cs/AABkmLdIH1ZbN4qVb8Nty6aEDidfUZWrvdEobU3JH74w0FIJPXpzTC-NkauczdwdT7BHUyXCnBuFtHdUyimCQ8Uhz1sPiEftTnzlyLEo0H0678gy0K7ZqbcuFPbIchsxIwoJD-xHnGwl=w800-h600-k-no',
+    photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLdIH1ZbN4qVb8Nty6aEDidfUZWrvdEobU3JH74w0FIJPXpzTC-NkauczdwdT7BHUyXCnBuFtHdUyimCQ8Uhz1sPiEftTnzlyLEo0H0678gy0K7ZqbcuFPbIchsxIwoJD-xHnGwl=w800-h600-k-no'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5631108,104.9050693&query_place_id=ChIJLa64WmJRCTERI6BHiQbD1Nc',
+    types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-15T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-ChIJQdeN_QxRCTERrBB70evZGMc',
+    googlePlaceId: 'ChIJQdeN_QxRCTERrBB70evZGMc',
+    nameKh: 'ហាងគុយទាវ អុឹងគីមស្រ៊ុន (Ung Kim Srun Noodle Shop)',
+    nameEn: 'Ung Kim Srun Kuy Teav Noodle Shop',
+    nameZh: '黄 金顺粿条面馆',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Noodle shop • ហាងគុយទាវ និងអាហារព្រឹក',
+    editorialSummary: 'គុយទាវ មីស៊ុប និងអាហារព្រឹក • Kuy Teav Noodles & Breakfast',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: '66 St 328, Tuol Svay Prey, Phnom Penh',
+    addressKh: 'ផ្ទះលេខ ៦៦ ផ្លូវ ៣២៨ សង្កាត់ទួលស្វាយព្រៃ រាជធានីភ្នំពេញ',
+    lat: 11.5544066,
+    lng: 104.9066942,
+    phone: '012 632 819',
+    openHours: '06:00 AM - 01:30 PM',
+    priceLevel: '$',
+    rating: 4.2,
+    reviewCount: 29,
+    photoUrl: 'https://lh3.googleusercontent.com/grass-cs/AABkmLcW5IpB8kcOXIyskL5hIp8UIbwCs7meMksOHdXb9VrGEZ0AVEPrKb38Mdz2M11f5fvfE16WAcyGRcsXNyyQuyUv8OQ6w8qunt1cYCCMiamDP7GSm4svz1latidNMmfc7yrjaDGKI1JD-voJ=w800-h600-k-no',
+    photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLcW5IpB8kcOXIyskL5hIp8UIbwCs7meMksOHdXb9VrGEZ0AVEPrKb38Mdz2M11f5fvfE16WAcyGRcsXNyyQuyUv8OQ6w8qunt1cYCCMiamDP7GSm4svz1latidNMmfc7yrjaDGKI1JD-voJ=w800-h600-k-no'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5544066,104.9066942&query_place_id=ChIJQdeN_QxRCTERrBB70evZGMc',
+    types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-15T00:00:00.000Z',
+  },
 ];
 
 function getTodayDateKey(): string {
@@ -1826,10 +2059,8 @@ export function expandMultilingualPlaceQuery(
     (!isCoffeeSearch && !isTourismSearch && restaurantRegex.test(rawQuery));
 
   if (isCoffeeSearch) {
-    // Check if the user also typed a specific brand/shop keyword alongside coffee/cafe
-    const specificBrand = clean
-      .replace(/ហាងកាហ្វេ|កាហ្វេ|coffee\s*shop|coffee|cafe|café|cambodia|ភ្នំពេញ|សៀមរាប|បាត់ដំបង|កំពត|កែប|ព្រះសីហនុ/gi, '')
-      .trim();
+    const qaCoffee = analyzeSearchQuery(rawQuery);
+    const specificBrand = qaCoffee.distinctive.join(' ').trim();
 
     if (specificBrand.length >= 2) {
       return {
@@ -1848,8 +2079,8 @@ export function expandMultilingualPlaceQuery(
       isRestaurantSearch: false,
       isTourismSearch: false,
       resolvedCategory: 'cafe',
-      matchTokens: ['coffee', 'cafe', 'café', 'កាហ្វេ', 'ហាងកាហ្វេ', 'espresso', 'latte', 'roastery'],
-      photonQueries: ['coffee', 'cafe', 'ហាងកាហ្វេ', 'កាហ្វេ'],
+      matchTokens: ['coffee', 'cafe', 'café', 'កាហ្វេ', 'ហាងកាហ្វេ', 'espresso', 'latte', 'roastery', 'តែគុជ'],
+      photonQueries: ['ហាងកាហ្វេ', 'Coffee shop', 'Cafe', 'កាហ្វេ'],
       nominatimQueries: ['កាហ្វេ', '[cafe]', 'ហាងកាហ្វេ', 'Brown Coffee', 'Amazon Cafe', 'Tube Coffee'],
     };
   }
@@ -1862,40 +2093,48 @@ export function expandMultilingualPlaceQuery(
     const qa = analyzeSearchQuery(rawQuery);
     const coreBrandPhrase = qa.distinctive.join(' ').trim();
     const bilingualSynonyms: Array<[RegExp, string[]]> = [
+      [/(អាហារខ្មែរ|ម្ហូបខ្មែរ|khmer\s*food|khmer\s*restaurant|ហាងបាយ|ភោជនីយដ្ឋានខ្មែរ)/i, ['ភោជនីយដ្ឋាន ម្ហូបខ្មែរ', 'Khmer restaurant', 'ហាងបាយ អាហារដ្ឋាន', 'អាហារខ្មែរ', 'ម្ហូបខ្មែរ']],
       [/(pizza|ភីហ្សា|pizzeria|披萨)/i, ['pizza', 'ភីហ្សា', 'pizzeria']],
       [/(burger|បឺហ្គឺ|ហាំបឺហ្គឺ|汉堡)/i, ['burger', 'បឺហ្គឺ', 'hamburger']],
-      [/(sushi|ស៊ូស៊ី|japanese|ជប៉ុន|寿司)/i, ['sushi', 'ស៊ូស៊ី', 'japanese']],
-      [/(steak|ស្តេក|គោអាំង|牛排)/i, ['steak', 'ស្តេក', 'steakhouse']],
-      [/(bbq|grill|សាច់អាំង|អាំង|skewer|ចង្កាក់|烧烤)/i, ['bbq', 'grill', 'សាច់អាំង', 'ចង្កាក់', 'អាំង']],
-      [/(seafood|គ្រឿងសមុទ្រ|ក្តាម|បង្គា|មឹក|crab|shrimp|prawn|squid|海鲜|螃蟹)/i, ['seafood', 'គ្រឿងសមុទ្រ', 'ក្តាម', 'បង្គា', 'crab']],
-      [/(មីសួរ|មីសួ|glass\s*noodle|mi\s*suor|粉丝|冬粉)/i, ['មីសួរ', 'មីសួ', 'glass noodle', 'mi suor']],
-      [/(noodle|noodles|kuy teav|kuyteav|គុយទាវ|មី(?!សួ)|នំបញ្ចុក|num banh chok|nom banh chok|lort cha|លតឆា|米粉|粿条|面)/i, ['noodle', 'noodles', 'គុយទាវ', 'នំបញ្ចុក', 'លតឆា', 'មីឆា', 'មីគោក', 'មីស៊ុប', 'num banh chok', 'kuy teav']],
-      [/(hotpot|soup|ស៊ុប|ឆ្នាំងភ្លើង|សម្ល|ស្ងោរ|火锅|汤)/i, ['hotpot', 'ស៊ុប', 'soup', 'សម្ល', 'ស្ងោរ']],
-      [/(amok|អាម៉ុក|ហហ្មុក|阿莫克)/i, ['amok', 'អាម៉ុក']],
-      [/(lok lak|luc lac|ឡុកឡាក់|摇滚牛肉)/i, ['lok lak', 'ឡុកឡាក់']],
-      [/(bai sach chrouk|បាយសាច់ជ្រូក|សាច់ជ្រូក|pork|猪肉)/i, ['បាយសាច់ជ្រូក', 'សាច់ជ្រូក', 'pork', 'bai sach chrouk']],
-      [/(chicken|មាន់|មាន់ដុត|សាច់មាន់|鸡)/i, ['មាន់', 'សាច់មាន់', 'មាន់ដុត', 'chicken']],
-      [/(beef|សាច់គោ|牛肉)/i, ['សាច់គោ', 'beef', 'ឡុកឡាក់']],
-      [/(fish|ត្រី|ត្រីអាំង|ខត្រី|鱼)/i, ['ត្រី', 'fish', 'អាម៉ុកត្រី', 'ខត្រី']],
-      [/(papaya|bok lhong|បុកល្ហុង|木瓜)/i, ['បុកល្ហុង', 'papaya', 'bok lhong']],
+      [/(sushi|ស៊ូស៊ី|japanese|ជប៉ុន|寿司)/i, ['sushi', 'ស៊ូស៊ី', 'japanese restaurant']],
+      [/(steak|ស្តេក|គោអាំង|牛排)/i, ['steakhouse', 'ស្តេក', 'steak']],
+      [/(bbq|grill|សាច់អាំង|អាំង|skewer|ចង្កាក់|烧烤)/i, ['សាច់អាំង', 'BBQ restaurant', 'ហាងសាច់អាំង ស៊ុប', 'bbq', 'grill', 'ចង្កាក់']],
+      [/(seafood|គ្រឿងសមុទ្រ|ក្តាម|បង្គា|មឹក|crab|shrimp|prawn|squid|海鲜|螃蟹)/i, ['គ្រឿងសមុទ្រ', 'Seafood restaurant', 'ហាងគ្រឿងសមុទ្រ', 'seafood', 'ក្តាម', 'បង្គា']],
+      [/(មីសួរ|មីសួ|glass\s*noodle|mi\s*suor|粉丝|冬粉)/i, ['មីសួរ', 'មីសួ', 'glass noodle', 'គុយទាវ']],
+      [/(noodle|noodles|kuy\s*teav|kuyteav|គុយទាវ|មី(?!សួ)|នំបញ្ចុក|num\s*banh\s*chok|nom\s*banh\s*chok|lort\s*cha|លតឆា|បបរ|porridge|congee|អាហារព្រឹក|អាហារពេលព្រឹក|breakfast|米粉|粿条|面|早餐)/i, ['គុយទាវ', 'Noodle restaurant', 'ហាងគុយទាវ មី', 'អាហារព្រឹក Breakfast', 'នំបញ្ចុក', 'លតឆា', 'បបរ', 'មីឆា', 'មីគោក', 'មីស៊ុប', 'noodle', 'noodles', 'kuy teav', 'breakfast']],
+      [/(hotpot|soup|ស៊ុប|ឆ្នាំងភ្លើង|សម្ល|ស្ងោរ|火锅|汤)/i, ['ស៊ុប', 'Hotpot restaurant', 'ហាងស៊ុប ឆ្នាំងភ្លើង', 'hotpot', 'soup', 'សម្ល', 'ស្ងោរ']],
+      [/(amok|អាម៉ុក|ហហ្មុក|阿莫克)/i, ['អាម៉ុក', 'Amok restaurant', 'ភោជនីយដ្ឋានខ្មែរ']],
+      [/(lok lak|luc lac|ឡុកឡាក់|摇滚牛肉)/i, ['ឡុកឡាក់', 'Lok Lak', 'ភោជនីយដ្ឋាន']],
+      [/(bai sach chrouk|បាយសាច់ជ្រូក|សាច់ជ្រូក|pork|猪肉)/i, ['បាយសាច់ជ្រូក', 'ហាងបាយ អាហារព្រឹក', 'សាច់ជ្រូក', 'pork', 'bai sach chrouk']],
+      [/(chicken|មាន់|មាន់ដុត|សាច់មាន់|បាយមាន់|鸡)/i, ['បាយមាន់ មាន់ដុត', 'Chicken restaurant', 'មាន់', 'សាច់មាន់', 'មាន់ដុត', 'chicken']],
+      [/(beef|សាច់គោ|ខគោ|牛肉)/i, ['សាច់គោ', 'Beef restaurant', 'គុយទាវខគោ', 'beef', 'ឡុកឡាក់']],
+      [/(fish|ត្រី|ត្រីអាំង|ខត្រី|ត្រីដុត|鱼)/i, ['ត្រីដុត ត្រីអាំង', 'Fish restaurant', 'ត្រី', 'fish', 'អាម៉ុកត្រី', 'ខត្រី']],
+      [/(papaya|bok lhong|បុកល្ហុង|木瓜)/i, ['បុកល្ហុង', 'Papaya salad', 'bok lhong']],
       [/(kralan|ក្រឡាន|bamboo sticky rice|竹筒饭)/i, ['ក្រឡាន', 'kralan']],
       [/(banh chao|បាញ់ឆែវ|នំគ្រក់|num krok)/i, ['បាញ់ឆែវ', 'នំគ្រក់', 'banh chao', 'num krok']],
-      [/(curry|ការី|សម្លការី|咖喱)/i, ['curry', 'ការី', 'សម្លការី']],
-      [/(korko|កកូរ|សម្លកកូរ)/i, ['korko', 'កកូរ', 'សម្លកកូរ']],
-      [/(machu|ម្ជូរ|សម្លម្ជូរ)/i, ['machu', 'ម្ជូរ', 'សម្លម្ជូរ']],
-      [/(bakery|bread|cake|dessert|នំប៉័ង|នំខេក|បង្អែម|ការ៉េម|ice cream|甜品|面包|蛋糕)/i, ['bakery', 'នំប៉័ង', 'បង្អែម', 'cake', 'dessert']],
-      [/(drink|drinks|beverage|juice|smoothie|tea|milk tea|boba|ភេសជ្ជៈ|ទឹកអំពៅ|ទឹកដូង|តែ|តែគុជ|饮品|饮料|奶茶)/i, ['ភេសជ្ជៈ', 'drink', 'tea', 'តែ', 'ទឹកអំពៅ', 'ទឹកដូង', 'តែគុជ', 'boba']],
-      [/(buffet|ប៊ូហ្វេ|自助餐)/i, ['buffet', 'ប៊ូហ្វេ']],
-      [/(vegetarian|vegeterian|vegan|ម្ហូបបួស|អាហារបួស|ហាងបួស|ហាងម្ហូបបួស|បាយបួស|មីបួស|គុយទាវបួស|អាហារសុខភាព|ម្ហូបសុខភាព|តមសាច់|អ្នកតមសាច់|បួស|素食|蔬食|斋菜)/i, ['ម្ហូបបួស', 'Vegetarian restaurant', 'Vegan restaurant', 'អាហារសុខភាព', 'Vitking House', 'អាហារបួស']],
+      [/(curry|ការី|សម្លការី|咖喱)/i, ['សម្លការី', 'Curry restaurant', 'ការី']],
+      [/(korko|កកូរ|សម្លកកូរ)/i, ['សម្លកកូរ', 'korko', 'កកូរ']],
+      [/(machu|ម្ជូរ|សម្លម្ជូរ)/i, ['សម្លម្ជូរ', 'machu', 'ម្ជូរ']],
+      [/(bakery|bread|cake|dessert|នំប៉័ង|នំខេក|បង្អែម|ការ៉េម|ice\s*cream|甜品|面包|蛋糕)/i, ['ហាងនំប៉័ង Bakery', 'បង្អែមខ្មែរ Dessert', 'ហាងនំខេក Cake', 'bakery', 'នំប៉័ង', 'បង្អែម', 'cake', 'dessert', 'ការ៉េម']],
+      [/(drink|drinks|beverage|juice|smoothie|tea|milk tea|boba|ភេសជ្ជៈ|ទឹកអំពៅ|ទឹកដូង|តែ|តែគុជ|饮品|饮料|奶茶)/i, ['តែគុជ ភេសជ្ជៈ', 'Milk tea Boba', 'ហាងកាហ្វេ', 'ភេសជ្ជៈ', 'drink', 'tea', 'តែ', 'ទឹកអំពៅ', 'ទឹកដូង', 'តែគុជ', 'boba']],
+      [/(buffet|ប៊ូហ្វេ|自助餐)/i, ['ប៊ូហ្វេ', 'Buffet restaurant', 'ហាងស៊ុប ប៊ូហ្វេ', 'buffet']],
+      [/(vegetarian|vegeterian|vegan|ម្ហូបបួស|អាហារបួស|ហាងបួស|ហាងម្ហូបបួស|បាយបួស|មីបួស|គុយទាវបួស|អាហារសុខភាព|ម្ហូបសុខភាព|តមសាច់|អ្នកតមសាច់|បួស|素食|蔬食|斋菜)/i, ['ម្ហូបបួស', 'Vegetarian restaurant', 'ហាងម្ហូបបួស អាហារបួស', 'Vegan restaurant', 'អាហារសុខភាព', 'Vitking House']],
       [/(vitking|វីតឃីង|វីតឃីងហោវ|វីតឃីងហាវ|វីតឃីងហៅស៍)/i, ['Vitking House', 'វីតឃីងហោវ អាហារសុខភាព', 'ម្ហូបបួស']],
-      [/(street food|night market|ម្ហូបតាមផ្លូវ|អាហារតាមផ្លូវ|ផ្សាររាត្រី|街头美食|夜市)/i, ['street food', 'ម្ហូបតាមផ្លូវ', 'ផ្សាររាត្រី', 'night market']],
-      [/(angkor|អង្គរ|អង្គរវត្ត|ប្រាសាទ|temple|吴哥)/i, ['angkor', 'អង្គរ', 'អង្គរវត្ត', 'ប្រាសាទ', 'temple']],
-      [/(beach|island|ឆ្នេរ|កោះ|កោះរ៉ុង|koh rong|សមុទ្រ|海滩|高龙岛)/i, ['beach', 'island', 'ឆ្នេរ', 'កោះ', 'កោះរ៉ុង', 'koh rong']],
-      [/(mountain|waterfall|ភ្នំ|ទឹកធ្លាក់|រមណីយដ្ឋាន|ទំនប់|瀑布|山)/i, ['mountain', 'waterfall', 'ភ្នំ', 'ទឹកធ្លាក់', 'រមណីយដ្ឋាន']],
-      [/(hotel|សណ្ឋាគារ|ផ្ទះសំណាក់|guesthouse|រីសត|បឹងហ្គាឡូ|បឹងកាឡូ|វីឡា|酒店)/i, ['hotel', 'សណ្ឋាគារ', 'resort', 'ផ្ទះសំណាក់']],
-      [/(halal|ហាឡាល់|ឥស្លាម)/i, ['halal', 'ហាឡាល់']],
-      [/(vegan|vegetarian|បួស|ម្ហូបបួស)/i, ['vegetarian', 'vegan', 'ម្ហូបបួស']],
-      [/(ហឹរ|ហិរ|ម្ទេស|spicy|chili|辣)/i, ['ហឹរ', 'ម្ទេស', 'បុកល្ហុង', 'ភ្លា', 'spicy', 'chili']],
+      [/(គុយទាវទូក|មីទូក|boat\s*noodle)/i, ['គុយទាវទូក', 'Boat Noodle', 'គុយទាវ']],
+      [/(មីហឹរ|មីហិរ|spicy\s*noodle)/i, ['មីហឹរ', 'Spicy Noodle', 'Korean Spicy Noodle']],
+      [/(បាយមាន់|chicken\s*rice)/i, ['បាយមាន់', 'Chicken Rice', 'Hainanese Chicken Rice']],
+      [/(ទាខ្វៃ|បាយទាខ្វៃ|roast\s*duck)/i, ['ទាខ្វៃ', 'Roast Duck', 'បាយទាខ្វៃ']],
+      [/(ឌីមសាំ|dim\s*sum|ហាកាវ)/i, ['ឌីមសាំ', 'Dim Sum', 'Chinese Restaurant']],
+      [/(អេអន|aeon)/i, ['AEON Mall', 'អេអន']],
+      [/(ជីបម៉ុង|ជីប ម៉ុង|chip\s*mong)/i, ['Chip Mong Mall', 'ជីបម៉ុង']],
+      [/(street food|night market|ម្ហូបតាមផ្លូវ|អាហារតាមផ្លូវ|ផ្សាររាត្រី|街头美食|夜市)/i, ['អាហារតាមផ្លូវ ផ្សាររាត្រី', 'Street food Night market', 'ម្ហូបតាមផ្លូវ', 'ផ្សាររាត្រី', 'night market']],
+      [/(tourist|attraction|រមណីយដ្ឋាន|តំបន់ទេសចរណ៍|កន្លែងដើរលេង|sightseeing|景点|旅游)/i, ['រមណីយដ្ឋាន', 'Tourist attraction', 'តំបន់ទេសចរណ៍ ប្រាសាទ', 'ប្រាសាទ', 'វត្ត', 'ទឹកធ្លាក់', 'សារមន្ទីរ', 'ឧទ្យាន']],
+      [/(angkor|អង្គរ|អង្គរវត្ត|ប្រាសាទ|វត្ត|temple|pagoda|吴哥|寺庙)/i, ['ប្រាសាទ វត្ត', 'Temple Pagoda', 'អង្គរវត្ត', 'angkor', 'អង្គរ', 'ប្រាសាទ', 'temple']],
+      [/(beach|island|ឆ្នេរ|កោះ|កោះរ៉ុង|koh rong|សមុទ្រ|海滩|高龙岛)/i, ['ឆ្នេរ កោះ', 'Beach Island', 'ឆ្នេរ', 'កោះ', 'កោះរ៉ុង', 'koh rong', 'beach', 'island']],
+      [/(mountain|waterfall|ភ្នំ|ទឹកធ្លាក់|ទំនប់|瀑布|山)/i, ['ទឹកធ្លាក់ ភ្នំ', 'Waterfall Mountain', 'ភ្នំ', 'ទឹកធ្លាក់', 'រមណីយដ្ឋាន', 'mountain', 'waterfall']],
+      [/(hotel|សណ្ឋាគារ|ផ្ទះសំណាក់|guesthouse|រីសត|បឹងហ្គាឡូ|បឹងកាឡូ|វីឡា|resort|酒店)/i, ['សណ្ឋាគារ', 'Hotel Resort', 'ផ្ទះសំណាក់ Guesthouse', 'hotel', 'សណ្ឋាគារ', 'resort', 'ផ្ទះសំណាក់']],
+      [/(halal|ហាឡាល់|ឥស្លាម)/i, ['អាហារហាឡាល់', 'Halal restaurant', 'halal', 'ហាឡាល់']],
+      [/(ហឹរ|ហិរ|ម្ទេស|spicy|chili|辣)/i, ['មីហឹរ បុកល្ហុង', 'Spicy noodle restaurant', 'ហឹរ', 'ម្ទេស', 'បុកល្ហុង', 'ភ្លា', 'spicy', 'chili']],
       [/(ទឹកសណ្តែក|សណ្តែកសៀង|soy\s*milk|豆浆)/i, ['ទឹកសណ្តែក', 'សណ្តែកសៀង', 'soy milk']],
     ];
 
@@ -1918,7 +2157,7 @@ export function expandMultilingualPlaceQuery(
     for (const [rx, syns] of bilingualSynonyms) {
       if (rx.test(clean) || rx.test(rawQuery)) {
         tokens.push(...syns);
-        extraQueries.push(...syns.slice(0, 3));
+        extraQueries.push(...syns.slice(0, 4));
       }
     }
 
@@ -2270,14 +2509,15 @@ const BILINGUAL_BRAND_TRANSLITERATIONS: Array<[RegExp, string[]]> = [
 export function extractDistinctiveQueryTokens(rawQuery: string): string[] {
   const clean = normalizeKhmerSearchText(rawQuery)
     .replace(/[éèêë]/g, 'e')
-    .replace(/^(ភោជនីយដ្ឋាន|ហាងអាហារ|ហាងកាហ្វេ|អាហារដ្ឋាន|រមណីយដ្ឋាន|តំបន់ទេសចរណ៍|សណ្ឋាគារ|ផ្ទះសំណាក់|រីសត|ផ្ទះបាយ|ហាង)\s+/i, '')
     .trim();
   if (!clean || clean.length < 2) return [];
 
-  const rawParts = clean
-    .split(/[\s\-_(),./|•·&+]+/)
+  const qa = analyzeSearchQuery(rawQuery);
+  const rawParts = qa.distinctive
     .map((p) => p.trim().toLowerCase().replace(/['’`]/g, ''))
     .filter((p) => p.length >= 2 && !GENERIC_CATEGORY_OR_LOCATION_WORDS.has(p) && !SEARCH_STOPWORDS.has(p));
+
+  if (rawParts.length === 0) return [];
 
   const out = new Set<string>(rawParts);
   for (const [rx, aliases] of BILINGUAL_BRAND_TRANSLITERATIONS) {
@@ -2337,6 +2577,9 @@ export function detectOptimalGooglePlacesLanguage(
 function getCombinedDirectoryRestaurants(): Restaurant[] {
   const map = new Map<string, Restaurant>();
   for (const r of SEED_RESTAURANTS) map.set(r.id, r);
+  for (const c of youthBrandedCafes30) {
+    if (c && c.id && !map.has(c.id)) map.set(c.id, c);
+  }
   try {
     const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('kft_restaurants_v1') : null;
     if (raw) {
@@ -2390,10 +2633,16 @@ function searchAppVerifiedCambodiaDirectory(
   const hasCoords = typeof latVal === 'number' && typeof lngVal === 'number';
   const provGeo = resolveProvinceGeoConfig(provinceFilter);
   const qNorm = normalizeKhmerSearchText(rawQuery).replace(/[éèêë]/g, 'e');
+  const qa = analyzeSearchQuery(rawQuery);
   const distinctiveTokens = extractDistinctiveQueryTokens(rawQuery);
   const hasSpecificName = distinctiveTokens.length > 0;
+  const queryWantsTourismOrHotel =
+    plan.isTourismSearch ||
+    /(hotel|resort|guesthouse|សណ្ឋាគារ|ផ្ទះសំណាក់|រីសត|បឹងហ្គាឡូ|វីឡា|រមណីយដ្ឋាន|តំបន់ទេសចរណ៍|ប្រាសាទ|វត្ត|ទឹកធ្លាក់|ឆ្នេរ|កោះ|ភ្នំ|សារមន្ទីរ|tourist|attraction|酒店|景点)/i.test(
+      rawQuery
+    );
 
-  // 1. Search SEED_RESTAURANTS + persisted restaurants (verified GPS locations only)
+  // 1. Search SEED_RESTAURANTS + youthBrandedCafes30 + persisted restaurants (verified GPS locations only)
   if (hasSpecificName || (typeFilter !== 'tourism' && !['tourism', 'temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter))) {
     for (const r of getCombinedDirectoryRestaurants()) {
       if (!isPlaceLocationVerified(r)) continue;
@@ -2407,23 +2656,41 @@ function searchAppVerifiedCambodiaDirectory(
       }
 
       const rZh = getLocalizedRestaurant(r, 'zh');
+      const menuText = (r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`).join(' ');
+      const sigSummary = [
+        r.categoryKh,
+        r.categoryEn,
+        r.cuisineType,
+        ...(r.signatureDishesKh || []),
+        ...(r.signatureDishesEn || []),
+        ...(rZh.signatureDishes || []),
+        menuText,
+        r.descriptionKh,
+        r.descriptionEn,
+      ]
+        .filter(Boolean)
+        .join(' • ');
+
       const hay = normalizeKhmerSearchText(
-        `${r.nameKh} ${r.nameEn} ${rZh.name || ''} ${r.descriptionKh || ''} ${r.addressKh} ${r.addressEn || ''} ${rZh.address || ''} ${(r.signatureDishesKh || []).join(' ')} ${(rZh.signatureDishes || []).join(' ')}`
+        `${r.nameKh} ${r.nameEn} ${rZh.name || ''} ${sigSummary} ${r.addressKh} ${r.addressEn || ''} ${rZh.address || ''}`
       ).replace(/[éèêë]/g, 'e');
 
-      const isCafeItem = /(coffee|cafe|café|កាហ្វេ|ភេសជ្ជៈ|នំដុត|bakery|tea|តែគុជ|咖啡)/i.test(hay);
+      const isCafeItem =
+        r.businessCategory === 'cafe' ||
+        /(coffee|cafe|café|កាហ្វេ|ភេសជ្ជៈ|នំដុត|bakery|tea|តែគុជ|咖啡)/i.test(`${r.nameKh} ${r.nameEn} ${r.categoryKh || ''}`);
       if (!hasSpecificName && categoryFilter === 'cafe' && !isCafeItem) continue;
 
       if (hasSpecificName) {
-        if (!doesPlaceMatchDistinctiveQuery({ nameKh: r.nameKh, nameEn: r.nameEn, nameZh: rZh.name }, distinctiveTokens)) {
+        if (!doesPlaceMatchDistinctiveQuery({ nameKh: r.nameKh, nameEn: r.nameEn, nameZh: rZh.name, categories: sigSummary }, distinctiveTokens)) {
           continue;
         }
-      } else {
+      } else if (qNorm) {
+        const restFields = restaurantSearchFields(r, [rZh.name, ...(rZh.signatureDishes || []), menuText]);
         const matchesQuery =
-          !qNorm ||
           hay.includes(qNorm) ||
           (plan.isCoffeeSearch && isCafeItem) ||
-          plan.matchTokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase()));
+          plan.matchTokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase())) ||
+          (!qa.isEmpty && scoreSearchRecord(qa, restFields).score >= 200);
         if (!matchesQuery) continue;
       }
 
@@ -2436,6 +2703,9 @@ function searchAppVerifiedCambodiaDirectory(
         nameEn: r.nameEn || r.nameKh,
         nameZh: rZh.name || r.nameEn || r.nameKh,
         category: isCafeItem ? 'cafe' : 'restaurant',
+        primaryTypeDisplayName: [r.categoryKh, r.categoryEn, r.cuisineType].filter(Boolean).join(' • ') || (isCafeItem ? 'ហាងកាហ្វេ • Cafe' : 'ភោជនីយដ្ឋាន • Restaurant'),
+        editorialSummary: sigSummary,
+        types: [isCafeItem ? 'cafe' : 'restaurant', r.businessCategory || '', r.cuisineType || ''].filter(Boolean),
         province: prov,
         provinceKh: r.provinceKh || prov,
         address: r.addressKh,
@@ -2463,8 +2733,12 @@ function searchAppVerifiedCambodiaDirectory(
     }
   }
 
-  // 2. Search SEED_DESTINATIONS + SEED_HOTELS_100 + persisted destinations (verified GPS locations only)
-  if (hasSpecificName || (typeFilter !== 'restaurant' && (categoryFilter === 'all' || ['tourism', 'temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter)))) {
+  // 2. Search SEED_DESTINATIONS + RAC 1,168 + SEED_HOTELS_359 + persisted destinations (verified GPS locations only)
+  if (
+    hasSpecificName ||
+    queryWantsTourismOrHotel ||
+    (typeFilter !== 'restaurant' && (categoryFilter === 'all' || ['tourism', 'temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter)))
+  ) {
     for (const d of getCombinedDirectoryDestinations()) {
       if (!isPlaceLocationVerified(d)) continue;
       if (provGeo) {
@@ -2475,7 +2749,7 @@ function searchAppVerifiedCambodiaDirectory(
         const dist = calculateHaversineMeters(latVal, lngVal, d.latitude, d.longitude);
         if (dist > radiusVal) continue;
       }
-      if (!hasSpecificName && ['temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter)) {
+      if (!hasSpecificName && !queryWantsTourismOrHotel && ['temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter)) {
         const matchesCat =
           d.categorySlug === categoryFilter ||
           (categoryFilter === 'resort' && d.categorySlug === 'hotel');
@@ -2483,18 +2757,30 @@ function searchAppVerifiedCambodiaDirectory(
       }
 
       const dZh = getLocalizedDestination(d, 'zh');
+      const destSummary = [
+        d.categoryKh,
+        d.categoryEn,
+        ...(d.highlightsKh || []),
+        ...((d as any).highlightsEn || []),
+        d.descriptionKh,
+        d.descriptionEn,
+      ]
+        .filter(Boolean)
+        .join(' • ');
+
       const hay = normalizeKhmerSearchText(
-        `${d.nameKh} ${d.nameEn} ${dZh.name || ''} ${d.descriptionKh || ''} ${dZh.description || ''} ${d.addressKh} ${d.addressEn || ''} ${d.provinceKh} ${d.provinceEn || ''} ${dZh.province || ''}`
+        `${d.nameKh} ${d.nameEn} ${dZh.name || ''} ${destSummary} ${dZh.description || ''} ${d.addressKh} ${d.addressEn || ''} ${d.provinceKh} ${d.provinceEn || ''} ${dZh.province || ''}`
       );
       if (hasSpecificName) {
-        if (!doesPlaceMatchDistinctiveQuery({ nameKh: d.nameKh, nameEn: d.nameEn, nameZh: dZh.name }, distinctiveTokens)) {
+        if (!doesPlaceMatchDistinctiveQuery({ nameKh: d.nameKh, nameEn: d.nameEn, nameZh: dZh.name, categories: destSummary }, distinctiveTokens)) {
           continue;
         }
-      } else {
+      } else if (qNorm) {
+        const destFields = destinationSearchFields(d, [dZh.name, dZh.description || '']);
         const matchesQuery =
-          !qNorm ||
           hay.includes(qNorm) ||
-          plan.matchTokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase()));
+          plan.matchTokens.some((tok) => tok.length >= 2 && hay.includes(tok.toLowerCase())) ||
+          (!qa.isEmpty && scoreSearchRecord(qa, destFields).score >= 200);
         if (!matchesQuery) continue;
       }
 
@@ -2510,6 +2796,9 @@ function searchAppVerifiedCambodiaDirectory(
         nameZh: dZh.name || d.nameEn || d.nameKh,
         category: 'tourism',
         subCategorySlug: d.categorySlug,
+        primaryTypeDisplayName: [d.categoryKh, d.categoryEn].filter(Boolean).join(' • ') || (d.categorySlug === 'hotel' ? 'សណ្ឋាគារ • Hotel' : 'រមណីយដ្ឋាន • Tourist Attraction'),
+        editorialSummary: destSummary,
+        types: [d.categorySlug, d.categorySlug === 'hotel' ? 'hotel' : 'tourist_attraction'].filter(Boolean),
         province: prov,
         provinceKh: d.provinceKh || prov,
         address: d.addressKh,
@@ -3149,15 +3438,37 @@ async function fetchFreeGoogleMapsTbmPlaces(
   rawQuery: string,
   provGeo: CambodiaProvinceGeoConfig | undefined = undefined,
   categoryFilter: GooglePlaceSearchCategory = 'all',
-  distinctiveTokens: string[] = []
+  distinctiveTokens: string[] = [],
+  gpsOpts?: { lat?: number; lng?: number; radiusMeters?: number; offset?: number }
 ): Promise<GooglePlaceCachedItem[]> {
   const cleanQ = (rawQuery || '').trim();
   const catHint = categoryFilter !== 'all' ? CATEGORY_SEARCH_KEYWORD_MAP[categoryFilter] || '' : '';
-  const queryParts = [cleanQ || catHint, provGeo ? provGeo.en : '', 'Cambodia'].filter(Boolean);
-  const fullQuery = queryParts.join(' ').trim();
-  if (fullQuery.length < 3) return [];
+  const hasGpsViewport =
+    Boolean(gpsOpts && typeof gpsOpts.lat === 'number' && typeof gpsOpts.lng === 'number') ||
+    Boolean(provGeo && typeof provGeo.lat === 'number' && typeof provGeo.lng === 'number');
+  const centerLat = gpsOpts?.lat ?? provGeo?.lat;
+  const centerLng = gpsOpts?.lng ?? provGeo?.lng;
+  const radiusM = gpsOpts?.radiusMeters ?? (provGeo ? 20000 : 25000);
+  const offset = Math.max(0, gpsOpts?.offset || 0);
 
-  const qs = `?tbm=map&authuser=0&hl=en&gl=kh&q=${encodeURIComponent(fullQuery)}&pb=${encodeURIComponent(FREE_GMAPS_TBM_PB)}`;
+  // When searching inside a specific GPS viewport in Cambodia for a generic dish/category, avoid appending "Cambodia"
+  // so Google Maps returns all neighborhood shops inside the viewport circle rather than only shops with "Cambodia" in their title.
+  const queryParts =
+    hasGpsViewport && distinctiveTokens.length === 0 && (cleanQ || catHint)
+      ? [cleanQ || catHint, !gpsOpts?.lat && provGeo ? provGeo.en : ''].filter(Boolean)
+      : [cleanQ || catHint, provGeo ? provGeo.en : '', 'Cambodia'].filter(Boolean);
+  const fullQuery = queryParts.join(' ').trim();
+  if (fullQuery.length < 2) return [];
+
+  const alt = Math.max(2500, Math.min(85000, Math.round(radiusM * 2.2)));
+  const activePb =
+    hasGpsViewport && typeof centerLat === 'number' && typeof centerLng === 'number'
+      ? `!4m8!1m3!1d${alt}!2d${centerLng}!3d${centerLat}!3m2!1i1024!2i768!4f13.1!7i20!8i${offset}!10b1!12m6!1m1!18b1!2m3!5m1!6e2!20e3!6m2!49b1!66b1!19m4!2m3!1i360!2i120!4i8!20m57!2m2!1i203!2i100!3m2!2i4!5b1!6m6!1m2!1i86!2i86!1m2!1i408!2i240!7m33!1m3!1e1!2b0!3e3!1m3!1e2!2b1!3e2!1m3!1e2!2b0!3e3!1m3!1e8!2b0!3e3!1m3!1e10!2b0!3e3!1m3!1e10!2b1!3e2!1m3!1e10!2b0!3e4!1m3!1e9!2b1!3e2!2b1!9b0!15m8!1m7!1m2!1m1!1e2!2m2!1i195!2i195!3i20`
+      : offset > 0
+      ? FREE_GMAPS_TBM_PB.replace('!7i20!', `!7i20!8i${offset}!`)
+      : FREE_GMAPS_TBM_PB;
+
+  const qs = `?tbm=map&authuser=0&hl=en&gl=kh&q=${encodeURIComponent(fullQuery)}&pb=${encodeURIComponent(activePb)}`;
   const directUrl = `https://www.google.com/search${qs}`;
   const reqHeaders: Record<string, string> = {
     'User-Agent':
@@ -3311,6 +3622,12 @@ async function fetchFreeGoogleMapsTbmPlaces(
         ? rawImgs[0]
         : buildPlaceSpecificNoPhotoSvg(nameKh, prov, cat);
 
+      const queryContextTag =
+        distinctiveTokens.length === 0 && cleanQ.length >= 2 && ((cat === 'tourism') === (categoryFilter === 'tourism' || isTourismOrHotel))
+          ? cleanQ
+          : '';
+      const combinedEditorial = [normalizedTypeList.join(' • '), queryContextTag].filter(Boolean).join(' • ') || undefined;
+
       results.push({
         placeId,
         googlePlaceId: validGpid || placeId.replace(/^gmap-/, ''),
@@ -3320,6 +3637,7 @@ async function fetchFreeGoogleMapsTbmPlaces(
         category: cat,
         subCategorySlug: isTourismOrHotel ? inferTourismSubCategory(typeList, combinedTypeText) : undefined,
         primaryTypeDisplayName: normalizedTypeList[0] || undefined,
+        editorialSummary: combinedEditorial,
         province: prov,
         provinceKh: prov,
         address: fullAddr,
@@ -4041,23 +4359,52 @@ async function searchLiveCambodiaMultiSource(
     }
   });
 
-  const freeGoogleMapsPromise =
-    pageIndex === 1
-      ? (async () => {
-          const queriesToRun = [rawQuery];
-          const englishAlt = plan.photonQueries.find((q) => /[a-zA-Z]{3,}/.test(q) && q.toLowerCase() !== rawQuery.trim().toLowerCase());
-          const khmerAlt = plan.photonQueries.find((q) => /[\u1780-\u17FF]{2,}/.test(q) && q.trim() !== rawQuery.trim());
-          if (/[\u1780-\u17FF\u3400-\u9FFF]/.test(rawQuery) && englishAlt) {
-            queriesToRun.push(englishAlt);
-          } else if (/[a-zA-Z]/.test(rawQuery) && khmerAlt) {
-            queriesToRun.push(khmerAlt);
-          }
-          const batches = await Promise.all(
-            queriesToRun.slice(0, 2).map((q) => fetchFreeGoogleMapsTbmPlaces(q, provGeo, categoryFilter, distinctiveTokens))
-          );
-          return deduplicateGooglePlacesList(batches.flat());
-        })()
-      : Promise.resolve([] as GooglePlaceCachedItem[]);
+  const freeGoogleMapsPromise = (async () => {
+    const candidateQueries: string[] = [];
+    const trimmedRaw = (rawQuery || '').trim();
+    const hasKhmer = /[\u1780-\u17FF]/.test(trimmedRaw);
+    const hasLatin = /[a-zA-Z]{2,}/.test(trimmedRaw);
+
+    // If the query is a mixed-script preset pill (e.g. "គុយទាវ Noodles Breakfast"), split into clean Khmer & English sub-queries
+    if (hasKhmer && hasLatin && distinctiveTokens.length === 0) {
+      const khOnly = trimmedRaw.replace(/[a-zA-Z0-9/,&-]+/g, ' ').replace(/\s+/g, ' ').trim();
+      const enOnly = trimmedRaw.replace(/[\u1780-\u17FF\u3400-\u9FFF/,&-]+/g, ' ').replace(/\s+/g, ' ').trim();
+      if (khOnly.length >= 2) candidateQueries.push(khOnly);
+      if (enOnly.length >= 2) candidateQueries.push(enOnly);
+    } else if (trimmedRaw.length >= 2) {
+      candidateQueries.push(trimmedRaw);
+    }
+
+    for (const pq of plan.photonQueries) {
+      const cleanPq = pq.trim();
+      if (cleanPq.length >= 2 && !candidateQueries.some((c) => c.toLowerCase() === cleanPq.toLowerCase())) {
+        candidateQueries.push(cleanPq);
+      }
+    }
+
+    if (candidateQueries.length === 0) {
+      candidateQueries.push(categoryFilter !== 'all' ? CATEGORY_SEARCH_KEYWORD_MAP[categoryFilter] : 'ភោជនីយដ្ឋាន ហាងកាហ្វេ');
+    }
+
+    const effectiveTbmProvGeo =
+      provGeo ||
+      (hasCoords
+        ? resolveProvinceGeoConfig(inferCambodiaProvinceFromAddressOrGps('', latVal!, lngVal!))
+        : undefined);
+    const tbmOffset = Math.max(0, (pageIndex - 1) * 20);
+    const maxQueries = pageIndex === 1 ? 4 : 2;
+    const batches = await Promise.all(
+      candidateQueries.slice(0, maxQueries).map((q) =>
+        fetchFreeGoogleMapsTbmPlaces(q, effectiveTbmProvGeo, categoryFilter, distinctiveTokens, {
+          lat: hasCoords ? latVal : effectiveTbmProvGeo?.lat,
+          lng: hasCoords ? lngVal : effectiveTbmProvGeo?.lng,
+          radiusMeters: hasCoords ? radiusVal : effectiveTbmProvGeo ? 20000 : 25000,
+          offset: tbmOffset,
+        })
+      )
+    );
+    return deduplicateGooglePlacesList(batches.flat());
+  })();
 
   const [freeGoogleItems, photonBatches, arcgisBatches, nominatimBatches] = await Promise.all([
     freeGoogleMapsPromise,
@@ -4097,16 +4444,10 @@ async function searchLiveCambodiaMultiSource(
 
   const deduplicated = deduplicateGooglePlacesList(filtered);
 
-  // Determine if another page is available
+  // Determine if another page is available across all scopes (GPS nearby, province, and nationwide)
   let nextToken: string | undefined = undefined;
-  if (provGeo) {
-    if (pageIndex < 2 && deduplicated.length > 0) {
-      nextToken = `kh-page:${pageIndex + 1}`;
-    }
-  } else if (!hasCoords) {
-    if (pageIndex < nationwideProvinceWaves.length && deduplicated.length > 0) {
-      nextToken = `kh-page:${pageIndex + 1}`;
-    }
+  if (pageIndex < 5 && deduplicated.length >= 8) {
+    nextToken = `kh-page:${pageIndex + 1}`;
   }
 
   return {
@@ -4122,24 +4463,52 @@ async function searchLiveCambodiaMultiSource(
 export function buildPlaceSearchFields(it: GooglePlaceCachedItem): SearchableFields {
   const categoryWords =
     it.category === 'cafe'
-      ? 'cafe coffee'
+      ? 'cafe coffee ហាងកាហ្វេ កាហ្វេ'
       : it.category === 'tourism'
       ? it.subCategorySlug === 'hotel'
-        ? 'hotel សណ្ឋាគារ lodging tourism'
-        : 'tourism attraction resort'
+        ? 'hotel សណ្ឋាគារ ផ្ទះសំណាក់ រីសត វីឡា ប៊ូទិក lodging tourism'
+        : 'tourism attraction resort រមណីយដ្ឋាន តំបន់ទេសចរណ៍'
       : it.category === 'street_food'
-      ? 'street food restaurant'
-      : 'restaurant food';
+      ? 'street food restaurant អាហារដ្ឋាន ម្ហូបតាមផ្លូវ'
+      : 'restaurant food ភោជនីយដ្ឋាន ហាងអាហារ អាហារដ្ឋាន';
+  const rawMetaText = [
+    it.nameKh,
+    it.nameEn,
+    it.nameZh,
+    it.name,
+    it.primaryTypeDisplayName,
+    it.editorialSummary,
+    ...(Array.isArray(it.types) ? it.types : []),
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const semanticCategoryTags: string[] = [];
+  if (/(vegetarian|vegeterian|vegan|veggie|chay|ម្ហូបបួស|អាហារបួស|បួស|ហាងបួស|ហាងម្ហូបបួស|អាហារសុខភាព|ម្ហូបសុខភាព|តមសាច់|អ្នកតមសាច់|តៅហ៊ូ|tofu|素食|蔬食|斋)/i.test(rawMetaText)) {
+    semanticCategoryTags.push('vegetarian vegan veggie chay ម្ហូបបួស អាហារបួស បួស ហាងបួស ហាងម្ហូបបួស អាហារសុខភាព ម្ហូបសុខភាព តមសាច់ តៅហ៊ូ 素食 蔬食');
+  }
+  if (/(noodle|noodles|kuy\s*teav|kuyteav|pho|ramen|porridge|congee|breakfast|brunch|គុយទាវ|ហាងគុយទាវ|មី|នំបញ្ចុក|លតឆា|បាញ់កាញ់|ហ្វឺ|បបរ|អាហារព្រឹក|អាហារពេលព្រឹក|បាយព្រឹក|粿条|米粉|面|粥|早餐)/i.test(rawMetaText)) {
+    semanticCategoryTags.push('noodle noodles kuyteav pho ramen porridge congee breakfast គុយទាវ ហាងគុយទាវ មី ហាងមី នំបញ្ចុក លតឆា បបរ អាហារព្រឹក អាហារពេលព្រឹក បាយព្រឹក 粿条 米粉 面 早餐');
+  }
+  if (/(bakery|bakeries|bread|cake|pastry|croissant|dessert|ice\s*cream|gelato|នំប៉័ង|ហាងនំ|នំខេក|បង្អែម|ការ៉េម|面包|蛋糕|甜品|冰淇淋)/i.test(rawMetaText)) {
+    semanticCategoryTags.push('bakery bread cake dessert icecream នំប៉័ង ហាងនំ នំខេក បង្អែម បង្អែមខ្មែរ ការ៉េម 面包 蛋糕 甜品');
+  }
+  if (/(coffee|cafe|café|espresso|latte|cappuccino|roastery|boba|bubble|matcha|milk\s*tea|កាហ្វេ|ហាងកាហ្វេ|តែគុជ|ម៉ាត់ឆា|តែទឹកដោះគោ|咖啡|奶茶)/i.test(rawMetaText)) {
+    semanticCategoryTags.push('coffee cafe coffeeshop boba matcha milktea កាហ្វេ ហាងកាហ្វេ តែគុជ ម៉ាត់ឆា 咖啡 奶茶');
+  }
+  if (/(hotel|resort|guesthouse|guest\s*house|hostel|motel|villa|bungalow|lodging|សណ្ឋាគារ|ផ្ទះសំណាក់|ផ្ទះស្នាក់|រីសត|បឹងហ្គាឡូ|វីឡា|ប៊ូទិក|酒店|度假村|客栈|民宿)/i.test(rawMetaText)) {
+    semanticCategoryTags.push('hotel resort guesthouse villa boutique lodging សណ្ឋាគារ ផ្ទះសំណាក់ រីសត រមណីយដ្ឋាន បឹងហ្គាឡូ វីឡា ប៊ូទិក 酒店 度假村 民宿');
+  }
   return {
     names: [it.nameKh, it.nameEn, it.nameZh, it.name],
     categories: [
       categoryWords,
       it.subCategorySlug,
       it.primaryTypeDisplayName,
+      ...semanticCategoryTags,
       ...(Array.isArray(it.types) ? it.types.map((t) => String(t).replace(/_/g, ' ')) : []),
     ],
     locations: [it.province, it.provinceKh, it.provinceEn, it.address, it.addressKh, it.addressEn],
-    texts: [it.editorialSummary],
+    texts: [it.editorialSummary, it.primaryTypeDisplayName],
   };
 }
 
@@ -4151,9 +4520,13 @@ export async function searchGoogleMapsPlacesAdvanced(
     req.categoryFilter ||
     req.category ||
     (req.typeFilter === 'tourism' ? 'tourism' : req.typeFilter === 'restaurant' ? 'restaurant' : 'all');
+  await loadExtendedDestinationsAndHotels().catch(() => []);
   const rawProv = (req.provinceFilter || req.province || '').trim();
   const provinceFilter =
-    req.searchScope === 'nationwide'
+    req.searchScope === 'nationwide' ||
+    req.searchScope === 'nearby' ||
+    rawProv === 'ទាំងអស់' ||
+    rawProv.toLowerCase() === 'all'
       ? ''
       : rawProv.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
   const storedUserGps = readStoredUserGps();
@@ -4243,88 +4616,74 @@ export async function searchGoogleMapsPlacesAdvanced(
     }
 
     const isSpecificBrandSearch = distinctiveTokens.length > 0;
+    const hasActiveTextQuery = Boolean(queryAnalysis && !queryAnalysis.isEmpty);
 
-    if (isNameQuery) {
+    if (hasActiveTextQuery) {
       let scored = deduped
-        .map((it, idx) => ({
-          it,
-          idx,
-          score: scorePlaceForQuery(it, effectiveGoogleRankById.get(it.placeId) ?? -1),
-          distMeters: hasUserGps ? calculateHaversineMeters(latVal, lngVal, it.lat, it.lng) : Infinity,
-        }))
+        .map((it, idx) => ({ it, idx, score: scorePlaceForQuery(it, effectiveGoogleRankById.get(it.placeId) ?? -1) }))
         .filter((x) => x.score >= 200);
 
-      if (req.searchScope === 'nearby' && hasLocationCoords && radiusVal && !isSpecificBrandSearch) {
-        const withinRadius = scored.filter((x) => x.distMeters <= radiusVal);
-        if (withinRadius.length > 0) {
+      if (hasLocationCoords && radiusVal) {
+        const withinRadius = scored.filter(
+          (x) => calculateHaversineMeters(latVal, lngVal, x.it.lat, x.it.lng) <= radiusVal
+        );
+        if (!isSpecificBrandSearch || withinRadius.length > 0) {
           scored = withinRadius;
         }
       }
 
-      // Global Rule: Sort all relevant search results by actual GPS distance in ascending order (closest to farthest)
-      // when GPS is available; use relevance tier -> popularity/rating -> score -> original index as fallback when GPS is unavailable or tied.
-      scored.sort((a, b) => {
-        if (hasUserGps) {
-          const finA = Number.isFinite(a.distMeters);
-          const finB = Number.isFinite(b.distMeters);
-          if (finA && !finB) return -1;
-          if (!finA && finB) return 1;
-          if (finA && finB && a.distMeters !== b.distMeters) {
-            return a.distMeters - b.distMeters;
-          }
-        }
-        if (!isSpecificBrandSearch) {
-          const strongA = a.score >= 600 ? 1 : 0;
-          const strongB = b.score >= 600 ? 1 : 0;
+      if (!isSpecificBrandSearch && hasUserGps) {
+        // Cuisine / food / category keyword with GPS: group strong name/type matches (score >= 480) ahead of menu-only matches,
+        // and sort nearest-first within each group!
+        scored.sort((a, b) => {
+          const tierA = a.score >= 480 ? 2 : 1;
+          const tierB = b.score >= 480 ? 2 : 1;
+          if (tierB !== tierA) return tierB - tierA;
+          const distA = calculateHaversineMeters(latVal, lngVal, a.it.lat, a.it.lng);
+          const distB = calculateHaversineMeters(latVal, lngVal, b.it.lat, b.it.lng);
+          if (Math.abs(distA - distB) > 15) return distA - distB;
+          return b.score - a.score || (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
+        });
+      } else if (!isSpecificBrandSearch) {
+        // Cuisine / food / category keyword without GPS → prioritize strong name/type matches & verified popular places
+        scored.sort((a, b) => {
+          const strongA = a.score >= 480 ? 1 : 0;
+          const strongB = b.score >= 480 ? 1 : 0;
           if (strongB !== strongA) return strongB - strongA;
           const popA = Math.log10((a.it.reviewCount || a.it.userRatingCount || 0) + 1) * (a.it.rating || 4.0);
           const popB = Math.log10((b.it.reviewCount || b.it.userRatingCount || 0) + 1) * (b.it.rating || 4.0);
           if (Math.abs(popB - popA) > 0.35) return popB - popA;
-        }
-        const ba = Math.floor(a.score / 100);
-        const bb = Math.floor(b.score / 100);
-        if (bb !== ba) return bb - ba;
-        if (b.score !== a.score) return b.score - a.score;
-        return (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
-      });
-      deduped = scored.map((x) => x.it);
-    } else if (queryAnalysis && (queryAnalysis.provinces.length > 0 || queryAnalysis.categoryGroups.length > 0)) {
-      // Category / province keyword ("hotel kampot", "ភោជនីយដ្ឋាន") → drop places in another province, sort nearest first when GPS is available
-      const scored = deduped
-        .map((it, idx) => ({
-          it,
-          idx,
-          detail: scoreSearchRecord(queryAnalysis, buildPlaceSearchFields(it)),
-          distMeters: hasUserGps ? calculateHaversineMeters(latVal, lngVal, it.lat, it.lng) : Infinity,
-        }))
-        .filter((x) => !x.detail.provinceMismatch);
-      scored.sort((a, b) => {
-        if (hasUserGps) {
-          const finA = Number.isFinite(a.distMeters);
-          const finB = Number.isFinite(b.distMeters);
-          if (finA && !finB) return -1;
-          if (!finA && finB) return 1;
-          if (finA && finB && a.distMeters !== b.distMeters) return a.distMeters - b.distMeters;
-        }
-        return b.detail.score - a.detail.score || (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
-      });
+          return b.score - a.score || (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
+        });
+      } else {
+        // Specific business / brand name typed → exact/prefix match tier first, then nearest branch (if GPS available), then rating
+        scored.sort((a, b) => {
+          const ba = Math.floor(a.score / 100);
+          const bb = Math.floor(b.score / 100);
+          if (bb !== ba) return bb - ba;
+          if (hasUserGps) {
+            const d =
+              calculateHaversineMeters(latVal, lngVal, a.it.lat, a.it.lng) -
+              calculateHaversineMeters(latVal, lngVal, b.it.lat, b.it.lng);
+            if (Math.abs(d) > 15) return d;
+          }
+          if (b.score !== a.score) return b.score - a.score;
+          return (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
+        });
+      }
       deduped = scored.map((x) => x.it);
     } else if (hasUserGps) {
-      if (req.searchScope === 'nearby' && hasLocationCoords && radiusVal) {
-        const withinRadius = deduped.filter(
+      if (hasLocationCoords && radiusVal) {
+        deduped = deduped.filter(
           (it) => calculateHaversineMeters(latVal, lngVal, it.lat, it.lng) <= radiusVal
         );
-        if (withinRadius.length > 0) {
-          deduped = withinRadius;
-        }
       }
-      // Category / nearby search → nearest first
-      deduped.sort((a, b) => {
-        const dA = calculateHaversineMeters(latVal, lngVal, a.lat, a.lng);
-        const dB = calculateHaversineMeters(latVal, lngVal, b.lat, b.lng);
-        if (dA !== dB) return dA - dB;
-        return (b.rating || 0) - (a.rating || 0);
-      });
+      // Category / nearby search without text query → nearest first
+      deduped.sort(
+        (a, b) =>
+          calculateHaversineMeters(latVal, lngVal, a.lat, a.lng) -
+          calculateHaversineMeters(latVal, lngVal, b.lat, b.lng)
+      );
     }
 
     const normalizedItems = deduped
@@ -4577,18 +4936,20 @@ export async function searchGoogleMapsPlacesAdvanced(
 
   const initialCombinedCache = deduplicateGooglePlacesList([...matchedInCache, ...directoryMatches]);
 
-  // Only short-circuit from cache if we already have a rich set (>= 35 places) and forceLiveApi is false
+  // Only short-circuit from cache if we already have a rich post-filter set (>= 35 places) and forceLiveApi is false
   if (
     !req.forceLiveApi &&
     !req.pageToken &&
     initialCombinedCache.length >= 35
   ) {
-    incrementCacheStat('cacheHitsSavedQuota');
-    const out = buildResponse(initialCombinedCache, true, 'smart_cache', {
+    const prebuiltCacheOut = buildResponse(initialCombinedCache, true, 'smart_cache', {
       nextPageToken: 'kh-page:2',
     });
-    searchQueryMemoryCache.set(memKey, out);
-    return out;
+    if (prebuiltCacheOut.results.length >= 35) {
+      incrementCacheStat('cacheHitsSavedQuota');
+      searchQueryMemoryCache.set(memKey, prebuiltCacheOut);
+      return prebuiltCacheOut;
+    }
   }
 
   // ==========================================================================
@@ -4635,7 +4996,21 @@ export async function searchGoogleMapsPlacesAdvanced(
   const stats = getSmartCacheStats();
   if (stats.dailyApiCallsCount >= stats.dailyApiLimit) {
     incrementCacheStat('cacheHitsSavedQuota');
-    return buildResponse(initialCombinedCache, true, 'smart_cache', {
+    const multiLive = await searchLiveCambodiaMultiSource(
+      cleanQuery,
+      provinceFilter,
+      categoryFilter,
+      1,
+      hasLocationCoords ? latVal : undefined,
+      hasLocationCoords ? lngVal : undefined,
+      hasLocationCoords ? radiusVal : undefined
+    );
+    if (multiLive.items.length > 0) {
+      await saveToSmartCache(multiLive.items);
+    }
+    const combined = deduplicateGooglePlacesList([...multiLive.items, ...initialCombinedCache]);
+    return buildResponse(combined, multiLive.items.length === 0, multiLive.items.length > 0 ? 'online_cambodia_map' : 'smart_cache', {
+      nextPageToken: multiLive.nextPageToken,
       rateLimitReached: true,
     });
   }
@@ -4851,9 +5226,14 @@ export async function searchGoogleMapsPlacesAdvanced(
       )
       .filter((x): x is GooglePlaceCachedItem => x !== null);
 
-    // Only supplement with multi-source Cambodia map when Google Places returned fewer than 5 items
+    // Supplement with multi-source Cambodia map whenever in-scope matched results are fewer than 25 or query is category/Khmer/CJK
+    const inScopeMatchedCount = newCachedItems.filter(
+      (it) =>
+        (!hasLocationCoords || !radiusVal || calculateHaversineMeters(latVal, lngVal, it.lat, it.lng) <= radiusVal) &&
+        scorePlaceForQuery(it, 0) >= 200
+    ).length;
     let supplementedItems: GooglePlaceCachedItem[] = [];
-    if (!req.pageToken && (newCachedItems.length < 12 || queryHasKhmerOrCjk)) {
+    if (!req.pageToken && (inScopeMatchedCount < 25 || queryHasKhmerOrCjk || distinctiveTokens.length === 0)) {
       const multiLive = await searchLiveCambodiaMultiSource(
         cleanQuery,
         provinceFilter,
@@ -5077,14 +5457,28 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
     longitude: place.lng,
     rating: place.rating > 0 ? place.rating : 0,
     reviewCount: place.reviewCount > 0 ? place.reviewCount : 0,
-    signatureDishesKh:
-      place.category === 'cafe'
-        ? ['កាហ្វេ និងភេសជ្ជៈ', 'នំដុត និងអាហារសម្រន់']
-        : /(vegetarian|vegeterian|vegan|veggie|បួស|ម្ហូបបួស|អាហារបួស|អ្នកតមសាច់|តមសាច់|អាហារសុខភាព|素食|斋)/i.test(
-            `${place.nameKh} ${place.nameEn} ${place.primaryTypeDisplayName || ''} ${(place.types || []).join(' ')}`
-          )
-        ? ['ម្ហូបបួស និងអាហារសុខភាព', 'បន្លែធម្មជាតិ និងតៅហ៊ូ']
-        : ['មុខម្ហូបប្រចាំហាង', 'អាហារខ្មែរ និងភេសជ្ជៈ'],
+    signatureDishesKh: (() => {
+      const meta = `${place.nameKh} ${place.nameEn} ${place.primaryTypeDisplayName || ''} ${place.editorialSummary || ''} ${(place.types || []).join(' ')}`;
+      if (place.category === 'cafe' && !/(គុយទាវ|មី|បាយ|noodle)/i.test(place.nameKh)) {
+        return ['កាហ្វេ និងភេសជ្ជៈ', 'នំដុត និងអាហារសម្រន់'];
+      }
+      if (/(vegetarian|vegeterian|vegan|veggie|បួស|ម្ហូបបួស|អាហារបួស|អ្នកតមសាច់|តមសាច់|អាហារសុខភាព|素食|斋)/i.test(meta)) {
+        return ['ម្ហូបបួស និងអាហារសុខភាព', 'បន្លែធម្មជាតិ និងតៅហ៊ូ'];
+      }
+      if (/(noodle|noodles|kuy\s*teav|kuyteav|pho|ramen|គុយទាវ|មី|នំបញ្ចុក|លតឆា|បាញ់កាញ់|ហ្វឺ|បបរ|អាហារព្រឹក|អាហារពេលព្រឹក|breakfast|粿条|米粉|面)/i.test(meta)) {
+        return ['គុយទាវ និងមីស៊ុប', 'នំបញ្ចុក លតឆា និងអាហារព្រឹក', 'បបរគ្រឿង និងគុយទាវភ្នំពេញ'];
+      }
+      if (/(seafood|គ្រឿងសមុទ្រ|ក្តាម|បង្គា|មឹក|海鲜)/i.test(meta)) {
+        return ['គ្រឿងសមុទ្រស្រស់ៗ', 'ក្តាម បង្គា និងមឹកអាំង'];
+      }
+      if (/(bbq|grill|hotpot|buffet|សាច់អាំង|ប៊ូហ្វេ|ស៊ុប|ឆ្នាំងភ្លើង|烧烤|火锅)/i.test(meta)) {
+        return ['សាច់អាំង និងស៊ុបឆ្នាំងភ្លើង', 'ប៊ូហ្វេ និងគ្រឿងសមុទ្រ'];
+      }
+      if (/(bakery|bread|cake|dessert|នំប៉័ង|នំខេក|បង្អែម|ការ៉េម|甜品|面包|蛋糕)/i.test(meta)) {
+        return ['នំប៉័ង និងនំខេក', 'បង្អែមខ្មែរ និងភេសជ្ជៈ'];
+      }
+      return ['មុខម្ហូបប្រចាំហាង', 'អាហារខ្មែរ និងភេសជ្ជៈ'];
+    })(),
     status: 'approved',
     isVerified: true,
     createdAt: place.cachedAt || new Date().toISOString(),
@@ -5218,7 +5612,7 @@ function buildSeedDirectoryNearbyCandidates(
   const out: GooglePlaceCachedItem[] = [];
   const deletedMap = loadDeletedRestaurantIdsMap();
 
-  for (const r of SEED_RESTAURANTS) {
+  for (const r of getCombinedDirectoryRestaurants()) {
     if (!isPlaceLocationVerified(r)) continue;
     if (isRestaurantIdDeleted(r.id, undefined, deletedMap, r.googlePlaceId)) continue;
     const dist = calculateHaversineMeters(lat, lng, r.latitude, r.longitude);
@@ -5226,13 +5620,18 @@ function buildSeedDirectoryNearbyCandidates(
     const prov = inferCambodiaProvinceFromAddressOrGps(`${r.provinceKh} ${r.addressKh}`, r.latitude, r.longitude);
     const rZh = getLocalizedRestaurant(r, 'zh');
     const cleanGpid = isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId! : '';
+    const isCafe = r.businessCategory === 'cafe' || /(កាហ្វេ|coffee|cafe|café|bakery)/i.test(`${r.nameKh} ${r.nameEn || ''}`);
+    const sigSummary = [r.categoryKh, r.categoryEn, r.cuisineType, ...(r.signatureDishesKh || []), r.descriptionKh].filter(Boolean).join(' • ');
     out.push({
       placeId: cleanGpid ? `gmap-${cleanGpid}` : `gmap-seed-rest-${r.id}`,
       googlePlaceId: cleanGpid,
       nameKh: r.nameKh,
       nameEn: r.nameEn || r.nameKh,
       nameZh: rZh.name || r.nameEn || r.nameKh,
-      category: /(កាហ្វេ|coffee|cafe|café|bakery)/i.test(`${r.nameKh} ${r.nameEn || ''}`) ? 'cafe' : 'restaurant',
+      category: isCafe ? 'cafe' : 'restaurant',
+      primaryTypeDisplayName: [r.categoryKh, r.categoryEn, r.cuisineType].filter(Boolean).join(' • ') || (isCafe ? 'ហាងកាហ្វេ • Cafe' : 'ភោជនីយដ្ឋាន • Restaurant'),
+      editorialSummary: sigSummary,
+      types: [isCafe ? 'cafe' : 'restaurant', r.businessCategory || '', r.cuisineType || ''].filter(Boolean),
       province: prov,
       provinceKh: r.provinceKh || prov,
       address: r.addressKh,
@@ -5254,14 +5653,14 @@ function buildSeedDirectoryNearbyCandidates(
     });
   }
 
-  for (const d of SEED_DESTINATIONS) {
+  for (const d of getCombinedDirectoryDestinations()) {
     if (!d || !isPlaceLocationVerified(d)) continue;
-    if (d.id.startsWith('rac-') && !d.isAdminEdited && !d.isCustomPhoto) continue;
     const dist = calculateHaversineMeters(lat, lng, d.latitude, d.longitude);
     if (dist > maxDistanceMeters) continue;
     const prov = inferCambodiaProvinceFromAddressOrGps(`${d.provinceKh} ${d.addressKh}`, d.latitude, d.longitude);
     const dZh = getLocalizedDestination(d, 'zh');
     const cleanGpid = isValidOfficialGooglePlaceId(d.googlePlaceId) ? d.googlePlaceId! : '';
+    const destSummary = [d.categoryKh, d.categoryEn, ...(d.highlightsKh || []), d.descriptionKh].filter(Boolean).join(' • ');
     out.push({
       placeId: cleanGpid ? `gmap-${cleanGpid}` : `gmap-seed-dest-${d.id}`,
       googlePlaceId: cleanGpid,
@@ -5270,21 +5669,24 @@ function buildSeedDirectoryNearbyCandidates(
       nameZh: dZh.name || d.nameEn || d.nameKh,
       category: 'tourism',
       subCategorySlug: d.categorySlug,
+      primaryTypeDisplayName: [d.categoryKh, d.categoryEn].filter(Boolean).join(' • ') || (d.categorySlug === 'hotel' ? 'សណ្ឋាគារ • Hotel' : 'រមណីយដ្ឋាន • Tourist Attraction'),
+      editorialSummary: destSummary,
+      types: [d.categorySlug, d.categorySlug === 'hotel' ? 'hotel' : 'tourist_attraction'].filter(Boolean),
       province: prov,
       provinceKh: d.provinceKh || prov,
       address: d.addressKh,
       addressKh: d.addressKh,
       lat: d.latitude,
       lng: d.longitude,
-      phone: '',
+      phone: formatDisplayPhone(d.phone || ''),
       openHours: d.bestTimeToVisitKh || '07:00 AM - 06:00 PM',
       priceLevel: undefined,
       rating: d.rating || 4.7,
       reviewCount: d.reviewCount || 120,
       photoUrl: d.photoUrl,
       photoUrls: d.galleryPhotos && d.galleryPhotos.length > 0 ? d.galleryPhotos : [d.photoUrl],
-      hasOfficialGooglePhoto: true,
-      hasRealGooglePhoto: true,
+      hasOfficialGooglePhoto: Boolean(d.photoUrl),
+      hasRealGooglePhoto: Boolean(d.photoUrl),
       googleMapsUrl: buildCanonicalGoogleMapsPinUrl(d.latitude, d.longitude, cleanGpid || undefined),
       source: 'cambodia_extended_directory',
       cachedAt: new Date().toISOString(),
@@ -5764,11 +6166,21 @@ export async function searchNearbyPlacesWithin500m(
 
     const nearbyProv = inferCambodiaProvinceFromAddressOrGps('', lat, lng);
     const nearbyProvGeo = resolveProvinceGeoConfig(nearbyProv);
-    const [freeGmapsNearby, nomBatches, photBatches] = await Promise.all([
-      fetchFreeGoogleMapsTbmPlaces('restaurant cafe hotel', nearbyProvGeo, 'all', []).catch(() => []),
+    const [freeGmapsBatches, nomBatches, photBatches] = await Promise.all([
+      Promise.all(
+        ['ភោជនីយដ្ឋាន អាហារដ្ឋាន', 'គុយទាវ មី អាហារព្រឹក', 'ហាងកាហ្វេ Cafe', 'រមណីយដ្ឋាន សណ្ឋាគារ'].map((q) =>
+          fetchFreeGoogleMapsTbmPlaces(q, nearbyProvGeo, 'all', [], {
+            lat,
+            lng,
+            radiusMeters: effectiveRadius,
+            offset: 0,
+          }).catch(() => [])
+        )
+      ),
       Promise.all(nominatimSpecs.map(fetchNominatimBox)),
       Promise.all(photonSpecs.map(fetchPhotonBox)),
     ]);
+    const freeGmapsNearby = freeGmapsBatches.flat();
 
     liveMapItems.push(...freeGmapsNearby);
     for (const b of nomBatches) liveMapItems.push(...b);

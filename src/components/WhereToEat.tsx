@@ -7,28 +7,7 @@ import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { getMatchingRestaurantsForDish, matchShopToProductQuery } from '../utils/foodFilters';
 import { ShopAvatar } from './icons/DefaultShopIcon';
-
-function readStoredUserGps(): { lat: number; lng: number } | null {
-  try {
-    const raw = localStorage.getItem('kft_last_known_user_gps_v1');
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (
-      parsed &&
-      Number.isFinite(Number(parsed.lat)) &&
-      Number.isFinite(Number(parsed.lng)) &&
-      Number(parsed.lat) >= 9.5 &&
-      Number(parsed.lat) <= 15.0 &&
-      Number(parsed.lng) >= 102.0 &&
-      Number(parsed.lng) <= 108.0
-    ) {
-      return { lat: Number(parsed.lat), lng: Number(parsed.lng) };
-    }
-  } catch {
-    // ignore storage errors
-  }
-  return null;
-}
+import { readSavedUserGps } from '../utils/nearMeEngine';
 
 export function findRestaurantsServingDish(
   food: FoodItem,
@@ -46,7 +25,7 @@ interface Props {
 /** "Where to eat this": verified restaurants whose listed inventory genuinely matches the dish, plus a Near-me shortcut. */
 export const WhereToEat: React.FC<Props> = ({ food }) => {
   const { language, restaurants, selectedProvince, setSelectedFood, setSelectedRestaurant, setIsNearMeModalOpen } = useApp();
-  const userCoords = useMemo(() => readStoredUserGps(), [food.id]);
+  const userCoords = useMemo(() => readSavedUserGps(), [food.id]);
   const matches = useMemo(
     () => findRestaurantsServingDish(food, restaurants, userCoords, selectedProvince || 'រាជធានីភ្នំពេញ').slice(0, 4),
     [food, restaurants, userCoords, selectedProvince]
