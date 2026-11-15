@@ -50,7 +50,7 @@ export const MEAL_SLOTS: MealSlot[] = [
   {
     id: 'snack',
     emoji: '🍮',
-    label: { km: 'បង្អែម & អាហារសម្រន់', en: 'Snacks & Sweets', zh: '甜点与小吃' },
+    label: { km: 'បង្អែម និងអាហារសម្រន់', en: 'Snacks & Sweets', zh: '甜点与小吃' },
     hint: {
       km: 'នំ បង្អែម និងភេសជ្ជៈត្រជាក់ៗសម្រាប់រសៀល',
       en: 'Cakes, desserts and cool treats for the afternoon',

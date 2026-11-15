@@ -229,15 +229,9 @@ function extractAddedTimestampMs(record: any, fallbackIndex: number): number {
     record?.featuredFromAt,
     record?.replacedAt,
     record?.approvedAt,
-    record?.updatedAt,
-    record?.adminEditedAt,
-    record?.photoUpdatedAt,
-    record?.pendingUpgradeRequest?.submittedAt,
-    record?.pendingPhotoReplacement?.submittedAt,
+    record?.created_at,
     record?.createdAt,
     record?.submittedAt,
-    record?.created_at,
-    record?.locationVerifiedAt,
   ];
   let latestMs = 0;
   for (const c of candidates) {
@@ -493,6 +487,9 @@ export const HotelView: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!readSavedUserGps()) {
+      requestLocation(false);
+    }
     const onGpsUpdated = (e: Event) => {
       const detail = (e as CustomEvent<{ lat: number; lng: number }>).detail;
       if (detail && Number.isFinite(detail.lat) && Number.isFinite(detail.lng)) {
@@ -623,21 +620,20 @@ export const HotelView: React.FC = () => {
       });
     });
 
-    // Also detect any genuinely admin-edited or custom-added hotels in `destinations` (excluding untouched seed `hotel-1`..`hotel-378`)
+    // Also detect any custom-added non-seed hotels in `destinations` (excluding seed `hotel-1`..`hotel-378`)
     destinations.forEach((d, idx) => {
       if (!d || d.categorySlug !== 'hotel') return;
       const isSeedHotelId = /^(?:dest-)?hotel-\d+$/i.test(String(d.id || ''));
-      const hasCustomImg = Boolean(hasVerifiedCustomHotelPhoto(d));
-      if (!isSeedHotelId || d.isAdminEdited || hasCustomImg) {
+      if (!isSeedHotelId) {
         if (!tsMap.has(d.id)) {
           tsMap.set(d.id, extractAddedTimestampMs(d, idx + 5000));
         }
       }
     });
 
-    // Sort user/owner-added hotels Most Recently Added/Updated First (`tsB - tsA`) so newly added hotels (e.g. "The Square") appear first
+    // Sort user/owner-added hotels in strict registration/approval order (earliest registered first: `tsA - tsB`)
     list.sort((a, b) => {
-      const diff = (tsMap.get(b.id) || 0) - (tsMap.get(a.id) || 0);
+      const diff = (tsMap.get(a.id) || 0) - (tsMap.get(b.id) || 0);
       if (diff !== 0) return diff;
       return String(a.id).localeCompare(String(b.id));
     });
@@ -825,9 +821,9 @@ export const HotelView: React.FC = () => {
         const ts = addedHotelTimestampMap.get(h.id) || 0;
         const explicitUntil = hotelFeaturedUntilMap.get(h.id) || 0;
         const boostEndMs = Math.max(ts > 0 ? ts + rotationCfg.durationMs : 0, explicitUntil);
-        return ts > 0 && nowTickMs < boostEndMs;
+        return ts > 0 && nowTickMs >= ts && nowTickMs < boostEndMs;
       })
-      .sort((a, b) => (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0));
+      .sort((a, b) => (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0));
 
     for (const h of newlyBoosted) {
       if (!seen.has(h.id)) {
@@ -862,7 +858,7 @@ export const HotelView: React.FC = () => {
         const rankA = hotelRotationRankMap.get(a.id) ?? 999999;
         const rankB = hotelRotationRankMap.get(b.id) ?? 999999;
         if (rankA !== rankB) return rankA - rankB;
-        return (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0);
+        return (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0);
       });
     const regularHotels = allHotels.filter((h) => !userAddedHotelIds.has(h.id));
     return [...userSubmitted, ...shuffleForCurrentSession(regularHotels)];
@@ -944,22 +940,27 @@ export const HotelView: React.FC = () => {
       return true;
     });
 
+    const hasActiveUserGps = Boolean(userCoords || readSavedUserGps());
+
     if (!trimmedQ) {
-      if (isNearMe) {
-        scoped = [...scoped].sort(
-          (a, b) => (distanceMetersMap.get(a.id) ?? 9999999) - (distanceMetersMap.get(b.id) ?? 9999999)
-        );
+      if (isNearMe || ((categoryFilter !== 'all' || hasActiveUserGps) && sortMode !== 'rating')) {
+        scoped = [...scoped].sort((a, b) => {
+          const dA = distanceMetersMap.get(a.id) ?? 9999999;
+          const dB = distanceMetersMap.get(b.id) ?? 9999999;
+          if (dA !== dB) return dA - dB;
+          return (b.rating || 4.6) - (a.rating || 4.6);
+        });
       } else if (sortMode === 'rating') {
         scoped = [...scoped].sort((a, b) => (b.rating || 4.6) - (a.rating || 4.6));
       } else {
-        // Automatic priority sorting: VIP Rotation + 24h Newest-Added Top-1 Boost appears at TOP 1
+        // Fallback when GPS is unavailable: VIP Rotation + 24h Newest-Added Top-1 Boost appears at TOP 1
         const priorityUserHotels = scoped
           .filter((h) => userAddedHotelIds.has(h.id))
           .sort((a, b) => {
             const rankA = hotelRotationRankMap.get(a.id) ?? 999999;
             const rankB = hotelRotationRankMap.get(b.id) ?? 999999;
             if (rankA !== rankB) return rankA - rankB;
-            return (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0);
+            return (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0);
           });
         const restHotels = scoped.filter((h) => !userAddedHotelIds.has(h.id));
         scoped = [...priorityUserHotels, ...restHotels];
@@ -969,7 +970,7 @@ export const HotelView: React.FC = () => {
 
     const qa = analyzeSearchQuery(trimmedQ);
     if (qa.distinctive.length === 0 && (smartIntent?.detectedProvinceKh || smartIntent?.semanticCategory)) {
-      if (isNearMe) {
+      if (isNearMe || hasActiveUserGps) {
         return [...scoped].sort(
           (a, b) => (distanceMetersMap.get(a.id) ?? 9999999) - (distanceMetersMap.get(b.id) ?? 9999999)
         );
@@ -984,9 +985,13 @@ export const HotelView: React.FC = () => {
       (h) => destinationSearchFields(h, [needZhSearch ? getLocalizedDestination(h, 'zh').name : '', classifyHotelSubCategory(h)]),
       {
         bucketSize: 100,
+        getDistanceMeters: (h) =>
+          hasActiveUserGps || isNearMe ? (distanceMetersMap.get(h.id) ?? Infinity) : Infinity,
+        sortByDistanceFirst: true,
         tieBreak: (a, b) => {
-          if (isNearMe) {
-            return (distanceMetersMap.get(a.id) ?? 9999999) - (distanceMetersMap.get(b.id) ?? 9999999);
+          if (isNearMe || hasActiveUserGps) {
+            const dDiff = (distanceMetersMap.get(a.id) ?? 9999999) - (distanceMetersMap.get(b.id) ?? 9999999);
+            if (dDiff !== 0) return dDiff;
           }
           const aUser = userAddedHotelIds.has(a.id);
           const bUser = userAddedHotelIds.has(b.id);
@@ -996,7 +1001,7 @@ export const HotelView: React.FC = () => {
             const rankA = hotelRotationRankMap.get(a.id) ?? 999999;
             const rankB = hotelRotationRankMap.get(b.id) ?? 999999;
             if (rankA !== rankB) return rankA - rankB;
-            return (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0);
+            return (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0);
           }
           return (
             (b.rating || 0) - (a.rating || 0) ||
@@ -1006,11 +1011,6 @@ export const HotelView: React.FC = () => {
       }
     );
 
-    if (isNearMe) {
-      return [...ranked].sort(
-        (a, b) => (distanceMetersMap.get(a.id) ?? 9999999) - (distanceMetersMap.get(b.id) ?? 9999999)
-      );
-    }
     return ranked;
   }, [
     orderedHotels,
@@ -1025,6 +1025,7 @@ export const HotelView: React.FC = () => {
     hotelRotationRankMap,
     addedHotelTimestampMap,
     language,
+    userCoords,
   ]);
 
   // Split into Section 1: TOP 1 Earliest Approved Hotel (Featured Card matching Reference Image 3)

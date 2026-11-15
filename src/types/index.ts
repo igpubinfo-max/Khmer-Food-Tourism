@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1601;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1602;
 export const APP_RELEASE_DATE = '2026-11-15';
 
 /**
@@ -5008,111 +5008,148 @@ export interface OfficialPlanDefinition {
   qrImageUrl?: string;
 }
 
-export const SHOP_ALL_INCLUSIVE_5_BENEFITS: ReadonlyArray<{
+export interface PackageBenefit {
   id: number;
+  group: string;
+  /** "Title|Description" - the title is rendered bold, the description normal. {d} = featured rotation span. */
   km: string;
   en: string;
   zh: string;
-}> = [
+}
+
+export interface PackageBenefitGroup {
+  id: string;
+  km: string;
+  en: string;
+  zh: string;
+}
+
+export const VIP_BENEFIT_GROUPS: ReadonlyArray<PackageBenefitGroup> = [
+  { id: 'ai', km: '🤖 ជំនួយការឆ្លាតវៃ', en: '🤖 Smart Assistants', zh: '🤖 智能助手' },
+  { id: 'search', km: '🔎 ស្វែងរក និងកត់ត្រា', en: '🔎 Discover & Record', zh: '🔎 探索与记录' },
+  { id: 'perk', km: '🏅 សិទ្ធិពិសេស', en: '🏅 Member Perks', zh: '🏅 会员专属' },
+];
+
+export const SHOP_BENEFIT_GROUPS: ReadonlyArray<PackageBenefitGroup> = [
+  { id: 'attract', km: '🧲 ទាក់ទាញអតិថិជន', en: '🧲 Attract Customers', zh: '🧲 吸引顾客' },
+  { id: 'manage', km: '🛠️ គ្រប់គ្រងហាង', en: '🛠️ Manage Your Shop', zh: '🛠️ 店铺管理' },
+];
+
+export const VIP_MEMBER_BENEFITS: ReadonlyArray<PackageBenefit> = [
   {
     id: 1,
-    km: '✅ ដាក់ហាង ទីតាំង GPS លេខទូរស័ព្ទ និងម៉ឺនុយម្ហូបលើ App',
-    en: '✅ List your shop, GPS pin, phone number & full food menu in the App',
-    zh: '✅ 在应用上架店铺、GPS 定位、联系电话与完整菜单',
+    group: 'ai',
+    km: '🧭 AI រៀបផែនការដើរលេង|ប្រាប់ AI ថាចង់ទៅកន្លែងណា វានឹងរៀបដំណើរទេសចរណ៍ និងម្ហូប ១ ថ្ងៃឱ្យរួចរាល់ក្នុងប៉ុន្មានវិនាទី',
+    en: '🧭 AI Trip Planner|Tell the AI where you want to go and get a ready 1-day travel & food itinerary in seconds',
+    zh: '🧭 AI 行程规划|告诉 AI 想去哪里，几秒钟即可生成一日游玩与美食行程',
   },
   {
     id: 2,
-    km: '✅ ភ្ញៀវអាចស្វែងរកឃើញហាង និងចុចនាំផ្លូវទៅហាងផ្ទាល់',
-    en: '✅ Customers can search & tap direct turn-by-turn navigation to your shop',
-    zh: '✅ 顾客可直接搜索并一键导航前往您的店铺',
+    group: 'ai',
+    km: '🥗 ម្ហូបសុខភាព|ច្រោះម្ហូបតាមសុខភាព ព្រមទាំងទទួលបានគំនិតអាហារ ៣ ពេលជារៀងរាល់ថ្ងៃ',
+    en: '🥗 Healthy Eating|Filter dishes by health needs and get daily 3-meal food ideas',
+    zh: '🥗 健康饮食|按健康需求筛选菜品，每日获得三餐推荐',
   },
   {
     id: 3,
-    km: '✅ បើក ផ្លាកសញ្ញា VIP (VIP Badge) ពណ៌មាសលើកាតហាង',
-    en: '✅ Unlock the Gold VIP Badge on your shop card',
-    zh: '✅ 解锁店铺卡片专属金色 VIP 徽章',
+    group: 'search',
+    km: '🔎 ស្វែងរកទូទាំងកម្ពុជា|រកហាង និងទីតាំងលើ Google Maps បានគ្រប់ខេត្ត មិនកំណត់តែក្នុង App',
+    en: '🔎 Cambodia-wide Search|Find shops and places on Google Maps in every province, beyond what is listed in the app',
+    zh: '🔎 全柬搜索|在 Google 地图上搜索各省份的店铺与地点，不限于应用内收录',
   },
   {
     id: 4,
-    km: '✅ ហាងលោតលើគេ (Featured Placement) ក្នុងទំព័រដើម និងពេលស្វែងរក',
-    en: '✅ Featured Top Placement on Home & Search (fair rotation)',
-    zh: '✅ 首页与搜索结果置顶推荐展示（公平轮播）',
+    group: 'search',
+    km: '🛂 Food Passport|កត់ត្រាម្ហូប និងកន្លែងដែលអ្នកបានភ្លក់ទុកជាអនុស្សាវរីយ៍ផ្ទាល់ខ្លួន',
+    en: '🛂 Food Passport|Keep a personal record of the dishes and places you have tasted',
+    zh: '🛂 美食护照|记录你品尝过的美食与地点，留作个人纪念',
   },
   {
     id: 5,
-    km: '✅ មើលស្ថិតិអ្នកចូលមើល (Store Analytics) (ចំនួនអ្នកមើល, អ្នកចុចហៅទូរស័ព្ទ, អ្នកចុចផែនទី)',
-    en: '✅ Full Store Analytics (views, phone call taps & map navigation clicks)',
-    zh: '✅ 查看完整店铺数据统计（浏览量、电话点击与地图导航次数）',
+    group: 'perk',
+    km: '🏅 Badge VIP ពណ៌មាស|បង្ហាញលើ Profile និងមតិយោបល់របស់អ្នក ឱ្យគេដឹងថាអ្នកជាសមាជិក VIP',
+    en: '🏅 Gold VIP Badge|Shown on your profile and comments so everyone knows you are a VIP member',
+    zh: '🏅 金色 VIP 徽章|显示在个人主页与评论中，彰显 VIP 会员身份',
   },
 ];
 
-export const SUMMARIZED_10_VIP_BENEFITS: ReadonlyArray<{
-  id: number;
-  km: string;
-  en: string;
-  zh: string;
-}> = [
+export const SHOP_PACKAGE_BENEFITS: ReadonlyArray<PackageBenefit> = [
   {
     id: 1,
-    km: '✅ ទម្រង់ហាងកម្រិតខ្ពស់ Theme មាស និងផ្លាកសញ្ញា Iconic VIP',
-    en: '✅ Enhanced Restaurant Profile with golden theme & Iconic VIP badge',
-    zh: '✅ 尊享金色主题餐厅主页与官方 Iconic VIP 认证标识',
+    group: 'attract',
+    km: '🚀 ហាងថ្មីលោតលើគេ {d}|ពេលចុះបញ្ជីរួច ហាងរបស់អ្នកត្រូវបានដាក់នៅកំពូលបញ្ជី ក្នុងរយៈពេល {d} ដំបូង',
+    en: '🚀 New Shop on Top for {d}|Right after approval, your shop is pinned at the top of the list for the first {d}',
+    zh: '🚀 新店置顶 {d}|审核通过后，您的店铺在最初 {d} 内置顶展示',
   },
   {
     id: 2,
-    km: '✅ ច្រោះម្ហូបសុខភាព និងគំនិតអាហារ ៣ ពេលប្រចាំថ្ងៃ',
-    en: '✅ Healthy dish filters & daily 3-meal food recommendations',
-    zh: '✅ 健康饮食筛选标签与每日三餐智能推荐',
+    group: 'attract',
+    km: '🥇 បង្ហាញលើគេតាមវេន|ហាង/សណ្ឋាគារដែលចុះបញ្ជីមុន បង្ហាញមុន។ រៀងរាល់ {d} ដល់វេនបន្ទាប់ ដូច្នេះគ្រប់ហាង និងសណ្ឋាគារមានឱកាសបង្ហាញនៅទំព័រដើម និងពេលស្វែងរក',
+    en: '🥇 Top Placement in Turns|Shops and hotels that registered first are shown first. Every {d} the next one takes its turn, so every shop and hotel gets a chance on Home & Search',
+    zh: '🥇 轮流置顶展示|先入驻的店铺/酒店先展示，每 {d} 轮换到下一家，每家店铺和酒店都有机会出现在首页与搜索结果',
   },
   {
     id: 3,
-    km: '✅ បង្ហោះវីដេអូផ្សព្វផ្សាយម្ហូប (YouTube, TikTok, Reels) លើកាតហាង',
-    en: '✅ Embed promotional food videos (YouTube, TikTok, Reels) on shop cards',
-    zh: '✅ 在店铺卡片直接嵌入美食宣传视频（YouTube、TikTok、Reels）',
+    group: 'attract',
+    km: '📍 អតិថិជនរកឃើញងាយ|ហាងរបស់អ្នកបង្ហាញលើផែនទី ហើយអតិថិជនចុចតែម្តងដើម្បីនាំផ្លូវមកដល់ហាង',
+    en: '📍 Easy to Find|Your shop appears on the map and customers tap once to get directions to you',
+    zh: '📍 轻松被找到|您的店铺显示在地图上，顾客一键即可导航前来',
   },
   {
     id: 4,
-    km: '✅ ផ្លាកសញ្ញា VIP (VIP Badge) ពណ៌មាសលើ Profile, មតិយោបល់ និងកាតហាង',
-    en: '✅ Gold VIP Badge on your Profile, comments & restaurant cards',
-    zh: '✅ 个人主页、评论与餐厅卡片专属金色 VIP 徽章',
+    group: 'attract',
+    km: '🏅 Badge VIP ពណ៌មាស|កាតហាងមានផ្លាក VIP ពណ៌មាស មើលទៅពិសេស និងគួរឱ្យទុកចិត្តជាងហាងធម្មតា',
+    en: '🏅 Gold VIP Badge|Your shop card carries a gold VIP badge that looks special and more trustworthy',
+    zh: '🏅 金色 VIP 徽章|店铺卡片带有金色 VIP 徽章，更显特别与可信',
   },
   {
     id: 5,
-    km: '✅ ហាងថ្មីបង្ហាញលើគេបង្អស់ដោយស្វ័យប្រវត្តិរយៈពេល ២៤ ម៉ោង',
-    en: '✅ New VIP shops pinned at the top of the list for 24 hours',
-    zh: '✅ 新上架 VIP 店铺自动置顶展示 24 小时',
+    group: 'manage',
+    km: '🏪 ទំព័រហាងផ្ទាល់ខ្លួន|ដាក់ទីតាំង GPS លេខទូរស័ព្ទ និងម៉ឺនុយម្ហូបទាំងអស់ក្នុងកន្លែងតែមួយ',
+    en: '🏪 Your Own Shop Page|Put your GPS location, phone number and full food menu in one place',
+    zh: '🏪 专属店铺主页|在同一处展示 GPS 定位、联系电话与完整菜单',
   },
   {
     id: 6,
-    km: '✅ ទីតាំងលេចធ្លោលើផែនទី GPS ជាមួយ Pin ពណ៌មាស និងនាំផ្លូវ 1-Tap',
-    en: '✅ Highlighted golden GPS map pin with 1-tap turn-by-turn navigation',
-    zh: '✅ 地图专属金色定位图标与一键导航直达',
+    group: 'manage',
+    km: '🎬 វីដេអូផ្សព្វផ្សាយ|បង្ហោះវីដេអូ YouTube, TikTok ឬ Reels លើហាងរបស់អ្នកដោយផ្ទាល់',
+    en: '🎬 Promo Video|Add a YouTube, TikTok or Reels video directly on your shop',
+    zh: '🎬 宣传视频|直接在店铺上展示 YouTube、TikTok 或 Reels 视频',
   },
   {
     id: 7,
-    km: '✅ រៀបចំផែនការដើរលេង AI និងដំណើរម្ហូប ១ ថ្ងៃរួចជាស្រេច',
-    en: '✅ Smart AI Trip Planner & ready-made 1-day food itineraries',
-    zh: '✅ AI 智能行程规划与精选一日美食路线',
-  },
-  {
-    id: 8,
-    km: '✅ មើលស្ថិតិអ្នកចូលមើលហាង (ចំនួនអ្នកមើល, ចុចហៅទូរស័ព្ទ, ចុចផែនទី)',
-    en: '✅ Real-time Store Analytics (views, phone calls & map clicks)',
-    zh: '✅ 实时查看店铺数据统计（浏览量、电话点击与地图导航次数）',
-  },
-  {
-    id: 9,
-    km: '✅ ស្វែងរកទីតាំងលើ Google Maps និងកំណត់ត្រាម្ហូបដែលបានភ្លក់',
-    en: '✅ Cambodia-wide Google Maps search & personal Food Passport',
-    zh: '✅ 全柬 Google 地图搜索与个人美食打卡护照',
-  },
-  {
-    id: 10,
-    km: '✅ អាទិភាពបង្ហាញលើគេពេលស្វែងរកមុខម្ហូប និងឈ្មោះហាងក្នុង App',
-    en: '✅ Priority search ranking for your dishes and restaurant listings',
-    zh: '✅ 菜品与餐厅搜索结果优先置顶排名',
+    group: 'manage',
+    km: '📊 ស្ថិតិអ្នកចូលមើល|មើលចំនួនអ្នកមើលហាង អ្នកចុចហៅទូរស័ព្ទ និងអ្នកចុចផែនទី',
+    en: '📊 Visitor Analytics|See how many people viewed your shop, tapped to call and tapped for directions',
+    zh: '📊 访客统计|查看店铺浏览量、电话点击与地图导航点击次数',
   },
 ];
+
+const KHMER_DIGITS = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+
+/** Human readable featured-rotation span derived from the Admin-configured duration (default 1 day = 24 hours). */
+export const formatFeaturedRotationSpan = (language: string, days: number): string => {
+  const d = Number.isFinite(days) && days >= 1 ? Math.round(days) : 1;
+  if (language === 'km') {
+    const toKh = (n: number) => String(n).replace(/[0-9]/g, (c) => KHMER_DIGITS[Number(c)]);
+    return d === 1 ? '២៤ ម៉ោង' : toKh(d) + ' ថ្ងៃ';
+  }
+  if (language === 'zh') return d === 1 ? '24 小时' : d + ' 天';
+  return d === 1 ? '24 hours' : d + ' days';
+};
+
+/** Splits a "Title|Description" benefit into display parts for the active language. */
+export const resolvePackageBenefit = (
+  benefit: PackageBenefit,
+  language: string,
+  rotationDays?: number
+): { title: string; desc: string } => {
+  const raw = language === 'km' ? benefit.km : language === 'zh' ? benefit.zh : benefit.en;
+  const days = rotationDays ?? getVipFeaturedRotationConfig().durationDays;
+  const text = raw.split('{d}').join(formatFeaturedRotationSpan(language, days));
+  const sep = text.indexOf('|');
+  return sep < 0 ? { title: text, desc: '' } : { title: text.slice(0, sep), desc: text.slice(sep + 1) };
+};
 
 const clampPosMoney = (v: unknown, def: number): number => {
   const n = Number(v);

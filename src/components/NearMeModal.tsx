@@ -65,6 +65,7 @@ import {
   isFoodShopGooglePlace,
   isTourismAttractionGooglePlace,
   resolveActiveNearMeCoords,
+  compareByGpsDistanceAscending,
 } from '../utils/nearMeEngine';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 
@@ -535,6 +536,12 @@ export const NearMeModal: React.FC = () => {
       return true;
     };
 
+    const sanitizeBadgeItems = (items: string[]): string[] => {
+      if (language === 'zh') return items.slice(0, 2);
+      const filtered = items.filter((it) => !/[\u4e00-\u9fff]/.test(it));
+      return (filtered.length > 0 ? filtered : items).slice(0, 2);
+    };
+
     if (!rawQuery) {
       return nearbyRestaurants
         .filter((r) => {
@@ -546,8 +553,9 @@ export const NearMeModal: React.FC = () => {
         })
         .map((r) => ({
           ...r,
-          matchedInventoryItems: (r.signatureDishesKh || []).slice(0, 2),
-        }));
+          matchedInventoryItems: sanitizeBadgeItems(r.signatureDishesKh || []),
+        }))
+        .sort((a, b) => compareByGpsDistanceAscending(a, b, activeNearMeCoords));
     }
 
     const activeTargetFood =
@@ -575,7 +583,7 @@ export const NearMeModal: React.FC = () => {
           if (!(nameDetail.matchedInName && nameDetail.score >= 200)) continue;
           results.push({
             ...r,
-            matchedInventoryItems: (r.signatureDishesKh || []).slice(0, 2),
+            matchedInventoryItems: sanitizeBadgeItems(r.signatureDishesKh || []),
             _matchScore: Math.round(nameDetail.score / 4),
             _isExactProductMatch: nameDetail.exactName,
           });
@@ -583,29 +591,19 @@ export const NearMeModal: React.FC = () => {
         }
         results.push({
           ...r,
-          matchedInventoryItems:
+          matchedInventoryItems: sanitizeBadgeItems(
             matchRes.matchedInventoryItems.length > 0
               ? matchRes.matchedInventoryItems
-              : (r.signatureDishesKh || []).slice(0, 2),
+              : (r.signatureDishesKh || [])
+          ),
           _matchScore: matchRes.score,
           _isExactProductMatch: matchRes.isExactProductMatch,
         });
       }
 
-      return results.sort((a, b) => {
-        if (a._isExactProductMatch !== b._isExactProductMatch) {
-          return a._isExactProductMatch ? -1 : 1;
-        }
-        const aWithinSelected = a.distanceMeters <= selectedRadiusMeters;
-        const bWithinSelected = b.distanceMeters <= selectedRadiusMeters;
-        if (aWithinSelected !== bWithinSelected) {
-          return aWithinSelected ? -1 : 1;
-        }
-        if (Math.abs(a._matchScore - b._matchScore) > 35) {
-          return b._matchScore - a._matchScore;
-        }
-        return a.distanceMeters - b.distanceMeters;
-      });
+      // Global Rule: Always sort search results by actual GPS distance in ascending order (closest to farthest),
+      // with relevance/exact-match/rating as tie-breaker when distances are identical.
+      return results.sort((a, b) => compareByGpsDistanceAscending(a, b, activeNearMeCoords));
     };
 
     const strictRadiusMatches = evaluateCandidates(nearbyRestaurants);
@@ -614,7 +612,7 @@ export const NearMeModal: React.FC = () => {
     }
 
     return evaluateCandidates(allVerifiedCityRestaurants);
-  }, [nearbyRestaurants, allVerifiedCityRestaurants, nearbyQuery, targetFood, quickFilterId, selectedRadiusMeters]);
+  }, [nearbyRestaurants, allVerifiedCityRestaurants, nearbyQuery, targetFood, quickFilterId, selectedRadiusMeters, language, activeNearMeCoords]);
 
   const filteredNearbyDestinations = useMemo(() => {
     const q = nearbyQuery.trim().toLowerCase();
@@ -654,8 +652,8 @@ export const NearMeModal: React.FC = () => {
       )
         return false;
       return true;
-    });
-  }, [nearbyDestinations, nearbyQuery, quickFilterId, language]);
+    }).sort((a, b) => compareByGpsDistanceAscending(a, b, activeNearMeCoords));
+  }, [nearbyDestinations, nearbyQuery, quickFilterId, language, activeNearMeCoords]);
 
   // Keep mounted once visited so GPS results & scroll position persist
 

@@ -45,7 +45,8 @@ import {
   inferBusinessTypeAndCategory,
   isHotelBusinessRecord,
   isUserOwnerOfRestaurantRecord,
-  SHOP_ALL_INCLUSIVE_5_BENEFITS,
+  SHOP_PACKAGE_BENEFITS,
+  resolvePackageBenefit,
   getShopSubscriptionCatalog,
   getOfficialAbaKhqrImageForPlan,
   getOfficialAbaKhqrDownloadFilename,
@@ -2156,18 +2157,22 @@ export const ManageMenuModal: React.FC = () => {
                     <span>
                       {tr(
                         language,
-                        '✨ មុខងារទាំង ៥ ក្នុងកញ្ចប់តែមួយ (គ្មានទារថ្លៃផ្សព្វផ្សាយបន្ថែម)',
-                        '✨ All 5 Benefits Included in One Package (No Extra Ad Fees)',
-                        '✨ 单一套餐包含全部 5 大权益（无任何额外广告费）'
+                        '✨ មុខងារទាំង ៧ ក្នុងកញ្ចប់តែមួយ (គ្មានទារថ្លៃផ្សព្វផ្សាយបន្ថែម)',
+                        '✨ All 7 Benefits Included in One Package (No Extra Ad Fees)',
+                        '✨ 单一套餐包含全部 7 大权益（无任何额外广告费）'
                       )}
                     </span>
                   </div>
                   <ul className="space-y-1.5 text-[11px] text-slate-700 dark:text-slate-200">
-                    {SHOP_ALL_INCLUSIVE_5_BENEFITS.map((b, idx) => (
-                      <li key={idx} className="leading-snug">
-                        {isKm ? b.km : language === 'zh' ? b.zh : b.en}
-                      </li>
-                    ))}
+                    {SHOP_PACKAGE_BENEFITS.map((b) => {
+                      const { title, desc } = resolvePackageBenefit(b, language);
+                      return (
+                        <li key={b.id} className="leading-snug">
+                          <span className="font-bold">{title}</span>
+                          {desc ? ` — ${desc}` : ''}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
 

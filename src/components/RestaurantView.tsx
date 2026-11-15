@@ -116,7 +116,7 @@ export const RestaurantView: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [cuisineFilter] = useState<string>('all');
   const [ratingFilter] = useState<'all' | '4.5' | '4.0'>('all');
-  const [sortMode, setSortMode] = useState<'popular' | 'nearest' | 'rating'>('popular');
+  const [sortMode, setSortMode] = useState<'popular' | 'nearest' | 'rating'>('nearest');
   const [nearMeActive, setNearMeActive] = useState<boolean>(false);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() => readSavedUserGps());
   const [geoStatus, setGeoStatus] = useState<'requesting' | 'granted' | 'fallback'>(() =>
@@ -308,6 +308,9 @@ export const RestaurantView: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!readSavedUserGps()) {
+      requestLocation(false);
+    }
     const onGpsUpdated = (e: Event) => {
       const detail = (e as CustomEvent<{ lat: number; lng: number }>).detail;
       if (detail && Number.isFinite(detail.lat) && Number.isFinite(detail.lng)) {
@@ -697,14 +700,25 @@ export const RestaurantView: React.FC = () => {
         ? fallbackUnfilteredScored
         : scored;
 
-    if (nearMeActive || sortMode === 'nearest') {
-      activeList.sort(
-        (a, b) => (distanceMetersMap.get(a.item.id) ?? 9999999) - (distanceMetersMap.get(b.item.id) ?? 9999999)
-      );
-    } else if (q) {
-      activeList.sort((a, b) => b.score - a.score);
-    } else if (sortMode === 'rating') {
-      activeList.sort((a, b) => Number(b.item.rating || 0) - Number(a.item.rating || 0));
+    const hasActiveUserGps = Boolean(userCoords || readSavedUserGps());
+    if (sortMode === 'rating' && !q && !nearMeActive) {
+      activeList.sort((a, b) => {
+        const rDiff = Number(b.item.rating || 0) - Number(a.item.rating || 0);
+        if (rDiff !== 0) return rDiff;
+        return (distanceMetersMap.get(a.item.id) ?? 9999999) - (distanceMetersMap.get(b.item.id) ?? 9999999);
+      });
+    } else if (nearMeActive || sortMode === 'nearest' || q || categoryFilter !== 'all' || cuisineFilter !== 'all' || hasActiveUserGps) {
+      // Global Rule: Always sort search and category results by actual GPS distance ascending (closest to farthest)
+      // when GPS is available; use search relevance score and rating as fallback when GPS is unavailable or tied.
+      activeList.sort((a, b) => {
+        if (hasActiveUserGps || nearMeActive || sortMode === 'nearest') {
+          const dA = distanceMetersMap.get(a.item.id) ?? 9999999;
+          const dB = distanceMetersMap.get(b.item.id) ?? 9999999;
+          if (dA !== dB) return dA - dB;
+        }
+        if (q && b.score !== a.score) return b.score - a.score;
+        return Number(b.item.rating || 0) - Number(a.item.rating || 0);
+      });
     }
 
     return activeList.map((entry) => entry.item);
@@ -720,6 +734,7 @@ export const RestaurantView: React.FC = () => {
     sortMode,
     distanceMetersMap,
     debouncedShopSearchQuery,
+    userCoords,
   ]);
 
   const rotationState = useMemo(
@@ -756,7 +771,8 @@ export const RestaurantView: React.FC = () => {
       return score;
     };
 
-    const isDefaultOrder = !debouncedShopSearchQuery.trim() && sortMode === 'popular';
+    const hasActiveUserGps = Boolean(userCoords || readSavedUserGps());
+    const isDefaultOrder = !debouncedShopSearchQuery.trim() && categoryFilter === 'all' && sortMode === 'popular' && !hasActiveUserGps;
     const eligibleList = sortedRestaurants.filter((r) => isVipOwnerListing(r) || !isSeedRestaurantId(r.id));
     const regularList = sortedRestaurants.filter((r) => !isVipOwnerListing(r) && isSeedRestaurantId(r.id));
 
@@ -774,7 +790,7 @@ export const RestaurantView: React.FC = () => {
     const featuredIds = new Set<string>(featured.map((r) => r.id));
     const directory = orderedAll.filter((r) => !featuredIds.has(r.id));
     return { featuredRestaurants: featured, directoryRestaurants: directory };
-  }, [sortedRestaurants, showAllFeatured, rotationState, debouncedShopSearchQuery, sortMode]);
+  }, [sortedRestaurants, showAllFeatured, rotationState, debouncedShopSearchQuery, sortMode, categoryFilter, userCoords]);
 
   const displayedDirectoryRestaurants = useMemo(
     () => directoryRestaurants.slice(0, visibleCount),

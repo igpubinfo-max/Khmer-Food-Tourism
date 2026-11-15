@@ -15,7 +15,7 @@ export const seedFoods: FoodItem[] = [
   // ==========================================
   {
     id: 'food-1',
-    nameKh: 'អាម៉ុកត្រីស្លឹកញរ',
+    nameKh: 'អាម៉ុកត្រីស្លឹកញ',
     nameEn: 'Fish Amok with Noni Leaves',
     categorySlug: 'soup',
     categoryKh: 'ម្ហូបពិសេស / អាម៉ុក',
@@ -441,7 +441,7 @@ export const seedFoods: FoodItem[] = [
     nameKh: 'ជ្រក់ជើងមាន់',
     nameEn: 'Spicy & Sour Cambodian Pickled Chicken Feet Salad (Chhruk Cheung Moan)',
     categorySlug: 'salad',
-    categoryKh: 'ម្ហូបញាំ & ភ្លា / ជ្រក់ជើងមាន់',
+    categoryKh: 'ម្ហូបញាំ និង ភ្លា / ជ្រក់ជើងមាន់',
     categoryEn: 'Salad / Pickled Chicken Feet',
     descriptionKh: 'ជ្រក់ជើងមាន់ ជាមុខម្ហូប និងអាហារសម្រន់ដ៏ពេញនិយម ប្រើជើងមាន់ស្រស់ស្ងោរត្រាំទឹកកកឱ្យស្រួយស្វិតល្អ លាយជាមួយទឹកជ្រលក់ទឹកត្រី ស្ករត្នោត ទឹកក្រូចឆ្មាស្រស់ គល់ស្លឹកគ្រៃហាន់ស្ដើង ខ្ទឹមស ខ្ទឹមក្រហម ស្លឹកក្រូចសើច និងម្ទេសខ្មាំង រសជាតិជូរហឹរផ្អែមប្រៃជក់មាត់។',
     descriptionEn: 'Crispy-tender poached chicken feet chilled in ice water and marinated in a vibrant Cambodian dressing of fish sauce, palm sugar, fresh lime juice, thinly sliced lemongrass, shallots, garlic, kaffir lime leaves, and bird-eye chilies.',
@@ -621,7 +621,7 @@ export const seedFoods: FoodItem[] = [
     nameKh: 'លៀសឆាអំពិលទុំ',
     nameEn: 'Stir-Fried Freshwater Clams with Tamarind & Basil (Leas Cha Ampil Tum)',
     categorySlug: 'stirfry',
-    categoryKh: 'ម្ហូបឆា / គ្រឿងសមុទ្រ & ទន្លេ',
+    categoryKh: 'ម្ហូបឆា / គ្រឿងសមុទ្រ និង ទន្លេ',
     categoryEn: 'Stir-fry / Tamarind Clams',
     descriptionKh: 'លៀសឆាអំពិលទុំ ជាមុខម្ហូប និងអាហារសម្រន់ដ៏ពេញនិយម ប្រើលៀសទឹកសាបស្រស់ៗឆាលើភ្លើងខ្លាំងជាមួយទឹកអំពិលទុំ ស្ករត្នោត ខ្ទឹមសបំពង ម្ទេស និងស្លឹកជីរនាងវង មានរសជាតិជូរផ្អែមហឹរតិចៗឈ្ងុយឆ្ងាញ់។',
     descriptionEn: 'Popular Cambodian wok-tossed freshwater clams glazed in a tangy-sweet ripe tamarind sauce with crispy garlic, fresh bird-eye chilies, and aromatic Thai basil.',
@@ -1219,7 +1219,7 @@ export const seedFoods: FoodItem[] = [
     ],
     steps: [
       { stepNumber: 1, instructionKh: 'ច្របល់ប្រហុក សាច់ជ្រូក ម្ទេស ខ្ទឹមស និងស្ករត្នោតឱ្យចូលគ្នាល្អ។', instructionEn: 'Mix prahok, minced pork, chilies, garlic, and palm sugar thoroughly.' },
-      { stepNumber: 2, instructionKh: 'វេចខ្ចប់ក្នុងស្លឹកចេកឱ្យជិត ខ្ទាស់ដោយបន្ទះឬស្សី។', instructionEn: 'Wrap parcel tightly in multiple layers of banana leaves.' },
+      { stepNumber: 2, instructionKh: 'វេចខ្ចប់ក្នុងស្លឹកចេកឱ្យជិត ខ្ទាស់ដោយបន្ទះឫស្សី។', instructionEn: 'Wrap parcel tightly in multiple layers of banana leaves.' },
       { stepNumber: 3, instructionKh: 'អាំងលើធ្យូងភ្លើងមធ្យម ១៥-២០ នាទី រហូតស្លឹកចេកក្រៀមឈ្ងុយ។', instructionEn: 'Grill over coals for 20 minutes until banana leaves are scorched and fragrant.' },
     ],
   },
@@ -1231,7 +1231,7 @@ export const seedFoods: FoodItem[] = [
     categoryKh: 'ម្ហូបភ្លា / គ្រឿងសមុទ្រស្រស់',
     categoryEn: 'Salad / Fresh Prawn Ceviche',
     descriptionKh: 'ភ្លាបង្គាស្រស់ ប្រើបង្គាសមុទ្រ ឬបង្គាទន្លេស្រស់ៗបកសំបកវះខ្នង ច្របាច់ទឹកក្រូចឆ្មាស្រស់ឱ្យសាច់បង្គាឡើងស្រួយផ្អែម លាយជាមួយគល់ស្លឹកគ្រៃហាន់ស្ដើង ខ្ទឹមក្រហម ស្លឹកក្រូចសើច ម្ទេស ជីរអង្កាម និងទឹកត្រីកោះកុងហឹរជូរអែម។',
-    descriptionEn: 'Zesty Cambodian fresh prawn ceviche cured in freshly squeezed lime juice and tossed with thinly sliced lemongrass, shallots, kaffir lime leaves, bird-eye chilies, mint, and spicy Koh Konggarlic-lime dressing.',
+    descriptionEn: 'Zesty Cambodian fresh prawn ceviche cured in freshly squeezed lime juice and tossed with thinly sliced lemongrass, shallots, kaffir lime leaves, bird-eye chilies, mint, and spicy Koh Kong garlic-lime dressing.',
     photoUrl: '/foods/food-35.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
@@ -1479,7 +1479,7 @@ export const seedFoods: FoodItem[] = [
     nameKh: 'គុយទាវគ្រឿងក្នុង',
     nameEn: 'Cambodian Pork Offal Rice Noodle Soup (Kuy Teav Kroeung Knong)',
     categorySlug: 'noodles',
-    categoryKh: 'គុយទាវ & នំបញ្ចុក / គុយទាវគ្រឿងក្នុង',
+    categoryKh: 'គុយទាវ និង នំបញ្ចុក / គុយទាវគ្រឿងក្នុង',
     categoryEn: 'Noodles / Pork Offal Kuy Teav',
     descriptionKh: 'គុយទាវគ្រឿងក្នុង ប្រើទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ថ្លាផ្អែមឈ្ងុយ ស្រោចលើសរសៃគុយទាវទន់ស្វិត រៀបពីលើដោយគ្រឿងក្នុងជ្រូកស្ងោរឆ្អិនល្អ (ថ្លើម បេះដូង ក្រពះ អណ្តាត និងពោះវៀន) សាឡាត់ សណ្តែកបណ្តុះ ខ្ទឹមសបំពង និងស្លឹកខ្ទឹម។',
     descriptionEn: 'Aromatic Cambodian rice noodle soup in crystal-clear pork bone broth topped with tender poached pork offal (liver, heart, stomach, and tongue), crisp lettuce, bean sprouts, golden fried garlic, and scallions.',
@@ -1694,7 +1694,7 @@ export const seedFoods: FoodItem[] = [
     categorySlug: 'dessert',
     categoryKh: 'បង្អែមខ្មែរ / ពេញនិយម',
     categoryEn: 'Desserts / Coconut Banana',
-    descriptionKh: 'បង្អែមចេកខ្ទិះ ប្រើចេកណាំវ៉ាទុំផ្អែម ចម្អិនក្នុងទឹកខ្ទិះដូងខាប់ ស្លឹកតើយ ស្ករត្នោត និងគ្រាប់សាគូ រោយល្ងសលីងពីលើ ទទួលទានក្តៅៗឈ្ងុយឆ្ងាញ់។',
+    descriptionKh: 'បង្អែមចេកខ្ទិះ ប្រើចេកណាំវ៉ាទុំផ្អែម ចម្អិនក្នុងទឹកខ្ទិះដូងខាប់ ស្លឹកតយ ស្ករត្នោត និងគ្រាប់សាគូ រោយល្ងសលីងពីលើ ទទួលទានក្តៅៗឈ្ងុយឆ្ងាញ់។',
     descriptionEn: 'Comforting warm dessert of ripe sweet bananas simmered in thick coconut cream, tapioca pearls, pandan leaves, and toasted white sesame.',
     photoUrl: '/foods/food-48.jpg',
     imageAuditStatus: 'verified',
@@ -1712,11 +1712,11 @@ export const seedFoods: FoodItem[] = [
     ingredients: [
       { nameKh: 'ចេកណាំវ៉ាទុំកាត់កង់ៗ', nameEn: 'Ripe small bananas sliced', amount: '៥-៦ ផ្លែ' },
       { nameKh: 'ខ្ទិះដូងខាប់', nameEn: 'Coconut milk', amount: '៤០០ មីលីលីត្រ' },
-      { nameKh: 'គ្រាប់សាគូ និងស្លឹកតើយ', nameEn: 'Tapioca pearls and pandan leaf', amount: '៥០ ក្រាម' },
+      { nameKh: 'គ្រាប់សាគូ និងស្លឹកតយ', nameEn: 'Tapioca pearls and pandan leaf', amount: '៥០ ក្រាម' },
       { nameKh: 'ស្ករត្នោត និងល្ងសលីង', nameEn: 'Palm sugar and toasted sesame seeds', amount: '២ ស្លាបព្រាបាយ' },
     ],
     steps: [
-      { stepNumber: 1, instructionKh: 'ដាំខ្ទិះដូងជាមួយស្លឹកតើយ និងគ្រាប់សាគូឱ្យឆ្អិនថ្លា។', instructionEn: 'Simmer coconut milk with pandan and tapioca pearls until translucent.' },
+      { stepNumber: 1, instructionKh: 'ដាំខ្ទិះដូងជាមួយស្លឹកតយ និងគ្រាប់សាគូឱ្យឆ្អិនថ្លា។', instructionEn: 'Simmer coconut milk with pandan and tapioca pearls until translucent.' },
       { stepNumber: 2, instructionKh: 'ដាក់ចេកណាំវ៉ា និងស្ករត្នោតចូល រម្ងាស់ ៥ នាទីឱ្យចូលជាតិ។', instructionEn: 'Add banana slices and palm sugar, simmer gently for 5 minutes.' },
       { stepNumber: 3, instructionKh: 'ដួសដាក់ចាន រោយល្ងសលីងឈ្ងុយៗពីលើ។', instructionEn: 'Ladle into bowls and garnish with toasted sesame seeds.' },
     ],
@@ -2381,7 +2381,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ដោតចង្កាក់ឬស្សី រួចអាំងលើភ្លើងធ្យូងរហូតដល់ឆ្អិនក្រហមឈ្ងុយ។",
+        "instructionKh": "ដោតចង្កាក់ឫស្សី រួចអាំងលើភ្លើងធ្យូងរហូតដល់ឆ្អិនក្រហមឈ្ងុយ។",
         "instructionEn": "Thread onto bamboo skewers and grill over embers until fragrant and charred."
       },
       {
@@ -2516,7 +2516,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "ផ្អកចំហុយ",
     "nameEn": "Cambodian Steamed Fermented Fish & Pork Belly with Crudités (Pha-ork Chamhoy)",
     "cat": "salad",
-    "catKh": "ម្ហូបទឹកគ្រឿង & ផ្អក / ផ្អកចំហុយ",
+    "catKh": "ម្ហូបទឹកគ្រឿង និង ផ្អក / ផ្អកចំហុយ",
     "catEn": "Dip / Steamed Fermented Fish & Pork",
     "descKh": "ផ្អកចំហុយ ជាមុខម្ហូបប្រពៃណីខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ យកផ្អកត្រីល្អមកចំហុយជាមួយសាច់ជ្រូកបីជាន់ ខ្ញីហាន់បន្ទះ ខ្ទឹមស ស្លឹកខ្ទឹម ស្ករត្នោត និងម្ទេសក្រហម រហូតដល់សាច់ជ្រូកផុយទន់ចូលជាតិផ្អកឈ្ងុយ ទទួលទានផ្ទាប់ជាមួយបន្លែអន្លក់ស្រស់ (ត្រសក់ ត្រប់ស្រួយ ពពាយ និងសណ្តែកគួរ)។",
     "descEn": "Traditional Cambodian savory steamed fermented fish (Pha-ork) and tender pork belly infused with sliced ginger, garlic, palm sugar, scallions, and red chilies, served with a platter of crisp raw vegetables.",
@@ -2623,7 +2623,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដោតសាច់គោលើចង្កាក់ឬស្សី ដោយដាក់ដុំខ្លាញ់គោមួយចំកណ្តាលដើម្បីរក្សាភាពទន់។",
+        "instructionKh": "ដោតសាច់គោលើចង្កាក់ឫស្សី ដោយដាក់ដុំខ្លាញ់គោមួយចំកណ្តាលដើម្បីរក្សាភាពទន់។",
         "instructionEn": "Thread beef onto bamboo skewers with a cube of fat in the center for juiciness."
       },
       {
@@ -3330,7 +3330,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "ញាំត្រចៀកជ្រូក",
     "nameEn": "Cambodian Crispy Pig Ear Salad",
     "cat": "salad",
-    "catKh": "ញាំ & ភ្លា",
+    "catKh": "ញាំ និង ភ្លា",
     "catEn": "Salads & Dips",
     "descKh": "ញាំត្រចៀកជ្រូក ជាមួយស្លឹកជីរគ្រប់មុខ សណ្តែកដីបុក និងទឹកត្រីកោះកុងជូរអែមឆ្ងាញ់ពិសា។",
     "descEn": "Crunchy sliced boiled pig ear salad tossed with fresh aromatic herbs, sliced onions, ripe tomatoes, crushed roasted peanuts, and zesty Koh Kong chili-lime dressing.",
@@ -3393,7 +3393,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "ញាំម្កាក់ត្រីឆ្អើរ",
     "nameEn": "Ambarella Salad with Smoked Fish (Nhoam Mkak Trey Chh-oe)",
     "cat": "salad",
-    "catKh": "ម្ហូបញាំ & ភ្លា / ញាំម្កាក់",
+    "catKh": "ម្ហូបញាំ និង ភ្លា / ញាំម្កាក់",
     "catEn": "Salad / Ambarella Smoked Fish",
     "descKh": "ញាំម្កាក់ត្រីឆ្អើរ ជាមុខម្ហូបញាំបែបស្រុកស្រែដ៏ពេញនិយម ដោយប្រើផ្លែម្កាក់ខ្ចីចិតសរសៃស្រួយជូរផ្អែម លាយជាមួយសាច់ត្រីឆ្អើរឈ្ងុយបេះគ្មានឆ្អឹង សណ្តែកដីលីងបុក និងទឹកត្រីកោះកុងជូរហឹរមុត។",
     "descEn": "Refreshing Cambodian country salad featuring crisp tart-sweet julienned ambarella fruit tossed with flaky smoked river fish, toasted crushed peanuts, fresh herbs, and zesty lime-chili dressing.",
@@ -3456,7 +3456,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "ទឹកគ្រឿងសណ្តែកដីបាត់ដំបង",
     "nameEn": "Battambang Peanut Fish Dip Platter",
     "cat": "salad",
-    "catKh": "ទឹកគ្រឿង & ញាំ",
+    "catKh": "ទឹកគ្រឿង និង ញាំ",
     "catEn": "Salads & Dips",
     "descKh": "ទឹកគ្រឿងសណ្តែកដីបាត់ដំបង ជាទឹកជ្រលក់បុរាណខ្មែរដ៏ល្បី ប្រើសាច់ត្រីរ៉ស់ស្ងោរបុកម៉ត់ លាយទឹកប្រហុកថ្លា សណ្តែកដីលីងបុក ទឹកអំពិលទុំ និងស្ករត្នោត ទទួលទានផ្ទាប់ជាមួយបន្លែអន្លក់ស្រស់គ្រប់មុខ។",
     "descEn": "Traditional Battambang-style thick fish and peanut dip made with pounded river fish, clarified prahok stock, crushed peanuts, and tangy tamarind, served with a raw vegetable platter.",
@@ -3524,7 +3524,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "ប្រហុកកប់ស្លឹកចេកអាំង",
     "nameEn": "Charcoal Pit Prahok in Banana Leaf",
     "cat": "salad",
-    "catKh": "ប្រហុក & ទឹកគ្រឿង",
+    "catKh": "ប្រហុក និង ទឹកគ្រឿង",
     "catEn": "Salads & Dips",
     "descKh": "ប្រហុកកប់ស្លឹកចេកអាំង ប្រើប្រហុកសាច់ត្រីកំភ្លាញចិញ្ច្រាំជាមួយសាច់ជ្រូកបីជាន់ ខ្ទឹមស ខ្ទឹមក្រហម និងស្លឹកក្រូចសើច ខ្ចប់ក្នុងស្លឹកចេកអាំងលើធ្យូងភ្លើងឡើងឈ្ងុយឈ្ងប់ ទទួលទានជាមួយអន្លក់បន្លែស្រស់។",
     "descEn": "Authentic Khmer fermented fish paste pounded with minced pork belly, lemongrass, garlic, wrapped in banana leaf packets, and slow-roasted over embers.",
@@ -3555,7 +3555,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
         "amount": "១ ស្លាបព្រាកាហ្វេ"
       },
       {
-        "nameKh": "ស្លឹកចេក និងបន្ទះឬស្សីខ្ទាស់",
+        "nameKh": "ស្លឹកចេក និងបន្ទះឫស្សីខ្ទាស់",
         "nameEn": "Banana leaves and bamboo toothpicks",
         "amount": "សម្រាប់ខ្ចប់"
       }
@@ -3587,7 +3587,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "បុកមីកញ្ចប់",
     "nameEn": "Spicy Pounded Instant Noodles Salad (Bok Mee Kanchop)",
     "cat": "salad",
-    "catKh": "ម្ហូបញាំ & បុក / បុកមីកញ្ចប់",
+    "catKh": "ម្ហូបញាំ និង បុក / បុកមីកញ្ចប់",
     "catEn": "Salad / Pounded Instant Noodles",
     "descKh": "បុកមីកញ្ចប់ អាហារសម្រន់បែបយុវវ័យដ៏ពេញនិយមបំផុត ចម្អិនដោយយកមីកញ្ចប់ស្រុះទន់ស្វិត បុកក្នុងត្បាល់ជាមួយក្តាមប្រៃ ប្រហិតសាច់ សណ្តែកគួរ ប៉េងប៉ោះ ទឹកប្រហុក ឬទឹកត្រីកោះកុង និងក្រូចឆ្មារ រសជាតិជូរហឹរមុតប្លែកមាត់។",
     "descEn": "Wildly popular Cambodian street snack: springy instant noodles lightly blanched and gently pounded in a mortar with salted crab, meatballs, long beans, tomatoes, lime, and fiery tamarind-chili sauce.",
@@ -3655,7 +3655,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "នំបញ្ចុកសម្លការីសាច់មាន់",
     "nameEn": "Nom Banh Chok with Red Chicken Curry",
     "cat": "noodles",
-    "catKh": "នំបញ្ចុក & មី",
+    "catKh": "នំបញ្ចុក និង មី",
     "catEn": "Noodles & Curry",
     "descKh": "នំបញ្ចុកសម្លការីសាច់មាន់ នំបញ្ចុកសរសៃស្រស់ទន់រលោង ស្រោចដោយទឹកសម្លការីក្រហមសាច់មាន់ស្រែ ខ្ទិះដូងខាប់ ដំឡូងជ្វា និងត្រប់វែង អមដោយបន្លែអន្លក់ស្រស់គ្រប់មុខ។",
     "descEn": "Fresh fermented rice noodles drenched in rich, aromatic red chicken coconut curry, sweet potatoes, eggplants, and crunchy garden crudités.",
@@ -3718,7 +3718,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "នំបញ្ចុកទឹកប្រហុកសៀមរាប",
     "nameEn": "Siem Reap Spicy Prahok Rice Noodles",
     "cat": "noodles",
-    "catKh": "នំបញ្ចុក & មី",
+    "catKh": "នំបញ្ចុក និង មី",
     "catEn": "Noodles & Soups",
     "descKh": "នំបញ្ចុកទឹកប្រហុកសៀមរាប ជានំបញ្ចុកប្រចាំតំបន់អង្គរដ៏ល្បីល្បាញ ទឹកស៊ុបប្រហុកដាំពុះលាយសាច់ត្រីអាំងបុក រសជាតិហឹរជូរអែម រោយសណ្តែកដីបុក និងអន្លក់ស្រែស្រស់ៗ។",
     "descEn": "Legendary Siem Reap Angkor specialty of fermented rice noodles served with a hot, tangy, aromatic prahok broth infused with pounded grilled fish and crushed peanuts.",
@@ -3786,7 +3786,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "គុយទាវកាត់",
     "nameEn": "Steamed Rice Noodle Rolls with Minced Pork",
     "cat": "noodles",
-    "catKh": "មី & គុយទាវ",
+    "catKh": "មី និង គុយទាវ",
     "catEn": "Noodles & Dim Sum",
     "descKh": "គុយទាវកាត់ ប្រើសន្លឹកគុយទាវចំហុយទន់រលោង កាត់ជាដុំៗ រោយសាច់ជ្រូកចិញ្ច្រាំឆាផ្សិតក្រៀម សាច់ក្រក សណ្តែកបណ្តុះ ខ្ទឹមបំពង និងស្រោចទឹកត្រីផ្អែមជូរអែម។",
     "descEn": "Silky steamed fresh flat rice noodle sheets topped with savory minced pork, dried mushrooms, sliced sausage, crispy shallots, and sweet garlic fish sauce.",
@@ -3849,7 +3849,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "គុយទាវឆា",
     "nameEn": "Cambodian Stir-Fried Flat Rice Noodles (Kuy Teav Cha)",
     "cat": "noodles",
-    "catKh": "មី & គុយទាវ",
+    "catKh": "មី និង គុយទាវ",
     "catEn": "Stir-Fried Noodles",
     "descKh": "គុយទាវឆា គុយទាវសរសៃធំឆាលើភ្លើងខ្លាំងជាមួយពងទា សាច់ជ្រូក ឬសាច់គោ តៅហ៊ូ និងសណ្តែកបណ្តុះ សរសៃគុយទាវឡើងពណ៌ក្រហមឈ្ងុយ ទទួលទានជាមួយទឹកត្រីម្ទេសក្រូចឆ្មារ។",
     "descEn": "Classic Cambodian street-style wok-charred flat rice noodles stir-fried with rich duck eggs, tender pork or beef, firm tofu, crunchy bean sprouts, and crushed peanuts.",
@@ -3912,7 +3912,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "មីសួរសាច់មាន់",
     "nameEn": "Chicken Glass Noodle Soup (Mi Suor Sach Moan)",
     "cat": "noodles",
-    "catKh": "មី & គុយទាវ / មីសួរ",
+    "catKh": "មី និង គុយទាវ / មីសួរ",
     "catEn": "Noodles & Soup / Chicken Glass Noodle",
     "descKh": "មីសួរសាច់មាន់ ទឹកស៊ុបមាន់ស្រែរម្ងាស់ថ្លាឈ្ងុយផ្អែមធម្មជាតិ មីសួរសណ្តែកបាយទន់រលោង អមដោយសាច់មាន់ស្រែហែកជាបន្ទះ ផ្សិតត្រចៀកកណ្តុរ ផ្កាចេក និងស្ពៃចង្កឹះ ស្រូបដោយខ្ទឹមបំពងឈ្ងុយ និងម្រេចកំពតម៉ត់។",
     "descEn": "Comforting Khmer clear chicken glass noodle soup featuring naturally sweet free-range chicken broth, silky mung bean vermicelli, shredded chicken, wood ear mushrooms, and fragrant crispy fried garlic with Kampot pepper.",
@@ -4101,7 +4101,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "បបរមាន់ស្រែស្លឹកខ្ទឹម",
     "nameEn": "Free-Range Chicken Rice Porridge",
     "cat": "soup",
-    "catKh": "ស៊ុប & បបរ",
+    "catKh": "ស៊ុប និង បបរ",
     "catEn": "Porridge & Congee",
     "descKh": "បបរមាន់ស្រែស្លឹកខ្ទឹម រម្ងាស់អង្ករជាមួយទឹកស៊ុបស្ងោរមាន់ស្រែផ្អែមធម្មជាតិ សាច់មាន់ទន់បេះសរសៃ ខ្ញីហាន់ល្អិត សណ្តែកបណ្តុះ ស្លឹកខ្ទឹម និងខ្ទឹមបំពង ជាអាហារពេលព្រឹកដ៏កក់ក្តៅ។",
     "descEn": "Heartwarming Cambodian chicken congee simmered with rich free-range chicken broth, shredded chicken, julienned ginger, bean sprouts, and crispy garlic.",
@@ -4164,7 +4164,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "បបរត្រីរ៉ស់ខ្ញីស្រស់",
     "nameEn": "Snakehead Fish Ginger Rice Congee",
     "cat": "soup",
-    "catKh": "ស៊ុប & បបរ",
+    "catKh": "ស៊ុប និង បបរ",
     "catEn": "Porridge & Congee",
     "descKh": "បបរត្រីរ៉ស់ខ្ញីស្រស់ រម្ងាស់អង្ករជាមួយទឹកស៊ុបត្រីថ្លា សាច់ត្រីរ៉ស់ស្រស់ហាន់បន្ទះស្ដើងទន់ផ្អែម ខ្ញីខ្ចីហាន់សរសៃជួយកម្តៅរាងកាយ និងបំបាត់ក្លិនឆ្អាប ឈ្ងុយឆ្ងាញ់ពិសា។",
     "descEn": "Traditional delicate rice porridge with tender fresh river snakehead fish fillets, shredded young ginger, scallions, and golden fried garlic.",
@@ -4229,7 +4229,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "cat": "dessert",
     "catKh": "បង្អែមខ្មែរ",
     "catEn": "Desserts & Sweets",
-    "descKh": "បាយដំណើបសង់ខ្យាខ្មែរ ជាបង្អែមប្រពៃណីខ្មែរដ៏ល្បីល្បាញ អង្ករដំណើបចំហុយជាមួយខ្ទិះដូងខាប់ទន់ឈ្ងុយស្លឹកតើយ ដាក់សង់ខ្យាស៊ុតទាស្ករត្នោតពីលើ រសជាតិផ្អែមមុតស្រាលឈ្ងុយដូង។",
+    "descKh": "បាយដំណើបសង់ខ្យាខ្មែរ ជាបង្អែមប្រពៃណីខ្មែរដ៏ល្បីល្បាញ អង្ករដំណើបចំហុយជាមួយខ្ទិះដូងខាប់ទន់ឈ្ងុយស្លឹកតយ ដាក់សង់ខ្យាស៊ុតទាស្ករត្នោតពីលើ រសជាតិផ្អែមមុតស្រាលឈ្ងុយដូង។",
     "descEn": "Classic Cambodian sweet: fragrant coconut-steamed sticky rice infused with pandan, crowned with rich steamed duck egg and palm sugar custard.",
     "prepTime": "២៥ នាទី",
     "cookTime": "៣០ នាទី",
@@ -4253,7 +4253,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
         "amount": "១៥០ មីលីលីត្រ"
       },
       {
-        "nameKh": "ស្លឹកតើយស្រស់",
+        "nameKh": "ស្លឹកតយស្រស់",
         "nameEn": "Fresh pandan leaves",
         "amount": "៤-៥ ស្លឹក"
       },
@@ -4266,7 +4266,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "ត្រាំអង្ករដំណើប រួចចំហុយជាមួយស្លឹកតើយ និងខ្ទិះដូងឱ្យទន់រលោងឈ្ងុយ។",
+        "instructionKh": "ត្រាំអង្ករដំណើប រួចចំហុយជាមួយស្លឹកតយ និងខ្ទិះដូងឱ្យទន់រលោងឈ្ងុយ។",
         "instructionEn": "Soak sticky rice, then steam with pandan leaves and coconut cream until glossy and tender."
       },
       {
@@ -4290,7 +4290,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "នំអន្សមចេកស្ករត្នោត",
     "nameEn": "Num Ansom Chek (Sweet Banana Sticky Rice Cake)",
     "cat": "cake",
-    "catKh": "នំខ្មែរ & បង្អែម",
+    "catKh": "នំខ្មែរ និង បង្អែម",
     "catEn": "Traditional Cakes",
     "descKh": "នំអន្សមចេកស្ករត្នោត ជានំបុរាណខ្មែរក្នុងពិធីបុណ្យភ្ជុំបិណ្ឌ និងចូលឆ្នាំ អង្ករដំណើបច្របល់ជាមួយដូងកោស និងស្ករត្នោត ខ្ចប់ចេកណាំវ៉ាទុំក្នុងស្លឹកចេក រួចស្ងោររហូតដល់ទន់ស្អិតឈ្ងុយ។",
     "descEn": "Traditional cylindrical banana leaf parcels of sticky rice seasoned with shredded coconut and palm sugar, wrapping sweet ripe baby bananas, slow-boiled for hours.",
@@ -4353,7 +4353,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "នំគមស្នូលដូងស្ករត្នោត",
     "nameEn": "Num Kom (Pyramid Sticky Cake with Sweet Coconut)",
     "cat": "cake",
-    "catKh": "នំខ្មែរ & បង្អែម",
+    "catKh": "នំខ្មែរ និង បង្អែម",
     "catEn": "Traditional Cakes",
     "descKh": "នំគម ជានំប្រពៃណីខ្មែររាងសាជីជ្រុង ធ្វើពីម្សៅដំណើបទន់រលោង ញាត់ស្នូលដូងកោសឆាស្ករត្នោតផ្អែមឈ្ងុយ វេចក្នុងស្លឹកចេកចំហុយឆ្អិន ជាតំណាងសិរីសួស្តីក្នុងពិធីបុណ្យជាតិ។",
     "descEn": "Iconic pyramid-shaped banana leaf steamed rice cakes filled with fragrant caramelized grated coconut and palm sugar.",
@@ -4411,7 +4411,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "នំកងស្ករត្នោត",
     "nameEn": "Num Kong (Khmer Glazed Donut Rings)",
     "cat": "cake",
-    "catKh": "នំខ្មែរ & បង្អែម",
+    "catKh": "នំខ្មែរ និង បង្អែម",
     "catEn": "Traditional Cakes & Donuts",
     "descKh": "នំកងស្ករត្នោត គឺជានំប្រពៃណីខ្មែរដ៏ពេញនិយមបំផុត មានរាងដូចកងដៃ ធ្វើពីម្សៅដំណើបបំពងស្រួយស្រោក ស្រោបដោយស្ករត្នោតរម្ងាស់ឡើងជើងក្អែក និងរោយល្ងសលីងឈ្ងុយឆ្ងាញ់ ទទួលទានជាបង្អែមសម្រន់។",
     "descEn": "Traditional Cambodian crispy fried rice flour donut rings generously glazed with caramelized palm sugar syrup and sprinkled with toasted fragrant white sesame seeds.",
@@ -4481,7 +4481,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "cat": "dessert",
     "catKh": "បង្អែមខ្មែរ",
     "catEn": "Desserts & Sweets",
-    "descKh": "បង្អែមបបរត្នោតខ្ទិះដូង ប្រើសាច់ត្នោតខ្ចីទន់រលោង ចម្អិនក្នុងទឹកខ្ទិះដូងខាប់ គ្រាប់សាគូ និងស្ករត្នោតសុទ្ធ ក្លិនឈ្ងុយស្លឹកតើយ រសជាតិផ្អែមស្រទន់ត្រជាក់ចិត្ត។",
+    "descKh": "បង្អែមបបរត្នោតខ្ទិះដូង ប្រើសាច់ត្នោតខ្ចីទន់រលោង ចម្អិនក្នុងទឹកខ្ទិះដូងខាប់ គ្រាប់សាគូ និងស្ករត្នោតសុទ្ធ ក្លិនឈ្ងុយស្លឹកតយ រសជាតិផ្អែមស្រទន់ត្រជាក់ចិត្ត។",
     "descEn": "Delightful tropical dessert of tender young palm fruit slices simmered in rich coconut cream with tapioca pearls and pure palm sugar.",
     "prepTime": "១៥ នាទី",
     "cookTime": "២០ នាទី",
@@ -4510,7 +4510,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
         "amount": "១២០ ក្រាម"
       },
       {
-        "nameKh": "ស្លឹកតើយ និងអំបិលបន្តិច",
+        "nameKh": "ស្លឹកតយ និងអំបិលបន្តិច",
         "nameEn": "Pandan leaves and pinch of salt",
         "amount": "៣ ស្លឹក"
       }
@@ -4523,7 +4523,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដាំទឹកជាមួយស្លឹកតើយ និងគ្រាប់សាគូឱ្យឆ្អិនថ្លា។",
+        "instructionKh": "ដាំទឹកជាមួយស្លឹកតយ និងគ្រាប់សាគូឱ្យឆ្អិនថ្លា។",
         "instructionEn": "Boil water with pandan leaves and tapioca pearls until translucent."
       },
       {
@@ -4726,7 +4726,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "អំបុកស្រូវថ្មីដូងខ្ចី",
     "nameEn": "Flattened New Rice with Fresh Young Coconut",
     "cat": "cake",
-    "catKh": "នំខ្មែរ & អាហារសម្រន់",
+    "catKh": "នំខ្មែរ និង អាហារសម្រន់",
     "catEn": "Traditional Snacks",
     "descKh": "អំបុកស្រូវថ្មីដូងខ្ចី ជានិមិត្តរូបនៃពិធីបុណ្យអកអំបុក អំបុកស្រូវថ្មីលីងបុកឈ្ងុយៗ ច្របល់ជាមួយសាច់ដូងខ្ចីកោស ទឹកដូង និងស្ករត្នោតបន្តិច រសជាតិផ្អែមស្រទន់ឈ្ងុយដូង។",
     "descEn": "Seasonal delicacy of newly harvested flattened green rice tossed with tender shredded young coconut, sweet coconut water, and a sprinkle of palm sugar.",
@@ -4789,7 +4789,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "នំគ្រក់ខ្ទិះដូងក្តៅៗ",
     "nameEn": "Num Krok (Crispy Coconut Rice Pods with Chives)",
     "cat": "cake",
-    "catKh": "នំខ្មែរ & អាហារសម្រន់",
+    "catKh": "នំខ្មែរ និង អាហារសម្រន់",
     "catEn": "Traditional Cakes & Snacks",
     "descKh": "នំគ្រក់ខ្ទិះដូង ជានំខ្មែរដ៏ពេញនិយមបំផុត ម្សៅអង្ករលាយខ្ទិះដូង និងស្លឹកខ្ទឹម ចាក់ក្នុងពុម្ពដែកក្តៅឱ្យបាតនំស្រួយស្រោក ផ្ទៃខាងក្នុងទន់រលោងឈ្ងុយដូង ជ្រលក់ទឹកត្រីផ្អែម។",
     "descEn": "Beloved Cambodian crispy coconut-rice spherical pancakes cooked in cast-iron pans, with a crisp outer shell, creamy coconut center, and chopped chives.",
@@ -4852,7 +4852,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "nameKh": "ចេកចៀនម្សៅស្រួយស្ករត្នោត",
     "nameEn": "Crispy Deep-Fried Bananas with Palm Glaze",
     "cat": "cake",
-    "catKh": "នំខ្មែរ & អាហារសម្រន់",
+    "catKh": "នំខ្មែរ និង អាហារសម្រន់",
     "catEn": "Traditional Cakes & Snacks",
     "descKh": "ចេកចៀនម្សៅស្រួយស្ករត្នោត ចេកណាំវ៉ាទុំសំប៉ែត ជ្រលក់ក្នុងម្សៅស្រួយរោយគ្រាប់ល្ងស បំពងក្នុងប្រេងក្តៅឡើងពណ៌មាសស្រួយស្រោក សាច់ចេកខាងក្នុងទន់ផ្អែមឆ្ងាញ់។",
     "descEn": "Favorite Cambodian street snack of sweet baby bananas pressed flat, coated in a crispy sesame rice batter, and fried golden brown.",

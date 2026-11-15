@@ -36,6 +36,8 @@ import {
   getProvinceOptionById,
   getMatchingRestaurantsForProvinceDish,
   getDishSpecificWhereToFind,
+  resolveCanonicalFoodCategorySlug,
+  matchesPresetCravingChip,
 } from '../utils/foodFilters';
 import { calculateDistanceKm } from '../services/dailyDiscoveryAndNotificationService';
 import { tr } from '../utils/i18n';
@@ -217,12 +219,17 @@ export const DailyDiscoveriesModal: React.FC = () => {
           }
         }
 
-        if (enforceProvAndTaste && vipTasteProfile !== 'all') {
-          const cat = food.categorySlug;
+        if (vipTasteProfile !== 'all') {
+          const cat = resolveCanonicalFoodCategorySlug(food);
           if (vipTasteProfile === 'soup_kroeung' && cat !== 'soup' && cat !== 'salad') {
             return false;
           }
-          if (vipTasteProfile === 'grill_seafood' && cat !== 'grilled' && cat !== 'stirfry' && cat !== 'specialty') {
+          if (
+            vipTasteProfile === 'grill_seafood' &&
+            cat !== 'grilled' &&
+            cat !== 'stirfry' &&
+            !matchesPresetCravingChip(food, 'seafood')
+          ) {
             return false;
           }
           if (
@@ -230,8 +237,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
             cat !== 'dessert' &&
             cat !== 'streetfood' &&
             cat !== 'noodles' &&
-            cat !== 'cake' &&
-            cat !== 'drink'
+            cat !== 'drink' &&
+            !matchesPresetCravingChip(food, 'streetfood')
           ) {
             return false;
           }
@@ -244,7 +251,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
       // Fallback: if user typed a search query while inside a specific province/taste filter that has 0 matches,
       // automatically return matching dishes across all provinces so search never shows a false 0-result screen.
       if (q && list.length === 0 && basePool.length > 0) {
-        list = basePool;
+        list = basePool.filter((food) => matchesFilters(food, false));
       }
 
       // If "All Provinces" is selected and no search query, order so we showcase top signature dishes across all 25 provinces evenly

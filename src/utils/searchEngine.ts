@@ -262,26 +262,62 @@ export function getCulinarySynonyms(term: string): string[] {
 
 /** Category / business-type words → soft hints (never sufficient on their own when a name is typed). */
 const CATEGORY_SYNONYM_GROUPS: string[][] = [
-  ['hotel', 'hotels', 'lodging', 'accommodation', 'សណ្ឋាគារ', '酒店', '宾馆', '饭店'],
+  // 0: hotel
+  ['hotel', 'hotels', 'lodging', 'accommodation', 'motel', 'សណ្ឋាគារ', 'ផ្ទះសំណាក់និងសណ្ឋាគារ', '酒店', '宾馆', '饭店'],
+  // 1: resort
   ['resort', 'resorts', 'resort_hotel', 'រីសត', 'រមណីយដ្ឋាន', '度假村'],
+  // 2: guesthouse
   ['guesthouse', 'guesthouses', 'guest', 'hostel', 'hostels', 'inn', 'lodge', 'homestay', 'bungalow', 'bungalows', 'ផ្ទះសំណាក់', 'បឹងហ្គាឡូ', '客栈', '民宿', '旅馆'],
+  // 3: villa
   ['villa', 'villas', 'boutique', 'suites', 'suite', 'residence', 'apartment', 'apartments', 'វីឡា', '别墅'],
-  ['restaurant', 'restaurants', 'eatery', 'dining', 'bistro', 'kitchen', 'food', 'ភោជនីយដ្ឋាន', 'អាហារដ្ឋាន', 'ហាងអាហារ', 'ហាងបាយ', 'ផ្ទះបាយ', '餐厅', '餐馆', '美食'],
-  ['cafe', 'cafes', 'coffee', 'coffeeshop', 'coffee_shop', 'kafe', 'កាហ្វេ', 'ហាងកាហ្វេ', '咖啡', '咖啡馆', '咖啡厅', '咖啡店'],
-  ['bakery', 'bakeries', 'cake', 'bread', 'នំប៉័ង', 'ហាងនំ', '面包', '蛋糕'],
-  ['bar', 'pub', 'lounge', 'club', 'បារ', '酒吧'],
-  ['spa', 'massage', 'ម៉ាស្សា', '按摩'],
-  ['market', 'mall', 'plaza', 'center', 'centre', 'ផ្សារ', 'ផ្សារទំនើប', '市场', '商场'],
-  ['temple', 'pagoda', 'wat', 'ប្រាសាទ', 'វត្ត', '寺庙', '寺'],
-  ['waterfall', 'ទឹកធ្លាក់', '瀑布'],
-  ['beach', 'island', 'koh', 'ឆ្នេរ', 'កោះ', '海滩', '岛'],
-  ['museum', 'សារមន្ទីរ', '博物馆'],
-  ['park', 'garden', 'ឧទ្យាន', 'សួន', '公园'],
-  ['seafood', 'crab', 'shrimp', 'prawn', 'គ្រឿងសមុទ្រ', 'ក្តាម', 'បង្គា', '海鲜', '螃蟹'],
-  ['bbq', 'grill', 'grilled', 'buffet', 'hotpot', 'សាច់អាំង', 'ប៊ូហ្វេ', 'ស៊ុប', '烧烤', '火锅', '自助餐'],
-  ['boba', 'bubble', 'matcha', 'milktea', 'តែគុជ', 'ម៉ាត់ឆា', 'មិចឆា', 'តែទឹកដោះគោ', '奶茶', '珍珠奶茶', '抹茶'],
-  ['shop', 'store', 'ហាង', '商店'],
+  // 4: restaurant / general dining & Khmer cuisine
+  ['restaurant', 'restaurants', 'eatery', 'dining', 'bistro', 'kitchen', 'food', 'foods', 'canteen', 'diner', 'lunch', 'dinner', 'supper', 'meal', 'meals', 'khmer', 'cambodian', 'ភោជនីយដ្ឋាន', 'អាហារដ្ឋាន', 'ហាងអាហារ', 'ហាងបាយ', 'ផ្ទះបាយ', 'អាហារខ្មែរ', 'ម្ហូបខ្មែរ', 'ហាងម្ហូបខ្មែរ', 'ភោជនីយដ្ឋានខ្មែរ', 'អាហារថ្ងៃត្រង់', 'អាហារពេលល្ងាច', 'អាហារយប់', 'អាហារ', 'ម្ហូប', 'មុខម្ហូប', '餐厅', '餐馆', '美食', '饭馆', '午餐', '晚餐', '高棉菜', '柬埔寨菜'],
+  // 5: cafe / coffee
+  ['cafe', 'cafes', 'coffee', 'coffeeshop', 'coffee_shop', 'kafe', 'espresso', 'latte', 'cappuccino', 'roastery', 'កាហ្វេ', 'ហាងកាហ្វេ', 'កាហ្វេដូង', '咖啡', '咖啡馆', '咖啡厅', '咖啡店'],
+  // 6: bakery / dessert / ice cream
+  ['bakery', 'bakeries', 'cake', 'cakes', 'bread', 'pastry', 'pastries', 'croissant', 'dessert', 'desserts', 'sweet', 'sweets', 'icecream', 'gelato', 'នំប៉័ង', 'ហាងនំ', 'ហាងនំប៉័ង', 'បង្អែម', 'បង្អែមខ្មែរ', 'ហាងបង្អែម', 'ការ៉េម', 'នំខេក', 'នំដុត', '面包', '面包店', '蛋糕', '甜品', '甜点', '冰淇淋'],
+  // 7: bar / pub / nightlife
+  ['bar', 'bars', 'pub', 'pubs', 'lounge', 'club', 'nightclub', 'skybar', 'rooftop', 'cocktail', 'beer', 'បារ', 'ក្លឹប', 'ស្កាយបារ', '酒吧', '夜店'],
+  // 8: spa / massage
+  ['spa', 'massage', 'wellness', 'sauna', 'ម៉ាស្សា', 'ស្ប៉ា', '按摩', '水疗'],
+  // 9: market / mall
+  ['market', 'markets', 'mall', 'malls', 'plaza', 'center', 'centre', 'supermarket', 'mart', 'nightmarket', 'ផ្សារ', 'ផ្សារទំនើប', 'ផ្សាររាត្រី', 'ម៉ាត', '市场', '商场', '夜市', '超市'],
+  // 10: temple / pagoda / heritage
+  ['temple', 'temples', 'pagoda', 'pagodas', 'wat', 'shrine', 'monument', 'sanctuary', 'ប្រាសាទ', 'វត្ត', 'វត្តអារាម', 'ព្រះវិហារ', '寺庙', '寺', '古迹'],
+  // 11: waterfall / nature / mountain
+  ['waterfall', 'waterfalls', 'cascade', 'mountain', 'mountains', 'hill', 'hills', 'forest', 'eco', 'ecotourism', 'camping', 'ទឹកធ្លាក់', 'ទឹកជ្រោះ', 'ភ្នំ', 'ព្រៃ', 'អេកូទេសចរណ៍', 'បោះតង់', '瀑布', '山', '森林', '生态旅游'],
+  // 12: beach / island / river
+  ['beach', 'beaches', 'island', 'islands', 'koh', 'coast', 'seaside', 'lake', 'river', 'ឆ្នេរ', 'ឆ្នេរសមុទ្រ', 'កោះ', 'សមុទ្រ', 'បឹង', 'ទន្លេ', 'ព្រែក', '海滩', '岛', '海岛', '湖', '河'],
+  // 13: museum / culture
+  ['museum', 'museums', 'gallery', 'palace', 'សារមន្ទីរ', 'ព្រះបរមរាជវាំង', 'វប្បធម៌', '博物馆', '皇宫'],
+  // 14: park / garden
+  ['park', 'parks', 'garden', 'gardens', 'zoo', 'ឧទ្យាន', 'សួន', 'សួនច្បារ', 'សួនសត្វ', '公园', '花园', '动物园'],
+  // 15: seafood
+  ['seafood', 'seafoods', 'crab', 'shrimp', 'prawn', 'prawns', 'lobster', 'oyster', 'squid', 'octopus', 'shellfish', 'គ្រឿងសមុទ្រ', 'ហាងគ្រឿងសមុទ្រ', 'ក្តាម', 'បង្គា', 'មឹក', 'ងៀត', 'អយស្ទ័រ', 'បង្កង', '海鲜', '螃蟹', '虾'],
+  // 16: bbq / grill / hotpot / buffet
+  ['bbq', 'barbecue', 'grill', 'grilled', 'buffet', 'hotpot', 'shabu', 'sukiyaki', 'mookata', 'yakiniku', 'សាច់អាំង', 'ហាងសាច់អាំង', 'ប៊ូហ្វេ', 'ស៊ុប', 'ហាងស៊ុប', 'ស៊ុបគោ', 'ស៊ុបម្រះ', 'ស៊ុបក្តាម', 'ស៊ុបត្រី', 'ស៊ុបពពែ', 'ស៊ុបមាន់', 'ភ្នំភ្លើង', '烧烤', '烤肉', '火锅', '自助餐'],
+  // 17: boba / tea / juice / drinks
+  ['boba', 'bubble', 'matcha', 'milktea', 'tea', 'teashop', 'juice', 'smoothie', 'drink', 'drinks', 'beverage', 'តែគុជ', 'ម៉ាត់ឆា', 'មិចឆា', 'តែទឹកដោះគោ', 'តែក្រូចឆ្មារ', 'ទឹកផ្លែឈើ', 'ទឹកអំពៅ', 'ភេសជ្ជៈ', '奶茶', '珍珠奶茶', '抹茶', '茶饮', '果汁'],
+  // 18: shop / store
+  ['shop', 'shops', 'store', 'stores', 'ហាង', '商店', '店铺'],
+  // 19: general tourism / attraction
+  ['tourist', 'tourism', 'attraction', 'attractions', 'sightseeing', 'landmark', 'viewpoint', 'destination', 'តំបន់ទេសចរណ៍', 'ទេសចរណ៍', 'កន្លែងដើរលេង', 'កន្លែងកម្សាន្ត', 'ទេសភាព', '景点', '旅游', '旅游景点', '观景台'],
+  // 20: noodles / porridge / breakfast
+  ['noodle', 'noodles', 'kuyteav', 'koayteow', 'hu_tieu', 'hutieu', 'pho', 'ramen', 'udon', 'vermicelli', 'spaghetti', 'pasta', 'porridge', 'congee', 'breakfast', 'brunch', 'គុយទាវ', 'ហាងគុយទាវ', 'ហាងលក់គុយទាវ', 'គុយទាវទូក', 'គុយទាវភ្នំពេញ', 'គុយទាវឆា', 'គុយទាវខគោ', 'គុយទាវកាត់', 'គុយទាវសាច់គោ', 'គុយទាវគ្រឿងសមុទ្រ', 'មី', 'ហាងមី', 'មីឆា', 'មីគោក', 'មីស៊ុប', 'មីទូក', 'មីហឹរ', 'មីហិរ', 'មីកូឡា', 'មីសួរ', 'មីសួ', 'មីទា', 'មីកាតាំង', 'មីទាញ', 'មីកញ្ចប់', 'បុកមី', 'នំបញ្ចុក', 'សម្លខ្មែរ', 'លតឆា', 'បាញ់កាញ់', 'បាញ់ស៊ុង', 'ហ្វឺ', 'បបរ', 'បបរស', 'បបរគ្រឿង', 'បបរមាន់', 'បបរត្រី', 'បបរទា', 'អាហារព្រឹក', 'បាយព្រឹក', 'ហាងអាហារព្រឹក', '粿条', '金边粿条', '面', '面条', '面馆', '米粉', '米线', '河粉', '汤粉', '汤面', '炒面', '船面', '辣面', '拉面', '粥', '早餐', '早点'],
+  // 21: vegetarian / vegan / healthy
+  ['vegetarian', 'vegetarians', 'vegeterian', 'vegan', 'veggie', 'plantbased', 'healthy', 'health', 'tofu', 'chay', 'organic', 'salad', 'ម្ហូបបួស', 'អាហារបួស', 'ហាងបួស', 'ហាងម្ហូបបួស', 'ហាងអាហារបួស', 'ភោជនីយដ្ឋានបួស', 'ភោជនីយដ្ឋានម្ហូបបួស', 'ភោជនីយដ្ឋានអ្នកតមសាច់', 'អ្នកតមសាច់', 'តមសាច់', 'បួស', 'អាហារសុខភាព', 'ម្ហូបសុខភាព', 'សុខភាព', 'បាយបួស', 'មីបួស', 'គុយទាវបួស', 'តៅហ៊ូ', 'បន្លែ', 'សាឡាត់', '素食', '素菜', '斋', '斋菜', '蔬食', '素食馆', '素食餐厅', '健康餐', '豆腐', '沙拉'],
+  // 22: rice / Khmer dishes / curries / meats
+  ['rice', 'pork', 'beef', 'chicken', 'duck', 'fish', 'amok', 'loklak', 'curry', 'soup', 'stew', 'បាយ', 'បាយសាច់ជ្រូក', 'បាយមាន់', 'បាយទាខ្វៃ', 'ទាខ្វៃ', 'បាយឆា', 'បាយថ្ងៃត្រង់', 'អាម៉ុក', 'ឡុកឡាក់', 'សម្ល', 'សម្លកកូរ', 'កកូរ', 'សម្លម្ជូរ', 'ម្ជូរ', 'សម្លការី', 'ការី', 'សម្លប្រហើរ', 'ប្រហើរ', 'ង៉ាំង៉ូវ', 'ប្រហុក', 'ប្រហុកខ្ទិះ', 'ទឹកគ្រឿង', 'បុកល្ហុង', 'ភ្លា', 'ញាំ', 'ឆាក្តៅ', 'ខគោ', 'ផាក់ឡូវ', 'បាញ់ឆែវ', 'នំគ្រក់', 'សាច់គោ', 'សាច់ជ្រូក', 'សាច់មាន់', 'សាច់ទា', 'ត្រី', 'ត្រីដុត', 'មាន់ដុត', 'ស្ងោរ', '米饭', '猪肉饭', '鸡饭', '海南鸡饭', '烧鸭', '炒饭', '阿莫克', '禄叻', '咖喱', '酸汤'],
+  // 23: fastfood / pizza / burger / sushi / dimsum / steak
+  ['pizza', 'pizzeria', 'burger', 'burgers', 'hamburger', 'sushi', 'sashimi', 'steak', 'steakhouse', 'dimsum', 'dumpling', 'dumplings', 'fastfood', 'friedchicken', 'ភីហ្សា', 'ប៊ឺហ្គឺ', 'ស៊ូស៊ី', 'ស្តេក', 'ឌីមសាំ', 'ហាកាវ', 'សៀវម៉ៃ', 'នំប៉ាវ', 'អាហាររហ័ស', 'មាន់បំពង', '披萨', '汉堡', '寿司', '牛排', '点心', '早茶', '快餐', '炸鸡', '包子', '饺子'],
+  // 24: street food / snacks
+  ['streetfood', 'snack', 'snacks', 'បាញ់ហយ', 'អាហារតាមផ្លូវ', 'ម្ហូបតាមផ្លូវ', 'អាហារសម្រន់', 'នំប៉័ងប៉ាតេ', 'ប្រហិត', 'សាច់ចង្កាក់', 'ពងទាកូន', 'លៀសហាល', '街头美食', '小吃', '夜宵'],
+  // 25: halal / muslim
+  ['halal', 'muslim', 'ហាឡាល់', 'អាហារហាឡាល់', 'ម្ហូបហាឡាល់', 'ឥស្លាម', '清真'],
 ];
+
+/** Broad container category groups (restaurant/meal, shop/store, general tourism). */
+const CONTAINER_CATEGORY_GROUPS = new Set<number>([4, 18, 19]);
 
 const CATEGORY_WORD_TO_GROUP = new Map<string, number>();
 CATEGORY_SYNONYM_GROUPS.forEach((g, i) => g.forEach((w) => CATEGORY_WORD_TO_GROUP.set(normalizeSearchText(w), i)));
@@ -414,13 +450,28 @@ export function analyzeSearchQuery(rawQuery: string): AnalyzedSearchQuery {
     if (SEARCH_STOPWORDS.has(tok)) continue;
 
     if (isNonLatinScript(tok)) {
+      // Direct exact category word match (e.g. "មី", "បាយ", "គុយទាវ", "បួស")
+      const directGroup = CATEGORY_WORD_TO_GROUP.get(tok);
+      if (directGroup !== undefined) {
+        categoryGroups.add(directGroup);
+        categoryWords.push(tok);
+        continue;
+      }
       // Khmer / Chinese are written without spaces — peel off conversational fillers, admin, category and edge stop words.
       for (const f of NON_LATIN_CONVERSATIONAL_FILLERS) {
         if (tok.includes(f)) tok = tok.split(f).join(' ');
       }
       for (const w of KHMER_ADMIN_WORDS) tok = tok.split(w).join(' ');
       for (const w of NON_LATIN_GENERIC_WORDS) {
-        if (tok.includes(w)) {
+        if (!tok.includes(w)) continue;
+        // Avoid peeling ultra-short 1-2 char Khmer roots ("មី", "តែ") from inside longer words ("ថ្មី", "បាយ័ន")
+        const canPeelSubstring =
+          tok === w ||
+          ((w.length >= 3 || (CJK_RX.test(w) && w.length >= 2)) &&
+            khmerSafeIncludes(tok, w) &&
+            !(w === 'បាយ' && tok.includes('បាយ័ន')) &&
+            !(w === 'កោះ' && tok.includes('កោះកុង')));
+        if (canPeelSubstring) {
           const g = CATEGORY_WORD_TO_GROUP.get(w);
           if (g !== undefined) categoryGroups.add(g);
           categoryWords.push(w);
@@ -429,7 +480,14 @@ export function analyzeSearchQuery(rawQuery: string): AnalyzedSearchQuery {
       }
       for (let piece of tok.split(/\s+/)) {
         piece = piece.replace(/^(?:នៅ|ក្នុង|ជិត|និង|ដ៏|របស់|的|在)+|(?:នៅ|ក្នុង|ជិត|និង|ដ៏|របស់|ហើយ|ទេ|ដែរ|មែនទេ|的|吗|呢)+$/g, '').trim();
-        if ((piece.length >= 2 || CJK_RX.test(piece)) && !SEARCH_STOPWORDS.has(piece)) distinctive.push(piece);
+        if (!piece || SEARCH_STOPWORDS.has(piece)) continue;
+        const pieceGroup = CATEGORY_WORD_TO_GROUP.get(piece);
+        if (pieceGroup !== undefined) {
+          categoryGroups.add(pieceGroup);
+          categoryWords.push(piece);
+          continue;
+        }
+        if (piece.length >= 2 || CJK_RX.test(piece)) distinctive.push(piece);
       }
       continue;
     }
@@ -730,25 +788,53 @@ export function scoreSearchRecord(q: AnalyzedSearchQuery, fields: SearchableFiel
     }
   }
 
-  // --- Category hints ----------------------------------------------------------
+  // --- Category hints & specialty dish/cuisine matching ------------------------
   let categoryScore = 0;
   let categoryMatched = false;
   if (q.categoryGroups.length > 0) {
-    for (const g of q.categoryGroups) {
-      const words = CATEGORY_SYNONYM_GROUPS[g].map((w) => normalizeSearchText(w));
-      const hit = words.some(
-        (w) => matchTokenInField(w, catField, false) >= 0.85 || nameFields.some((nf) => matchTokenInField(w, nf, false) >= 0.85)
-      );
-      if (hit) {
-        categoryMatched = true;
-        categoryScore += 40;
+    const specificGroups = q.categoryGroups.filter((g) => !CONTAINER_CATEGORY_GROUPS.has(g));
+    const requiredGroups = specificGroups.length > 0 ? specificGroups : q.categoryGroups;
+    let requiredCategoryMatched = false;
+
+    // Direct match of user-typed category/specialty words in place name (e.g. "គុយទាវ" or "Noodle" in shop name)
+    for (const cw of q.categoryWords) {
+      const cwGroup = CATEGORY_WORD_TO_GROUP.get(cw);
+      if (specificGroups.length > 0 && cwGroup !== undefined && CONTAINER_CATEGORY_GROUPS.has(cwGroup)) continue;
+      if (nameFields.some((nf) => matchTokenInField(cw, nf, false) >= 0.85)) {
+        matchedInName = true;
+        categoryScore += 280;
+        break;
       }
     }
+
+    for (const g of q.categoryGroups) {
+      const isContainerWithSpecific = specificGroups.length > 0 && CONTAINER_CATEGORY_GROUPS.has(g);
+      const words = CATEGORY_SYNONYM_GROUPS[g].map((w) => normalizeSearchText(w));
+      const hitInName = words.some((w) => nameFields.some((nf) => matchTokenInField(w, nf, false) >= 0.85));
+      const hitInCat = words.some((w) => matchTokenInField(w, catField, false) >= 0.85);
+      const hitInText = words.some((w) => matchTokenInField(w, textField, false) >= 0.85);
+
+      if (hitInName || hitInCat || hitInText) {
+        if (hitInName) {
+          if (!isContainerWithSpecific) matchedInName = true;
+          categoryScore += isContainerWithSpecific ? 35 : 180;
+        } else if (hitInCat) {
+          categoryScore += isContainerWithSpecific ? 25 : 110;
+        } else {
+          categoryScore += isContainerWithSpecific ? 15 : 75;
+        }
+        if (requiredGroups.includes(g)) {
+          requiredCategoryMatched = true;
+        }
+      }
+    }
+    categoryMatched = requiredCategoryMatched;
   }
 
   let score: number;
-  if (q.distinctive.length > 0 || phraseScore > 0) {
-    score = Math.max(phraseScore, tokenScore) + categoryScore + provinceBonus;
+  if (q.distinctive.length > 0) {
+    const brandCatBonus = Math.min(120, Math.round(categoryScore * 0.25));
+    score = Math.max(phraseScore, tokenScore) + brandCatBonus + provinceBonus;
     if (provinceMismatch) {
       // The user named a province (e.g. "… Kampot") but this record is located elsewhere → unrelated,
       // unless the full name itself was typed.
@@ -756,11 +842,14 @@ export function scoreSearchRecord(q: AnalyzedSearchQuery, fields: SearchableFiel
       score -= 100;
     }
   } else if (q.categoryGroups.length > 0) {
-    // Category query ("hotel kampot", "cafe") → category must match
+    // Pure category / cuisine / dish query ("គុយទាវ Noodles Breakfast", "ម្ហូបបួស", "hotel kampot", "cafe")
     if (!categoryMatched) return none;
     if (provinceMismatch) return none;
     if (q.provinces.length > 0 && provinceBonus === 0) return none;
-    score = 300 + categoryScore + provinceBonus;
+    score = Math.max(phraseScore, 300 + categoryScore) + provinceBonus;
+  } else if (phraseScore > 0) {
+    score = phraseScore + provinceBonus;
+    if (provinceMismatch && phraseScore < 900) return { ...none, provinceMismatch: true };
   } else if (q.provinces.length > 0) {
     // Location-only query ("Kampot", "កំពត")
     if (provinceBonus === 0) return none;
@@ -781,16 +870,100 @@ export function matchesSearchQuery(query: string | AnalyzedSearchQuery, fields: 
   return scoreSearchRecord(q, fields).score >= minScore;
 }
 
-export interface RankOptions<T> {
-  minScore?: number;
-  /** Tie-breaker for equal relevance buckets (e.g. distance, rating). Return negative if a should come first. */
-  tieBreak?: (a: T, b: T) => number;
-  /** Relevance bucket size; results inside the same bucket are ordered by `tieBreak`. Default 1 (pure score). */
-  bucketSize?: number;
-  limit?: number;
+function isCambodiaCoordValid(lat?: number, lng?: number): boolean {
+  return (
+    typeof lat === 'number' &&
+    typeof lng === 'number' &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= 9.5 &&
+    lat <= 15.0 &&
+    lng >= 102.0 &&
+    lng <= 108.0
+  );
 }
 
-/** Filter + rank records by relevance. Deterministic and duplicate-safe for the same input order. */
+function readCachedSearchUserGps(): { lat: number; lng: number } | null {
+  try {
+    if (typeof localStorage === 'undefined') return null;
+    const raw = localStorage.getItem('kft_last_known_user_gps_v1');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const lat = Number(parsed?.lat);
+    const lng = Number(parsed?.lng);
+    if (isCambodiaCoordValid(lat, lng)) return { lat, lng };
+  } catch {
+    // ignore storage errors
+  }
+  return null;
+}
+
+function haversineMetersBetween(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  if (!isCambodiaCoordValid(lat1, lon1) || !isCambodiaCoordValid(lat2, lon2)) return Infinity;
+  const R = 6371000;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c);
+}
+
+export function computeSearchEntityDistanceMeters(
+  entity: any,
+  userCoords?: { lat?: number | null; lng?: number | null } | null
+): number {
+  if (!entity || typeof entity !== 'object') return Infinity;
+  const activeGps =
+    userCoords &&
+    typeof userCoords.lat === 'number' &&
+    typeof userCoords.lng === 'number' &&
+    isCambodiaCoordValid(userCoords.lat, userCoords.lng)
+      ? { lat: userCoords.lat, lng: userCoords.lng }
+      : readCachedSearchUserGps();
+
+  const candidate = entity.item && typeof entity.item === 'object' ? entity.item : entity;
+  const entLat = Number(candidate.latitude ?? candidate.lat ?? candidate.location?.lat);
+  const entLng = Number(candidate.longitude ?? candidate.lng ?? candidate.location?.lng);
+  if (activeGps && isCambodiaCoordValid(entLat, entLng)) {
+    return haversineMetersBetween(activeGps.lat, activeGps.lng, entLat, entLng);
+  }
+  const preMeters = Number(entity.distanceMeters ?? entity.distMeters ?? candidate.distanceMeters);
+  if (Number.isFinite(preMeters) && preMeters >= 0 && preMeters < 9999990) {
+    return Math.round(preMeters);
+  }
+  const preKm = Number(entity.distanceKm ?? candidate.distanceKm);
+  if (Number.isFinite(preKm) && preKm >= 0 && preKm < 9999) {
+    return Math.round(preKm * 1000);
+  }
+  return Infinity;
+}
+
+export interface RankOptions<T> {
+  minScore?: number;
+  /** Tie-breaker / fallback comparator when GPS is unavailable or distances are equal. Return negative if a should come first. */
+  tieBreak?: (a: T, b: T) => number;
+  /** Relevance bucket size for fallback ordering when GPS is unavailable. Default 1 (pure score). */
+  bucketSize?: number;
+  limit?: number;
+  /** Optional explicit user GPS coordinates for distance-first sorting. Falls back to kft_last_known_user_gps_v1. */
+  userCoords?: { lat?: number | null; lng?: number | null } | null;
+  /** Optional distance resolver in meters for each item. */
+  getDistanceMeters?: (item: T) => number;
+  /** Whether to sort matching results by GPS distance ascending first (default: true). */
+  sortByDistanceFirst?: boolean;
+}
+
+/**
+ * Filter + rank records:
+ * 1. Filters all relevant records matching the query (score >= minScore) so relevant results are preserved.
+ * 2. Sorts matching records by actual GPS distance in ascending order (closest to farthest) whenever GPS distance is available.
+ * 3. Falls back to relevance bucket -> caller tieBreak -> exact score -> original index when GPS is unavailable or distances are equal.
+ */
 export function rankBySearchRelevance<T>(
   items: T[],
   query: string | AnalyzedSearchQuery,
@@ -798,15 +971,51 @@ export function rankBySearchRelevance<T>(
   opts: RankOptions<T> = {}
 ): T[] {
   const q = typeof query === 'string' ? analyzeSearchQuery(query) : query;
-  if (q.isEmpty) return opts.limit ? items.slice(0, opts.limit) : items.slice();
+  const sortByDistance = opts.sortByDistanceFirst !== false;
+  if (q.isEmpty) {
+    const base = items.slice();
+    if (sortByDistance) {
+      base.sort((a, b) => {
+        const dA = opts.getDistanceMeters
+          ? opts.getDistanceMeters(a)
+          : computeSearchEntityDistanceMeters(a, opts.userCoords);
+        const dB = opts.getDistanceMeters
+          ? opts.getDistanceMeters(b)
+          : computeSearchEntityDistanceMeters(b, opts.userCoords);
+        const finA = Number.isFinite(dA) && dA >= 0 && dA < 9999990;
+        const finB = Number.isFinite(dB) && dB >= 0 && dB < 9999990;
+        if (finA && !finB) return -1;
+        if (!finA && finB) return 1;
+        if (finA && finB && dA !== dB) return dA - dB;
+        return opts.tieBreak ? opts.tieBreak(a, b) : 0;
+      });
+    }
+    return opts.limit ? base.slice(0, opts.limit) : base;
+  }
   const minScore = opts.minScore ?? DEFAULT_MIN_SEARCH_SCORE;
   const bucket = Math.max(1, opts.bucketSize ?? 1);
-  const scored: Array<{ item: T; score: number; idx: number }> = [];
+  const scored: Array<{ item: T; score: number; distMeters: number; idx: number }> = [];
   items.forEach((item, idx) => {
     const { score } = scoreSearchRecord(q, getFields(item));
-    if (score >= minScore) scored.push({ item, score, idx });
+    if (score >= minScore) {
+      const rawDist = opts.getDistanceMeters
+        ? opts.getDistanceMeters(item)
+        : computeSearchEntityDistanceMeters(item, opts.userCoords);
+      const distMeters =
+        Number.isFinite(rawDist) && rawDist >= 0 && rawDist < 9999990 ? Math.round(rawDist) : Infinity;
+      scored.push({ item, score, distMeters, idx });
+    }
   });
   scored.sort((a, b) => {
+    if (sortByDistance) {
+      const finA = Number.isFinite(a.distMeters);
+      const finB = Number.isFinite(b.distMeters);
+      if (finA && !finB) return -1;
+      if (!finA && finB) return 1;
+      if (finA && finB && a.distMeters !== b.distMeters) {
+        return a.distMeters - b.distMeters;
+      }
+    }
     const ba = Math.floor(a.score / bucket);
     const bb = Math.floor(b.score / bucket);
     if (bb !== ba) return bb - ba;

@@ -31,6 +31,7 @@ import {
   detectUserGpsCoordinate,
   readCachedUserGps,
   calculateDistanceKm,
+  sortResultsByGpsDistance,
 } from '../utils/nearMeEngine';
 import {
   GooglePlaceCachedItem,
@@ -277,8 +278,8 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         query: activeQuery,
         category: activeCat,
         categoryFilter: activeCat,
-        province: activeScope === 'nationwide' ? 'ទាំងអស់' : activeProv,
-        provinceFilter: activeScope === 'nationwide' ? 'ទាំងអស់' : activeProv,
+        province: activeScope === 'nationwide' || activeScope === 'nearby' ? 'ទាំងអស់' : activeProv,
+        provinceFilter: activeScope === 'nationwide' || activeScope === 'nearby' ? 'ទាំងអស់' : activeProv,
         searchScope: activeScope,
         location: activeLoc
           ? {
@@ -406,11 +407,15 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     return map;
   }, [results, restaurants, destinations]);
 
-  const totalPages = Math.max(1, Math.ceil(results.length / ITEMS_PER_PAGE));
+  const sortedResults = useMemo(
+    () => sortResultsByGpsDistance(results, gpsLocation),
+    [results, gpsLocation]
+  );
+  const totalPages = Math.max(1, Math.ceil(sortedResults.length / ITEMS_PER_PAGE));
   const paginatedResults = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return results.slice(start, start + ITEMS_PER_PAGE);
-  }, [results, currentPage]);
+    return sortedResults.slice(start, start + ITEMS_PER_PAGE);
+  }, [sortedResults, currentPage]);
 
   const toggleSelectPlace = (placeId: string) => {
     if (!isAdmin) return;
@@ -762,10 +767,12 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                 {[
                   { q: 'អាហារខ្មែរ Khmer Restaurant', kh: '🍲 អាហារខ្មែរ', en: '🍲 Khmer Food', zh: '🍲 柬式餐厅', cat: 'restaurant' as const },
                   { q: 'ម្ហូបបួស Vegetarian Restaurant', kh: '🥗 ម្ហូបបួស/សុខភាព', en: '🥗 Vegetarian & Healthy', zh: '🥗 素食/健康餐', cat: 'restaurant' as const },
-                  { q: 'គុយទាវ Noodles Breakfast', kh: '🍜 គុយទាវ/អាហារព្រឹក', en: '🍜 Noodles', zh: '🍜 粿条/早餐', cat: 'restaurant' as const },
+                  { q: 'គុយទាវ Noodles Breakfast', kh: '🍜 គុយទាវ/អាហារព្រឹក', en: '🍜 Noodles & Breakfast', zh: '🍜 粿条/早餐', cat: 'restaurant' as const },
                   { q: 'Coffee Cafe ហាងកាហ្វេ', kh: '☕ ហាងកាហ្វេ', en: '☕ Coffee & Café', zh: '☕ 咖啡馆', cat: 'restaurant' as const },
                   { q: 'Seafood BBQ គ្រឿងសមុទ្រ សាច់អាំង', kh: '🦐 គ្រឿងសមុទ្រ/សាច់អាំង', en: '🦐 Seafood & BBQ', zh: '🦐 海鲜与烧烤', cat: 'restaurant' as const },
+                  { q: 'Bakery Dessert នំប៉័ង បង្អែម', kh: '🥐 នំប៉័ង/បង្អែម', en: '🥐 Bakery & Dessert', zh: '🥐 面包甜品', cat: 'restaurant' as const },
                   { q: 'Tourist Attraction រមណីយដ្ឋាន', kh: '🏞️ រមណីយដ្ឋាន', en: '🏞️ Attractions', zh: '🏞️ 热门景点', cat: 'tourism' as const },
+                  { q: 'Hotel Resort សណ្ឋាគារ ផ្ទះសំណាក់', kh: '🏨 សណ្ឋាគារ/ផ្ទះសំណាក់', en: '🏨 Hotels & Resorts', zh: '🏨 酒店/度假村', cat: 'tourism' as const },
                 ].map((preset) => (
                   <button
                     key={preset.q}

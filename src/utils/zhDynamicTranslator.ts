@@ -105,9 +105,21 @@ export function formatDifficultyByLang(difficulty: 'easy' | 'medium' | 'hard' | 
  */
 export function formatAmountByLang(raw: string | undefined, lang: Language): string {
   if (!raw) return '';
-  if (lang === 'km') return raw;
+  const cleanedRaw = raw
+    .trim()
+    .replace(/\s*\/\s*[A-Za-z0-9\s]+$/g, '')
+    .replace(/\s*\([A-Za-z0-9\s]+\)$/g, '')
+    .trim();
 
-  let s = khmerToArabicNumerals(raw.trim());
+  if (lang === 'km') {
+    const map: Record<string, string> = {
+      '0': '០', '1': '១', '2': '២', '3': '៣', '4': '៤',
+      '5': '៥', '6': '៦', '7': '៧', '8': '៨', '9': '៩',
+    };
+    return (cleanedRaw || raw.trim()).replace(/[0-9]/g, (ch) => map[ch] || ch);
+  }
+
+  let s = khmerToArabicNumerals(cleanedRaw || raw.trim());
 
   const unitRules: Array<[RegExp, string, string]> = [
     [/តាមចំណូលចិត្ត/g, 'To taste', '适量'],
@@ -131,12 +143,14 @@ export function formatAmountByLang(raw: string | undefined, lang: Language): str
     [/លីត្រ/g, 'L', '升'],
     [/ស្លាបព្រាបាយ/g, 'tbsp', '汤匙'],
     [/ស្លាបព្រាកាហ្វេ/g, 'tsp', '茶匙'],
+    [/ចានគោម/g, 'large bowl', '大碗'],
     [/កូនចាន/g, 'small bowl', '小碗'],
     [/ចានធំ/g, 'large bowl', '大碗'],
     [/ចានតូច/g, 'small bowl', '小碗'],
     [/ចានល្មម/g, 'medium bowl', '中碗'],
     [/ចាន/g, 'bowl', '碗'],
     [/ថាសធំ/g, 'large platter', '大盘'],
+    [/ថាសតូច/g, 'small platter', '小盘'],
     [/ថាស/g, 'platter', '盘'],
     [/កន្ត្រកធំ/g, 'large basket', '大篮'],
     [/កន្ត្រកតូច/g, 'small basket', '小篮'],
@@ -154,6 +168,12 @@ export function formatAmountByLang(raw: string | undefined, lang: Language): str
     [/គល់|ដើម/g, 'stalks', '根'],
     [/ធាង/g, 'fronds/sheets', '片'],
     [/សន្លឹក|ស្លឹក/g, 'leaves', '片'],
+    [/បន្ទះធំ/g, 'large slice', '大片'],
+    [/បន្ទះ/g, 'slices', '片'],
+    [/ចង្កាក់/g, 'skewers', '串'],
+    [/ឈុត/g, 'set', '份'],
+    [/ដុំ/g, 'pcs', '块'],
+    [/ទង/g, 'caps', '朵'],
     [/ក្បាល/g, 'whole', '只/条'],
     [/ផ្លែធំ/g, 'large pcs', '大个'],
     [/ផ្លែតូច/g, 'small pcs', '小个'],
@@ -161,6 +181,7 @@ export function formatAmountByLang(raw: string | undefined, lang: Language): str
     [/ផ្កាធំ/g, 'large blossom', '大朵'],
     [/ផ្កា/g, 'blossoms', '朵'],
     [/កែវ/g, 'cup', '杯'],
+    [/គ្រាប់ធំ/g, 'large pcs', '大颗'],
     [/គ្រាប់/g, 'pcs', '颗'],
     [/កន្លះ/g, '1/2', '半'],
   ];
@@ -176,7 +197,28 @@ export function formatAmountByLang(raw: string | undefined, lang: Language): str
  * Exact Food Category translations (English -> Simplified Chinese)
  */
 export const FOOD_CATEGORY_ZH_MAP: Record<string, string> = {
+  'Famous Regional Dish': '地方代表名菜',
+  'Desserts & Snacks': '甜品与小吃',
+  'Noodles & Soups': '粉面与汤品',
+  'Street Food': '街头美食',
   'Signature / Amok': '招牌名菜 / 高棉阿莫克',
+  'Salad / Pickled Chicken Feet': '高棉凉拌 / 酸辣泡椒凤爪',
+  'Soup / Water Lily Sour Soup': '高棉酸汤 / 睡莲茎黄颡鱼汤',
+  'Stir-fry / Tamarind Clams': '特色小炒 / 罗望子炒河蚬',
+  'Stir-Fried / Lemongrass Chicken': '特色小炒 / 香茅干煸土鸡',
+  'Stir-fry / Ginger Beef': '家常小炒 / 子姜丝炒牛肉',
+  'Noodles / Pork Offal Kuy Teav': '高棉粉面 / 猪杂粿条汤',
+  'Dessert / Pandan Rice Drops in Coconut Cream': '传统甜品 / 斑兰椰汁米漏粉',
+  'Specialty / Steamed Salted Fish': '高棉名菜 / 咸鱼蒸肉饼',
+  'Dip / Steamed Fermented Fish & Pork': '传统蘸酱 / 清蒸酒糟鱼肉饼',
+  'Stir-Fried / River Prawn & Green Pepper': '爆炒海鲜 / 青胡椒炒大头虾',
+  'Stir-Fried / Kale & Beef': '猛火小炒 / 芥兰炒牛肉',
+  'Salad / Ambarella Smoked Fish': '高棉凉拌 / 酸木果烟熏鱼沙拉',
+  'Salad / Pounded Instant Noodles': '高棉凉拌 / 酸辣舂方便面',
+  'Noodles & Soup / Chicken Glass Noodle': '汤粉面食 / 土鸡粉丝清汤',
+  'Salads & Ceviche': '高棉凉拌与生腌',
+  'Stir-Fry / Spicy Hot Basil Eel': '猛火辣炒 / 九层塔爆炒黄鳝',
+  'Street Food / Fresh Prawn Spring Rolls': '街头小吃 / 鲜虾米纸春卷',
   'Soup / Traditional': '传统高棉汤品',
   'Soup / Lemongrass Sour': '香茅酸汤',
   'Curry / Traditional': '传统高棉咖喱',
@@ -323,7 +365,6 @@ export const FOOD_CATEGORY_ZH_MAP: Record<string, string> = {
   'Street Food / Khmer Banh Chao': '高棉姜黄椰香鲜虾煎饼',
   'Street Food / Spiced Sun-Dried Clams': '金边香辣晒河蚬',
   'Street Food / Grilled Beef Meatballs': '炭烤高棉牛肉丸串',
-  'Street Food / Fresh Spring Rolls': '鲜虾花生酱高棉春卷',
   'Street Food / Crispy Fried Spring Rolls': '香酥芋头猪肉炸春卷',
   'Street Food / Crispy Chive Cakes': '香煎韭菜米粿',
   'Street Food / Steamed Pong Tea Koun': '清蒸毛蛋配贡布青柠胡椒',
@@ -403,8 +444,117 @@ export const FOOD_CATEGORY_ZH_MAP: Record<string, string> = {
  * Exact Dish Name translations for the 100 Core Dishes + 100 Additional Dishes
  */
 export const EXACT_FOOD_NAME_ZH_MAP: Record<string, string> = {
+  'Sweet fresh crab and unmatched fragrant green peppercorn sauce. A must-visit at Kep Market.': '海蟹肉质饱满清甜，配独一无二的贡布新鲜青胡椒酱，白马螃蟹市场必打卡！',
+  'Kampot Riverfront Grilled Seafood': '贡布河畔炭烤鲜活海鲜摊',
+  'Charcoal-grilled ocean squid seasoned with aromatic fresh Kampot green peppercorns and fiery citrus chili dip.': '深海大鱿鱼配飘香新鲜贡布青胡椒粒炭火慢烤，佐酸辣开胃的青柠辣椒海鲜蘸汁。',
+  'Tender juicy squid with fresh Kampot peppercorns bursting with flavor.': '炭烤鱿鱼鲜嫩多汁，搭配新鲜贡布青胡椒粒香气四溢！',
+  'Ta Sim Braised Beef Noodles Old Market': '老市场塔森三十年五香红烧牛腩粉',
+  'Famous 30-year legacy noodle soup featuring melt-in-mouth slow-simmered braised beef and tender tendon broth.': '传承三十年的老市场传奇早餐汤粉，慢火精炖出入口即化的红烧牛腩与软糯牛筋浓汤。',
+  'Silky rich spiced beef broth with tender beef that melts instantly on the palate.': '五香红烧牛肉汤底浓郁丝滑，大片牛腩软烂入味、入口即化！',
+  'Em Sruoy Koh Kong Papaya Salad': '国公省爽脆春青木瓜海鲜沙拉专门店',
+  'Authentic Koh Kong style fiery crushed green papaya salad with artisan salted crab and dried shrimp.': '正宗国公海滨风味香辣春青木瓜沙拉，拌入秘制腌海蟹与海晒大虾米。',
+  'Intensely spicy and addictive! The fresh mangrove salted crab makes it legendary.': '香辣过瘾、越吃越上瘾！新鲜红树林腌海蟹更是点睛之笔。',
+  'Palm Shadow Traditional Sweets Siem Reap': '暹粒棕影传统高棉甜品老铺',
+  'Whole local pumpkin filled with silky palm-sugar duck egg coconut custard and steamed to perfection.': '整颗本地小金瓜掏空去籽，注入丝滑棕榈糖鸭蛋浓椰浆蛋奶液慢火蒸透。',
+  'Subtle fragrant organic palm nectar paired with velvety steamed pumpkin custard.': '清雅芬芳的有机棕榈糖香，搭配绵密丝滑的蒸南瓜炖蛋布丁！',
+  '7 Makara Char-grilled Beef Skewers': '金边一月七日区炭火香茅烤牛肉串',
+  'Lemongrass turmeric marinated beef skewers grilled over open charcoal and served with pickled papaya and savory dip.': '香茅姜黄泥秘制腌渍的牛肉串在明火木炭上烤至焦香，配爽脆青木瓜泡菜与浓香鱼酱蘸水。',
+  'Tender beef with caramelized turmeric edges, perfectly paired with tangy pickled papaya.': '牛肉软嫩多汁、边缘微焦带姜黄香气，配酸甜青木瓜泡菜绝佳！',
+  // Trending Foods (seedTrendingFoods.ts)
+  'Battambang Thmor Koul Bamboo Sticky Rice (Kralan)': '马德望特摩戈炭烤竹筒香糯米饭（高棉竹筒饭）',
+  'Thmor Koul Kralan Village Battambang': '马德望5号公路特摩戈竹筒饭名村',
+  'Legendary charcoal-roasted bamboo sticky rice with fresh coconut cream and black beans in Thmor Koul, Battambang.': '马德望省著名的炭火慢烤青竹筒香糯米饭，融合鲜榨浓椰浆与黑豆，竹香四溢、软糯清甜。',
+  'Warm smoky bamboo aroma with rich coconut sticky rice inside!': '刚出炉的热气竹筒饭带着浓郁炭烤竹香与椰奶糯米甜香，令人回味无穷！',
+  'National Road 5, Thmor Koul, Battambang': '马德望省特摩戈县5号国道旁',
+  'Ta Dambang Kranhoung Statue, Battambang': '马德望省黑神杖爷爷雕像广场',
+
+  'Kep Blue Crab Stir-Fried with Fresh Kampot Pepper': '白马市贡布青胡椒爆炒鲜活蓝花蟹',
+  'Kep Crab Market Stall 8': '白马市螃蟹市场8号老字号海鲜摊',
+  'Freshly caught Kep blue swimmer crab wok-fried with aromatic green Kampot peppercorns and garlic.': '白马海滨现捕鲜活蓝花蟹，搭配成串新鲜贡布青胡椒与蒜蓉猛火快炒，蟹肉紧实鲜甜、椒香微辛。',
+  'Sweet fresh crab meat infused with fragrant green Kampot pepper!': '现捞海蟹肉质饱满鲜甜，裹满贡布新鲜青胡椒的独特清香！',
+  'Kep Crab Market, Phum Thmei, Kep City': '白马省白马市新村螃蟹市场',
+  'Kep Crab Statue & Kep Beach': '白马市巨型蓝蟹雕像与白马海滩',
+
+  'Kampot Fresh Peppercorn Grilled Squid': '贡布河畔椒盐炭烤鲜海鱿鱼',
+  'Kampot Riverfront Night Seafood': '贡布河畔夜市现烤海鲜摊',
+  'Whole fresh ocean squid scored and grilled over glowing charcoal with crushed Kampot chili-salt glaze.': '整只新鲜海捕大鱿鱼改花刀后刷上贡布椒盐辣椒汁，置于通红木炭火上快烤至焦香弹牙，配贡布青柠海鲜辣酱。',
+  'Tender bouncy squid with smoky char and fiery Koh Kong dipping sauce!': '炭烤鱿鱼鲜嫩弹牙、焦香扑鼻，蘸上酸辣开胃的青柠海鲜汁绝配！',
+  'Old Bridge Riverside, Kampot City': '贡布省贡布市老桥河畔夜市街',
+  'Kampot Durian Roundabout & Old Bridge': '贡布大榴莲转盘地标与历史老桥',
+
+  'Old Market Braised Beef Stew & Tendon Noodle Soup': '金边老市场五香红烧牛腩牛筋粿条汤',
+  'Ming Huot Old Market Beef Stew': '老市场明发三十年牛腩粉老店',
+  'Famous 30-year morning noodle soup featuring slow-braised spiced beef brisket, soft tendon, and rice noodles.': '享誉金边老市场三十余年的传奇早餐牛腩粉，以高棉五香慢火精炖软烂牛腩与牛蹄筋，汤浓味醇。',
+  'Melt-in-your-mouth beef tendon and deeply aromatic five-spice broth.': '牛筋软糯入口即化，五香红烧牛肉汤底醇厚浓香！',
+  'Street 110 near Old Market (Phsar Chas), Phnom Penh': '金边市隆边区老市场旁110号路',
+  'Wat Phnom & Riverside Old Market Area': '金边塔山寺与洞里萨河畔老市场街区',
+
+  'Koh Kong Spicy Salted Crab & Dried Shrimp Papaya Salad': '国公省海滨咸蟹虾米春青木瓜沙拉',
+  'Prek Koh Pao Riverside Seafood & Bok Lahong': '国公河畔海鲜与春木瓜沙拉专门店',
+  'Zesty pounded green papaya salad tossed with salted crab, dried coastal shrimp, smoky prahok, and lime.': '酸辣爽脆的国公海滨风味春青木瓜沙拉，在木臼中拌入腌海蟹、大虾米、空心菜、长豆角与青柠辣椒汁。',
+  'Crispy papaya shreds with bold sweet-sour-spicy coastal flavors!': '青木瓜丝爽脆多汁，酸甜咸辣的海滨风味层次感十足！',
+  'Riverfront Road, Smach Meanchey, Koh Kong City': '国公省国公市河滨大道',
+  'Koh Kong Bridge & Peam Krasop Mangrove Forest': '国公跨海大桥与红树林生态保护区',
+
+  'Siem Reap Steamed Pumpkin Coconut Custard (Sangkhya Lapov)': '暹粒传统椰香鸭蛋蒸整颗金瓜布丁',
+  'Phsar Leu Traditional Khmer Sweets Stall': '暹粒上市场传统高棉甜品老铺',
+  'Whole local pumpkin filled with silky duck egg, palm sugar, and rich coconut cream custard, steamed to perfection.': '暹粒传统手工甜点：整颗香甜小金瓜掏空去籽，注入鸭蛋、头道浓椰浆与棕榈糖调制的蛋奶浆慢火蒸熟。',
+  'Velvety palm sugar custard inside sweet, tender steamed pumpkin.': '绵密香甜的棕榈糖椰香炖蛋与粉糯南瓜肉完美交融，入口即化！',
+  'National Road 6, Phsar Leu Market, Siem Reap': '暹粒省暹粒市6号国道上市场',
+  'Angkor Archaeological Park & Royal Independence Gardens, Siem Reap': '暹粒吴哥窟古迹群与独立花园',
+
+  'Char-Grilled Lemongrass Beef Skewers with Tuk Prahok': '炭烤香茅腌牛肉串配木瓜泡菜与波罗福鱼酱',
+  'Bong Sros Toul Sleng Evening Beef Skewers': '金边万景岗阿丝姑娘傍晚炭烤牛肉串',
+  'Juicy marinated beef skewers grilled over charcoal embers, served with crunchy green papaya pickle and toasted baguette.': '香茅姜黄泥与棕榈糖秘制腌渍的鲜嫩牛肉串，炭火现烤至滋滋冒油，搭配爽脆青木瓜泡菜、烤法棍与浓香波罗福蘸水。',
+  'Smoky lemongrass beef paired with tangy papaya pickle and savory prahok dip!': '炭香浓郁的香茅烤牛肉串，配酸甜木瓜泡菜与香浓鱼酱蘸水越吃越香！',
+  'Street 113, Boeung Keng Kang, Phnom Penh': '金边市万景岗区113号路',
+  'Independence Monument & Park, Phnom Penh': '金边独立纪念碑与广场公园',
+
+  'Battambang Traditional Coconut Banana Dessert (Chek Ktis)': '马德望古法棕榈糖椰浆西米炖甜蕉',
+  'Mae Yeay Wat Liep Traditional Desserts': '马德望列寺阿婆四十年传统甜汤铺',
+  'Beloved 40-year dessert bar serving traditional Khmer warm banana in sweet coconut cream with toasted sesame.': '传承四十余年的马德望老字号甜品铺，招牌棕榈糖浓椰浆炖糯蕉配晶莹西米与烤白芝麻，温润香甜。',
+  'Freshly pressed coconut cream that is creamy without being overly sweet.': '每日现榨头道浓椰浆醇厚顺滑、甜而不腻，傍晚品尝格外舒心！',
+  'North of Wat Liep, Street 3, Battambang City': '马德望省马德望市列寺北侧3号路',
+  'Phnom Sampeau & Wat Kor Heritage, Battambang': '马德望森宝山与高寺百年古木屋村',
+
+  'Kampong Cham Traditional Num Banh Chok Khmer Noodle Curry': '磅湛湄公河畔传统手工高棉米线配青鱼咖喱与红咖喱',
+  'Kampong Cham Riverfront Num Banh Chok': '磅湛湄公河畔农家手工鲜米线摊',
+  'Silky fresh artisanal rice noodles topped with aromatic lemongrass fish gravy and fresh garden herbs.': '手工现榨顺滑鲜米线，浇上香茅黑鱼青咖喱汤或椰香红咖喱，搭配香蕉花、长豆角与睡莲花等田园鲜蔬。',
+  'Rich kaffir lime and lemongrass broth coating freshly fermented rice noodles.': '浓郁青柠叶与香茅鱼汤裹满爽滑鲜米线，配脆嫩野菜鲜美无比！',
+  'Mekong Riverfront near Kizuna Bridge, Kampong Cham City': '磅湛省磅湛市跨河大桥旁湄公河畔大道',
+  'Kizuna Bridge & Koh Pen Bamboo Bridge, Kampong Cham': '磅湛跨湄公河大桥与歌本岛竹桥',
+
+  'Cambodian Saraman Beef Curry': '金边传统高棉萨拉曼花生椰香牛肉咖喱',
+  '999 Khmer Curry House Toul Tompoung': '金边俄罗斯市场999高棉咖喱专门店',
+  'Rich aromatic Saraman beef curry slow-simmered in coconut milk, roasted peanuts, and warm spices.': '传统高棉萨拉曼牛肉咖喱，以浓椰浆、传统香料与烘烤花生慢火精炖至牛腩酥烂入味，配热法棍或香米饭皆宜。',
+  'Deeply aromatic coconut peanut curry with fall-apart tender beef chunks.': '花生椰香咖喱汤汁浓郁醇厚，大块牛肉软烂脱骨，蘸热脆法棍好吃到停不下来！',
+  'Street 432, Toul Tompoung 1, Chamkarmon, Phnom Penh': '金边市桑园区俄罗斯市场一分区432号路',
+  'Royal Palace of Cambodia, Phnom Penh': '金边四臂湾柬埔寨王宫广场',
+
+  'Night Market Chili Salt Grilled Prawns & Spiced Clams': '金边河畔夜市椒盐炭烤大虾与日光晒河蚬',
+  'Riverside Night Market Fresh Seafood Stall': '金边洞里萨河畔夜市鲜活海鲜烧烤摊',
+  'Plump fresh prawns grilled over embers with garlic chili sea salt and fiery Koh Kong dipping sauce.': '饱满鲜活大河虾抹上蒜蓉辣椒海盐炭火现烤，配金边特色香辣晒河蚬与酸辣国公海鲜蘸汁，夜市人气爆棚。',
+  'Super sweet, juicy grilled prawns with punchy lime chili garlic sauce.': '炭烤大虾肉质紧实甘甜，配酸辣蒜香青柠蘸水去夜市必尝！',
+  'Night Market, Street 106, Wat Phnom, Phnom Penh': '金边市塔山寺分区106号路河畔夜市',
+  'Chaktomuk Riverside Walkway & Night Market, Phnom Penh': '金边四臂湾河滨步道与金边夜市',
+
+  'Kampong Speu Flattened New Rice with Young Coconut (Ambok)': '实居省新收舂扁米拌香水嫩椰肉与熟甜蕉',
+  'Chbar Mon Fresh Ambok & Coconut Stall': '实居省芷森市鲜舂扁米与香水椰老摊',
+  'Freshly pounded toasted new harvest rice mixed with tender young coconut flesh, palm sugar, and ripe banana.': '4号国道旁备受欢迎的实居省时令名点：现烘现舂的新收香扁米，拌入滑嫩香水椰肉、清甜椰子水与熟透南瓦甜蕉。',
+  'Toasted new rice aroma balanced with sweet young coconut and banana.': '新谷烘烤的浓郁米香与清甜嫩椰肉、熟香蕉完美融合，地道高棉古早味！',
+  'National Road 4, Phum Roliang, Chbar Mon City': '实居省芷森市4号国道旁',
+  'Kirirom Pine Forest National Park, Kampong Speu': '实居省基里隆高山松林国家公园',
   // 30 Authentic Cambodian Vegetarian Dishes (food-201 .. food-230)
   'Vegetarian Mushroom & Tofu Steamed Amok': '纯素蘑菇豆腐蒸阿莫克',
+  'Spicy & Sour Cambodian Pickled Chicken Feet Salad (Chhruk Cheung Moan)': '高棉酸辣柠檬泡椒凤爪',
+  'Cambodian Stir-Fried Chicken with Lemongrass & Kaffir Lime Leaves (Ling Sach Moan)': '高棉香茅青柠叶干煸土鸡',
+  'Stir-Fried Beef with Fresh Ginger (Cha Knyei Sach Ko)': '高棉鲜姜丝爆炒嫩牛肉',
+  'Cambodian Pork Offal Rice Noodle Soup (Kuy Teav Kroeung Knong)': '高棉猪杂粿条汤',
+  'Cambodian Garlic Chili Salt Egg Fried Rice (Bay Cha Ambil)': '高棉蒜香椒盐鸡蛋炒饭',
+  'Cambodian Fresh Field Crab Salad (Pleah Kdam Srae)': '高棉凉拌鲜稻田蟹',
+  'Charcoal-Grilled Sun-Dried Fish with Watermelon & Tamarind Dip': '炭烤咸鱼干配冰镇西瓜与罗望子蘸酱',
+  'Fresh Cambodian Prawn Spring Rolls with Peanut Dipping Sauce (Nime Chow)': '高棉鲜虾春卷配花生蘸酱',
+  'Siem Reap Style Herbal Kroeung Stir-Fry with Prahok & Peanuts (Cha Kroeung Siem Reap)': '暹粒风味香茅花生炒肉',
   'Vegetarian Cambodian Korko Mixed Vegetable Stew': '纯素高棉什锦蔬菜浓汤',
   'Vegetarian Lemongrass Sour Soup with Tofu & Water Spinach': '纯素香茅酸汤配豆腐空心菜',
   'Vegetarian Fresh Bamboo Shoot Soup with Yanang Leaves': '纯素鲜竹笋黑叶鲜草清汤',
@@ -1916,7 +2066,7 @@ function computeSanitizeStrictLanguageText(input: string, lang: Language): strin
       .replace(/[\u1780-\u17FF]+/g, '')
       .replace(/\(\s*\)/g, '')
       .replace(/(?:\s*,\s*){2,}/g, ', ')
-      .replace(/^[\s,.;:–—-]+|[\s,.;:–—-]+$/g, '')
+      .replace(/^[\s,.;:–—-]+|[\s,;:–—-]+$/g, '')
       .replace(/\s+/g, ' ')
       .trim();
     return out || input.replace(/[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]+/g, '').trim();
@@ -2036,10 +2186,6 @@ export function toConciseSummary(raw: string | undefined, lang: Language): strin
       .replace(/\broyal Cambodian\b/gi, 'Cambodian')
       .replace(/\bCambodian royal\b/gi, 'Cambodian')
       .replace(/\broyal Khmer\b/gi, 'Khmer')
-      .replace(
-        /\b(prepared|crafted|made) with ([^,.]+),\s*[^.]+?\s+and (?:aromatic |fragrant )?[^.]+\./i,
-        '$1 with $2.'
-      )
       .replace(/\s+/g, ' ')
       .trim();
     const firstSentenceMatch = cleaned.match(/^(.+?[.!?])(?:\s+|$)/);
@@ -2066,6 +2212,24 @@ export function toConciseSummary(raw: string | undefined, lang: Language): strin
   return cleanedZh;
 }
 
+const ENGLISH_CANONICAL_FOOD_NAME_MAP: Record<string, string> = {
+  'food-2': 'Cambodian Mixed Vegetable Stew (Samlor Korko)',
+  'food-5': 'Cambodian Herbal Green Fish Soup (Samlor Proher)',
+  'food-26': 'Kampot Pepper Beef Lok Lak',
+  'food-34': 'Banana-Leaf Grilled Prahok',
+  'food-36': 'Phnom Penh Pork Noodle Soup (Kuyteav)',
+  'food-37': 'Khmer Rice Noodle Fish Curry (Nom Banh Chok)',
+  'food-38': 'Steamed Noodles with Dried Shrimp & Egg (Mee Kola)',
+  'food-39': 'Cambodian Braised Beef Stew Noodle Soup (Kuyteav Khor Ko)',
+  'food-41': 'Cambodian Grilled Pork with Broken Rice (Bai Sach Chrouk)',
+  'food-45': 'Battambang Bamboo Sticky Rice (Kralan)',
+  'food-47': 'Cambodian Steamed Pumpkin Duck Egg Custard (Sangkhya Lapov)',
+  'food-48': 'Warm Banana in Sweet Coconut Cream (Chek Ktis)',
+  'food-49': 'Cambodian Pâté Baguette Sandwich (Num Pang Pate)',
+  'food-91': 'Sweet Banana Sticky Rice Cake (Num Ansom Chek)',
+  'food-93': 'Khmer Palm Sugar Glazed Donut Rings (Num Kong)',
+};
+
 function computeLocalizedFood(food: FoodItem, lang: Language) {
   if (lang === 'km') {
     const diffKm = formatDifficultyByLang(food.difficulty, 'km');
@@ -2078,14 +2242,14 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
       category: sanitizeStrictLanguageText(food.categoryKh, 'km'),
       province: sanitizeStrictLanguageText(food.provinceKh || '', 'km'),
       description: sanitizeStrictLanguageText(conciseKm, 'km'),
-      prepTime: food.prepTime,
-      cookTime: food.cookTime,
-      servings: food.servings,
+      prepTime: formatDurationByLang(food.prepTime, 'km'),
+      cookTime: formatDurationByLang(food.cookTime, 'km'),
+      servings: formatServingsByLang(food.servings, 'km'),
       difficulty: diffKm,
       difficultyLabel: diffKm,
       ingredients: (food.ingredients || []).map((ing: Ingredient) => ({
         name: sanitizeStrictLanguageText(ing.nameKh, 'km'),
-        amount: ing.amount,
+        amount: formatAmountByLang(ing.amount, 'km'),
       })),
       steps: (food.steps || []).map((st: CookingStep) => ({
         stepNumber: st.stepNumber,
@@ -2097,8 +2261,9 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
 
   if (lang === 'en') {
     const diffEn = formatDifficultyByLang(food.difficulty, 'en');
+    const canonicalEnSource = ENGLISH_CANONICAL_FOOD_NAME_MAP[food.id] || food.nameEn || '';
     const cleanEnName = sanitizeStrictLanguageText(
-      (food.nameEn || '').replace(/\s*[\(（][^\)）]*[\)）]\s*/g, ' '),
+      canonicalEnSource.replace(/\s*[\(（][^\)）]*[\)）]\s*/g, ' '),
       'en'
     );
     const conciseEn = toConciseSummary(food.descriptionEn, 'en');

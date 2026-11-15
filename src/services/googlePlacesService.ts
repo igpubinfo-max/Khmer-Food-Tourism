@@ -4156,8 +4156,13 @@ export async function searchGoogleMapsPlacesAdvanced(
     req.searchScope === 'nationwide'
       ? ''
       : rawProv.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
-  const latVal = typeof req.lat === 'number' ? req.lat : req.location?.lat;
-  const lngVal = typeof req.lng === 'number' ? req.lng : req.location?.lng;
+  const storedUserGps = readStoredUserGps();
+  const rawReqLat = typeof req.lat === 'number' ? req.lat : req.location?.lat;
+  const rawReqLng = typeof req.lng === 'number' ? req.lng : req.location?.lng;
+  const hasExplicitReqGps =
+    typeof rawReqLat === 'number' && typeof rawReqLng === 'number' && isValidCambodiaCoordinates(rawReqLat, rawReqLng);
+  const latVal = hasExplicitReqGps ? rawReqLat : storedUserGps?.lat;
+  const lngVal = hasExplicitReqGps ? rawReqLng : storedUserGps?.lng;
   const radiusVal = req.radiusMeters || req.location?.radiusMeters || 25000;
   const hasUserGps =
     typeof latVal === 'number' && typeof lngVal === 'number' && isValidCambodiaCoordinates(latVal, lngVal);
@@ -4166,7 +4171,7 @@ export async function searchGoogleMapsPlacesAdvanced(
       ? hasUserGps
       : req.searchScope !== 'nationwide' &&
         req.searchScope !== 'province' &&
-        hasUserGps &&
+        hasExplicitReqGps &&
         Boolean(req.radiusMeters || req.location?.radiusMeters);
 
   const currentApiCfg = getCloudApiConfig();
@@ -4241,56 +4246,71 @@ export async function searchGoogleMapsPlacesAdvanced(
 
     if (isNameQuery) {
       let scored = deduped
-        .map((it, idx) => ({ it, idx, score: scorePlaceForQuery(it, effectiveGoogleRankById.get(it.placeId) ?? -1) }))
+        .map((it, idx) => ({
+          it,
+          idx,
+          score: scorePlaceForQuery(it, effectiveGoogleRankById.get(it.placeId) ?? -1),
+          distMeters: hasUserGps ? calculateHaversineMeters(latVal, lngVal, it.lat, it.lng) : Infinity,
+        }))
         .filter((x) => x.score >= 200);
 
-      if (hasLocationCoords && radiusVal) {
-        const withinRadius = scored.filter(
-          (x) => calculateHaversineMeters(latVal, lngVal, x.it.lat, x.it.lng) <= radiusVal
-        );
+      if (req.searchScope === 'nearby' && hasLocationCoords && radiusVal && !isSpecificBrandSearch) {
+        const withinRadius = scored.filter((x) => x.distMeters <= radiusVal);
         if (withinRadius.length > 0) {
           scored = withinRadius;
         }
       }
 
-      if (!isSpecificBrandSearch && hasUserGps) {
-        // Cuisine / food / category keyword (e.g. "ម្ហូបបួស", "គុយទាវ", "ហាងកាហ្វេ") with user GPS available → sort nearest first!
-        scored.sort((a, b) => {
-          const distA = calculateHaversineMeters(latVal, lngVal, a.it.lat, a.it.lng);
-          const distB = calculateHaversineMeters(latVal, lngVal, b.it.lat, b.it.lng);
-          if (Math.abs(distA - distB) > 15) return distA - distB;
-          return b.score - a.score || (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
-        });
-      } else if (!isSpecificBrandSearch) {
-        // Cuisine / food / category keyword without GPS → prioritize strong matches & verified popular places
-        scored.sort((a, b) => {
+      // Global Rule: Sort all relevant search results by actual GPS distance in ascending order (closest to farthest)
+      // when GPS is available; use relevance tier -> popularity/rating -> score -> original index as fallback when GPS is unavailable or tied.
+      scored.sort((a, b) => {
+        if (hasUserGps) {
+          const finA = Number.isFinite(a.distMeters);
+          const finB = Number.isFinite(b.distMeters);
+          if (finA && !finB) return -1;
+          if (!finA && finB) return 1;
+          if (finA && finB && a.distMeters !== b.distMeters) {
+            return a.distMeters - b.distMeters;
+          }
+        }
+        if (!isSpecificBrandSearch) {
           const strongA = a.score >= 600 ? 1 : 0;
           const strongB = b.score >= 600 ? 1 : 0;
           if (strongB !== strongA) return strongB - strongA;
           const popA = Math.log10((a.it.reviewCount || a.it.userRatingCount || 0) + 1) * (a.it.rating || 4.0);
           const popB = Math.log10((b.it.reviewCount || b.it.userRatingCount || 0) + 1) * (b.it.rating || 4.0);
           if (Math.abs(popB - popA) > 0.35) return popB - popA;
-          return b.score - a.score || (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
-        });
-      } else {
-        // Specific business / brand name typed → exact/prefix match tier first, then nearest branch (if GPS available), then rating
-        scored.sort((a, b) => {
-          const ba = Math.floor(a.score / 100);
-          const bb = Math.floor(b.score / 100);
-          if (bb !== ba) return bb - ba;
-          if (hasUserGps) {
-            const d =
-              calculateHaversineMeters(latVal, lngVal, a.it.lat, a.it.lng) -
-              calculateHaversineMeters(latVal, lngVal, b.it.lat, b.it.lng);
-            if (Math.abs(d) > 15) return d;
-          }
-          if (b.score !== a.score) return b.score - a.score;
-          return (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
-        });
-      }
+        }
+        const ba = Math.floor(a.score / 100);
+        const bb = Math.floor(b.score / 100);
+        if (bb !== ba) return bb - ba;
+        if (b.score !== a.score) return b.score - a.score;
+        return (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
+      });
+      deduped = scored.map((x) => x.it);
+    } else if (queryAnalysis && (queryAnalysis.provinces.length > 0 || queryAnalysis.categoryGroups.length > 0)) {
+      // Category / province keyword ("hotel kampot", "ភោជនីយដ្ឋាន") → drop places in another province, sort nearest first when GPS is available
+      const scored = deduped
+        .map((it, idx) => ({
+          it,
+          idx,
+          detail: scoreSearchRecord(queryAnalysis, buildPlaceSearchFields(it)),
+          distMeters: hasUserGps ? calculateHaversineMeters(latVal, lngVal, it.lat, it.lng) : Infinity,
+        }))
+        .filter((x) => !x.detail.provinceMismatch);
+      scored.sort((a, b) => {
+        if (hasUserGps) {
+          const finA = Number.isFinite(a.distMeters);
+          const finB = Number.isFinite(b.distMeters);
+          if (finA && !finB) return -1;
+          if (!finA && finB) return 1;
+          if (finA && finB && a.distMeters !== b.distMeters) return a.distMeters - b.distMeters;
+        }
+        return b.detail.score - a.detail.score || (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
+      });
       deduped = scored.map((x) => x.it);
     } else if (hasUserGps) {
-      if (hasLocationCoords && radiusVal) {
+      if (req.searchScope === 'nearby' && hasLocationCoords && radiusVal) {
         const withinRadius = deduped.filter(
           (it) => calculateHaversineMeters(latVal, lngVal, it.lat, it.lng) <= radiusVal
         );
@@ -4299,18 +4319,12 @@ export async function searchGoogleMapsPlacesAdvanced(
         }
       }
       // Category / nearby search → nearest first
-      deduped.sort(
-        (a, b) =>
-          calculateHaversineMeters(latVal, lngVal, a.lat, a.lng) -
-          calculateHaversineMeters(latVal, lngVal, b.lat, b.lng)
-      );
-    } else if (queryAnalysis && (queryAnalysis.provinces.length > 0 || queryAnalysis.categoryGroups.length > 0)) {
-      // Category / province keyword ("hotel kampot") → drop places in another province, rank matches first
-      const scored = deduped
-        .map((it, idx) => ({ it, idx, detail: scoreSearchRecord(queryAnalysis, buildPlaceSearchFields(it)) }))
-        .filter((x) => !x.detail.provinceMismatch);
-      scored.sort((a, b) => b.detail.score - a.detail.score || (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx);
-      deduped = scored.map((x) => x.it);
+      deduped.sort((a, b) => {
+        const dA = calculateHaversineMeters(latVal, lngVal, a.lat, a.lng);
+        const dB = calculateHaversineMeters(latVal, lngVal, b.lat, b.lng);
+        if (dA !== dB) return dA - dB;
+        return (b.rating || 0) - (a.rating || 0);
+      });
     }
 
     const normalizedItems = deduped
@@ -6107,24 +6121,47 @@ export function performUnifiedCambodiaSearch(
     }
   }
 
-  if (hasRadiusFilter) {
-    externalPlaces.sort(
-      (a, b) =>
-        calculateHaversineMeters(userLat, userLng, a.lat, a.lng) -
-        calculateHaversineMeters(userLat, userLng, b.lat, b.lng)
-    );
-  }
+  const explicitUserGpsValid =
+    typeof userLat === 'number' &&
+    typeof userLng === 'number' &&
+    isValidCambodiaCoordinates(userLat, userLng);
+  const effectiveUserGps = explicitUserGpsValid
+    ? { lat: userLat!, lng: userLng! }
+    : readStoredUserGps();
 
-  // Rank by relevance (exact name → partial → typo → category/address), keeping the previous order
-  // (VIP / distance) as a deterministic tie-breaker within the same relevance tier.
+  // Global Rule: Sort all relevant search results by actual GPS distance in ascending order (closest to farthest)
+  // when GPS coordinates are available; use relevance tier + VIP status + rating as fallback when GPS is unavailable or tied.
   const rankStable = <T,>(list: T[], fieldsOf: (x: T) => SearchableFields, isVipBoost?: (x: T) => boolean): T[] =>
     list
       .map((item, idx) => {
         const baseScore = scoreSearchRecord(unifiedQa, fieldsOf(item)).score;
         const vipBonus = baseScore > 0 && isVipBoost?.(item) ? 2 : 0;
-        return { item, idx, tier: Math.floor(baseScore / 100) + vipBonus };
+        const rec: any = item;
+        const itemLat = Number(rec?.latitude ?? rec?.lat);
+        const itemLng = Number(rec?.longitude ?? rec?.lng);
+        const distMeters =
+          effectiveUserGps && isValidCambodiaCoordinates(itemLat, itemLng)
+            ? calculateHaversineMeters(effectiveUserGps.lat, effectiveUserGps.lng, itemLat, itemLng)
+            : Infinity;
+        return {
+          item,
+          idx,
+          baseScore,
+          tier: Math.floor(baseScore / 100) + vipBonus,
+          distMeters,
+          rating: Number(rec?.rating) || 0,
+        };
       })
-      .sort((a, b) => b.tier - a.tier || a.idx - b.idx)
+      .sort((a, b) => {
+        const finA = Number.isFinite(a.distMeters);
+        const finB = Number.isFinite(b.distMeters);
+        if (finA && !finB) return -1;
+        if (!finA && finB) return 1;
+        if (finA && finB && a.distMeters !== b.distMeters) {
+          return a.distMeters - b.distMeters;
+        }
+        return b.tier - a.tier || b.baseScore - a.baseScore || b.rating - a.rating || a.idx - b.idx;
+      })
       .map((x) => x.item);
   const rankedRestaurants = rankStable(
     mergedRestaurants,
@@ -6159,6 +6196,23 @@ export function calculateDistanceMeters(
   return calculateHaversineMeters(lat1, lng1, lat2, lng2);
 }
 
+function readStoredUserGps(): { lat: number; lng: number } | null {
+  try {
+    if (typeof localStorage === 'undefined') return null;
+    const raw = localStorage.getItem('kft_last_known_user_gps_v1');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const lat = Number(parsed?.lat);
+    const lng = Number(parsed?.lng);
+    if (isValidCambodiaCoordinates(lat, lng)) {
+      return { lat, lng };
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return null;
+}
+
 // In-memory cache for recent device GPS (prevents repetitive mobile GPS chip wakeups & thermal throttling)
 let cachedDeviceGps: { lat: number; lng: number; timestamp: number } | null = null;
 
@@ -6167,22 +6221,40 @@ export async function getCurrentDeviceLocation(forceFresh = false): Promise<{ la
   if (!forceFresh && cachedDeviceGps && now - cachedDeviceGps.timestamp < 120000) {
     return { lat: cachedDeviceGps.lat, lng: cachedDeviceGps.lng };
   }
+  const storedFallback = () =>
+    cachedDeviceGps ? { lat: cachedDeviceGps.lat, lng: cachedDeviceGps.lng } : readStoredUserGps();
   if (typeof navigator === 'undefined' || !navigator.geolocation) {
-    return cachedDeviceGps ? { lat: cachedDeviceGps.lat, lng: cachedDeviceGps.lng } : null;
+    return storedFallback();
   }
   return new Promise((resolve) => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const coords = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          timestamp: Date.now(),
-        };
-        cachedDeviceGps = coords;
-        resolve({ lat: coords.lat, lng: coords.lng });
+        const rawLat = pos.coords.latitude;
+        const rawLng = pos.coords.longitude;
+        if (isValidCambodiaCoordinates(rawLat, rawLng)) {
+          const coords = {
+            lat: rawLat,
+            lng: rawLng,
+            timestamp: Date.now(),
+          };
+          cachedDeviceGps = coords;
+          try {
+            if (typeof localStorage !== 'undefined') {
+              localStorage.setItem(
+                'kft_last_known_user_gps_v1',
+                JSON.stringify({ lat: rawLat, lng: rawLng, updatedAt: Date.now() })
+              );
+            }
+          } catch {
+            // ignore storage errors
+          }
+          resolve({ lat: coords.lat, lng: coords.lng });
+        } else {
+          resolve(storedFallback());
+        }
       },
       () => {
-        resolve(cachedDeviceGps ? { lat: cachedDeviceGps.lat, lng: cachedDeviceGps.lng } : null);
+        resolve(storedFallback());
       },
       {
         enableHighAccuracy: false,

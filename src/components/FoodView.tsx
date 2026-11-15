@@ -217,8 +217,18 @@ export const FoodView: React.FC = () => {
       }
 
       const filteredWithinActiveTab = searchMatched.filter(matchesActiveFilters);
+      const categoryStrictSearch =
+        selectedCategory === 'all'
+          ? searchMatched
+          : searchMatched.filter((f) => matchesFoodScreenCategoryTab(f, selectedCategory));
       const finalSearchList =
-        filteredWithinActiveTab.length > 0 ? filteredWithinActiveTab : searchMatched;
+        filteredWithinActiveTab.length > 0
+          ? filteredWithinActiveTab
+          : categoryStrictSearch.length > 0
+          ? categoryStrictSearch
+          : selectedCategory === 'all'
+          ? searchMatched
+          : [];
 
       if (restoredOrderIds && restoredOrderIds.length > 0) {
         const byId = new Map(finalSearchList.map((f) => [f.id, f]));
@@ -657,6 +667,25 @@ export const FoodView: React.FC = () => {
                     setRestoredOrderIds(null);
                     setShowFilterDrawer(false);
                     setSelectedCategory(cat.id);
+                    if (foodSearchQuery.trim()) {
+                      setFoodSearchQuery('');
+                    }
+                    if (
+                      tagFilter !== 'all' &&
+                      !uniqueOrganizedFoods.some(
+                        (f) => matchesFoodScreenCategoryTab(f, cat.id) && matchesTagFilter(f, tagFilter)
+                      )
+                    ) {
+                      setTagFilter('all');
+                    }
+                    if (
+                      provinceFilter &&
+                      !uniqueOrganizedFoods.some(
+                        (f) => matchesFoodScreenCategoryTab(f, cat.id) && doesDishBelongToProvince(f, provinceFilter)
+                      )
+                    ) {
+                      setProvinceFilter('');
+                    }
                     setCategoryShuffleNonce((prev) => prev + 1);
                     setVisibleCount(PAGE_BATCH_SIZE);
                     scrollToDishList();

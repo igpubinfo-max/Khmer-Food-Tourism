@@ -33,7 +33,8 @@ import {
   TouristDestination,
   RestaurantPriceLevel,
   GoogleMapsPlaceMetadata,
-  SHOP_ALL_INCLUSIVE_5_BENEFITS,
+  SHOP_PACKAGE_BENEFITS,
+  resolvePackageBenefit,
   getShopSubscriptionCatalog,
   getOfficialAbaKhqrImageForPlan,
   getOfficialAbaKhqrDownloadFilename,
@@ -2774,9 +2775,9 @@ export const VipAddRestaurantModal: React.FC = () => {
                           <span>
                             {tr(
                               language,
-                              'កញ្ចប់ដាក់ហាងរួមបញ្ចូលទាំង ៥ មុខងារ (គ្មានទារថ្លៃបន្ថែម)',
-                              'All-Inclusive Shop Package (All 5 Benefits Included)',
-                              '全包店铺套餐（含全部 5 大权益，无额外广告费）'
+                              'កញ្ចប់ដាក់ហាងរួមបញ្ចូលទាំង ៧ មុខងារ (គ្មានទារថ្លៃបន្ថែម)',
+                              'All-Inclusive Shop Package (All 7 Benefits Included)',
+                              '全包店铺套餐（含全部 7 大权益，无额外广告费）'
                             )}
                           </span>
                         </span>
@@ -2785,11 +2786,15 @@ export const VipAddRestaurantModal: React.FC = () => {
                         </span>
                       </div>
                       <ul className="space-y-1.5 text-[11px] text-slate-100">
-                        {SHOP_ALL_INCLUSIVE_5_BENEFITS.map((b, i) => (
-                          <li key={i} className="leading-snug">
-                            {isKm ? b.km : language === 'zh' ? b.zh : b.en}
-                          </li>
-                        ))}
+                        {SHOP_PACKAGE_BENEFITS.map((b) => {
+                          const { title, desc } = resolvePackageBenefit(b, language);
+                          return (
+                            <li key={b.id} className="leading-snug">
+                              <span className="font-bold">{title}</span>
+                              {desc ? ` — ${desc}` : ''}
+                            </li>
+                          );
+                        })}
                       </ul>
                       <div className="pt-2 border-t border-slate-700/80 text-[10.5px] font-bold text-amber-300 leading-relaxed">
                         {tr(

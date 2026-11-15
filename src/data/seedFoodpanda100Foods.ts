@@ -18,9 +18,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Comforting Cambodian clear soup simmered with tender amaranth greens, seasoned minced pork balls, and golden fried garlic.",
     "descriptionZh": "清甜滋润的柬埔寨家常苋菜肉末汤，配手捏猪肉丸与金黄炸蒜酥，营养健康。",
     "photoUrl": "/foods/food-231.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 270,
     "difficulty": "medium",
     "priceRiel": 52000,
@@ -30,25 +30,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ស្លឹកផ្ទីខ្មែរស្រស់បេះលាងស្អាត",
         "nameEn": "Fresh tender Khmer amaranth greens (Slek Pti)",
         "nameZh": "洗净新鲜高棉苋菜叶",
-        "amount": "300 ក្រាម (300g)"
+        "amount": "៣០០ ក្រាម"
       },
       {
         "nameKh": "សាច់ជ្រូកជាប់ខ្លាញ់ចិញ្ច្រាំម៉ត់",
         "nameEn": "Minced pork shoulder seasoned with pepper",
         "nameZh": "调味猪肉末",
-        "amount": "200 ក្រាម (200g)"
+        "amount": "២០០ ក្រាម"
       },
       {
         "nameKh": "ខ្ទឹមសបំពង និងស្លឹកខ្ទឹមហាន់",
         "nameEn": "Crispy fried garlic & chopped scallions",
         "nameZh": "金黄炸蒜酥与葱花",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
+        "amount": "២ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ទឹកត្រី អំបិល ស្ករត្នោតបន្តិច និងម្រេចកំពត",
         "nameEn": "Fish sauce, sea salt, pinch of palm sugar & Kampot pepper",
         "nameZh": "鱼露、海盐、少许棕榈糖与贡布胡椒",
-        "amount": "តាមចំណូលចិត្ត (To taste)"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -91,9 +91,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Classic Cambodian home-cooked clear soup with slow-simmered tender pork spare ribs, sweet cabbage, and fried garlic.",
     "descriptionZh": "经典高棉家常排骨白菜汤，鲜嫩猪肋排慢炖至软烂，配清甜白菜与炸蒜酥。",
     "photoUrl": "/foods/food-232.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 325,
     "difficulty": "easy",
     "priceRiel": 14000,
@@ -103,25 +103,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ឆ្អឹងជំនីរជ្រូកខ្ចីកាប់ដុំល្មម",
         "nameEn": "Young pork spare ribs cut into bite-sized pieces",
         "nameZh": "鲜嫩猪肋排斩件",
-        "amount": "400 ក្រាម (400g)"
+        "amount": "៤០០ ក្រាម"
       },
       {
         "nameKh": "ស្ពៃបូកគោ ឬស្ពៃខៀវកាត់កង់ៗ",
         "nameEn": "Fresh Napa cabbage or green mustard cabbage",
         "nameZh": "新鲜大白菜或青芥菜段",
-        "amount": "300 ក្រាម (300g)"
+        "amount": "៣០០ ក្រាម"
       },
       {
         "nameKh": "ខ្ទឹមសបំពង ស្លឹកខ្ទឹម និងជីរវ៉ាន់ស៊ុយ",
         "nameEn": "Crispy fried garlic, scallions & fresh cilantro",
         "nameZh": "炸蒜酥、香葱与香菜",
-        "amount": "30 ក្រាម (30g)"
+        "amount": "៣០ ក្រាម"
       },
       {
         "nameKh": "ទឹកត្រី អំបិល និងម្រេចកំពតម៉ត់",
         "nameEn": "Fish sauce, sea salt & ground Kampot black pepper",
         "nameZh": "鱼露、海盐与贡布黑胡椒粉",
-        "amount": "តាមចំណូលចិត្ត (To taste)"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -164,9 +164,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Smoky charcoal-grilled Cambodian river black sharkminnow fish served with tangy shredded green mango and sweet chili fish sauce.",
     "descriptionZh": "炭火慢烤的洞里萨湖黑鲨鲃鱼，外皮焦香，配酸脆青芒果丝与甜辣鱼露蘸汁。",
     "photoUrl": "/foods/food-233.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 245,
     "difficulty": "easy",
     "priceRiel": 21000,
@@ -176,25 +176,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីចាកែងទន្លេស្រស់ឆូតសាច់",
         "nameEn": "Fresh river black sharkminnow fish (Trei Chakaeng), scored",
         "nameZh": "洗净改花刀的新鲜黑鲨鲃鱼",
-        "amount": "450 ក្រាម (450g)"
+        "amount": "៤៥០ ក្រាម"
       },
       {
         "nameKh": "ស្វាយខ្ចីសាប់ជាសរសៃស្រួយ",
         "nameEn": "Crisp hand-shredded tart green mango",
         "nameZh": "手切酸脆青芒果丝",
-        "amount": "200 ក្រាម (200g)"
+        "amount": "២០០ ក្រាម"
       },
       {
         "nameKh": "ទឹកត្រីល្អ ស្ករត្នោត ខ្ទឹមស និងម្ទេសខ្មាំង",
         "nameEn": "Premium fish sauce, palm sugar, minced garlic & chilies",
         "nameZh": "特级鱼露、棕榈糖、蒜蓉与小米辣",
-        "amount": "4 ស្លាបព្រាបាយ (4 tbsp)"
+        "amount": "៤ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ជីរគ្រប់មុខ និងត្រសក់ស្រស់",
         "nameEn": "Assorted fresh Khmer herbs & cucumber slices",
         "nameZh": "高棉什锦香草与鲜黄瓜片",
-        "amount": "100 ក្រាម (100g)"
+        "amount": "១០០ ក្រាម"
       }
     ],
     "steps": [
@@ -237,9 +237,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Delicate whole Mekong river sheatfish pan-fried until golden and crispy outside while staying sweet and tender inside.",
     "descriptionZh": "肉质细嫩的湄公河鲶鱼，入锅慢煎至通体金黄酥脆，配酸辣蘸汁。",
     "photoUrl": "/foods/food-234.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "២ នាក់",
     "calories": 495,
     "difficulty": "medium",
     "priceRiel": 28000,
@@ -249,25 +249,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីកេសទន្លេស្រស់លាងស្អាត",
         "nameEn": "Fresh whole Mekong river sheatfish (Trei Kes)",
         "nameZh": "新鲜湄公河鲶鱼",
-        "amount": "400 ក្រាម (400g)"
+        "amount": "៤០០ ក្រាម"
       },
       {
         "nameKh": "ខ្ទឹមសចិញ្ច្រាំបំពង និងអំបិលម៉ត់បន្តិច",
         "nameEn": "Crispy fried garlic & fine sea salt",
         "nameZh": "炸蒜酥与细海盐",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
+        "amount": "២ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ទឹកត្រីអំពិលទុំ ឬទឹកត្រីកោះកុង",
         "nameEn": "Tamarind chili fish sauce or Koh Kong dipping sauce",
         "nameZh": "酸角鱼露汁或国公海鲜辣酱",
-        "amount": "1 កូនចាន (1 small bowl)"
+        "amount": "១ កូនចាន"
       },
       {
         "nameKh": "ស្វាយខ្ចី ត្រសក់ និងជីរវ៉ាន់ស៊ុយ",
         "nameEn": "Green mango strips, cucumber & fresh cilantro",
         "nameZh": "青芒果条、黄瓜与香菜",
-        "amount": "100 ក្រាម (100g)"
+        "amount": "១០០ ក្រាម"
       }
     ],
     "steps": [
@@ -310,9 +310,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Succulent Mekong giant river prawns flash-fried and wok-tossed in a creamy, velvety salted duck egg yolk and garlic glaze.",
     "descriptionZh": "肥美湄公河大头虾酥炸后，裹满起沙流油的咸鸭蛋黄蒜香酱汁，鲜香浓郁。",
     "photoUrl": "/foods/food-235.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 460,
     "difficulty": "easy",
     "priceRiel": 35000,
@@ -322,25 +322,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "បង្កងទន្លេធំៗស្រស់កាត់ពុកមាត់វះខ្នង",
         "nameEn": "Fresh giant river prawns, trimmed and split",
         "nameZh": "新鲜开背湄公河大头虾",
-        "amount": "450 ក្រាម (450g)"
+        "amount": "៤៥០ ក្រាម"
       },
       {
         "nameKh": "ក្រហមពងទាប្រៃចំហុយកិនម៉ត់ ៤ គ្រាប់",
         "nameEn": "4 steamed and mashed salted duck egg yolks",
         "nameZh": "蒸熟压泥的咸鸭蛋黄4颗",
-        "amount": "4 គ្រាប់ (4 yolks)"
+        "amount": "៤ គ្រាប់"
       },
       {
         "nameKh": "ខ្ទឹមសចិញ្ច្រាំ ប៊័រ និងស្លឹកខ្ទឹមហាន់",
         "nameEn": "Minced garlic, butter & chopped scallions",
         "nameZh": "蒜末、黄油与葱花",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ម្ទេសក្រហមហាន់ ស្ករត្នោតបន្តិច និងទឹកដោះគោឆៅ",
         "nameEn": "Sliced red chilies, pinch of sugar & splash of evaporated milk",
         "nameZh": "红椒圈、少许糖与淡奶",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
+        "amount": "២ ស្លាបព្រាបាយ"
       }
     ],
     "steps": [
@@ -383,9 +383,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Rich Cambodian claypot beef soup simmered with marbled brisket, beef tendon, meatballs, morning glory, and aromatic herbs.",
     "descriptionZh": "热气腾腾的柬埔寨砂锅牛肉汤，慢炖牛腩、牛蹄筋与手打牛肉丸，配空心菜与刺芫荽。",
     "photoUrl": "/foods/food-236.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 310,
     "difficulty": "easy",
     "priceRiel": 42000,
@@ -395,25 +395,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់គោជាប់ខ្លាញ់ សរសៃកែង និងប្រហិតសាច់គោ",
         "nameEn": "Beef brisket, tender tendon & bouncy beef meatballs",
         "nameZh": "牛腩块、熟牛筋与手打牛肉丸",
-        "amount": "450 ក្រាម (450g)"
+        "amount": "៤៥០ ក្រាម"
       },
       {
         "nameKh": "ទឹកស៊ុបឆ្អឹងគោរម្ងាស់គ្រឿងទេសខ្មែរ",
         "nameEn": "Slow-simmered aromatic Cambodian beef bone broth",
         "nameZh": "高棉香料慢熬牛骨高汤",
-        "amount": "800 មីលីលីត្រ (800ml)"
+        "amount": "៨០០ មីលីលីត្រ"
       },
       {
         "nameKh": "ត្រកួន ស្ពៃតឿ ផ្សិតម្ជុល និងពោតបារាំង",
         "nameEn": "Morning glory, bok choy, enoki mushrooms & okra",
         "nameZh": "空心菜、小棠菜、金针菇与秋葵",
-        "amount": "250 ក្រាម (250g)"
+        "amount": "២៥០ ក្រាម"
       },
       {
         "nameKh": "ខ្ទឹមសបំពង ជីររណារ ជីរនាងវង និងទឹកជ្រលក់សៀង",
         "nameEn": "Fried garlic, culantro, basil & fermented bean dipping sauce",
         "nameZh": "炸蒜酥、刺芫荽、罗勒与腐乳辣酱",
-        "amount": "1 ឈុត (1 set)"
+        "amount": "១ ឈុត"
       }
     ],
     "steps": [
@@ -456,9 +456,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Freshwater Cambodian spiny eel fish deep-fried whole until golden and crunchy, tossed with crispy garlic and kaffir lime leaves.",
     "descriptionZh": "柬埔寨特色淡水刺鳅鱼整条酥炸至金黄香脆，撒上炸蒜酥与柠檬叶，配罗望子辣酱。",
     "photoUrl": "/foods/food-237.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 420,
     "difficulty": "medium",
     "priceRiel": 49000,
@@ -468,25 +468,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីឆ្លូញស្រស់លាងទឹកអំបិលស្អាត",
         "nameEn": "Fresh cleaned freshwater spiny eel fish (Trei Chhlounh)",
         "nameZh": "洗净新鲜淡水刺鳅鱼",
-        "amount": "350 ក្រាម (350g)"
+        "amount": "៣៥០ ក្រាម"
       },
       {
         "nameKh": "ម្សៅបំពងស្រួយបន្តិច និងអំបិលម្រេច",
         "nameEn": "Light dusting of crispy rice flour, salt & Kampot pepper",
         "nameZh": "薄酥炸粉、海盐与贡布胡椒",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
+        "amount": "២ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ខ្ទឹមសបំពង និងស្លឹកក្រូចសើចបំពងស្រួយ",
         "nameEn": "Golden fried garlic & crispy kaffir lime leaves",
         "nameZh": "金黄炸蒜酥与酥炸柠檬叶",
-        "amount": "30 ក្រាម (30g)"
+        "amount": "៣០ ក្រាម"
       },
       {
         "nameKh": "ទឹកត្រីអំពិលទុំ និងស្វាយខ្ចីឈូស",
         "nameEn": "Spicy tamarind fish sauce & shredded green mango",
         "nameZh": "酸角鱼露辣酱与青芒果丝",
-        "amount": "1 ឈុត (1 set)"
+        "amount": "១ ឈុត"
       }
     ],
     "steps": [
@@ -529,9 +529,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Crunchy marinated chicken knee cartilage deep-fried until golden and wok-tossed with crispy garlic, chilies, and kaffir lime leaves.",
     "descriptionZh": "秘制腌制的鸡膝软骨酥炸至香脆可口，配金黄蒜酥、红辣椒与柠檬叶翻炒。",
     "photoUrl": "/foods/food-238.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 410,
     "difficulty": "easy",
     "priceRiel": 11000,
@@ -541,25 +541,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សរសៃកែងមាន់ស្រស់លាងស្អាត",
         "nameEn": "Fresh chicken knee cartilage and tendons",
         "nameZh": "新鲜鸡膝软骨",
-        "amount": "350 ក្រាម (350g)"
+        "amount": "៣៥០ ក្រាម"
       },
       {
         "nameKh": "ម្សៅបំពងស្រួយ ទឹកត្រី និងប្រេងខ្យង",
         "nameEn": "Crispy frying flour, fish sauce & oyster sauce",
         "nameZh": "酥炸粉、鱼露与蚝油",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ខ្ទឹមសចិញ្ច្រាំបំពងមាស និងល្ងស",
         "nameEn": "Golden crispy fried garlic & toasted sesame seeds",
         "nameZh": "金黄炸蒜酥与熟白芝麻",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ស្លឹកក្រូចសើច ម្ទេសហាន់ និងទឹកម្ទេស",
         "nameEn": "Fried kaffir lime leaves, sliced chilies & chili sauce",
         "nameZh": "酥炸柠檬叶、辣椒圈与甜辣酱",
-        "amount": "30 ក្រាម (30g)"
+        "amount": "៣០ ក្រាម"
       }
     ],
     "steps": [
@@ -602,9 +602,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Plump coastal blood cockles steamed with bruised lemongrass and tossed in a fiery Cambodian chili-salt, garlic, and lime glaze.",
     "descriptionZh": "鲜活肥美的海捕血蚶配香茅焖熟，裹满高棉特色蒜蓉辣椒盐与青柠汁，鲜辣过瘾。",
     "photoUrl": "/foods/food-239.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 185,
     "difficulty": "easy",
     "priceRiel": 18000,
@@ -614,25 +614,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ងាវសមុទ្រស្រស់ដុសលាងសំបកស្អាត",
         "nameEn": "Fresh plump blood cockles, scrubbed clean",
         "nameZh": "刷洗干净的鲜活血蚶",
-        "amount": "500 ក្រាម (500g)"
+        "amount": "៥០០ ក្រាម"
       },
       {
         "nameKh": "អំបិលម្ទេសបុក ខ្ទឹមសចិញ្ច្រាំ និងស្ករត្នោតបន្តិច",
         "nameEn": "Pounded chili salt, minced garlic & touch of palm sugar",
         "nameZh": "捣碎辣椒盐、蒜蓉与少许棕榈糖",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃដំ និងស្លឹកក្រូចសើច",
         "nameEn": "Bruised lemongrass stalks & kaffir lime leaves",
         "nameZh": "拍碎香茅与柠檬叶",
-        "amount": "50 ក្រាម (50g)"
+        "amount": "៥០ ក្រាម"
       },
       {
         "nameKh": "ជីរពង់ទាកូន (ជីរវៀតណាម) និងទឹកក្រូចឆ្មារ",
         "nameEn": "Vietnamese coriander (Rau Ram) & fresh lime juice",
         "nameZh": "越南香菜（叻沙叶）与鲜青柠汁",
-        "amount": "50 ក្រាម (50g)"
+        "amount": "៥០ ក្រាម"
       }
     ],
     "steps": [
@@ -675,9 +675,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Rich, fatty salmon fins and belly strips rubbed with Cambodian chili salt and grilled until the skin is shatteringly crisp.",
     "descriptionZh": "油脂丰富的三文鱼鳍与鱼腩，抹匀高棉辣椒盐炭火慢烤至鱼皮焦脆，配国公青柠辣酱。",
     "photoUrl": "/foods/food-240.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "២ នាក់",
     "calories": 345,
     "difficulty": "medium",
     "priceRiel": 25000,
@@ -687,25 +687,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ព្រុយនិងសាច់ពោះត្រីសាលម៉ុនស្រស់",
         "nameEn": "Fresh salmon fins and rich belly strips",
         "nameZh": "新鲜三文鱼鳍与鱼腩条",
-        "amount": "350 ក្រាម (350g)"
+        "amount": "៣៥០ ក្រាម"
       },
       {
         "nameKh": "អំបិលម្ទេសបុក និងខ្ទឹមសម៉ត់",
         "nameEn": "Coarse Cambodian chili salt & garlic rub",
         "nameZh": "高棉粗粒辣椒盐与蒜蓉",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
+        "amount": "២ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ទឹកត្រីកោះកុង និងក្រូចឆ្មារចំណិត",
         "nameEn": "Spicy Koh Kong seafood dipping sauce & lime wedges",
         "nameZh": "国公酸辣海鲜酱与青柠角",
-        "amount": "1 កូនចាន (1 small bowl)"
+        "amount": "១ កូនចាន"
       },
       {
         "nameKh": "ត្រសក់ស្រស់ និងជីរអង្កាម",
         "nameEn": "Crisp cucumber slices & fresh mint leaves",
         "nameZh": "脆黄瓜片与鲜薄荷叶",
-        "amount": "80 ក្រាម (80g)"
+        "amount": "៨០ ក្រាម"
       }
     ],
     "steps": [
@@ -748,9 +748,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Juicy blanched blood cockles tossed in a bold Cambodian dressing of roasted shrimp paste (Kapi), lime juice, lemongrass, and chilies.",
     "descriptionZh": "鲜嫩白灼血蚶拌入高棉烤虾酱、鲜青柠汁、香茅薄片与小米辣，咸鲜酸辣。",
     "photoUrl": "/foods/food-241.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 195,
     "difficulty": "easy",
     "priceRiel": 32000,
@@ -760,25 +760,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ងាវសមុទ្រស្រស់ស្រុសទឹកក្តៅបកសំបកម្ខាង",
         "nameEn": "Blanched fresh blood cockles on the half shell",
         "nameZh": "去半壳白灼鲜血蚶",
-        "amount": "450 ក្រាម (450g)"
+        "amount": "៤៥០ ក្រាម"
       },
       {
         "nameKh": "កាពិខ្មែរអាំង ទឹកក្រូចឆ្មារ និងស្ករត្នោត",
         "nameEn": "Roasted shrimp paste (Kapi), fresh lime juice & palm sugar",
         "nameZh": "高棉烤虾酱、鲜青柠汁与棕榈糖",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃ ខ្ទឹមក្រហម និងខ្ទឹមសហាន់បន្ទះ",
         "nameEn": "Thinly sliced lemongrass, shallots & garlic cloves",
         "nameZh": "香茅薄片、红葱头与蒜片",
-        "amount": "80 ក្រាម (80g)"
+        "amount": "៨០ ក្រាម"
       },
       {
         "nameKh": "ម្ទេសខ្មាំងបុក ជីររណារ និងជីរអង្កាម",
         "nameEn": "Crushed bird-eye chilies, culantro & fresh mint",
         "nameZh": "捣碎小米辣、刺芫荽与鲜薄荷",
-        "amount": "40 ក្រាម (40g)"
+        "amount": "៤០ ក្រាម"
       }
     ],
     "steps": [
@@ -821,9 +821,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Prized coastal crab brimming with rich orange roe, marinated in a savory-spicy bath of fish sauce, soy, garlic, chilies, and lime.",
     "descriptionZh": "满腹红膏的鲜活海蟹，以秘制鱼露豉油、蒜片、小米辣与鲜青柠汁腌制入味，蟹膏绵密鲜甜。",
     "photoUrl": "/foods/food-242.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 190,
     "difficulty": "easy",
     "priceRiel": 39000,
@@ -833,25 +833,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ក្តាមសមុទ្រស្រស់ពេញពងក្រហមលាងស្អាត",
         "nameEn": "Fresh roe-filled coastal crabs, cleaned and halved",
         "nameZh": "洗净切半的鲜活红膏海蟹",
-        "amount": "500 ក្រាម (500g)"
+        "amount": "៥០០ ក្រាម"
       },
       {
         "nameKh": "ទឹកត្រីល្អ ទឹកស៊ីអ៊ីវ ស្ករត្នោត និងទឹកក្រូចឆ្មារ",
         "nameEn": "Premium fish sauce, soy sauce, palm sugar & fresh lime juice",
         "nameZh": "特级鱼露、生抽、棕榈糖与鲜青柠汁",
-        "amount": "1 កូនចាន (1 cup)"
+        "amount": "១ កូនចាន"
       },
       {
         "nameKh": "ខ្ទឹមសចំណិត និងម្ទេសខ្មាំងហាន់",
         "nameEn": "Sliced garlic cloves & chopped bird-eye chilies",
         "nameZh": "大蒜切片与小米辣圈",
-        "amount": "60 ក្រាម (60g)"
+        "amount": "៦០ ក្រាម"
       },
       {
         "nameKh": "ជីរវ៉ាន់ស៊ុយ និងគល់ស្លឹកគ្រៃហាន់ស្ដើង",
         "nameEn": "Fresh cilantro & thinly sliced lemongrass",
         "nameZh": "新鲜香菜与香茅薄片",
-        "amount": "40 ក្រាម (40g)"
+        "amount": "៤០ ក្រាម"
       }
     ],
     "steps": [
@@ -894,9 +894,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Sweet freshwater baby shrimp gently pounded in a mortar with tart young green tamarind pods, roasted prahok, palm sugar, and chilies.",
     "descriptionZh": "鲜甜淡水小河虾与酸爽嫩青酸角、炭烤鱼露膏、棕榈糖及小米辣同捣，酸辣鲜美。",
     "photoUrl": "/foods/food-243.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 265,
     "difficulty": "medium",
     "priceRiel": 46000,
@@ -906,25 +906,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "កំពឹសទឹកសាបស្រស់លាងស្អាត",
         "nameEn": "Fresh sweet freshwater baby shrimp (Kampis)",
         "nameZh": "洗净新鲜淡水小河虾 (Kampis)",
-        "amount": "250 ក្រាម (250g)"
+        "amount": "២៥០ ក្រាម"
       },
       {
         "nameKh": "ផ្លែអំពិលខ្ចីស្រស់",
         "nameEn": "Fresh young green tamarind pods",
         "nameZh": "新鲜嫩青酸角果",
-        "amount": "150 ក្រាម (150g)"
+        "amount": "១៥០ ក្រាម"
       },
       {
         "nameKh": "ប្រហុកអាំង ស្ករត្នោត ខ្ទឹមស និងម្ទេសខ្មាំង",
         "nameEn": "Roasted prahok, palm sugar, garlic & bird-eye chilies",
         "nameZh": "烤鱼露膏、棕榈糖、大蒜与小米辣",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ជីររណារ ជីរនាងវង និងត្រប់ស្រួយ",
         "nameEn": "Culantro, sweet basil & crisp round eggplants",
         "nameZh": "刺芫荽、甜罗勒与脆圆茄",
-        "amount": "80 ក្រាម (80g)"
+        "amount": "៨០ ក្រាម"
       }
     ],
     "steps": [
@@ -967,9 +967,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Zesty Cambodian hot and sour soup loaded with tender pork spare ribs, straw mushrooms, lemongrass, galangal, and fresh lime.",
     "descriptionZh": "酸辣开胃的柬埔寨猪肋排汤，配香茅、南姜、柠檬叶、草菇与鲜青柠汁慢炖。",
     "photoUrl": "/foods/food-244.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 260,
     "difficulty": "easy",
     "priceRiel": 53000,
@@ -979,25 +979,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ឆ្អឹងជំនីរជ្រូកខ្ចីកាប់ដុំល្មម",
         "nameEn": "Young pork spare ribs cut into pieces",
         "nameZh": "鲜嫩猪肋排块",
-        "amount": "400 ក្រាម (400g)"
+        "amount": "៤០០ ក្រាម"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃ រំដេង ស្លឹកក្រូចសើច និងប៉េងប៉ោះ",
         "nameEn": "Lemongrass, galangal, kaffir lime leaves & tomatoes",
         "nameZh": "香茅、南姜、柠檬叶与番茄",
-        "amount": "150 ក្រាម (150g)"
+        "amount": "១៥០ ក្រាម"
       },
       {
         "nameKh": "ផ្សិតចំបើង ទឹកក្រូចឆ្មារ និងម្ទេសខ្មាំងបុក",
         "nameEn": "Straw mushrooms, fresh lime juice & crushed chilies",
         "nameZh": "草菇、鲜青柠汁与小米辣",
-        "amount": "150 ក្រាម (150g)"
+        "amount": "១៥០ ក្រាម"
       },
       {
         "nameKh": "ជីររណារ ស្លឹកខ្ទឹម និងខ្ទឹមសបំពង",
         "nameEn": "Culantro, scallions & crispy fried garlic",
         "nameZh": "刺芫荽、香葱与炸蒜酥",
-        "amount": "40 ក្រាម (40g)"
+        "amount": "៤០ ក្រាម"
       }
     ],
     "steps": [
@@ -1040,9 +1040,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Collagen-rich chicken feet slow-simmered until tender in a fiery Cambodian lemongrass, galangal, lime, and chili broth.",
     "descriptionZh": "富含胶原蛋白的凤爪慢炖至软糯脱骨，汤底酸辣鲜香，充满香茅与青柠风味。",
     "photoUrl": "/foods/food-245.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 215,
     "difficulty": "easy",
     "priceRiel": 15000,
@@ -1052,25 +1052,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ជើងមាន់ស្រស់កាត់ក្រចកលាងស្អាត",
         "nameEn": "Cleaned fresh chicken feet, claws trimmed",
         "nameZh": "去趾洗净的新鲜凤爪",
-        "amount": "400 ក្រាម (400g)"
+        "amount": "៤០០ ក្រាម"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃ រំដេង ស្លឹកក្រូចសើច និងផ្សិតម្ជុល",
         "nameEn": "Lemongrass, galangal, kaffir lime leaves & enoki mushrooms",
         "nameZh": "香茅、南姜、柠檬叶与金针菇",
-        "amount": "150 ក្រាម (150g)"
+        "amount": "១៥០ ក្រាម"
       },
       {
         "nameKh": "ទឹកក្រូចឆ្មារ ទឹកត្រី ស្ករត្នោត និងម្ទេសខ្មាំង",
         "nameEn": "Fresh lime juice, fish sauce, palm sugar & bird-eye chilies",
         "nameZh": "鲜青柠汁、鱼露、棕榈糖与小米辣",
-        "amount": "4 ស្លាបព្រាបាយ (4 tbsp)"
+        "amount": "៤ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ជីររណារ ជីរវ៉ាន់ស៊ុយ និងខ្ទឹមសបំពង",
         "nameEn": "Culantro, cilantro & crispy fried garlic",
         "nameZh": "刺芫荽、香菜与炸蒜酥",
-        "amount": "40 ក្រាម (40g)"
+        "amount": "៤០ ក្រាម"
       }
     ],
     "steps": [
@@ -1113,9 +1113,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Silky steamed chicken blood cubes and giblets in a tangy, spicy lemongrass broth with bean sprouts and Vietnamese coriander.",
     "descriptionZh": "滑嫩鸡血块配鲜美鸡杂，加入香茅、豆芽、青柠汁与越南香菜煮成酸辣热汤。",
     "photoUrl": "/foods/food-246.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "២ នាក់",
     "calories": 315,
     "difficulty": "medium",
     "priceRiel": 22000,
@@ -1125,25 +1125,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ឈាមមាន់ចំហុយកាត់ដុំ និងគ្រឿងក្នុងមាន់",
         "nameEn": "Cubed silky chicken blood curd & cleaned chicken giblets",
         "nameZh": "滑嫩鸡血块与洗净鸡杂",
-        "amount": "350 ក្រាម (350g)"
+        "amount": "៣៥០ ក្រាម"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃ រំដេង និងស្លឹកក្រូចសើច",
         "nameEn": "Bruised lemongrass, galangal & kaffir lime leaves",
         "nameZh": "拍碎香茅、南姜与柠檬叶",
-        "amount": "60 ក្រាម (60g)"
+        "amount": "៦០ ក្រាម"
       },
       {
         "nameKh": "សណ្តែកបណ្តុះ ទឹកក្រូចឆ្មារ និងម្ទេសខ្មាំង",
         "nameEn": "Crisp bean sprouts, fresh lime juice & bird-eye chilies",
         "nameZh": "脆豆芽、鲜青柠汁与小米辣",
-        "amount": "150 ក្រាម (150g)"
+        "amount": "១៥០ ក្រាម"
       },
       {
         "nameKh": "ជីរពង់ទាកូន ជីររណារ និងខ្ទឹមសបំពង",
         "nameEn": "Vietnamese coriander, culantro & crispy fried garlic",
         "nameZh": "越南香菜、刺芫荽与炸蒜酥",
-        "amount": "50 ក្រាម (50g)"
+        "amount": "៥០ ក្រាម"
       }
     ],
     "steps": [
@@ -1186,9 +1186,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Plump, briny-sweet coastal oysters served chilled on the half shell with crispy fried shallots, wild acacia shoots, lime, and Koh Kong chili dip.",
     "descriptionZh": "肥美鲜甜的柬埔寨沿海生蚝，配金黄炸红葱酥、银合欢嫩芽、青柠与国公青柠海鲜辣酱。",
     "photoUrl": "/foods/food-247.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 165,
     "difficulty": "easy",
     "priceRiel": 29000,
@@ -1198,25 +1198,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "អយស្ទ័រសមុទ្រស្រស់ៗបកសំបកម្ខាង",
         "nameEn": "Fresh shucked coastal oysters on ice",
         "nameZh": "冰镇鲜活开壳海生蚝",
-        "amount": "6 គ្រាប់ធំ (6 large oysters)"
+        "amount": "៦ គ្រាប់ធំ"
       },
       {
         "nameKh": "ខ្ទឹមក្រហមបំពងស្រួយ និងខ្ទឹមសចំណិត",
         "nameEn": "Golden crispy fried shallots & raw garlic slices",
         "nameZh": "金黄炸红葱酥与生蒜片",
-        "amount": "50 ក្រាម (50g)"
+        "amount": "៥០ ក្រាម"
       },
       {
         "nameKh": "ទឹកត្រីកោះកុង (ម្ទេសខៀវ-ក្រហម ខ្ទឹមស ក្រូចឆ្មារ)",
         "nameEn": "Spicy Koh Kong green & red chili-lime seafood sauce",
         "nameZh": "国公青红椒青柠海鲜蘸酱",
-        "amount": "1 កូនចាន (1 bowl)"
+        "amount": "១ កូនចាន"
       },
       {
         "nameKh": "ត្រួយក្ទម្ទេស ក្រូចឆ្មារ និងទឹកម្ទេសសៀង",
         "nameEn": "Fresh leadtree shoots (Kanthom Thet), lime wedges & chili paste",
         "nameZh": "新鲜银合欢嫩芽、青柠角与辣酱",
-        "amount": "1 ឈុត (1 set)"
+        "amount": "១ ឈុត"
       }
     ],
     "steps": [
@@ -1259,9 +1259,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Sizzling oysters roasted in their shells over charcoal embers, topped with Cambodian chili salt, scallion oil, and crispy garlic.",
     "descriptionZh": "带壳大生蚝在炭火上烤至滋滋作响，铺上高棉辣椒盐、香葱油与金黄炸蒜酥。",
     "photoUrl": "/foods/food-248.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 210,
     "difficulty": "easy",
     "priceRiel": 36000,
@@ -1271,25 +1271,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "អយស្ទ័រសមុទ្រធំៗបកសំបកម្ខាង",
         "nameEn": "Large coastal oysters on the half shell",
         "nameZh": "半壳大号海生蚝",
-        "amount": "6 គ្រាប់ធំ (6 large oysters)"
+        "amount": "៦ គ្រាប់ធំ"
       },
       {
         "nameKh": "អំបិលម្ទេសបុក និងខ្លាញ់ស្លឹកខ្ទឹម",
         "nameEn": "Spiced chili-garlic salt & fragrant scallion oil",
         "nameZh": "蒜香辣椒盐与香葱油",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ខ្ទឹមសបំពង និងសណ្តែកដីលីងបុក",
         "nameEn": "Crispy fried garlic & crushed roasted peanuts",
         "nameZh": "炸蒜酥与烤花生碎",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
+        "amount": "២ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ទឹកត្រីកោះកុង និងក្រូចឆ្មារ",
         "nameEn": "Koh Kong dipping sauce & fresh lime wedges",
         "nameZh": "国公海鲜辣酱与青柠角",
-        "amount": "1 ឈុត (1 set)"
+        "amount": "១ ឈុត"
       }
     ],
     "steps": [
@@ -1332,9 +1332,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Authentic Cambodian countryside sour soup of rich river fish roe simmered with aromatic shredded young turmeric leaves and tamarind.",
     "descriptionZh": "极具柬埔寨乡村风味的鲜鱼籽酸汤，配细切鲜嫩姜黄叶与罗望子同煮，清香解腻。",
     "photoUrl": "/foods/food-249.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 265,
     "difficulty": "medium",
     "priceRiel": 43000,
@@ -1344,25 +1344,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ពងត្រីទន្លេស្រស់លាងស្អាត",
         "nameEn": "Fresh river fish roe sacs",
         "nameZh": "洗净新鲜河鱼籽",
-        "amount": "350 ក្រាម (350g)"
+        "amount": "៣៥០ ក្រាម"
       },
       {
         "nameKh": "ស្លឹករមៀតខ្ចីហាន់សរសៃស្ដើងៗ",
         "nameEn": "Finely shredded young turmeric leaves (Slek Romiet)",
         "nameZh": "细切鲜嫩姜黄叶丝",
-        "amount": "50 ក្រាម (50g)"
+        "amount": "៥០ ក្រាម"
       },
       {
         "nameKh": "គ្រឿងបុកលឿង ប្រហុក និងទឹកអំពិលទុំ",
         "nameEn": "Yellow lemongrass kroeung, prahok & ripe tamarind",
         "nameZh": "黄柠檬草香料泥、鱼露膏与酸角汁",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ជីរម្អម និងម្ទេសខ្មាំងស្រស់",
         "nameEn": "Rice paddy herb & fresh bird-eye chilies",
         "nameZh": "水芙蓉与新鲜小米辣",
-        "amount": "30 ក្រាម (30g)"
+        "amount": "៣០ ក្រាម"
       }
     ],
     "steps": [
@@ -1395,7 +1395,7 @@ export const foodpanda100Foods: FoodItem[] = [
   {
     "id": "food-250",
     "nameKh": "ឆាគ្រឿងសៀមរាប",
-    "nameEn": "Siem Reap Style Herbal Kroeung Stir-Fry withPrahok & Peanuts (Cha Kroeung Siem Reap)",
+    "nameEn": "Siem Reap Style Herbal Kroeung Stir-Fry with Prahok & Peanuts (Cha Kroeung Siem Reap)",
     "nameZh": "暹粒风味香茅鱼露膏炒肉 (Cha Kroeung Siem Reap)",
     "categorySlug": "stirfry",
     "categoryKh": "ម្ហូបឆា និងក្តៅ",
@@ -1405,9 +1405,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Signature Siem Reap dry-style stir-fry featuring pounded turmeric-lemongrass kroeung, savory prahok, crisp round eggplants, and holy basil.",
     "descriptionZh": "正宗暹粒风味干炒香料肉，融合鲜姜黄香茅泥、鱼露膏、脆圆茄与圣罗勒叶，浓香四溢。",
     "photoUrl": "/foods/food-250.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 515,
     "difficulty": "easy",
     "priceRiel": 50000,
@@ -1417,25 +1417,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់គោ ឬសាច់ជ្រូកបីជាន់ហាន់ស្ដើង",
         "nameEn": "Thinly sliced tender beef or pork belly",
         "nameZh": "薄切嫩牛肉或五花肉",
-        "amount": "350 ក្រាម (350g)"
+        "amount": "៣៥០ ក្រាម"
       },
       {
         "nameKh": "គ្រឿងបុកសៀមរាប (ស្លឹកគ្រៃ រមៀត រំដេង ខ្ជាយ) និងប្រហុក",
         "nameEn": "Siem Reap pounded yellow kroeung paste & minced prahok",
         "nameZh": "暹粒黄柠檬草香料泥与鱼露膏",
-        "amount": "4 ស្លាបព្រាបាយ (4 tbsp)"
+        "amount": "៤ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ត្រប់ស្រួយ និងត្រប់ពុតលំញង",
         "nameEn": "Crisp Thai round eggplants & pea eggplants",
         "nameZh": "脆圆茄片与水茄",
-        "amount": "150 ក្រាម (150g)"
+        "amount": "១៥០ ក្រាម"
       },
       {
         "nameKh": "ស្លឹកម្រះព្រៅ ស្លឹកក្រូចសើច និងម្ទេសក្រហម",
         "nameEn": "Holy basil leaves, kaffir lime leaves & red chilies",
         "nameZh": "圣罗勒叶、柠檬叶与红辣椒",
-        "amount": "40 ក្រាម (40g)"
+        "amount": "៤០ ក្រាម"
       }
     ],
     "steps": [
@@ -1478,9 +1478,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Fresh Indian mackerel lightly scored, seasoned with sea salt, and pan-fried until golden and crispy, served with spicy Koh Kong fish sauce.",
     "descriptionZh": "新鲜小鲭鱼划刀抹盐香煎至外皮金黄酥脆，配国公省酸辣海鲜蘸汁。",
     "photoUrl": "/foods/food-251.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 410,
     "difficulty": "easy",
     "priceRiel": 12000,
@@ -1490,25 +1490,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីកាម៉ុងស្រស់ ៤ ក្បាល (៥០០ ក្រាម)",
         "nameEn": "Fresh Indian mackerel 4 whole (500 g)",
         "nameZh": "新鲜小鲭鱼 4条（500克）",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "អំបិលម៉ដ្ឋ និងម្រេច ១ ស្លាបព្រាកាហ្វេ",
         "nameEn": "Fine salt & black pepper 1 tsp",
         "nameZh": "细盐与黑胡椒 1茶匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមស ម្ទេស និងក្រូចឆ្មារ សម្រាប់ទឹកត្រី ១ ចាន",
         "nameEn": "Garlic, chili & lime for dipping sauce 1 bowl",
         "nameZh": "蒜末、辣椒与青柠（蘸汁用）1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប្រេងឆា ៤ ស្លាបព្រាបាយ",
         "nameEn": "Cooking oil 4 tbsp",
         "nameZh": "食用油 4汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -1551,9 +1551,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Wok-seared garlic and oyster-sauce beef strips spooned warm over crisp, peppery wild peperomia greens.",
     "descriptionZh": "大火蒜香蚝油爆炒嫩牛肉，铺在清脆微辛的新鲜草胡椒叶上。",
     "photoUrl": "/foods/food-252.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "២ នាក់",
     "calories": 385,
     "difficulty": "medium",
     "priceRiel": 19000,
@@ -1563,25 +1563,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់គោផុយហាន់ស្តើងៗ ៣០០ ក្រាម",
         "nameEn": "Tender beef sirloin sliced thin 300 g",
         "nameZh": "嫩牛里脊薄片 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "បន្លែក្រសាំងទាបស្រស់ ២៥០ ក្រាម",
         "nameEn": "Fresh peperomia greens (Krasang Teap) 250 g",
         "nameZh": "新鲜草胡椒叶 250克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសចិញ្ច្រាំ ២ ស្លាបព្រាបាយ",
         "nameEn": "Minced garlic 2 tbsp",
         "nameZh": "蒜末 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប្រេងខ្យង និងទឹកស៊ីអ៊ីវ ២ ស្លាបព្រាបាយ",
         "nameEn": "Oyster sauce & soy sauce 2 tbsp",
         "nameZh": "蚝油与酱油 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -1624,9 +1624,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Crunchy young lotus stems stir-fried over high heat with tender marinated beef, garlic, and scallions.",
     "descriptionZh": "鲜嫩爽脆的藕带配滑嫩牛肉片大火快炒，鲜香脆口。",
     "photoUrl": "/foods/food-253.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 275,
     "difficulty": "easy",
     "priceRiel": 26000,
@@ -1636,25 +1636,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ក្រអៅឈូកខ្ចីកាត់កង់ ៣០០ ក្រាម",
         "nameEn": "Young lotus stems cut into batons 300 g",
         "nameZh": "鲜嫩藕带切段 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់គោហាន់ស្តើងៗ ២៥០ ក្រាម",
         "nameEn": "Sliced beef tenderloin 250 g",
         "nameZh": "牛肉薄片 250克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសចិញ្ច្រាំ ១ ស្លាបព្រាបាយ",
         "nameEn": "Minced garlic 1 tbsp",
         "nameZh": "蒜末 1汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប្រេងខ្យង ទឹកត្រី និងស្លឹកខ្ទឹម ២ ស្លាបព្រាបាយ",
         "nameEn": "Oyster sauce, fish sauce & scallions 2 tbsp",
         "nameZh": "蚝油、鱼露与葱段 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -1697,9 +1697,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Crunchy pork chitterlings wok-fried with savory Cambodian fermented fish mam, minced pork, lemongrass, and chilies.",
     "descriptionZh": "爽脆猪粉肠配柬埔寨传统腌鱼（Mam）、肉末、香茅和辣椒爆炒，咸香浓郁。",
     "photoUrl": "/foods/food-254.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 310,
     "difficulty": "easy",
     "priceRiel": 33000,
@@ -1709,25 +1709,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ពោះតាន់ជ្រូកស្ងោរឆ្អិនកាត់កង់ ៣០០ ក្រាម",
         "nameEn": "Boiled pork chitterlings cut into pieces 300 g",
         "nameZh": "熟猪粉肠切段 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ម៉ាំត្រីចិញ្ច្រាំ ៣ ស្លាបព្រាបាយ",
         "nameEn": "Minced fermented fish (Mam) 3 tbsp",
         "nameZh": "剁碎柬式腌鱼（Mam）3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកចិញ្ច្រាំ ១០០ ក្រាម",
         "nameEn": "Minced pork 100 g",
         "nameZh": "猪肉末 100克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃហាន់ ខ្ទឹមស ម្ទេស និងស្លឹកក្រូចសើច ៣ ស្លាបព្រាបាយ",
         "nameEn": "Sliced lemongrass, garlic, chili & kaffir lime leaves 3 tbsp",
         "nameZh": "香茅片、蒜末、辣椒与柠檬叶 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -1770,9 +1770,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Pungent Cambodian fermented fish mam tossed with lime, garlic, chilies, and crunchy Thai eggplant, served alongside boiled pork chitterlings.",
     "descriptionZh": "柬式风味生腌鱼拌入青柠汁、蒜片、辣椒与脆茄子，搭配爽脆白灼猪粉肠享用。",
     "photoUrl": "/foods/food-255.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 460,
     "difficulty": "medium",
     "priceRiel": 40000,
@@ -1782,25 +1782,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ម៉ាំត្រីឆ្ងាញ់ ១៥០ ក្រាម",
         "nameEn": "Premium Cambodian fermented fish (Mam) 150 g",
         "nameZh": "优质柬式腌鱼（Mam）150克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ពោះតាន់ជ្រូកស្ងោរស្រួយ ៣០០ ក្រាម",
         "nameEn": "Boiled crunchy pork chitterlings 300 g",
         "nameZh": "白灼脆猪粉肠 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ត្រប់ស្រួយហាន់ស្តើងៗ ៥ ផ្លែ",
         "nameEn": "Crunchy green Thai eggplants sliced 5 pcs",
         "nameZh": "脆绿圆茄切片 5个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមស ម្ទេស ក្រូចឆ្មារ និងស្ករត្នោត ៣ ស្លាបព្រាបាយ",
         "nameEn": "Garlic, bird-eye chili, lime juice & palm sugar 3 tbsp",
         "nameZh": "蒜片、小米辣、青柠汁与棕榈糖 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -1843,9 +1843,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Crisp yardlong beans bruised in a mortar with dried shrimp, roasted peanuts, cooked prahok sauce, lime, and fiery chilies.",
     "descriptionZh": "鲜脆长豆角在石臼中与虾米、烤花生、熟臭鱼露、青柠和辣椒捣拌，酸辣脆爽。",
     "photoUrl": "/foods/food-256.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 195,
     "difficulty": "easy",
     "priceRiel": 47000,
@@ -1855,25 +1855,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សណ្តែកកួរស្រស់កាត់កង់ខ្លី ៣០០ ក្រាម",
         "nameEn": "Fresh yardlong beans cut into short pieces 300 g",
         "nameZh": "新鲜长豆角切短段 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "បង្គាក្រៀម និងសណ្តែកដីលីង ៤ ស្លាបព្រាបាយ",
         "nameEn": "Dried shrimp & roasted peanuts 4 tbsp",
         "nameZh": "虾米与烤花生 4汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប៉េងប៉ោះតូចៗ ៥ ផ្លែ",
         "nameEn": "Cherry tomatoes halved 5 pcs",
         "nameZh": "圣女果对半切 5颗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកប្រហុកឆ្អិន ស្ករត្នោត ក្រូចឆ្មារ ខ្ទឹមស និងម្ទេស ៣ ស្លាបព្រាបាយ",
         "nameEn": "Cooked prahok sauce, palm sugar, lime, garlic & chili 3 tbsp",
         "nameZh": "熟臭鱼汁、棕榈糖、青柠、蒜与辣椒 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -1916,9 +1916,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Tart shredded green mango pounded in a mortar with flaky grilled sun-dried fish, dried shrimp, palm sugar, and fresh mint.",
     "descriptionZh": "酸脆青芒果丝配炭烤咸鱼干肉碎、虾米、棕榈糖和薄荷叶在石臼中捣拌而成。",
     "photoUrl": "/foods/food-257.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 215,
     "difficulty": "easy",
     "priceRiel": 54000,
@@ -1928,25 +1928,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ស្វាយខ្ចីឈូសសរសៃ ២ ផ្លែ (៣៥០ ក្រាម)",
         "nameEn": "Shredded tart green mango 2 fruits (350 g)",
         "nameZh": "青芒果刨丝 2个（350克）",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ត្រីងៀតចៀនឬអាំងបេះសាច់ ១៥០ ក្រាម",
         "nameEn": "Fried or grilled sun-dried fish flaked 150 g",
         "nameZh": "香煎或炭烤咸鱼干拆肉 150克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "បង្គាក្រៀម និងសណ្តែកដីលីង ៣ ស្លាបព្រាបាយ",
         "nameEn": "Dried shrimp & roasted peanuts 3 tbsp",
         "nameZh": "虾米与烤花生 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមក្រហម ម្ទេស ទឹកត្រី ស្ករត្នោត និងជីរអង្កាម ១ ចានតូច",
         "nameEn": "Shallots, chili, fish sauce, palm sugar & mint 1 small bowl",
         "nameZh": "红葱头、辣椒、鱼露、棕榈糖与薄荷 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -1989,9 +1989,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Rich, aromatic Cambodian stew simmered with fermented fish mam broth, pork belly, snakehead fish fillets, eggplant, and okra.",
     "descriptionZh": "以柬式腌鱼汤底慢炖五花肉、黑鱼片、茄子、苦瓜与秋葵，汤浓味美。",
     "photoUrl": "/foods/food-258.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "២ នាក់",
     "calories": 540,
     "difficulty": "medium",
     "priceRiel": 16000,
@@ -2001,25 +2001,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ម៉ាំត្រីប្រាឬត្រីរ៉ស់ ២០០ ក្រាម",
         "nameEn": "Fermented fish (Mam) 200 g",
         "nameZh": "柬式腌鱼（Mam）200克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកបីជាន់ហាន់ដុំ និងសាច់ត្រី ៣០០ ក្រាម",
         "nameEn": "Pork belly chunks & fish fillets 300 g",
         "nameZh": "五花肉块与鱼片 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ត្រប់វែង ពោតបារាំង និងម្រះ ៣០០ ក្រាម",
         "nameEn": "Eggplant, okra & bitter melon 300 g",
         "nameZh": "长茄子、秋葵与苦瓜 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃចិញ្ច្រាំ ខ្ទឹមស ម្ទេស និងស្ករត្នោត ៣ ស្លាបព្រាបាយ",
         "nameEn": "Minced lemongrass, garlic, chili & palm sugar 3 tbsp",
         "nameZh": "香茅碎、蒜末、辣椒与棕榈糖 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2062,9 +2062,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Succulent whole free-range chicken marinated in fermented soybean paste, cola, and wild honey, roasted to a glossy mahogany glaze.",
     "descriptionZh": "走地鸡以甜豆酱、可乐与天然蜂蜜腌制，烤至表皮红亮焦香、肉质鲜嫩多汁。",
     "photoUrl": "/foods/food-259.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 495,
     "difficulty": "easy",
     "priceRiel": 23000,
@@ -2074,25 +2074,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "មាន់ស្រែ ១ ក្បាល (១.២ គីឡូក្រាម)",
         "nameEn": "Whole free-range chicken 1 bird (1.2 kg)",
         "nameZh": "整只走地鸡 1只（1.2公斤）",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សៀងផ្អែម និងប្រេងខ្យង ៣ ស្លាបព្រាបាយ",
         "nameEn": "Sweet fermented soybean paste & oyster sauce 3 tbsp",
         "nameZh": "甜黄豆酱与蚝油 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកកូកាកូឡា ១ កំប៉ុង និងទឹកឃ្មុំ ២ ស្លាបព្រាបាយ",
         "nameEn": "Cola 1 can & wild honey 2 tbsp",
         "nameZh": "可乐 1罐、蜂蜜 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមស គល់ស្លឹកគ្រៃ និងម្រេចម៉ដ្ឋ ២ ស្លាបព្រាបាយ",
         "nameEn": "Crushed garlic, lemongrass & black pepper 2 tbsp",
         "nameZh": "拍蒜、香茅与黑胡椒 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2135,9 +2135,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Whole duck slow-braised in aromatic Cambodian five-spice, star anise, cinnamon, palm sugar caramel, and dark soy sauce.",
     "descriptionZh": "全鸭配八角、桂皮、五香粉、棕榈糖焦糖与老抽慢火卤制，香醇软烂。",
     "photoUrl": "/foods/food-260.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 505,
     "difficulty": "easy",
     "priceRiel": 30000,
@@ -2147,25 +2147,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ទាស្រស់ ១ ចំហៀង (៧០០ ក្រាម)",
         "nameEn": "Fresh duck half (700 g)",
         "nameZh": "鲜鸭半只（700克）",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ម្សៅផាក់ឡូវ ផ្កាចន្ទន៍ និងឈើអែម ២ ស្លាបព្រាបាយ",
         "nameEn": "Five-spice powder, star anise & cinnamon bark 2 tbsp",
         "nameZh": "五香粉、八角与桂皮 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករត្នោត និងទឹកស៊ីអ៊ីវខាប់ ៣ ស្លាបព្រាបាយ",
         "nameEn": "Palm sugar & dark soy sauce 3 tbsp",
         "nameZh": "棕榈糖与老抽 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមស និងខ្ញីដំ ៥ កំពឹស",
         "nameEn": "Crushed garlic cloves & ginger slices 5 pcs",
         "nameZh": "拍蒜与姜片 5瓣",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2208,9 +2208,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Thick steaks of freshwater Wallago catfish marinated with garlic, turmeric, and salt, pan-fried to a golden crust.",
     "descriptionZh": "湄公河大叉尾鲶鱼切厚片，以蒜蓉、姜黄与海盐腌制后香煎至外焦里嫩。",
     "photoUrl": "/foods/food-261.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 520,
     "difficulty": "medium",
     "priceRiel": 37000,
@@ -2220,25 +2220,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីសណ្ដាយកាត់កង់ ៥០០ ក្រាម",
         "nameEn": "Wallago catfish steaks 500 g",
         "nameZh": "叉尾鲶鱼厚片 500克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសបុក និងម្សៅរមៀត ១ ស្លាបព្រាបាយ",
         "nameEn": "Pounded garlic & turmeric powder 1 tbsp",
         "nameZh": "蒜泥与姜黄粉 1汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី អំបិល និងម្រេច ១ ស្លាបព្រាបាយ",
         "nameEn": "Fish sauce, salt & black pepper 1 tbsp",
         "nameZh": "鱼露、盐与黑胡椒 1汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប្រេងឆា ៤ ស្លាបព្រាបាយ",
         "nameEn": "Cooking oil 4 tbsp",
         "nameZh": "食用油 4汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2281,9 +2281,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Golden pan-fried Wallago catfish topped with a savory Cambodian stir-fried sauce of julienned ginger, soybean paste, minced pork, and scallions.",
     "descriptionZh": "香煎叉尾鲶鱼淋上姜丝、甜豆酱、猪肉末与葱花炒制的柬式浓汁。",
     "photoUrl": "/foods/food-262.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 480,
     "difficulty": "easy",
     "priceRiel": 44000,
@@ -2293,25 +2293,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីសណ្ដាយកាត់កង់ ៥០០ ក្រាម",
         "nameEn": "Wallago catfish steaks 500 g",
         "nameZh": "叉尾鲶鱼厚片 500克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ញីខ្ចីហាន់សរសៃ ១ ចានតូច",
         "nameEn": "Young ginger julienned 1 small bowl",
         "nameZh": "嫩姜丝 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកចិញ្ច្រាំ ១០០ ក្រាម និងសៀងផ្អែម ២ ស្លាបព្រាបាយ",
         "nameEn": "Minced pork 100 g & fermented soybean paste 2 tbsp",
         "nameZh": "猪肉末 100克、甜豆酱 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមស ស្ករស ទឹកត្រី និងស្លឹកខ្ទឹម ២ ស្លាបព្រាបាយ",
         "nameEn": "Garlic, sugar, fish sauce & scallions 2 tbsp",
         "nameZh": "蒜末、糖、鱼露与葱花 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2354,9 +2354,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Traditional Cambodian 'outside-the-pot' sour soup made by arranging roasted or crispy fried sun-dried fish (Trei Ngiet), boiled duck eggs, shredded green mango, sliced cucumber, shallots, chilies, and fresh herbs in a deep bowl, then pouring boiling hot water seasoned with fish sauce and fresh lime juice directly over top.",
     "descriptionZh": "地道柬埔寨传统“锅外酸汤”，将烤香或煎脆的咸鱼块（Trei Ngiet）、水煮鸭蛋、青芒果丝、黄瓜片、红葱头、辣椒和新鲜香草铺在深碗中，直接冲入滚水并调入鱼露与鲜青柠汁即成。",
     "photoUrl": "/foods/food-263.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 285,
     "difficulty": "easy",
     "priceRiel": 24000,
@@ -2366,37 +2366,37 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីងៀតអាំង ឬចៀនឱ្យឈ្ងុយ បេះជាដុំៗគ្មានឆ្អឹង ២៥០ ក្រាម",
         "nameEn": "Roasted or crispy fried Cambodian sun-dried fish (Trei Ngiet), deboned & flaked 250 g",
         "nameZh": "烤香或煎脆的柬埔寨咸鱼（去骨撕块） 250克",
-        "amount": "២៥០ ក្រាម / 250 g"
+        "amount": "២៥០ ក្រាម"
       },
       {
         "nameKh": "ពងទាស្ងោរ ឬពងមាន់ស្ងោរ បកសំបកពុះជាដុំ ៣ គ្រាប់",
         "nameEn": "Hard-boiled duck or chicken eggs, peeled & quartered 3 pcs",
         "nameZh": "水煮鸭蛋或鸡蛋（去壳切瓣） 3颗",
-        "amount": "៣ គ្រាប់ / 3 pcs"
+        "amount": "៣ គ្រាប់"
       },
       {
         "nameKh": "ស្វាយខ្ចីឈូសសរសៃ និងត្រសក់ស្រួយហាន់ស្តើងៗ ១ ចាន",
         "nameEn": "Shredded green mango & thinly sliced crisp cucumber 1 bowl",
         "nameZh": "青芒果丝与脆黄瓜薄片 1碗",
-        "amount": "១ ចាន / 1 bowl"
+        "amount": "១ ចាន"
       },
       {
         "nameKh": "ខ្ទឹមក្រហមហាន់ស្តើង ខ្ទឹមស និងម្ទេសខ្មាំង ៣ ស្លាបព្រាបាយ",
         "nameEn": "Sliced shallots, garlic & bird's eye chilies 3 tbsp",
         "nameZh": "红葱头薄片、大蒜与小米辣 3汤匙",
-        "amount": "៣ ស្លាបព្រាបាយ / 3 tbsp"
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
         "nameKh": "ទឹកត្រី ទឹកក្រូចឆ្មារស្រស់ អំបិល និងស្ករសបន្តិច",
         "nameEn": "Fish sauce, fresh lime juice, salt & a pinch of sugar",
         "nameZh": "鱼露、鲜青柠汁、盐及少许白糖",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ជីររណារ ជីរនាងវង ស្លឹកខ្ទឹម និងទឹកដាំពុះក្តៅៗ ១ ចានគោម",
         "nameEn": "Sawtooth coriander, sweet basil, spring onion & boiling hot water 1 large bowl",
         "nameZh": "刺芫荽、罗勒、葱花与滚水 1大碗",
-        "amount": "១ ចានគោម / 1 large bowl"
+        "amount": "១ ចានគោម"
       }
     ],
     "steps": [
@@ -2439,9 +2439,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Sashimi-grade salmon slices cured in a savory-sweet soy marinade with sliced garlic, bird-eye chilies, lime slices, and toasted sesame.",
     "descriptionZh": "刺身级鲜三文鱼厚片浸渍于特调甜酱油汁中，配蒜片、小米辣、青柠片与白芝麻。",
     "photoUrl": "/foods/food-264.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "២ នាក់",
     "calories": 315,
     "difficulty": "medium",
     "priceRiel": 13000,
@@ -2451,25 +2451,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់ត្រីសាលម៉ុនស្រស់ហាន់បន្ទះ ៣០០ ក្រាម",
         "nameEn": "Sashimi-grade fresh salmon sliced 300 g",
         "nameZh": "刺身级鲜三文鱼切片 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកស៊ីអ៊ីវជប៉ុន និងទឹកឆ្អិន ១ កូនចាន",
         "nameEn": "Soy sauce & filtered water 1 small bowl",
         "nameZh": "日式酱油与饮用水 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករត្នោត ឬទឹកឃ្មុំ ២ ស្លាបព្រាបាយ",
         "nameEn": "Palm sugar or honey 2 tbsp",
         "nameZh": "棕榈糖或蜂蜜 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសហាន់ ម្ទេស ក្រូចឆ្មារ និងល្ងសលីង ៣ ស្លាបព្រាបាយ",
         "nameEn": "Sliced garlic, chilies, lime slices & toasted sesame 3 tbsp",
         "nameZh": "蒜片、辣椒圈、青柠片与熟白芝麻 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2503,18 +2503,18 @@ export const foodpanda100Foods: FoodItem[] = [
     "id": "food-265",
     "nameKh": "សាច់ជ្រូកអាំងភូមិព្រះដាក់",
     "nameEn": "Preah Dak Village Siem Reap Charcoal-Grilled Marinated Pork",
-    "nameZh": "暹粒Preah Dak村炭烤秘制猪肉",
+    "nameZh": "暹粒普雷达村炭烤秘制猪肉",
     "categorySlug": "grilled",
     "categoryKh": "អាំង និង បំពង",
     "categoryEn": "Grilled & Fried",
     "categoryZh": "烧烤与油炸",
     "descriptionKh": "សាច់ជ្រូកជាប់ខ្លាញ់ប្រឡាក់គ្រឿងស្ករត្នោតនិងខ្ទឹមស តាមរូបមន្តភូមិព្រះដាក់ ខេត្តសៀមរាប អាំងលើរងើកភ្លើងឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Famous Preah Dak village style pork shoulder marinated with palm sugar, garlic, and fish sauce, grilled over glowing charcoal until caramelized.",
-    "descriptionZh": "暹粒Preah Dak村著名炭烤猪肉，以棕榈糖、蒜蓉与鱼露秘制腌渍，炭火烤至焦香多汁。",
+    "descriptionZh": "暹粒普雷达村著名炭烤猪肉，以棕榈糖、蒜蓉与鱼露秘制腌渍，炭火烤至焦香多汁。",
     "photoUrl": "/foods/food-265.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 390,
     "difficulty": "easy",
     "priceRiel": 20000,
@@ -2524,25 +2524,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់ជ្រូកជាប់ខ្លាញ់ហាន់បន្ទះ ៥០០ ក្រាម",
         "nameEn": "Pork shoulder with fat cap sliced 500 g",
         "nameZh": "带脂梅花猪肉切片 500克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករត្នោតសៀមរាប ២ ស្លាបព្រាបាយ",
         "nameEn": "Siem Reap palm sugar 2 tbsp",
         "nameZh": "暹粒棕榈糖 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសបុក ម្រេច និងទឹកត្រី ២ ស្លាបព្រាបាយ",
         "nameEn": "Pounded garlic, black pepper & fish sauce 2 tbsp",
         "nameZh": "蒜泥、黑胡椒与鱼露 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប្រេងខ្យង និងល្ងស ១ ស្លាបព្រាបាយ",
         "nameEn": "Oyster sauce & sesame seeds 1 tbsp",
         "nameZh": "蚝油与白芝麻 1汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2585,9 +2585,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Tangy Cambodian tamarind soup simmered with crunchy lotus stems, savory fermented pangasius steaks, and aromatic rice paddy herb.",
     "descriptionZh": "酸角汤底配脆嫩藕带、风味微发酵咸巴沙鱼块及水芙蓉香草煮制，酸香开胃。",
     "photoUrl": "/foods/food-266.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 210,
     "difficulty": "easy",
     "priceRiel": 27000,
@@ -2597,25 +2597,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីប្រាហើមកាត់កង់ ៣៥០ ក្រាម",
         "nameEn": "Fermented salted pangasius fish steaks 350 g",
         "nameZh": "风味咸巴沙鱼块 350克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ក្រអៅឈូកខ្ចីកាត់កង់ ៣០០ ក្រាម",
         "nameEn": "Young lotus stems cut into segments 300 g",
         "nameZh": "鲜嫩藕带切段 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "អំពិលទុំ និងប៉េងប៉ោះ ២ ស្លាបព្រាបាយ",
         "nameEn": "Ripe tamarind pulp & tomatoes 2 tbsp",
         "nameZh": "熟酸角膏与番茄 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃ ខ្ទឹមស ម្ទេស និងជីរម្អម ១ ចានតូច",
         "nameEn": "Lemongrass, garlic, chili & rice paddy herb 1 small bowl",
         "nameZh": "香茅、蒜、辣椒与水芙蓉 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2658,9 +2658,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Golden crispy scorched rice crackers topped with pork floss and served with a rich coconut-simmered minced pork and shrimp dipping sauce.",
     "descriptionZh": "金黄酥脆的米锅巴撒肉松，搭配椰奶鲜虾猪肉末慢熬的浓香蘸酱。",
     "photoUrl": "/foods/food-267.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 500,
     "difficulty": "medium",
     "priceRiel": 34000,
@@ -2670,25 +2670,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "បាយក្ដាំងហាលស្ងួតបំពងស្រួយ ៤ បន្ទះ",
         "nameEn": "Sun-dried scorched rice crusts fried crisp 4 sheets",
         "nameZh": "炸脆米锅巴 4大片",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកចិញ្ច្រាំ និងបង្គាចិញ្ច្រាំ ២០០ ក្រាម",
         "nameEn": "Minced pork & chopped fresh shrimp 200 g",
         "nameZh": "猪肉末与鲜虾仁碎 200克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទិះដូងដើម ១ កូនចាន",
         "nameEn": "Thick coconut cream 1 small bowl",
         "nameZh": "浓椰浆 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកផាត់ ស្លឹកខ្ទឹម និងម្ទេស ៣ ស្លាបព្រាបាយ",
         "nameEn": "Pork floss, scallions & chili 3 tbsp",
         "nameZh": "肉松、葱花与辣椒 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2731,9 +2731,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Fragrant garlic and egg wok-fried rice crowned with thick slices of crackling crispy roast pork belly.",
     "descriptionZh": "粒粒分明的蒜香鸡蛋炒饭，铺满外皮酥脆的脆皮五花烧肉，配辣椒酱油享用。",
     "photoUrl": "/foods/food-268.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 525,
     "difficulty": "easy",
     "priceRiel": 41000,
@@ -2743,25 +2743,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "បាយសត្រជាក់ ២ ចានគោម",
         "nameEn": "Chilled cooked jasmine rice 2 bowls",
         "nameZh": "隔夜茉莉香米饭 2碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកខ្វៃស្បែកស្រួយហាន់ដុំ ២០០ ក្រាម",
         "nameEn": "Crispy roast pork belly chopped 200 g",
         "nameZh": "脆皮烧肉切块 200克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ពងទា ២ គ្រាប់ និងការ៉ុតហាន់តូចៗ ២ ស្លាបព្រាបាយ",
         "nameEn": "Duck or chicken eggs 2 pcs & diced carrot 2 tbsp",
         "nameZh": "鸡蛋或鸭蛋 2个、胡萝卜丁 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមស ប្រេងខ្យង ទឹកស៊ីអ៊ីវ និងស្លឹកខ្ទឹម ២ ស្លាបព្រាបាយ",
         "nameEn": "Garlic, oyster sauce, soy sauce & scallions 2 tbsp",
         "nameZh": "蒜末、蚝油、酱油与葱花 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2804,9 +2804,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Chilled butterflied raw prawns dressed in a fiery Cambodian lime, garlic, bird-eye chili, and prahok dressing over crisp bitter melon.",
     "descriptionZh": "冰镇开背鲜生虾淋上青柠汁、蒜片、指天椒与熟臭鱼露特调酸辣汁，配薄切苦瓜。",
     "photoUrl": "/foods/food-269.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 185,
     "difficulty": "easy",
     "priceRiel": 48000,
@@ -2816,25 +2816,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "បង្គាស្រស់បកសំបកវះខ្នង ៣០០ ក្រាម",
         "nameEn": "Fresh prawns peeled & butterflied 300 g",
         "nameZh": "鲜虾去壳开背 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកប្រហុកឆ្អិន និងទឹកត្រី ២ ស្លាបព្រាបាយ",
         "nameEn": "Cooked prahok sauce & fish sauce 2 tbsp",
         "nameZh": "熟臭鱼汁与鱼露 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកក្រូចឆ្មារ ខ្ទឹមសហាន់ និងម្ទេសបុក ៣ ស្លាបព្រាបាយ",
         "nameEn": "Fresh lime juice, sliced garlic & pounded chilies 3 tbsp",
         "nameZh": "鲜青柠汁、蒜片与捣碎辣椒 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ម្រះហាន់ស្តើងៗ និងជីរអង្កាម ១ ចាន",
         "nameEn": "Thinly sliced bitter melon & fresh mint 1 bowl",
         "nameZh": "苦瓜薄片与鲜薄荷叶 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2877,9 +2877,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Juicy boiled sweet corn kernels tossed in a mortar with poached fresh prawns, yardlong beans, cherry tomatoes, peanuts, and spicy lime dressing.",
     "descriptionZh": "清甜熟玉米粒与白灼鲜虾仁、长豆角、圣女果及烤花生在石臼中拌入酸辣青柠鱼露汁。",
     "photoUrl": "/foods/food-270.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "២ នាក់",
     "calories": 295,
     "difficulty": "medium",
     "priceRiel": 10000,
@@ -2889,25 +2889,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ពោតផ្អែមស្ងោរចិតយកគ្រាប់ ២ ផ្លែ",
         "nameEn": "Boiled sweet corn kernels sliced off the cob 2 ears",
         "nameZh": "熟甜玉米削粒 2根",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "បង្គាស្រស់ស្រុសឆ្អិន ២០០ ក្រាម",
         "nameEn": "Poached fresh prawns peeled 200 g",
         "nameZh": "白灼鲜虾仁 200克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សណ្តែកកួរ ប៉េងប៉ោះតូចៗ និងសណ្តែកដីលីង ១ ចានតូច",
         "nameEn": "Yardlong beans, cherry tomatoes & roasted peanuts 1 small bowl",
         "nameZh": "长豆角、圣女果与烤花生 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី ស្ករត្នោត ក្រូចឆ្មារ ខ្ទឹមស និងម្ទេស ៣ ស្លាបព្រាបាយ",
         "nameEn": "Fish sauce, palm sugar, lime juice, garlic & chili 3 tbsp",
         "nameZh": "鱼露、棕榈糖、青柠汁、蒜与辣椒 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -2950,9 +2950,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Springy blanched instant noodles tossed with crunchy boneless chicken feet, meatballs, yardlong beans, and fiery lime-chili dressing.",
     "descriptionZh": "劲道烫面配爽脆无骨凤爪、肉丸、长豆角与泰式青柠辣椒汁拌制而成。",
     "photoUrl": "/foods/food-271.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 465,
     "difficulty": "easy",
     "priceRiel": 17000,
@@ -2962,25 +2962,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ជើងមាន់អត់ឆ្អឹងស្ងោរស្រួយ ២៥០ ក្រាម",
         "nameEn": "Boiled boneless chicken feet 250 g",
         "nameZh": "熟脆无骨鸡爪 250克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "មីកញ្ចប់ស្រុស ២ កញ្ចប់ និងប្រហិតសាច់គោ ១០០ ក្រាម",
         "nameEn": "Blanched instant noodles 2 packs & beef balls 100 g",
         "nameZh": "烫方便面 2包、牛肉丸 100克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សណ្តែកកួរ ប៉េងប៉ោះ និងស្ពៃក្ដោបហាន់ ១ ចាន",
         "nameEn": "Yardlong beans, tomatoes & shredded cabbage 1 bowl",
         "nameZh": "长豆角、番茄与包菜丝 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី ស្ករត្នោត ទឹកក្រូចឆ្មារ ខ្ទឹមស និងម្ទេសបុក ៣ ស្លាបព្រាបាយ",
         "nameEn": "Fish sauce, palm sugar, lime juice, garlic & pounded chili 3 tbsp",
         "nameZh": "鱼露、棕榈糖、青柠汁、蒜与辣椒泥 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3023,9 +3023,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Silky glass noodles tossed with poached prawns, squid rings, minced pork, shallots, herbs, and nutty toasted rice powder in lime dressing.",
     "descriptionZh": "爽滑粉丝配白灼鲜虾、鱿鱼圈、猪肉末、红葱头、香草与烘焙米粉酸辣凉拌。",
     "photoUrl": "/foods/food-272.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 305,
     "difficulty": "easy",
     "priceRiel": 24000,
@@ -3035,25 +3035,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "បង្គាស្រស់ និងមឹកហាន់កង់ ៣០០ ក្រាម",
         "nameEn": "Fresh prawns & squid rings 300 g",
         "nameZh": "鲜虾与鱿鱼圈 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "មីសួរស្រុស ១៥០ ក្រាម និងសាច់ជ្រូកចិញ្ច្រាំ ១០០ ក្រាម",
         "nameEn": "Blanched glass noodles 150 g & cooked minced pork 100 g",
         "nameZh": "泡发烫熟粉丝 150克、熟猪肉末 100克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "អង្ករលីងម៉ដ្ឋ និងសណ្តែកដីលីង ៣ ស្លាបព្រាបាយ",
         "nameEn": "Toasted rice powder & roasted peanuts 3 tbsp",
         "nameZh": "烘焙米粉与烤花生 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី ក្រូចឆ្មារ ខ្ទឹមក្រហម ម្ទេស និងជីរគ្រប់មុខ ១ ចាន",
         "nameEn": "Fish sauce, lime juice, shallots, chili & mixed herbs 1 bowl",
         "nameZh": "鱼露、青柠汁、红葱头、辣椒与什锦香草 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3096,9 +3096,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Fluffy golden duck egg omelette packed with caramelized sweet onions, fish sauce, and cracked black pepper.",
     "descriptionZh": "饱满鸭蛋液加入清甜洋葱丝、鱼露和黑胡椒，煎至两面金黄蓬松。",
     "photoUrl": "/foods/food-273.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 385,
     "difficulty": "medium",
     "priceRiel": 31000,
@@ -3108,25 +3108,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ពងទា ៤ គ្រាប់",
         "nameEn": "Fresh duck eggs 4 pcs",
         "nameZh": "新鲜鸭蛋 4个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមបារាំងហាន់ស្តើងៗ ១ មើមធំ",
         "nameEn": "Sweet onion thinly sliced 1 large bulb",
         "nameZh": "洋葱切薄丝 1大个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី និងម្រេចម៉ដ្ឋ ១ ស្លាបព្រាបាយ",
         "nameEn": "Fish sauce & ground black pepper 1 tbsp",
         "nameZh": "鱼露与黑胡椒粉 1汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្លឹកខ្ទឹមហាន់ និងប្រេងឆា ៣ ស្លាបព្រាបាយ",
         "nameEn": "Chopped scallions & cooking oil 3 tbsp",
         "nameZh": "葱花与食用油 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3169,9 +3169,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Crunchy boiled pork chitterlings wok-fried with tangy pickled mustard greens, julienned ginger, garlic, and chilies.",
     "descriptionZh": "爽脆猪粉肠配酸爽芥菜、姜丝、蒜末与红椒大火快炒，开胃解腻。",
     "photoUrl": "/foods/food-274.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 310,
     "difficulty": "easy",
     "priceRiel": 38000,
@@ -3181,25 +3181,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ពោះតាន់ជ្រូកស្ងោរឆ្អិនកាត់កង់ ៣៥០ ក្រាម",
         "nameEn": "Boiled pork chitterlings cut into segments 350 g",
         "nameZh": "熟猪粉肠切段 350克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ពៃជូរហាន់ ២៥០ ក្រាម",
         "nameEn": "Pickled mustard greens sliced 250 g",
         "nameZh": "酸芥菜切块 250克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសចិញ្ច្រាំ និងខ្ញីហាន់សរសៃ ២ ស្លាបព្រាបាយ",
         "nameEn": "Minced garlic & julienned ginger 2 tbsp",
         "nameZh": "蒜末与姜丝 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប្រេងខ្យង ស្ករស និងម្ទេសក្រហម ២ ស្លាបព្រាបាយ",
         "nameEn": "Oyster sauce, sugar & sliced red chili 2 tbsp",
         "nameZh": "蚝油、糖与红椒片 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3242,9 +3242,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Slow-simmered beef brisket and green papaya chunks in a crystal-clear, naturally sweet broth topped with fried garlic and cilantro.",
     "descriptionZh": "牛腩与半熟青木瓜块慢火煲煮，汤清味甜，撒炸蒜酥与香菜。",
     "photoUrl": "/foods/food-275.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 240,
     "difficulty": "easy",
     "priceRiel": 45000,
@@ -3254,25 +3254,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់គោជាប់សរសៃហាន់ដុំ ៣៥០ ក្រាម",
         "nameEn": "Beef brisket or shank cubed 350 g",
         "nameZh": "牛腩或牛腱切块 350克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ល្ហុងស្រគាលចិតដុំធំៗ ៤០០ ក្រាម",
         "nameEn": "Green papaya peeled & cut into chunks 400 g",
         "nameZh": "青木瓜去皮切大块 400克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសដំ និងទឹកត្រី ២ ស្លាបព្រាបាយ",
         "nameEn": "Crushed garlic & fish sauce 2 tbsp",
         "nameZh": "拍蒜与鱼露 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ និងម្រេចម៉ដ្ឋ ២ ស្លាបព្រាបាយ",
         "nameEn": "Scallions, cilantro & black pepper 2 tbsp",
         "nameZh": "葱花、香菜与黑胡椒粉 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3315,9 +3315,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Tender pork slices wok-tossed with juicy ripe pineapple, bell peppers, tomatoes, and onions in a glossy sweet-and-sour glaze.",
     "descriptionZh": "鲜嫩猪肉片配熟菠萝块、彩椒、番茄与洋葱炒制，酸甜可口。",
     "photoUrl": "/foods/food-276.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "២ នាក់",
     "calories": 395,
     "difficulty": "medium",
     "priceRiel": 52000,
@@ -3327,25 +3327,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់ជ្រូកហាន់ស្តើងៗ ៣០០ ក្រាម",
         "nameEn": "Sliced pork loin or belly 300 g",
         "nameZh": "猪里脊或五花肉片 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ម្នាស់ទុំចិតដុំ ២៥០ ក្រាម",
         "nameEn": "Ripe pineapple chunks 250 g",
         "nameZh": "熟菠萝块 250克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប៉េងប៉ោះ ម្ទេសប្លោក និងខ្ទឹមបារាំង ២០០ ក្រាម",
         "nameEn": "Tomatoes, bell peppers & onion wedges 200 g",
         "nameZh": "番茄、彩椒与洋葱块 200克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកប៉េងប៉ោះ ប្រេងខ្យង ស្ករស និងទឹកត្រី ៣ ស្លាបព្រាបាយ",
         "nameEn": "Tomato sauce, oyster sauce, sugar & fish sauce 3 tbsp",
         "nameZh": "番茄酱、蚝油、糖与鱼露 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3388,9 +3388,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Juicy marinated beef strips wok-seared with tri-color bell peppers and sweet onions in a savory oyster and black pepper sauce.",
     "descriptionZh": "腌制嫩牛肉条配三色彩椒和洋葱大火爆炒，蚝油黑椒香气浓郁。",
     "photoUrl": "/foods/food-277.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 295,
     "difficulty": "easy",
     "priceRiel": 14000,
@@ -3400,25 +3400,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់គោផុយហាន់ស្តើងៗ ៣០០ ក្រាម",
         "nameEn": "Tender beef sliced 300 g",
         "nameZh": "嫩牛肉切片 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ម្ទេសប្លោកខៀវ ក្រហម លឿង ២៥០ ក្រាម",
         "nameEn": "Green, red & yellow bell peppers sliced 250 g",
         "nameZh": "青红黄彩椒切块 250克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមបារាំងហាន់ចំណិត ១ មើម",
         "nameEn": "Onion cut into wedges 1 bulb",
         "nameZh": "洋葱切块 1个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប្រេងខ្យង ទឹកស៊ីអ៊ីវ ខ្ទឹមស និងម្រេចខ្មៅ ៣ ស្លាបព្រាបាយ",
         "nameEn": "Oyster sauce, soy sauce, garlic & black pepper 3 tbsp",
         "nameZh": "蚝油、酱油、蒜末与黑胡椒 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3461,9 +3461,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Soothing Cambodian clear broth simmered with tender winter melon slices, seasoned minced pork balls, and dried shrimp.",
     "descriptionZh": "鲜嫩冬瓜片配猪肉丸与虾米慢煮清汤，清甜润燥，撒葱花与胡椒。",
     "photoUrl": "/foods/food-278.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 195,
     "difficulty": "easy",
     "priceRiel": 21000,
@@ -3473,25 +3473,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រឡាចខ្ចីចិតសំបកហាន់ចំណិត ៤០០ ក្រាម",
         "nameEn": "Young winter melon peeled & sliced 400 g",
         "nameZh": "嫩冬瓜去皮切片 400克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកចិញ្ច្រាំលាយម្រេច ២០០ ក្រាម",
         "nameEn": "Minced pork seasoned with pepper 200 g",
         "nameZh": "胡椒调味猪肉末 200克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "បង្គាក្រៀម និងខ្ទឹមសដំ ២ ស្លាបព្រាបាយ",
         "nameEn": "Dried shrimp & crushed garlic 2 tbsp",
         "nameZh": "虾米与拍蒜 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី ស្លឹកខ្ទឹម និងជីរវ៉ាន់ស៊ុយ ២ ស្លាបព្រាបាយ",
         "nameEn": "Fish sauce, scallions & cilantro 2 tbsp",
         "nameZh": "鱼露、葱花与香菜 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3534,9 +3534,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Traditional Cambodian fermented fish relish mixed with crunchy salted green papaya strips, galangal, garlic, chilies, and palm sugar.",
     "descriptionZh": "柬埔寨传统风味腌鱼拌入爽脆青木瓜片、南姜、蒜瓣、辣椒与棕榈糖，咸香下饭。",
     "photoUrl": "/foods/food-279.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 265,
     "difficulty": "medium",
     "priceRiel": 28000,
@@ -3546,25 +3546,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ម៉ាំត្រីសាច់ ២០០ ក្រាម",
         "nameEn": "Cambodian fermented fish fillets (Mam) 200 g",
         "nameZh": "柬式腌鱼肉（Mam）200克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ល្ហុងខ្ចីហាន់បន្ទះច្របាច់អំបិលឱ្យស្រួយ ២៥០ ក្រាម",
         "nameEn": "Crunchy salted green papaya strips 250 g",
         "nameZh": "盐渍脆青木瓜片 250克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "រំដេងហាន់ ខ្ទឹមស និងម្ទេសក្រហម ៣ ស្លាបព្រាបាយ",
         "nameEn": "Sliced galangal, garlic cloves & red chilies 3 tbsp",
         "nameZh": "南姜丝、蒜瓣与红辣椒 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករត្នោត អង្ករលីង និងទឹកក្រូចឆ្មារ ២ ស្លាបព្រាបាយ",
         "nameEn": "Palm sugar, toasted rice powder & lime juice 2 tbsp",
         "nameZh": "棕榈糖、烘焙米粉与青柠汁 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3607,9 +3607,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Silvery Mekong river fish slow-braised over sugarcane stalks with pork belly, palm sugar caramel, and black pepper until the bones are soft.",
     "descriptionZh": "湄公河小银鱼（Trei Riel）垫甘蔗段，配五花肉、棕榈糖与黑胡椒慢火酥焖至骨软肉香。",
     "photoUrl": "/foods/food-280.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 460,
     "difficulty": "easy",
     "priceRiel": 35000,
@@ -3619,25 +3619,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីរៀលស្រស់ធ្វើស្អាត ៥០០ ក្រាម",
         "nameEn": "Fresh cleaned Trei Riel river fish 500 g",
         "nameZh": "新鲜湄公河小鲤鱼 500克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកបីជាន់ហាន់ដុំ ១៥០ ក្រាម",
         "nameEn": "Pork belly sliced 150 g",
         "nameZh": "五花肉片 150克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករត្នោត ទឹកត្រី និងម្រេចម៉ដ្ឋ ៣ ស្លាបព្រាបាយ",
         "nameEn": "Palm sugar, fish sauce & black pepper 3 tbsp",
         "nameZh": "棕榈糖、鱼露与黑胡椒 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "អំពៅបកសំបក និងខ្ទឹមស ១ ចានតូច",
         "nameEn": "Peeled sugarcane stalks & garlic 1 small bowl",
         "nameZh": "去皮甘蔗段与蒜瓣 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3680,9 +3680,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Five-spice braised pork large and small intestines flash-fried until crispy on the outside and tender inside, served with tangy chili dip.",
     "descriptionZh": "五香卤制的猪大肠与猪小肠下锅炸至外酥里嫩，配酸辣蘸水与腌菜享用。",
     "photoUrl": "/foods/food-281.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 485,
     "difficulty": "easy",
     "priceRiel": 42000,
@@ -3692,25 +3692,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ពោះវៀនធំ និងពោះវៀនតូចជ្រូកធ្វើស្អាត ៥០០ ក្រាម",
         "nameEn": "Cleaned pork large & small intestines 500 g",
         "nameZh": "洗净猪大肠与小肠 500克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គ្រឿងផាក់ឡូវ ទឹកស៊ីអ៊ីវខាប់ និងស្ករត្នោត ៣ ស្លាបព្រាបាយ",
         "nameEn": "Five-spice powder, dark soy sauce & palm sugar 3 tbsp",
         "nameZh": "五香粉、老抽与棕榈糖 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃ ខ្ញី និងខ្ទឹមស ១ ដុំ",
         "nameEn": "Lemongrass, ginger & garlic 1 bundle",
         "nameZh": "香茅、姜片与蒜头 1束",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រីកោះកុង និងជ្រក់ស្ពៃ ១ ចាន",
         "nameEn": "Spicy Koh Kong dipping sauce & pickled greens 1 bowl",
         "nameZh": "国公酸辣蘸汁与酸菜 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3753,9 +3753,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Delicate fresh pork brain gently braised in a claypot with palm sugar caramel, soy sauce, julienned ginger, scallions, and Kampot pepper.",
     "descriptionZh": "鲜嫩猪脑在砂锅中配棕榈糖、酱油、姜丝、葱段与贡布黑胡椒小火慢煨，绵密香醇。",
     "photoUrl": "/foods/food-282.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "២ នាក់",
     "calories": 465,
     "difficulty": "medium",
     "priceRiel": 49000,
@@ -3765,25 +3765,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ខួរជ្រូកស្រស់ធ្វើស្អាត ២ ដុំ (៣០០ ក្រាម)",
         "nameEn": "Fresh cleaned pork brains 2 pcs (300 g)",
         "nameZh": "新鲜洗净猪脑 2副（300克）",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ញីហាន់សរសៃ និងខ្ទឹមសចិញ្ច្រាំ ២ ស្លាបព្រាបាយ",
         "nameEn": "Julienned ginger & minced garlic 2 tbsp",
         "nameZh": "姜丝与蒜末 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកស៊ីអ៊ីវ ប្រេងខ្យង និងស្ករត្នោត ២ ស្លាបព្រាបាយ",
         "nameEn": "Soy sauce, oyster sauce & palm sugar 2 tbsp",
         "nameZh": "酱油、蚝油与棕榈糖 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ម្រេចម៉ដ្ឋ និងស្លឹកខ្ទឹម ២ ស្លាបព្រាបាយ",
         "nameEn": "Ground black pepper & scallions 2 tbsp",
         "nameZh": "黑胡椒粉与葱段 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3824,11 +3824,11 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryZh": "汤羹与炖菜",
     "descriptionKh": "ជើងជ្រូកបំពងរួចយកមករំងាស់ហុងជាមួយផ្សិតក្រអូប ផ្កាចន្ទន៍ ស្ករត្នោត និងស្ពៃតឿ ផុយទន់រលោង។",
     "descriptionEn": "Golden-seared pork trotters slow-braised in aromatic five-spice and shiitake mushroom gravy with baby bok choy.",
-    "descriptionZh": "猪蹄炸至金黄后配香菇、八角、棕榈糖慢火红烧，搭配小油菜，软糯Q弹。",
+    "descriptionZh": "猪蹄炸至金黄后配香菇、八角、棕榈糖慢火红烧，搭配小油菜，软糯弹牙。",
     "photoUrl": "/foods/food-283.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 510,
     "difficulty": "easy",
     "priceRiel": 11000,
@@ -3838,25 +3838,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ជើងជ្រូកកាប់ដុំ ៦០០ ក្រាម",
         "nameEn": "Pork trotters chopped into pieces 600 g",
         "nameZh": "猪蹄斩块 600克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
-        "nameKh": "ផ្សិតក្រអូបត្រាំទឹក ៨ 朵 និងស្ពៃតឿ ២០០ ក្រាម",
+        "nameKh": "ផ្សិតក្រអូបត្រាំទឹក ៨ ទង និងស្ពៃតឿ ២០០ ក្រាម",
         "nameEn": "Soaked shiitake mushrooms 8 caps & baby bok choy 200 g",
         "nameZh": "泡发香菇 8朵、上海青 200克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គ្រឿងផាក់ឡូវ ទឹកស៊ីអ៊ីវខាប់ ប្រេងខ្យង និងស្ករត្នោត ៣ ស្លាបព្រាបាយ",
         "nameEn": "Five-spice, dark soy sauce, oyster sauce & palm sugar 3 tbsp",
         "nameZh": "五香粉、老抽、蚝油与棕榈糖 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមស ខ្ញី និងផ្កាចន្ទន៍ ២ ស្លាបព្រាបាយ",
         "nameEn": "Garlic, ginger & star anise 2 tbsp",
         "nameZh": "蒜头、姜片与八角 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3899,9 +3899,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Tender pork tongue slow-braised in caramelized palm sugar, garlic, fish sauce, and black pepper, sliced thin and drizzled with glaze.",
     "descriptionZh": "猪舌刮洗干净，以棕榈糖、蒜瓣、鱼露与黑胡椒慢卤入味，切片淋浓汁。",
     "photoUrl": "/foods/food-284.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 455,
     "difficulty": "easy",
     "priceRiel": 18000,
@@ -3911,25 +3911,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "អណ្ដាតជ្រូកស្រស់ ២ ដុំ (៥០០ ក្រាម)",
         "nameEn": "Fresh pork tongues 2 pcs (500 g)",
         "nameZh": "新鲜猪舌 2条（500克）",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករត្នោត និងទឹកត្រី ៣ ស្លាបព្រាបាយ",
         "nameEn": "Palm sugar & fish sauce 3 tbsp",
         "nameZh": "棕榈糖与鱼露 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកស៊ីអ៊ីវខាប់ និងម្រេចម៉ដ្ឋ ១ ស្លាបព្រាបាយ",
         "nameEn": "Dark soy sauce & black pepper 1 tbsp",
         "nameZh": "老抽与黑胡椒 1汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសដំ និងទឹកដូងស្រស់ ១ កូនចាន",
         "nameEn": "Crushed garlic & fresh coconut water 1 small bowl",
         "nameZh": "拍蒜与鲜椰子水 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -3972,9 +3972,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Clean pork stomach braised in palm sugar caramel, garlic, soy sauce, and aromatic black pepper until tender with a pleasant bite.",
     "descriptionZh": "猪肚洗净后以棕榈糖、蒜头、酱油和黑胡椒慢火卤至软韧适口，切片装盘。",
     "photoUrl": "/foods/food-285.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 490,
     "difficulty": "medium",
     "priceRiel": 25000,
@@ -3984,25 +3984,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ក្រពះជ្រូកធ្វើស្អាត ១ ដុំ (៥០០ ក្រាម)",
         "nameEn": "Cleaned whole pork stomach 1 pc (500 g)",
         "nameZh": "洗净猪肚 1个（500克）",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករត្នោត ទឹកស៊ីអ៊ីវ និងទឹកត្រី ៣ ស្លាបព្រាបាយ",
         "nameEn": "Palm sugar, soy sauce & fish sauce 3 tbsp",
         "nameZh": "棕榈糖、酱油与鱼露 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសដំ និងម្រេចគ្រាប់បុក ២ ស្លាបព្រាបាយ",
         "nameEn": "Crushed garlic & cracked black peppercorns 2 tbsp",
         "nameZh": "拍蒜与捣碎黑胡椒粒 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកដូងស្រស់ និងស្លឹកខ្ទឹម ១ ចាន",
         "nameEn": "Fresh coconut water & scallions 1 bowl",
         "nameZh": "鲜椰子水与葱花 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4045,9 +4045,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Crunchy medley of pickled papaya, carrots, cucumber, lotus stems, and green mango shaken with palm sugar fish sauce, chilies, and dried shrimp.",
     "descriptionZh": "木瓜、胡萝卜、黄瓜、藕带与青芒果脆片，加入棕榈糖鱼露、辣椒和虾米摇匀入味。",
     "photoUrl": "/foods/food-286.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 160,
     "difficulty": "easy",
     "priceRiel": 32000,
@@ -4057,25 +4057,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ល្ហុង ការ៉ុត ត្រសក់ និងក្រអៅឈូកហាន់ ៤០០ ក្រាម",
         "nameEn": "Papaya, carrot, cucumber & lotus stems sliced 400 g",
         "nameZh": "木瓜、胡萝卜、黄瓜与藕带切片 400克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្វាយខ្ចីហាន់ចំណិត ១០០ ក្រាម",
         "nameEn": "Tart green mango slices 100 g",
         "nameZh": "青芒果片 100克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី ស្ករត្នោត និងទឹកក្រូចឆ្មារ ៣ ស្លាបព្រាបាយ",
         "nameEn": "Fish sauce, palm sugar & lime juice 3 tbsp",
         "nameZh": "鱼露、棕榈糖与青柠汁 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមស ម្ទេសបុក និងបង្គាក្រៀម ២ ស្លាបព្រាបាយ",
         "nameEn": "Garlic, pounded chili & dried shrimp 2 tbsp",
         "nameZh": "蒜片、辣椒泥与虾米 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4118,9 +4118,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Crisp-tender emerald baby bok choy glazed with a savory oyster sauce reduction and crowned with golden fried garlic.",
     "descriptionZh": "翠绿鲜嫩的上海青配浓郁蚝油芡汁，撒上金黄炸蒜酥。",
     "photoUrl": "/foods/food-287.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 175,
     "difficulty": "easy",
     "priceRiel": 39000,
@@ -4130,25 +4130,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ស្ពៃតឿខ្ចី ៤០០ ក្រាម",
         "nameEn": "Fresh baby bok choy 400 g",
         "nameZh": "新鲜小上海青 400克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសចិញ្ច្រាំ ២ ស្លាបព្រាបាយ",
         "nameEn": "Minced garlic 2 tbsp",
         "nameZh": "蒜末 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប្រេងខ្យង និងទឹកស៊ីអ៊ីវ ៣ ស្លាបព្រាបាយ",
         "nameEn": "Oyster sauce & light soy sauce 3 tbsp",
         "nameZh": "蚝油与生抽 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករសបន្តិច និងប្រេងល្ង ១ ស្លាបព្រាកាហ្វេ",
         "nameEn": "Pinch of sugar & sesame oil 1 tsp",
         "nameZh": "少许白糖与香油 1茶匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4191,9 +4191,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Soft-centered boiled duck eggs halved in a fiery, aromatic Cambodian lemongrass, galangal, lime, and bird-eye chili broth.",
     "descriptionZh": "溏心水煮鸭蛋对半切开，浸入酸辣鲜香的香茅、南姜、青柠与指天椒热汤中。",
     "photoUrl": "/foods/food-288.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "២ នាក់",
     "calories": 315,
     "difficulty": "medium",
     "priceRiel": 46000,
@@ -4203,25 +4203,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ពងទាស្ងោរឆ្អិនល្មមបកសំបក ៥ គ្រាប់",
         "nameEn": "Jammy boiled duck eggs peeled 5 pcs",
         "nameZh": "去壳水煮溏心鸭蛋 5个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃ រំដេង និងស្លឹកក្រូចសើច ១ ដុំ",
         "nameEn": "Lemongrass, galangal & kaffir lime leaves 1 bundle",
         "nameZh": "香茅、南姜与柠檬叶 1束",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី ទឹកក្រូចឆ្មារ និងម្ទេសបុក ៣ ស្លាបព្រាបាយ",
         "nameEn": "Fish sauce, fresh lime juice & pounded chilies 3 tbsp",
         "nameZh": "鱼露、鲜青柠汁与捣碎辣椒 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ជីរណា ជីរនាងវង និងខ្ទឹមបំពង ១ ចានតូច",
         "nameEn": "Sawtooth coriander, Thai basil & fried garlic 1 small bowl",
         "nameZh": "刺芫荽、罗勒与炸蒜酥 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4264,9 +4264,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Bite-sized pieces of savory fermented salted fish fried crisp and tossed with crispy lemongrass, fried garlic, kaffir lime leaves, and chilies.",
     "descriptionZh": "风味微发酵咸鱼切块炸脆，与炸香茅碎、蒜酥、柠檬叶丝和辣椒摇匀。",
     "photoUrl": "/foods/food-289.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 390,
     "difficulty": "easy",
     "priceRiel": 53000,
@@ -4276,25 +4276,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីប្រាហើមកាត់ដុំតូចៗ ៤០០ ក្រាម",
         "nameEn": "Fermented salted fish cut into bite-sized cubes 400 g",
         "nameZh": "风味咸鱼切小块 400克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃហាន់ល្អិត និងស្លឹកក្រូចសើច ១ ចានតូច",
         "nameEn": "Finely sliced lemongrass & kaffir lime leaves 1 small bowl",
         "nameZh": "细香茅碎与柠檬叶 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសចិញ្ច្រាំ និងម្ទេសក្រហម ៣ ស្លាបព្រាបាយ",
         "nameEn": "Minced garlic & sliced red chilies 3 tbsp",
         "nameZh": "蒜末与红辣椒圈 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករស ១ ស្លាបព្រាកាហ្វេ និងក្រូចឆ្មារ ១ ផ្លែ",
         "nameEn": "Sugar 1 tsp & fresh lime 1 pc",
         "nameZh": "白糖 1茶匙、青柠 1个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4337,9 +4337,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Sweet, meaty sun-dried shrimp tossed with thinly sliced shallots, garlic, fiery bird-eye chilies, palm sugar, and fresh lime juice.",
     "descriptionZh": "精选大虾米拌入薄切红葱头、蒜片、指天椒、少许棕榈糖与鲜青柠汁，佐粥下饭皆宜。",
     "photoUrl": "/foods/food-290.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 195,
     "difficulty": "easy",
     "priceRiel": 15000,
@@ -4349,25 +4349,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "បង្គាក្រៀមល្អ (ហៃប៊ី) ២០០ ក្រាម",
         "nameEn": "Premium sun-dried shrimp (Haibee) 200 g",
         "nameZh": "精选大虾米（Haibee）200克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមក្រហម និងខ្ទឹមសហាន់ស្តើងៗ ៤ ស្លាបព្រាបាយ",
         "nameEn": "Thinly sliced shallots & garlic 4 tbsp",
         "nameZh": "红葱头薄片与蒜片 4汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ម្ទេសអាចម៍សត្វហាន់ ២ ស្លាបព្រាបាយ",
         "nameEn": "Sliced bird-eye chilies 2 tbsp",
         "nameZh": "小米辣圈 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកក្រូចឆ្មារ ស្ករស និងទឹកត្រីបន្តិច ៣ ស្លាបព្រាបាយ",
         "nameEn": "Fresh lime juice, sugar & a splash of fish sauce 3 tbsp",
         "nameZh": "鲜青柠汁、白糖与少许鱼露 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4410,9 +4410,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Rich, oily-yolked boiled salted duck eggs cut into wedges and served with tangy pickled young ginger, shallots, and chilies.",
     "descriptionZh": "起沙流油的熟咸鸭蛋切瓣摆盘，搭配酸甜嫩姜片、红葱头与小米辣，配白粥绝佳。",
     "photoUrl": "/foods/food-291.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 190,
     "difficulty": "medium",
     "priceRiel": 22000,
@@ -4422,25 +4422,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ពងទាប្រៃស្ងោរឆ្អិន ៤ គ្រាប់",
         "nameEn": "Boiled salted duck eggs 4 pcs",
         "nameZh": "熟咸鸭蛋 4个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ជ្រក់ខ្ញីខ្ចីហាន់ស្តើងៗ ១ កូនចាន",
         "nameEn": "Pickled young ginger thinly sliced 1 small bowl",
         "nameZh": "酸甜嫩姜薄片 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមក្រហមហាន់ និងម្ទេសអាចម៍សត្វ ២ ស្លាបព្រាបាយ",
         "nameEn": "Sliced shallots & bird-eye chilies 2 tbsp",
         "nameZh": "红葱头片与小米辣 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកក្រូចឆ្មារ និងស្ករសបន្តិច ១ ស្លាបព្រាបាយ",
         "nameEn": "Fresh lime juice & a pinch of sugar 1 tbsp",
         "nameZh": "鲜青柠汁与少许白糖 1汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4483,9 +4483,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Plump field frogs braised in a claypot with palm sugar caramel, garlic, fish sauce, and fragrant Kampot black pepper.",
     "descriptionZh": "肥美田鸡在砂锅中以棕榈糖、蒜瓣、鱼露与贡布黑胡椒慢焖收汁，咸甜微辣。",
     "photoUrl": "/foods/food-292.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 365,
     "difficulty": "easy",
     "priceRiel": 29000,
@@ -4495,25 +4495,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "កង្កែបស្រែធ្វើស្អាតកាប់ដុំ ៥០០ ក្រាម",
         "nameEn": "Cleaned field frogs cut into pieces 500 g",
         "nameZh": "洗净田鸡斩块 500克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករត្នោត និងទឹកត្រី ៣ ស្លាបព្រាបាយ",
         "nameEn": "Palm sugar & fish sauce 3 tbsp",
         "nameZh": "棕榈糖与鱼露 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសបុក និងម្រេចម៉ដ្ឋ ២ ស្លាបព្រាបាយ",
         "nameEn": "Crushed garlic & ground Kampot black pepper 2 tbsp",
         "nameZh": "蒜泥与贡布黑胡椒粉 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្លឹកខ្ទឹម និងម្ទេសក្រហម ២ ស្លាបព្រាបាយ",
         "nameEn": "Scallions & sliced red chilies 2 tbsp",
         "nameZh": "葱花与红辣椒圈 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4556,9 +4556,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Succulent prawns shaken with crunchy sweet preserved radish strips, shallots, garlic, bird-eye chilies, and zesty lime dressing.",
     "descriptionZh": "鲜嫩虾仁配爽脆甜菜脯丝、红葱头、蒜片、指天椒与青柠汁摇匀入味。",
     "photoUrl": "/foods/food-293.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 195,
     "difficulty": "easy",
     "priceRiel": 36000,
@@ -4568,25 +4568,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "បង្គាស្រស់បកសំបកស្រុសឬឆៅតាមចំណូលចិត្ត ៣០០ ក្រាម",
         "nameEn": "Fresh peeled prawns (poached or chilled raw) 300 g",
         "nameZh": "去壳鲜虾仁（白灼或冰镇）300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ឆៃប៉ូវផ្អែមហាន់សរសៃ ១៥០ ក្រាម",
         "nameEn": "Sweet preserved radish julienned 150 g",
         "nameZh": "甜菜脯切丝 150克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមក្រហម ខ្ទឹមស និងម្ទេសអាចម៍សត្វ ៣ ស្លាបព្រាបាយ",
         "nameEn": "Sliced shallots, garlic & bird-eye chilies 3 tbsp",
         "nameZh": "红葱头片、蒜片与小米辣 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី ទឹកក្រូចឆ្មារ ស្ករត្នោត និងជីរណា ៣ ស្លាបព្រាបាយ",
         "nameEn": "Fish sauce, lime juice, palm sugar & culantro 3 tbsp",
         "nameZh": "鱼露、青柠汁、棕榈糖与刺芫荽 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4629,9 +4629,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Warm steamed quail embryo eggs served in a nest of fresh Vietnamese coriander with a zesty Kampot black pepper and lime dip.",
     "descriptionZh": "热气腾腾的蒸毛鹌鹑蛋，搭配越南香菜（叻沙叶）与贡布黑胡椒青柠盐蘸食。",
     "photoUrl": "/foods/food-294.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "២ នាក់",
     "calories": 340,
     "difficulty": "medium",
     "priceRiel": 43000,
@@ -4641,25 +4641,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ពងក្រួចកូន ២០ គ្រាប់",
         "nameEn": "Quail embryo eggs 20 pcs",
         "nameZh": "毛鹌鹑蛋 20个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ជីរពងទាកូនស្រស់ ១ ចាន",
         "nameEn": "Fresh Vietnamese coriander (Rau Ram) 1 bowl",
         "nameZh": "新鲜越南香菜（叻沙叶）1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "អំបិលម៉ដ្ឋ និងម្រេចកំពតបុក ២ ស្លាបព្រាបាយ",
         "nameEn": "Fine salt & crushed Kampot black pepper 2 tbsp",
         "nameZh": "细盐与现磨贡布黑胡椒 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ក្រូចឆ្មារ និងម្ទេស ២ ផ្លែ",
         "nameEn": "Fresh limes & bird-eye chilies 2 pcs",
         "nameZh": "新鲜青柠与小米辣 2个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4702,9 +4702,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Savory-sweet Cambodian duck egg omelette studded with crunchy diced preserved radish, minced pork, and scallions.",
     "descriptionZh": "鸭蛋液混合爽脆甜菜脯碎、猪肉末与葱花，香煎至金黄焦香。",
     "photoUrl": "/foods/food-295.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 375,
     "difficulty": "easy",
     "priceRiel": 50000,
@@ -4714,25 +4714,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ពងទា ៤ គ្រាប់",
         "nameEn": "Fresh duck eggs 4 pcs",
         "nameZh": "新鲜鸭蛋 4个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ឆៃប៉ូវផ្អែមចិញ្ច្រាំល្អិត ១០០ ក្រាម",
         "nameEn": "Finely diced sweet preserved radish 100 g",
         "nameZh": "甜菜脯切细丁 100克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកចិញ្ច្រាំ ៨០ ក្រាម",
         "nameEn": "Minced pork 80 g",
         "nameZh": "猪肉末 80克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្លឹកខ្ទឹមហាន់ ម្រេច និងប្រេងឆា ៣ ស្លាបព្រាបាយ",
         "nameEn": "Chopped scallions, black pepper & cooking oil 3 tbsp",
         "nameZh": "葱花、黑胡椒与食用油 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4775,9 +4775,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Hearty Cambodian celebration rice porridge simmered in pork bone broth with sliced pork, liver, chitterlings, bean sprouts, and crispy garlic.",
     "descriptionZh": "猪骨高汤慢熬香米粥，配鲜猪肉片、猪肝、粉肠、豆芽、菜脯与炸蒜酥。",
     "photoUrl": "/foods/food-296.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 330,
     "difficulty": "easy",
     "priceRiel": 12000,
@@ -4787,25 +4787,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "អង្ករក្រអូបលីងបន្តិច ១ កំប៉ុង",
         "nameEn": "Lightly toasted jasmine rice 1 cup",
         "nameZh": "微焙茉莉香米 1杯",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូក ថ្លើមជ្រូក និងពោះតាន់ស្ងោរ ៣៥០ ក្រាម",
         "nameEn": "Sliced pork, liver & boiled chitterlings 350 g",
         "nameZh": "猪肉片、猪肝与熟粉肠 350克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកស៊ុបឆ្អឹងជ្រូក ១.៥ លីត្រ និងឆៃប៉ូវហាន់ ២ ស្លាបព្រាបាយ",
         "nameEn": "Pork bone broth 1.5 L & diced preserved radish 2 tbsp",
         "nameZh": "猪骨高汤 1.5升、菜脯丁 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សណ្ដែកបណ្ដុះ ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ និងខ្ទឹមបំពង ១ ចាន",
         "nameEn": "Bean sprouts, scallions, cilantro & fried garlic 1 bowl",
         "nameZh": "豆芽、葱花、香菜与炸蒜酥 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4848,9 +4848,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Delicate steamed woven rice vermicelli sheets drizzled with rich coconut cream and scallion oil, served with minced pork, herbs, peanuts, and sweet fish sauce.",
     "descriptionZh": "细腻蒸米网粉淋上浓椰浆与香葱油，配肉末、鲜蔬香草、烤花生及柬式酸甜鱼露。",
     "photoUrl": "/foods/food-297.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 475,
     "difficulty": "medium",
     "priceRiel": 19000,
@@ -4860,25 +4860,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "បាញ់ហយស្រស់ ៤០០ ក្រាម",
         "nameEn": "Fresh woven rice vermicelli bundles (Banh Hoy) 400 g",
         "nameZh": "新鲜米网粉（Banh Hoy）400克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ក្បាលខ្ទិះដូង ១ កូនចាន និងប្រេងស្លឹកខ្ទឹម ២ ស្លាបព្រាបាយ",
         "nameEn": "Thick coconut cream 1 small bowl & scallion oil 2 tbsp",
         "nameZh": "浓椰浆 1小碗、香葱油 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកចិញ្ច្រាំឆា និងសណ្ដែកដីលីងបុក ១៥០ ក្រាម",
         "nameEn": "Savory cooked minced pork & crushed peanuts 150 g",
         "nameZh": "炒香猪肉末与花生碎 150克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ត្រសក់ សណ្ដែកបណ្ដុះ ជីរគ្រប់មុខ និងទឹកត្រីផ្អែម ១ ចាន",
         "nameEn": "Cucumber, bean sprouts, fresh herbs & sweet fish sauce 1 bowl",
         "nameZh": "黄瓜丝、豆芽、香草与酸甜鱼露 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4921,9 +4921,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Signature Cambodian street-style braised pork ears, tongue, and chitterlings simmered in coconut water, palm sugar, and five-spice.",
     "descriptionZh": "柬埔寨经典五香卤味，将猪耳、猪舌与粉肠在椰子水、棕榈糖及五香卤汁中慢卤至红亮爽脆。",
     "photoUrl": "/foods/food-298.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 465,
     "difficulty": "easy",
     "priceRiel": 26000,
@@ -4933,25 +4933,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រចៀកជ្រូក អណ្ដាត និងពោះតាន់ ៦០០ ក្រាម",
         "nameEn": "Pork ears, tongue & chitterlings 600 g",
         "nameZh": "猪耳、猪舌与猪粉肠 600克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គ្រឿងផាក់ឡូវ ផ្កាចន្ទន៍ និងឈើអែម ២ ស្លាបព្រាបាយ",
         "nameEn": "Five-spice powder, star anise & cinnamon 2 tbsp",
         "nameZh": "五香粉、八角与桂皮 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករត្នោត ទឹកស៊ីអ៊ីវខាប់ និងទឹកដូងស្រស់ ២ ចាន",
         "nameEn": "Palm sugar, dark soy sauce & fresh coconut water 2 bowls",
         "nameZh": "棕榈糖、老抽与鲜椰子水 2碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ជ្រក់ស្ពៃ និងទឹកត្រីកោះកុង ១ ចាន",
         "nameEn": "Pickled mustard greens & spicy dipping sauce 1 bowl",
         "nameZh": "酸菜与酸辣蘸汁 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -4994,9 +4994,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Authentic Battambang specialty of minced river fish cured with lemongrass kroeung, kaffir lime leaves, and galangal, wrapped in banana leaves and charcoal-grilled.",
     "descriptionZh": "马德望省传统名菜，鲜鱼肉剁碎拌入香茅香料与柠檬叶，裹香蕉叶炭火慢烤，香气四溢。",
     "photoUrl": "/foods/food-299.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 220,
     "difficulty": "easy",
     "priceRiel": 33000,
@@ -5006,25 +5006,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់ត្រីរ៉ស់ឬត្រីឆ្លាតចិញ្ច្រាំម៉ដ្ឋ ៤០០ ក្រាម",
         "nameEn": "Finely minced snakehead or featherback fish 400 g",
         "nameZh": "精细黑鱼或刀鱼肉糜 400克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គ្រឿងស្លឹកគ្រៃ រំដេង និងស្លឹកក្រូចសើចហាន់ ៣ ស្លាបព្រាបាយ",
         "nameEn": "Lemongrass kroeung paste, galangal & kaffir lime leaves 3 tbsp",
         "nameZh": "香茅泥、南姜与柠檬叶丝 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "អង្ករលីងម៉ដ្ឋ អំបិល និងម្ទេសអាចម៍សត្វ ២ ស្លាបព្រាបាយ",
         "nameEn": "Toasted rice powder, salt & bird-eye chilies 2 tbsp",
         "nameZh": "烘焙米粉、盐与指天椒 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្លឹកចេកសម្រាប់ខ្ចប់ និងបន្លែអន្លក់ ១ ចាន",
         "nameEn": "Banana leaves for wrapping & fresh crudités 1 bowl",
         "nameZh": "包裹用香蕉叶与鲜蔬 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -5063,13 +5063,13 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryKh": "អាំង និង បំពង",
     "categoryEn": "Grilled & Fried",
     "categoryZh": "烧烤与油炸",
-    "descriptionKh": "សំបុកឃ្មុំព្រៃខ្ចីៗរោយអំបិលនិងស្លឹកខ្ទឹមបន្តិច ខ្ចប់ស្លឹកចេកអាំងលើរងើកភ្លើង មានរសជាតិផ្អែម béo ឈ្ងុយស្លឹកចេក។",
+    "descriptionKh": "សំបុកឃ្មុំព្រៃខ្ចីៗរោយអំបិលនិងស្លឹកខ្ទឹមបន្តិច ខ្ចប់ស្លឹកចេកអាំងលើរងើកភ្លើង មានរសជាតិផ្អែមឆ្ងាញ់ ឈ្ងុយស្លឹកចេក។",
     "descriptionEn": "Delicate wild honeycomb filled with creamy bee larvae, lightly salted, wrapped in banana leaves, and grilled over low charcoal embers.",
     "descriptionZh": "柬埔寨乡村珍馐，鲜嫩野生蜂巢蛹撒少许盐与葱花，裹香蕉叶炭火慢烤，甘甜丰腴。",
     "photoUrl": "/foods/food-300.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "២ នាក់",
     "calories": 250,
     "difficulty": "medium",
     "priceRiel": 40000,
@@ -5079,25 +5079,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សំបុកឃ្មុំព្រៃខ្ចី (កូនឃ្មុំ) ៣០០ ក្រាម",
         "nameEn": "Fresh wild honeycomb with larvae 300 g",
         "nameZh": "鲜嫩野生蜂巢蛹 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្លឹកខ្ទឹមហាន់ និងម្ទេសហាន់ ២ ស្លាបព្រាបាយ",
         "nameEn": "Chopped scallions & sliced chilies 2 tbsp",
         "nameZh": "葱花与辣椒圈 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "អំបិលម៉ដ្ឋ និងម្រេចកំពត ១ ស្លាបព្រាកាហ្វេ",
         "nameEn": "Fine sea salt & Kampot pepper 1 tsp",
         "nameZh": "细海盐与贡布黑胡椒 1茶匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្លឹកចេកស្រស់សម្រាប់ខ្ចប់ ២ សន្លឹក",
         "nameEn": "Fresh banana leaves for wrapping 2 sheets",
         "nameZh": "新鲜香蕉叶 2张",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -5140,9 +5140,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Springy egg noodles completely hidden beneath a generous topping of stir-fried pork, prawns, Chinese kale in gravy, and a crispy-edged sunny-side egg.",
     "descriptionZh": "劲道蛋面隐藏在丰盛的蚝油芥兰炒猪肉、鲜虾以及金黄流心荷包蛋之下。",
     "photoUrl": "/foods/food-301.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 475,
     "difficulty": "easy",
     "priceRiel": 47000,
@@ -5152,25 +5152,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "មីពងទាស្រស់ ២ ដុំ",
         "nameEn": "Fresh egg noodles 2 bundles",
         "nameZh": "鲜全蛋面 2团",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកហាន់ បង្គាស្រស់ និងប្រហិតត្រី ២៥០ ក្រាម",
         "nameEn": "Sliced pork, fresh prawns & fish balls 250 g",
         "nameZh": "猪肉片、鲜虾仁与鱼丸 250克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ពងទាចៀនជ័រភ្នៅ ២ គ្រាប់ និងខាត់ណា ១៥០ ក្រាម",
         "nameEn": "Sunny-side-up fried eggs 2 pcs & Chinese kale 150 g",
         "nameZh": "溏心荷包蛋 2个、芥兰 150克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ប្រេងខ្យង ទឹកស៊ីអ៊ីវ ខ្ទឹមស និងម្រេច ៣ ស្លាបព្រាបាយ",
         "nameEn": "Oyster sauce, soy sauce, garlic & pepper 3 tbsp",
         "nameZh": "蚝油、酱油、蒜末与胡椒 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -5204,7 +5204,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "id": "food-302",
     "nameKh": "ប្រហិតខ្យង",
     "nameEn": "Bouncy Cambodian Freshwater Snail Meatballs with Spicy Dip (Prohet Khyang)",
-    "nameZh": "柬式Q弹田螺肉丸（Prohet Khyang）",
+    "nameZh": "柬式爽弹田螺肉丸（Prohet Khyang）",
     "categorySlug": "streetfood",
     "categoryKh": "អាំង និង បំពង",
     "categoryEn": "Grilled & Fried",
@@ -5213,9 +5213,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Savory meatballs crafted from minced freshwater snails, pork paste, kaffir lime leaves, and black pepper, steamed and pan-seared until bouncy.",
     "descriptionZh": "鲜田螺肉剁碎混合猪肉浆、柠檬叶丝与黑胡椒制成丸子，蒸熟或香煎，爽脆弹牙。",
     "photoUrl": "/foods/food-302.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "៤ នាក់",
     "calories": 245,
     "difficulty": "easy",
     "priceRiel": 54000,
@@ -5225,25 +5225,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់ខ្យងស្រែធ្វើស្អាតចិញ្ច្រាំ ៣០០ ក្រាម",
         "nameEn": "Cleaned freshwater snail meat minced 300 g",
         "nameZh": "洗净田螺肉剁碎 300克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "សាច់ជ្រូកកិនម៉ដ្ឋ ១៥០ ក្រាម",
         "nameEn": "Finely ground pork paste 150 g",
         "nameZh": "细腻猪肉糜 150克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្លឹកក្រូចសើចហាន់ល្អិត ខ្ទឹមស និងម្រេច ២ ស្លាបព្រាបាយ",
         "nameEn": "Finely shredded kaffir lime leaves, garlic & black pepper 2 tbsp",
         "nameZh": "细柠檬叶丝、蒜末与黑胡椒 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី ស្ករស និងទឹកម្ទេសអំពិលទុំ ១ ចានតូច",
         "nameEn": "Fish sauce, sugar & tamarind chili dipping sauce 1 small bowl",
         "nameZh": "鱼露、糖与罗望子辣椒蘸酱 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -5286,9 +5286,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Tender freshwater snails steamed in banana leaf cups with aromatic Cambodian kroeung curry paste, rich coconut cream, and young noni leaves.",
     "descriptionZh": "鲜脆田螺肉配柬埔寨阿莫克黄咖喱香料、浓椰浆、鸭蛋与檄树叶，盛于香蕉叶盅内蒸制。",
     "photoUrl": "/foods/food-303.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "២ នាក់",
     "calories": 320,
     "difficulty": "medium",
     "priceRiel": 16000,
@@ -5298,25 +5298,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់ខ្យងស្រែធ្វើស្អាត ៣៥០ ក្រាម",
         "nameEn": "Cleaned freshwater snail meat 350 g",
         "nameZh": "洗净田螺肉 350克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គ្រឿងអាម៉ុកបុកម៉ដ្ឋ ៣ ស្លាបព្រាបាយ",
         "nameEn": "Pounded Cambodian Amok kroeung paste 3 tbsp",
         "nameZh": "柬式阿莫克香料泥 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទិះដូងដើម ១ ចាន និងពងទា ១ គ្រាប់",
         "nameEn": "Thick coconut cream 1 bowl & duck egg 1 pc",
         "nameZh": "浓椰浆 1碗、鸭蛋 1个",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្លឹកញខ្ចី ស្លឹកក្រូចសើច និងម្ទេសក្រហម ១ ចានតូច",
         "nameEn": "Young noni leaves, kaffir lime leaves & red chili 1 small bowl",
         "nameZh": "嫩檄树叶、柠檬叶丝与红椒丝 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -5359,9 +5359,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Authentic Cambodian hand-whipped featherback fish cakes seasoned with garlic, scallions, and pepper, fried until golden and springy.",
     "descriptionZh": "纯正柬埔寨刀鱼刮肉反复摔打至极富弹性，拌入葱花胡椒煎至金黄蓬松。",
     "photoUrl": "/foods/food-304.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២០ នាទី",
+    "servings": "៣ នាក់",
     "calories": 385,
     "difficulty": "easy",
     "priceRiel": 23000,
@@ -5371,25 +5371,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "សាច់ត្រីឆ្លាតកោសសុទ្ធ ៤០០ ក្រាម",
         "nameEn": "Pure scraped featherback fish paste 400 g",
         "nameZh": "纯刀鱼肉糜 400克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ទឹមសបុក ម្រេចម៉ដ្ឋ និងស្លឹកខ្ទឹមហាន់ ២ ស្លាបព្រាបាយ",
         "nameEn": "Pounded garlic, black pepper & chopped scallions 2 tbsp",
         "nameZh": "蒜泥、黑胡椒粉与葱花 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រី អំបិល និងស្ករសបន្តិច ១ ស្លាបព្រាបាយ",
         "nameEn": "Fish sauce, salt & a pinch of sugar 1 tbsp",
         "nameZh": "鱼露、盐与少许白糖 1汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកត្រីផ្អែមលាយសណ្ដែកដី និងត្រសក់ ១ ចាន",
         "nameEn": "Sweet peanut fish sauce & sliced cucumber 1 bowl",
         "nameZh": "花生酸甜鱼露蘸汁与黄瓜片 1碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -5432,9 +5432,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Bold, aromatic Cambodian relish of finely minced fermented fish paste with lemongrass, galangal, garlic, crisp Thai eggplant, and fresh lime.",
     "descriptionZh": "精选柬埔寨臭鱼肉与香茅、南姜、蒜瓣、指天椒及脆茄子一同剁碎，拌入鲜青柠汁。",
     "photoUrl": "/foods/food-305.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "4 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
+    "servings": "៤ នាក់",
     "calories": 175,
     "difficulty": "easy",
     "priceRiel": 30000,
@@ -5444,25 +5444,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ប្រហុកសាច់ត្រីរ៉ស់ឬត្រីកំភ្លាញ ១៥០ ក្រាម",
         "nameEn": "Boneless Cambodian prahok fish paste 150 g",
         "nameZh": "去骨柬式臭鱼酱（Prahok）150克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គល់ស្លឹកគ្រៃហាន់ រំដេង និងស្លឹកក្រូចសើច ៣ ស្លាបព្រាបាយ",
         "nameEn": "Sliced lemongrass, galangal & kaffir lime leaves 3 tbsp",
         "nameZh": "香茅片、南姜与柠檬叶 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ត្រប់ស្រួយហាន់ ខ្ទឹមស និងម្ទេសអាចម៍សត្វ ១ ចានតូច",
         "nameEn": "Crunchy Thai eggplants, garlic & bird-eye chilies 1 small bowl",
         "nameZh": "脆绿茄、蒜瓣与指天椒 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកក្រូចឆ្មារ និងស្ករត្នោត ២ ស្លាបព្រាបាយ",
         "nameEn": "Fresh lime juice & palm sugar 2 tbsp",
         "nameZh": "鲜青柠汁与棕榈糖 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -5505,9 +5505,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Rustic Cambodian delicacy of minced pork belly, prahok, and lemongrass kroeung pressed onto a wooden board or banana leaf and roasted over charcoal.",
     "descriptionZh": "五花肉末、臭鱼酱与香茅黄姜香料剁匀，铺于木砧板或蕉叶上以炭火炙烤至焦香四溢。",
     "photoUrl": "/foods/food-306.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "2 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣០ នាទី",
+    "servings": "២ នាក់",
     "calories": 490,
     "difficulty": "medium",
     "priceRiel": 37000,
@@ -5517,25 +5517,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ប្រហុកសាច់ ១០០ ក្រាម និងសាច់ជ្រូកបីជាន់ចិញ្ច្រាំ ២០០ ក្រាម",
         "nameEn": "Boneless prahok 100 g & minced pork belly 200 g",
         "nameZh": "去骨臭鱼酱 100克、五花肉末 200克",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "គ្រឿងស្លឹកគ្រៃ រំដេង ខ្ទឹមស និងស្លឹកក្រូចសើច ៣ ស្លាបព្រាបាយ",
         "nameEn": "Lemongrass kroeung, galangal, garlic & kaffir lime leaves 3 tbsp",
         "nameZh": "香茅泥、南姜、蒜与柠檬叶丝 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្ករត្នោត និងម្ទេសក្រហម ២ ស្លាបព្រាបាយ",
         "nameEn": "Palm sugar & red chilies 2 tbsp",
         "nameZh": "棕榈糖与红辣椒 2汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "បន្លែអន្លក់ ត្រសក់ ត្រប់ និងស្ពៃក្ដោប ១ ចានធំ",
         "nameEn": "Fresh crudités: cucumber, eggplant & cabbage 1 large platter",
         "nameZh": "黄瓜、脆茄与包菜等新鲜蘸菜 1大盘",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
@@ -5578,9 +5578,9 @@ export const foodpanda100Foods: FoodItem[] = [
     "descriptionEn": "Whole fresh spotted scat fish steamed until silky tender with julienned ginger, scallions, shiitake mushrooms, and aromatic soy-sesame broth.",
     "descriptionZh": "新鲜金钱鱼（Trei Tokkae）配姜丝、香菇与葱段清蒸，淋上秘制蒸鱼豉油与热香油，肉质细嫩鲜甜。",
     "photoUrl": "/foods/food-307.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "3 នាក់",
+    "prepTime": "១៥ នាទី",
+    "cookTime": "៣៥ នាទី",
+    "servings": "៣ នាក់",
     "calories": 255,
     "difficulty": "easy",
     "priceRiel": 44000,
@@ -5590,25 +5590,25 @@ export const foodpanda100Foods: FoodItem[] = [
         "nameKh": "ត្រីតុកកែស្រស់ ១ ក្បាលធំ (៦០០ ក្រាម)",
         "nameEn": "Whole fresh spotted scat fish 1 large (600 g)",
         "nameZh": "新鲜大金钱鱼 1条（600克）",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ខ្ញីខ្ចីហាន់សរសៃ និងផ្សិតក្រអូបហាន់ ១ ចានតូច",
         "nameEn": "Julienned young ginger & sliced shiitake mushrooms 1 small bowl",
         "nameZh": "嫩姜丝与香菇片 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ទឹកស៊ីអ៊ីវពិសេស ប្រេងខ្យង និងប្រេងល្ង ៣ ស្លាបព្រាបាយ",
         "nameEn": "Light soy sauce, oyster sauce & sesame oil 3 tbsp",
         "nameZh": "蒸鱼豉油、蚝油与香油 3汤匙",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       },
       {
         "nameKh": "ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ និងម្ទេសក្រហមហាន់សរសៃ ១ ចានតូច",
         "nameEn": "Julienne scallions, cilantro & red chili threads 1 small bowl",
         "nameZh": "葱丝、香菜与红椒丝 1小碗",
-        "amount": "តាមចំណូលចិត្ត / To taste"
+        "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [

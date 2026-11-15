@@ -53,8 +53,13 @@ import {
   getVipFeaturedRotationState,
   isShopSubscriptionActive,
   getShopSubscriptionCatalog,
-  SHOP_ALL_INCLUSIVE_5_BENEFITS,
-  SUMMARIZED_10_VIP_BENEFITS,
+  SHOP_PACKAGE_BENEFITS,
+  VIP_MEMBER_BENEFITS,
+  VIP_BENEFIT_GROUPS,
+  SHOP_BENEFIT_GROUPS,
+  resolvePackageBenefit,
+  type PackageBenefit,
+  type PackageBenefitGroup,
   sanitizeVipMembershipHistoryEntry,
   sanitizeLegacyVipTransactionPricing,
 } from '../types';
@@ -787,6 +792,41 @@ export const ProfileView: React.FC = () => {
         </div>
   );
 
+  const shopYearlyPriceUsd =
+    shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled
+      ? shopCatalog.earlyBirdPlan.priceUsd
+      : shopCatalog.yearlyPlan.priceUsd;
+
+  const renderBenefitGroups = (
+    groups: ReadonlyArray<PackageBenefitGroup>,
+    items: ReadonlyArray<PackageBenefit>
+  ) => (
+    <div className="space-y-2.5">
+      {groups.map((g) => {
+        const rows = items.filter((b) => b.group === g.id);
+        if (rows.length === 0) return null;
+        return (
+          <div key={g.id} className="space-y-1.5">
+            <div className="text-[11px] font-black text-slate-900">
+              {isKm ? g.km : language === 'zh' ? g.zh : g.en}
+            </div>
+            <ul className="space-y-1.5">
+              {rows.map((b) => {
+                const { title, desc } = resolvePackageBenefit(b, language, rotationCfg.durationDays);
+                return (
+                  <li key={b.id} className="text-[11.5px] leading-[1.65] text-slate-700">
+                    <span className="font-extrabold text-slate-900">{title}</span>
+                    {desc ? <span> — {desc}</span> : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   const vipAndShopBenefitsCards = !isAdmin && !isIosAppStore ? (
     <div className="space-y-3 font-khmer">
       {/* Card 1: Collapsible 10 VIP Membership Benefits (Clean Modern White Card with Colorful Glossy Accents) */}
@@ -812,9 +852,9 @@ export const ProfileView: React.FC = () => {
               <div className="font-extrabold text-xs sm:text-[13.5px] text-slate-900 leading-[1.6]">
                 {tr(
                   language,
-                  'អត្ថប្រយោជន៍ទាំង ១០ ក្នុងការចុះឈ្មោះជា VIP',
-                  'All 10 VIP Membership Benefits Included',
-                  '注册 VIP 会员包含全部 10 大专属特权'
+                  'អត្ថប្រយោជន៍សមាជិក VIP',
+                  'VIP Membership Benefits',
+                  'VIP 会员专属权益'
                 )}
               </div>
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -825,7 +865,7 @@ export const ProfileView: React.FC = () => {
                   <span>
                     {isVip10BenefitsExpanded
                       ? tr(language, 'លាក់អត្ថប្រយោជន៍', 'Hide Benefits', '收起特权')
-                      : tr(language, 'មើលអត្ថប្រយោជន៍ទាំង ១០', 'View 10 Benefits', '查看 10 项特权')}
+                      : tr(language, 'មើលអត្ថប្រយោជន៍ទាំង ៥', 'View 5 Benefits', '查看 5 项特权')}
                   </span>
                   <ChevronDown
                     className={`w-3.5 h-3.5 text-slate-600 transition-transform duration-200 ${
@@ -839,22 +879,16 @@ export const ProfileView: React.FC = () => {
         </div>
 
         {isVip10BenefitsExpanded && (
-          <div className="p-3 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-2 animate-fade-in">
-            <ul className="space-y-1.5 text-[11.5px] text-slate-800 font-medium">
-              {SUMMARIZED_10_VIP_BENEFITS.map((b) => (
-                <li key={b.id} className="leading-[1.65]">
-                  {isKm ? b.km : language === 'zh' ? b.zh : b.en}
-                </li>
-              ))}
-            </ul>
-            <div className="pt-2 border-t border-amber-200/70 text-[10.5px] font-bold text-amber-900 leading-[1.65]">
+          <div className="p-3 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-3 animate-fade-in">
+            <div className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11.5px] font-extrabold leading-[1.6]">
               {tr(
                 language,
-                `🔒 កញ្ចប់សមាជិកភាព VIP ($${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ, $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90ថ្ងៃ ឬ $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ) — អាចសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ (Free Trial) សម្រាប់ជំនួយការ AI និងផែនការដើរលេង។`,
-                `🔒 Paid VIP Membership ($${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d, $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d or $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr) — 7-Day Free Trial available for AI Assistant & Trip Planner.`,
-                `🔒 付费 VIP 会员（$${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天、$${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90天 或 $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/年）——支持 7 天免费试用 AI 助手与智能行程规划。`
+                '🎁 សាកល្បង VIP ឥតគិតថ្លៃ ៧ ថ្ងៃ សម្រាប់អ្នកប្រើគ្រប់គ្នា ក្រោយទាញយក App ហើយចុះឈ្មោះដោយ Email ឬលេខទូរស័ព្ទ',
+                '🎁 7-day free VIP trial for every user after downloading the app and registering with email or phone',
+                '🎁 所有用户下载应用并使用邮箱或手机号注册后，即可免费试用 VIP 7 天'
               )}
             </div>
+            {renderBenefitGroups(VIP_BENEFIT_GROUPS, VIP_MEMBER_BENEFITS)}
           </div>
         )}
 
@@ -933,9 +967,9 @@ export const ProfileView: React.FC = () => {
               <div className="font-extrabold text-xs sm:text-[13.5px] text-slate-900 leading-[1.6]">
                 {tr(
                   language,
-                  'កញ្ចប់ដាក់ហាង និងសណ្ឋាគាររួមបញ្ចូលទាំង ៥ មុខងារ',
-                  'Shop & Hotel Registration Package (All 5 Benefits)',
-                  '店铺与酒店全包入驻套餐（含全部 5 大权益）'
+                  'ដាក់ហាង/សណ្ឋាគារ ទាក់ទាញអតិថិជនថ្មីរៀងរាល់ថ្ងៃ',
+                  'List Your Shop & Attract New Customers Daily',
+                  '入驻店铺，每天吸引新顾客'
                 )}
               </div>
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -946,7 +980,7 @@ export const ProfileView: React.FC = () => {
                   <span>
                     {isShopHotelBenefitsExpanded
                       ? tr(language, 'លាក់អត្ថប្រយោជន៍', 'Hide Benefits', '收起权益')
-                      : tr(language, 'មើលអត្ថប្រយោជន៍ទាំង ៥', 'View 5 Benefits', '查看 5 项权益')}
+                      : tr(language, 'មើលអត្ថប្រយោជន៍ទាំង ៧', 'View 7 Benefits', '查看 7 项权益')}
                   </span>
                   <ChevronDown
                     className={`w-3.5 h-3.5 text-slate-600 transition-transform duration-200 ${
@@ -960,20 +994,14 @@ export const ProfileView: React.FC = () => {
         </div>
 
         {isShopHotelBenefitsExpanded && (
-          <div className="p-3 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-2 animate-fade-in">
-            <ul className="space-y-1.5 text-[11.5px] text-slate-800 font-medium">
-              {SHOP_ALL_INCLUSIVE_5_BENEFITS.map((b, i) => (
-                <li key={i} className="leading-[1.65]">
-                  {isKm ? b.km : language === 'zh' ? b.zh : b.en}
-                </li>
-              ))}
-            </ul>
+          <div className="p-3 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-3 animate-fade-in">
+            {renderBenefitGroups(SHOP_BENEFIT_GROUPS, SHOP_PACKAGE_BENEFITS)}
             <div className="pt-2 border-t border-emerald-200/70 text-[10.5px] font-bold text-emerald-900 leading-[1.65]">
               {tr(
                 language,
-                `🔒 កញ្ចប់ដាក់ហាងបង់ប្រាក់ ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ។ តម្រូវឱ្យបង់ប្រាក់តាម ABA KHQR និងផ្ទៀងផ្ទាត់ដោយ Admin ជាមុនសិន។`,
-                `🔒 Paid Shop Package ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr) — Not included in the 7-Day Free Trial. Payment via ABA KHQR and Admin verification is required to add your shop or hotel.`,
-                `🔒 付费店铺套餐（$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天 或 $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/年）——不含在 7 天免费试用内，管理员审核通过后付款开通。`
+                `🔒 កញ្ចប់ដាក់ហាង $${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ $${shopYearlyPriceUsd.toFixed(2)}/ឆ្នាំ។ បង់ប្រាក់តាម ABA KHQR ហើយ Admin ផ្ទៀងផ្ទាត់មុនបើកដំណើរការ។ កញ្ចប់នេះមិនរួមបញ្ចូលក្នុង Free Trial ទេ។`,
+                `🔒 Shop package $${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or $${shopYearlyPriceUsd.toFixed(2)}/yr. Pay via ABA KHQR and Admin verifies before activation. Not included in the Free Trial.`,
+                `🔒 店铺套餐 $${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天 或 $${shopYearlyPriceUsd.toFixed(2)}/年。通过 ABA KHQR 付款，管理员审核后开通。不含在免费试用内。`
               )}
             </div>
           </div>
@@ -991,9 +1019,9 @@ export const ProfileView: React.FC = () => {
           <span>
             {tr(
               language,
-              '+ ចុះបញ្ជីហាងរបស់អ្នកនៅលើកម្មវិធី',
-              '+ Register Your Shop on the App',
-              '+ 在应用上注册您的店铺'
+              'ចុះបញ្ជីហាងរបស់អ្នកនៅលើកម្មវិធី',
+              'Register Your Shop on the App',
+              '在应用上注册您的店铺'
             )}
           </span>
         </button>

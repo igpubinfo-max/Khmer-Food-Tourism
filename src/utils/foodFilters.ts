@@ -959,7 +959,7 @@ const PRIMARY_PRODUCT_GROUPS: ReadonlyArray<{
   },
   {
     id: 'kuy_teav',
-    tokens: ['គុយទាវ', 'kuy teav', 'kuyteav', 'rice noodle soup', 'pho', 'ហ្វឺ', '粿条', '河粉'],
+    tokens: ['គុយទាវ', 'ហាងគុយទាវ', 'kuy teav', 'kuyteav', 'noodle', 'noodles', 'rice noodle soup', 'pho', 'ហ្វឺ', 'អាហារព្រឹក', 'អាហារពេលព្រឹក', 'breakfast', '粿条', '河粉', '面条'],
     intent: 'savory_food',
   },
   {
@@ -1349,10 +1349,13 @@ export function matchShopToProductQuery(
 
   let score = 0;
   let isExactProductMatch = false;
+  const queryHasZh = /[\u4e00-\u9fff]/.test(rawQuery);
   const matchedInventoryItems: string[] = [];
   const addMatchedItem = (rawItem: string) => {
     const clean = rawItem.trim();
-    if (clean && !matchedInventoryItems.includes(clean)) {
+    if (!clean) return;
+    if (!queryHasZh && /[\u4e00-\u9fff]/.test(clean)) return;
+    if (!matchedInventoryItems.includes(clean)) {
       matchedInventoryItems.push(clean);
     }
   };
@@ -1495,7 +1498,28 @@ export function getMatchingRestaurantsForProvinceDish(
     return [];
   }
 
-  const hasUserCoords = Boolean(userCoords && Number.isFinite(userCoords.lat) && Number.isFinite(userCoords.lng));
+  let effectiveCoords =
+    userCoords && Number.isFinite(userCoords.lat) && Number.isFinite(userCoords.lng)
+      ? { lat: userCoords.lat, lng: userCoords.lng }
+      : null;
+  if (!effectiveCoords) {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const rawGps = localStorage.getItem('kft_last_known_user_gps_v1');
+        if (rawGps) {
+          const parsedGps = JSON.parse(rawGps);
+          const gLat = Number(parsedGps?.lat);
+          const gLng = Number(parsedGps?.lng);
+          if (Number.isFinite(gLat) && Number.isFinite(gLng) && gLat >= 9.5 && gLat <= 15.0 && gLng >= 102.0 && gLng <= 108.0) {
+            effectiveCoords = { lat: gLat, lng: gLng };
+          }
+        }
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }
+  const hasUserCoords = Boolean(effectiveCoords);
   if (lastRestaurantsRefForCache !== restaurants) {
     lastRestaurantsRefForCache = restaurants;
     provinceDishMatchCache.clear();
@@ -1524,8 +1548,8 @@ export function getMatchingRestaurantsForProvinceDish(
 
       const profile = getPrecomputedShopProfile(r);
 
-      const distMeters = hasUserCoords
-        ? haversineDistanceMeters(userCoords!.lat, userCoords!.lng, r.latitude, r.longitude)
+      const distMeters = effectiveCoords
+        ? haversineDistanceMeters(effectiveCoords.lat, effectiveCoords.lng, r.latitude, r.longitude)
         : Infinity;
 
       const inUserOrTargetProvince =
@@ -1565,6 +1589,13 @@ export function getMatchingRestaurantsForProvinceDish(
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
   matchingScored.sort((a, b) => {
+    const finA = Number.isFinite(a.distMeters);
+    const finB = Number.isFinite(b.distMeters);
+    if (finA && !finB) return -1;
+    if (!finA && finB) return 1;
+    if (finA && finB && a.distMeters !== b.distMeters) {
+      return a.distMeters - b.distMeters;
+    }
     if (a.isExactProductMatch !== b.isExactProductMatch) {
       return a.isExactProductMatch ? -1 : 1;
     }
@@ -1707,7 +1738,7 @@ export function isStirFriedDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' |
   ) {
     return false;
   }
-  return /^(ឆា|លីង|ឡុកឡាក់|លាសឆា|ក្តាម.*ឆា|ក្ដាម.*ឆា|បង្កងឆា|កំពិសលីង|ពោះតាន់ស្ពៃជូរ)/i.test(kh);
+  return /^(ឆា|លីង|ឡុកឡាក់|លាសឆា|លៀសឆា|ក្តាម.*ឆា|ក្ដាម.*ឆា|បង្កងឆា|កំពិសលីង|ពោះតាន់ស្ពៃជូរ)/i.test(kh);
 }
 
 export function isGrilledOrFriedDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' | 'categorySlug'>): boolean {
@@ -1747,7 +1778,8 @@ export function isSaladOrDipDishStrict(food: Pick<FoodItem, 'nameKh' | 'nameEn' 
     return false;
   }
   const kh = (food.nameKh || '').trim();
-  return /^(ញាំ|ភ្លា|បុក|ជ្រក់|ក្ដាមពងជ្រក់|ក្តាមពងជ្រក់|ទឹកគ្រឿង|ប្រហុក|ផ្អក|មុំា|មំា|សាឡាដ|អយស្ទ័រស្រស់|ងាវស្រុះ|ពោះគោទឹកប្រហុក|ត្រីសាលម៉ុនត្រាំ|ហៃប៊ីក្រូចឆ្មារ)/i.test(
+  if (/^ខម៉ាំ/i.test(kh)) return false;
+  return /^(ញាំ|ភ្លា|បុក|ជ្រក់|ក្ដាមពងជ្រក់|ក្តាមពងជ្រក់|ទឹកគ្រឿង|ប្រហុក|ផ្អក|ម៉ាំ|មុំា|មំា|សាឡាដ|អយស្ទ័រស្រស់|ងាវស្រុះ|ពោះគោទឹកប្រហុក|ត្រីសាលម៉ុនត្រាំ|ហៃប៊ីក្រូចឆ្មារ)/i.test(
     kh
   );
 }
@@ -1856,35 +1888,45 @@ export function matchesPresetCravingChip(food: FoodItem, chipId: string): boolea
     case 'soup':
       return matchesStrictFoodCategory(food, 'soup') && !isVeg;
     case 'grilled':
-      return matchesStrictFoodCategory(food, 'grilled') && !isVeg;
+      return (
+        matchesStrictFoodCategory(food, 'grilled') &&
+        !isVeg &&
+        !/^(នំកាឆាយ|នំគូឆាយ|នំត្រាវបំពង|នំអន្សមចៀន|បាញ់ឆែវ)/i.test(kh)
+      );
     case 'dessert':
       return matchesStrictFoodCategory(food, 'dessert');
     case 'vegetarian':
       return isVeg;
     case 'seafood':
       if (isBeverageDishStrict(food) || isSweetDessertOrCakeDishStrict(food) || isVeg) return false;
-      if (/^បុកមី/i.test(kh)) return false;
-      return /(គ្រឿងសមុទ្រ|ក្តាម|ក្ដាម|បង្គា|បង្កង|មឹក|ងាវ|លាស|លៀស|ខ្យង|គ្រំ|អយស្ទ័រ|កំពិស|ហៃប៊ី|ត្រីសាលម៉ុន|\bseafood\b|\bcrab\b|\bprawn\b|\bshrimp\b|\blobster\b|\bsquid\b|\bclam\b|\bcockle\b|\boysters?\b|\bshellfish\b|\bsalmon\b)/i.test(
+      if (/^(បុកមី|បុកល្ហុង|មីកូឡា|មីលាក់ខ្លួន|បាយក្តាំង|បាញ់ឆែវ|ភ្លាសាច់គោ)/i.test(kh)) return false;
+      if (/(ក្តាមស្រែ|ក្ដាមស្រែ|ខ្យងស្រែ)/i.test(kh)) return false;
+      return /(គ្រឿងសមុទ្រ|ក្តាម|ក្ដាម|បង្គា(?!ក្រៀម)|បង្កង|មឹក|ងាវ|លាសឆា|លៀសឆា|លៀសហាល|គ្រំ|អយស្ទ័រ|កំពិស|កំពឹស|ហៃប៊ី|ត្រីសាលម៉ុន|ត្រីកាម៉ុង|\bseafood\b|\bcrab\b|\bprawn\b|\blobster\b|\bsquid\b|\bclam\b|\bcockle\b|\boysters?\b|\bshellfish\b|\bsalmon\b|\bmackerel\b)/i.test(
         title
       );
     case 'spicy':
       if (isBeverageDishStrict(food) || isSweetDessertOrCakeDishStrict(food)) return false;
-      return (
-        getDishTagIds(food).includes('spicy') ||
-        /(ហឹរ|ម្ទេស|ឆាក្តៅ|ឆាក្ដៅ|ឆាម្រះព្រៅ|ឆាគ្រឿង|^ភ្លា|^បុក|ទឹកគ្រឿង|ប្រហុក|កាពិ|សម្លម្ជូរព្រៃ|តុងយ៉ាំ|\bspicy\b|\bchili\b|\bhot\s*basil\b)/i.test(
-          title
-        )
+      if (/^នំកាឆាយ/i.test(kh)) return false;
+      return /(ហឹរ|ម្ទេស(?!ប្លោក)|ឆាក្តៅ|ឆាក្ដៅ|ឆាម្រះព្រៅ|ម្រះព្រៅ|^ឆាគ្រឿង|^ភ្លា|^បុក|^ជ្រក់|ទឹកគ្រឿង|ប្រហុកខ្ទិះ|ប្រហុកអាំង|ប្រហុកឆៅ|កាពិ|សម្លម្ជូរព្រៃ|តុងយ៉ាំ|គីមឈី|\bspicy\b|\bchili\b|\bhot\s*basil\b)/i.test(
+        title
       );
     case 'spicy_sour':
       if (isBeverageDishStrict(food) || isSweetDessertOrCakeDishStrict(food)) return false;
-      return /(ជូរហឹរ|ម្ជូរព្រៃ|ម្ជូរគ្រឿង|ស្ងោរជ្រក់|សម្លម្ជូរ|ម្ជូរក្រអៅឈូក|ម្ជូរពងត្រី|តុងយ៉ាំ|^ភ្លា|^ញាំ|^បុក|ទឹកត្រីកោះកុង|អំពិលទុំ|ក្រូចឆ្មារ|\bspicy\s*(?:and|&)?\s*sour\b|\btom\s*yum\b|\bsour\s*soup\b|\bceviche\b|\bpapaya\s*salad\b)/i.test(
+      return /(ជូរហឹរ|ម្ជូរព្រៃ|ម្ជូរគ្រឿង|ស្ងោរជ្រក់|សម្លម្ជូរ|ម្ជូរក្រអៅឈូក|ម្ជូរពងត្រី|តុងយ៉ាំ|^ភ្លា|^ញាំ|^បុក|^ជ្រក់|ទឹកត្រីកោះកុង|លៀសឆាអំពិលទុំ|ហៃប៊ីក្រូចឆ្មារ|\bspicy\s*(?:and|&)?\s*sour\b|\btom\s*yum\b|\bsour\s*soup\b|\bceviche\b|\bpapaya\s*salad\b)/i.test(
         title
       );
     case 'streetfood':
-      if (isBeverageDishStrict(food) || isSoupOrCurryDishStrict(food) || isRiceDishStrict(food)) return false;
+      if (
+        isBeverageDishStrict(food) ||
+        isSweetDessertOrCakeDishStrict(food) ||
+        isSoupOrCurryDishStrict(food) ||
+        isRiceDishStrict(food)
+      ) {
+        return false;
+      }
       return (
         resolveCanonicalFoodCategorySlug(food) === 'streetfood' ||
-        /^(លតឆា|មីឆា|នំប៉័ងប៉ាតេ|បាញ់ឆែវ|បាញ់ហយ|នំគ្រក់|គួង|ណែម|ចាយ៉|ប្រហិត|សាច់ចង្កាក់|សាច់គោចង្កាក់|សាច់គោអាំងចង្កាក់|ស្លាបមាន់អាំង|ពងទាកូន|ពងក្រួចកូន|នំកាឆាយ|នំគូឆាយ|នំត្រាវបំពង|នំអន្សមចៀន|ចេកចៀន|ដំឡូង.*បំពង|បុកល្ហុង|បុកមី|បុកពោត|បុកស្វាយ|ងាវស្រុះ|ខ្យងស្រែអាំង|កំពិសលីង|សាច់ក្រក|សង្វាក់អាំង)/i.test(
+        /^(លតឆា|នំប៉័ងប៉ាតេ|នំប៉័ងផូស|បឺហ្គឺរ|បាញ់ឆែវ|បាញ់ហយ|នំគ្រក់|គួង|ណែម|ចាយ៉|ប្រហិត|សាច់ចង្កាក់|សាច់គោចង្កាក់|សាច់គោអាំងចង្កាក់|ស្លាបមាន់អាំង|ពងទាកូន|ពងក្រួចកូន|នំកាឆាយ|នំគូឆាយ|នំត្រាវបំពង|នំអន្សមចៀន|បុកល្ហុង|បុកមី|បុកពោត|បុកស្វាយ|ងាវស្រុះ|ខ្យងស្រែអាំង|កំពិសលីង|សាច់ក្រក|សង្វាក់អាំង)/i.test(
           kh
         )
       );
@@ -1902,7 +1944,7 @@ export function matchesPresetCravingChip(food: FoodItem, chipId: string): boolea
       return (
         isGrilledOrFriedDishStrict(food) ||
         isSaladOrDipDishStrict(food) ||
-        /^(ឆាក្តៅ|ឆាក្ដៅ|ឆាគ្រឿង|ឆាម្រះព្រៅ|ឡុកឡាក់|ក្តាមឆា|ក្ដាមឆា|បង្កងឆា|លាសឆា|កំពិសលីង|ងាវអប់)/i.test(kh)
+        /^(ឆាក្តៅ|ឆាក្ដៅ|ឆាគ្រឿង|ឆាម្រះព្រៅ|ឡុកឡាក់|ក្តាមឆា|ក្ដាមឆា|បង្កងឆា|លាសឆា|លៀសឆា|កំពិសលីង|ងាវអប់)/i.test(kh)
       );
     default:
       return matchesStrictFoodCategory(food, chipId);

@@ -135,6 +135,154 @@ export function readSavedUserGps(): { lat: number; lng: number } | null {
 export const readCachedUserGps = readSavedUserGps;
 export const calculateDistanceKm = calculateDistanceKmRounded;
 
+/**
+ * Resolves the active user GPS coordinates from explicit parameters or cached localStorage GPS.
+ * Returns null if no valid Cambodia GPS coordinate is available.
+ */
+export function resolveGlobalUserGpsCoords(
+  explicitCoords?: { lat?: number | null; lng?: number | null } | null
+): { lat: number; lng: number } | null {
+  if (
+    explicitCoords &&
+    typeof explicitCoords.lat === 'number' &&
+    typeof explicitCoords.lng === 'number' &&
+    isValidCambodiaGps(explicitCoords.lat, explicitCoords.lng)
+  ) {
+    return { lat: explicitCoords.lat, lng: explicitCoords.lng };
+  }
+  return readSavedUserGps();
+}
+
+/**
+ * Extracts valid Cambodia GPS coordinates from any shop, restaurant, hotel, tourist attraction, or Google Place record.
+ */
+export function extractEntityGpsCoords(entity: any): { lat: number; lng: number } | null {
+  if (!entity || typeof entity !== 'object') return null;
+  const candidate = entity.item && typeof entity.item === 'object' ? entity.item : entity;
+  const rawLat = Number(
+    candidate.latitude ??
+      candidate.lat ??
+      candidate.location?.lat ??
+      candidate.geometry?.location?.lat
+  );
+  const rawLng = Number(
+    candidate.longitude ??
+      candidate.lng ??
+      candidate.location?.lng ??
+      candidate.geometry?.location?.lng
+  );
+  if (isValidCambodiaGps(rawLat, rawLng)) {
+    return { lat: rawLat, lng: rawLng };
+  }
+  return null;
+}
+
+/**
+ * Returns the accurate Haversine distance in meters between the user's GPS location and an entity.
+ * Returns Infinity when either the user's GPS or the entity's coordinates are unavailable.
+ */
+export function getEntityDistanceMeters(
+  entity: any,
+  userCoords?: { lat?: number | null; lng?: number | null } | null
+): number {
+  if (!entity || typeof entity !== 'object') return Infinity;
+  const gps = resolveGlobalUserGpsCoords(userCoords);
+  const entityCoords = extractEntityGpsCoords(entity);
+  if (gps && entityCoords) {
+    return calculateDistanceMeters(gps.lat, gps.lng, entityCoords.lat, entityCoords.lng);
+  }
+  const precomputedMeters = Number(entity.distanceMeters ?? entity.distMeters ?? entity.item?.distanceMeters);
+  if (Number.isFinite(precomputedMeters) && precomputedMeters >= 0 && precomputedMeters < 9999990) {
+    return Math.round(precomputedMeters);
+  }
+  const precomputedKm = Number(entity.distanceKm ?? entity.item?.distanceKm);
+  if (Number.isFinite(precomputedKm) && precomputedKm >= 0 && precomputedKm < 9999) {
+    return Math.round(precomputedKm * 1000);
+  }
+  return Infinity;
+}
+
+/**
+ * Clearly defined deterministic fallback comparator when GPS is unavailable or when two locations share the exact same distance:
+ * 1. Exact product/dish/name match
+ * 2. Search relevance score descending
+ * 3. Verified / Featured / Recommended status
+ * 4. Rating descending
+ * 5. Review count descending
+ * 6. Name alphabetical
+ */
+export function compareByFallbackRelevance(a: any, b: any): number {
+  const itemA = a?.item && typeof a.item === 'object' ? a.item : a;
+  const itemB = b?.item && typeof b.item === 'object' ? b.item : b;
+
+  const exactA = Boolean(a?._isExactProductMatch ?? a?.isExactProductMatch ?? itemA?._isExactProductMatch);
+  const exactB = Boolean(b?._isExactProductMatch ?? b?.isExactProductMatch ?? itemB?._isExactProductMatch);
+  if (exactA !== exactB) return exactA ? -1 : 1;
+
+  const scoreA = Number(a?._matchScore ?? a?.score ?? itemA?._matchScore ?? itemA?.score ?? 0);
+  const scoreB = Number(b?._matchScore ?? b?.score ?? itemB?._matchScore ?? itemB?.score ?? 0);
+  if (Number.isFinite(scoreA) && Number.isFinite(scoreB) && scoreA !== scoreB) {
+    return scoreB - scoreA;
+  }
+
+  const verA = Boolean(itemA?.isVerified || itemA?.isFeatured || itemA?.recommended);
+  const verB = Boolean(itemB?.isVerified || itemB?.isFeatured || itemB?.recommended);
+  if (verA !== verB) return verA ? -1 : 1;
+
+  const ratingA = Number(itemA?.rating) || 0;
+  const ratingB = Number(itemB?.rating) || 0;
+  if (ratingA !== ratingB) return ratingB - ratingA;
+
+  const revA = Number(itemA?.reviewCount ?? itemA?.userRatingsTotal) || 0;
+  const revB = Number(itemB?.reviewCount ?? itemB?.userRatingsTotal) || 0;
+  if (revA !== revB) return revB - revA;
+
+  const nameA = String(itemA?.nameKh || itemA?.nameEn || itemA?.id || '');
+  const nameB = String(itemB?.nameKh || itemB?.nameEn || itemB?.id || '');
+  return nameA.localeCompare(nameB);
+}
+
+/**
+ * Global GPS Distance-First Comparator:
+ * - Always sorts by actual GPS distance in ascending order (closest to farthest) when GPS coordinates are available.
+ * - Locations with valid coordinates always appear before locations without coordinates.
+ * - Falls back to customFallback (if provided) and compareByFallbackRelevance when GPS is unavailable or distances are equal.
+ */
+export function compareByGpsDistanceAscending<T>(
+  a: T,
+  b: T,
+  userCoords?: { lat?: number | null; lng?: number | null } | null,
+  customFallback?: (a: T, b: T) => number
+): number {
+  const distA = getEntityDistanceMeters(a, userCoords);
+  const distB = getEntityDistanceMeters(b, userCoords);
+  const finA = Number.isFinite(distA);
+  const finB = Number.isFinite(distB);
+
+  if (finA && !finB) return -1;
+  if (!finA && finB) return 1;
+  if (finA && finB && distA !== distB) {
+    return distA - distB;
+  }
+
+  if (customFallback) {
+    const fb = customFallback(a, b);
+    if (fb !== 0) return fb;
+  }
+  return compareByFallbackRelevance(a, b);
+}
+
+/**
+ * Returns a new array of search/category results sorted nearest-first by actual GPS distance (with deterministic fallback when GPS is unavailable).
+ */
+export function sortResultsByGpsDistance<T>(
+  items: readonly T[],
+  userCoords?: { lat?: number | null; lng?: number | null } | null,
+  customFallback?: (a: T, b: T) => number
+): T[] {
+  return [...items].sort((a, b) => compareByGpsDistanceAscending(a, b, userCoords, customFallback));
+}
+
 export async function detectUserGpsCoordinate(
   forceHighAccuracy = false
 ): Promise<{ coord: { lat: number; lng: number } | null; error?: string }> {
@@ -436,7 +584,7 @@ export function mergeNearbyFoodShops(params: {
       return { ...r, distanceMeters, distanceKm };
     })
     .filter((r) => Number.isFinite(r.distanceMeters) && r.distanceMeters <= radiusMeters)
-    .sort((a, b) => a.distanceMeters - b.distanceMeters);
+    .sort((a, b) => compareByGpsDistanceAscending(a, b, refCoords));
 }
 
 /**
@@ -501,7 +649,7 @@ export function mergeNearbyHotels(params: {
       return { ...h, distanceMeters, distanceKm };
     })
     .filter((h) => Number.isFinite(h.distanceMeters) && h.distanceMeters <= radiusMeters)
-    .sort((a, b) => a.distanceMeters - b.distanceMeters);
+    .sort((a, b) => compareByGpsDistanceAscending(a, b, refCoords));
 }
 
 /**
@@ -555,6 +703,6 @@ export function mergeNearbyTourismDestinations(params: {
       return { ...d, distanceMeters, distanceKm };
     })
     .filter((d) => Number.isFinite(d.distanceMeters) && d.distanceMeters <= radiusMeters)
-    .sort((a, b) => a.distanceMeters - b.distanceMeters);
+    .sort((a, b) => compareByGpsDistanceAscending(a, b, refCoords));
 }
 

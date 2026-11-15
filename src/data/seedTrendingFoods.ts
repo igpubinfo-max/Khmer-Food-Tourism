@@ -91,7 +91,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     "lastUpdated": "2026-10-29",
     "isVerified": true,
     "viewCount": 2150,
-    "landmarkNameKh": "រូបសំណាកក្តាមសមុទ្រយក្ស & ឆ្នេរកែប",
+    "landmarkNameKh": "រូបសំណាកក្តាមសមុទ្រយក្ស និង ឆ្នេរកែប",
     "landmarkNameEn": "Kep Giant Blue Crab Statue & Beach, Kep",
     "videoUrl": "https://www.facebook.com/FoodBuzzCambodia",
     "locationVerificationStatus": "verified",
@@ -136,7 +136,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     "lastUpdated": "2026-10-29",
     "isVerified": true,
     "viewCount": 3890,
-    "landmarkNameKh": "រង្វង់មូលទុរេនកំពត & ស្ពានចាស់កំពត",
+    "landmarkNameKh": "រង្វង់មូលទុរេនកំពត និង ស្ពានចាស់កំពត",
     "landmarkNameEn": "Kampot Durian Roundabout & Old Bridge, Kampot",
     "videoUrl": "https://www.tiktok.com/@derdailyofficial?is_from_webapp=1&sender_device=pc",
     "locationVerificationStatus": "verified",
@@ -156,7 +156,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
       "food-158"
     ],
     "categorySlug": "unusual_local",
-    "categoryKh": "មុខម្ហូបប្លែកៗ & កម្រ",
+    "categoryKh": "មុខម្ហូបប្លែកៗ និង កម្រ",
     "categoryEn": "Unusual & Exotic Specialty",
     "descriptionKh": "មុខម្ហូបល្បីល្បាញជាង ៣០ ឆ្នាំ! ទឹកស៊ុបខសាច់គោរម្ងាស់ជាមួយគ្រឿងទេសឈ្ងុយផ្អែម សាច់គោនិងសរសៃពួរផុយរលាយក្នុងមាត់។ ពេញនិយមខ្លាំងសម្រាប់អាហារពេលព្រឹក។",
     "descriptionEn": "Famous 30-year legacy noodle soup featuring melt-in-mouth slow-simmered braised beef and tender tendon broth.",
@@ -247,7 +247,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
       "food-91"
     ],
     "categorySlug": "dessert_snack",
-    "categoryKh": "បង្អែម & អាហារសម្រន់",
+    "categoryKh": "បង្អែម និង អាហារសម្រន់",
     "categoryEn": "Desserts & Snacks",
     "descriptionKh": "សង់ខ្យាល្ពៅចំហុយថ្មីៗ ប្រើពងទាខ្មែរ ខ្ទិះដូងស្រស់ និងស្ករត្នោតធម្មជាតិ ផ្អែមឈ្ងុយរលាយក្នុងមាត់ ល្បីខ្លាំងនៅក្រុងសៀមរាប។",
     "descriptionEn": "Whole local pumpkin filled with silky palm-sugar duck egg coconut custard and steamed to perfection.",
@@ -281,7 +281,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
   },
   {
     "id": "trend-food-7",
-    "foodNameKh": "សាច់គោចង្កាក់អាំងគ្រឿង & ទឹកប្រហុកខាប់",
+    "foodNameKh": "សាច់គោចង្កាក់អាំងគ្រឿង និង ទឹកប្រហុកខាប់",
     "foodNameEn": "Char-Grilled Lemongrass Beef Skewers with Tuk Prahok",
     "restaurantNameKh": "សាច់គោអាំង ៧ មករា ភ្នំពេញ",
     "restaurantNameEn": "7 Makara Char-grilled Beef Skewers",
@@ -339,7 +339,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
       "food-47"
     ],
     "categorySlug": "dessert_snack",
-    "categoryKh": "បង្អែម & អាហារសម្រន់",
+    "categoryKh": "បង្អែម និង អាហារសម្រន់",
     "categoryEn": "Desserts & Snacks",
     "descriptionKh": "តូបបង្អែមបុរាណល្បីល្បាញជាង ៤០ ឆ្នាំ មានបង្អែមចេកខ្ទិះស្ករត្នោត រោយល្ងលីង និងគ្រាប់សាគូ ផ្អែមឈ្ងុយត្រជាក់ចិត្ត។",
     "descriptionEn": "Beloved 40-year dessert bar serving traditional Khmer warm banana in sweet coconut cream with toasted sesame.",
@@ -373,7 +373,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
   },
   {
     "id": "trend-food-9",
-    "foodNameKh": "នំបញ្ចុកសម្លខ្មែរ & សម្លការី កំពង់ចាម",
+    "foodNameKh": "នំបញ្ចុកសម្លខ្មែរ និង សម្លការី កំពង់ចាម",
     "foodNameEn": "Kampong Cham Traditional Num Banh Chok Khmer Noodle Curry",
     "restaurantNameKh": "នំបញ្ចុកអ្នកស្រែកំពង់ចាម (មាត់ទន្លេ)",
     "restaurantNameEn": "Kampong Cham Riverfront Num Banh Chok",
@@ -386,7 +386,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
       "food-4"
     ],
     "categorySlug": "noodle_soup",
-    "categoryKh": "គុយទាវ & ស៊ុប",
+    "categoryKh": "គុយទាវ និង ស៊ុប",
     "categoryEn": "Noodles & Soups",
     "descriptionKh": "នំបញ្ចុកសរសៃស្រស់ធ្វើដោយដៃ ស្រោចសម្លខ្មែរត្រីរ៉ស់ និងសម្លការីខ្ទិះដូង ជាមួយបន្លែធម្មជាតិដូចជាត្រយូងចេក សណ្ដែកកួរ និងផ្កាកំប្លោកស្រស់ៗ។",
     "descriptionEn": "Silky fresh artisanal rice noodles topped with aromatic lemongrass fish gravy and fresh garden herbs.",
@@ -424,11 +424,11 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     "foodNameEn": "Cambodian Saraman Beef Curry",
     "restaurantNameKh": "ផ្ទះសម្លខ្មែរ ៩៩៩ ទួលទំពូង",
     "restaurantNameEn": "999 Khmer Curry House Toul Tompoung",
-    "photoUrl": "/foods/food-16.jpg",
-    "matchedFoodId": "food-16",
+    "photoUrl": "/foods/food-165.jpg",
+    "matchedFoodId": "food-165",
     "fallbackFoodIds": [
-      "food-16",
-      "food-165"
+      "food-165",
+      "food-4"
     ],
     "categorySlug": "famous_dish",
     "categoryKh": "មុខម្ហូបល្បីប្រចាំតំបន់",
@@ -465,7 +465,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
   },
   {
     "id": "trend-food-11",
-    "foodNameKh": "បង្គាអាំងអំបិលម្ទេស & លៀសហាល ផ្សាររាត្រី",
+    "foodNameKh": "បង្គាអាំងអំបិលម្ទេស និង លៀសហាល ផ្សាររាត្រី",
     "foodNameEn": "Night Market Chili Salt Grilled Prawns & Spiced Clams",
     "restaurantNameKh": "តូបគ្រឿងសមុទ្រស្រស់ ផ្សាររាត្រីមាត់ទន្លេ",
     "restaurantNameEn": "Riverside Night Market Fresh Seafood Stall",
@@ -523,7 +523,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
       "food-50"
     ],
     "categorySlug": "dessert_snack",
-    "categoryKh": "បង្អែម & អាហារសម្រន់",
+    "categoryKh": "បង្អែម និង អាហារសម្រន់",
     "categoryEn": "Desserts & Snacks",
     "descriptionKh": "អំបុកស្រូវថ្មីដាល់ថ្មីៗឈ្ងុយប្រហើរ លាយជាមួយសាច់ដូងខ្ចី ទឹកដូងក្រអូប និងចេកណាំវ៉ាទុំផ្អែមឆ្ងាញ់ ពេញនិយមខ្លាំងតាមផ្លូវជាតិលេខ ៤។",
     "descriptionEn": "Freshly pounded toasted new harvest rice mixed with tender young coconut flesh, palm sugar, and ripe banana.",

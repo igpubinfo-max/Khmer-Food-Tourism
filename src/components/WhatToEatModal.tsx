@@ -846,23 +846,10 @@ export const WhatToEatModal: React.FC = () => {
     );
     if (strictWithoutMealSlot.length > 0) return withCustomLead(strictWithoutMealSlot);
 
-    // 3. Keep Category + Diet strict across all foods if Craving conflicted
-    const categoryAndDietOnly = foods.filter(
-      (food) =>
-        matchesCategoryStrict(food, categoryFilter) &&
-        (!shouldEnforceMealSlot || matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot)) &&
-        matchesDietStrict(food, vipDietFilter)
-    );
-    if (categoryAndDietOnly.length > 0) return withCustomLead(categoryAndDietOnly);
-
-    // 3b. A selected dietary chip is a HARD rule: never fall back to dishes that do not satisfy it.
+    // 3b. A selected dietary chip, category, or craving is a HARD rule: never fall back to dishes that do not satisfy it.
     if (vipDietFilter !== 'none') return [];
-
-    // 4. Keep Category strict across all foods so selecting a category never leaks other categories
-    if (categoryFilter !== 'all') {
-      const categoryOnly = foods.filter((food) => matchesCategoryStrict(food, categoryFilter));
-      if (categoryOnly.length > 0) return withCustomLead(categoryOnly);
-    }
+    if (categoryFilter !== 'all') return [];
+    if (presetChipId || qTrim) return [];
 
     return withCustomLead(basePool);
   }, [
@@ -1024,7 +1011,7 @@ export const WhatToEatModal: React.FC = () => {
       const verifiedFoods = foods.filter((f) => !isGeneratedDishId(f.id));
       // A selected dietary chip / dish type is a HARD rule: when nothing matches, show the empty state,
       // never an unrelated dish from the full catalog.
-      const hasHardFilter = vipDietFilter !== 'none' || categoryFilter !== 'all';
+      const hasHardFilter = vipDietFilter !== 'none' || categoryFilter !== 'all' || Boolean(cravingQuery.trim());
       const rawSource = activeDishList.length > 0 ? activeDishList : hasHardFilter ? [] : verifiedFoods;
       const sourcePool = rawSource.filter((f) => !isGeneratedDishId(f.id));
       if (sourcePool.length === 0 && (hasHardFilter || verifiedFoods.length === 0)) return [];
@@ -3238,7 +3225,17 @@ export const WhatToEatModal: React.FC = () => {
                     testId: 'wte-tab-craving',
                     imageSrc: '/categories/ai_cat_taste.png',
                     label: tr(language, 'ចំណង់រសជាតិ', 'Taste', '口味偏好'),
-                    value: QUICK_CRAVING_CHIPS.some((c) => c.queryKh === cravingQuery.trim() || c.queryEn.toLowerCase() === cravingQuery.trim().toLowerCase() || c.queryZh === cravingQuery.trim()) ? cravingQuery.trim() : '',
+                    value: (() => {
+                      const matchedChip = QUICK_CRAVING_CHIPS.find(
+                        (c) =>
+                          normalizeKhmerFoodText(c.queryKh) === normalizeKhmerFoodText(cravingQuery) ||
+                          c.queryEn.toLowerCase() === cravingQuery.trim().toLowerCase() ||
+                          c.queryZh === cravingQuery.trim()
+                      );
+                      return matchedChip
+                        ? stripLeadingSymbols(tr(language, matchedChip.labelKh, matchedChip.labelEn, matchedChip.labelZh))
+                        : '';
+                    })(),
                     active: hasMatchedCravingQuery,
                     vip: false,
                   },
@@ -3457,18 +3454,21 @@ export const WhatToEatModal: React.FC = () => {
                               setRecommendationError('');
                               setCategoryFilter(c.id);
                               setDrinkMode(false);
-                              if (c.id !== 'all' && cravingQuery.trim()) {
-                                const isPresetChip = QUICK_CRAVING_CHIPS.some(
-                                  (chip) =>
-                                    normalizeKhmerFoodText(chip.queryKh) === normalizeKhmerFoodText(cravingQuery) ||
-                                    chip.queryEn.toLowerCase() === cravingQuery.trim().toLowerCase() ||
-                                    chip.queryZh.toLowerCase() === cravingQuery.trim().toLowerCase()
-                                );
-                                const hasStrictIntersection = (aiCravingRecommendations?.allMatchedDishes || []).some((f) =>
-                                  matchesCategoryStrict(f, c.id)
-                                );
-                                if (isPresetChip || !hasStrictIntersection) {
+                              if (c.id !== 'all') {
+                                if (cravingQuery.trim()) {
                                   setCravingQuery('');
+                                }
+                                if (
+                                  vipDietFilter !== 'none' &&
+                                  !foods.some((f) => matchesCategoryStrict(f, c.id) && matchesDietStrict(f, vipDietFilter))
+                                ) {
+                                  setVipDietFilter('none');
+                                }
+                                if (
+                                  mealSlotFilter !== 'auto' &&
+                                  !foods.some((f) => matchesCategoryStrict(f, c.id) && matchesMealSlotStrict(f, mealSlotFilter, effectiveMealSlot))
+                                ) {
+                                  setMealSlotFilter('auto');
                                 }
                               }
                               if (chatMessages.length > 1) {
@@ -3530,6 +3530,15 @@ export const WhatToEatModal: React.FC = () => {
                                 setCravingQuery(chipQuery);
                                 setDrinkMode(false);
                                 setCategoryFilter('all');
+                                if (vipDietFilter !== 'none') {
+                                  setVipDietFilter('none');
+                                }
+                                if (
+                                  mealSlotFilter !== 'auto' &&
+                                  !foods.some((f) => matchesPresetCravingChip(f, chip.id) && matchesMealSlotStrict(f, mealSlotFilter, effectiveMealSlot))
+                                ) {
+                                  setMealSlotFilter('auto');
+                                }
                                 if (chatMessages.length > 1) {
                                   setChatMessages([
                                     buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length),
@@ -3566,6 +3575,23 @@ export const WhatToEatModal: React.FC = () => {
                             onClick={() => {
                               setVipDietFilter(opt.id);
                               setDrinkMode(false);
+                              if (opt.id !== 'none') {
+                                if (
+                                  categoryFilter !== 'all' &&
+                                  !foods.some((f) => matchesCategoryStrict(f, categoryFilter) && matchesDietStrict(f, opt.id))
+                                ) {
+                                  setCategoryFilter('all');
+                                }
+                                if (cravingQuery.trim()) {
+                                  const activeChipId = resolvePresetCravingChipId(cravingQuery);
+                                  if (
+                                    activeChipId &&
+                                    !foods.some((f) => matchesPresetCravingChip(f, activeChipId) && matchesDietStrict(f, opt.id))
+                                  ) {
+                                    setCravingQuery('');
+                                  }
+                                }
+                              }
                               if (chatMessages.length > 1) {
                                 setChatMessages([
                                   buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length),

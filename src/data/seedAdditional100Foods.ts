@@ -84,7 +84,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'កំពិសលីង',
     nameEn: 'Cambodian Wok-Roasted Crispy River Shrimp with Scallions & Chili (Kampis Ling)',
     cat: 'stirfry',
-    catKh: 'ម្ហូបឆា & លីង / កំពិសលីង',
+    catKh: 'ម្ហូបឆា និង លីង / កំពិសលីង',
     catEn: 'Stir-Fry / Roasted Freshwater Shrimp',
     mainIngKh: 'កំពិសទន្លេស្រស់លាងស្អាត (៤០០ ក្រាម)',
     mainIngEn: 'Fresh tiny freshwater river shrimp, cleaned and drained (400g)',
@@ -240,7 +240,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បបរសាមចូក',
     nameEn: 'Cambodian Samchok Rice Porridge with Prawns & Pork Offal (Borbor Samchok)',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បបរសាមចូក',
+    catKh: 'បាយ និង បបរ / បបរសាមចូក',
     catEn: 'Porridge / Borbor Samchok',
     mainIngKh: 'បបរអង្ករផ្កាម្លិះ បង្គាស្រស់ ប្រហិតសាច់ជ្រូក និងគ្រឿងក្នុងជ្រូក (៤៥០ ក្រាម)',
     mainIngEn: 'Jasmine rice porridge with fresh prawns, pork balls, and tender pork offal (450g)',
@@ -398,7 +398,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បបរសាច់ជ្រូក',
     nameEn: 'Cambodian Savory Pork & Offal Rice Porridge (Borbor Sach Chrouk)',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បបរសាច់ជ្រូក',
+    catKh: 'បាយ និង បបរ / បបរសាច់ជ្រូក',
     catEn: 'Porridge / Pork Congee',
     mainIngKh: 'បបរអង្ករផ្កាម្លិះ សាច់ជ្រូកហាន់ សាច់ជ្រូកខ្វៃ និងឈាមជ្រូក (៤៥០ ក្រាម)',
     mainIngEn: 'Jasmine rice porridge, tender sliced pork, crispy roast pork, and pork blood cubes (450g)',
@@ -424,7 +424,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ពោះគោទឹកប្រហុក',
     nameEn: 'Tender Boiled Beef Tripe with Savory Prahok Dip & Fresh Herbs (Poh Ko Teuk Prahok)',
     cat: 'salad',
-    catKh: 'ម្ហូបញាំ & ទឹកជ្រលក់ / ពោះគោទឹកប្រហុក',
+    catKh: 'ម្ហូបញាំ និង ទឹកជ្រលក់ / ពោះគោទឹកប្រហុក',
     catEn: 'Salad & Dip / Beef Tripe with Prahok Dip',
     mainIngKh: 'ពោះគោ និងសាច់គោស្ងោរផុយជាមួយគល់ស្លឹកគ្រៃស្លឹកក្រូចសើច (៤៥០ ក្រាម)',
     mainIngEn: 'Tender simmered honeycomb beef tripe and brisket infused with lemongrass (450g)',
@@ -649,7 +649,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ភ្លាសាច់គោ',
     nameEn: 'Cambodian Lime-Cured Beef Herb Salad (Pleah Sach Ko)',
     cat: 'salad',
-    catKh: 'ម្ហូបញាំ & ភ្លា / ភ្លាសាច់គោ',
+    catKh: 'ម្ហូបញាំ និង ភ្លា / ភ្លាសាច់គោ',
     catEn: 'Salad / Lime-Cured Beef Pleah',
     mainIngKh: 'សាច់គោផុយហាន់ស្តើង (៣៥០ ក្រាម)',
     mainIngEn: 'Paper-thin tender beef tenderloin (350g)',
@@ -662,7 +662,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ញាំត្រយូងចេកសាច់មាន់ហែក ស្បែកជ្រូក',
     nameEn: 'Shredded Chicken, Crispy Pork Skin & Banana Blossom Salad',
     cat: 'salad',
-    catKh: 'ម្ហូបញាំ & ភ្លា / ញាំត្រយូងចេក',
+    catKh: 'ម្ហូបញាំ និង ភ្លា / ញាំត្រយូងចេក',
     catEn: 'Salad / Chicken, Pork Skin & Banana Blossom Salad',
     mainIngKh: 'សាច់មាន់ស្រែស្ងោរហែក និងស្បែកជ្រូកស្ងោរហាន់ស្តើង (៣៥០ ក្រាម)',
     mainIngEn: 'Poached shredded free-range chicken and thinly sliced boiled pork skin (350g)',
@@ -675,7 +675,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក',
     nameEn: 'Glass Noodle Seafood Salad with Prawns & Squid',
     cat: 'salad',
-    catKh: 'ម្ហូបញាំ & ភ្លា / ញាំមីសួរ',
+    catKh: 'ម្ហូបញាំ និង ភ្លា / ញាំមីសួរ',
     catEn: 'Salad / Seafood Glass Noodle',
     mainIngKh: 'មីសួរស្រុស បង្គា និងមឹកស្រស់ (៤០០ ក្រាម)',
     mainIngEn: 'Glass noodles, fresh prawns, and squid rings (400g)',
@@ -688,7 +688,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ញាំក្រូចថ្លុងបង្គាស្រស់',
     nameEn: 'Fresh Pomelo & River Prawn Salad with Toasted Coconut',
     cat: 'salad',
-    catKh: 'ម្ហូបញាំ & ភ្លា / ញាំក្រូចថ្លុងបង្គាស្រស់',
+    catKh: 'ម្ហូបញាំ និង ភ្លា / ញាំក្រូចថ្លុងបង្គាស្រស់',
     catEn: 'Salad / Pomelo & Prawn Salad',
     mainIngKh: 'សាច់ក្រូចថ្លុងផ្អែមជូរ និងបង្គាស្រស់ស្រុស (៤០០ ក្រាម)',
     mainIngEn: 'Juicy ruby pomelo segments and poached fresh river prawns (400g)',
@@ -701,7 +701,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ភ្លាបង្គាស្រស់ម្រះខ្ចី',
     nameEn: 'Fresh River Prawn Ceviche with Crisp Bitter Melon',
     cat: 'salad',
-    catKh: 'ម្ហូបញាំ & ភ្លា / ភ្លាបង្គាស្រស់',
+    catKh: 'ម្ហូបញាំ និង ភ្លា / ភ្លាបង្គាស្រស់',
     catEn: 'Salad / Fresh Prawn Pleah',
     mainIngKh: 'បង្គាស្រស់បកសំបកលាងទឹកក្រូចឆ្មារ (៣៥០ ក្រាម)',
     mainIngEn: 'Fresh river prawns cured in lime juice (350g)',
@@ -714,7 +714,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ញាំស្តៅត្រីឆ្អើរសាច់ជ្រូកបីជាន់',
     nameEn: 'Cambodian Neem Flower, Smoked Fish & Pork Belly Salad',
     cat: 'salad',
-    catKh: 'ម្ហូបញាំ & ភ្លា / ញាំស្តៅ',
+    catKh: 'ម្ហូបញាំ និង ភ្លា / ញាំស្តៅ',
     catEn: 'Salad / Neem Flower & Smoked Fish',
     mainIngKh: 'ផ្កាស្តៅស្រុស ត្រីឆ្អើរ និងសាច់ជ្រូកបីជាន់ស្ងោរ (៣៥០ ក្រាម)',
     mainIngEn: 'Blanched neem blossoms, flaked smoked fish, and boiled pork belly (350g)',
@@ -727,7 +727,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ញាំសាច់មាន់ត្រញ៉ូងចេក',
     nameEn: 'Cambodian Shredded Chicken & Banana Blossom Salad with Roasted Peanuts',
     cat: 'salad',
-    catKh: 'ម្ហូបញាំ & ភ្លា / ញាំសាច់មាន់ត្រញ៉ូងចេក',
+    catKh: 'ម្ហូបញាំ និង ភ្លា / ញាំសាច់មាន់ត្រញ៉ូងចេក',
     catEn: 'Salad / Chicken & Banana Blossom',
     mainIngKh: 'សាច់មាន់ស្រែស្ងោរហែក និងត្រញ៉ូងចេកខ្ចីហាន់ស្តើង (៤០០ ក្រាម)',
     mainIngEn: 'Poached shredded country chicken and finely sliced banana blossom (400g)',
@@ -740,7 +740,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ទឹកគ្រឿងខ្មែរពិសេស',
     nameEn: 'Traditional Khmer Fish Herb Dip with Fresh Garden Vegetables (Teuk Kroeung)',
     cat: 'salad',
-    catKh: 'ទឹកជ្រលក់ & បន្លែ / ទឹកគ្រឿង',
+    catKh: 'ទឹកជ្រលក់ និង បន្លែ / ទឹកគ្រឿង',
     catEn: 'Dip & Salad / Teuk Kroeung',
     mainIngKh: 'សាច់ត្រីរ៉ស់ស្ងោរបុកម៉ត់ និងទឹកប្រហុកឆ្អិន (៣៥០ ក្រាម)',
     mainIngEn: 'Pounded poached snakehead fish and simmered prahok broth (350g)',
@@ -753,7 +753,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ប្រហុកខ្ទិះ',
     nameEn: 'Creamy Coconut & Minced Pork Prahok Dip with Fresh Crudités',
     cat: 'salad',
-    catKh: 'ទឹកជ្រលក់ & បន្លែ / ប្រហុកខ្ទិះ',
+    catKh: 'ទឹកជ្រលក់ និង បន្លែ / ប្រហុកខ្ទិះ',
     catEn: 'Dip & Salad / Prahok Ktis',
     mainIngKh: 'សាច់ជ្រូកបីជាន់ចិញ្ច្រាំ និងប្រហុកសាច់ (៣០០ ក្រាម)',
     mainIngEn: 'Minced pork belly and fine prahok paste (300g)',
@@ -766,7 +766,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បុកល្ហុងក្តាមប្រៃបង្គាក្រៀម',
     nameEn: 'Cambodian Green Papaya Salad with Salted Field Crab & Dried Shrimp',
     cat: 'salad',
-    catKh: 'ម្ហូបញាំ & បុក / បុកល្ហុងខ្មែរ',
+    catKh: 'ម្ហូបញាំ និង បុក / បុកល្ហុងខ្មែរ',
     catEn: 'Salad / Green Papaya Bok Lahong',
     mainIngKh: 'ល្ហុងខ្ចីឈូសសរសៃ ក្តាមប្រៃ និងបង្គាក្រៀម (៤០០ ក្រាម)',
     mainIngEn: 'Shredded green papaya, salted crab, and dried shrimp (400g)',
@@ -781,7 +781,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'នំបញ្ចុកសម្លណាំយ៉ា',
     nameEn: 'Khmer Rice Noodles with Red Nam Ya Coconut Curry (Num Banh Chok Nam Ya)',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / សម្លណាំយ៉ា',
+    catKh: 'គុយទាវ និង នំបញ្ចុក / សម្លណាំយ៉ា',
     catEn: 'Noodles / Nam Ya Curry Noodles',
     mainIngKh: 'នំបញ្ចុកស្រស់ និងសាច់ត្រី ឬសាច់មាន់ចិញ្ច្រាំ (៥០០ ក្រាម)',
     mainIngEn: 'Fresh rice vermicelli with minced fish or chicken curry gravy (500g)',
@@ -794,7 +794,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'គុយទាវទូកភ្នំពេញសាច់គោប្រហិត',
     nameEn: 'Phnom Penh Boat Noodle Soup with Sliced Beef & Meatballs',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / គុយទាវទូក',
+    catKh: 'គុយទាវ និង នំបញ្ចុក / គុយទាវទូក',
     catEn: 'Noodles / Boat Noodle Soup',
     mainIngKh: 'សរសៃគុយទាវ សាច់គោស្រស់ និងប្រហិតសាច់គោ (៤៥០ ក្រាម)',
     mainIngEn: 'Rice noodles, sliced beef, and beef meatballs (450g)',
@@ -807,7 +807,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'មីឆាគ្រឿងសមុទ្របែបខ្មែរ',
     nameEn: 'Cambodian Wok-Fried Egg Noodles with Fresh Seafood & Green Kampot Pepper',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / មីឆាគ្រឿងសមុទ្រ',
+    catKh: 'គុយទាវ និង នំបញ្ចុក / មីឆាគ្រឿងសមុទ្រ',
     catEn: 'Noodles / Seafood Stir-Fried Noodles',
     mainIngKh: 'សរសៃមីពងទា មឹកស្រស់ និងបង្គាស្រស់ (៤៥០ ក្រាម)',
     mainIngEn: 'Springy egg noodles, fresh ocean squid rings, and prawns (450g)',
@@ -820,7 +820,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'លតឆាសាច់គោពងទាចៀន',
     nameEn: 'Phnom Penh Stir-Fried Short Pin Noodles with Beef & Fried Egg (Lort Cha)',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / លតឆាសាច់គោ',
+    catKh: 'គុយទាវ និង នំបញ្ចុក / លតឆាសាច់គោ',
     catEn: 'Noodles / Beef Lort Cha',
     mainIngKh: 'នំលតស្រស់ សាច់គោហាន់ស្តើង និងពងទាចៀន ១ គ្រាប់ (៤៥០ ក្រាម)',
     mainIngEn: 'Short rice pin noodles, tender sliced beef, and sunny-side-up duck egg (450g)',
@@ -833,7 +833,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'មីគោកសាច់ជ្រូកសាស៊ីវ',
     nameEn: 'Cambodian Dry Egg Noodles with Honey Char Siu Pork',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / មីគោកសាច់ជ្រូកសាស៊ីវ',
+    catKh: 'គុយទាវ និង នំបញ្ចុក / មីគោកសាច់ជ្រូកសាស៊ីវ',
     catEn: 'Noodles / Dry Char Siu Noodles',
     mainIngKh: 'មីពងទា និងសាច់ជ្រូកសាស៊ីវហាន់បន្ទះ (៤៥០ ក្រាម)',
     mainIngEn: 'Springy egg noodles and honey-roasted char siu pork slices (450g)',
@@ -846,7 +846,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'គុយទាវគ្រឿងសមុទ្រកែប',
     nameEn: 'Kep Coastal Fresh Seafood Rice Noodle Soup',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / គុយទាវគ្រឿងសមុទ្រ',
+    catKh: 'គុយទាវ និង នំបញ្ចុក / គុយទាវគ្រឿងសមុទ្រ',
     catEn: 'Noodles / Kep Seafood Kuy Teav',
     mainIngKh: 'សរសៃគុយទាវ បង្គា មឹក និងសាច់ក្តាមសេះ (៥០០ ក្រាម)',
     mainIngEn: 'Rice noodles, fresh prawns, squid, and blue crab meat (500g)',
@@ -859,7 +859,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'នំបញ្ចុកទឹកប្រហុក ត្រីអណ្តែង',
     nameEn: 'Rice Vermicelli with Grilled Walking Catfish & Savory Prahok Sauce',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / នំបញ្ចុកទឹកប្រហុកត្រីអណ្តែង',
+    catKh: 'គុយទាវ និង នំបញ្ចុក / នំបញ្ចុកទឹកប្រហុកត្រីអណ្តែង',
     catEn: 'Noodles / Catfish & Prahok Vermicelli',
     mainIngKh: 'ត្រីអណ្តែងអាំងភ្លើងធ្យូង និងនំបញ្ចុកស្រស់ (៥០០ ក្រាម)',
     mainIngEn: 'Charcoal-grilled walking catfish and fresh rice vermicelli (500g)',
@@ -872,7 +872,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'មីសួរឆាក្តាមសេះកំពត',
     nameEn: 'Wok-Baked Glass Noodles with Kampot Blue Swimmer Crab',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / មីសួរឆាក្តាម',
+    catKh: 'គុយទាវ និង នំបញ្ចុក / មីសួរឆាក្តាម',
     catEn: 'Noodles / Crab Glass Noodles',
     mainIngKh: 'មីសួរ និងក្តាមសេះស្រស់ ២ ក្បាល (៥០០ ក្រាម)',
     mainIngEn: 'Glass vermicelli and 2 fresh blue swimmer crabs (500g)',
@@ -885,7 +885,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'ខគោនំប៉័ង',
     nameEn: 'Cambodian Spiced Beef Stew with Crispy Baguette (Khor Ko)',
     cat: 'soup',
-    catKh: 'ម្ហូបសម្ល & ខ / ខគោនំប៉័ង',
+    catKh: 'ម្ហូបសម្ល និង ខ / ខគោនំប៉័ង',
     catEn: 'Breakfast Stew / Beef Khor Ko & Baguette',
     mainIngKh: 'សាច់គោជាប់សរសៃរម្ងាស់ផុយ និងនំប៉័ងអាំងស្រួយ (៥០០ ក្រាម)',
     mainIngEn: 'Tender braised beef brisket & tendon with crispy toasted baguette (500g)',
@@ -898,7 +898,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បាញ់កាញ់ស៊ុបឆ្អឹងជ្រូក',
     nameEn: 'Thick Tapioca Rice Noodle Soup with Pork Ribs & Blood Cubes (Banh Kanh)',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / បាញ់កាញ់ស៊ុប',
+    catKh: 'គុយទាវ និង នំបញ្ចុក / បាញ់កាញ់ស៊ុប',
     catEn: 'Noodles / Pork Broth Banh Kanh',
     mainIngKh: 'សរសៃបាញ់កាញ់ ឆ្អឹងជំនីរជ្រូក និងឈាមជ្រូកស្ងោរ (៤៥០ ក្រាម)',
     mainIngEn: 'Thick tapioca rice noodles, tender pork ribs, and pork blood cubes (450g)',
@@ -913,7 +913,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បាយឆាក្តាម',
     nameEn: 'Cambodian Lump Crab Meat Fried Rice with Egg & Scallions',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បាយឆាក្តាម',
+    catKh: 'បាយ និង បបរ / បាយឆាក្តាម',
     catEn: 'Rice / Crab Fried Rice',
     mainIngKh: 'បាយផ្កាម្លិះ សាច់ក្តាមសេះសុទ្ធ និងពងទា (៤៥០ ក្រាម)',
     mainIngEn: 'Jasmine rice, fresh lump blue crab meat, and farm egg (450g)',
@@ -926,7 +926,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បាយសាច់ជ្រូកអាំង ជ្រក់ត្រសក់',
     nameEn: 'Cambodian Grilled Pork Rice with Crispy Fried Egg & Cucumber Pickles (Bay Sach Chrouk)',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បាយសាច់ជ្រូកអាំង',
+    catKh: 'បាយ និង បបរ / បាយសាច់ជ្រូកអាំង',
     catEn: 'Rice / Grilled Pork & Cucumber Pickle Rice',
     mainIngKh: 'បាយក្តៅៗ សាច់ជ្រូកអាំងធ្យូងប្រឡាក់ទឹកដូង និងពងទាចៀន (៤៥០ ក្រាម)',
     mainIngEn: 'Steamed jasmine rice, coconut-marinated charcoal-grilled pork, and crispy fried duck egg (450g)',
@@ -939,7 +939,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បបរគ្រឿងមាន់ស្រែឈាមជ្រូក',
     nameEn: 'Cambodian Herbed Chicken & Pork Blood Rice Porridge (Borbor Kroeung)',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បបរគ្រឿងមាន់',
+    catKh: 'បាយ និង បបរ / បបរគ្រឿងមាន់',
     catEn: 'Porridge / Chicken Congee',
     mainIngKh: 'អង្ករផ្កាម្លិះ សាច់មាន់ស្រែហែក និងឈាមជ្រូក (៤៥០ ក្រាម)',
     mainIngEn: 'Jasmine rice porridge, shredded country chicken, and pork blood cubes (450g)',
@@ -952,7 +952,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បបរត្រីរ៉ស់ទន្លេសាបខ្ញីស្រស់',
     nameEn: 'Tonle Sap Snakehead Fish Rice Congee with Fresh Ginger',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បបរត្រីរ៉ស់',
+    catKh: 'បាយ និង បបរ / បបរត្រីរ៉ស់',
     catEn: 'Porridge / Snakehead Fish Congee',
     mainIngKh: 'បបរអង្ករផ្កាម្លិះ និងសាច់ត្រីរ៉ស់ស្រស់ (៤៥០ ក្រាម)',
     mainIngEn: 'Silky rice porridge and fresh snakehead fish fillets (450g)',
@@ -965,7 +965,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បាយឆាម្រះព្រៅសាច់គោពងទាចៀន',
     nameEn: 'Spicy Holy Basil Beef Fried Rice with Crispy Fried Egg',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បាយឆាម្រះព្រៅ',
+    catKh: 'បាយ និង បបរ / បាយឆាម្រះព្រៅ',
     catEn: 'Rice / Holy Basil Beef Rice',
     mainIngKh: 'បាយផ្កាម្លិះ សាច់គោចិញ្ច្រាំ និងពងទាចៀន (៤៥០ ក្រាម)',
     mainIngEn: 'Jasmine rice, minced beef, and crispy fried duck egg (450g)',
@@ -978,7 +978,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បាយមាន់ស្ងោរទឹកត្រីខ្ញីពិសេស',
     nameEn: 'Cambodian Poached Free-Range Chicken Rice with Ginger Sauce',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បាយមាន់ខ្ញី',
+    catKh: 'បាយ និង បបរ / បាយមាន់ខ្ញី',
     catEn: 'Rice / Poached Chicken Rice',
     mainIngKh: 'សាច់មាន់ស្រែស្ងោរ និងបាយដាំជាមួយទឹកស៊ុបមាន់ (៥០០ ក្រាម)',
     mainIngEn: 'Poached country chicken over fragrant chicken-broth rice (500g)',
@@ -991,7 +991,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បាយឆាយ៉ាងចូវ',
     nameEn: 'Yangzhou Fried Rice',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បាយឆាយ៉ាងចូវ',
+    catKh: 'បាយ និង បបរ / បាយឆាយ៉ាងចូវ',
     catEn: 'Rice / Yangzhou Fried Rice',
     mainIngKh: 'បាយផ្កាម្លិះ សាច់ក្រក សាច់ជ្រូកសាស៊ីវ បង្គា និងស៊ុត (៤៥០ ក្រាម)',
     mainIngEn: 'Jasmine rice, sweet sausage, char siu pork, prawns, and egg (450g)',
@@ -1004,7 +1004,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បបរសពងទាប្រៃត្រីងៀតឆាឆៃប៉ូវ',
     nameEn: 'Plain Rice Congee with Salted Egg, Dried Fish & Stir-Fried Radish',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បបរសត្រីងៀត',
+    catKh: 'បាយ និង បបរ / បបរសត្រីងៀត',
     catEn: 'Porridge / Teochew-Khmer Congee Set',
     mainIngKh: 'បបរសស្លឹកតយ ត្រីងៀតចៀន និងពងទាប្រៃ (៤០០ ក្រាម)',
     mainIngEn: 'Pandan plain rice porridge, fried dried fish, and salted egg (400g)',
@@ -1017,7 +1017,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បាយគោងៀត ជ្រក់ល្ហុង',
     nameEn: 'Steamed Jasmine Rice with Crispy Beef Jerky & Tangy Papaya Pickle',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បាយគោងៀតជ្រក់ល្ហុង',
+    catKh: 'បាយ និង បបរ / បាយគោងៀតជ្រក់ល្ហុង',
     catEn: 'Rice / Beef Jerky & Papaya Pickle Rice',
     mainIngKh: 'បាយក្តៅៗ និងសាច់គោងៀតចៀន ឬអាំងឈ្ងុយ (៤០០ ក្រាម)',
     mainIngEn: 'Steamed jasmine rice and crispy sun-dried marinated beef jerky (400g)',
@@ -1030,7 +1030,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បាយខជើងជ្រូក',
     nameEn: 'Cambodian Caramelized Braised Pork Leg Rice with Egg & Pickled Greens (Bay Khor Cheung Chrouk)',
     cat: 'rice',
-    catKh: 'បាយ & បបរ / បាយខជើងជ្រូក',
+    catKh: 'បាយ និង បបរ / បាយខជើងជ្រូក',
     catEn: 'Rice / Braised Pork Leg Rice',
     mainIngKh: 'បាយផ្កាម្លិះក្តៅៗ ជើងជ្រូកខផុយ និងពងទាខ (៥០០ ក្រាម)',
     mainIngEn: 'Steamed jasmine rice, tender caramelized braised pork leg, and braised duck egg (500g)',
@@ -1045,7 +1045,7 @@ const RAW_100_NEW_DISHES: Array<{
     nameKh: 'បុកក្រសាំងត្រីឆ្អើរ',
     nameEn: 'Cambodian Pounded Wood-Apple & Smoked Fish Relish (Bok Krasang Trei Chhaeur)',
     cat: 'salad',
-    catKh: 'ញាំ ភ្លា & បុក / បុកក្រសាំងត្រីឆ្អើរ',
+    catKh: 'ញាំ ភ្លា និង បុក / បុកក្រសាំងត្រីឆ្អើរ',
     catEn: 'Salad & Relish / Pounded Wood-Apple & Smoked Fish',
     mainIngKh: 'ផ្លែក្រសាំងជ្រក់កោសយកសាច់ និងសាច់ត្រីឆ្អើរហែក (៣៥០ ក្រាម)',
     mainIngEn: 'Scooped sour wood-apple pulp and flaked smoked river fish (350g)',
@@ -1491,13 +1491,24 @@ function buildSeasoningIngredient(
   };
 }
 
+function lowerInlineEn(s: string): string {
+  if (!s) return s;
+  if (/^(Cambodian|Khmer|Kampot|Kep|Battambang|Siem Reap|Phnom Penh|Khor Ko|Prahok|Kroeung|Thai|Chinese|Vietnamese|Mekong|Tonle Sap|Preah|Stung Treng|Kandal|Takeo|Kampong|Yangzhou)\b/.test(s)) {
+    return s;
+  }
+  return s.charAt(0).toLowerCase() + s.slice(1);
+}
+
 function buildStepsForDish(
   id: string,
   item: RawNewDish,
   mainIngKh: string,
   mainIngEn: string
 ): Array<{ stepNumber: number; instructionKh: string; instructionEn: string }> {
-  const { cat, nameKh, nameEn, subIngKh, herbKh, subIngEn, herbEn } = item;
+  const { cat, nameKh, nameEn, subIngKh, herbKh } = item;
+  const subIngEn = lowerInlineEn(item.subIngEn);
+  const herbEn = lowerInlineEn(item.herbEn);
+  mainIngEn = lowerInlineEn(mainIngEn);
 
   // Cambodian Wok-Roasted Crispy River Shrimp - Kampis Ling (food-104)
   if (id === 'food-104') {
@@ -3354,6 +3365,7 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
     item.mainIngKh,
     item.mainIngEn
   );
+  const inlineMainEn = lowerInlineEn(cleanMainEn);
 
   const descriptionKh =
     id === 'food-173'
@@ -3370,16 +3382,16 @@ export const additional100Foods: FoodItem[] = RAW_100_NEW_DISHES.map((item, idx)
 
   const descriptionEn =
     id === 'food-173'
-      ? `${item.nameEn} is a popular wok-fried rice dish prepared with ${cleanMainEn}.`
+      ? `${item.nameEn} is a popular wok-fried rice dish prepared with ${inlineMainEn}.`
       : id === 'food-191'
-      ? `${item.nameEn} is a beloved traditional Cambodian savory sticky rice cake sliced and pan-fried golden crisp (${cleanMainEn}).`
+      ? `${item.nameEn} is a beloved traditional Cambodian savory sticky rice cake sliced and pan-fried golden crisp (${inlineMainEn}).`
       : item.cat === 'cake'
-      ? `${item.nameEn} is a traditional banana-leaf Cambodian cake prepared with ${cleanMainEn}.`
+      ? `${item.nameEn} is a traditional banana-leaf Cambodian cake prepared with ${inlineMainEn}.`
       : item.cat === 'drink'
-      ? `${item.nameEn} is a refreshing Cambodian beverage crafted with ${cleanMainEn}.`
+      ? `${item.nameEn} is a refreshing Cambodian beverage crafted with ${inlineMainEn}.`
       : item.cat === 'dessert'
-      ? `${item.nameEn} is a traditional Cambodian dessert made with ${cleanMainEn}.`
-      : `${item.nameEn} is an authentic Cambodian dish prepared with ${cleanMainEn}.`;
+      ? `${item.nameEn} is a traditional Cambodian dessert made with ${inlineMainEn}.`
+      : `${item.nameEn} is an authentic Cambodian dish prepared with ${inlineMainEn}.`;
 
   return {
     id,
