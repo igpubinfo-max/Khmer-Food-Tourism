@@ -1189,7 +1189,10 @@ export const RestaurantView: React.FC = () => {
               detectedGpsProvince={detectedGpsProvince}
               manualProvince={manualProvince}
               onProvinceChange={handleNearMeProvinceChange}
-              onRefreshGps={() => requestLocation(true)}
+              onRefreshGps={() => {
+                requestLocation(true);
+                scrollToShopList();
+              }}
               isLoadingNearby={isLoadingNearby}
               selectedRadiusMeters={selectedRadiusMeters}
               onSelectRadius={handleSelectRadius}

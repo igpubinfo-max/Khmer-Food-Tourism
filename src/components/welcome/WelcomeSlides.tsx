@@ -15,9 +15,10 @@ interface Props {
 /**
  * Fully Responsive Angkor AI Robot Welcome / Launch Screen:
  * - Strictly preserves the original 3:4 (768x1024) artwork aspect ratio on ALL phones, foldables, iPads, and tablets.
- * - Never stretches or distorts the background image, robot, square App Logo, or 4 square feature tiles.
- * - Uses a solid dark charcoal/black (#12151C) backdrop on remaining space (no blurred/stretched background fill).
- * - Scales naturally in both portrait and landscape orientations using container-relative units (cqw).
+ * - App Logo reduced by 40% (13.2% width, 1:1 square) with proportional Title & Subtitle below it.
+ * - Recognizable Angkor Wat 3-spire landmark icon for Tourism.
+ * - Middle AI bar removed per user design.
+ * - Only the "ចាប់ផ្តើមប្រើប្រាស់ >" (Get Started) button is clickable; all other tiles are non-interactive display elements.
  */
 export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish }) => {
   return (
@@ -50,20 +51,20 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           className="pointer-events-none absolute inset-0 w-full h-full object-contain select-none"
         />
 
-        {/* Top-Right Language Switcher (ខ្មែរ | EN | 中文) */}
+        {/* Top-Right Language Badge (ខ្មែរ | EN | 中文) */}
         <WelcomeTopBar language={language} onLanguage={onLanguage} />
 
-        {/* 1. App Logo inside Glowing Gold 1:1 Square (Right of Robot, Above Title) */}
+        {/* 1. App Logo Reduced by 40% inside Glowing Gold 1:1 Square (Right of Robot, Above Title) */}
         <div
           style={{
-            top: '18.6%',
-            left: '53.5%',
-            width: '21.2%',
+            top: '23.4%',
+            left: '58.2%',
+            width: '13.0%',
             aspectRatio: '1 / 1',
           }}
-          className="absolute z-20 flex items-center justify-center"
+          className="pointer-events-none absolute z-20 flex items-center justify-center"
         >
-          <div className="w-full h-full rounded-[22%] p-[2.5px] bg-gradient-to-b from-[#FEF08A] via-[#FACC15] to-[#D97706] shadow-[0_0_22px_rgba(250,204,21,0.85),0_6px_16px_rgba(0,0,0,0.5)]">
+          <div className="w-full h-full rounded-[22%] p-[2px] bg-gradient-to-b from-[#FEF08A] via-[#FACC15] to-[#D97706] shadow-[0_0_18px_rgba(250,204,21,0.85),0_4px_12px_rgba(0,0,0,0.5)]">
             <div className="w-full h-full rounded-[20%] overflow-hidden bg-[#06281E] flex items-center justify-center">
               <img
                 src={WELCOME_IMAGES.logo}
@@ -77,21 +78,21 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           </div>
         </div>
 
-        {/* 2. Main Khmer Title & English/Chinese Subtitle (Above the Golden Arc at y=44.5%) */}
+        {/* 2. Proportional Khmer Title & English/Chinese Subtitle (Above the Golden Arc) */}
         <div
           style={{
-            top: '35.0%',
-            left: '34.5%',
-            right: '2.5%',
-            height: '9.2%',
+            top: '37.2%',
+            left: '36.5%',
+            right: '3.0%',
+            height: '8.0%',
           }}
-          className="absolute z-20 flex flex-col items-center justify-center text-center px-1"
+          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center text-center px-1"
         >
           <h1
-            className="font-khmer font-extrabold text-white tracking-wide leading-[1.35] whitespace-nowrap"
+            className="font-khmer font-extrabold text-white tracking-wide leading-[1.32] whitespace-nowrap"
             style={{
-              fontSize: 'clamp(13px, 4.4cqw, 22px)',
-              textShadow: '0 2px 10px rgba(0, 15, 40, 0.95), 0 0 18px rgba(56, 189, 248, 0.45)',
+              fontSize: 'clamp(11px, 3.55cqw, 17.5px)',
+              textShadow: '0 2px 10px rgba(0, 15, 40, 0.95), 0 0 16px rgba(56, 189, 248, 0.45)',
             }}
           >
             រសជាតិ និងទេសចរណ៍កម្ពុជា
@@ -99,7 +100,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           <p
             className="font-extrabold text-white/95 tracking-wide leading-tight mt-0.5 whitespace-nowrap"
             style={{
-              fontSize: 'clamp(10px, 3.1cqw, 15.5px)',
+              fontSize: 'clamp(8.5px, 2.5cqw, 12.2px)',
               textShadow: '0 2px 8px rgba(0, 15, 40, 0.95)',
             }}
           >
@@ -107,21 +108,19 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           </p>
         </div>
 
-        {/* 3. Four Glowing Cyan Square Feature Tiles (y = 48.05% .. 59.38%) */}
+        {/* 3. Four Glowing Cyan Square Feature Tiles (y = 51.17% .. 63.28%, Non-Clickable Visual Preview) */}
         {/* Tile 1: ម្ហូបខ្មែរ (Food) */}
-        <button
-          type="button"
-          onClick={() => onFinish('food')}
+        <div
           style={{
-            top: '48.05%',
+            top: '51.17%',
             left: '9.38%',
             width: '17.71%',
-            height: '11.33%',
+            height: '12.11%',
           }}
-          className="absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px] bg-transparent hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer group"
+          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
         >
           <svg
-            className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)] group-hover:scale-105 transition-transform"
+            className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
             viewBox="0 0 36 36"
             fill="none"
           >
@@ -138,26 +137,39 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           >
             {tr(language, 'ម្ហូបខ្មែរ', 'Food', '高棉美食')}
           </span>
-        </button>
+        </div>
 
-        {/* Tile 2: ទេសចរណ៍ (Tourism / Angkor Wat) */}
-        <button
-          type="button"
-          onClick={() => onFinish('tourism')}
+        {/* Tile 2: ទេសចរណ៍ (Tourism — Recognizable Angkor Wat 3-Tower Landmark Icon) */}
+        <div
           style={{
-            top: '48.05%',
-            left: '31.25%',
-            width: '17.32%',
-            height: '11.33%',
+            top: '51.17%',
+            left: '30.99%',
+            width: '17.58%',
+            height: '12.11%',
           }}
-          className="absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px] bg-transparent hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer group"
+          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
         >
           <svg
-            className="w-[40%] h-[40%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)] group-hover:scale-105 transition-transform"
-            viewBox="0 0 36 36"
-            fill="currentColor"
+            className="w-[40%] h-[40%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <path d="M18 5l3.2 6.5h-6.4L18 5zm-8.5 5.5l2.4 5H7.1l2.4-5zm17 0l2.4 5h-4.8l2.4-5zM14 12.5h8v5h-8v-5zm-7.5 4h5v5h-5v-5zm18 0h5v5h-5v-5zM5 22.5h26v3H5v-3zm-1.5 4h29v2.5h-29v-2.5z" />
+            {/* Stepped temple foundation & gallery */}
+            <path d="M2.5 20h19" />
+            <path d="M4 20v-4.5h16V20" fill="currentColor" fillOpacity="0.18" />
+            {/* Central Angkor lotus tower */}
+            <path d="M9.5 15.5V9l2.5-5 2.5 5v6.5" fill="currentColor" fillOpacity="0.22" />
+            <path d="M12 2.5V4" />
+            {/* Left lotus tower */}
+            <path d="M5 15.5v-4.2l2.2-3.5 2.3 3.5v4.2" />
+            {/* Right lotus tower */}
+            <path d="M14.5 15.5v-4.2l2.3-3.5 2.2 3.5v4.2" />
+            {/* Central sanctuary entrance */}
+            <path d="M11 20v-2.4a1 1 0 0 1 2 0V20" />
           </svg>
           <span
             className="font-khmer font-extrabold text-white leading-tight text-center whitespace-nowrap"
@@ -168,22 +180,20 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           >
             {tr(language, 'ទេសចរណ៍', 'Tourism', '旅游景点')}
           </span>
-        </button>
+        </div>
 
         {/* Tile 3: ចំណូលចិត្ត (Favorites / Heart) */}
-        <button
-          type="button"
-          onClick={() => onFinish('favorites')}
+        <div
           style={{
-            top: '48.05%',
-            left: '52.86%',
-            width: '17.19%',
-            height: '11.33%',
+            top: '51.17%',
+            left: '52.47%',
+            width: '17.58%',
+            height: '12.11%',
           }}
-          className="absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px] bg-transparent hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer group"
+          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
         >
           <svg
-            className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)] group-hover:scale-105 transition-transform"
+            className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -202,22 +212,20 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           >
             {tr(language, 'ចំណូលចិត្ត', 'Favorites', '我的收藏')}
           </span>
-        </button>
+        </div>
 
         {/* Tile 4: ផែនទី (Map / Near Me) */}
-        <button
-          type="button"
-          onClick={() => onFinish('map')}
+        <div
           style={{
-            top: '48.05%',
-            left: '74.22%',
-            width: '17.19%',
-            height: '11.33%',
+            top: '51.17%',
+            left: '73.96%',
+            width: '17.58%',
+            height: '12.11%',
           }}
-          className="absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px] bg-transparent hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer group"
+          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
         >
           <svg
-            className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)] group-hover:scale-105 transition-transform"
+            className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -238,78 +246,49 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           >
             {tr(language, 'ផែនទី', 'Map', '附近地图')}
           </span>
-        </button>
+        </div>
 
-        {/* 4. Long Horizontal Glowing Cyan AI Pill Bar (y = 61.52% .. 68.55%) */}
+        {/* 4. ONLY Functional Button: Glowing Blue-Purple "ចាប់ផ្តើមប្រើប្រាស់ >" (Get Started) CTA Pill (y = 65.82% .. 74.61%) */}
         <button
           type="button"
-          onClick={() => onFinish('ai_assistant')}
+          onClick={() => onFinish('home')}
           style={{
-            top: '61.52%',
-            left: '9.25%',
-            width: '82.16%',
-            height: '7.03%',
+            top: '65.82%',
+            left: '15.89%',
+            width: '68.22%',
+            height: '8.79%',
           }}
-          className="absolute z-20 flex items-center justify-between px-2.5 sm:px-3.5 rounded-full bg-transparent hover:bg-cyan-400/10 active:scale-[0.99] transition cursor-pointer group"
+          className="
+            absolute z-30 rounded-full flex items-center justify-center gap-1.5 px-4
+            bg-transparent hover:bg-white/5 active:scale-[0.98] transition cursor-pointer group
+          "
         >
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            {/* Cute AI Robot Head Icon (strictly 1:1 circle) */}
-            <div
-              style={{ width: '7.8cqw', height: '7.8cqw', minWidth: '26px', minHeight: '26px', maxWidth: '38px', maxHeight: '38px' }}
-              className="rounded-full overflow-hidden border border-cyan-300/70 shadow-[0_0_10px_rgba(56,189,248,0.65)] shrink-0 bg-[#0A2540]"
-            >
-              <img
-                src={WELCOME_IMAGES.robotHead}
-                alt="AI Assistant"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {/* AI Pill Tag */}
-            <span
-              style={{ fontSize: 'clamp(9.5px, 2.5cqw, 12px)' }}
-              className="px-2 py-0.5 rounded-full bg-blue-500/40 border border-cyan-300/60 text-white font-black tracking-wider shrink-0 shadow-[0_0_8px_rgba(56,189,248,0.45)]"
-            >
-              AI
-            </span>
-            {/* Vertical Divider */}
-            <span className="h-4 w-px bg-cyan-300/50 shrink-0" aria-hidden="true" />
-            {/* AI Bar Title */}
-            <span
-              className="font-khmer font-extrabold text-white truncate"
-              style={{
-                fontSize: 'clamp(10.5px, 3.1cqw, 15px)',
-                textShadow: '0 1px 5px rgba(0,0,0,0.9)',
-              }}
-            >
-              {tr(
-                language,
-                'ជំនួយការ AI ម្ហូបអាហារ និងទេសចរណ៍',
-                'AI Food & Travel Assistant',
-                'AI 美食与旅游智能助手'
-              )}
-            </span>
-          </div>
-          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0 group-hover:translate-x-0.5 transition-transform" />
+          <span
+            className="font-khmer font-extrabold text-white tracking-wide whitespace-nowrap"
+            style={{
+              fontSize: 'clamp(14px, 4.3cqw, 21px)',
+              textShadow: '0 2px 8px rgba(15, 23, 42, 0.85)',
+            }}
+          >
+            {WELCOME_LABELS.start[language]}
+          </span>
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.8] shrink-0 group-hover:translate-x-1 transition-transform" />
         </button>
 
-        {/* 5. Three Quick-Action Items with Crisp CSS Cyan Dividers (y = 70.0% .. 77.8%) */}
+        {/* 5. Three Non-Interactive Feature Highlights with Crisp CSS Cyan Dividers (y = 76.2% .. 83.6%) */}
         <div
           style={{
-            top: '70.0%',
+            top: '76.2%',
             left: '4.8%',
             right: '4.8%',
-            height: '7.8%',
+            height: '7.4%',
           }}
-          className="absolute z-20 grid grid-cols-[1fr_1.08fr_1.18fr] items-center divide-x divide-cyan-300/45"
+          className="pointer-events-none absolute z-20 grid grid-cols-[1fr_1.08fr_1.18fr] items-center divide-x divide-cyan-300/45"
         >
           {/* Column 1: សុខភាព និងអាហារូបត្ថម្ភ */}
-          <button
-            type="button"
-            onClick={() => onFinish('healthy')}
-            className="h-full flex flex-col items-center justify-center gap-0.5 px-1 hover:bg-white/5 active:scale-95 transition cursor-pointer"
-          >
+          <div className="h-full flex flex-col items-center justify-center gap-0.5 px-1">
             <svg
-              style={{ width: '4.8cqw', height: '4.8cqw', minWidth: '17px', minHeight: '17px', maxWidth: '23px', maxHeight: '23px' }}
+              style={{ width: '4.6cqw', height: '4.6cqw', minWidth: '16px', minHeight: '16px', maxWidth: '22px', maxHeight: '22px' }}
               className="text-white shrink-0 drop-shadow-[0_1px_4px_rgba(56,189,248,0.6)]"
               viewBox="0 0 24 24"
               fill="none"
@@ -324,22 +303,18 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
             <span
               className="font-khmer font-bold text-white leading-[1.28] text-center whitespace-nowrap"
               style={{
-                fontSize: 'clamp(7.6px, 2.15cqw, 11px)',
+                fontSize: 'clamp(7.5px, 2.1cqw, 10.8px)',
                 textShadow: '0 1px 4px rgba(0,0,0,0.95)',
               }}
             >
               {tr(language, 'សុខភាព និងអាហារូបត្ថម្ភ', 'Health & Nutrition', '健康与营养')}
             </span>
-          </button>
+          </div>
 
           {/* Column 2: មុខម្ហូបគួរឱ្យចង់ញ៉ាំថ្ងៃនេះ */}
-          <button
-            type="button"
-            onClick={() => onFinish('what_to_eat')}
-            className="h-full flex flex-col items-center justify-center gap-0.5 px-1 hover:bg-white/5 active:scale-95 transition cursor-pointer"
-          >
+          <div className="h-full flex flex-col items-center justify-center gap-0.5 px-1">
             <svg
-              style={{ width: '4.8cqw', height: '4.8cqw', minWidth: '17px', minHeight: '17px', maxWidth: '23px', maxHeight: '23px' }}
+              style={{ width: '4.6cqw', height: '4.6cqw', minWidth: '16px', minHeight: '16px', maxWidth: '22px', maxHeight: '22px' }}
               className="text-white shrink-0 drop-shadow-[0_1px_4px_rgba(56,189,248,0.6)]"
               viewBox="0 0 24 24"
               fill="none"
@@ -356,28 +331,24 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
             <span
               className="font-khmer font-bold text-white leading-[1.28] text-center whitespace-nowrap"
               style={{
-                fontSize: 'clamp(7.5px, 2.1cqw, 10.8px)',
+                fontSize: 'clamp(7.4px, 2.05cqw, 10.5px)',
                 textShadow: '0 1px 4px rgba(0,0,0,0.95)',
               }}
             >
               {tr(language, 'មុខម្ហូបគួរឱ្យចង់ញ៉ាំថ្ងៃនេះ', 'Dishes to Try Today', '今日推荐美食')}
             </span>
-          </button>
+          </div>
 
           {/* Column 3: ស្វែងរកទីកន្លែងដើរលេងសម្រាប់ថ្ងៃនេះ */}
-          <button
-            type="button"
-            onClick={() => onFinish('discover_places')}
-            className="h-full flex flex-col items-center justify-center gap-0.5 px-1 hover:bg-white/5 active:scale-95 transition cursor-pointer"
-          >
+          <div className="h-full flex flex-col items-center justify-center gap-0.5 px-1">
             <Compass
-              style={{ width: '4.8cqw', height: '4.8cqw', minWidth: '17px', minHeight: '17px', maxWidth: '23px', maxHeight: '23px' }}
+              style={{ width: '4.6cqw', height: '4.6cqw', minWidth: '16px', minHeight: '16px', maxWidth: '22px', maxHeight: '22px' }}
               className="text-white shrink-0 drop-shadow-[0_1px_4px_rgba(56,189,248,0.6)]"
             />
             <span
               className="font-khmer font-bold text-white leading-[1.28] text-center whitespace-nowrap"
               style={{
-                fontSize: 'clamp(7.2px, 1.98cqw, 10.2px)',
+                fontSize: 'clamp(7.1px, 1.95cqw, 10px)',
                 textShadow: '0 1px 4px rgba(0,0,0,0.95)',
               }}
             >
@@ -388,41 +359,17 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
                 '今日出游景点推荐'
               )}
             </span>
-          </button>
+          </div>
         </div>
 
-        {/* 6. Bottom Glowing Blue-Purple CTA Pill Button (y = 79.10% .. 86.72%) */}
-        <button
-          type="button"
-          onClick={() => onFinish('home')}
-          style={{
-            top: '79.10%',
-            left: '20.83%',
-            width: '58.08%',
-            height: '7.62%',
-          }}
-          className="absolute z-20 rounded-full flex items-center justify-center gap-1.5 px-4 bg-transparent hover:bg-white/5 active:scale-[0.98] transition cursor-pointer group"
-        >
-          <span
-            className="font-khmer font-extrabold text-white tracking-wide whitespace-nowrap"
-            style={{
-              fontSize: 'clamp(13px, 4.1cqw, 20px)',
-              textShadow: '0 2px 8px rgba(15, 23, 42, 0.85)',
-            }}
-          >
-            {WELCOME_LABELS.start[language]}
-          </span>
-          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.8] shrink-0 group-hover:translate-x-1 transition-transform" />
-        </button>
-
-        {/* 7. Offline Mode Readiness Badge ("ប្រើបានទោះគ្មានអ៊ីនធឺណិត") */}
+        {/* 6. Offline Mode Readiness Badge ("ប្រើបានទោះគ្មានអ៊ីនធឺណិត") */}
         <div
           style={{
-            top: '87.8%',
+            top: '85.2%',
             left: '6.5%',
             right: '6.5%',
           }}
-          className="absolute z-20 inline-flex flex-col gap-0.5 rounded-2xl bg-[#042f2e]/92 border border-emerald-400/45 px-2.5 py-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.55)]"
+          className="pointer-events-none absolute z-20 inline-flex flex-col gap-0.5 rounded-2xl bg-[#042f2e]/92 border border-emerald-400/45 px-2.5 py-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.55)]"
         >
           <div
             style={{ fontSize: 'clamp(9.5px, 2.7cqw, 13px)' }}

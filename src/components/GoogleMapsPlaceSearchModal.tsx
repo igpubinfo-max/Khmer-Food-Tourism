@@ -26,6 +26,7 @@ import {
   buildCanonicalGoogleMapsPinUrl,
 } from '../types';
 import { tr, translateProvinceName } from '../utils/i18n';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
   detectUserGpsCoordinate,
@@ -181,11 +182,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
   const searchFormTopRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToResultsSection = () => {
-    setTimeout(() => {
-      if (resultsAnchorRef.current) {
-        resultsAnchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 90);
+    smoothScrollToElement(resultsAnchorRef.current, {
+      containerEl: scrollContainerRef.current,
+      offsetTop: 8,
+      delayMs: 35,
+    });
   };
 
   const scrollToSearchTop = () => {
@@ -316,9 +317,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         setResults(foundPlaces);
         setCurrentPage(1);
         setSelectedPlaceIds(new Set());
-        if (foundPlaces.length > 0) {
-          scrollToResultsSection();
-        }
+        scrollToResultsSection();
       }
 
       setNextPageToken(response.nextPageToken);
@@ -700,7 +699,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     onChange={e => {
                       const nextCat = e.target.value as GooglePlaceSearchCategory;
                       setCategory(nextCat);
-                      if (query.trim()) {
+                      if (query.trim() || results.length > 0) {
                         executeSearch({ cat: nextCat });
                       }
                     }}
@@ -722,7 +721,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                       const nextProv = e.target.value;
                       setProvince(nextProv);
                       setSearchScope(nextProv === 'ទាំងអស់' ? 'nationwide' : 'province');
-                      if (query.trim()) {
+                      if (query.trim() || results.length > 0) {
                         executeSearch({
                           prov: nextProv,
                           scope: nextProv === 'ទាំងអស់' ? 'nationwide' : 'province',

@@ -915,7 +915,10 @@ export const TourismView: React.FC = () => {
             detectedGpsProvince={detectedGpsProvince}
             manualProvince={manualProvince}
             onProvinceChange={handleNearMeProvinceChange}
-            onRefreshGps={() => requestLocation(true)}
+            onRefreshGps={() => {
+              requestLocation(true);
+              scrollToTourismList();
+            }}
             isLoadingNearby={isLoadingNearby}
             selectedRadiusMeters={selectedRadiusMeters}
             onSelectRadius={handleSelectRadius}

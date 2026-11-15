@@ -528,7 +528,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
         >
           {/* Clean Artwork Template Background (935x1024) — No Logo or Program Title overlay */}
           <img
-            src="/welcome/auth-login-bg.jpg?v=2.7.1"
+            src="/welcome/auth-login-bg.jpg?v=2.7.2"
             alt="Cambodia Flavors & Tourism Sign In"
             width={935}
             height={1024}
@@ -575,7 +575,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
             </div>
           )}
 
-          {/* 1. First Glowing Cyan Pill Button: ចូលប្រើដោយលេខទូរស័ព្ទ (y = 46.88% .. 56.05%) */}
+          {/* 1. First Glowing Cyan Pill Button: ចូលប្រើដោយលេខទូរស័ព្ទ (y = 46.88% .. 56.05%, Clean Single-Line Centered) */}
           <button
             type="button"
             onClick={() => {
@@ -589,46 +589,27 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
               width: '88.45%',
               height: '9.18%',
             }}
-            className="absolute z-20 rounded-full px-3.5 sm:px-4 flex items-center justify-between gap-2.5 bg-transparent hover:bg-cyan-400/10 active:scale-[0.99] transition cursor-pointer group"
+            className="absolute z-20 rounded-full px-4 sm:px-5 flex items-center justify-between gap-3 bg-transparent hover:bg-cyan-400/10 active:scale-[0.99] transition cursor-pointer group"
           >
-            <span className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-              {/* Glowing Cyan Circle Phone Icon */}
-              <span
-                style={{ width: '9.8cqw', height: '9.8cqw', minWidth: '34px', minHeight: '34px', maxWidth: '42px', maxHeight: '42px' }}
-                className="rounded-full border-2 border-cyan-300/90 bg-cyan-400/15 shadow-[0_0_14px_rgba(56,189,248,0.65)] flex items-center justify-center shrink-0"
-              >
-                <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
-              </span>
-              <span className="text-left min-w-0 flex-1">
-                <span
-                  className="block font-khmer font-extrabold text-white leading-snug truncate"
-                  style={{
-                    fontSize: 'clamp(12.5px, 3.85cqw, 17px)',
-                    textShadow: '0 2px 6px rgba(0, 10, 28, 0.95)',
-                  }}
-                >
-                  {tr(
-                    language,
-                    'ចូលប្រើដោយលេខទូរស័ព្ទ',
-                    'Sign in with Phone Number',
-                    '使用手机号码登录'
-                  )}
-                </span>
-                <span
-                  className="block font-khmer font-medium text-cyan-100/95 leading-tight truncate mt-0.5"
-                  style={{
-                    fontSize: 'clamp(9.5px, 2.8cqw, 12.2px)',
-                    textShadow: '0 1px 4px rgba(0, 10, 28, 0.95)',
-                  }}
-                >
-                  {tr(
-                    language,
-                    'បញ្ចូលលេខទូរស័ព្ទ • ទទួលលេខកូដ (SMS)',
-                    'Enter phone number • Receive verification code',
-                    '输入手机号码 • 获取安全验证码'
-                  )}
-                </span>
-              </span>
+            <span
+              style={{ width: '9.2cqw', height: '9.2cqw', minWidth: '32px', minHeight: '32px', maxWidth: '40px', maxHeight: '40px' }}
+              className="rounded-full border-2 border-cyan-300/90 bg-cyan-400/15 shadow-[0_0_14px_rgba(56,189,248,0.65)] flex items-center justify-center shrink-0"
+            >
+              <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
+            </span>
+            <span
+              className="font-khmer font-extrabold text-white tracking-wide whitespace-nowrap text-center flex-1"
+              style={{
+                fontSize: 'clamp(13px, 4.0cqw, 17.5px)',
+                textShadow: '0 2px 6px rgba(0, 10, 28, 0.95)',
+              }}
+            >
+              {tr(
+                language,
+                'ចូលប្រើដោយលេខទូរស័ព្ទ',
+                'Sign in with Phone Number',
+                '使用手机号码登录'
+              )}
             </span>
             <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white/95 shrink-0 group-hover:translate-x-0.5 transition-transform" />
           </button>
@@ -673,7 +654,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
               <span
                 className="font-khmer font-extrabold text-white tracking-wide whitespace-nowrap"
                 style={{
-                  fontSize: 'clamp(12.5px, 3.85cqw, 17px)',
+                  fontSize: 'clamp(13px, 4.0cqw, 17.5px)',
                   textShadow: '0 2px 6px rgba(0, 10, 28, 0.95)',
                 }}
               >
@@ -682,15 +663,15 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
             </button>
           )}
 
-          {/* 3. Clean Bottom Action Row (y = 70.2% .. 76.8%): មិនទាន់មានគណនីមែនទេ? បង្កើតគណនីថ្មី | ✉️ អ៊ីមែល */}
+          {/* 3. Clean Bottom Action Row (y = 70.2% .. 76.8%): បង្កើតគណនីថ្មី | ✉️ អ៊ីមែល */}
           <div
             style={{
               top: '70.2%',
-              left: '6.0%',
-              right: '6.0%',
+              left: '8.0%',
+              right: '8.0%',
               height: '6.5%',
             }}
-            className="absolute z-20 flex items-center justify-center gap-2 sm:gap-3"
+            className="absolute z-20 flex items-center justify-center gap-5 sm:gap-6"
           >
             <button
               type="button"
@@ -698,21 +679,12 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 setPhoneTab('register');
                 setAuthMode('phone');
               }}
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
+              className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
             >
-              <span
-                className="font-khmer font-medium text-white/95 whitespace-nowrap"
-                style={{
-                  fontSize: 'clamp(10px, 3.0cqw, 13.5px)',
-                  textShadow: '0 1px 4px rgba(0,0,0,0.95)',
-                }}
-              >
-                {tr(language, 'មិនទាន់មានគណនីមែនទេ?', 'No account yet?', '还没有账号？')}
-              </span>
               <span
                 className="font-khmer font-extrabold text-cyan-300 whitespace-nowrap"
                 style={{
-                  fontSize: 'clamp(10.5px, 3.15cqw, 14px)',
+                  fontSize: 'clamp(11.5px, 3.4cqw, 15px)',
                   textShadow: '0 0 10px rgba(34, 211, 238, 0.7), 0 1px 4px rgba(0,0,0,0.95)',
                 }}
               >
@@ -728,13 +700,13 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 setEmailTab('login');
                 setAuthMode('email');
               }}
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-cyan-400/10 active:scale-95 transition cursor-pointer"
             >
               <Mail className="w-4 h-4 text-white/95 shrink-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]" />
               <span
                 className="font-khmer font-bold text-white/95 whitespace-nowrap"
                 style={{
-                  fontSize: 'clamp(10.5px, 3.15cqw, 14px)',
+                  fontSize: 'clamp(11.5px, 3.4cqw, 15px)',
                   textShadow: '0 1px 4px rgba(0,0,0,0.95)',
                 }}
               >

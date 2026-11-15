@@ -409,14 +409,37 @@ export const HotelView: React.FC = () => {
   const hotelListStartRef = useRef<HTMLDivElement | null>(null);
   const hotelCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToHotelList = (keepCategoriesVisible = false) => {
-    if (keepCategoriesVisible) return;
+  const [scrollRequestTick, setScrollRequestTick] = useState<number>(0);
+
+  const scrollToHotelList = (_keepCategoriesVisible = false) => {
+    setScrollRequestTick((prev) => prev + 1);
     smoothScrollToElement(hotelListStartRef.current, {
       containerId: 'kft-main-scroll',
       targetId: 'kft-hotel-list-section',
       offsetTop: 6,
       delayMs: 25,
     });
+  };
+
+  useEffect(() => {
+    if (scrollRequestTick === 0 || isRestoringHistoryRef.current) return;
+    smoothScrollToElement(hotelListStartRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: 'kft-hotel-list-section',
+      offsetTop: 6,
+      delayMs: 25,
+    });
+  }, [scrollRequestTick]);
+
+  const handleExecuteHotelSearch = () => {
+    const trimmed = hotelSearchQuery.trim();
+    const explicitCat = detectExplicitAccommodationCategoryFromQuery(trimmed);
+    if (explicitCat && categoryFilter !== explicitCat) {
+      setCategoryFilter(explicitCat);
+    }
+    setDebouncedSearchQuery(hotelSearchQuery);
+    searchInputRef.current?.blur();
+    scrollToHotelList();
   };
 
   const recordHotelStep = (label?: string) => {
@@ -1650,7 +1673,14 @@ export const HotelView: React.FC = () => {
             }}
             className="flex-1 min-w-0 min-h-[48px] py-1 rounded-full border border-white pl-3.5 pr-2 flex items-center gap-2"
           >
-            <Search className="w-5 h-5 text-slate-500 shrink-0" strokeWidth={2.3} />
+            <button
+              type="button"
+              onClick={handleExecuteHotelSearch}
+              aria-label={tr(language, 'ស្វែងរក', 'Search', '搜索')}
+              className="p-0.5 text-slate-500 hover:text-emerald-700 shrink-0 cursor-pointer bg-transparent border-0"
+            >
+              <Search className="w-5 h-5" strokeWidth={2.3} />
+            </button>
             <input
               ref={searchInputRef}
               type="text"
@@ -1670,8 +1700,7 @@ export const HotelView: React.FC = () => {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
-                  searchInputRef.current?.blur();
-                  scrollToHotelList();
+                  handleExecuteHotelSearch();
                 }
               }}
               placeholder={tr(
@@ -1761,6 +1790,7 @@ export const HotelView: React.FC = () => {
                       setDebouncedSearchQuery('');
                     }
                     setCategoryFilter(cat.id);
+                    scrollToHotelList();
                   }}
                   aria-pressed={active}
                   className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 overflow-visible p-0 bg-transparent border-0 transition-colors duration-150 cursor-pointer focus:outline-none select-none"
@@ -1915,7 +1945,10 @@ export const HotelView: React.FC = () => {
               detectedGpsProvince={detectedGpsProvince}
               manualProvince={manualProvince}
               onProvinceChange={handleNearMeProvinceChange}
-              onRefreshGps={() => requestLocation(true)}
+              onRefreshGps={() => {
+                requestLocation(true);
+                scrollToHotelList();
+              }}
               isLoadingNearby={isLoadingNearby}
               selectedRadiusMeters={selectedRadiusMeters}
               onSelectRadius={handleSelectRadius}

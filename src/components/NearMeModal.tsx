@@ -848,7 +848,10 @@ export const NearMeModal: React.FC = () => {
               </select>
 
               <button
-                onClick={() => requestLocation(true)}
+                onClick={() => {
+                  requestLocation(true);
+                  scrollToNearbyShopList();
+                }}
                 disabled={isLoadingNearby}
                 style={{
                   background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',

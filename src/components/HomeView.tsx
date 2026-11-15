@@ -1,6 +1,7 @@
 import { openNearMeModal } from '../utils/nearMeNavigation';
 import { readSavedUserGps, compareByGpsDistanceAscending } from '../utils/nearMeEngine';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 import { useApp } from '../context/AppContext';
 import { TrendingFoodItem, isUserVipActive, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, resolveFoodPhotoUrl, handleFoodImageError, isStrictVerifiedCambodiaRestaurant } from '../types';
 import {
@@ -104,6 +105,17 @@ export const HomeView: React.FC = () => {
   }, []);
   const [isGettingSearchGps, setIsGettingSearchGps] = useState<boolean>(false);
   const [searchVisibleCount, setSearchVisibleCount] = useState<number>(12);
+  const homeSearchResultsStartRef = useRef<HTMLDivElement | null>(null);
+  const homeSearchPanelRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToHomeSearchResults = useCallback((targetEl?: HTMLElement | null) => {
+    smoothScrollToElement(targetEl || homeSearchResultsStartRef.current || homeSearchPanelRef.current, {
+      containerId: 'kft-main-scroll',
+      targetId: targetEl?.id || 'kft-home-search-results-list',
+      offsetTop: 8,
+      delayMs: 25,
+    });
+  }, []);
 
   const [homeSmartCachePlaces, setHomeSmartCachePlaces] = useState<GooglePlaceCachedItem[]>([]);
   const [isHomeSearchingOnline, setIsHomeSearchingOnline] = useState(false);
@@ -192,10 +204,12 @@ export const HomeView: React.FC = () => {
   const handleSelectSearchRadius = async (meters: number) => {
     if (meters === 0) {
       setSearchRadiusMeters(0);
+      scrollToHomeSearchResults();
       return;
     }
     if (userGpsLocation) {
       setSearchRadiusMeters(meters);
+      scrollToHomeSearchResults();
       return;
     }
     setIsGettingSearchGps(true);
@@ -204,6 +218,7 @@ export const HomeView: React.FC = () => {
     if (loc) {
       setUserGpsLocation({ lat: loc.lat, lng: loc.lng });
       setSearchRadiusMeters(meters);
+      scrollToHomeSearchResults();
     } else {
       showToast(
         tr(
@@ -316,16 +331,20 @@ export const HomeView: React.FC = () => {
     (next: 'all' | 'food' | 'restaurants' | 'tourism' | 'external') => {
       if (next !== searchTab) recordHomeStep('home-search-tab:' + next);
       setSearchTabRaw(next);
+      scrollToHomeSearchResults();
     },
-    [recordHomeStep, searchTab]
+    [recordHomeStep, searchTab, scrollToHomeSearchResults]
   );
 
   const setSelectedProvince = useCallback(
     (next: string) => {
       if (next !== selectedProvince) recordHomeStep('home-prov:' + next);
       setSelectedProvinceCtx(next);
+      if (globalSearchQuery.trim()) {
+        scrollToHomeSearchResults();
+      }
     },
-    [recordHomeStep, selectedProvince, setSelectedProvinceCtx]
+    [recordHomeStep, selectedProvince, setSelectedProvinceCtx, globalSearchQuery, scrollToHomeSearchResults]
   );
 
   const setGlobalSearchQuery = useCallback(
@@ -466,7 +485,7 @@ export const HomeView: React.FC = () => {
 
       {/* 2. Global Live Search Results Dropdown/Panel */}
       {searchResults && (
-        <div className="p-3.5 sm:p-4 rounded-3xl bg-white dark:bg-slate-800 border-2 border-emerald-500 shadow-lg space-y-3 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div ref={homeSearchPanelRef} id="kft-home-search-panel" className="p-3.5 sm:p-4 rounded-3xl bg-white dark:bg-slate-800 border-2 border-emerald-500 shadow-lg space-y-3 animate-in fade-in slide-in-from-top-2 duration-150 scroll-mt-2">
           <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-1.5 min-w-0">
               <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -621,7 +640,7 @@ export const HomeView: React.FC = () => {
           </div>
 
           {/* Results List */}
-          <div className="space-y-2 max-h-[440px] overflow-y-auto no-scrollbar pt-1">
+          <div ref={homeSearchResultsStartRef} id="kft-home-search-results-list" className="space-y-2 max-h-[440px] overflow-y-auto no-scrollbar pt-1 scroll-mt-2">
             {isHomeSearchingOnline && searchResults.totalCount === 0 ? (
               <div className="py-8 flex items-center justify-center gap-2 text-xs text-slate-500">
                 <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
