@@ -685,17 +685,6 @@ export const FoodView: React.FC = () => {
                       </span>
                     </div>
                   </div>
-                  {/* Active Selection Highlight Bar Below Button */}
-                  <span
-                    aria-hidden="true"
-                    className={`mt-1 h-1.5 w-8 sm:w-10 rounded-full transition-all duration-150 ${
-                      active ? 'opacity-100' : 'opacity-0'
-                    }`}
-                    style={{
-                      background: 'linear-gradient(90deg, #F59E0B 0%, #FDE047 50%, #F59E0B 100%)',
-                      boxShadow: '0 1px 8px rgba(245, 158, 11, 0.8)',
-                    }}
-                  />
                 </button>
               );
             })}
