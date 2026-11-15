@@ -32,6 +32,21 @@ import {
 } from '../utils/searchEngine';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
+import {
+  searchNearbyPlacesWithin500m,
+  GooglePlaceCachedItem,
+} from '../services/googlePlacesService';
+import { NearMeControlBar } from './common/NearMeControlBar';
+import {
+  MAX_NEARBY_RADIUS_METERS,
+  PROVINCE_CENTERS,
+  calculateDistanceMeters,
+  readSavedUserGps,
+  detectClosestProvinceFromCoords,
+  resolveActiveNearMeCoords,
+  requestCambodiaGpsLocation,
+  mergeNearbyTourismDestinations,
+} from '../utils/nearMeEngine';
 
 const TOURISM_BATCH_SIZE = 18;
 const DEFAULT_PP_COORDS = { lat: 11.5564, lng: 104.9282 };
@@ -61,7 +76,18 @@ export const TourismView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [nearMeActive, setNearMeActive] = useState<boolean>(false);
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() => readSavedUserGps());
+  const [geoStatus, setGeoStatus] = useState<'requesting' | 'granted' | 'fallback'>(() =>
+    readSavedUserGps() ? 'granted' : 'requesting'
+  );
+  const [selectedRadiusMeters, setSelectedRadiusMeters] = useState<number>(MAX_NEARBY_RADIUS_METERS);
+  const [manualProvince, setManualProvince] = useState<string>(() => {
+    const saved = readSavedUserGps();
+    return saved ? detectClosestProvinceFromCoords(saved) : 'រាជធានីភ្នំពេញ';
+  });
+  const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
+  const [liveNearbyAttractions, setLiveNearbyAttractions] = useState<GooglePlaceCachedItem[]>([]);
+  const locationReqSeqRef = useRef<number>(0);
   const [visibleCount, setVisibleCount] = useState<number>(TOURISM_BATCH_SIZE);
   const [shuffleSeed, setShuffleSeed] = useState<number>(() => generateFreshShuffleSeed());
   const [avoidTopIds, setAvoidTopIds] = useState<ReadonlySet<string>>(() => getRecentTopTourismIds());
@@ -88,6 +114,8 @@ export const TourismView: React.FC = () => {
       selectedProvince,
       searchQuery,
       nearMeActive,
+      selectedRadiusMeters,
+      manualProvince,
       visibleCount,
       shuffleSeed,
       avoidTopIds: new Set(avoidTopIds),
@@ -99,6 +127,8 @@ export const TourismView: React.FC = () => {
         setSelectedProvince(snap.selectedProvince);
         setSearchQuery(snap.searchQuery);
         setNearMeActive(snap.nearMeActive);
+        setSelectedRadiusMeters(snap.selectedRadiusMeters);
+        setManualProvince(snap.manualProvince);
         setShuffleSeed(snap.shuffleSeed);
         setAvoidTopIds(snap.avoidTopIds);
         setVisibleCount(snap.visibleCount);
@@ -119,7 +149,7 @@ export const TourismView: React.FC = () => {
   useEffect(() => {
     if (isRestoringHistoryRef.current) return;
     setVisibleCount(TOURISM_BATCH_SIZE);
-  }, [selectedCategory, selectedProvince, deferredSearchQuery, nearMeActive]);
+  }, [selectedCategory, selectedProvince, deferredSearchQuery, nearMeActive, selectedRadiusMeters, manualProvince]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).__kft_tourism_near_me) {
@@ -132,43 +162,130 @@ export const TourismView: React.FC = () => {
     }
   }, []);
 
+  const baseCoords = useMemo(() => {
+    return userCoords || readSavedUserGps() || PROVINCE_CENTERS['រាជធានីភ្នំពេញ'];
+  }, [userCoords]);
+
+  const detectedGpsProvince = useMemo(
+    () => detectClosestProvinceFromCoords(baseCoords),
+    [baseCoords]
+  );
+
+  const activeNearMeCoords = useMemo(
+    () => resolveActiveNearMeCoords(baseCoords, detectedGpsProvince, manualProvince),
+    [baseCoords, detectedGpsProvince, manualProvince]
+  );
+
+  const fetchLiveNearby500m = async (
+    coords: { lat: number; lng: number },
+    forceRefresh = false,
+    radiusOverride = selectedRadiusMeters
+  ) => {
+    if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) return;
+    const reqSeq = locationReqSeqRef.current;
+    setIsLoadingNearby(true);
+    try {
+      const res = await searchNearbyPlacesWithin500m(
+        coords.lat,
+        coords.lng,
+        radiusOverride,
+        forceRefresh
+      );
+      if (reqSeq !== locationReqSeqRef.current) return;
+      setLiveNearbyAttractions(res.attractions);
+    } catch (err) {
+      console.warn('Tourism NearMe fetch warning:', err);
+    } finally {
+      if (reqSeq === locationReqSeqRef.current) {
+        setIsLoadingNearby(false);
+      }
+    }
+  };
+
+  const requestLocation = (forceRefresh = false) => {
+    const reqSeq = ++locationReqSeqRef.current;
+    setGeoStatus('requesting');
+    let fetchedCoords: { lat: number; lng: number } | null = null;
+
+    requestCambodiaGpsLocation({
+      forceRefresh,
+      defaultProvinceKh: manualProvince || 'រាជធានីភ្នំពេញ',
+      isCurrentReq: () => reqSeq === locationReqSeqRef.current,
+      onImmediateSaved: (savedCoords, detProv) => {
+        setUserCoords(savedCoords);
+        setManualProvince(detProv);
+        setGeoStatus('granted');
+        fetchedCoords = savedCoords;
+        fetchLiveNearby500m(savedCoords, false, selectedRadiusMeters);
+      },
+      onGranted: (nextCoords, detProv) => {
+        setUserCoords(nextCoords);
+        setManualProvince(detProv);
+        setGeoStatus('granted');
+        if (
+          !fetchedCoords ||
+          forceRefresh ||
+          calculateDistanceMeters(fetchedCoords.lat, fetchedCoords.lng, nextCoords.lat, nextCoords.lng) > 120
+        ) {
+          fetchedCoords = nextCoords;
+          fetchLiveNearby500m(nextCoords, forceRefresh, selectedRadiusMeters);
+        }
+      },
+      onFallback: (fallbackCoords, detProv) => {
+        setUserCoords(fallbackCoords);
+        setManualProvince(detProv);
+        setGeoStatus('fallback');
+        if (!fetchedCoords) {
+          fetchedCoords = fallbackCoords;
+          fetchLiveNearby500m(fallbackCoords, forceRefresh, selectedRadiusMeters);
+        }
+      },
+    });
+  };
+
+  useEffect(() => {
+    const onGpsUpdated = (e: Event) => {
+      const detail = (e as CustomEvent<{ lat: number; lng: number }>).detail;
+      if (detail && Number.isFinite(detail.lat) && Number.isFinite(detail.lng)) {
+        setUserCoords(detail);
+        setGeoStatus('granted');
+      }
+    };
+    window.addEventListener('kft:gps-updated', onGpsUpdated);
+    return () => window.removeEventListener('kft:gps-updated', onGpsUpdated);
+  }, []);
+
+  const handleNearMeProvinceChange = (prov: string) => {
+    recordTourismStep('tourism-nearme-prov:' + prov);
+    setManualProvince(prov);
+    const nextRef = resolveActiveNearMeCoords(baseCoords, detectedGpsProvince, prov);
+    fetchLiveNearby500m(nextRef, false, selectedRadiusMeters);
+    scrollToTourismList();
+  };
+
+  const handleSelectRadius = (newRadius: number) => {
+    recordTourismStep('tourism-nearme-radius:' + newRadius);
+    setSelectedRadiusMeters(newRadius);
+    fetchLiveNearby500m(activeNearMeCoords, true, newRadius);
+    scrollToTourismList();
+  };
+
   const handleToggleNearMe = () => {
     if (nearMeActive) {
       setNearMeActive(false);
       return;
     }
     setNearMeActive(true);
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          showToast(
-            tr(
-              language,
-              '📍 បានរៀបតំបន់ទេសចរណ៍តាមចម្ងាយជិតអ្នកបំផុត!',
-              '📍 Sorted destinations nearest to your location!',
-              '📍 已按距离您最近排序旅游景点！'
-            ),
-            'success'
-          );
-        },
-        () => {
-          setUserCoords(DEFAULT_PP_COORDS);
-          showToast(
-            tr(
-              language,
-              '📍 បង្ហាញតំបន់ទេសចរណ៍នៅជិតអ្នក',
-              '📍 Showing destinations near you',
-              '📍 显示您附近的旅游景点'
-            ),
-            'info'
-          );
-        },
-        { enableHighAccuracy: false, timeout: 6000, maximumAge: 120000 }
-      );
-    } else {
-      setUserCoords(DEFAULT_PP_COORDS);
-    }
+    requestLocation(false);
+    showToast(
+      tr(
+        language,
+        '📍 បានរៀបតំបន់ទេសចរណ៍តាមចម្ងាយជិតអ្នកបំផុត!',
+        '📍 Sorted destinations nearest to your location!',
+        '📍 已按距离您最近排序旅游景点！'
+      ),
+      'success'
+    );
   };
 
   // 6 Premium 3D Gold-Framed Category Buttons
@@ -236,27 +353,42 @@ export const TourismView: React.FC = () => {
     return shuffleTourismByRatingTiers(verified, shuffleSeed, avoidTopIds);
   }, [destinations, shuffleSeed, avoidTopIds]);
 
-  // Compute GPS distance (in km) for each destination
-  const distanceMap = useMemo(() => {
-    const origin = userCoords || DEFAULT_PP_COORDS;
-    const map = new Map<string, number>();
-    for (const d of scenicDestinationsOnly) {
-      if (
-        typeof d.latitude === 'number' &&
-        typeof d.longitude === 'number' &&
-        Number.isFinite(d.latitude) &&
-        Number.isFinite(d.longitude) &&
-        d.latitude !== 0 &&
-        d.longitude !== 0
-      ) {
-        const km = haversineDistanceKm(origin.lat, origin.lng, d.latitude, d.longitude);
-        if (Number.isFinite(km) && km >= 0) {
-          map.set(d.id, km);
-        }
+  const nearbyMergedDestinations = useMemo(() => {
+    if (!nearMeActive) return [];
+    return mergeNearbyTourismDestinations({
+      destinations: scenicDestinationsOnly,
+      liveNearbyAttractions,
+      refCoords: activeNearMeCoords,
+      radiusMeters: selectedRadiusMeters,
+      targetProvinceKh: manualProvince,
+    });
+  }, [
+    nearMeActive,
+    scenicDestinationsOnly,
+    liveNearbyAttractions,
+    activeNearMeCoords,
+    selectedRadiusMeters,
+    manualProvince,
+  ]);
+
+  // Compute GPS distance (in km and meters) for each destination
+  const { distanceMap, distanceMetersMap } = useMemo(() => {
+    const origin = nearMeActive ? activeNearMeCoords : baseCoords;
+    const kmMap = new Map<string, number>();
+    const mMap = new Map<string, number>();
+    for (const d of [...scenicDestinationsOnly, ...nearbyMergedDestinations]) {
+      const m = calculateDistanceMeters(origin.lat, origin.lng, d.latitude, d.longitude);
+      if (Number.isFinite(m)) {
+        mMap.set(d.id, m);
+        kmMap.set(d.id, Number((m / 1000).toFixed(1)));
       }
     }
-    return map;
-  }, [scenicDestinationsOnly, userCoords]);
+    for (const d of nearbyMergedDestinations) {
+      mMap.set(d.id, d.distanceMeters);
+      kmMap.set(d.id, d.distanceKm);
+    }
+    return { distanceMap: kmMap, distanceMetersMap: mMap };
+  }, [scenicDestinationsOnly, nearbyMergedDestinations, nearMeActive, activeNearMeCoords, baseCoords]);
 
   // Filter destinations by category first so province dropdown counts reflect the selected category
   const categoryMatchedDestinations = useMemo(() => {
@@ -314,7 +446,7 @@ export const TourismView: React.FC = () => {
       map.set(d.id, { fields, combinedNormName, combinedNormAll });
     }
     return map;
-  }, [scenicDestinationsOnly, hasActiveTourismSearch]);
+  }, [scenicDestinationsOnly, nearbyMergedDestinations, hasActiveTourismSearch]);
 
   // Ordered destinations are already rating-tier prioritized (5.0★ at top -> 4.9★ -> 4.8★ -> 4.7★ -> 4.6★)
   // and randomized within each rating tier for the current open/refresh cycle.
@@ -355,7 +487,12 @@ export const TourismView: React.FC = () => {
         ? smartIntent.semanticCategory
         : '';
 
-    const scoped = orderedSessionDestinations.filter((d) => {
+    const candidatePool: typeof orderedSessionDestinations = nearMeActive
+      ? nearbyMergedDestinations
+      : orderedSessionDestinations;
+
+    const scoped = candidatePool.filter((d) => {
+      if (!d || d.categorySlug === 'hotel') return false;
       if (selectedCategory === 'trending_social') {
         if (!d.isTrendingSocial) return false;
       } else if (selectedCategory === 'cultural') {
@@ -365,7 +502,7 @@ export const TourismView: React.FC = () => {
       } else if (selectedCategory === 'all' && mappedSemanticCat && d.categorySlug !== mappedSemanticCat) {
         return false;
       }
-      if (cleanSelProv && !(d.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
+      if (!nearMeActive && cleanSelProv && !(d.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
         return false;
       }
       return true;
@@ -411,21 +548,22 @@ export const TourismView: React.FC = () => {
 
     if (nearMeActive) {
       return [...results].sort((a, b) => {
-        const distA = distanceMap.get(a.id) ?? 9999;
-        const distB = distanceMap.get(b.id) ?? 9999;
+        const distA = distanceMetersMap.get(a.id) ?? 9999999;
+        const distB = distanceMetersMap.get(b.id) ?? 9999999;
         return distA - distB;
       });
     }
 
     return results;
   }, [
+    nearMeActive,
+    nearbyMergedDestinations,
     orderedSessionDestinations,
     selectedCategory,
     selectedProvince,
     deferredSearchQuery,
     searchIndexById,
-    nearMeActive,
-    distanceMap,
+    distanceMetersMap,
   ]);
 
   const displayedDestinations = useMemo(
@@ -736,6 +874,26 @@ export const TourismView: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {nearMeActive && (
+          <NearMeControlBar
+            language={language}
+            geoStatus={geoStatus}
+            detectedGpsProvince={detectedGpsProvince}
+            manualProvince={manualProvince}
+            onProvinceChange={handleNearMeProvinceChange}
+            onRefreshGps={() => requestLocation(true)}
+            isLoadingNearby={isLoadingNearby}
+            selectedRadiusMeters={selectedRadiusMeters}
+            onSelectRadius={handleSelectRadius}
+            countLabel={tr(
+              language,
+              `ឃើញ ${filteredDestinations.length} ទីតាំង`,
+              `${filteredDestinations.length} places`,
+              `共 ${filteredDestinations.length} 处`
+            )}
+          />
+        )}
 
         {/* Row 4: Destination Cards Grid */}
         {filteredDestinations.length === 0 ? (

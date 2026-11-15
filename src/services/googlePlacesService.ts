@@ -54,7 +54,7 @@ import {
 } from '../utils/searchEngine';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { initial100Restaurants as SEED_RESTAURANTS } from '../data/seedRestaurants';
-import { initial100Destinations as SEED_DESTINATIONS } from '../data/seedDestinations';
+import { initial100Destinations as SEED_DESTINATIONS, loadExtendedDestinationsAndHotels } from '../data/seedDestinations';
 import { isRestaurantIdDeleted, loadDeletedRestaurantIdsMap } from './permanentMediaVaultService';
 import { stripForeignScripts } from '../utils/i18n';
 import {
@@ -4922,7 +4922,8 @@ function buildSeedDirectoryNearbyCandidates(
   }
 
   for (const d of SEED_DESTINATIONS) {
-    if (!isPlaceLocationVerified(d)) continue;
+    if (!d || !isPlaceLocationVerified(d)) continue;
+    if (d.id.startsWith('rac-') && !d.isAdminEdited && !d.isCustomPhoto) continue;
     const dist = calculateHaversineMeters(lat, lng, d.latitude, d.longitude);
     if (dist > maxDistanceMeters) continue;
     const prov = inferCambodiaProvinceFromAddressOrGps(`${d.provinceKh} ${d.addressKh}`, d.latitude, d.longitude);
@@ -4999,12 +5000,17 @@ export async function searchNearbyPlacesWithin500m(
     };
   }
 
-  // 1. Gather existing cached & verified seed directory places strictly within effectiveRadius
-  const localPool = getLocalSmartCache().filter(
+  // 1. Gather existing cached, prior-radius memory, & verified seed directory places strictly within effectiveRadius
+  const priorMemoryItems: GooglePlaceCachedItem[] = [];
+  for (const entry of nearby500mMemoryCache.values()) {
+    priorMemoryItems.push(...entry.restaurants, ...entry.attractions);
+  }
+  const localPool = [...getLocalSmartCache(), ...priorMemoryItems].filter(
     (p) =>
       !isRoadOrInvalidNearbyPlaceName(p.nameKh) &&
       calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius
   );
+  await loadExtendedDestinationsAndHotels().catch(() => []);
   const seedPool = buildSeedDirectoryNearbyCandidates(lat, lng, effectiveRadius);
 
   const googleItems: GooglePlaceCachedItem[] = [];
@@ -5427,8 +5433,8 @@ export async function searchNearbyPlacesWithin500m(
     const nearbyProvGeo = resolveProvinceGeoConfig(nearbyProv);
     const [freeGmapsNearby, nomBatches, photBatches] = await Promise.all([
       fetchFreeGoogleMapsTbmPlaces('restaurant cafe hotel', nearbyProvGeo, 'all', []).catch(() => []),
-      Promise.all(nominatimSpecs.slice(0, 2).map(fetchNominatimBox)),
-      Promise.all(photonSpecs.slice(0, 4).map(fetchPhotonBox)),
+      Promise.all(nominatimSpecs.map(fetchNominatimBox)),
+      Promise.all(photonSpecs.map(fetchPhotonBox)),
     ]);
 
     liveMapItems.push(...freeGmapsNearby);

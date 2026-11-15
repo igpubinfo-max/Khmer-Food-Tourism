@@ -353,6 +353,12 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
               >
                 {tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
               </div>
+              <div
+                className="font-khmer font-bold text-[#0B3A66]/90 leading-[1.5] py-0.5 break-words line-clamp-1"
+                style={{ fontSize: 'clamp(10.5px, 2.9vw, 12.4px)' }}
+              >
+                {tr(language, 'សួរអ្វីក៏បាន • ថតរូបម្ហូប • រូបមន្ត', 'Ask anything • Photo • Recipes', '随便问 • 拍照识菜 • 食谱')}
+              </div>
             </div>
           </div>
           {/* 3D-Styled Cute AI Robot Illustration */}

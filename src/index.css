@@ -910,6 +910,11 @@ img[src^="data:image"],
   white-space: normal;
 }
 
+.kft-food-cat-label-active {
+  color: #FEF08A !important;
+  text-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.95), 0 0 10px rgba(250, 204, 21, 0.65) !important;
+}
+
 /* Unified label inside 3-Column Glossy Icon Tiles (ProfileView, AiTripPlannerModal, SmartHubHealthySection) */
 .kft-tile-label {
   display: inline-flex;

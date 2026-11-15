@@ -144,8 +144,9 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     }, [rawPhoto, isRealPhoto, destination.photoUpdatedAt]);
 
     const distanceStr = useMemo(() => {
-      if (typeof distanceKm === 'number' && Number.isFinite(distanceKm) && distanceKm > 0) {
-        return distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm).toString();
+      if (typeof distanceKm === 'number' && Number.isFinite(distanceKm) && distanceKm >= 0) {
+        const eff = Math.max(0.1, distanceKm);
+        return eff < 10 ? eff.toFixed(1) : Math.round(eff).toString();
       }
       return computeDeterministicDistanceKm(String(destination.id || destination.nameKh || 'dest'));
     }, [distanceKm, destination.id, destination.nameKh]);
@@ -158,10 +159,12 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
       openExternalUrlNativeSafe(getDirectDestinationMapsUrl(destination));
     };
 
-    const isCompactDirectoryRow = destination.id.startsWith('rac-') && !destination.isFeatured;
+    const isCompactDirectoryRow =
+      (destination.id.startsWith('rac-') && !destination.isFeatured) ||
+      (!hasClearPhoto && destination.dataSource === 'google_maps');
 
     // Compact Clean White Card Variant
-    if (!hasClearPhoto) return null;
+    if (!hasClearPhoto && !isCompactDirectoryRow) return null;
     if (isCompactDirectoryRow) {
       return (
         <article

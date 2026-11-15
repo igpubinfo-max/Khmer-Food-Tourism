@@ -312,6 +312,8 @@ export interface BuildRequestParams {
   history: AssistantHistoryTurn[];
   memory?: AiConversationMemory | null;
   image?: FoodImageInput | null;
+  /** Human-readable filter chips the user currently has selected (dietary / dish type / meal time). */
+  activeFilters?: string;
   model: string;
   /** progressive degradation when a model rejects optional fields: 0 = schema+thinking, 1 = schema, 2 = JSON mime only, 3 = plain contents-only */
   level?: 0 | 1 | 2 | 3;
@@ -378,6 +380,9 @@ export function buildGeminiRequestBody(params: BuildRequestParams): Record<strin
     `LOCAL_TIME (Cambodia, UTC+7): ${now.toISOString()}`,
     `RELEVANT_DISH_DETAILS: ${JSON.stringify(grounding.map(dishFacts))}`,
     `RESTAURANTS: ${JSON.stringify(shops)}`,
+    params.activeFilters
+      ? `USER_ACTIVE_FILTERS (the user selected these chips in the app - respect them when recommending dishes): ${params.activeFilters}`
+      : '',
     hasImage
       ? 'A food photo is attached to this message - follow the IMAGE RULES. If the text is empty, identify the dish and explain it.'
       : '',
@@ -1091,6 +1096,8 @@ export interface AskFoodAssistantParams {
   history: AssistantHistoryTurn[];
   memory?: AiConversationMemory | null;
   image?: FoodImageInput | null;
+  /** Selected app filters forwarded to the model so answers match the active chip. */
+  activeFilters?: string;
   geminiApiKey?: string;
   currentUser?: User | null;
   /** Test hook / future proxy: replaces the raw network call. */
@@ -1214,6 +1221,7 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
         history,
         memory,
         image,
+        activeFilters: params.activeFilters,
         model,
         level,
       });

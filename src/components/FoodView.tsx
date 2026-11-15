@@ -663,26 +663,48 @@ export const FoodView: React.FC = () => {
                   }}
                   aria-pressed={active}
                   style={{ transform: 'none' }}
-                  className="kft-cat-btn group relative block w-full max-w-full min-w-0 min-h-0 aspect-[560/460] overflow-visible bg-transparent border-0 p-0 transition-opacity duration-150 cursor-pointer select-none"
+                  className="kft-cat-btn group relative flex flex-col items-center w-full max-w-full min-w-0 min-h-0 overflow-visible bg-transparent border-0 p-0 cursor-pointer select-none"
                 >
-                  <img
-                    src={cat.imageSrc}
-                    alt={label}
-                    style={{ transform: 'none' }}
-                    className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none transition-opacity duration-150 ${
+                  <div
+                    className={`relative w-full max-w-full min-w-0 min-h-0 aspect-[560/460] rounded-[14px] transition-all duration-150 ${
                       active
                         ? 'opacity-100'
-                        : 'opacity-95 group-hover:opacity-100'
+                        : 'opacity-70 group-hover:opacity-95'
                     }`}
-                    loading="eager"
-                    decoding="async"
-                  />
-                  {/* Centered Large Bold WHITE Label Inside Button Directly Below the Food Illustration */}
-                  <div className="pointer-events-none absolute inset-x-[4%] top-[69%] bottom-[6.5%] flex items-center justify-center px-0.5 overflow-visible">
-                    <span className="kft-food-cat-label">
-                      {label}
-                    </span>
+                    style={
+                      active
+                        ? {
+                            boxShadow: '0 0 0 2.5px #15803D, 0 5px 14px rgba(21, 128, 61, 0.35)',
+                          }
+                        : undefined
+                    }
+                  >
+                    <img
+                      src={cat.imageSrc}
+                      alt={label}
+                      style={{ transform: 'none' }}
+                      className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none"
+                      loading="eager"
+                      decoding="async"
+                    />
+                    {/* Centered Large Bold Label Inside Button Directly Below the Food Illustration */}
+                    <div className="pointer-events-none absolute inset-x-[4%] top-[69%] bottom-[6.5%] flex items-center justify-center px-0.5 overflow-visible">
+                      <span className={`kft-food-cat-label ${active ? 'kft-food-cat-label-active' : ''}`}>
+                        {label}
+                      </span>
+                    </div>
                   </div>
+                  {/* Active Selection Highlight Bar Below Button */}
+                  <span
+                    aria-hidden="true"
+                    className={`mt-1 h-1.5 w-8 sm:w-10 rounded-full transition-all duration-150 ${
+                      active ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    style={{
+                      background: 'linear-gradient(90deg, #16A34A 0%, #F59E0B 50%, #16A34A 100%)',
+                      boxShadow: '0 1px 6px rgba(22, 163, 74, 0.55)',
+                    }}
+                  />
                 </button>
               );
             })}

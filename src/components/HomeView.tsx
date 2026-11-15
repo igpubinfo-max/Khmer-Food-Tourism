@@ -352,7 +352,17 @@ export const HomeView: React.FC = () => {
     setIsWhatToEatModalOpen(true);
   }, [setIsWhatToEatModalOpen]);
 
-  const handleFoodRecommendations = useCallback(() => setIsWhatToEatModalOpen(true), [setIsWhatToEatModalOpen]);
+  // "ណែនាំម្ហូប" / Food Picks tile: instant pick-by-time/type/diet (no typing, no AI).
+  const handleFoodRecommendations = useCallback(() => {
+    (window as any).__kft_wte_mode = 'picks';
+    setIsWhatToEatModalOpen(true);
+  }, [setIsWhatToEatModalOpen]);
+
+  // "ជំនួយការ AI ម្ហូបអាហារ" banner: conversational AI (ask anything / food photo / recipes).
+  const handleOpenAiAssistantChat = useCallback(() => {
+    (window as any).__kft_wte_mode = 'assistant';
+    setIsWhatToEatModalOpen(true);
+  }, [setIsWhatToEatModalOpen]);
 
   const [homeAiQuery, setHomeAiQuery] = useState<string>('');
 
@@ -937,7 +947,7 @@ export const HomeView: React.FC = () => {
                   onOpenFood={setSelectedFood}
                   onSeeAllFoods={handleSeeAllFoods}
                   onOpenHealthyFood={handleOpenHealthyFood}
-                  onOpenAiAssistant={() => setIsWhatToEatModalOpen(true)}
+                  onOpenAiAssistant={handleOpenAiAssistantChat}
                   onOpenSocialReviews={handleOpenSocialReviews}
                 />
 
@@ -1148,7 +1158,7 @@ export const HomeView: React.FC = () => {
                 onOpenFood={setSelectedFood}
                 onSeeAllFoods={handleSeeAllFoods}
                 onOpenHealthyFood={handleOpenHealthyFood}
-                onOpenAiAssistant={() => setIsWhatToEatModalOpen(true)}
+                onOpenAiAssistant={handleOpenAiAssistantChat}
                 onOpenSocialReviews={handleOpenSocialReviews}
               />
 

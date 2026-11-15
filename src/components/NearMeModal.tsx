@@ -62,6 +62,11 @@ import {
 } from '../utils/searchEngine';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../utils/aiSearchBridge';
+import {
+  isFoodShopGooglePlace,
+  isTourismAttractionGooglePlace,
+  resolveActiveNearMeCoords,
+} from '../utils/nearMeEngine';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 
 // Haversine formula for distance between 2 GPS coordinates in meters
@@ -120,6 +125,9 @@ function saveUserGps(coords: { lat: number; lng: number }) {
       LAST_KNOWN_GPS_STORAGE_KEY,
       JSON.stringify({ lat: coords.lat, lng: coords.lng, updatedAt: Date.now() })
     );
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('kft:gps-updated', { detail: coords }));
+    }
   } catch {
     // ignore storage errors
   }
@@ -300,8 +308,9 @@ export const NearMeModal: React.FC = () => {
   };
 
   const handleProvinceChange = (prov: string) => {
-    // Keep userCoords locked to the user's real GPS location; changing province filters results within the user's GPS radius
     setManualProvince(prov);
+    const nextRef = resolveActiveNearMeCoords(baseCoords, detectedGpsProvince, prov);
+    fetchLiveNearby500m(nextRef, false, selectedRadiusMeters);
     scrollToNearbyShopList();
   };
 
@@ -409,39 +418,40 @@ export const NearMeModal: React.FC = () => {
     scrollToNearbyShopList();
   };
 
+  const activeNearMeCoords = useMemo(
+    () => resolveActiveNearMeCoords(baseCoords, detectedGpsProvince, manualProvince),
+    [baseCoords, detectedGpsProvince, manualProvince]
+  );
+
   // Merge & deduplicate verified Supabase restaurants + Google Maps/Live nearby places within user's location
   const allVerifiedCityRestaurants = useMemo(() => {
     const mergedMap = new Map<string, Restaurant>();
     const maxCitySearchRadius = Math.max(selectedRadiusMeters, 20000);
 
-    // If the user's real GPS location (`baseCoords`) is outside the selected province (`manualProvince`),
-    // then 0 shops in `manualProvince` exist within the 5km/10km/20km GPS radius around the user.
-    if (!doesPlaceBelongToProvince(baseCoords.lat, baseCoords.lng, detectedGpsProvince, manualProvince)) {
-      return [];
-    }
-
     for (const r of restaurants) {
+      if (!r || isHotelBusinessRecord(r)) continue;
       if (!verifyShopDataForDisplay(r)) continue;
-      const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
+      const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, r.latitude, r.longitude);
       if (dist > maxCitySearchRadius) continue;
       if (!doesPlaceBelongToProvince(r.latitude, r.longitude, r.provinceKh, manualProvince)) continue;
       mergedMap.set(r.id, r);
     }
 
     for (const gp of liveNearbyRestaurants) {
-      const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, gp.lat, gp.lng);
+      if (!isFoodShopGooglePlace(gp)) continue;
+      const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, gp.lat, gp.lng);
       if (dist > maxCitySearchRadius) continue;
-      if (!doesPlaceBelongToProvince(gp.lat, gp.lng, undefined, manualProvince)) continue;
+      if (!doesPlaceBelongToProvince(gp.lat, gp.lng, gp.provinceKh || gp.province, manualProvince)) continue;
 
       const existingMatch = findDuplicateRestaurantForGooglePlace(gp, Array.from(mergedMap.values()));
       if (existingMatch) {
         const merged = mergeGoogleMapsPlaceWithExistingRestaurant(existingMatch, gp);
-        if (verifyShopDataForDisplay(merged)) {
+        if (!isHotelBusinessRecord(merged) && verifyShopDataForDisplay(merged)) {
           mergedMap.set(existingMatch.id, merged);
         }
       } else {
         const converted = convertGooglePlaceToRestaurant(gp);
-        if (verifyShopDataForDisplay(converted)) {
+        if (!isHotelBusinessRecord(converted) && verifyShopDataForDisplay(converted)) {
           mergedMap.set(converted.id, converted);
         }
       }
@@ -449,106 +459,54 @@ export const NearMeModal: React.FC = () => {
 
     return Array.from(mergedMap.values())
       .map((r) => {
-        const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
+        const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, r.latitude, r.longitude);
         return { ...r, distanceMeters: dist };
       })
       .filter((r) => Number.isFinite(r.distanceMeters) && r.distanceMeters <= maxCitySearchRadius)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [restaurants, liveNearbyRestaurants, baseCoords, selectedRadiusMeters, manualProvince, detectedGpsProvince]);
+  }, [restaurants, liveNearbyRestaurants, activeNearMeCoords, selectedRadiusMeters, manualProvince]);
 
   const nearbyRestaurants = useMemo(() => {
     return allVerifiedCityRestaurants
       .filter((r) => r.distanceMeters <= selectedRadiusMeters)
-      .sort((a, b) => {
-        const aVip = isShopSubscriptionActive(a) ? 1 : 0;
-        const bVip = isShopSubscriptionActive(b) ? 1 : 0;
-        if (bVip !== aVip) return bVip - aVip;
-        return a.distanceMeters - b.distanceMeters;
-      });
+      .sort((a, b) => a.distanceMeters - b.distanceMeters);
   }, [allVerifiedCityRestaurants, selectedRadiusMeters]);
 
   const nearbyDestinations = useMemo(() => {
-    if (!doesPlaceBelongToProvince(baseCoords.lat, baseCoords.lng, detectedGpsProvince, manualProvince)) {
-      return [];
-    }
     const mergedMap = new Map<string, TouristDestination>();
 
     for (const d of destinations) {
-      if (!d) continue;
+      if (!d || d.categorySlug === 'hotel') continue;
       if (!isPlaceLocationVerified(d)) continue;
-      const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, d.latitude, d.longitude);
-      if (dist <= selectedRadiusMeters) {
-        mergedMap.set(d.id, d);
-      }
-    }
-
-    for (const r of restaurants) {
-      if (!r || !isHotelBusinessRecord(r) || (r.status && r.status !== 'approved')) continue;
-      if (!isPlaceLocationVerified(r)) continue;
-      const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
-      if (dist > selectedRadiusMeters || mergedMap.has(r.id)) continue;
-      const catInfo = inferBusinessTypeAndCategory(r);
-      const resolvedPhoto =
-        r.profileImage ||
-        r.photoUrl ||
-        r.thumbnailUrl ||
-        (Array.isArray(r.galleryPhotos) && r.galleryPhotos[0]) ||
-        '';
-      mergedMap.set(r.id, {
-        id: r.id,
-        nameKh: r.nameKh,
-        nameEn: r.nameEn || r.nameKh,
-        categorySlug: 'hotel',
-        categoryKh: r.categoryKh || catInfo.shortKh,
-        categoryEn: r.categoryEn || catInfo.shortEn,
-        descriptionKh: r.descriptionKh || `${r.nameKh} — កន្លែងស្នាក់នៅស្អាត និងមានផាសុកភាព។`,
-        descriptionEn: r.descriptionEn || `${r.nameEn || r.nameKh} — Verified accommodation in ${r.provinceEn}.`,
-        photoUrl: resolvedPhoto,
-        galleryPhotos: r.galleryPhotos || [],
-        provinceKh: r.provinceKh,
-        provinceEn: r.provinceEn,
-        addressKh: r.addressKh || r.provinceKh,
-        addressEn: r.addressEn || r.provinceEn,
-        phone: r.phone,
-        priceRange: r.priceLevel || '$$',
-        entranceFeeKh: `តម្លៃបន្ទប់៖ ${r.priceLevel || '$'} • ${r.phone || ''}`,
-        entranceFeeEn: `Room Rate: ${r.priceLevel || '$'} • ${r.phone || ''}`,
-        bestTimeToVisitKh: r.openingHoursKh || 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង',
-        bestTimeToVisitEn: r.openingHoursEn || 'Open 24 Hours',
-        mapUrl: r.mapUrl || `https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`,
-        latitude: r.latitude,
-        longitude: r.longitude,
-        googlePlaceId: r.googlePlaceId,
-        rating: r.rating || 4.7,
-        reviewCount: r.reviewCount || 64,
-        highlightsKh: r.signatureDishesKh?.length
-          ? r.signatureDishesKh
-          : ['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ Wi-Fi និងចំណតរថយន្តសុវត្ថិភាព'],
-        isFeatured: Boolean(r.isPromoted),
-        isCustomPhoto: Boolean(resolvedPhoto),
-        locationVerificationStatus: 'verified',
-      });
+      const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, d.latitude, d.longitude);
+      if (dist > selectedRadiusMeters) continue;
+      if (!doesPlaceBelongToProvince(d.latitude, d.longitude, d.provinceKh, manualProvince)) continue;
+      mergedMap.set(d.id, d);
     }
 
     for (const gp of liveNearbyAttractions) {
-      const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, gp.lat, gp.lng);
+      if (!isTourismAttractionGooglePlace(gp)) continue;
+      const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, gp.lat, gp.lng);
       if (dist > selectedRadiusMeters) continue;
+      if (!doesPlaceBelongToProvince(gp.lat, gp.lng, gp.provinceKh || gp.province, manualProvince)) continue;
 
       const existingMatch = findDuplicateDestinationForGooglePlace(gp, Array.from(mergedMap.values()));
       if (!existingMatch) {
         const converted = convertGooglePlaceToDestination(gp);
-        mergedMap.set(converted.id, converted);
+        if (converted.categorySlug !== 'hotel') {
+          mergedMap.set(converted.id, converted);
+        }
       }
     }
 
     return Array.from(mergedMap.values())
       .map((d) => {
-        const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, d.latitude, d.longitude);
+        const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, d.latitude, d.longitude);
         return { ...d, distanceMeters: dist };
       })
       .filter((d) => Number.isFinite(d.distanceMeters) && d.distanceMeters <= selectedRadiusMeters)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [destinations, restaurants, liveNearbyAttractions, baseCoords, selectedRadiusMeters, manualProvince, detectedGpsProvince]);
+  }, [destinations, liveNearbyAttractions, activeNearMeCoords, selectedRadiusMeters, manualProvince]);
 
   const filteredNearbyRestaurants = useMemo(() => {
     const rawQuery = nearbyQuery.trim();

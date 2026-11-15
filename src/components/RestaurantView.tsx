@@ -35,7 +35,23 @@ import {
   Filter,
 } from 'lucide-react';
 import { isVipOwnerListing } from './listing/ListingUI';
-import { normalizeKhmerSearchText } from '../services/googlePlacesService';
+import {
+  normalizeKhmerSearchText,
+  searchNearbyPlacesWithin500m,
+  GooglePlaceCachedItem,
+} from '../services/googlePlacesService';
+import { NearMeControlBar } from './common/NearMeControlBar';
+import {
+  MAX_NEARBY_RADIUS_METERS,
+  PROVINCE_CENTERS,
+  calculateDistanceMeters,
+  calculateDistanceKmRounded,
+  readSavedUserGps,
+  detectClosestProvinceFromCoords,
+  resolveActiveNearMeCoords,
+  requestCambodiaGpsLocation,
+  mergeNearbyFoodShops,
+} from '../utils/nearMeEngine';
 import { analyzeSearchQuery, scoreSearchRecord, restaurantSearchFields } from '../utils/searchEngine';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
@@ -105,7 +121,18 @@ export const RestaurantView: React.FC = () => {
   const [ratingFilter] = useState<'all' | '4.5' | '4.0'>('all');
   const [sortMode, setSortMode] = useState<'popular' | 'nearest' | 'rating'>('popular');
   const [nearMeActive, setNearMeActive] = useState<boolean>(false);
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() => readSavedUserGps());
+  const [geoStatus, setGeoStatus] = useState<'requesting' | 'granted' | 'fallback'>(() =>
+    readSavedUserGps() ? 'granted' : 'requesting'
+  );
+  const [selectedRadiusMeters, setSelectedRadiusMeters] = useState<number>(MAX_NEARBY_RADIUS_METERS);
+  const [manualProvince, setManualProvince] = useState<string>(() => {
+    const saved = readSavedUserGps();
+    return saved ? detectClosestProvinceFromCoords(saved) : 'រាជធានីភ្នំពេញ';
+  });
+  const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
+  const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>([]);
+  const locationReqSeqRef = useRef<number>(0);
   const [showAllFeatured, setShowAllFeatured] = useState<boolean>(false);
   const [shopSearchQuery, setShopSearchQuery] = useState<string>('');
   const [debouncedShopSearchQuery, setDebouncedShopSearchQuery] = useState<string>('');
@@ -135,6 +162,8 @@ export const RestaurantView: React.FC = () => {
       categoryFilter,
       sortMode,
       nearMeActive,
+      selectedRadiusMeters,
+      manualProvince,
       showAllFeatured,
       shopSearchQuery,
       debouncedShopSearchQuery,
@@ -146,6 +175,8 @@ export const RestaurantView: React.FC = () => {
         setCategoryFilter(snap.categoryFilter);
         setSortMode(snap.sortMode);
         setNearMeActive(snap.nearMeActive);
+        setSelectedRadiusMeters(snap.selectedRadiusMeters);
+        setManualProvince(snap.manualProvince);
         setShowAllFeatured(snap.showAllFeatured);
         setShopSearchQuery(snap.shopSearchQuery);
         setDebouncedShopSearchQuery(snap.debouncedShopSearchQuery);
@@ -198,6 +229,114 @@ export const RestaurantView: React.FC = () => {
     return () => clearTimeout(timer);
   }, [shopSearchQuery]);
 
+  const baseCoords = useMemo(() => {
+    return userCoords || readSavedUserGps() || PROVINCE_CENTERS['រាជធានីភ្នំពេញ'];
+  }, [userCoords]);
+
+  const detectedGpsProvince = useMemo(
+    () => detectClosestProvinceFromCoords(baseCoords),
+    [baseCoords]
+  );
+
+  const activeNearMeCoords = useMemo(
+    () => resolveActiveNearMeCoords(baseCoords, detectedGpsProvince, manualProvince),
+    [baseCoords, detectedGpsProvince, manualProvince]
+  );
+
+  const fetchLiveNearby500m = async (
+    coords: { lat: number; lng: number },
+    forceRefresh = false,
+    radiusOverride = selectedRadiusMeters
+  ) => {
+    if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) return;
+    const reqSeq = locationReqSeqRef.current;
+    setIsLoadingNearby(true);
+    try {
+      const res = await searchNearbyPlacesWithin500m(
+        coords.lat,
+        coords.lng,
+        radiusOverride,
+        forceRefresh
+      );
+      if (reqSeq !== locationReqSeqRef.current) return;
+      setLiveNearbyRestaurants(res.restaurants);
+    } catch (err) {
+      console.warn('Shop NearMe fetch warning:', err);
+    } finally {
+      if (reqSeq === locationReqSeqRef.current) {
+        setIsLoadingNearby(false);
+      }
+    }
+  };
+
+  const requestLocation = (forceRefresh = false) => {
+    const reqSeq = ++locationReqSeqRef.current;
+    setGeoStatus('requesting');
+    let fetchedCoords: { lat: number; lng: number } | null = null;
+
+    requestCambodiaGpsLocation({
+      forceRefresh,
+      defaultProvinceKh: manualProvince || 'រាជធានីភ្នំពេញ',
+      isCurrentReq: () => reqSeq === locationReqSeqRef.current,
+      onImmediateSaved: (savedCoords, detProv) => {
+        setUserCoords(savedCoords);
+        setManualProvince(detProv);
+        setGeoStatus('granted');
+        fetchedCoords = savedCoords;
+        fetchLiveNearby500m(savedCoords, false, selectedRadiusMeters);
+      },
+      onGranted: (nextCoords, detProv) => {
+        setUserCoords(nextCoords);
+        setManualProvince(detProv);
+        setGeoStatus('granted');
+        if (
+          !fetchedCoords ||
+          forceRefresh ||
+          calculateDistanceMeters(fetchedCoords.lat, fetchedCoords.lng, nextCoords.lat, nextCoords.lng) > 120
+        ) {
+          fetchedCoords = nextCoords;
+          fetchLiveNearby500m(nextCoords, forceRefresh, selectedRadiusMeters);
+        }
+      },
+      onFallback: (fallbackCoords, detProv) => {
+        setUserCoords(fallbackCoords);
+        setManualProvince(detProv);
+        setGeoStatus('fallback');
+        if (!fetchedCoords) {
+          fetchedCoords = fallbackCoords;
+          fetchLiveNearby500m(fallbackCoords, forceRefresh, selectedRadiusMeters);
+        }
+      },
+    });
+  };
+
+  useEffect(() => {
+    const onGpsUpdated = (e: Event) => {
+      const detail = (e as CustomEvent<{ lat: number; lng: number }>).detail;
+      if (detail && Number.isFinite(detail.lat) && Number.isFinite(detail.lng)) {
+        setUserCoords(detail);
+        setGeoStatus('granted');
+      }
+    };
+    window.addEventListener('kft:gps-updated', onGpsUpdated);
+    return () => window.removeEventListener('kft:gps-updated', onGpsUpdated);
+  }, []);
+
+  const handleNearMeProvinceChange = (prov: string) => {
+    recordRestaurantStep('shop-nearme-prov:' + prov);
+    setManualProvince(prov);
+    const nextRef = resolveActiveNearMeCoords(baseCoords, detectedGpsProvince, prov);
+    fetchLiveNearby500m(nextRef, false, selectedRadiusMeters);
+    scrollToShopList();
+  };
+
+  const handleSelectRadius = (newRadius: number) => {
+    recordRestaurantStep('shop-nearme-radius:' + newRadius);
+    setSelectedRadiusMeters(newRadius);
+    fetchLiveNearby500m(activeNearMeCoords, true, newRadius);
+    scrollToShopList();
+  };
+
   const handleToggleNearMe = () => {
     if (nearMeActive) {
       setNearMeActive(false);
@@ -206,37 +345,16 @@ export const RestaurantView: React.FC = () => {
     }
     setNearMeActive(true);
     setSortMode('nearest');
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          showToast(
-            tr(
-              language,
-              '📍 បានរៀបហាងតាមចម្ងាយជិតអ្នកបំផុត!',
-              '📍 Sorted shops nearest to your location!',
-              '📍 已按距离您最近排序店铺！'
-            ),
-            'success'
-          );
-        },
-        () => {
-          setUserCoords({ lat: 11.5564, lng: 104.9282 });
-          showToast(
-            tr(
-              language,
-              '📍 បង្ហាញហាងពេញនិយមនៅជិតអ្នក',
-              '📍 Showing popular shops near you',
-              '📍 显示您附近的热门店铺'
-            ),
-            'info'
-          );
-        },
-        { enableHighAccuracy: false, timeout: 6000, maximumAge: 120000 }
-      );
-    } else {
-      setUserCoords({ lat: 11.5564, lng: 104.9282 });
-    }
+    requestLocation(false);
+    showToast(
+      tr(
+        language,
+        '📍 បានរៀបហាងតាមចម្ងាយជិតអ្នកបំផុត!',
+        '📍 Sorted shops nearest to your location!',
+        '📍 已按距离您最近排序店铺！'
+      ),
+      'success'
+    );
   };
 
   const classifyRestaurantCategory = (r: Restaurant): string => {
@@ -395,7 +513,7 @@ export const RestaurantView: React.FC = () => {
   useEffect(() => {
     if (isRestoringHistoryRef.current) return;
     setVisibleCount(RESTAURANT_BATCH_SIZE);
-  }, [selectedProvince, priceFilter, categoryFilter, cuisineFilter, ratingFilter, sortMode, shopSearchQuery]);
+  }, [selectedProvince, priceFilter, categoryFilter, cuisineFilter, ratingFilter, sortMode, shopSearchQuery, nearMeActive, selectedRadiusMeters, manualProvince]);
 
   const sessionShuffledRestaurants = useMemo(
     () => shuffleForCurrentSession(restaurants),
@@ -453,18 +571,43 @@ export const RestaurantView: React.FC = () => {
     [validDirectoryRestaurants, users, appSettings, nowTickMs]
   );
 
-  const distanceMap = useMemo(() => {
-    const map = new Map<string, number>();
-    const refLat = userCoords?.lat ?? 11.5564;
-    const refLng = userCoords?.lng ?? 104.9282;
+  const nearbyMergedShops = useMemo(() => {
+    if (!nearMeActive) return [];
+    return mergeNearbyFoodShops({
+      restaurants: validDirectoryRestaurants,
+      liveNearbyRestaurants,
+      refCoords: activeNearMeCoords,
+      radiusMeters: selectedRadiusMeters,
+      targetProvinceKh: manualProvince,
+    });
+  }, [
+    nearMeActive,
+    validDirectoryRestaurants,
+    liveNearbyRestaurants,
+    activeNearMeCoords,
+    selectedRadiusMeters,
+    manualProvince,
+  ]);
+
+  const { distanceMap, distanceMetersMap } = useMemo(() => {
+    const kmMap = new Map<string, number>();
+    const mMap = new Map<string, number>();
+    const refLat = nearMeActive ? activeNearMeCoords.lat : baseCoords.lat;
+    const refLng = nearMeActive ? activeNearMeCoords.lng : baseCoords.lng;
+
     for (const r of preRotatedRestaurants) {
-      if (typeof r.latitude === 'number' && typeof r.longitude === 'number' && r.latitude > 9 && r.longitude > 102) {
-        const d = haversineDistanceKm(refLat, refLng, r.latitude, r.longitude);
-        map.set(r.id, d);
+      const m = calculateDistanceMeters(refLat, refLng, r.latitude, r.longitude);
+      if (Number.isFinite(m)) {
+        mMap.set(r.id, m);
+        kmMap.set(r.id, Number((m / 1000).toFixed(1)));
       }
     }
-    return map;
-  }, [preRotatedRestaurants, userCoords]);
+    for (const r of nearbyMergedShops) {
+      mMap.set(r.id, r.distanceMeters);
+      kmMap.set(r.id, r.distanceKm);
+    }
+    return { distanceMap: kmMap, distanceMetersMap: mMap };
+  }, [preRotatedRestaurants, nearbyMergedShops, nearMeActive, activeNearMeCoords, baseCoords]);
 
   const sortedRestaurants = useMemo(() => {
     const rawTrimmed = debouncedShopSearchQuery.trim();
@@ -481,14 +624,17 @@ export const RestaurantView: React.FC = () => {
     const seenIds = new Set<string>();
     const seenFallbackIds = new Set<string>();
 
-    for (const r of preRotatedRestaurants) {
+    const candidatePool: Restaurant[] = nearMeActive ? nearbyMergedShops : preRotatedRestaurants;
+
+    for (const r of candidatePool) {
       if (!r?.id) continue;
       const cleanRestProvince = (r.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim();
-      const matchesProvince =
-        !effectiveProvince ||
-        cleanRestProvince === effectiveProvince ||
-        (r.provinceKh || '').includes(effectiveProvince) ||
-        (r.addressKh || '').includes(effectiveProvince);
+      const matchesProvince = nearMeActive
+        ? true
+        : !effectiveProvince ||
+          cleanRestProvince === effectiveProvince ||
+          (r.provinceKh || '').includes(effectiveProvince) ||
+          (r.addressKh || '').includes(effectiveProvince);
       const matchesPrice = priceFilter === 'all' || r.priceLevel === priceFilter;
       const matchesCategory = matchesPrimaryTabPill(r, categoryFilter);
       const matchesCuisine = cuisineFilter === 'all' || classifyRestaurantCategory(r) === cuisineFilter;
@@ -542,25 +688,32 @@ export const RestaurantView: React.FC = () => {
             scored.push({ item: r, score: relevance });
           }
         }
-        if (q && !seenFallbackIds.has(r.id)) {
+        if (q && !nearMeActive && !seenFallbackIds.has(r.id)) {
           seenFallbackIds.add(r.id);
           fallbackUnfilteredScored.push({ item: r, score: relevance });
         }
       }
     }
 
-    const activeList = q && scored.length === 0 && fallbackUnfilteredScored.length > 0 ? fallbackUnfilteredScored : scored;
+    const activeList =
+      q && !nearMeActive && scored.length === 0 && fallbackUnfilteredScored.length > 0
+        ? fallbackUnfilteredScored
+        : scored;
 
-    if (q) {
+    if (nearMeActive || sortMode === 'nearest') {
+      activeList.sort(
+        (a, b) => (distanceMetersMap.get(a.item.id) ?? 9999999) - (distanceMetersMap.get(b.item.id) ?? 9999999)
+      );
+    } else if (q) {
       activeList.sort((a, b) => b.score - a.score);
-    } else if (sortMode === 'nearest') {
-      activeList.sort((a, b) => (distanceMap.get(a.item.id) ?? 999) - (distanceMap.get(b.item.id) ?? 999));
     } else if (sortMode === 'rating') {
       activeList.sort((a, b) => Number(b.item.rating || 0) - Number(a.item.rating || 0));
     }
 
     return activeList.map((entry) => entry.item);
   }, [
+    nearMeActive,
+    nearbyMergedShops,
     preRotatedRestaurants,
     cleanSelectedProvince,
     priceFilter,
@@ -568,7 +721,7 @@ export const RestaurantView: React.FC = () => {
     cuisineFilter,
     ratingFilter,
     sortMode,
-    distanceMap,
+    distanceMetersMap,
     debouncedShopSearchQuery,
   ]);
 
@@ -671,8 +824,9 @@ export const RestaurantView: React.FC = () => {
     const first = featuredRestaurants[0];
     if (!first) return '0.8 km';
     const d = distanceMap.get(first.id);
-    if (typeof d === 'number' && Number.isFinite(d) && d > 0) {
-      return `${d < 10 ? d.toFixed(1) : Math.round(d)} km`;
+    if (typeof d === 'number' && Number.isFinite(d) && d >= 0) {
+      const eff = Math.max(0.1, d);
+      return `${eff < 10 ? eff.toFixed(1) : Math.round(eff)} km`;
     }
     return '0.8 km';
   }, [featuredRestaurants, distanceMap]);
@@ -1014,8 +1168,29 @@ export const RestaurantView: React.FC = () => {
         {/* ===================================================================
             3. NEARBY & POPULAR SHOPS LISTINGS
             =================================================================== */}
-        {sortedRestaurants.length > 0 ? (
-          <div ref={shopListStartRef} id="kft-shop-list-section" className="space-y-4 pt-0.5 min-h-[85vh] scroll-mt-2">
+        <div ref={shopListStartRef} id="kft-shop-list-section" className="space-y-3 pt-0.5 scroll-mt-2">
+          {nearMeActive && (
+            <NearMeControlBar
+              language={language}
+              geoStatus={geoStatus}
+              detectedGpsProvince={detectedGpsProvince}
+              manualProvince={manualProvince}
+              onProvinceChange={handleNearMeProvinceChange}
+              onRefreshGps={() => requestLocation(true)}
+              isLoadingNearby={isLoadingNearby}
+              selectedRadiusMeters={selectedRadiusMeters}
+              onSelectRadius={handleSelectRadius}
+              countLabel={tr(
+                language,
+                `ឃើញ ${sortedRestaurants.length} ហាង`,
+                `${sortedRestaurants.length} shops`,
+                `共 ${sortedRestaurants.length} 家`
+              )}
+            />
+          )}
+
+          {sortedRestaurants.length > 0 ? (
+          <div className="space-y-4 min-h-[85vh]">
             {/* Section 1: ហាងពេញនិយមជិតខ្ញុំ (Popular Shops Near Me) */}
             {featuredRestaurants.length > 0 && (
               <div className="space-y-2.5">
@@ -1128,7 +1303,7 @@ export const RestaurantView: React.FC = () => {
             )}
           </div>
         ) : (
-          <div ref={shopListStartRef} id="kft-shop-list-section" className="py-12 px-4 text-center bg-white rounded-3xl border border-slate-200 text-slate-600 space-y-2.5 shadow-xs min-h-[85vh] scroll-mt-2">
+          <div className="py-12 px-4 text-center bg-white rounded-3xl border border-slate-200 text-slate-600 space-y-2.5 shadow-xs min-h-[85vh]">
             <Store className="w-10 h-10 mx-auto text-slate-400" strokeWidth={1.75} />
             <p className="text-xs font-bold text-slate-700">
               {debouncedShopSearchQuery.trim()
@@ -1164,6 +1339,7 @@ export const RestaurantView: React.FC = () => {
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

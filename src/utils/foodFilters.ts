@@ -381,7 +381,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ទន្លេក្រចេះ អន្លង់ផ្សោតកាំពី និងកោះទ្រង់ ខេត្តក្រចេះ',
     whereToFindEn: 'Kratie Mekong Promenade, Kampi Dolphin Pool Riverside & Koh Trong Island, Kratie',
     whereToFindZh: '桔井湄公河滨江大道、甘比江豚观赏区河畔及笼岛 (Koh Trong)',
-    signatureDishIds: ['food-112', 'food-146', 'food-32', 'food-77', 'food-53', 'food-152', 'food-95', 'food-7'],
+    signatureDishIds: ['food-112', 'food-146', 'food-32', 'food-77', 'food-152', 'food-95', 'food-7'],
   },
   {
     id: 'pailin',
@@ -427,7 +427,7 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
     whereToFindKh: 'មាត់ស្ទឹងពោធិ៍សាត់ ភូមិបណ្តែតទឹកកំពង់ហ្លួង និងស្រុកវាលវែង ខេត្តពោធិ៍សាត់',
     whereToFindEn: 'Pursat Riverbank Market, Kampong Luong Floating Town & Veal Veng Highlands, Pursat',
     whereToFindZh: '菩萨河畔夜市、贡邦鲁水上渔村及维旺高山景区',
-    signatureDishIds: ['food-53', 'food-65', 'food-74', 'food-103', 'food-133', 'food-142', 'food-190', 'food-90'],
+    signatureDishIds: ['food-65', 'food-74', 'food-103', 'food-133', 'food-142', 'food-190', 'food-90'],
   },
   {
     id: 'preah_vihear',

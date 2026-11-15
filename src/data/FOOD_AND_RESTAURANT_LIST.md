@@ -61,7 +61,6 @@
 | 50 | `food-50` | **ពងទាកូនទឹកម្រេចក្រូចឆ្មា** | Balut with Kampot Lime & Pepper (Pong Tea Kon) | អាហារសម្រន់ / ពេញនិយម |
 | 51 | `food-51` | **សម្លម្ជូរត្រីកែវរំដេង** | River Keo Fish Galangal Sour Soup | ម្ហូបសម្ល / ប្រពៃណី |
 | 52 | `food-52` | **សម្លម្ជូរល្ពៅសាច់ជ្រូក** | Pumpkin Pork Rib Sour Soup | ម្ហូបសម្ល / ប្រពៃណី |
-| 53 | `food-53` | **សម្លម្ជូរទំពាំងត្រីឆ្អើរ** | Bamboo Shoot & Smoked Fish Soup | ម្ហូបសម្ល / ប្រពៃណី |
 | 54 | `food-54` | **សាច់ជ្រូកចិញ្ច្រាំ ត្រីប្រម៉ា** | Steamed Minced Pork with Salted Fish | ម្ហូបសម្ល / ប្រពៃណី |
 | 55 | `food-55` | **សម្លស្ងោរម្រះញាត់សាច់ជ្រូក** | Bitter Melon Stuffed with Pork Soup | ម្ហូបសម្ល / ប្រពៃណី |
 | 56 | `food-56` | **សម្លម្ជូរផ្កាកំប្លោកត្រីរ៉ស់** | Water Lily Flower Sour Soup with Fish | ម្ហូបសម្ល / ប្រពៃណី |

@@ -151,8 +151,9 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
     );
 
     const distanceStr = useMemo(() => {
-      if (typeof distanceKm === 'number' && Number.isFinite(distanceKm) && distanceKm > 0) {
-        return distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm).toString();
+      if (typeof distanceKm === 'number' && Number.isFinite(distanceKm) && distanceKm >= 0) {
+        const eff = Math.max(0.1, distanceKm);
+        return eff < 10 ? eff.toFixed(1) : Math.round(eff).toString();
       }
       return computeFallbackDistanceKm(String(restaurant.id || restaurant.nameKh || 'shop'));
     }, [distanceKm, restaurant.id, restaurant.nameKh]);

@@ -45,7 +45,22 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { ListingFeaturedCard } from './listing/ListingUI';
-import { normalizeKhmerSearchText } from '../services/googlePlacesService';
+import {
+  normalizeKhmerSearchText,
+  searchNearbyPlacesWithin500m,
+  GooglePlaceCachedItem,
+} from '../services/googlePlacesService';
+import { NearMeControlBar } from './common/NearMeControlBar';
+import {
+  MAX_NEARBY_RADIUS_METERS,
+  PROVINCE_CENTERS,
+  calculateDistanceMeters,
+  readSavedUserGps,
+  detectClosestProvinceFromCoords,
+  resolveActiveNearMeCoords,
+  requestCambodiaGpsLocation,
+  mergeNearbyHotels,
+} from '../utils/nearMeEngine';
 import { TouristImageModal } from './TouristImageModal';
 import { rankBySearchRelevance, destinationSearchFields, analyzeSearchQuery } from '../utils/searchEngine';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
@@ -310,7 +325,19 @@ export const HotelView: React.FC = () => {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(HOTEL_BATCH_SIZE);
   const [hotelForImageEdit, setHotelForImageEdit] = useState<TouristDestination | null>(null);
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() => readSavedUserGps());
+  const [geoStatus, setGeoStatus] = useState<'requesting' | 'granted' | 'fallback'>(() =>
+    readSavedUserGps() ? 'granted' : 'requesting'
+  );
+  const [selectedRadiusMeters, setSelectedRadiusMeters] = useState<number>(MAX_NEARBY_RADIUS_METERS);
+  const [manualProvince, setManualProvince] = useState<string>(() => {
+    const saved = readSavedUserGps();
+    return saved ? detectClosestProvinceFromCoords(saved) : 'រាជធានីភ្នំពេញ';
+  });
+  const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
+  const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>([]);
+  const [liveNearbyAttractions, setLiveNearbyAttractions] = useState<GooglePlaceCachedItem[]>([]);
+  const locationReqSeqRef = useRef<number>(0);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const hotelListStartRef = useRef<HTMLDivElement | null>(null);
@@ -334,6 +361,8 @@ export const HotelView: React.FC = () => {
       categoryFilter,
       ratingFilter,
       sortMode,
+      selectedRadiusMeters,
+      manualProvince,
       showAllFeatured,
       hotelSearchQuery,
       debouncedSearchQuery,
@@ -345,6 +374,8 @@ export const HotelView: React.FC = () => {
         setCategoryFilter(snap.categoryFilter);
         setRatingFilter(snap.ratingFilter);
         setSortMode(snap.sortMode);
+        setSelectedRadiusMeters(snap.selectedRadiusMeters);
+        setManualProvince(snap.manualProvince);
         setShowAllFeatured(snap.showAllFeatured);
         setHotelSearchQuery(snap.hotelSearchQuery);
         setDebouncedSearchQuery(snap.debouncedSearchQuery);
@@ -384,21 +415,116 @@ export const HotelView: React.FC = () => {
   useEffect(() => {
     if (isRestoringHistoryRef.current) return;
     setVisibleCount(HOTEL_BATCH_SIZE);
-  }, [selectedProvince, categoryFilter, ratingFilter, sortMode, hotelSearchQuery]);
+  }, [selectedProvince, categoryFilter, ratingFilter, sortMode, hotelSearchQuery, selectedRadiusMeters, manualProvince]);
+
+  const baseCoords = useMemo(() => {
+    return userCoords || readSavedUserGps() || PROVINCE_CENTERS['រាជធានីភ្នំពេញ'];
+  }, [userCoords]);
+
+  const detectedGpsProvince = useMemo(
+    () => detectClosestProvinceFromCoords(baseCoords),
+    [baseCoords]
+  );
+
+  const activeNearMeCoords = useMemo(
+    () => resolveActiveNearMeCoords(baseCoords, detectedGpsProvince, manualProvince),
+    [baseCoords, detectedGpsProvince, manualProvince]
+  );
+
+  const fetchLiveNearby500m = async (
+    coords: { lat: number; lng: number },
+    forceRefresh = false,
+    radiusOverride = selectedRadiusMeters
+  ) => {
+    if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) return;
+    const reqSeq = locationReqSeqRef.current;
+    setIsLoadingNearby(true);
+    try {
+      const res = await searchNearbyPlacesWithin500m(
+        coords.lat,
+        coords.lng,
+        radiusOverride,
+        forceRefresh
+      );
+      if (reqSeq !== locationReqSeqRef.current) return;
+      setLiveNearbyRestaurants(res.restaurants);
+      setLiveNearbyAttractions(res.attractions);
+    } catch (err) {
+      console.warn('Hotel NearMe fetch warning:', err);
+    } finally {
+      if (reqSeq === locationReqSeqRef.current) {
+        setIsLoadingNearby(false);
+      }
+    }
+  };
+
+  const requestLocation = (forceRefresh = false) => {
+    const reqSeq = ++locationReqSeqRef.current;
+    setGeoStatus('requesting');
+    let fetchedCoords: { lat: number; lng: number } | null = null;
+
+    requestCambodiaGpsLocation({
+      forceRefresh,
+      defaultProvinceKh: manualProvince || 'រាជធានីភ្នំពេញ',
+      isCurrentReq: () => reqSeq === locationReqSeqRef.current,
+      onImmediateSaved: (savedCoords, detProv) => {
+        setUserCoords(savedCoords);
+        setManualProvince(detProv);
+        setGeoStatus('granted');
+        fetchedCoords = savedCoords;
+        fetchLiveNearby500m(savedCoords, false, selectedRadiusMeters);
+      },
+      onGranted: (nextCoords, detProv) => {
+        setUserCoords(nextCoords);
+        setManualProvince(detProv);
+        setGeoStatus('granted');
+        if (
+          !fetchedCoords ||
+          forceRefresh ||
+          calculateDistanceMeters(fetchedCoords.lat, fetchedCoords.lng, nextCoords.lat, nextCoords.lng) > 120
+        ) {
+          fetchedCoords = nextCoords;
+          fetchLiveNearby500m(nextCoords, forceRefresh, selectedRadiusMeters);
+        }
+      },
+      onFallback: (fallbackCoords, detProv) => {
+        setUserCoords(fallbackCoords);
+        setManualProvince(detProv);
+        setGeoStatus('fallback');
+        if (!fetchedCoords) {
+          fetchedCoords = fallbackCoords;
+          fetchLiveNearby500m(fallbackCoords, forceRefresh, selectedRadiusMeters);
+        }
+      },
+    });
+  };
 
   useEffect(() => {
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        },
-        () => {
-          // Ignore silent geolocation error
-        },
-        { enableHighAccuracy: false, timeout: 5000, maximumAge: 180000 }
-      );
-    }
+    const onGpsUpdated = (e: Event) => {
+      const detail = (e as CustomEvent<{ lat: number; lng: number }>).detail;
+      if (detail && Number.isFinite(detail.lat) && Number.isFinite(detail.lng)) {
+        setUserCoords(detail);
+        setGeoStatus('granted');
+      }
+    };
+    window.addEventListener('kft:gps-updated', onGpsUpdated);
+    return () => window.removeEventListener('kft:gps-updated', onGpsUpdated);
   }, []);
+
+  const handleNearMeProvinceChange = (prov: string) => {
+    recordHotelStep('hotel-nearme-prov:' + prov);
+    setManualProvince(prov);
+    const nextRef = resolveActiveNearMeCoords(baseCoords, detectedGpsProvince, prov);
+    fetchLiveNearby500m(nextRef, false, selectedRadiusMeters);
+    scrollToHotelList();
+  };
+
+  const handleSelectRadius = (newRadius: number) => {
+    recordHotelStep('hotel-nearme-radius:' + newRadius);
+    setSelectedRadiusMeters(newRadius);
+    fetchLiveNearby500m(activeNearMeCoords, true, newRadius);
+    scrollToHotelList();
+  };
 
   const [nowTickMs, setNowTickMs] = useState<number>(() => Date.now());
   useEffect(() => {
@@ -749,18 +875,48 @@ export const HotelView: React.FC = () => {
     return [...userSubmitted, ...shuffleForCurrentSession(regularHotels)];
   }, [allHotels, userAddedHotelIds, hotelRotationRankMap, addedHotelTimestampMap]);
 
-  const distanceMap = useMemo(() => {
-    const map = new Map<string, number>();
-    const refLat = userCoords?.lat ?? 11.5564;
-    const refLng = userCoords?.lng ?? 104.9282;
+  const nearbyMergedHotels = useMemo(() => {
+    if (sortMode !== 'nearest') return [];
+    return mergeNearbyHotels({
+      allHotels,
+      liveNearbyAttractions,
+      liveNearbyRestaurants,
+      refCoords: activeNearMeCoords,
+      radiusMeters: selectedRadiusMeters,
+      targetProvinceKh: manualProvince,
+    });
+  }, [
+    sortMode,
+    allHotels,
+    liveNearbyAttractions,
+    liveNearbyRestaurants,
+    activeNearMeCoords,
+    selectedRadiusMeters,
+    manualProvince,
+  ]);
+
+  const { distanceMap, distanceMetersMap } = useMemo(() => {
+    const kmMap = new Map<string, number>();
+    const mMap = new Map<string, number>();
+    const refLat = sortMode === 'nearest' ? activeNearMeCoords.lat : baseCoords.lat;
+    const refLng = sortMode === 'nearest' ? activeNearMeCoords.lng : baseCoords.lng;
+
     for (const h of orderedHotels) {
-      const d = calculateDistanceKm(refLat, refLng, h.latitude, h.longitude);
-      map.set(h.id, d !== null ? d : getDeterministicDistanceKm(h.id));
+      const m = calculateDistanceMeters(refLat, refLng, h.latitude, h.longitude);
+      if (Number.isFinite(m)) {
+        mMap.set(h.id, m);
+        kmMap.set(h.id, Number((m / 1000).toFixed(1)));
+      }
     }
-    return map;
-  }, [orderedHotels, userCoords]);
+    for (const h of nearbyMergedHotels) {
+      mMap.set(h.id, h.distanceMeters);
+      kmMap.set(h.id, h.distanceKm);
+    }
+    return { distanceMap: kmMap, distanceMetersMap: mMap };
+  }, [orderedHotels, nearbyMergedHotels, sortMode, activeNearMeCoords, baseCoords]);
 
   const filteredHotels = useMemo(() => {
+    const isNearMe = sortMode === 'nearest';
     const trimmedQ = debouncedSearchQuery.trim();
     const smartIntent = trimmedQ ? parseSmartSearchIntent(trimmedQ) : null;
     const normSelProv =
@@ -770,7 +926,10 @@ export const HotelView: React.FC = () => {
     const effectiveProvRaw = normSelProv || smartIntent?.detectedProvinceKh || '';
     const cleanSelProv = effectiveProvRaw.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
 
-    let scoped = orderedHotels.filter((h) => {
+    const basePool: TouristDestination[] = isNearMe ? nearbyMergedHotels : orderedHotels;
+
+    let scoped = basePool.filter((h) => {
+      if (!h || h.categorySlug !== 'hotel') return false;
       if (categoryFilter === 'verified_big' && !isVerifiedBigHotel(h)) return false;
       if (
         categoryFilter !== 'all' &&
@@ -783,7 +942,7 @@ export const HotelView: React.FC = () => {
         if (smartIntent.semanticCategory === 'resort' && classifyHotelSubCategory(h) !== 'luxury_resort') return false;
         if (smartIntent.semanticCategory === 'guesthouse' && classifyHotelSubCategory(h) !== 'guesthouse') return false;
       }
-      if (cleanSelProv && !(h.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
+      if (!isNearMe && cleanSelProv && !(h.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
         return false;
       }
       const effRating = h.rating && h.rating > 0 ? Number(h.rating) : 4.6;
@@ -793,8 +952,10 @@ export const HotelView: React.FC = () => {
     });
 
     if (!trimmedQ) {
-      if (sortMode === 'nearest') {
-        scoped = [...scoped].sort((a, b) => (distanceMap.get(a.id) ?? 999) - (distanceMap.get(b.id) ?? 999));
+      if (isNearMe) {
+        scoped = [...scoped].sort(
+          (a, b) => (distanceMetersMap.get(a.id) ?? 9999999) - (distanceMetersMap.get(b.id) ?? 9999999)
+        );
       } else if (sortMode === 'rating') {
         scoped = [...scoped].sort((a, b) => (b.rating || 4.6) - (a.rating || 4.6));
       } else {
@@ -815,17 +976,25 @@ export const HotelView: React.FC = () => {
 
     const qa = analyzeSearchQuery(trimmedQ);
     if (qa.distinctive.length === 0 && (smartIntent?.detectedProvinceKh || smartIntent?.semanticCategory)) {
+      if (isNearMe) {
+        return [...scoped].sort(
+          (a, b) => (distanceMetersMap.get(a.id) ?? 9999999) - (distanceMetersMap.get(b.id) ?? 9999999)
+        );
+      }
       return scoped;
     }
 
     const needZhSearch = language === 'zh' || /[\u4e00-\u9fff]/.test(trimmedQ);
-    return rankBySearchRelevance(
+    const ranked = rankBySearchRelevance(
       scoped,
       trimmedQ,
       (h) => destinationSearchFields(h, [needZhSearch ? getLocalizedDestination(h, 'zh').name : '', classifyHotelSubCategory(h)]),
       {
         bucketSize: 100,
         tieBreak: (a, b) => {
+          if (isNearMe) {
+            return (distanceMetersMap.get(a.id) ?? 9999999) - (distanceMetersMap.get(b.id) ?? 9999999);
+          }
           const aUser = userAddedHotelIds.has(a.id);
           const bUser = userAddedHotelIds.has(b.id);
           if (aUser && !bUser) return -1;
@@ -843,17 +1012,26 @@ export const HotelView: React.FC = () => {
         },
       }
     );
+
+    if (isNearMe) {
+      return [...ranked].sort(
+        (a, b) => (distanceMetersMap.get(a.id) ?? 9999999) - (distanceMetersMap.get(b.id) ?? 9999999)
+      );
+    }
+    return ranked;
   }, [
     orderedHotels,
+    nearbyMergedHotels,
     categoryFilter,
     ratingFilter,
     sortMode,
     selectedProvince,
     debouncedSearchQuery,
-    distanceMap,
+    distanceMetersMap,
     userAddedHotelIds,
     hotelRotationRankMap,
     addedHotelTimestampMap,
+    language,
   ]);
 
   // Split into Section 1: TOP 1 Earliest Approved Hotel (Featured Card matching Reference Image 3)
@@ -981,45 +1159,27 @@ export const HotelView: React.FC = () => {
 
   const nearestDistanceLabel = useMemo(() => {
     const first = featuredHotels[0];
-    if (!first) return '0.8 km';
+    if (!first) return '0.5 km';
     const d = distanceMap.get(first.id);
-    if (typeof d === 'number' && Number.isFinite(d) && d > 0) {
-      return `${d < 10 ? d.toFixed(1) : Math.round(d)} km`;
+    if (typeof d === 'number' && Number.isFinite(d) && d >= 0) {
+      const eff = Math.max(0.1, d);
+      return `${eff < 10 ? eff.toFixed(1) : Math.round(eff)} km`;
     }
     return '0.8 km';
   }, [featuredHotels, distanceMap]);
 
   const handleToggleNearMe = () => {
     setSortMode('nearest');
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          setSortMode('nearest');
-          showToast(
-            tr(
-              language,
-              '📍 បង្ហាញសណ្ឋាគារនៅជិតទីតាំងរបស់អ្នក!',
-              '📍 Showing hotels near your location!',
-              '📍 显示您附近的酒店！'
-            ),
-            'success'
-          );
-        },
-        () => {
-          setSortMode('nearest');
-          showToast(
-            tr(
-              language,
-              '📍 បង្ហាញសណ្ឋាគារពេញនិយមនៅជិតអ្នក',
-              '📍 Showing popular hotels near you',
-              '📍 显示您附近的热门酒店'
-            ),
-            'info'
-          );
-        }
-      );
-    }
+    requestLocation(false);
+    showToast(
+      tr(
+        language,
+        '📍 បង្ហាញសណ្ឋាគារនៅជិតទីតាំងរបស់អ្នក!',
+        '📍 Showing hotels near your location!',
+        '📍 显示您附近的酒店！'
+      ),
+      'success'
+    );
   };
 
   const primaryHotelCategoryButtons = [
@@ -1396,8 +1556,29 @@ export const HotelView: React.FC = () => {
         {/* =====================================================================
             3. HOTEL LISTINGS (Clean White Cards on Dark Slate #1E293B)
             ===================================================================== */}
-        {filteredHotels.length > 0 ? (
-          <div ref={hotelListStartRef} id="kft-hotel-list-section" className="space-y-4 pt-0.5 min-h-[85vh] scroll-mt-2">
+        <div ref={hotelListStartRef} id="kft-hotel-list-section" className="space-y-3 pt-0.5 scroll-mt-2">
+          {sortMode === 'nearest' && (
+            <NearMeControlBar
+              language={language}
+              geoStatus={geoStatus}
+              detectedGpsProvince={detectedGpsProvince}
+              manualProvince={manualProvince}
+              onProvinceChange={handleNearMeProvinceChange}
+              onRefreshGps={() => requestLocation(true)}
+              isLoadingNearby={isLoadingNearby}
+              selectedRadiusMeters={selectedRadiusMeters}
+              onSelectRadius={handleSelectRadius}
+              countLabel={tr(
+                language,
+                `ឃើញ ${filteredHotels.length} សណ្ឋាគារ`,
+                `${filteredHotels.length} hotels`,
+                `共 ${filteredHotels.length} 家酒店`
+              )}
+            />
+          )}
+
+          {filteredHotels.length > 0 ? (
+          <div className="space-y-4 min-h-[85vh]">
             {/* Section 1: សណ្ឋាគារពេញនិយមជិតខ្ញុំ (Popular Hotels Near Me - Clean White Featured Cards) */}
             {featuredHotels.length > 0 && (
               <div className="space-y-2.5">
@@ -1586,7 +1767,11 @@ export const HotelView: React.FC = () => {
                       hotel.reviewCount && hotel.reviewCount > 0
                         ? hotel.reviewCount
                         : 95 + (hash % 210);
-                    const distanceKm = distanceMap.get(hotel.id) ?? getDeterministicDistanceKm(hotel.id);
+                    const rawDist = distanceMap.get(hotel.id);
+                    const distanceKm =
+                      typeof rawDist === 'number' && Number.isFinite(rawDist) && rawDist >= 0
+                        ? Math.max(0.1, rawDist)
+                        : getDeterministicDistanceKm(hotel.id);
 
                     return (
                       <article
@@ -1694,7 +1879,7 @@ export const HotelView: React.FC = () => {
             )}
           </div>
         ) : (
-          <div ref={hotelListStartRef} id="kft-hotel-list-section" className="py-8 text-center text-slate-500 space-y-3 font-khmer bg-white rounded-2xl border border-slate-200/80 p-6 scroll-mt-2">
+          <div className="py-8 text-center text-slate-500 space-y-3 font-khmer bg-white rounded-2xl border border-slate-200/80 p-6">
             <BedDouble className="w-10 h-10 mx-auto text-slate-300" strokeWidth={1.75} />
             <p className="text-xs font-bold text-slate-600">
               {debouncedSearchQuery.trim()
@@ -1740,6 +1925,7 @@ export const HotelView: React.FC = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Direct Hotel Photo Upload Modal for Admin */}

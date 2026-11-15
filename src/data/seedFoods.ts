@@ -1941,69 +1941,6 @@ export const AUTHENTIC_FOOD_RECIPES = {
       }
     ]
   },
-  "food-53": {
-    "nameKh": "ស្ងោរជ្រក់គ្រឿងសមុទ្រ",
-    "nameEn": "Cambodian Seafood Sour Herb Soup (Sngor Chhruk Kroeung Samot)",
-    "cat": "soup",
-    "catKh": "ម្ហូបស្ងោរ / ស្ងោរជ្រក់គ្រឿងសមុទ្រ",
-    "catEn": "Soup / Seafood Sour Herb Soup",
-    "descKh": "ស្ងោរជ្រក់គ្រឿងសមុទ្រ ជាម្ហូបស្ងោរទឹកថ្លារសជាតិជូរហឹរស្រស់ស្រាយ ចម្អិនពីមឹកស្រស់ឆូតក្រឡា ផ្សិតចំបើង គល់ស្លឹកគ្រៃ ស្លឹកក្រូចសើច ម្ទេសក្រហម ជីរគ្រប់មុខ និងរោយខ្ទឹមក្រហមបំពងឈ្ងុយ។",
-    "descEn": "Refreshing Cambodian clear sour seafood soup simmered with scored fresh squid, sweet clams, bruised lemongrass, leafy greens, fresh red chilies, and crispy fried shallots.",
-    "prepTime": "១៥ នាទី",
-    "cookTime": "២០ នាទី",
-    "servings": "៣-៤ នាក់",
-    "calories": 210,
-    "difficulty": "easy",
-    "ingredients": [
-      {
-        "nameKh": "មឹកស្រស់ឆូតក្រឡា និងងាវស្រស់លាងស្អាត",
-        "nameEn": "Fresh crosshatch-scored squid and cleaned clams",
-        "amount": "៣៥០ ក្រាម"
-      },
-      {
-        "nameKh": "គល់ស្លឹកគ្រៃដំ រំដេង និងស្លឹកក្រូចសើច",
-        "nameEn": "Bruised lemongrass, galangal, and kaffir lime leaves",
-        "amount": "១ ក្តាប់តូច"
-      },
-      {
-        "nameKh": "ស្ពៃតឿ ឬត្រកួនបៃតងខ្ចី",
-        "nameEn": "Tender bok choy and leafy greens",
-        "amount": "២០០ ក្រាម"
-      },
-      {
-        "nameKh": "ទឹកក្រូចឆ្មារស្រស់ ទឹកត្រី និងស្ករបន្តិច",
-        "nameEn": "Fresh lime juice, fish sauce, and a pinch of palm sugar",
-        "amount": "២ ស្លាបព្រាបាយ"
-      },
-      {
-        "nameKh": "ខ្ទឹមក្រហមបំពង ម្ទេសក្រហម និងជីរគ្រប់មុខ",
-        "nameEn": "Crispy fried shallots, fresh red chilies, and herbs",
-        "amount": "តាមចំណូលចិត្ត"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "លាងសម្អាតមឹកឆូតជាក្រឡាផ្កា និងត្រាំលាងងាវឱ្យអស់ដីខ្សាច់។",
-        "instructionEn": "Clean and score fresh squid in a crosshatch pattern, and purge clams clean."
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាំទឹកឱ្យពុះជាមួយគល់ស្លឹកគ្រៃដំ រំដេង និងស្លឹកក្រូចសើចឱ្យចេញក្លិនក្រអូបឈ្ងុយ។",
-        "instructionEn": "Bring water to a rolling boil with bruised lemongrass, galangal, and kaffir lime leaves."
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "បង់ងាវ និងមឹកចូលស្រុសឱ្យឆ្អិនផុយស្រួយ រួចដាក់បន្លែបៃតង និងថែមទឹកត្រី អំបិល ស្ករបន្តិច។",
-        "instructionEn": "Add clams and scored squid briefly until clams open and squid curls tender, then toss in greens and season with fish sauce."
-      },
-      {
-        "stepNumber": 4,
-        "instructionKh": "បិទភ្លើង ច្របាច់ក្រូចឆ្មារ ដាក់ម្ទេសស្រស់ និងរោយខ្ទឹមក្រហមបំពងពីលើ រួចទទួលទានក្តៅៗ។",
-        "instructionEn": "Remove from heat, stir in fresh lime juice and chilies, and garnish with crispy fried shallots."
-      }
-    ]
-  },
   "food-54": {
     "nameKh": "សាច់ជ្រូកចិញ្ច្រាំ ត្រីប្រម៉ា",
     "nameEn": "Steamed Minced Pork with Salted Fish (Sach Chrouk Trey Prama)",

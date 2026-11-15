@@ -38,12 +38,12 @@ export interface DishTag {
 }
 
 export const DISH_TAG_DEFS: Record<DishTagId, DishTag> = {
-  light: { id: 'light', labelKh: 'ស្រាល', labelEn: 'Light', labelZh: '清淡', emoji: '🌿', tone: 'green', benefitKh: "≤ 450 kcal • ល្អសម្រាប់អាហារស្រាលក្រពះ & រក្សាទម្ងន់", benefitEn: "≤ 450 kcal • great for light meals & balanced eating", benefitZh: "≤ 450 千卡 • 适合清淡餐食与均衡饮食", cookingTipKh: "គន្លឹះ៖ បន្ថយប្រេងឆា ទឹកត្រី ឬស្ករ ហើយបន្ថែមបន្លែស្រស់ឱ្យបានច្រើន", cookingTipEn: "Tip: use less oil, fish sauce or sugar, and add plenty of fresh vegetables.", cookingTipZh: "小贴士：少放油、鱼露或糖，多加新鲜蔬菜。" },
+  light: { id: 'light', labelKh: 'ស្រាល', labelEn: 'Light', labelZh: '清淡', emoji: '🌿', tone: 'green', benefitKh: "< 450 kcal ក្នុង ១ ចាន • ល្អសម្រាប់អាហារស្រាលក្រពះ & រក្សាទម្ងន់", benefitEn: "Under 450 kcal per serving • great for light meals & weight management", benefitZh: "每份低于 450 千卡 • 适合清淡餐食与体重管理", cookingTipKh: "គន្លឹះ៖ បន្ថយប្រេងឆា ទឹកត្រី ឬស្ករ ហើយបន្ថែមបន្លែស្រស់ឱ្យបានច្រើន", cookingTipEn: "Tip: use less oil, fish sauce or sugar, and add plenty of fresh vegetables.", cookingTipZh: "小贴士：少放油、鱼露或糖，多加新鲜蔬菜。" },
   steamed_boiled: { id: 'steamed_boiled', labelKh: 'ចំហុយ/ស្ងោរ', labelEn: 'Steamed/Boiled', labelZh: '蒸/煮', emoji: '♨️', tone: 'blue', benefitKh: "ចម្អិនដោយចំហុយ/ស្ងោរ • កាត់បន្ថយប្រេងឆា & ស្រួលរំលាយ", benefitEn: "Steamed or boiled • less frying oil & gentle to digest", benefitZh: "蒸或煮 • 少油，易于消化", cookingTipKh: "គន្លឹះ៖ ចំហុយ ឬស្ងោរជំនួសការចៀន ហើយបន្ថយអំបិល និងទឹកត្រីក្នុងទឹកស៊ុប", cookingTipEn: "Tip: steam or boil instead of frying, and go easy on salt and fish sauce in the broth.", cookingTipZh: "小贴士：以蒸、煮代替油炸，汤底少放盐和鱼露。" },
   grilled: { id: 'grilled', labelKh: 'អាំង/ដុត', labelEn: 'Grilled', labelZh: '烧烤', emoji: '🔥', tone: 'blue', benefitKh: "អាំង/ដុត ស្រក់ខ្លាញ់ចេញ • ឈ្ងុយឆ្ងាញ់មិនបាច់បំពង", benefitEn: "Grilled • fat drips away, tasty without deep-frying", benefitZh: "烧烤 • 油脂滴落，无需油炸也美味", cookingTipKh: "គន្លឹះ៖ អាំងលើភ្លើងស្រាល កុំឱ្យឆេះខ្មៅ ហើយកាត់ខ្លាញ់ចេញមុនអាំង", cookingTipEn: "Tip: grill over gentle heat, avoid charring, and trim visible fat first.", cookingTipZh: "小贴士：用温和火力烤制，避免烤焦，烤前去除肥肉。" },
   fried: { id: 'fried', labelKh: 'បំពង/ចៀន', labelEn: 'Fried', labelZh: '油炸', emoji: '🍳', tone: 'amber', infoOnly: true },
   vegetable_rich: { id: 'vegetable_rich', labelKh: 'សម្បូរបន្លែ', labelEn: 'Vegetable-rich', labelZh: '蔬菜丰富', emoji: '🥬', tone: 'green', benefitKh: "សម្បូរបន្លែធម្មជាតិ & ជាតិសរសៃជំនួយការរំលាយអាហារ", benefitEn: "Plenty of natural vegetables & dietary fiber", benefitZh: "富含天然蔬菜与膳食纤维", cookingTipKh: "គន្លឹះ៖ ដាក់បន្លែឱ្យបានច្រើនជាងសាច់ ហើយកុំចម្អិនយូរពេកដើម្បីរក្សាភាពស្រស់", cookingTipEn: "Tip: add more vegetables than meat and avoid overcooking to keep them fresh.", cookingTipZh: "小贴士：多放蔬菜、少放肉，避免煮得过久以保持新鲜。" },
-  protein_rich: { id: 'protein_rich', labelKh: 'សម្បូរប្រូតេអ៊ីន', labelEn: 'Protein-rich', labelZh: '蛋白质丰富', emoji: '💪', tone: 'green', benefitKh: "សម្បូរសាច់ត្រី & ប្រូតេអ៊ីនផ្ដល់ថាមពល", benefitEn: "Rich in meat/fish & protein for energy", benefitZh: "富含肉鱼类与蛋白质，补充能量", cookingTipKh: "គន្លឹះ៖ ជ្រើសសាច់ស្គម ឬត្រី ចម្អិនដោយចំហុយ ស្ងោរ ឬអាំង ហើយញ៉ាំជាមួយបន្លែ", cookingTipEn: "Tip: choose lean meat or fish, steam, boil or grill it, and serve with vegetables.", cookingTipZh: "小贴士：选择瘦肉或鱼，以蒸、煮或烤的方式烹饪，并搭配蔬菜。" },
+  protein_rich: { id: 'protein_rich', labelKh: 'សម្បូរប្រូតេអ៊ីន', labelEn: 'Protein-rich', labelZh: '蛋白质丰富', emoji: '💪', tone: 'green', benefitKh: "ប្រូតេអ៊ីនប្រហែល ២៥ ក្រាមឡើង ក្នុង ១ ចាន ពីសាច់ ត្រី ឬតៅហ៊ូ", benefitEn: "About 25 g+ protein per serving from meat, fish or tofu", benefitZh: "每份约含 25 克以上蛋白质（来自肉、鱼或豆腐）", cookingTipKh: "គន្លឹះ៖ ជ្រើសសាច់ស្គម ឬត្រី ចម្អិនដោយចំហុយ ស្ងោរ ឬអាំង ហើយញ៉ាំជាមួយបន្លែ", cookingTipEn: "Tip: choose lean meat or fish, steam, boil or grill it, and serve with vegetables.", cookingTipZh: "小贴士：选择瘦肉或鱼，以蒸、煮或烤的方式烹饪，并搭配蔬菜。" },
   vegetarian_friendly: { id: 'vegetarian_friendly', labelKh: 'សមស្របអ្នកញ៉ាំបួស', labelEn: 'Vegetarian-friendly', labelZh: '素食友好', emoji: '🌱', tone: 'green', benefitKh: "ម្ហូបបួស & បន្លែធម្មជាតិ", benefitEn: "Plant-based or easy to make vegetarian", benefitZh: "植物性或易于做成素食", cookingTipKh: "គន្លឹះ៖ ជំនួសទឹកត្រី និងប្រហុកដោយទឹកស៊ីអ៊ីវ ឬអំបិល ដើម្បីធ្វើជាម្ហូបបួស", cookingTipEn: "Tip: swap fish sauce and prahok for soy sauce or salt to make it fully vegetarian.", cookingTipZh: "小贴士：用酱油或盐代替鱼露和发酵鱼酱，即可做成素食。" },
   spicy: { id: 'spicy', labelKh: 'ហឹរ', labelEn: 'Spicy', labelZh: '辣', emoji: '🌶️', tone: 'amber' },
   fish_sauce_prahok: { id: 'fish_sauce_prahok', labelKh: 'មានទឹកត្រី/ប្រហុក', labelEn: 'Contains fish sauce/prahok', labelZh: '含鱼露/发酵鱼酱', emoji: '🐟', tone: 'amber', infoOnly: true },
@@ -108,11 +108,71 @@ export const TAG_KEYWORD_RULES = {
 
 const includesAny = (text: string, words: readonly string[]) => words.some((w) => text.includes(w));
 
+/** Weight-management rule: strictly below this many kcal per serving (recorded calories only - never guessed). */
+export const LIGHT_KCAL_LIMIT = 450;
+/** High-protein rule: estimated grams of protein per serving from the dish's main protein ingredients. */
+export const HIGH_PROTEIN_GRAMS = 25;
+
+const KHMER_DIGITS = '០១២៣៤៥៦៧៨៩';
+const toAsciiDigits = (s: string) => String(s || '').replace(/[០-៩]/g, (c) => String(KHMER_DIGITS.indexOf(c)));
+
+/** Grams (or ml) written in an ingredient amount such as "៤០០ ក្រាម", "450 g", "1 kg". 0 when no weight is given. */
+export function parseIngredientGrams(amount?: string): number {
+  const a = toAsciiDigits(amount || '');
+  let m = a.match(/(\d+(?:\.\d+)?)\s*(?:kg|គីឡូ)/i);
+  if (m) return parseFloat(m[1]) * 1000;
+  m = a.match(/(\d+(?:\.\d+)?)\s*(?:g\b|ក្រាម)/i);
+  if (m) return parseFloat(m[1]);
+  m = a.match(/\((\d+(?:\.\d+)?)\s*g\)/i);
+  if (m) return parseFloat(m[1]);
+  return 0;
+}
+
+/** Midpoint of a servings string such as "២-៤ នាក់" or "3 people" (defaults to 2, clamped 1-8). */
+export function parseServingsMidpoint(servings?: string): number {
+  const nums = (toAsciiDigits(servings || '').match(/\d+/g) || []).map(Number).filter((n) => n > 0);
+  if (nums.length === 0) return 2;
+  const mid = nums.length === 1 ? nums[0] : (nums[0] + nums[1]) / 2;
+  return Math.min(8, Math.max(1, mid));
+}
+
+// Protein per 100 g raw edible portion x edible share of the listed weight (bones / shells excluded).
+const PROTEIN_DENSITY_RULES: Array<{ re: RegExp; per100g: number; edible: number }> = [
+  { re: /tofu|តៅហ៊ូ/i, per100g: 8, edible: 1 },
+  { re: /ribs|spare|trotter|feet|ជើង|ឆ្អឹង/i, per100g: 19, edible: 0.5 },
+  { re: /whole|cockle|clam|snail|crab|shell|oyster|ក្តាម|ងាវ|ខ្យង|អយស្ទ័រ/i, per100g: 15, edible: 0.45 },
+  { re: /prawn|shrimp|squid|បង្គា|បង្កង|មឹក/i, per100g: 17, edible: 0.8 },
+  { re: /fish|salmon|eel|ត្រី|អន្ទង់/i, per100g: 19, edible: 0.85 },
+  { re: /pork|beef|chicken|duck|meat|offal|liver|tripe|frog|សាច់|មាន់|ជ្រូក|គោ|ទា|កង្កែប|ពោះ/i, per100g: 20, edible: 0.9 },
+];
+const PROTEIN_SKIP_RE = /sauce|paste|prahok|stock|broth|dip|oil|ទឹកត្រី|ប្រហុក|កាពិ/i;
+const PROTEIN_NON_MEAT_RE = /coconut|noodle|rice|egg|ស៊ុត|ពង/i;
+const PROTEIN_MEAT_WORD_RE = /fish|pork|beef|chicken|prawn|crab|squid|tofu/i;
+
+/**
+ * Estimated protein (g) per serving, computed ONLY from ingredient weights written in the recipe
+ * (main protein ingredients / servings). Returns 0 when the recipe lists no weight for a protein ingredient.
+ */
+export function estimateProteinPerServing(food: FoodItem): number {
+  let totalGrams = 0;
+  for (const ing of food.ingredients || []) {
+    const name = `${ing.nameEn || ''} ${ing.nameKh || ''}`;
+    if (PROTEIN_SKIP_RE.test(name) && !/ball/i.test(name)) continue;
+    const grams = parseIngredientGrams(ing.amount);
+    if (!grams) continue;
+    const rule = PROTEIN_DENSITY_RULES.find((r) => r.re.test(name));
+    if (!rule) continue;
+    if (PROTEIN_NON_MEAT_RE.test(name) && !PROTEIN_MEAT_WORD_RE.test(name)) continue;
+    totalGrams += grams * rule.edible * (rule.per100g / 100);
+  }
+  return totalGrams / parseServingsMidpoint(food.servings);
+}
+
 const cache = new Map<string, DishTagId[]>();
 
 /** All tags derived from the recipe (unordered priority applied). */
 export function getDishTagIds(food: FoodItem): DishTagId[] {
-  const key = `v2|${food.id}|${food.nameKh || ''}|${food.nameEn || ''}|${food.categorySlug || ''}|${food.calories ?? ''}|${food.ingredients?.length ?? 0}|${food.steps?.length ?? 0}`;
+  const key = `v3|${food.id}|${food.nameKh || ''}|${food.nameEn || ''}|${food.categorySlug || ''}|${food.calories ?? ''}|${food.ingredients?.length ?? 0}|${food.steps?.length ?? 0}`;
   const hit = cache.get(key);
   if (hit) return hit;
 
@@ -204,7 +264,9 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
     !isSweetOrDrink &&
     typeof food.calories === 'number' &&
     food.calories > 0 &&
-    food.calories <= 450 &&
+    food.calories < LIGHT_KCAL_LIMIT &&
+    // Fried-rice plates are never offered as "light": a recorded value under 450 kcal is not credible for rice + oil + egg + protein.
+    !/បាយឆា|fried\s+rice/i.test(nameText) &&
     !isFried &&
     !isBraisedKhoDish &&
     !isRichCoconutCurry
@@ -219,8 +281,19 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
   const stripNotMeat = (s: string) => TAG_KEYWORD_RULES.notMeat.reduce((acc, w) => acc.split(w).join(' '), s);
 
   const vegCount = ingNames.filter((n) => includesAny(n, TAG_KEYWORD_RULES.vegetables)).length;
-  const vegByName = !isSweetOrDrink && (food.categorySlug === 'salad' || includesAny(nameText, TAG_KEYWORD_RULES.vegetableDishName));
-  if (!isSweetOrDrink && !isFried && (vegCount >= 2 || vegByName)) tags.add('vegetable_rich');
+  // Raw seafood / dips / burgers / fried rice are not "vegetable-rich" even when they ship with a few greens.
+  const isRawSeafoodOrDip = /ឆៅ|ភ្លា|ត្រាំ|អយស្ទ័រ|ទឹកគ្រឿង|ប្រហុកឆៅ|\braw\b|ceviche|oyster|sashimi|\bdip\b|relish/i.test(nameText);
+  const isProcessedStarchDish = /burger|បឺហ្គឺរ|fried\s+rice|បាយឆា|spaghetti|ស្ប៉ាហ្គេទី|cutlet|ស៊ូផាយ|pancake|sandwich|instant\s+noodle|មីកញ្ចប់|មីជើងមាន់/i.test(nameText);
+  const vegByName =
+    !isSweetOrDrink &&
+    vegCount >= 1 &&
+    includesAny(nameText, ['សម្លកកូរ', 'សម្លម្ជូរ', 'ឆាបន្លែ', 'ញាំ', 'salad', 'vegetable']);
+  // 2 vegetables are enough for soups / stir-fries / salads / noodle dishes; mains such as rice, grills and rolls need 3+.
+  const vegHeavyEnough =
+    vegCount >= 3 || (vegCount >= 2 && ['soup', 'stirfry', 'salad', 'noodles'].includes(food.categorySlug || ''));
+  if (!isSweetOrDrink && !isFried && !isRawSeafoodOrDip && !isProcessedStarchDish && (vegHeavyEnough || vegByName)) {
+    tags.add('vegetable_rich');
+  }
 
   // Main dishes only: desserts / drinks / sweet snacks never count as protein dishes
   const hasMainProtein = !isSweetOrDrink && ingNames.some(
@@ -229,7 +302,7 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
       return includesAny(s, TAG_KEYWORD_RULES.mainProtein) && !includesAny(s, TAG_KEYWORD_RULES.swappable);
     }
   );
-  if (hasMainProtein) tags.add('protein_rich');
+  if (hasMainProtein && estimateProteinPerServing(food) >= HIGH_PROTEIN_GRAMS) tags.add('protein_rich');
 
   // Plant-based savory dishes/snacks, or only animal ingredient is a swappable condiment (fish sauce / prahok / paste)
   const cleanTitleForVeg = stripNotMeat(nameText).replace(/ទឹកដោះគោ|ប្រេងខ្យង|oyster\s+sauce|condensed\s+milk/gi, ' ');

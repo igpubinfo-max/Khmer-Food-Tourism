@@ -31,6 +31,7 @@ import {
   ChevronRight,
   Plus,
   Check,
+  MessageCircle,
 } from 'lucide-react';
 import { FoodItem, isGpipRegisteredRestaurant, isHotelBusinessRecord, openExternalUrlNativeSafe, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, isIosOrIpadAppStoreRuntime } from '../types';
 import {
@@ -141,6 +142,10 @@ const HEALTH_OPTIONS: Array<{
   shortKh: string;
   shortEn: string;
   shortZh: string;
+  /** One-line plain-language rule shown under the chips so users know exactly what each filter returns. */
+  ruleKh: string;
+  ruleEn: string;
+  ruleZh: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
   {
@@ -152,50 +157,65 @@ const HEALTH_OPTIONS: Array<{
     shortKh: 'ធម្មតា',
     shortEn: 'Standard',
     shortZh: '常规',
+    ruleKh: 'ណែនាំម្ហូបទូទៅតាមពេលវេលា និងប្រភេទម្ហូបដែលអ្នកជ្រើសរើស',
+    ruleEn: 'General recommendations for the time of day and dish type you pick',
+    ruleZh: '按所选时段与菜品类型提供常规推荐',
     icon: Utensils,
   },
   {
     id: 'light',
-    vip: true,
+    vip: false,
     labelKh: 'ស្រាលក្រពះ (<450 kcal)',
     labelEn: 'Light (<450 kcal)',
     labelZh: '清淡低卡 (<450 kcal)',
     shortKh: 'ស្រាលក្រពះ',
     shortEn: 'Light',
     shortZh: '清淡',
+    ruleKh: 'ម្ហូបតិចជាង ៤៥០ kcal ក្នុង ១ ចាន (មិនរាប់ម្ហូបចៀន ឬខ្ទិះដូងក្រាស់) • តែម្ហូបដែលមានទិន្នន័យកាឡូរី',
+    ruleEn: 'Dishes under 450 kcal per serving (no fried or rich coconut dishes) • only dishes with recorded calories',
+    ruleZh: '每份低于 450 千卡（不含油炸与浓椰浆菜品）• 仅限有热量记录的菜品',
     icon: Leaf,
   },
   {
     id: 'protein_rich',
-    vip: true,
+    vip: false,
     labelKh: 'ប្រូតេអ៊ីនខ្ពស់',
     labelEn: 'High Protein',
     labelZh: '高蛋白',
     shortKh: 'ប្រូតេអ៊ីនខ្ពស់',
     shortEn: 'Protein',
     shortZh: '高蛋白',
+    ruleKh: 'ម្ហូបមានប្រូតេអ៊ីនប្រហែល ២៥ ក្រាមឡើង ក្នុង ១ ចាន ពីសាច់ ត្រី ឬតៅហ៊ូ (គណនាពីទម្ងន់គ្រឿងផ្សំ)',
+    ruleEn: 'Dishes with about 25 g+ protein per serving from meat, fish or tofu (estimated from ingredient weights)',
+    ruleZh: '每份约含 25 克以上蛋白质（肉、鱼或豆腐，依食材重量估算）',
     icon: Award,
   },
   {
     id: 'steamed_boiled',
-    vip: true,
+    vip: false,
     labelKh: 'ស្ងោរ/ចំហុយ',
     labelEn: 'Steamed / Boiled',
     labelZh: '清蒸/水煮',
     shortKh: 'ស្ងោរ/ចំហុយ',
     shortEn: 'Steamed',
     shortZh: '蒸/煮',
+    ruleKh: 'សម្ល ស៊ុប បបរ ស្ងោរ និងចំហុយ — មិនរាប់ម្ហូបចៀន ឬអាំង',
+    ruleEn: 'Soups, congee, boiled and steamed dishes — no frying or grilling',
+    ruleZh: '汤羹、粥、水煮与清蒸菜品，不含煎炸与烧烤',
     icon: Soup,
   },
   {
     id: 'vegetable_rich',
-    vip: true,
+    vip: false,
     labelKh: 'បន្លែច្រើន',
     labelEn: 'Vegetable-Rich',
     labelZh: '多蔬菜',
     shortKh: 'បន្លែច្រើន',
     shortEn: 'Veggies',
     shortZh: '多蔬菜',
+    ruleKh: 'ម្ហូបដែលមានបន្លែយ៉ាងតិច ២ មុខ ដូចជាសម្ល ឆាបន្លែ និងញាំ (មិនរាប់ម្ហូបចៀន ឬអាហារឆៅ)',
+    ruleEn: 'Dishes with at least 2 kinds of vegetables, such as soups, veggie stir-fries and salads (no fried or raw dishes)',
+    ruleZh: '含至少两种蔬菜的菜品，如汤、素炒与凉拌（不含油炸与生食）',
     icon: Salad,
   },
 ];
@@ -324,6 +344,9 @@ export const WhatToEatModal: React.FC = () => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const [openGroup, setOpenGroup] = useState<MenuGroupId | null>(null);
+  // Two distinct experiences share this modal: 'picks' = instant Food Picks (no typing, no AI),
+  // 'assistant' = conversational AI Food Assistant (ask anything / food photo / recipes).
+  const [viewMode, setViewMode] = useState<'assistant' | 'picks'>('assistant');
   const [drinkMode, setDrinkMode] = useState(false);
   const [drinkKind, setDrinkKind] = useState<DrinkKindFilter>('all');
   const [setPage, setSetPage] = useState(0);
@@ -472,6 +495,14 @@ export const WhatToEatModal: React.FC = () => {
   // Consume entry navigation flags exactly once when WhatToEatModal opens
   useEffect(() => {
     if (!isWhatToEatModalOpen) return;
+    {
+      const w = window as any;
+      const entry = w.__kft_wte_mode;
+      w.__kft_wte_mode = undefined;
+      const wantsPicks = entry === 'picks' || w.__kft_wte_open_drink_pairing || w.__kft_wte_open_compare_mode || w.__kft_wte_open_health;
+      const hasAiIntent = Boolean(w.__kft_pending_ai_query) || Boolean(w.__kft_wte_open_camera);
+      setViewMode(hasAiIntent ? 'assistant' : wantsPicks ? 'picks' : 'assistant');
+    }
     if ((window as any).__kft_wte_open_drink_pairing || (window as any).__kft_wte_open_compare_mode) {
       (window as any).__kft_wte_open_drink_pairing = false;
       (window as any).__kft_wte_open_compare_mode = false;
@@ -514,6 +545,7 @@ export const WhatToEatModal: React.FC = () => {
       const q = String((e as CustomEvent<{ query?: string }>).detail?.query || (window as any).__kft_pending_ai_query || '').trim();
       if (!q || !isWhatToEatModalOpen) return;
       (window as any).__kft_pending_ai_query = '';
+      setViewMode('assistant');
       setDrinkMode(false);
       setOpenGroup(null);
       setCravingQuery(q);
@@ -814,6 +846,9 @@ export const WhatToEatModal: React.FC = () => {
     );
     if (categoryAndDietOnly.length > 0) return withCustomLead(categoryAndDietOnly);
 
+    // 3b. A selected dietary chip is a HARD rule: never fall back to dishes that do not satisfy it.
+    if (vipDietFilter !== 'none') return [];
+
     // 4. Keep Category strict across all foods so selecting a category never leaks other categories
     if (categoryFilter !== 'all') {
       const categoryOnly = foods.filter((food) => matchesCategoryStrict(food, categoryFilter));
@@ -837,7 +872,13 @@ export const WhatToEatModal: React.FC = () => {
   ]);
 
   // Active candidate list
-  const activeDishList = isMedicalRefusalActive ? [] : matchingFoods.length > 0 ? matchingFoods : cravingQuery.trim() ? [] : foods;
+  const activeDishList = isMedicalRefusalActive
+    ? []
+    : matchingFoods.length > 0
+    ? matchingFoods
+    : cravingQuery.trim() || vipDietFilter !== 'none' || categoryFilter !== 'all'
+    ? []
+    : foods;
 
   const hasStructuredFilter = Boolean(
     cravingQuery.trim() || categoryFilter !== 'all' || mealSlotFilter !== 'auto' || vipDietFilter !== 'none' || drinkMode
@@ -972,9 +1013,12 @@ export const WhatToEatModal: React.FC = () => {
       if (isMedicalRefusalActive) return [];
       const BATCH_SIZE = 4;
       const verifiedFoods = foods.filter((f) => !isGeneratedDishId(f.id));
-      const rawSource = activeDishList.length > 0 ? activeDishList : verifiedFoods;
+      // A selected dietary chip / dish type is a HARD rule: when nothing matches, show the empty state,
+      // never an unrelated dish from the full catalog.
+      const hasHardFilter = vipDietFilter !== 'none' || categoryFilter !== 'all';
+      const rawSource = activeDishList.length > 0 ? activeDishList : hasHardFilter ? [] : verifiedFoods;
       const sourcePool = rawSource.filter((f) => !isGeneratedDishId(f.id));
-      if (sourcePool.length === 0 && verifiedFoods.length === 0) return [];
+      if (sourcePool.length === 0 && (hasHardFilter || verifiedFoods.length === 0)) return [];
 
       const effectivePool = sourcePool.length > 0 ? sourcePool : verifiedFoods;
       const result: FoodItem[] = [];
@@ -1013,7 +1057,7 @@ export const WhatToEatModal: React.FC = () => {
     } catch {
       return [];
     }
-  }, [activeDishList, foods, isMedicalRefusalActive, spinCount]);
+  }, [activeDishList, foods, isMedicalRefusalActive, spinCount, vipDietFilter, categoryFilter]);
 
   const alternativeDishes = useMemo(() => {
     if (isMedicalRefusalActive || recommendedTenDishes.length <= 1) return [];
@@ -1327,6 +1371,15 @@ export const WhatToEatModal: React.FC = () => {
       history: toHistoryTurns(chatMessages),
       memory: chatMemory,
       image,
+      activeFilters: (() => {
+        const parts: string[] = [];
+        const diet = HEALTH_OPTIONS.find((h) => h.id === vipDietFilter);
+        if (diet && vipDietFilter !== 'none') parts.push(`dietary="${diet.labelEn}" (${diet.ruleEn})`);
+        const cat = CATEGORY_OPTIONS.find((c) => c.id === categoryFilter);
+        if (cat && categoryFilter !== 'all') parts.push(`dish_type="${cat.labelEn}"`);
+        if (mealSlotFilter !== 'auto') parts.push(`meal_time="${mealSlotFilter}"`);
+        return parts.join('; ');
+      })(),
       geminiApiKey: geminiKey,
       currentUser,
     })
@@ -1616,8 +1669,8 @@ export const WhatToEatModal: React.FC = () => {
     },
     {
       id: 'health',
-      vip: true,
-      icon: <Crown className="w-4 h-4 text-amber-500" />,
+      vip: false,
+      icon: <Leaf className="w-4 h-4 text-emerald-500" />,
       label: tr(language, 'សុខភាព', 'Dietary', '饮食偏好'),
       value:
         vipDietFilter === 'none' || !activeHealth
@@ -1668,7 +1721,9 @@ export const WhatToEatModal: React.FC = () => {
               <IconFoodPicks className="w-5 h-5" />
             </span>
             <h3 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5 break-words">
-              {tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
+              {viewMode === 'picks'
+                ? tr(language, 'ណែនាំម្ហូប', 'Food Picks', '美食推荐')
+                : tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
             </h3>
             <span
               className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold shrink-0"
@@ -1687,12 +1742,67 @@ export const WhatToEatModal: React.FC = () => {
           </button>
         </div>
 
+        {/* Mode switch: two different jobs, one tap apart */}
+        <div
+          role="tablist"
+          aria-label={tr(language, 'ជ្រើសរើសមុខងារ', 'Choose a mode', '选择功能')}
+          className="px-3.5 pt-2.5 pb-1 bg-[#1E293B] shrink-0 grid grid-cols-2 gap-1.5 font-khmer"
+        >
+          {([
+            {
+              id: 'picks' as const,
+              testId: 'wte-mode-picks',
+              icon: <Utensils className="w-4 h-4 shrink-0" strokeWidth={2} />,
+              title: tr(language, 'ណែនាំម្ហូប', 'Food Picks', '美食推荐'),
+              sub: tr(language, 'ជ្រើសតាមពេល ប្រភេទ សុខភាព', 'Pick by time, type & diet', '按时段、类型与饮食挑选'),
+            },
+            {
+              id: 'assistant' as const,
+              testId: 'wte-mode-assistant',
+              icon: <MessageCircle className="w-4 h-4 shrink-0" strokeWidth={2} />,
+              title: tr(language, 'ជំនួយការ AI', 'AI Assistant', 'AI 助手'),
+              sub: tr(language, 'សួរ • ថតរូប • រូបមន្ត', 'Ask • Photo • Recipes', '提问 • 拍照 • 食谱'),
+            },
+          ]).map((m) => {
+            const active = viewMode === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                data-testid={m.testId}
+                onClick={() => {
+                  setViewMode(m.id);
+                  setOpenGroup(null);
+                  if (m.id === 'assistant') setDrinkMode(false);
+                }}
+                className={`rounded-xl px-2.5 py-1.5 text-left flex items-center gap-2 transition cursor-pointer border ${
+                  active
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-xs'
+                    : 'bg-white/10 text-white border-white/15 hover:bg-white/15'
+                }`}
+              >
+                {m.icon}
+                <span className="min-w-0">
+                  <span className="block text-[12.5px] font-extrabold leading-tight truncate">{m.title}</span>
+                  <span className={`block text-[10px] font-bold leading-tight truncate ${active ? 'text-slate-800' : 'text-emerald-100/80'}`}>
+                    {m.sub}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         <div
           ref={scrollerRef}
           className="flex-1 min-h-0 overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch] bg-[#1E293B] flex flex-col"
         >
           {/* Conversational AI Search / Chat Input Bar */}
           <div className="px-3.5 pt-3 pb-0 bg-[#1E293B] space-y-2.5 font-khmer">
+            {viewMode === 'assistant' && (
+            <>
             <form onSubmit={handleCravingSubmit} className="relative flex items-center gap-1.5">
               <input
                 ref={fileInputRef}
@@ -2979,8 +3089,11 @@ export const WhatToEatModal: React.FC = () => {
                 </div>
               );
             })()}
+            </>
+            )}
 
             {/* 6 Premium 3D Gold-Framed Category Buttons (Time, Category, Taste, Healthy, Beverage Pairings, New Picks) */}
+            {viewMode === 'picks' && (
             <div
               className="w-full max-w-full min-w-0 overflow-hidden rounded-[24px] p-2 min-[360px]:p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
               style={{
@@ -3035,7 +3148,7 @@ export const WhatToEatModal: React.FC = () => {
                         ? tr(language, activeHealth.shortKh, activeHealth.shortEn, activeHealth.shortZh)
                         : '',
                     active: vipDietFilter !== 'none',
-                    vip: true,
+                    vip: false,
                   },
                 ].map((g) => {
                   const isOpen = openGroup === g.id;
@@ -3336,8 +3449,9 @@ export const WhatToEatModal: React.FC = () => {
                       </>
                     )}
 
-                    {openGroup === 'health' &&
-                      HEALTH_OPTIONS.map((opt) => {
+                    {openGroup === 'health' && (
+                      <>
+                      {HEALTH_OPTIONS.map((opt) => {
                         const OptIcon = opt.icon;
                         const isOptActive = vipDietFilter === opt.id;
                         return (
@@ -3346,10 +3460,6 @@ export const WhatToEatModal: React.FC = () => {
                             type="button"
                             data-testid={`wte-health-${opt.id}`}
                             onClick={() => {
-                              if (opt.vip && !canUseVip) {
-                                promptVipUpgradeForAiAssistant();
-                                return;
-                              }
                               setVipDietFilter(opt.id);
                               setDrinkMode(false);
                               if (chatMessages.length > 1) {
@@ -3369,10 +3479,20 @@ export const WhatToEatModal: React.FC = () => {
                           >
                             <OptIcon className="w-3.5 h-3.5 shrink-0" />
                             <span>{tr(language, opt.labelKh, opt.labelEn, opt.labelZh)}</span>
-                            {opt.vip && <AccessBadge vip />}
                           </button>
                         );
                       })}
+                      <p
+                        data-testid="wte-health-rule"
+                        className="basis-full text-[11px] leading-snug font-bold text-slate-600 px-1 pt-0.5"
+                      >
+                        {(() => {
+                          const sel = HEALTH_OPTIONS.find((h) => h.id === vipDietFilter) || HEALTH_OPTIONS[0];
+                          return tr(language, sel.ruleKh, sel.ruleEn, sel.ruleZh);
+                        })()}
+                      </p>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
@@ -3444,9 +3564,11 @@ export const WhatToEatModal: React.FC = () => {
                 )}
               </div>
             </div>
+            )}
           </div>
 
           {/* Content body (Dark Slate #1E293B background for all marked areas) */}
+          {viewMode === 'picks' && (
           <div ref={dishCardRef} className="px-3.5 pt-3.5 pb-12 space-y-3 bg-[#1E293B] flex-1 min-h-[85vh] scroll-mt-2">
 
             {/* Beverage Pairing sets */}
@@ -3935,9 +4057,11 @@ export const WhatToEatModal: React.FC = () => {
               </div>
             )}
           </div>
+          )}
         </div>
 
         {/* Primary action: show other dishes (free) */}
+        {viewMode === 'picks' && (
         <div
           style={{ paddingBottom: 'max(var(--kft-safe-bottom, 0px), 0.75rem)' }}
           className="px-3 pt-3 bg-[#1E293B] border-t border-slate-700/80 shrink-0"
@@ -3958,6 +4082,7 @@ export const WhatToEatModal: React.FC = () => {
             </span>
           </button>
         </div>
+        )}
       </div>
     </div>
   );

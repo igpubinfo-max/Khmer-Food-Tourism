@@ -6,8 +6,8 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1594;
-export const APP_RELEASE_DATE = '2026-11-14';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1595;
+export const APP_RELEASE_DATE = '2026-11-15';
 
 /**
  * Audited duplicate food IDs removed from the Food Menu so every dish and photograph is 100% unique
@@ -24,6 +24,7 @@ export const REMOVED_DUPLICATE_FOOD_CANONICAL_MAP: Readonly<Record<string, strin
   'food-43': 'food-167',
   'food-46': 'food-187',
   'food-51': 'food-103',
+  'food-53': 'food-17',
   'food-55': 'food-108',
   'food-56': 'food-106',
   'food-69': 'food-138',
@@ -60,6 +61,7 @@ export const DUPLICATE_FOOD_PHOTO_CANONICAL_MAP: Readonly<Record<string, string>
   '/foods/food-43.jpg': '/foods/food-167.jpg',
   '/foods/food-46.jpg': '/foods/food-187.jpg',
   '/foods/food-51.jpg': '/foods/food-103.jpg',
+  '/foods/food-53.jpg': '/foods/food-17.jpg',
   '/foods/food-55.jpg': '/foods/food-108.jpg',
   '/foods/food-56.jpg': '/foods/food-106.jpg',
   '/foods/food-69.jpg': '/foods/food-138.jpg',
