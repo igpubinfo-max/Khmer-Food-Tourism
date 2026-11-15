@@ -762,7 +762,7 @@ export const TourismView: React.FC = () => {
           }}
           className="w-full max-w-full min-w-0 rounded-[24px] p-2 min-[360px]:p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
         >
-          <div className="kft-cat-grid grid grid-cols-3 gap-x-1.5 min-[360px]:gap-x-2 sm:gap-x-3 gap-y-2 min-[360px]:gap-y-2.5 sm:gap-y-3 items-start">
+          <div className="kft-cat-grid grid grid-cols-3 gap-x-1.5 min-[360px]:gap-x-2 sm:gap-x-3 gap-y-2 min-[360px]:gap-y-2.5 sm:gap-y-3 items-stretch">
             {primaryCategoryButtons.map((cat) => {
               const active = selectedCategory === cat.id;
               const label = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);

@@ -1701,7 +1701,7 @@ export const ProfileView: React.FC = () => {
         <div
           role="tablist"
           aria-label={tr(language, 'ម៉ឺនុយគណនី', 'Profile menu', '个人中心菜单')}
-          className="rounded-[26px] bg-white p-2.5 sm:p-3.5 shadow-[0_8px_26px_rgba(15,23,42,0.06)] border border-slate-100 grid grid-cols-3 gap-2.5 font-khmer shrink-0"
+          className="rounded-[26px] bg-white p-2 min-[360px]:p-2.5 sm:p-3.5 shadow-[0_8px_26px_rgba(15,23,42,0.06)] border border-slate-100 grid grid-cols-3 gap-1.5 min-[360px]:gap-2.5 items-stretch font-khmer shrink-0"
         >
           {/* 1. My Shop (Glossy Orange) */}
           <button
@@ -1709,7 +1709,7 @@ export const ProfileView: React.FC = () => {
             role="tab"
             aria-selected={activeSubTab === 'myrestaurant'}
             onClick={() => selectAndScrollSubTab('myrestaurant')}
-            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FF9F43] via-[#F97316] to-[#D9530F] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`[container-type:inline-size] relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-1 min-[360px]:px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FF9F43] via-[#F97316] to-[#D9530F] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'myrestaurant'
                 ? 'border-white ring-3 ring-orange-500/50 shadow-[0_6px_16px_rgba(234,88,12,0.34)] scale-[1.01]'
                 : 'border-orange-300/60 shadow-[0_4px_12px_rgba(234,88,12,0.22)] opacity-95 hover:opacity-100'
@@ -1729,7 +1729,7 @@ export const ProfileView: React.FC = () => {
             data-testid="profile-grid-wishlists"
             aria-selected={activeSubTab === 'wishlists'}
             onClick={() => selectAndScrollSubTab('wishlists')}
-            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#34D399] via-[#16A34A] to-[#146C32] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`[container-type:inline-size] relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-1 min-[360px]:px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#34D399] via-[#16A34A] to-[#146C32] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'wishlists'
                 ? 'border-white ring-3 ring-emerald-500/50 shadow-[0_6px_16px_rgba(22,163,74,0.34)] scale-[1.01]'
                 : 'border-emerald-300/60 shadow-[0_4px_12px_rgba(22,163,74,0.22)] opacity-95 hover:opacity-100'
@@ -1755,7 +1755,7 @@ export const ProfileView: React.FC = () => {
               }
               selectAndScrollSubTab('tripplans');
             }}
-            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FB7185] via-[#E11D48] to-[#BE123C] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`[container-type:inline-size] relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-1 min-[360px]:px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FB7185] via-[#E11D48] to-[#BE123C] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'tripplans'
                 ? 'border-white ring-3 ring-rose-500/50 shadow-[0_6px_16px_rgba(225,29,72,0.34)] scale-[1.01]'
                 : 'border-rose-300/60 shadow-[0_4px_12px_rgba(225,29,72,0.22)] opacity-95 hover:opacity-100'
@@ -1778,7 +1778,7 @@ export const ProfileView: React.FC = () => {
             data-testid="profile-grid-saved"
             aria-selected={activeSubTab === 'bookmarks'}
             onClick={() => selectAndScrollSubTab('bookmarks')}
-            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#60A5FA] via-[#2563EB] to-[#1D4ED8] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`[container-type:inline-size] relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-1 min-[360px]:px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#60A5FA] via-[#2563EB] to-[#1D4ED8] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'bookmarks'
                 ? 'border-white ring-3 ring-blue-500/50 shadow-[0_6px_16px_rgba(37,99,235,0.34)] scale-[1.01]'
                 : 'border-blue-300/60 shadow-[0_4px_12px_rgba(37,99,235,0.22)] opacity-95 hover:opacity-100'
@@ -1800,7 +1800,7 @@ export const ProfileView: React.FC = () => {
             role="tab"
             aria-selected={activeSubTab === 'membership'}
             onClick={() => selectAndScrollSubTab('membership')}
-            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FBBF24] via-[#D97706] to-[#B45309] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`[container-type:inline-size] relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-1 min-[360px]:px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FBBF24] via-[#D97706] to-[#B45309] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'membership'
                 ? 'border-white ring-3 ring-amber-500/50 shadow-[0_6px_16px_rgba(217,119,6,0.34)] scale-[1.01]'
                 : 'border-amber-300/60 shadow-[0_4px_12px_rgba(217,119,6,0.22)] opacity-95 hover:opacity-100'
@@ -1819,7 +1819,7 @@ export const ProfileView: React.FC = () => {
             role="tab"
             aria-selected={activeSubTab === 'settings'}
             onClick={() => selectAndScrollSubTab('settings')}
-            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#2DD4BF] via-[#0D9488] to-[#115E59] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`[container-type:inline-size] relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-1 min-[360px]:px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#2DD4BF] via-[#0D9488] to-[#115E59] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'settings'
                 ? 'border-white ring-3 ring-teal-500/50 shadow-[0_6px_16px_rgba(13,148,136,0.34)] scale-[1.01]'
                 : 'border-teal-300/60 shadow-[0_4px_12px_rgba(13,148,136,0.22)] opacity-95 hover:opacity-100'

@@ -510,7 +510,7 @@ export const FoodView: React.FC = () => {
       <div className="relative z-20 -mt-[82px] px-2.5 min-[360px]:px-3.5 sm:px-5 space-y-2.5">
         {/* Compact Original Khmer Promotional Title Banner (Aligned Left) */}
         <div className="flex items-center justify-start pl-0.5 sm:pl-1">
-          <div className="relative py-1 pl-1 pr-2 bg-transparent inline-flex items-center gap-2.5 max-w-[65%] min-w-0">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent inline-flex items-center gap-2.5 max-w-[82%] sm:max-w-[75%] min-w-0">
             {/* Left Yellow Food Icon */}
             <div
               style={{
@@ -642,9 +642,9 @@ export const FoodView: React.FC = () => {
             background: 'rgba(255, 255, 255, 0.98)',
             boxShadow: '0 8px 22px rgba(15, 23, 42, 0.08)',
           }}
-          className="w-full max-w-full min-w-0 rounded-[24px] p-1.5 min-[360px]:p-2 sm:p-3 border border-white"
+          className="w-full max-w-full min-w-0 rounded-[24px] p-1 min-[360px]:p-2 sm:p-2.5 md:p-3 border border-white"
         >
-          <div className="grid grid-cols-5 gap-1 min-[360px]:gap-1.5 sm:gap-2.5 items-stretch w-full max-w-full min-w-0">
+          <div className="grid grid-cols-5 gap-1 min-[360px]:gap-1.5 sm:gap-2 md:gap-2.5 items-stretch w-full max-w-full min-w-0">
             {[
               {
                 id: 'all',
@@ -734,8 +734,14 @@ export const FoodView: React.FC = () => {
                       decoding="async"
                     />
                     {/* Centered Large Bold Label Inside Button Directly Below the Food Illustration */}
-                    <div className="pointer-events-none absolute inset-x-[4%] top-[69%] bottom-[6.5%] flex items-center justify-center px-0.5 overflow-visible">
-                      <span className={`kft-food-cat-label ${active ? 'kft-food-cat-label-active' : ''}`}>
+                    <div className="pointer-events-none absolute inset-x-[2%] top-[68.5%] bottom-[6.5%] flex items-center justify-center px-[1px] overflow-visible">
+                      <span
+                        className={`kft-food-cat-label ${
+                          cat.id === 'bong_aem' || cat.id === 'all' || cat.id === 'vegetarian'
+                            ? 'kft-food-cat-label-compact'
+                            : ''
+                        } ${active ? 'kft-food-cat-label-active' : ''}`}
+                      >
                         {label}
                       </span>
                     </div>

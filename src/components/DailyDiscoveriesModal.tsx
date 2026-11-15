@@ -587,7 +587,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
             }}
             className="w-full max-w-full min-w-0 overflow-hidden rounded-[22px] p-2 sm:p-3 border border-amber-400/25"
           >
-            <div className="grid grid-cols-2 min-[340px]:grid-cols-4 gap-2 sm:gap-3">
+            <div className="grid grid-cols-4 gap-1.5 min-[360px]:gap-2 sm:gap-3 items-stretch">
               {categoryCards.map((card) => {
                 const active = vipTasteProfile === card.id;
                 return (

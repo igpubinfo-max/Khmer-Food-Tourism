@@ -55,8 +55,8 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
         {/* 1. App Logo (New Logo in exact original Image 1 size and placement) */}
         <div
           style={{
-            top: '23.4%',
-            left: '58.2%',
+            top: '26.6%',
+            left: '60.25%',
             width: '13.0%',
             aspectRatio: '1 / 1',
           }}
@@ -89,7 +89,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
               textShadow: '0 2px 10px rgba(0, 15, 40, 0.95), 0 0 16px rgba(56, 189, 248, 0.45)',
             }}
           >
-            រសជាតិ និងទេសចរណ៍កម្ពុជា
+            {WELCOME_LABELS.appName[language]}
           </h1>
           <p
             className="font-extrabold text-white/95 tracking-wide leading-tight mt-0.5 whitespace-nowrap"
@@ -98,7 +98,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
               textShadow: '0 2px 8px rgba(0, 15, 40, 0.95)',
             }}
           >
-            {language === 'zh' ? '柬埔寨风味与旅游 • Cambodia Flavors & Tourism' : 'Cambodia Flavors & Tourism'}
+            {language === 'en' ? 'រសជាតិ និងទេសចរណ៍កម្ពុជា' : 'Cambodia Flavors & Tourism'}
           </p>
         </div>
 

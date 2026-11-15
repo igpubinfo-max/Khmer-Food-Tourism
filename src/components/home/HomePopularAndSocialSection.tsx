@@ -287,7 +287,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
       )}
 
       {/* 2. Two Attractive Horizontal Feature Banners Side-by-Side (ម្ហូបសុខភាព & ជំនួយការ AI ម្ហូបអាហារ) */}
-      <section className="grid grid-cols-1 min-[350px]:grid-cols-2 gap-2.5">
+      <section className="grid grid-cols-2 gap-1.5 min-[360px]:gap-2.5">
         {/* Left Green Banner: ម្ហូបសុខភាព with Leaf Icon & Healthy Food Bowl Photo */}
         <button
           type="button"

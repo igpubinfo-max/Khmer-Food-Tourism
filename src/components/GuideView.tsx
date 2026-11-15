@@ -622,7 +622,7 @@ export const GuideView: React.FC = () => {
           <div
             role="tablist"
             aria-label={tr(language, 'ផ្នែកណែនាំ', 'Guide sections', '指南分区')}
-            className="grid grid-cols-2 min-[340px]:grid-cols-4 gap-2 sm:gap-3 items-start"
+            className="grid grid-cols-4 gap-1.5 min-[360px]:gap-2 sm:gap-3 items-stretch"
           >
             {[
               {

@@ -991,7 +991,7 @@ export const AiTripPlannerModal: React.FC = () => {
                 </div>
 
                 {/* 6 Colorful, Distinct Gradient Category Buttons (Matching Reference Image 2) */}
-                <div className="grid grid-cols-2 min-[360px]:grid-cols-3 gap-2 sm:gap-2.5">
+                <div className="grid grid-cols-3 gap-1.5 min-[360px]:gap-2 sm:gap-2.5 items-stretch">
                   {advisorGoals.map((g) => {
                     const isLocked = g.vipOnly && !canUseVip;
                     const isSelected = expandedGoalId === g.id || (!expandedGoalId && advisorGoal === g.id);
@@ -1028,7 +1028,7 @@ export const AiTripPlannerModal: React.FC = () => {
                             ? '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
                             : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
                         }}
-                        className="group relative min-h-[76px] rounded-[16px] py-2 px-1.5 flex flex-col items-center justify-center gap-1 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                        className="[container-type:inline-size] group relative min-h-[76px] rounded-[16px] py-2 px-1 sm:px-1.5 flex flex-col items-center justify-center gap-1 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
                       >
                         {/* Subtle top glass highlight */}
                         <span

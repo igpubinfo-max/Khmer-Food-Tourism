@@ -83,7 +83,7 @@ const BottomNavInner: React.FC = () => {
                     setActiveTab(item.id);
                   }
                 }}
-                className="group relative z-10 min-h-[54px] min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl bg-transparent border-0 cursor-pointer focus:outline-none active:scale-95 transition-transform duration-150"
+                className="[container-type:inline-size] group relative z-10 min-h-[54px] min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 px-0.5 sm:px-1 rounded-2xl bg-transparent border-0 cursor-pointer focus:outline-none active:scale-95 transition-transform duration-150"
               >
                 <div
                   className={`shrink-0 transition-all duration-200 ${
@@ -93,10 +93,9 @@ const BottomNavInner: React.FC = () => {
                   <Icon className="w-[21px] h-[21px] shrink-0" />
                 </div>
                 <span
-                  className={`kft-nav-label max-w-full truncate leading-[1.5] transition-colors duration-200 ${
+                  className={`kft-nav-label max-w-full leading-[1.5] transition-colors duration-200 ${
                     isActive ? 'font-extrabold text-amber-300' : 'font-semibold text-slate-400 group-hover:text-slate-200'
                   }`}
-                  style={{ fontSize: 'clamp(10.5px, 2.9vw, 12px)' }}
                 >
                   {tr(language, item.labelKh, item.labelEn, item.labelZh)}
                 </span>

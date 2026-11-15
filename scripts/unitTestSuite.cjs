@@ -511,6 +511,13 @@ test('13. Food menu loads all 277+ dishes on Show All without 36-item filter/pag
 // 14. Responsive Screen & Layout Optimization (Phone & Tablet Aspect-Ratio Lock + Solid Dark Charcoal Backdrop)
 test('14. Welcome Screen, Auth Modal, and App Shell maintain original aspect ratio without stretching on phones/tablets', () => {
   const welcomeSlidesSrc = fs.readFileSync(path.join(ROOT, 'src/components/welcome/WelcomeSlides.tsx'), 'utf8');
+  const welcomeTopBarSrc = fs.readFileSync(path.join(ROOT, 'src/components/welcome/WelcomeTopBar.tsx'), 'utf8');
+  assert.ok(
+    welcomeTopBarSrc.includes('pointer-events-auto') &&
+      welcomeTopBarSrc.includes('<button') &&
+      welcomeTopBarSrc.includes('onLanguage(l.code)'),
+    'WelcomeTopBar must render interactive language buttons that call onLanguage(l.code)'
+  );
   const authModalSrc = fs.readFileSync(path.join(ROOT, 'src/components/AuthModal.tsx'), 'utf8');
   const appSrc = fs.readFileSync(path.join(ROOT, 'src/App.tsx'), 'utf8');
 

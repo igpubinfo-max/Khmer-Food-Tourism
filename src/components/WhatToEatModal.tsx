@@ -3225,7 +3225,7 @@ export const WhatToEatModal: React.FC = () => {
                   '0 8px 24px rgba(2, 6, 23, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
               }}
             >
-              <div className="kft-cat-grid grid grid-cols-3 gap-x-1.5 min-[360px]:gap-x-2 sm:gap-x-3 gap-y-2 min-[360px]:gap-y-2.5 sm:gap-y-3 items-start">
+              <div className="kft-cat-grid grid grid-cols-3 gap-x-1.5 min-[360px]:gap-x-2 sm:gap-x-3 gap-y-2 min-[360px]:gap-y-2.5 sm:gap-y-3 items-stretch">
                 {[
                   {
                     id: 'time' as const,
@@ -3303,7 +3303,7 @@ export const WhatToEatModal: React.FC = () => {
                             : dishCardRef.current
                         );
                       }}
-                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-colors duration-150 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
+                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-colors duration-150 cursor-pointer select-none flex flex-col items-center justify-start"
                     >
                       {/* 3D Gold-Framed Pill Illustration */}
                       <div
@@ -3349,7 +3349,7 @@ export const WhatToEatModal: React.FC = () => {
                       type="button"
                       aria-pressed={drinkMode}
                       onClick={handleOpenDrinkPairing}
-                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-colors duration-150 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
+                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-colors duration-150 cursor-pointer select-none flex flex-col items-center justify-start"
                     >
                       <div
                         className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-opacity duration-150 rounded-[14px] ${
@@ -3388,7 +3388,7 @@ export const WhatToEatModal: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleShowAnother}
-                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-colors duration-150 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
+                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-colors duration-150 cursor-pointer select-none flex flex-col items-center justify-start"
                     >
                       <div className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-opacity duration-150 rounded-[14px] opacity-95 group-hover:opacity-100">
                         <img

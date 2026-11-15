@@ -147,7 +147,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
             </div>
           </div>
 
-          <div className="grid grid-cols-2 min-[360px]:grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5 min-[360px]:gap-2 items-stretch">
             {HUB_TAGS.map((id) => {
               const def = DISH_TAG_DEFS[id];
               return (
@@ -159,7 +159,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
                     background: TAG_GRADIENTS[id],
                     boxShadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
                   }}
-                  className="group relative min-h-[74px] rounded-[16px] py-2 px-1.5 flex flex-col items-center justify-center gap-1 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                  className="[container-type:inline-size] group relative min-h-[74px] rounded-[16px] py-2 px-1 sm:px-1.5 flex flex-col items-center justify-center gap-1 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
                 >
                   <span
                     className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
@@ -233,7 +233,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
 
       {/* 6 Colorful, Distinct Gradient Category Buttons (Matching Reference Image 2) */}
       <div className="rounded-[22px] bg-white p-2.5 sm:p-3 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-slate-200/85">
-        <div className="grid grid-cols-2 min-[360px]:grid-cols-3 gap-2 sm:gap-2.5">
+        <div className="grid grid-cols-3 gap-1.5 min-[360px]:gap-2 sm:gap-2.5 items-stretch">
           {HUB_TAGS.map((id) => {
             const def = DISH_TAG_DEFS[id];
             const list = byTag[id] || [];
@@ -250,7 +250,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
                     ? '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
                     : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
                 }}
-                className="group relative min-h-[76px] rounded-[16px] py-2 px-1.5 flex flex-col items-center justify-center gap-1 text-white active:scale-[0.96] transition cursor-pointer overflow-hidden"
+                className="[container-type:inline-size] group relative min-h-[76px] rounded-[16px] py-2 px-1 sm:px-1.5 flex flex-col items-center justify-center gap-1 text-white active:scale-[0.96] transition cursor-pointer overflow-hidden"
               >
                 <span
                   className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
