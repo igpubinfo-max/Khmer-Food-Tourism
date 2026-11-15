@@ -666,27 +666,14 @@ export const FoodView: React.FC = () => {
                   className="kft-cat-btn group relative flex flex-col items-center w-full max-w-full min-w-0 min-h-0 overflow-visible bg-transparent border-0 p-0 cursor-pointer select-none"
                 >
                   <div
-                    className={`relative w-full max-w-full min-w-0 min-h-0 aspect-[560/460] rounded-[14px] overflow-visible transition-all duration-150 ${
-                      active
-                        ? 'opacity-100'
-                        : 'opacity-80 group-hover:opacity-95'
-                    }`}
-                    style={
-                      active
-                        ? {
-                            background: 'linear-gradient(180deg, rgba(254, 243, 199, 0.95) 0%, rgba(253, 230, 138, 0.85) 100%)',
-                            boxShadow:
-                              '0 0 0 2.5px #D97706, 0 0 0 4.5px rgba(245, 158, 11, 0.28), 0 6px 14px rgba(180, 83, 9, 0.28)',
-                          }
-                        : undefined
-                    }
+                    className={`kft-food-tile relative w-full max-w-full min-w-0 min-h-0 aspect-[560/460] rounded-[14px] overflow-visible ${active ? 'kft-food-tile-active' : ''}`}
                   >
                     <img
                       src={cat.imageSrc}
                       alt={label}
                       style={{ transform: 'none' }}
                       className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none transition-all duration-150 ${
-                        active ? 'kft-cat-img-active-glow' : ''
+                        ''
                       }`}
                       loading="eager"
                       decoding="async"
@@ -698,16 +685,10 @@ export const FoodView: React.FC = () => {
                       </span>
                     </div>
                   </div>
-                  {/* Subtle Gold Active Selection Indicator Bar Below Button */}
+                  {/* Uniform selection indicator: same slot for all 5 buttons */}
                   <span
                     aria-hidden="true"
-                    className={`mt-1.5 h-1.5 w-8 sm:w-10 rounded-full transition-all duration-150 ${
-                      active ? 'opacity-100' : 'opacity-0'
-                    }`}
-                    style={{
-                      background: 'linear-gradient(90deg, #D97706 0%, #F59E0B 50%, #D97706 100%)',
-                      boxShadow: '0 1px 5px rgba(180, 83, 9, 0.45)',
-                    }}
+                    className={`kft-food-indicator ${active ? 'kft-food-indicator-active' : ''}`}
                   />
                 </button>
               );

@@ -557,3 +557,4 @@ export function mergeNearbyTourismDestinations(params: {
     .filter((d) => Number.isFinite(d.distanceMeters) && d.distanceMeters <= radiusMeters)
     .sort((a, b) => a.distanceMeters - b.distanceMeters);
 }
+
