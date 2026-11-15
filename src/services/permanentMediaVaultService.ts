@@ -2684,7 +2684,14 @@ export function applyFoodOverrides(
 
     const nextCookTime = ov.cookTime || f.cookTime;
     const nextServings = ov.servings || f.servings;
-    const nextCalories = typeof ov.calories === 'number' && ov.calories > 0 ? ov.calories : f.calories;
+    const nextCalories =
+      useAuditedSeedRecipeAndLocale && typeof seedFood?.calories === 'number'
+        ? seedFood.calories
+        : isSameDishNameAsSeed && typeof seedFood?.calories === 'number'
+        ? seedFood.calories
+        : typeof ov.calories === 'number' && ov.calories > 0
+        ? ov.calories
+        : f.calories;
     const nextDifficulty = ov.difficulty || f.difficulty;
 
     let nextIngredients =

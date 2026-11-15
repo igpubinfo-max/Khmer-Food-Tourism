@@ -415,20 +415,21 @@ export function estimateDishNutritionFromRecipe(food: FoodItem): DishNutritionEs
   };
 }
 
-// ---- "Gentle on the stomach" gate (used by the Light tag) ----
+// ---- Strict Healthy-Chip Gates (used by light, protein_rich, steamed_boiled, vegetable_rich) ----
 const CHILI_RE = /ម្ទេស|chili|chilli|cayenne|sambal/i;
 const FRESH_PEPPER_RE = /ម្រេចខ្ចី|green\s+peppercorn|fresh\s+peppercorn|peppercorn\s+cluster/i;
 const SOUR_TITLE_RE = /ម្ជូរ|ជ្រក់|ង៉ាំង៉ូវ|ងាំងូវ|ជូរ|ត្រួយអម្ពិល|\bsour\b|\btamarind\b|pickl|\bmachu\b|chhruk|ngam\s*ngov|ngov/i;
-const SOUR_ING_RE = /អម្ពិល|អំពិល|tamarind|ក្រូចឆ្មារ|ក្រូចថ្លុង|\blime\b|\blemon\b|ទឹកខ្មេះ|vinegar|ង៉ាំង៉ូវ|ងាំងូវ|pickled|preserved\s+lime|ស្លឹកថ្នឹង/i;
-const FERMENTED_RE = /ប្រហុក|prahok|ផ្អក|កាពិ|shrimp\s+paste|fermented|ម៉ាំ|ត្រីប្រម៉ា|salted\s+(?:fish|crab)|ក្តាមប្រៃ|ក្ដាមប្រៃ|pickled\s+fish/i;
-const GREASY_RE = /គ្រឿងក្នុង|offal|tripe|ពោះគោ|ឈាមជ្រូក|pork\s+blood|blood\s+cube|pork\s+belly|សាច់ជ្រូកបីជាន់|pig\s+ear|ត្រចៀកជ្រូក|chicken\s+feet|ជើងមាន់|crispy\s+pork|ស្បែកជ្រូក|pork\s+skin|lard|ខ្លាញ់ជ្រូក/i;
-const DEEP_FRY_STEP_RE = /deep[\s-]*fr|pan[\s-]*fr|fry\s+until\s+crisp|ចៀនឱ្យស្រួយ|បំពងឱ្យ|បំពងរហូត/i;
+const SOUR_ING_RE = /អម្ពិល|អំពិល|tamarind|ក្រូចឆ្មារ|ក្រូចថ្លុង|\blime\s+juice\b|\bfresh\s+lime\b|\blemon\s+juice\b|ទឹកខ្មេះ|vinegar|ង៉ាំង៉ូវ|ងាំងូវ|pickled\s+(?:lime|mustard|garlic|green)|preserved\s+lime|ស្លឹកថ្នឹង/i;
+const FERMENTED_HEAVY_RE = /ប្រហុក|prahok|ផ្អក|កាពិ|shrimp\s+paste|ម៉ាំ|ត្រីប្រម៉ា|salted\s+(?:fish|crab)|ក្តាមប្រៃ|ក្ដាមប្រៃ|pickled\s+fish|fermented\s+fish/i;
+const GREASY_OR_OFFAL_RE = /គ្រឿងក្នុង|offal|tripe|ពោះគោ|ពោះតាន់|ពោះវៀន|chitterling|intestine|ឈាមជ្រូក|ឈាមមាន់|pork\s+blood|chicken\s+blood|blood\s+cube|ខួរជ្រូក|pork\s+brain|ថ្លើម|liver|កោះមាន់|gizzard|giblet|pork\s+belly|សាច់ជ្រូកបីជាន់|pig\s+ear|pork\s+ear|ត្រចៀកជ្រូក|chicken\s+feet|ជើងមាន់|ជើងជ្រូក|pork\s+trotter|pork\s+hock|ផាកឡូវ|ផាក់ឡូវ|crispy\s+pork|ស្បែកជ្រូក|pork\s+skin|lard|ខ្លាញ់ជ្រូក/i;
+const DEEP_FRY_STEP_RE = /deep[\s-]*fr|fry\s+until\s+crisp|ចៀនឱ្យស្រួយ|បំពងឱ្យ|បំពងរហូត/i;
+const EMBRYO_OR_STREET_SHELLFISH_RE = /ពងទាកូន|ពងក្រួចកូន|\bbalut\b|embryo|ងាវស្រុះ|ងាវអប់|ពោះគោទឹកប្រហុក|ផ្អកចំហុយ/i;
 
 /**
  * True only when the dish is genuinely mild for a sensitive stomach, judged from ingredients,
  * taste profile and cooking method. Rejects spicy / chili, sour / pickled / lime-tamarind, fermented
- * (prahok, shrimp paste, salted crab), raw or cold-salad dishes, deep-fried dishes, greasy offal / pork belly
- * and rich coconut curries - in Khmer, English and Chinese descriptions alike.
+ * (prahok, shrimp paste, salted crab), raw or cold-salad dishes, deep-fried or grilled dishes,
+ * greasy offal / pork belly and rich coconut curries - in Khmer, English and Chinese descriptions alike.
  */
 export function isGentleOnStomachDish(
   food: FoodItem,
@@ -449,11 +450,17 @@ export function isGentleOnStomachDish(
     ctx?.ingText ??
     (food.ingredients || []).map((i) => `${(i.nameEn || '').toLowerCase()} ${i.nameKh || ''}`).join(' | ');
 
-  // Remove harmless look-alikes before keyword tests (bell pepper, lemongrass, kaffir lime leaf, lemon basil).
+  // Remove harmless look-alikes before keyword tests (bell pepper, lemongrass, kaffir lime leaf, lemon basil, optional lime wedges on chicken congee).
   const cleanIng = ingText
     .replace(/ម្ទេសប្លោក|bell\s+pepper\w*|sweet\s+pepper\w*/gi, ' ')
-    .replace(/lemon\s*grass|lemon\s+basil|kaffir\s+lime\s+leaf|kaffir\s+lime\s+leaves|lime\s+leaf|lime\s+leaves|ស្លឹកក្រូចសើច|ស្លឹកក្រូច|ស្លឹកគ្រៃ|គល់ស្លឹកគ្រៃ|ជីរនាងវង/gi, ' ');
+    .replace(/lemon\s*grass|lemon\s+basil|kaffir\s+lime\s+leaf|kaffir\s+lime\s+leaves|lime\s+leaf|lime\s+leaves|ស្លឹកក្រូចសើច|ស្លឹកក្រូច|ស្លឹកគ្រៃ|គល់ស្លឹកគ្រៃ|ជីរនាងវង/gi, ' ')
+    .replace(/ក្រូចឆ្មា\s*ម្រេច|lime\s+wedges?/gi, ' ');
   const cleanName = nameText.replace(/lemon\s*grass|ស្លឹកគ្រៃ/gi, ' ');
+
+  const isMildHerbalSamlorProher = /សម្លប្រហើរ|samlor\s+proher|samlor\s+praher/i.test(cleanName);
+  const cleanIngForFermented = isMildHerbalSamlorProher
+    ? cleanIng.replace(/ប្រហុកខ្មែរ|ប្រហុកសាច់បន្តិច|prahok\s+paste|hint\s+of\s+prahok/gi, ' ')
+    : cleanIng;
 
   const descText = `${food.descriptionKh || ''} ${food.descriptionEn || ''} ${food.tasteProfile || ''}`;
   const stepsText = (food.steps || []).map((s) => `${s.instructionKh || ''} ${s.instructionEn || ''}`).join(' ');
@@ -465,9 +472,10 @@ export function isGentleOnStomachDish(
   if (SOUR_TITLE_RE.test(cleanName)) return false;
   if (SOUR_ING_RE.test(cleanIng)) return false;
   if (/ជូរ|\bsour\b|\btangy\b|\btart\b|酸/i.test(descText)) return false;
-  if (FERMENTED_RE.test(cleanIng) || FERMENTED_RE.test(cleanName)) return false;
-  if (GREASY_RE.test(cleanIng) || GREASY_RE.test(cleanName)) return false;
-  if (ctx?.isFried || ctx?.isGrilled || DEEP_FRY_STEP_RE.test(stepsText)) return false; // charred / fried food is not stomach-gentle
+  if (FERMENTED_HEAVY_RE.test(cleanIngForFermented) || FERMENTED_HEAVY_RE.test(cleanName)) return false;
+  if (GREASY_OR_OFFAL_RE.test(cleanIng) || GREASY_OR_OFFAL_RE.test(cleanName)) return false;
+  if (EMBRYO_OR_STREET_SHELLFISH_RE.test(cleanName)) return false;
+  if (ctx?.isFried || ctx?.isGrilled || DEEP_FRY_STEP_RE.test(stepsText)) return false;
   if (ctx?.isRawSeafoodOrDip || ctx?.isColdSaladOrDipOrDryNoodle || food.categorySlug === 'salad') return false;
   if (ctx?.isRichCoconutCurry) return false;
   return true;
@@ -477,7 +485,7 @@ const cache = new Map<string, DishTagId[]>();
 
 /** All tags derived from the recipe (unordered priority applied). */
 export function getDishTagIds(food: FoodItem): DishTagId[] {
-  const key = `v4|${food.id}|${food.nameKh || ''}|${food.nameEn || ''}|${food.categorySlug || ''}|${food.calories ?? ''}|${food.ingredients?.length ?? 0}|${food.steps?.length ?? 0}`;
+  const key = `v5|${food.id}|${food.nameKh || ''}|${food.nameEn || ''}|${food.categorySlug || ''}|${food.calories ?? ''}|${food.ingredients?.length ?? 0}|${food.steps?.length ?? 0}`;
   const hit = cache.get(key);
   if (hit) return hit;
 
@@ -503,16 +511,19 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
     includesAny(nameText, TAG_KEYWORD_RULES.sweet) ||
     /បង្អែម|សង់ខ្យា|បាយដំណើបស្វាយ|បាយដំណើបធុរេន|បាយដំណើបសង់ខ្យា|អន្សមចេក|ចេកខ្ទិះ|ចេកចៀន/i.test(titleKh);
 
-  // Primary dish cooking-style classification from dish title & category (prevents incidental prep steps like "ដាំខ្ទះ" or "ស្ងោរពងទា" from misclassifying ឆា/ខ/ទឹកគ្រឿង)
+  // Primary dish cooking-style classification from dish title & category
   const isDryTossedNoodle = /មីកូឡា|មីគោក/i.test(titleKh);
+  const isEmbryoOrStreetShellfish = EMBRYO_OR_STREET_SHELLFISH_RE.test(nameText) || food.categorySlug === 'streetfood';
   const isExplicitlySteamedOrBoiledTitle =
     !isDryTossedNoodle &&
-    (/ចំហុយ|អាម៉ុក|ស្ងោរ|ស្រុះ|ពោះគោទឹកប្រហុក/i.test(titleKh) ||
+    !isEmbryoOrStreetShellfish &&
+    food.categorySlug !== 'salad' &&
+    (/ចំហុយ|អាម៉ុក|ស្ងោរ/i.test(titleKh) ||
       /\bsteamed\b(?!\s+(?:jasmine\s+|white\s+|fragrant\s+)?rice\b)|\bpoached\b|\bamok\b/i.test(titleEn));
 
   const isBraisedKhoDish =
     !/ស្ងោរ|ចំហុយ/i.test(titleKh) &&
-    (/(?:^|\s|គុយទាវ|បាយ|មី)ខ(?:សាច់|ត្រី|ជើង|ពង|មាន់|ទា|ពោះ|ឆ្អឹង|បង្កង|គោ|ប្រហុក)/i.test(titleKh) ||
+    (/(?:^|\s|គុយទាវ|បាយ|មី)ខ(?:សាច់|ត្រី|ជើង|ពង|មាន់|ទា|ពោះ|ឆ្អឹង|បង្កង|គោ|ប្រហុក|ម៉ាំ)|ខួរជ្រូកខ|ផាកឡូវ|ផាក់ឡូវ/i.test(titleKh) ||
       /\bkhor\b|\bcaramelized\b|\bbraised\s+(?:pork|beef|mekong\s+fish|duck|spiced\s+beef)/i.test(titleEn));
 
   const isStirFriedDish =
@@ -542,18 +553,21 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
       /\bred\s+(?:chicken\s+|nam\s+ya\s+)?(?:coconut\s+)?curry\b|\bnam\s*ya\b|\bsamlor\s+ktis\b/i.test(titleEn));
 
   const isColdSaladOrDipOrDryNoodle =
-    !isExplicitlySteamedOrBoiledTitle &&
-    (food.categorySlug === 'salad' ||
-      /^(?:ញាំ|ភ្លា|បុក|ទឹកគ្រឿង|ប្រហុក|កាពិ|ជ្រក់|គួង|នំប៉័ង)|ទឹកគ្រឿង|ប្រហុកខ្ទិះ|ទឹកប្រហុក|មីគោក|មីកូឡា/i.test(
-        titleKh
-      ));
+    food.categorySlug === 'salad' ||
+    /^(?:ញាំ|ភ្លា|បុក|ទឹកគ្រឿង|ប្រហុក|កាពិ|ជ្រក់|គួង|នំប៉័ង|ងាវស្រុះ|ផ្អក)|ទឹកគ្រឿង|ប្រហុកខ្ទិះ|ទឹកប្រហុក|មីគោក|មីកូឡា/i.test(
+      titleKh
+    );
 
   const isClearBrothSoupOrCongee =
-    (/ស៊ុប|សម្លប្រហើរ|ស្ងោរ|បបរ|គុយទាវ(?!ឆា|ខ)|មីសួរ(?!ឆា)|បាញ់កាញ់|ពងទាកូន|អន្សមជ្រូក/i.test(titleKh) &&
+    !isEmbryoOrStreetShellfish &&
+    (/ស៊ុប|សម្លប្រហើរ|ស្ងោរ|បបរ|គុយទាវ(?!ឆា|ខ)|មីសួរ(?!ឆា)|បាញ់កាញ់|អន្សមជ្រូក/i.test(titleKh) &&
       !isStirFriedDish &&
       !isBraisedKhoDish &&
       !isRichCoconutCurry &&
       !isFried);
+
+  const hasGreasyOrOffal = GREASY_OR_OFFAL_RE.test(ingText) || GREASY_OR_OFFAL_RE.test(nameText);
+  const hasHeavyFermentedPaste = /ផ្អក|ម៉ាំ|ត្រីប្រម៉ា|ប្រហុកខ្ទិះ|ទឹកប្រហុក/i.test(nameText);
 
   const isSteamedOrBoiled =
     !isSweetOrDrink &&
@@ -563,13 +577,14 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
     !isGrilled &&
     !isRichCoconutCurry &&
     !isColdSaladOrDipOrDryNoodle &&
+    !isEmbryoOrStreetShellfish &&
+    !hasGreasyOrOffal &&
+    !hasHeavyFermentedPaste &&
     (isExplicitlySteamedOrBoiledTitle || isClearBrothSoupOrCongee);
 
   const isRawSeafoodOrDip = /ឆៅ|ភ្លា|ត្រាំ|អយស្ទ័រ|ទឹកគ្រឿង|ប្រហុកឆៅ|\braw\b|ceviche|oyster|sashimi|\bdip\b|relish/i.test(nameText);
   const isProcessedStarchDish = /burger|បឺហ្គឺរ|fried\s+rice|បាយឆា|spaghetti|ស្ប៉ាហ្គេទី|cutlet|ស៊ូផាយ|pancake|sandwich|instant\s+noodle|មីកញ្ចប់|មីជើងមាន់/i.test(nameText);
 
-  // "Light / gentle on the stomach" is judged from the REAL recipe (ingredients, taste profile, cooking method),
-  // not only from kcal: anything spicy, sour, fermented, raw, deep-fried or greasy is never offered as light.
   const isGentleOnStomach = isGentleOnStomachDish(food, {
     titleKh,
     nameText,
@@ -587,7 +602,6 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
     typeof food.calories === 'number' &&
     food.calories > 0 &&
     food.calories < LIGHT_KCAL_LIMIT &&
-    // Fried-rice plates, burgers, cutlets, spaghetti, and instant noodles are never offered as "light".
     !/បាយឆា|fried\s+rice/i.test(nameText) &&
     !isProcessedStarchDish &&
     !isFried &&
@@ -611,18 +625,40 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
   // 2 vegetables are enough for soups / stir-fries / salads / noodle dishes; mains such as rice, grills and rolls need 3+.
   const vegHeavyEnough =
     vegCount >= 3 || (vegCount >= 2 && ['soup', 'stirfry', 'salad', 'noodles'].includes(food.categorySlug || ''));
-  if (!isSweetOrDrink && !isFried && !isRawSeafoodOrDip && !isProcessedStarchDish && (vegHeavyEnough || vegByName)) {
+  const isFieryPoundedOrPickledSnack = /^(?:បុក|ជ្រក់)|ទឹកប្រហុក|ខម៉ាំ|ក្តាមប្រៃ|ក្ដាមប្រៃ/i.test(titleKh);
+  if (
+    !isSweetOrDrink &&
+    !isFried &&
+    !isRawSeafoodOrDip &&
+    !isProcessedStarchDish &&
+    !isBraisedKhoDish &&
+    !isRichCoconutCurry &&
+    !hasGreasyOrOffal &&
+    !isFieryPoundedOrPickledSnack &&
+    (vegHeavyEnough || vegByName)
+  ) {
     tags.add('vegetable_rich');
   }
 
-  // Main dishes only: desserts / drinks / sweet snacks never count as protein dishes
+  // Main dishes only: desserts / drinks / sweet snacks / fried / fatty offal / braised Kho / rich curry never count as healthy high-protein dishes
   const hasMainProtein = !isSweetOrDrink && ingNames.some(
     (n) => {
       const s = stripNotMeat(n);
       return includesAny(s, TAG_KEYWORD_RULES.mainProtein) && !includesAny(s, TAG_KEYWORD_RULES.swappable);
     }
   );
-  if (hasMainProtein && estimateProteinPerServing(food) >= HIGH_PROTEIN_GRAMS) tags.add('protein_rich');
+  if (
+    hasMainProtein &&
+    !isFried &&
+    !isProcessedStarchDish &&
+    !isBraisedKhoDish &&
+    !isRichCoconutCurry &&
+    !hasGreasyOrOffal &&
+    !hasHeavyFermentedPaste &&
+    estimateProteinPerServing(food) >= HIGH_PROTEIN_GRAMS
+  ) {
+    tags.add('protein_rich');
+  }
 
   // Plant-based savory dishes/snacks, or only animal ingredient is a swappable condiment (fish sauce / prahok / paste)
   const cleanTitleForVeg = stripNotMeat(nameText).replace(/ទឹកដោះគោ|ប្រេងខ្យង|oyster\s+sauce|condensed\s+milk/gi, ' ');
