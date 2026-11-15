@@ -82,7 +82,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     if (!photo.ok) return json(400, { error: { status: 'INVALID_ARGUMENT', message: 'bad photo reference' } });
     if (!photoPerMinute.allow(ip)) return json(429, { error: { status: 'RESOURCE_EXHAUSTED', message: 'Too many photo requests' } }, { 'Retry-After': '30' });
     const used = await usageHit(quotaKey, 'places_photo', 1);
-    if (used !== null && used > envInt(Deno.env.get('PLACES_DAILY_PHOTO_LIMIT'), 1500)) {
+    if (used !== null && used > envInt(Deno.env.get('PLACES_DAILY_PHOTO_LIMIT'), 300)) {
       return json(429, { error: { status: 'DAILY_QUOTA_EXCEEDED', message: 'Daily photo limit reached' } }, { 'Retry-After': '3600' });
     }
     try {
@@ -131,7 +131,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   // 2) daily quota
-  const limit = userId ? envInt(Deno.env.get('PLACES_DAILY_LIMIT_USER'), 400) : envInt(Deno.env.get('PLACES_DAILY_LIMIT_ANON'), 120);
+  const limit = userId ? envInt(Deno.env.get('PLACES_DAILY_LIMIT_USER'), 150) : envInt(Deno.env.get('PLACES_DAILY_LIMIT_ANON'), 60);
   const used = await usageHit(quotaKey, 'places', 1);
   if (used !== null && used > limit) {
     background(logUsage({ user_key: quotaKey, kind: 'places', status: 429, note: 'daily_quota', ms: Date.now() - started }));

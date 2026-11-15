@@ -327,6 +327,8 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
             if ($hasRequired) {
                 $fresh = $true
                 if ($info -and $minVersionCode -gt 0 -and [int]$info.versionCode -lt $minVersionCode) { $fresh = $false }
+                if ($info -and $needApk -and (-not $info.apk)) { $fresh = $false }
+                if ($info -and $needAab -and (-not $info.aab)) { $fresh = $false }
                 if (-not $info) {
                     if ($needApk -and $apkAsset) {
                         $apkUpdated = ConvertTo-UtcDateTime $apkAsset.updated_at
@@ -596,8 +598,13 @@ if ($DownloadOnly) {
     exit 0
 }
 
-# If there are NO new app changes and ForceNewBuild wasn't passed:
-if (-not $hasAppChanges -and -not $ForceNewBuild) {
+$headRunTitle = if ($matchingHeadRun -and $matchingHeadRun.display_title) { [string]$matchingHeadRun.display_title } else { "" }
+$headRunMissingAab = ((-not $ApkOnly) -and ($headRunTitle -like "*[apk-only]*"))
+$headRunMissingApk = ((-not $AabOnly) -and ($headRunTitle -like "*[aab-only]*"))
+$canReuseHeadRun = (-not $headRunMissingAab) -and (-not $headRunMissingApk)
+
+# If there are NO new app changes, ForceNewBuild wasn't passed, and the previous run actually built the requested target (APK/AAB):
+if (-not $hasAppChanges -and -not $ForceNewBuild -and $canReuseHeadRun) {
     if ($matchingHeadRun -and $matchingHeadRun.status -ne "completed") {
         Write-Host ""
         Write-Host "  A cloud build for your latest code ($($headSha.Substring(0,7))) is ALREADY running!" -ForegroundColor Green

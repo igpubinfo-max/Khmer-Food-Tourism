@@ -372,7 +372,7 @@ export const AdminDashboard: React.FC = () => {
   const [isSavingNewFood, setIsSavingNewFood] = useState(false);
   const [googleMapsDiag, setGoogleMapsDiag] = useState<any>(() => getLastGooglePlacesApiDiagnosis());
   const [isVerifyingGoogleMaps, setIsVerifyingGoogleMaps] = useState(false);
-  const [adminDailyLimitInput, setAdminDailyLimitInput] = useState<string>(() => String(getSmartCacheStats().dailyApiLimit || 500));
+  const [adminDailyLimitInput, setAdminDailyLimitInput] = useState<string>(() => String(getSmartCacheStats().dailyApiLimit || 150));
 
   const handleVerifyGoogleMapsApi = async (_customKey?: string) => {
     setIsVerifyingGoogleMaps(true);

@@ -191,7 +191,7 @@ export interface GooglePlacesSearchResponse {
 const SMART_CACHE_STORAGE_KEY = 'kft_google_places_smart_cache_v9';
 const SMART_CACHE_STATS_KEY = 'kft_google_places_cache_stats_v2';
 const GOOGLE_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30-day policy-compliant refresh window
-const DEFAULT_DAILY_GOOGLE_API_LIMIT = 500;
+const DEFAULT_DAILY_GOOGLE_API_LIMIT = 150;
 
 /**
  * Strip Khmer zero-width spaces (\u200B-\u200D, \uFEFF) and normalize text for reliable Khmer/English/Chinese matching
@@ -1535,7 +1535,7 @@ export function getSmartCacheStats(): SmartCacheStats {
         cacheHitsSavedQuota: Number(parsed.cacheHitsSavedQuota || 0),
         googleApiCallsCount: Number(parsed.googleApiCallsCount || 0),
         dailyApiCallsCount: isSameDay ? Number(parsed.dailyApiCallsCount || 0) : 0,
-        dailyApiLimit: Number(parsed.dailyApiLimit || DEFAULT_DAILY_GOOGLE_API_LIMIT),
+        dailyApiLimit: Number(parsed.dailyApiLimit) === 500 ? DEFAULT_DAILY_GOOGLE_API_LIMIT : Number(parsed.dailyApiLimit || DEFAULT_DAILY_GOOGLE_API_LIMIT),
         dailyCounterDate: today,
         lastUpdatedAt: parsed.lastUpdatedAt || new Date().toISOString(),
       };
