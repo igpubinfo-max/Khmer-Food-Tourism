@@ -1,15 +1,33 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  X, Crown, AlertCircle, RefreshCw, 
-  ShieldCheck, Star, Clock,
-  QrCode, ExternalLink, CheckCircle2,
-  Download, Copy, Check, ArrowRight, ShieldAlert, BadgeCheck, Share2,
-  CheckCircle, XCircle, Upload, Image as ImageIcon, Camera, Trash2, MessageSquareWarning
+import {
+  X,
+  Crown,
+  AlertCircle,
+  RefreshCw,
+  Clock,
+  QrCode,
+  ExternalLink,
+  CheckCircle2,
+  Download,
+  Copy,
+  Check,
+  ArrowRight,
+  BadgeCheck,
+  CheckCircle,
+  XCircle,
+  Upload,
+  Image as ImageIcon,
+  Camera,
+  Trash2,
+  MessageSquareWarning,
 } from 'lucide-react';
-import { 
-  isUserVipActive, isUserOnConsumerFreeTrial, getVipRemainingDays,
-  APP_VERSION, APP_BUILD_CODE,
+import {
+  isUserVipActive,
+  isUserOnConsumerFreeTrial,
+  getVipRemainingDays,
+  APP_VERSION,
+  APP_BUILD_CODE,
   getDynamicVipBenefits,
   OfficialPlanId,
   getConsumerVipPricingCatalog,
@@ -19,7 +37,10 @@ import {
   launchAbaMobileWithDynamicKhqr,
   isConsumerTrial7dEligible,
   isConsumerPromo099Eligible,
-  hasAuthenticatedEmailAccount, hasAuthenticatedPhoneAccount, isAdminAccount, isIosOrIpadAppStoreRuntime
+  hasAuthenticatedEmailAccount,
+  hasAuthenticatedPhoneAccount,
+  isAdminAccount,
+  isIosOrIpadAppStoreRuntime,
 } from '../types';
 import {
   savePngDataUrlToGallery,
@@ -296,6 +317,11 @@ export const UpgradeVipModal: React.FC = () => {
     }
   }, [isUpgradeVipModalOpen, currentUser, isVipRenewMode]);
 
+  const activeAbaPaymentBundle = useMemo(
+    () => buildAbaDynamicPaymentBundle(selectedPlan?.priceUsd || 19.99),
+    [selectedPlan?.priceUsd]
+  );
+
   if (!isUpgradeVipModalOpen || isIosOrIpadAppStoreRuntime()) return null;
   if (
     !isAdminAccount(currentUser) &&
@@ -423,10 +449,6 @@ export const UpgradeVipModal: React.FC = () => {
     setErrorMessage('');
   };
 
-  const activeAbaPaymentBundle = useMemo(
-    () => buildAbaDynamicPaymentBundle(selectedPlan?.priceUsd || 19.99),
-    [selectedPlan?.priceUsd]
-  );
 
   const handleSaveQrImage = async () => {
     try {

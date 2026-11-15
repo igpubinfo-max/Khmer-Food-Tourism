@@ -29,7 +29,7 @@ import {
   buildCanonicalGoogleUserId,
   getNativeGoogleAuthPlugin,
 } from '../services/googleAuth';
-import { normalizeCambodiaPhone, validateCambodiaPhoneForRegistration, isDisposableEmailAddress } from '../utils/identityNormalize';
+import { validateCambodiaPhoneForRegistration, isDisposableEmailAddress } from '../utils/identityNormalize';
 import { checkDeviceAccountRegistrationEligibility, generateInAppPhoneOtpCode } from '../services/deviceIdentityService';
 import { tr } from '../utils/i18n';
 

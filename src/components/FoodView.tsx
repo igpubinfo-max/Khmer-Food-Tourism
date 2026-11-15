@@ -666,24 +666,15 @@ export const FoodView: React.FC = () => {
                   className="kft-cat-btn group relative flex flex-col items-center w-full max-w-full min-w-0 min-h-0 overflow-visible bg-transparent border-0 p-0 cursor-pointer select-none"
                 >
                   <div
-                    className={`relative w-full max-w-full min-w-0 min-h-0 aspect-[560/460] rounded-[14px] transition-all duration-150 ${
-                      active
-                        ? 'opacity-100'
-                        : 'opacity-70 group-hover:opacity-95'
-                    }`}
-                    style={
-                      active
-                        ? {
-                            boxShadow: '0 0 0 2.5px #15803D, 0 5px 14px rgba(21, 128, 61, 0.35)',
-                          }
-                        : undefined
-                    }
+                    className="relative w-full max-w-full min-w-0 min-h-0 aspect-[560/460] rounded-[14px] opacity-100 overflow-visible transition-all duration-150"
                   >
                     <img
                       src={cat.imageSrc}
                       alt={label}
                       style={{ transform: 'none' }}
-                      className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none"
+                      className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none transition-all duration-150 ${
+                        active ? 'kft-cat-img-active-glow' : ''
+                      }`}
                       loading="eager"
                       decoding="async"
                     />
@@ -701,8 +692,8 @@ export const FoodView: React.FC = () => {
                       active ? 'opacity-100' : 'opacity-0'
                     }`}
                     style={{
-                      background: 'linear-gradient(90deg, #16A34A 0%, #F59E0B 50%, #16A34A 100%)',
-                      boxShadow: '0 1px 6px rgba(22, 163, 74, 0.55)',
+                      background: 'linear-gradient(90deg, #F59E0B 0%, #FDE047 50%, #F59E0B 100%)',
+                      boxShadow: '0 1px 8px rgba(245, 158, 11, 0.8)',
                     }}
                   />
                 </button>

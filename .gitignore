@@ -49,3 +49,5 @@ key.properties
 android/key.properties
 *.pem
 Emergency_Recovery_Kit/
+APK/
+release_out/

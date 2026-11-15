@@ -22,7 +22,6 @@ import {
   Settings,
   MapPin,
   Search,
-  Bell,
   X,
   LayoutGrid,
   Utensils,
@@ -45,7 +44,6 @@ import {
   MAX_NEARBY_RADIUS_METERS,
   PROVINCE_CENTERS,
   calculateDistanceMeters,
-  calculateDistanceKmRounded,
   readSavedUserGps,
   detectClosestProvinceFromCoords,
   resolveActiveNearMeCoords,
@@ -57,7 +55,6 @@ import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { DISH_PROVINCES, matchShopToProductQuery, verifyShopDataForDisplay } from '../utils/foodFilters';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
-import { handleAvatarImageError } from '../utils/avatarHelper';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 
 const RESTAURANT_BATCH_SIZE = 24;
@@ -1054,7 +1051,7 @@ export const RestaurantView: React.FC = () => {
                 >
                   {/* 3D Gold-Bordered Category Illustration Button */}
                   <div
-                    className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] transition-all duration-200 rounded-[14px]"
+                    className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] ${active ? 'kft-cat-img-active-glow' : ''}`}
                     style={{
                       transform: 'none',
                     }}

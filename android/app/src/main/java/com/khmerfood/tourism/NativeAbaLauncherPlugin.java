@@ -7,6 +7,9 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ResolveInfo;
+import java.util.List;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -510,10 +513,35 @@ public class NativeAbaLauncherPlugin extends Plugin {
             pendingCameraFile = photoFile;
             pendingCameraUri = photoUri;
 
+            // Persist path in SharedPreferences so low-RAM devices (Xiaomi/Redmi/OPPO/vivo/Samsung)
+            // that recreate the Activity while the system Camera app is open never lose the file reference.
+            try {
+                SharedPreferences prefs = context.getSharedPreferences("kft_camera_state", Context.MODE_PRIVATE);
+                prefs.edit().putString("last_capture_path", photoFile.getAbsolutePath()).apply();
+            } catch (Exception ignored) {}
+
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
             takePictureIntent.setClipData(ClipData.newUri(context.getContentResolver(), "Captured Photo", photoUri));
             takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            // Explicitly grant URI read/write permission to all resolved camera packages
+            // for compatibility with older OEM ROMs (MIUI, ColorOS, EMUI, FuntouchOS, HiOS).
+            try {
+                List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(
+                    takePictureIntent,
+                    PackageManager.MATCH_DEFAULT_ONLY
+                );
+                for (ResolveInfo resolveInfo : resInfoList) {
+                    String packageName = resolveInfo.activityInfo.packageName;
+                    context.grantUriPermission(
+                        packageName,
+                        photoUri,
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
+                }
+            } catch (Exception ignored) {}
+
             startActivityForResult(call, takePictureIntent, "handleCameraCaptureResult");
         } catch (Exception e) {
             call.reject("Could not launch camera: " + e.getMessage());
@@ -525,6 +553,25 @@ public class NativeAbaLauncherPlugin extends Plugin {
         if (call == null) {
             return;
         }
+        Context context = getContext();
+        if (pendingCameraFile == null && context != null) {
+            try {
+                SharedPreferences prefs = context.getSharedPreferences("kft_camera_state", Context.MODE_PRIVATE);
+                String savedPath = prefs.getString("last_capture_path", null);
+                if (savedPath != null && !savedPath.isEmpty()) {
+                    File restoredFile = new File(savedPath);
+                    if (restoredFile.exists()) {
+                        pendingCameraFile = restoredFile;
+                        pendingCameraUri = FileProvider.getUriForFile(
+                            context,
+                            context.getPackageName() + ".fileprovider",
+                            restoredFile
+                        );
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
         if (result.getResultCode() != Activity.RESULT_OK) {
             if (pendingCameraFile != null && pendingCameraFile.exists()) {
                 pendingCameraFile.delete();
@@ -538,7 +585,6 @@ public class NativeAbaLauncherPlugin extends Plugin {
             return;
         }
 
-        Context context = getContext();
         if (context == null) {
             call.reject("Context is null");
             return;
@@ -570,6 +616,10 @@ public class NativeAbaLauncherPlugin extends Plugin {
             }
             pendingCameraFile = null;
             pendingCameraUri = null;
+            try {
+                SharedPreferences prefs = context.getSharedPreferences("kft_camera_state", Context.MODE_PRIVATE);
+                prefs.edit().remove("last_capture_path").apply();
+            } catch (Exception ignored) {}
         }
 
         if (dataUrl == null) {

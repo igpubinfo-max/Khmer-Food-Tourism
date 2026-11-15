@@ -1,8 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  X, Camera, Image, QrCode, CheckCircle2, AlertTriangle, 
-  ExternalLink, Copy, RefreshCw, Award, ShieldCheck, HelpCircle
+import {
+  X,
+  Camera,
+  Image,
+  QrCode,
+  CheckCircle2,
+  AlertTriangle,
+  ExternalLink,
+  Copy,
+  RefreshCw,
+  Award,
 } from 'lucide-react';
 import jsQR from 'jsqr';
 import { Capacitor } from '@capacitor/core';

@@ -25,7 +25,6 @@ import {
   isValidCambodiaCoordinates,
   isValidOfficialGooglePlaceId,
   isPlaceLocationVerified,
-  isStrictVerifiedCambodiaRestaurant,
   doesVerifiedPlaceNameMatchTarget,
   getCachedVerifiedPlaceForCoords,
   saveCachedVerifiedPlaceForCoords,

@@ -19,6 +19,7 @@ import {
 } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
+import { estimateDishNutritionFromRecipe } from '../utils/dishTags';
 import { isMedicalOrHealthQuery, type BrainChip } from './aiFoodBrain';
 
 export type AiAgentUserRole = 'normal_user' | 'shop_owner' | 'admin';
@@ -630,52 +631,12 @@ function parseKhmerOrArabicDigits(raw: string): number | null {
 }
 
 function estimateDishNutrition(dish: FoodItem, language: Language): AiAgentNutritionReport {
-  const text = `${dish.nameKh} ${dish.nameEn} ${dish.categoryKh} ${dish.categoryEn} ${dish.descriptionEn}`.toLowerCase();
-  let kcal = typeof dish.calories === 'number' && dish.calories > 40 ? dish.calories : 380;
-  let protein = 22;
-  let carbs = 38;
-  let fat = 14;
-  let healthLevel: 'healthy' | 'balanced' | 'indulgent' = 'balanced';
-
-  if (!dish.calories || dish.calories <= 40) {
-    if (/សម្លម្ជូរ|ស្ងោរ|ភ្លា|ញាំ|បន្លែ|ត្រីចំហុយ|អាម៉ុក|sour\s*soup|salad|steamed|amok/.test(text)) {
-      kcal = 295;
-      protein = 24;
-      carbs = 20;
-      fat = 11;
-      healthLevel = 'healthy';
-    } else if (/គុយទាវ|នំបញ្ចុក|បបរ|មី|noodle|porridge|num\s*banh\s*chok|kuy\s*teav/.test(text)) {
-      kcal = 390;
-      protein = 21;
-      carbs = 52;
-      fat = 10;
-      healthLevel = 'balanced';
-    } else if (/បាយសាច់ជ្រូក|ឡុកឡាក់|ឆា|អាំង|ការី|lok\s*lak|pork\s*rice|curry|grilled|stir[-\s]*fry/.test(text)) {
-      kcal = 520;
-      protein = 28;
-      carbs = 56;
-      fat = 19;
-      healthLevel = 'balanced';
-    } else if (/បង្អែម|ចេកខ្ទិះ|ទឹកក្រឡុក|បំពង|ចៀន|ខ្ទិះ|dessert|sweet|smoothie|crispy|fried|coconut\s*cream/.test(text)) {
-      kcal = 460;
-      protein = 7;
-      carbs = 66;
-      fat = 18;
-      healthLevel = 'indulgent';
-    }
-  } else {
-    if (kcal <= 340) {
-      protein = 23;
-      carbs = 26;
-      fat = 10;
-      healthLevel = 'healthy';
-    } else if (kcal >= 540) {
-      protein = 25;
-      carbs = 58;
-      fat = 22;
-      healthLevel = 'indulgent';
-    }
-  }
+  const est = estimateDishNutritionFromRecipe(dish);
+  const kcal = est.caloriesKcal;
+  const protein = est.proteinGrams;
+  const carbs = est.carbsGrams;
+  const fat = est.fatGrams;
+  const healthLevel = est.healthLevel;
 
   const ingredients =
     dish.ingredients && dish.ingredients.length > 0

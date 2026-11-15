@@ -1,4 +1,3 @@
-import { resolveCanonicalFoodCategorySlug } from '../utils/foodFilters';
 import {
   FoodItem,
   SEED_FOOD_PHOTO_BASELINE_ISO,
@@ -349,7 +348,7 @@ export const seedFoods: FoodItem[] = [
     prepTime: '២០ នាទី',
     cookTime: '៤០ នាទី',
     servings: '៣-៤ នាក់',
-    calories: 310,
+    calories: 460,
     difficulty: 'easy',
     priceRiel: 15000,
     priceUsd: 3.75,
@@ -672,7 +671,7 @@ export const seedFoods: FoodItem[] = [
     prepTime: '២០ នាទី',
     cookTime: '១៥ នាទី',
     servings: '៣-៤ នាក់',
-    calories: 410,
+    calories: 455,
     difficulty: 'easy',
     priceRiel: 24000,
     priceUsd: 6.0,
@@ -922,7 +921,7 @@ export const seedFoods: FoodItem[] = [
     prepTime: '១៥ នាទី',
     cookTime: '១០ នាទី',
     servings: '២-៣ នាក់',
-    calories: 420,
+    calories: 475,
     difficulty: 'easy',
     priceRiel: 22000,
     priceUsd: 5.5,
@@ -1349,7 +1348,7 @@ export const seedFoods: FoodItem[] = [
     prepTime: '១៥ នាទី',
     cookTime: '១០ នាទី',
     servings: '២ នាក់',
-    calories: 380,
+    calories: 460,
     difficulty: 'easy',
     priceRiel: 12000,
     priceUsd: 3.0,
@@ -2214,7 +2213,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "prepTime": "២០ នាទី",
     "cookTime": "២៥ នាទី",
     "servings": "២-៣ នាក់",
-    "calories": 340,
+    "calories": 455,
     "difficulty": "medium",
     "ingredients": [
       {
@@ -2277,7 +2276,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "prepTime": "១៥ នាទី",
     "cookTime": "១៥ នាទី",
     "servings": "២-៣ នាក់",
-    "calories": 320,
+    "calories": 470,
     "difficulty": "easy",
     "ingredients": [
       {
@@ -2403,7 +2402,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "prepTime": "២០ នាទី",
     "cookTime": "២០ នាទី",
     "servings": "៣-៤ នាក់",
-    "calories": 360,
+    "calories": 455,
     "difficulty": "easy",
     "ingredients": [
       {
@@ -2524,7 +2523,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "prepTime": "១៥ នាទី",
     "cookTime": "២៥ នាទី",
     "servings": "៣-៤ នាក់",
-    "calories": 310,
+    "calories": 465,
     "difficulty": "easy",
     "ingredients": [
       {
@@ -3086,7 +3085,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "prepTime": "១០ នាទី",
     "cookTime": "៨ នាទី",
     "servings": "២-៣ នាក់",
-    "calories": 380,
+    "calories": 480,
     "difficulty": "easy",
     "ingredients": [
       {
@@ -3595,7 +3594,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "prepTime": "១០ នាទី",
     "cookTime": "៥ នាទី",
     "servings": "១-២ នាក់",
-    "calories": 350,
+    "calories": 465,
     "difficulty": "easy",
     "ingredients": [
       {
@@ -3663,7 +3662,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "prepTime": "២៥ នាទី",
     "cookTime": "៣០ នាទី",
     "servings": "៤-៦ នាក់",
-    "calories": 410,
+    "calories": 485,
     "difficulty": "medium",
     "ingredients": [
       {
@@ -3857,7 +3856,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "prepTime": "១៥ នាទី",
     "cookTime": "១០ នាទី",
     "servings": "២-៣ នាក់",
-    "calories": 380,
+    "calories": 470,
     "difficulty": "medium",
     "ingredients": [
       {
@@ -4860,7 +4859,7 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "prepTime": "១៥ នាទី",
     "cookTime": "១២ នាទី",
     "servings": "៣-៤ នាក់",
-    "calories": 270,
+    "calories": 395,
     "difficulty": "easy",
     "ingredients": [
       {

@@ -5,9 +5,7 @@ import {
   NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI,
   getRestaurantRatingSummary,
   isAdminAccount,
-  isGpipRegisteredRestaurant,
   isUserVipActive,
-  openRestaurantGoogleExternal,
   resolveFoodPhotoUrl,
   sanitizeRestaurantShopPhoto,
   sortRestaurantsWithVipRotation,
@@ -19,12 +17,39 @@ import { copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
-  BookOpen, Award, MapPinned, CalendarDays, Lightbulb, Heart, Star, Store, Compass, Utensils,
-  ChevronRight, Copy, Lock, CheckCircle2, Route, Navigation, Maximize2, X, PhoneCall, ShieldAlert, Clock,
+  BookOpen,
+  Award,
+  MapPinned,
+  CalendarDays,
+  Lightbulb,
+  Heart,
+  Star,
+  Store,
+  Compass,
+  Utensils,
+  ChevronRight,
+  Copy,
+  CheckCircle2,
+  Route,
+  Navigation,
+  Maximize2,
+  X,
+  PhoneCall,
+  ShieldAlert,
+  Clock,
 } from 'lucide-react';
 import {
-  EMERGENCY_CONTACTS, GUIDE_TIPS, MEAL_SLOTS, PHRASES, SEASONAL_ITEMS, TIP_CATEGORIES,
-  getCambodiaHolidaysForYear, getMealSlotForHour, getSeasonForMonth, monthLabel, pickTri,
+  EMERGENCY_CONTACTS,
+  GUIDE_TIPS,
+  MEAL_SLOTS,
+  PHRASES,
+  SEASONAL_ITEMS,
+  TIP_CATEGORIES,
+  getCambodiaHolidaysForYear,
+  getMealSlotForHour,
+  getSeasonForMonth,
+  monthLabel,
+  pickTri,
 } from '../data/guideContent';
 import type { MealSlotId, TipCategory } from '../data/guideContent';
 import { resolveFestivalFoods } from '../data/festivalFoods';
@@ -635,7 +660,7 @@ export const GuideView: React.FC = () => {
                 >
                   {/* 3D Gold-Bordered Button Graphic */}
                   <div
-                    className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px]"
+                    className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] ${active ? 'kft-cat-img-active-glow' : ''}`}
                     style={{
                       transform: 'none',
                     }}

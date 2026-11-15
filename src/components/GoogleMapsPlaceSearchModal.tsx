@@ -1,8 +1,23 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  Search, MapPin, Star, ExternalLink, X, CheckCircle, AlertTriangle,
-  Globe, RefreshCw, PlusCircle, Edit3, Check, ChevronLeft, ChevronRight,
-  Navigation, ShieldCheck, Database, SlidersHorizontal, Phone, Image as ImageIcon, ArrowUp
+  Search,
+  MapPin,
+  Star,
+  ExternalLink,
+  X,
+  CheckCircle,
+  AlertTriangle,
+  Globe,
+  RefreshCw,
+  PlusCircle,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Navigation,
+  Database,
+  Phone,
+  Image as ImageIcon,
+  ArrowUp,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
@@ -20,8 +35,6 @@ import {
   setGoogleMapsDailyLimit,
   findDuplicateRestaurantForGooglePlace,
   findDuplicateDestinationForGooglePlace,
-  convertGooglePlaceToRestaurant,
-  convertGooglePlaceToDestination,
   openExternalPlaceInGoogleMaps,
 } from '../services/googlePlacesService';
 

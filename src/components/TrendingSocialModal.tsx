@@ -1,9 +1,23 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
-  X, Utensils, ExternalLink, Navigation, Phone, Share2, Calendar,
-  UtensilsCrossed, RefreshCw, ChefHat, CheckCircle2, Play,
-  Search, Sparkles, AlertCircle, RotateCcw, ChevronRight, Loader2, WifiOff, Volume2, VolumeX
+  X,
+  Utensils,
+  ExternalLink,
+  Navigation,
+  Calendar,
+  UtensilsCrossed,
+  RefreshCw,
+  CheckCircle2,
+  Play,
+  Search,
+  Sparkles,
+  AlertCircle,
+  RotateCcw,
+  ChevronRight,
+  Loader2,
+  WifiOff,
+  VolumeX,
 } from 'lucide-react';
 import {
   TrendingFoodCategorySlug,

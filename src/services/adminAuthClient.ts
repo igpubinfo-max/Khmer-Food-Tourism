@@ -78,6 +78,11 @@ export function adminTokenHeaders(key: string): Record<string, string> {
     key !== 'kft_cloud_users_v2' &&
     key !== 'kft_cloud_vip_backup_v1' &&
     key !== 'kft_cloud_deleted_users_v1' &&
+    key !== 'kft_cloud_deleted_transactions_v1' &&
+    key !== 'kft_cloud_deleted_restaurants_v1' &&
+    key !== 'kft_SharedMediaVault_v1' &&
+    key !== 'kft_cloud_media_tombstones_v1' &&
+    !key.startsWith('kft_ov_') &&
     key !== 'kft_cloud_transactions_v1'
   ) {
     return {};

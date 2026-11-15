@@ -8,7 +8,6 @@ import {
   RefreshCw,
   Camera,
   Trash2,
-  Utensils,
   Store,
 } from 'lucide-react';
 import {

@@ -8,25 +8,63 @@ import {
 import { adminServerLogin, adminServerChangePassword, clearAdminToken, isAdminServerAuthActive } from '../services/adminAuthClient';
 import { checkBiometricAvailability, enrollAdminBiometric, getSavedAdminUsername } from '../services/biometricService';
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { 
-  User, FoodItem, Restaurant, TouristDestination, 
-  Language, UserRole, AppSettings, RegistrationTransaction,
-  RestaurantMenuItem, RestaurantReview, MembershipTier, isRestaurantPremiumActive, isUserVipActive, isUserPaidVipActive, isUserOnConsumerFreeTrial, getVipRemainingDays,
-  getVipAccountState, VipAccountState,
-  getRestaurantCreatedAtIso, getRestaurantCreatedAtMs, sortRestaurantsChronologically, isSeedRestaurantId, getRestaurantRatingSummary,
-  Wishlist, WishlistItem, TripPlan, AppNotification,
-  TrendingFoodItem, AiCheckInSubmission,
-  SupportTicket, SupportTicketMessage, SupportTicketStatus, VIP_PLANS,
-  DeletedUserRecord, AbaReceiptVerificationReport,
-  getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
-  getUserStoreQuotaSummary, UserStoreQuotaSummary,
-  isAdminAccount, isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, sanitizeManualFeaturedSchedule,
-  parseSafeDateMs, getAuthoritativeServerNowMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal,
-  isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl,
-  isStrictVerifiedCambodiaRestaurant, SEED_FOOD_PHOTO_BASELINE_MS,
-  sanitizeVerifiedShopPhotoUrl, isVerifiedShopSpecialtyPhotoUrl, isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
-  AuthModalInitialView, hasAuthenticatedEmailAccount, hasAuthenticatedPhoneAccount, hasAuthenticatedAccount, computeFastPhotoSignature,
-  APP_VERSION_NAME, APP_BUILD_CODE,
+import {
+  User,
+  FoodItem,
+  Restaurant,
+  TouristDestination,
+  Language,
+  UserRole,
+  AppSettings,
+  RegistrationTransaction,
+  RestaurantMenuItem,
+  RestaurantReview,
+  MembershipTier,
+  isRestaurantPremiumActive,
+  isUserVipActive,
+  isUserPaidVipActive,
+  isUserOnConsumerFreeTrial,
+  getRestaurantCreatedAtIso,
+  getRestaurantCreatedAtMs,
+  sortRestaurantsChronologically,
+  isSeedRestaurantId,
+  getRestaurantRatingSummary,
+  Wishlist,
+  WishlistItem,
+  TripPlan,
+  AppNotification,
+  TrendingFoodItem,
+  AiCheckInSubmission,
+  SupportTicket,
+  SupportTicketMessage,
+  SupportTicketStatus,
+  DeletedUserRecord,
+  AbaReceiptVerificationReport,
+  getDynamicVipPlans,
+  getUserStoreQuotaSummary,
+  UserStoreQuotaSummary,
+  isAdminAccount,
+  isIosOrIpadAppStoreRuntime,
+  getVipFeaturedRotationConfig,
+  sanitizeManualFeaturedSchedule,
+  parseSafeDateMs,
+  getAuthoritativeServerNowMs,
+  isValidCambodiaCoordinates,
+  isValidOfficialGooglePlaceId,
+  buildCanonicalGoogleMapsPinUrl,
+  isStrictVerifiedCambodiaRestaurant,
+  SEED_FOOD_PHOTO_BASELINE_MS,
+  sanitizeVerifiedShopPhotoUrl,
+  isVerifiedShopSpecialtyPhotoUrl,
+  isValidGoogleMapsUrl,
+  extractCoordsFromGoogleMapsUrl,
+  AuthModalInitialView,
+  hasAuthenticatedEmailAccount,
+  hasAuthenticatedPhoneAccount,
+  hasAuthenticatedAccount,
+  computeFastPhotoSignature,
+  APP_VERSION_NAME,
+  APP_BUILD_CODE,
   REMOVED_DUPLICATE_FOOD_IDS,
   remapDuplicateFoodIdToCanonical,
   normalizeFoodNameKhForDedup,
@@ -76,29 +114,37 @@ import {
   normalizeAbaTrxId,
   getCambodiaDateIso,
 } from '../services/aiPaymentVerificationService';
-import { 
-  verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
-  VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, VIP_QUARTERLY_PRICE_USD, VIP_QUARTERLY_DAYS,
-  PaymentVerificationRequest, verifyAbaPaymentTransaction, resolveAndValidateVipPlan,
-  verifyAdditionalStorePaymentOnBackend, recordVerifiedTransaction, checkDuplicateTransaction
+import {
+  verifyPaymentOnBackend,
+  calculateVipDates,
+  checkEligibleRestoration,
+  PaymentVerificationRequest,
+  verifyAbaPaymentTransaction,
+  resolveAndValidateVipPlan,
+  verifyAdditionalStorePaymentOnBackend,
+  recordVerifiedTransaction,
+  checkDuplicateTransaction,
 } from '../services/paymentService';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { buildDynamicNotificationsList } from '../services/dailyDiscoveryAndNotificationService';
 import { findDuplicateRestaurant, mergeRestaurantRecords, calculateDistanceMeters } from '../utils/duplicateDetector';
 import { recordSubmissionTimestamp, checkSubmissionRateLimit } from '../services/aiCheckInService';
 
-import { 
-  initialUsers, initialFoods, initialRestaurants, 
-  initialDestinations, initialAppSettings, initialTransactions 
+import {
+  initialUsers,
+  initialFoods,
+  initialRestaurants,
+  initialDestinations,
+  initialAppSettings,
+  initialTransactions,
 } from '../data/seedData';
 import { loadExtendedDestinationsAndHotels } from '../data/seedDestinations';
-import { hashPassword, verifyPassword } from '../utils/crypto';
+import { verifyPassword } from '../utils/crypto';
 import { normalizeCambodiaPhone, validateCambodiaPhoneForRegistration, normalizeEmailForIdentity, getCanonicalPhoneDigits, isDisposableEmailAddress, computeIdentityClaimHashes } from '../utils/identityNormalize';
 import { recordMeaningfulAction } from '../utils/engagement';
 import {
   getAdminAvatarUrl,
   saveAdminAvatar,
-  cacheUserAvatar,
   getCachedUserAvatar,
   cacheUserAvatarForAccount,
   getCachedUserAvatarForAccount,
@@ -106,12 +152,17 @@ import {
   isCustomUploadedAvatarDataUrl,
   isPlaceholderOrInvalidAvatarUrl,
 } from '../utils/avatarHelper';
-import { translateTextToChinese, useChineseDomTranslation, stripForeignScripts, tr } from '../utils/i18n';
-import { 
-  hashPasswordPBKDF2, verifyPasswordPBKDF2, 
-  checkAdminLoginAllowed, recordAdminLoginFailed, resetAdminLoginAttempts,
-  createAdminSession, verifyAdminSession, revokeAdminSession,
-  recordSecurityAudit
+import { useChineseDomTranslation, stripForeignScripts, tr } from '../utils/i18n';
+import {
+  hashPasswordPBKDF2,
+  verifyPasswordPBKDF2,
+  checkAdminLoginAllowed,
+  recordAdminLoginFailed,
+  resetAdminLoginAttempts,
+  createAdminSession,
+  verifyAdminSession,
+  revokeAdminSession,
+  recordSecurityAudit,
 } from '../utils/security';
 import { App as CapApp } from '@capacitor/app';
 import {
@@ -145,7 +196,7 @@ import {
   isRevokedOrDeletedUserRecord,
 } from '../services/supabaseService';
 import { resetUserHighWater } from '../services/userDataIntegrityService';
-import { authenticateAdminWithBiometric, setSavedAdminUsername } from '../services/biometricService';
+import { authenticateAdminWithBiometric } from '../services/biometricService';
 import {
   loadLocalMediaOverrides,
   saveLocalMediaOverrides,
@@ -6738,8 +6789,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       handleBackButtonAction();
     }).then(h => {
       backListenerHandle = h;
-    }).catch(err => {
-      console.log('Native back-button listener not available in standard web view', err);
+    }).catch(err => { /* Native back-button listener not available in standard web view */
     });
 
     const handlePopState = () => {

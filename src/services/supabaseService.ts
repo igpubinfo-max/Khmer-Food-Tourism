@@ -5374,8 +5374,9 @@ export async function syncAllAppDataWithSupabase(localState: {
  * SQL Script for 1-Click Setup in Supabase SQL Editor (Free Tier)
  */
 export const SUPABASE_SETUP_SQL = `-- ============================================================================
--- Cambodia Flavors & Tourism (v1.7.5) — Supabase Free Tier Cloud Database Setup
--- Copy and Run this once in your Supabase Dashboard -> SQL Editor -> New Query
+-- Cambodia Flavors & Tourism (v2.7.0) — Hardened Supabase Cloud Database Setup
+-- Copy and Run this in your Supabase Dashboard -> SQL Editor -> New Query
+-- (See supabase/migrations/ for the full multi-layer trigger & RLS migrations)
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS public.kft_app_kv_store (
@@ -5384,28 +5385,82 @@ CREATE TABLE IF NOT EXISTS public.kft_app_kv_store (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Enable Row Level Security (RLS) with public app access policy for sync
+-- Enable Row Level Security (RLS) with granular, namespace-scoped policies
 ALTER TABLE public.kft_app_kv_store ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Allow public read and write for app sync" ON public.kft_app_kv_store;
-CREATE POLICY "Allow public read and write for app sync"
-  ON public.kft_app_kv_store
-  FOR ALL
-  USING (true)
-  WITH CHECK (true);
+DROP POLICY IF EXISTS "kft_kv_select_policy" ON public.kft_app_kv_store;
+DROP POLICY IF EXISTS "kft_kv_insert_policy" ON public.kft_app_kv_store;
+DROP POLICY IF EXISTS "kft_kv_update_policy" ON public.kft_app_kv_store;
+DROP POLICY IF EXISTS "kft_kv_delete_policy" ON public.kft_app_kv_store;
 
--- Optional: Index on updated_at for fast queries
+CREATE POLICY "kft_kv_select_policy"
+  ON public.kft_app_kv_store
+  FOR SELECT
+  USING (key LIKE 'kft\\_%' ESCAPE '\\');
+
+CREATE POLICY "kft_kv_insert_policy"
+  ON public.kft_app_kv_store
+  FOR INSERT
+  WITH CHECK (
+    key LIKE 'kft\\_%' ESCAPE '\\'
+    AND length(key) <= 200
+    AND jsonb_typeof(payload) IN ('object', 'array')
+  );
+
+CREATE POLICY "kft_kv_update_policy"
+  ON public.kft_app_kv_store
+  FOR UPDATE
+  USING (key LIKE 'kft\\_%' ESCAPE '\\')
+  WITH CHECK (
+    key LIKE 'kft\\_%' ESCAPE '\\'
+    AND length(key) <= 200
+    AND jsonb_typeof(payload) IN ('object', 'array')
+  );
+
+CREATE POLICY "kft_kv_delete_policy"
+  ON public.kft_app_kv_store
+  FOR DELETE
+  TO service_role
+  USING (true);
+
 CREATE INDEX IF NOT EXISTS idx_kft_app_kv_updated_at ON public.kft_app_kv_store(updated_at DESC);
 
--- Optional: Public Cloud Storage Bucket for Food, Shop & Tourism Media
+-- Public Cloud Storage Bucket for Food, Shop & Tourism Media (Image-only INSERT, service_role UPDATE/DELETE)
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('food-media', 'food-media', true)
 ON CONFLICT (id) DO UPDATE SET public = true;
 
 DROP POLICY IF EXISTS "Allow public read and upload on food-media" ON storage.objects;
-CREATE POLICY "Allow public read and upload on food-media"
+DROP POLICY IF EXISTS "food_media_public_select" ON storage.objects;
+DROP POLICY IF EXISTS "food_media_safe_image_insert" ON storage.objects;
+DROP POLICY IF EXISTS "food_media_service_update" ON storage.objects;
+DROP POLICY IF EXISTS "food_media_service_delete" ON storage.objects;
+
+CREATE POLICY "food_media_public_select"
   ON storage.objects
-  FOR ALL
+  FOR SELECT
+  USING (bucket_id = 'food-media');
+
+CREATE POLICY "food_media_safe_image_insert"
+  ON storage.objects
+  FOR INSERT
+  WITH CHECK (
+    bucket_id = 'food-media'
+    AND lower(storage.extension(name)) IN ('jpg', 'jpeg', 'png', 'webp', 'gif', 'avif')
+    AND position('..' in name) = 0
+  );
+
+CREATE POLICY "food_media_service_update"
+  ON storage.objects
+  FOR UPDATE
+  TO service_role
   USING (bucket_id = 'food-media')
   WITH CHECK (bucket_id = 'food-media');
+
+CREATE POLICY "food_media_service_delete"
+  ON storage.objects
+  FOR DELETE
+  TO service_role
+  USING (bucket_id = 'food-media');
 `;

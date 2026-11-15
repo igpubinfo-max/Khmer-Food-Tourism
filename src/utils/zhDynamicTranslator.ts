@@ -10,7 +10,6 @@ import {
   EXTRA_DESTINATION_NAME_ZH_MAP,
   DEST_DESC_ZH_BY_ID,
   DEST_CATEGORY_ZH_MAP,
-  translateEntranceFeeToZh,
   translateBestTimeToZh,
   translateAddressToZh,
   translateRestaurantNameToZh,

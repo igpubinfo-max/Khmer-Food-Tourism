@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  X, ArrowLeft, MapPin, Phone, Star, Clock, ExternalLink, Compass,
-  Send, Share2, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
-  BarChart3, Video, Crown, Edit2, MessageSquare, Trash2
+import {
+  ArrowLeft,
+  MapPin,
+  Phone,
+  Star,
+  Clock,
+  ExternalLink,
+  Compass,
+  Camera,
+  Bookmark,
+  BarChart3,
+  Video,
+  Crown,
+  Edit2,
+  Trash2,
 } from 'lucide-react';
 import {
   isUserVipActive,
@@ -21,7 +32,7 @@ import { tr } from '../utils/i18n';
 import { isHotelBusinessRecord } from '../types';
 import { DetailedFourPartRatingsCard } from './common/CambodiaChoiceAndRatings';
 import { NearbyEcosystemSection } from './common/NearbyEcosystemSection';
-import { getLocalizedRestaurant, translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
+import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import {
   sanitizeDialablePhone,
   formatDisplayPhone,

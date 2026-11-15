@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  X, ArrowLeft, Heart, MapPin, Calendar, ExternalLink, 
-  Send, Share2, Compass, Camera, Bookmark, Edit2, Save, Phone
+import {
+  ArrowLeft,
+  Heart,
+  MapPin,
+  Calendar,
+  ExternalLink,
+  Compass,
+  Camera,
+  Bookmark,
+  Edit2,
+  Save,
+  Phone,
 } from 'lucide-react';
 import { TouristImageModal } from './TouristImageModal';
 import { DefaultDestinationIcon } from './TouristCard';

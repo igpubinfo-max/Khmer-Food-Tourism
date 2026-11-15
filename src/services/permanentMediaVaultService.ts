@@ -66,7 +66,6 @@ import {
   resetSupabaseEgressCooldown,
   pullCloudDocument,
   pushCloudDocument,
-  pullCloudDocumentsByPrefix,
   pullCloudKeysManifestByPrefix,
   pullCloudDocumentsByKeys,
   deleteCloudDocument,

@@ -40,8 +40,6 @@ import {
   launchAbaMobileWithDynamicKhqr,
   isShopSubscriptionActive,
   isIosOrIpadAppStoreRuntime,
-  isUserVipActive,
-  getDynamicVipPlans,
   isAdminAccount,
   isValidCambodiaCoordinates,
   buildCanonicalGoogleMapsPinUrl,

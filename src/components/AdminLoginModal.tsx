@@ -6,24 +6,35 @@ import {
   setVerifiedPinForSession,
 } from '../services/adminAuthClient';
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  X, ShieldAlert, Lock, User as UserIcon, Eye, EyeOff, 
-  KeyRound, CheckCircle2, ShieldCheck, AlertCircle, Clock, Fingerprint, Delete, Key
+import {
+  X,
+  ShieldAlert,
+  Lock,
+  User as UserIcon,
+  Eye,
+  EyeOff,
+  KeyRound,
+  CheckCircle2,
+  ShieldCheck,
+  AlertCircle,
+  Clock,
+  Fingerprint,
+  Delete,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { checkAdminLoginAllowed, resetAdminLoginAttempts } from '../utils/security';
-import { 
-  checkBiometricAvailability, 
-  setSavedAdminUsername, 
+import { checkAdminLoginAllowed } from '../utils/security';
+import {
+  checkBiometricAvailability,
+  setSavedAdminUsername,
   enrollAdminBiometric,
   getSavedAdminUsername,
-  authenticateAdminWithBiometric 
+  authenticateAdminWithBiometric,
 } from '../services/biometricService';
 import {
   DEFAULT_ADMIN_PIN_HASH,
   hashAdminPin,
   getAdminPinHash,
-  setAdminPinHash
+  setAdminPinHash,
 } from '../services/supabaseService';
 import { tr } from '../utils/i18n';
 import { getAdminAvatarUrl, getFallbackAvatarDataUri } from '../utils/avatarHelper';

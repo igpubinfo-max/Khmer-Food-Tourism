@@ -1,4 +1,4 @@
-import { Restaurant, FoodItem, AiCheckInSubmission } from '../types';
+import { Restaurant } from '../types';
 
 /**
  * Khmer Text Normalizer

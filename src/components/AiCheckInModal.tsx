@@ -1,8 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  X, Camera, Image as ImageIcon, MapPin, ShieldCheck, CheckCircle2, 
-  AlertCircle, RefreshCw, Send, Store, Utensils, Phone, Info 
+import {
+  X,
+  Camera,
+  Image as ImageIcon,
+  MapPin,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  Send,
+  Info,
 } from 'lucide-react';
 import {
   isNativeAndroidOrIosPlatform,
@@ -10,9 +18,13 @@ import {
   pickImageUsingNativeAndroidGallery,
   dataUrlToFile,
 } from '../utils/androidMediaHelper';
-import { 
-  compressImage, captureCurrentLocation, analyzeCheckInPhotoWithAi, 
-  LocationCoordinates, getProvinceFromGps, checkSubmissionRateLimit 
+import {
+  compressImage,
+  captureCurrentLocation,
+  analyzeCheckInPhotoWithAi,
+  LocationCoordinates,
+  getProvinceFromGps,
+  checkSubmissionRateLimit,
 } from '../services/aiCheckInService';
 import { tr } from '../utils/i18n';
 

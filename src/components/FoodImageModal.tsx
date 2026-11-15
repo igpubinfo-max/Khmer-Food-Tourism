@@ -1,8 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FoodItem, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
-import { 
-  X, Upload, Camera, Image as ImageIcon, Check, RefreshCw, 
-  AlertTriangle, CheckCircle2, Eye, Sliders, Smartphone, Search, Globe 
+import {
+  X,
+  Upload,
+  Camera,
+  Image as ImageIcon,
+  Check,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+  Eye,
+  Smartphone,
+  Search,
+  Globe,
 } from 'lucide-react';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import { normalizeAndValidateImage } from './TouristImageModal';

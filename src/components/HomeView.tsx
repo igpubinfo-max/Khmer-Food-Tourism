@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, isStrictVerifiedCambodiaRestaurant, isIosOrIpadAppStoreRuntime } from '../types';
+import { TrendingFoodItem, isUserVipActive, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, resolveFoodPhotoUrl, handleFoodImageError, isStrictVerifiedCambodiaRestaurant } from '../types';
 import {
   normalizeKhmerSearchText,
   searchGoogleMapsPlacesAdvanced,
@@ -13,31 +13,38 @@ import {
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
-import { HomeGreetingSearch } from './home/HomeGreetingSearch';
 import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
-import { TrendingFoodsRow } from './home/TrendingFoodsRow';
-import { HomeSkeleton, HomeEmptyState } from './home/HomeStates';
+import { HomeSkeleton } from './home/HomeStates';
 import { FeatureGrid } from './home/FeatureGrid';
 import { HomePopularAndSocialSection } from './home/HomePopularAndSocialSection';
 import { IconNavFood, IconNavShop, IconNavTourism, IconMapRoute } from './icons/HandcraftedIcons';
 import { ShopAvatar } from './icons/DefaultShopIcon';
-import { ForYouSection } from './home/ForYouSection';
 import { DailyHabitCard } from './home/DailyHabitCard';
-import { FestivalFoodSection } from './home/FestivalFoodSection';
-import { PopularShops } from './home/PopularShops';
-import { PopularDestinations } from './home/PopularDestinations';
-import { VipPerksCard } from './home/VipPerksCard';
-import { VipStatusNotice } from './home/VipStatusNotice';
 import { MyShopPanel } from './home/MyShopPanel';
-import { getMealSlot, getMealHint, seededShuffle, type MealSlot } from './home/homeUtils';
+import { getMealSlot, seededShuffle, type MealSlot } from './home/homeUtils';
 import { getAuthenticCambodianDishesForMealTime } from '../utils/cambodianMealHabits';
 import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../utils/aiSearchBridge';
 import {
-  ChevronRight, Utensils, Store, Compass,
+  ChevronRight,
+  Utensils,
+  Store,
+  Compass,
   MapPin,
-  ExternalLink, Search, Sparkles, RefreshCw,
-  Plus, Edit2, X, Trash2, Globe, Loader2,
-  Users, CreditCard, Settings, MessageSquare, Shield
+  ExternalLink,
+  Search,
+  Sparkles,
+  RefreshCw,
+  Plus,
+  Edit2,
+  X,
+  Trash2,
+  Globe,
+  Loader2,
+  Users,
+  CreditCard,
+  Settings,
+  MessageSquare,
+  Shield,
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {

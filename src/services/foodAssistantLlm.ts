@@ -27,7 +27,6 @@ import {
   buildGeminiGenerateContentUrls,
   getGeminiCandidateModels,
   getWorkingGeminiRoute,
-  isVertexExpressApiKey,
   recordWorkingGeminiRoute,
   resolveGeminiApiKey,
   type AiAssistantMessage,
@@ -35,7 +34,7 @@ import {
   type AiImageAnalysis,
   type AiTurnIntent,
 } from './conversationalAiAssistant';
-import { getCloudApiConfig, verifyUserVipStatusFromBackend } from './supabaseService';
+import { getCloudApiConfig } from './supabaseService';
 import { ensureAiConsent } from './aiConsent';
 
 /* ------------------------------------------------------------------------------------------------ */

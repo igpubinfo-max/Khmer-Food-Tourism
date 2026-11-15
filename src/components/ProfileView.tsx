@@ -4,21 +4,62 @@ import { FoodCard } from './FoodCard';
 import { RestaurantCard } from './RestaurantCard';
 import { TouristCard } from './TouristCard';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
-import { 
-  User as UserIcon, Heart, Shield, Store, 
-  Globe, LogOut, RefreshCw, ShieldCheck, CheckCircle2,
-  Bell, Compass, Bookmark, Plus, Trash2, ChevronRight, ChevronDown,
-  Edit2, Check, X as CloseIcon, Crown, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera, Image as ImageIcon, RotateCw, RotateCcw
+import {
+  User as UserIcon,
+  Heart,
+  Shield,
+  Store,
+  Globe,
+  LogOut,
+  RefreshCw,
+  ShieldCheck,
+  CheckCircle2,
+  Bell,
+  Compass,
+  Bookmark,
+  Plus,
+  Trash2,
+  ChevronRight,
+  ChevronDown,
+  Edit2,
+  Check,
+  X as CloseIcon,
+  Crown,
+  Award,
+  Copy,
+  Clock,
+  MessageSquare,
+  Mail,
+  Settings,
+  Camera,
+  Image as ImageIcon,
+  RotateCw,
 } from 'lucide-react';
 import {
-  isRestaurantPremiumActive, isUserVipActive, isUserOnConsumerFreeTrial, isUserPaidVipActive, getConsumerVipPricingCatalog, getVipAccountState, getVipRemainingDays, resolveUserActualVipPlanDays,
-  APP_VERSION, APP_BUILD_CODE, getDynamicVipPlans, getDynamicVipBenefits,
+  isUserVipActive,
+  isUserOnConsumerFreeTrial,
+  isUserPaidVipActive,
+  getConsumerVipPricingCatalog,
+  getVipAccountState,
+  getVipRemainingDays,
+  resolveUserActualVipPlanDays,
+  APP_VERSION,
+  APP_BUILD_CODE,
+  getDynamicVipPlans,
+  getDynamicVipBenefits,
   isAdminAccount,
-  isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, getVipFeaturedRotationState,
-  isShopSubscriptionActive, getShopSubscriptionCatalog, SHOP_ALL_INCLUSIVE_5_BENEFITS, SUMMARIZED_10_VIP_BENEFITS, sanitizeVipMembershipHistoryEntry, sanitizeLegacyVipTransactionPricing
+  isIosOrIpadAppStoreRuntime,
+  getVipFeaturedRotationConfig,
+  getVipFeaturedRotationState,
+  isShopSubscriptionActive,
+  getShopSubscriptionCatalog,
+  SHOP_ALL_INCLUSIVE_5_BENEFITS,
+  SUMMARIZED_10_VIP_BENEFITS,
+  sanitizeVipMembershipHistoryEntry,
+  sanitizeLegacyVipTransactionPricing,
 } from '../types';
 import { tr } from '../utils/i18n';
-import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl, isCustomUploadedAvatarDataUrl, rotateDataUrl } from '../utils/avatarHelper';
+import { resolveUserAvatarUrl, handleAvatarImageError, isCustomUploadedAvatarDataUrl } from '../utils/avatarHelper';
 import { AvatarEditorModal } from './AvatarEditorModal';
 import {
   isNativeAndroidOrIosPlatform,

@@ -1,6 +1,5 @@
 import {
   AppNotification,
-  DailyDiscoveryCategory,
   DailyDiscoveryItem,
   FoodItem,
   NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI,

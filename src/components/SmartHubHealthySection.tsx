@@ -5,7 +5,11 @@ import { resolveFoodPhotoUrl, handleFoodImageError, type FoodItem } from '../typ
 import { tr } from '../utils/i18n';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 import {
-  DISH_TAG_DEFS, getDishTagIds, tagBenefit, tagCookingTip, TAG_ESTIMATE_NOTE, GENERAL_FOOD_INFO_NOTE,
+  DISH_TAG_DEFS,
+  getDishTagIds,
+  tagCookingTip,
+  TAG_ESTIMATE_NOTE,
+  GENERAL_FOOD_INFO_NOTE,
 } from '../utils/dishTags';
 import type { DishTagId } from '../utils/dishTags';
 import { buildMealPlan } from '../utils/mealPlan';

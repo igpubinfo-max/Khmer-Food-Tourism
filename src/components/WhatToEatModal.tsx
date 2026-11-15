@@ -4,7 +4,6 @@ import {
   X,
   Award,
   Shuffle,
-  MapPin,
   Star,
   Clock,
   ChefHat,
@@ -15,7 +14,6 @@ import {
   Coffee,
   CheckCircle2,
   Crown,
-  Lock,
   Navigation,
   Search,
   Send,
@@ -34,7 +32,7 @@ import {
   Check,
   MessageCircle,
 } from 'lucide-react';
-import { FoodItem, isGpipRegisteredRestaurant, isHotelBusinessRecord, openExternalUrlNativeSafe, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, isIosOrIpadAppStoreRuntime } from '../types';
+import { FoodItem, openExternalUrlNativeSafe, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, isIosOrIpadAppStoreRuntime } from '../types';
 import {
   buildAgentRoleChips,
   checkAndIncrementDailyTierAiQuota,
@@ -42,7 +40,6 @@ import {
   resolveAiAgentUserRole,
   tryExecuteAiAgentTurn,
 } from '../services/aiAgentPlatformService';
-import { verifyUserVipStatusFromBackend } from '../services/supabaseService';
 import {
   isNativeAndroidOrIosPlatform,
   takePhotoUsingNativeAndroidCamera,
@@ -65,7 +62,7 @@ import { grantAiConsent } from '../services/aiConsent';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
-import { getDishTagIds, type DishTagId } from '../utils/dishTags';
+import { getDishTagIds, estimateDishNutritionFromRecipe, type DishTagId } from '../utils/dishTags';
 import {
   getMatchingRestaurantsForDish,
   matchesDishCategoryFilter,
@@ -89,8 +86,6 @@ import {
   buildWelcomeAssistantMessage,
   generateConversationalAiResponse,
   fetchOnlineDishPhotoByQuery,
-  detectOutOfCatalogDishName,
-  createOutOfCatalogDishItem,
   resolveGeminiApiKey,
   testGeminiApiConnection,
   type AiAssistantMessage,
@@ -178,9 +173,9 @@ const HEALTH_OPTIONS: Array<{
     shortKh: 'ស្រាលក្រពះ',
     shortEn: 'Light',
     shortZh: '清淡',
-    ruleKh: 'ម្ហូបតិចជាង ៤៥០ kcal ក្នុង ១ ចាន (មិនរាប់ម្ហូបចៀន ឬខ្ទិះដូងក្រាស់) • តែម្ហូបដែលមានទិន្នន័យកាឡូរី',
-    ruleEn: 'Dishes under 450 kcal per serving (no fried or rich coconut dishes) • only dishes with recorded calories',
-    ruleZh: '每份低于 450 千卡（不含油炸与浓椰浆菜品）• 仅限有热量记录的菜品',
+    ruleKh: 'ម្ហូបស្រាលក្រពះ៖ តិចជាង ៤៥០ kcal • គ្មានម្ទេស ទឹកត្រីម្ទេស ហឹរ ជូរ (ម្ជូរ ជ្រក់ ក្រូចឆ្មារ អម្ពិល) • គ្មានប្រហុក/កាពិ • មិនឆៅ មិនចៀន មិនអាំង មិនខ្លាញ់ក្រាស់ ឬខ្ទិះដូងក្រាស់',
+    ruleEn: 'Gentle on the stomach: under 450 kcal • no chili, chili sauce, spicy or sour dishes (tamarind, lime, pickles) • no prahok/shrimp paste • not raw, fried, grilled, greasy or rich coconut curry',
+    ruleZh: '养胃清淡：每份低于 450 千卡 • 不含辣椒、辣酱、辛辣与酸味菜（罗望子、青柠、腌菜）• 不含发酵鱼酱/虾酱 • 非生食、油炸、烧烤、油腻或浓椰浆咖喱',
     icon: Leaf,
   },
   {
@@ -2301,7 +2296,7 @@ export const WhatToEatModal: React.FC = () => {
                                         )}
                                       </div>
                                       <div className="text-[10px] font-bold text-emerald-700">
-                                        {isGeneratedDishId(dish.id) ? dLoc.category : `${dLoc.category} • ${dLoc.cookTime} • ${dish.calories || 280} kcal`}
+                                        {isGeneratedDishId(dish.id) ? dLoc.category : `${dLoc.category} • ${dLoc.cookTime} • ${dish.calories || estimateDishNutritionFromRecipe(dish).caloriesKcal} kcal`}
                                       </div>
                                       {!isGeneratedDishId(dish.id) && (
                                       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/80 text-amber-900 text-[10px] font-bold">
@@ -2433,7 +2428,7 @@ export const WhatToEatModal: React.FC = () => {
                                           <span>•</span>
                                           <span>{rpLoc.cookTime}</span>
                                           <span>•</span>
-                                          <span>{rpFood.calories || 280} kcal</span>
+                                          <span>{rpFood.calories || estimateDishNutritionFromRecipe(rpFood).caloriesKcal} kcal</span>
                                         </>
                                       ) : rpFood.cookTime ? (
                                         <span>{rpLoc.cookTime}</span>
@@ -2861,7 +2856,7 @@ export const WhatToEatModal: React.FC = () => {
                                 <div className="grid grid-cols-4 gap-1.5 text-center">
                                   <div className="p-2 rounded-xl bg-white border border-emerald-200/70">
                                     <div className="text-xs font-black text-amber-600">{n.caloriesKcal}</div>
-                                    <div className="text-[9px] font-bold text-slate-500">kcal</div>
+                                    <div className="text-[9px] font-bold text-slate-500">{tr(language, 'kcal (ប៉ាន់ស្មាន)', 'kcal (est.)', '千卡 (估算)')}</div>
                                   </div>
                                   <div className="p-2 rounded-xl bg-white border border-emerald-200/70">
                                     <div className="text-xs font-black text-emerald-600">{n.proteinGrams}g</div>
@@ -4141,7 +4136,7 @@ export const WhatToEatModal: React.FC = () => {
                           </div>
                           <div className="font-extrabold text-slate-900 line-clamp-1">{cLoc.name}</div>
                           <div className="text-[10px] font-bold text-emerald-700">
-                            {cDish.rating} • {cLoc.cookTime} • {cDish.calories || 280} kcal
+                            {cDish.rating} • {cLoc.cookTime} • {cDish.calories || estimateDishNutritionFromRecipe(cDish).caloriesKcal} kcal
                           </div>
                           <div className="text-[10px] text-amber-800 font-semibold line-clamp-2 leading-snug break-words">
                             {cTaste}

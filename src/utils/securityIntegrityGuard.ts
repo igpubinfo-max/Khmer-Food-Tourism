@@ -19,7 +19,6 @@ import {
   User,
   parseSafeDateMs,
   getAuthoritativeServerNowMs,
-  isPermanentVipEmail,
   resolveUserActualVipPlanDays,
   sanitizeUserVipPlanAndExpiry,
   sanitizeVipMembershipHistoryEntry,

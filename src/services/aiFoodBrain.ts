@@ -2,9 +2,7 @@ import type { FoodItem, Language } from '../types';
 import { tr } from '../utils/i18n';
 import {
   isBeverageFood,
-  isSweetOrBeverageFood,
   normalizeKhmerFoodText,
-  stripNegatedSpicePhrases,
 } from '../utils/khmerFoodSearch';
 import {
   rankDrinkPairingDishes,

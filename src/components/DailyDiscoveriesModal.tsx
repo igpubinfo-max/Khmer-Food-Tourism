@@ -611,7 +611,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   >
                     {/* 3D Gold-Bordered Button Graphic */}
                     <div
-                      className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px]"
+                      className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] ${active ? 'kft-cat-img-active-glow' : ''}`}
                       style={{
                         transform: 'none',
                       }}

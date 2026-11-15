@@ -801,6 +801,11 @@ img[src^="data:image"],
   filter: none !important;
   -webkit-filter: none !important;
 }
+.kft-cat-img-wrap.kft-cat-img-active-glow > img,
+.kft-cat-img-active-glow {
+  filter: drop-shadow(0 0 3px rgba(250, 204, 21, 1)) drop-shadow(0 0 9px rgba(245, 158, 11, 0.92)) drop-shadow(0 2px 14px rgba(217, 119, 6, 0.65)) !important;
+  -webkit-filter: drop-shadow(0 0 3px rgba(250, 204, 21, 1)) drop-shadow(0 0 9px rgba(245, 158, 11, 0.92)) drop-shadow(0 2px 14px rgba(217, 119, 6, 0.65)) !important;
+}
 
 /* 14. Unified Compact Green Khmer Angkor Wat Decorative Header Banner (Untitled-3.png) */
 .kft-khmer-modal-header {

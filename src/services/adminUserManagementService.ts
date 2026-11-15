@@ -1,11 +1,11 @@
-import { isUserOwnerOfRestaurantRecord, isHotelBusinessRecord } from '../types';
+import { isUserOwnerOfRestaurantRecord } from '../types';
 import type {
   User,
-  UserRole,
   DeletedUserRecord,
   Restaurant,
   RegistrationTransaction,
-  SupportTicket,} from '../types';
+  SupportTicket,
+} from '../types';
 import { isSeedRestaurantId } from '../types';
 import { getCanonicalUserId, pushCloudDocument, pullCloudDocument } from './supabaseService';
 

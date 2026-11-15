@@ -1,4 +1,3 @@
-import { AiCheckInSubmission } from '../types';
 
 export interface LocationCoordinates {
   latitude: number;

@@ -1,8 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { 
-  X, Bookmark, Plus, Trash2, Check, ListPlus, Heart, ExternalLink 
+import {
+  X,
+  Bookmark,
+  Plus,
+  Trash2,
+  Check,
+  ListPlus,
+  Heart,
+  ExternalLink,
 } from 'lucide-react';
-import { WishlistItem, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl } from '../types';
+import { WishlistItem, resolveFoodPhotoUrl } from '../types';
 import { useApp } from '../context/AppContext';
 import { tr, translateProvince } from '../utils/i18n';
 import { translateDynamicTextToZh, sanitizeStrictLanguageText } from '../utils/zhDynamicTranslator';

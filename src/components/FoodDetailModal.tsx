@@ -1,21 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  X, Heart, Clock, Users, Utensils, ChefHat, 
-  CheckCircle2, Circle, Volume2, Search, Bookmark, Globe, Check,
-  Edit2, Save, Upload, Camera, ArrowLeft, Plus, Trash2
+import {
+  Heart,
+  Clock,
+  Users,
+  Utensils,
+  ChefHat,
+  CheckCircle2,
+  Circle,
+  Volume2,
+  Search,
+  Bookmark,
+  Globe,
+  Check,
+  Edit2,
+  Save,
+  Upload,
+  Camera,
+  ArrowLeft,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
   takePhotoUsingNativeAndroidCamera,
-  processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import { FoodCategorySlug, FoodItem, Ingredient, CookingStep, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { DishTagChips } from './DishTagChips';
+import { estimateDishNutritionFromRecipe, isEstimatedCalorieDish } from '../utils/dishTags';
+import { isGeneratedDishId } from '../utils/generatedDish';
 import { PassportStampButton } from './PassportStampButton';
 import { WhereToEat } from './WhereToEat';
 import { FOOD_WATERMARK_TEXT, FOOD_WATERMARK_BADGE_CLASS, applyFoodWatermarkOnce, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
@@ -1183,7 +1200,9 @@ export const FoodDetailModal: React.FC = () => {
                 <Utensils className="w-4 h-4 mx-auto text-orange-500 mb-1" />
                 <p className="text-[11px] text-slate-400">{tr(language, 'ថាមពល', 'Energy', '热量')}</p>
                 <p className="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-slate-200">
-                  {selectedFood.calories || 285} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}
+                  {isGeneratedDishId(selectedFood.id) && !selectedFood.calories
+                    ? tr(language, 'មិនទាន់មាន', 'N/A', '暂无')
+                    : `${selectedFood.calories || estimateDishNutritionFromRecipe(selectedFood).caloriesKcal} ${tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}${isEstimatedCalorieDish(selectedFood.id) ? ` (${tr(language, 'ប៉ាន់ស្មាន', 'est.', '估算')})` : ''}`}
                 </p>
               </div>
 

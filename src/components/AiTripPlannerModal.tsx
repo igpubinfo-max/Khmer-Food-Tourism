@@ -40,7 +40,6 @@ import {
   getAiFoodAdvisorRecommendations,
 } from '../services/aiFoodAdvisorService';
 import { AiBrainInsightCard } from './AiBrainInsightCard';
-import { verifyUserVipStatusFromBackend } from '../services/supabaseService';
 
 export interface CambodiaProvinceTripOption {
   id: string;

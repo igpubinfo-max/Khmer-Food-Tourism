@@ -21,7 +21,7 @@ import {
   ExternalLink,
   RefreshCw,
 } from 'lucide-react';
-import { AppNotification, isHotelBusinessRecord } from '../types';
+import { AppNotification } from '../types';
 import { tr, translateTextToChinese, translateProvince } from '../utils/i18n';
 import {
   loadNotificationPreferences,

@@ -14,8 +14,8 @@ import {
   getCachedUniversalDishPhoto,
   fetchUniversalDishPhotoFromOpenApis,
 } from '../utils/universalDishOpenApi';
-import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
-import { isMedicalOrHealthQuery, buildMedicalScopeNotice, describeDish, type BrainChip } from './aiFoodBrain';
+import { getLocalizedFood } from '../utils/zhDynamicTranslator';
+import { isMedicalOrHealthQuery, buildMedicalScopeNotice, type BrainChip } from './aiFoodBrain';
 import { getAiFoodAdvisorRecommendations, isVegetarianQuery } from './aiFoodAdvisorService';
 import { getCloudApiConfig, DEFAULT_GOOGLE_MAPS_API_KEY } from './supabaseService';
 import type { AiAgentToolResult } from './aiAgentPlatformService';
