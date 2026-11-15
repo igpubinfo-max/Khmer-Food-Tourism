@@ -1,4 +1,5 @@
 import {
+  Language,
   Restaurant,
   TouristDestination,
   isHotelBusinessRecord,
@@ -13,7 +14,9 @@ import {
   mergeGoogleMapsPlaceWithExistingRestaurant,
   normalizeKhmerSearchText,
 } from '../services/googlePlacesService';
-import { verifyShopDataForDisplay } from './foodFilters';
+import { classifyShopBusinessKind, verifyShopDataForDisplay } from './foodFilters';
+import { normalizeKhmerFoodText } from './khmerFoodSearch';
+import { getLocalizedRestaurant } from './zhDynamicTranslator';
 
 // Haversine formula for distance between 2 GPS coordinates in meters
 export function calculateDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -477,10 +480,10 @@ const HOTEL_KEYWORD_REGEX =
   /សណ្ឋាគារ|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|បឹងកាឡូ|រីសត|អេកូរីសត|អេកូឡច|វីឡា|ប៊ូទិក|រេស៊ីដង់|រ៉េស៊ីដិន|អាផាតមិន|ស្វីត|ភូមិគ្រឹះ|ហូមស្ទេ|ហូស្តេល|ឡច|\b(hotel|hotels|guesthouse|guest\s*house|hostel|motel|homestay|home\s*stay|bungalow|bungalows|lodge|lodging|inn|suites?|resort|resorts|eco-resort|eco-lodge|villa|villas|boutique|residence|residences|apartment|apartments|retreat|glamping)\b/i;
 
 const FOOD_SHOP_KEYWORD_REGEX =
-  /ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងកាហ្វេ|ហាងបាយ|គុយទាវ|មីឆា|នំបញ្ចុក|សាច់អាំង|ស៊ុប|តែគុជ|នំប៉័ង|ម្ហូបបួស|អាហារបួស|អាហារព្រឹក|\b(restaurant|cafe|café|coffee|bakery|bistro|eatery|noodle|noodles|bbq|hotpot|grill|pizza|burger|boba|vegetarian|vegan|breakfast)\b/i;
+  /ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងអាហារ|ហាងកាហ្វេ|កាហ្វេ|ហាងបាយ|បាយ|ម្ហូប|សម្ល|អាម៉ុក|ឡុកឡាក់|គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់|គ្រឿង|ប៉ាតេ|ប្រហិត|ពង|លាក់ខ្លួន|ជាតិ)|នំបញ្ចុក|លតឆា|បបរ|សាច់អាំង|ស៊ុប|គ្រឿងសមុទ្រ|ប៊ូហ្វេ|ឆ្នាំងភ្លើង|តែគុជ|ហាងតែ|ភេសជ្ជៈ|នំប៉័ង|នំខេក|ការ៉េម|បង្អែម|ភីហ្សា|ម្ហូបបួស|អាហារបួស|អាហារព្រឹក|\b(restaurant|cafe|café|coffee|cofe|coffe|kopi|roastery|espresso|latte|matcha|bakery|bistro|eatery|diner|noodle|noodles|kuy\s*teav|pho|ramen|udon|bbq|hotpot|grill|seafood|buffet|steak|steakhouse|sushi|dim\s*sum|pizza|burger|burrito|tacos|boba|milk\s*tea|tea\s*house|smoothie|juice|ice\s*cream|dessert|vegetarian|vegan|breakfast)\b/i;
 
 const TOURISM_ONLY_KEYWORD_REGEX =
-  /ប្រាសាទ|វត្ត|ទឹកធ្លាក់|សារមន្ទីរ|ភ្នំ|ឆ្នេរ|កោះ|ឧទ្យានជាតិ|រមណីយដ្ឋាន|ពហុកីឡដ្ឋាន|កីឡដ្ឋាន|សួនសត្វ|វិមានឯករាជ្យ|ស្តូប|រូបសំណាក|ផ្សារធំថ្មី|ផ្សារទួលទំពូង|ផ្សាររាត្រី|ផ្លូវថ្មើរជើង|មជ្ឈមណ្ឌលប្រល័យពូជសាសន៍|ទួលស្លែង|ជើងឯក|\b(temple|pagoda|wat\b|museum|waterfall|national\s*park|monument|palace|sanctuary|beach|island|mountain|stadium|zoo|safari\s*world|genocide|memorial\s*statue|walk\s*street|promenade)\b/i;
+  /ប្រាសាទ|វត្ត|ទឹកធ្លាក់|សារមន្ទីរ|ភ្នំ(?!ពេញ)|ឆ្នេរ|កោះ|ឧទ្យានជាតិ|រមណីយដ្ឋាន|ពហុកីឡដ្ឋាន|កីឡដ្ឋាន|សួនសត្វ|សួនទឹក|សួនកម្សាន្ត|វិមានឯករាជ្យ|ព្រះបរមរាជវាំង|ស្តូប|រូបសំណាក|ផ្សារធំថ្មី|ផ្សារទួលទំពូង|ផ្សាររាត្រី|ផ្លូវថ្មើរជើង|មជ្ឈមណ្ឌលប្រល័យពូជសាសន៍|ទួលស្លែង|ជើងឯក|\b(temple|pagoda|wat\b|museum|waterfall|national\s*park|monument|palace|sanctuary|beach|island|mountain|stadium|zoo|safari\s*world|genocide|memorial\s*statue|walk\s*street|promenade|tourist\s*attraction|amusement\s*park|water\s*park|botanical\s*garden|heritage)\b/i;
 
 const STRICT_NON_HOTEL_ATTRACTION_REGEX =
   /ពហុកីឡដ្ឋាន|កីឡដ្ឋាន|សារមន្ទីរ|ប្រាសាទ|វត្ត|សួនសត្វ|វិមានឯករាជ្យ|ស្តូប|រូបសំណាក|ផ្សារធំថ្មី|ផ្សារទួលទំពូង|ផ្សាររាត្រី|ផ្លូវថ្មើរជើង|មជ្ឈមណ្ឌលប្រល័យពូជសាសន៍|ទួលស្លែង|ជើងឯក|សួនមាត់ទន្លេ|វិថីមាត់ទន្លេ|កោះពេជ្រ\s*ទីក្រុងរណប|ឧទ្យានជាតិ|ក្លឹបហាត់ប្រាណ|សាលាគុន|\b(stadium|museum|pagoda|wat\b|zoo|safari\s*world|monument|memorial\s*statue|genocide|central\s*market|russian\s*market|night\s*market|walk\s*street|promenade|national\s*park|martial\s*arts|boxing\s*gym|fitness\s*gym|crossfit)\b/i;
@@ -609,20 +612,75 @@ export function isHotelGooglePlace(gp: GooglePlaceCachedItem): boolean {
 export function isTourismAttractionGooglePlace(gp: GooglePlaceCachedItem): boolean {
   if (!gp) return false;
   if (isHotelGooglePlace(gp)) return false;
-  const text = `${gp.nameKh || ''} ${gp.nameEn || ''}`;
-  if (FOOD_SHOP_KEYWORD_REGEX.test(text) && !TOURISM_ONLY_KEYWORD_REGEX.test(text)) {
+  if (gp.category === 'restaurant' || gp.category === 'cafe' || gp.category === 'street_food') {
     return false;
   }
-  if (gp.category === 'tourism') return true;
-  return TOURISM_ONLY_KEYWORD_REGEX.test(text);
+  const cleanText = `${gp.nameKh || ''} ${gp.nameEn || ''}`.replace(
+    /រាជធានីភ្នំពេញ|ក្រុងភ្នំពេញ|ភ្នំពេញ|phnom\s*penh/gi,
+    ' '
+  );
+  if (FOOD_SHOP_KEYWORD_REGEX.test(cleanText)) {
+    return false;
+  }
+  const types = (gp.types || []).map((t) => String(t).toLowerCase());
+  const hasFoodGoogleType = types.some((t) =>
+    [
+      'restaurant',
+      'cafe',
+      'coffee_shop',
+      'bakery',
+      'bar',
+      'meal_takeaway',
+      'meal_delivery',
+      'food',
+      'steak_house',
+      'seafood_restaurant',
+      'ramen_restaurant',
+      'pizza_restaurant',
+      'hamburger_restaurant',
+      'ice_cream_shop',
+    ].includes(t)
+  );
+  if (hasFoodGoogleType && !STRICT_NON_HOTEL_ATTRACTION_REGEX.test(cleanText)) {
+    return false;
+  }
+  const hasTourismGoogleType = types.some((t) =>
+    [
+      'tourist_attraction',
+      'museum',
+      'hindu_temple',
+      'buddhist_temple',
+      'place_of_worship',
+      'historical_landmark',
+      'national_park',
+      'park',
+      'zoo',
+      'amusement_park',
+      'aquarium',
+      'art_gallery',
+      'stadium',
+      'natural_feature',
+    ].includes(t)
+  );
+  const pid = String(gp.placeId || gp.googlePlaceId || '').trim();
+  const isCuratedSeedDest = /^(?:gmap-(?:seed-)?dest-(?!hotel-)|(?:dest|rac)-[a-z0-9_-]+)/i.test(pid);
+  return isCuratedSeedDest || hasTourismGoogleType || TOURISM_ONLY_KEYWORD_REGEX.test(cleanText);
 }
 
 export function isFoodShopGooglePlace(gp: GooglePlaceCachedItem): boolean {
   if (!gp) return false;
   if (isHotelGooglePlace(gp)) return false;
-  if (gp.category === 'tourism') return false;
-  const text = `${gp.nameKh || ''} ${gp.nameEn || ''}`;
-  if (TOURISM_ONLY_KEYWORD_REGEX.test(text) && !FOOD_SHOP_KEYWORD_REGEX.test(text)) {
+  const cleanText = `${gp.nameKh || ''} ${gp.nameEn || ''}`.replace(
+    /រាជធានីភ្នំពេញ|ក្រុងភ្នំពេញ|ភ្នំពេញ|phnom\s*penh/gi,
+    ' '
+  );
+  if (STRICT_NON_HOTEL_ATTRACTION_REGEX.test(cleanText) && !FOOD_SHOP_KEYWORD_REGEX.test(cleanText)) {
+    return false;
+  }
+  if (gp.category === 'tourism') {
+    return FOOD_SHOP_KEYWORD_REGEX.test(cleanText) && !TOURISM_ONLY_KEYWORD_REGEX.test(cleanText);
+  }
+  if (TOURISM_ONLY_KEYWORD_REGEX.test(cleanText) && !FOOD_SHOP_KEYWORD_REGEX.test(cleanText)) {
     return false;
   }
   return true;
@@ -810,5 +868,223 @@ export function mergeNearbyTourismDestinations(params: {
     })
     .filter((d) => Number.isFinite(d.distanceMeters) && d.distanceMeters <= radiusMeters)
     .sort((a, b) => compareByGpsDistanceAscending(a, b, refCoords));
+}
+
+// ============================================================================
+// Centralized 6-Category Button Classifier & Localized Dish Badge Selector
+// ============================================================================
+
+const NOODLE_CATEGORY_REGEX =
+  /គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់|គ្រឿង|ប៉ាតេ|ប្រហិត|ពង|លាក់ខ្លួន|ជាតិ|ខ្លាឃ្មុំ)|(?<![ក-អ\u17B6-\u17D2])មី(?=\s|$|[&,/()])|បុកមី|ហាងមី|នំបញ្ចុក|លតឆា|បាញ់កាញ់|ហ្វឺ|គាវ|បបរ|\b(?:noodle|noodles|kuy\s*teav|kuyteav|pho|ramen|udon|vermicelli|wonton|dumpling|dumplings)\b|粿条|米粉|面条|拉面|汤面|炒面|粉面|云吞|饺子/i;
+
+const RICE_KHMER_CATEGORY_REGEX =
+  /បាយ|ម្ហូបខ្មែរ|អាហារខ្មែរ|ម្ហូបបួស|អាហារបួស|សម្ល|អាម៉ុក|ឡុកឡាក់|ប្រហុក|កកូរ|ម្ជូរ|ឆាក្តៅ|ត្រីចៀន|ត្រីអាំង|មាន់ដុត|ទាខ្វៃ|បាញ់ឆែវ|ណែម|ភោជនីយដ្ឋានខ្មែរ|ហាងបាយ|\b(?:khmer|cambodian|rice(?!\s*(?:noodles?|vermicelli|paper|flour|cake|wine))|amok|lok\s*lak|prahok|curry)\b|柬式|高棉|柬埔寨菜|米饭|炒饭|猪脚饭|鸡饭|阿莫克|禄拉克/i;
+
+const COFFEE_DRINK_CATEGORY_REGEX =
+  /កាហ្វេ|តែគុជ|តែបៃតង|តែក្រូចឆ្មា|តែទឹកដោះគោ|តែផ្លែឈើ|តែត្រជាក់|តែក្ដៅ|ហាងតែ|ភេសជ្ជៈ|ទឹកផ្លែឈើ|ទឹកក្រឡុក|ទឹកអំពៅ|ការ៉េម|នំប៉័ង|នំខេក|នំដុត|\b(?:coffee|cafe|café|cofe|coffe|kopi|espresso|latte|cappuccino|americano|mocha|macchiato|matcha|roastery|tea|boba|bubble\s*tea|milk\s*tea|smoothie|juice|bakery|pastry|croissant|cake|ice\s*cream|gelato|chagee|koi\s*th[eé]|gong\s*cha|the\s*alley|mixue|starbucks)\b|咖啡|奶茶|茶饮|果茶|冰沙|果汁|烘焙|面包|蛋糕|冰淇淋|甜品/i;
+
+const BBQ_SEAFOOD_CATEGORY_REGEX =
+  /សាច់អាំង|សាច់គោអាំង|គ្រឿងសមុទ្រ|ស៊ុបឆ្នាំងដី|ស៊ុបឆ្នាំងភ្លើង|ស៊ុបគោ|ស៊ុបម្រះ|ស៊ុបពិសេស|ស៊ុបសាច់គោ|ស៊ុបពពែ|ស៊ុបខួរ|ស៊ុបហឹរ|ឆ្នាំងភ្លើង|ឆ្នាំងដី|ហតផត|ប៊ូហ្វេ|ក្តាម|បង្គា|មឹក|អយស្ទ័រ|ងៀត|ត្រីដុត|បង្កង|\b(?:bbq|barbecue|seafood|grill|grilled|hotpot|hot\s*pot|shabu|sukiyaki|mookata|buffet|crab|prawns?|shrimp|squid|oyster|lobster|yakiniku)\b|烧烤|烤肉|海鲜|火锅|自助餐|螃蟹|大虾|鱿鱼/i;
+
+/**
+ * Evaluates whether a verified restaurant matches one of the 5 food category buttons in Near Me:
+ * - 'all' (ហាងទាំងអស់ / All Shops / 全部店铺)
+ * - 'rice_khmer' (បាយ & ម្ហូបខ្មែរ / Rice & Khmer / 柬式简餐)
+ * - 'noodles' (គុយទាវ & មី / Noodles / 粉面汤品)
+ * - 'coffee' (កាហ្វេ & ភេសជ្ជៈ / Café & Drinks / 咖啡饮品)
+ * - 'bbq_seafood' (សាច់អាំង & ស៊ុប / BBQ & Hotpot / 烧烤海鲜)
+ */
+export function matchesNearMeQuickCategory(r: Restaurant, quickFilterId: string): boolean {
+  if (!r) return false;
+  if (!quickFilterId || quickFilterId === 'all') return true;
+
+  const shopKind = classifyShopBusinessKind(r);
+  const zhLoc = getLocalizedRestaurant(r, 'zh');
+  const nameAndCatText = normalizeKhmerFoodText(
+    [r.nameKh, r.nameEn, zhLoc?.name, r.categoryKh, r.categoryEn, r.businessCategory]
+      .filter(Boolean)
+      .join(' ')
+  );
+  const fullHaystack = normalizeKhmerFoodText(
+    [
+      r.nameKh,
+      r.nameEn,
+      zhLoc?.name,
+      r.categoryKh,
+      r.categoryEn,
+      r.businessCategory,
+      ...(r.signatureDishesKh || []),
+      ...(r.signatureDishesEn || []),
+      ...(zhLoc?.signatureDishes || []),
+      ...((r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`)),
+    ]
+      .filter(Boolean)
+      .join(' ')
+  );
+
+  if (quickFilterId === 'coffee') {
+    if (shopKind === 'coffee_drink' || shopKind === 'bakery_bread' || r.businessCategory === 'cafe') {
+      return true;
+    }
+    if (shopKind === 'noodle_soup_restaurant' || shopKind === 'pizza_western') {
+      return false;
+    }
+    // Only include a general restaurant in Coffee & Drinks if its name/category is a cafe/bakery/tea house,
+    // or if its primary signature dish is explicitly a coffee/tea/bakery item (preventing Steakhouses or generic restaurants from leaking in).
+    if (COFFEE_DRINK_CATEGORY_REGEX.test(nameAndCatText)) {
+      return true;
+    }
+    const primaryDishText = normalizeKhmerFoodText(
+      `${(r.signatureDishesKh || [])[0] || ''} ${(r.signatureDishesEn || [])[0] || ''}`
+    );
+    return (
+      COFFEE_DRINK_CATEGORY_REGEX.test(primaryDishText) &&
+      !/ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងបាយ|សាច់អាំង|ស៊ុប|គ្រឿងសមុទ្រ|\b(?:steak|steakhouse|bbq|hotpot|seafood|buffet)\b/i.test(
+        nameAndCatText
+      )
+    );
+  }
+
+  // Non-coffee categories strictly exclude pure bakeries and pure coffee/drink shops
+  if (shopKind === 'bakery_bread' || shopKind === 'coffee_drink' || r.businessCategory === 'cafe') {
+    return false;
+  }
+
+  if (quickFilterId === 'noodles') {
+    if (shopKind === 'pizza_western') return false;
+    if (shopKind === 'noodle_soup_restaurant') return true;
+    return NOODLE_CATEGORY_REGEX.test(fullHaystack);
+  }
+
+  if (quickFilterId === 'rice_khmer') {
+    if (shopKind === 'pizza_western') return false;
+    if (shopKind === 'noodle_soup_restaurant') {
+      return /បាយ|អាម៉ុក|សម្ល|ឡុកឡាក់|ប្រហុក|\b(?:steamed\s*rice|fried\s*rice|pork\s*rice|chicken\s*rice|amok|lok\s*lak)\b/i.test(
+        fullHaystack
+      );
+    }
+    const khmerAndEnHaystack = normalizeKhmerFoodText(
+      [
+        r.nameKh,
+        r.nameEn,
+        r.categoryKh,
+        r.categoryEn,
+        ...(r.signatureDishesKh || []),
+        ...(r.signatureDishesEn || []),
+        ...((r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`)),
+      ]
+        .filter(Boolean)
+        .join(' ')
+    );
+    if (RICE_KHMER_CATEGORY_REGEX.test(khmerAndEnHaystack)) {
+      return true;
+    }
+    if (
+      shopKind === 'khmer_restaurant' &&
+      !BBQ_SEAFOOD_CATEGORY_REGEX.test(nameAndCatText) &&
+      !NOODLE_CATEGORY_REGEX.test(nameAndCatText) &&
+      !COFFEE_DRINK_CATEGORY_REGEX.test(nameAndCatText) &&
+      !/\b(?:steak|steakhouse|japanese|ramen|sushi|izakaya|dim\s*sum|indian|french|italian|mexican|korean|western)\b|ជប៉ុន|កូរ៉េ|ឥណ្ឌា|បារាំង|អ៊ីតាលី|ឌីមសាំ|ស្ទេក/i.test(
+        nameAndCatText
+      )
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  if (quickFilterId === 'bbq_seafood') {
+    if (shopKind === 'pizza_western') return false;
+    if (shopKind === 'noodle_soup_restaurant') {
+      return /សាច់អាំង|ស៊ុបឆ្នាំង|ហតផត|ប៊ូហ្វេ|\b(?:bbq|barbecue|hotpot|hot\s*pot|grill|buffet|seafood\s*restaurant)\b/i.test(
+        nameAndCatText
+      );
+    }
+    return BBQ_SEAFOOD_CATEGORY_REGEX.test(fullHaystack);
+  }
+
+  return true;
+}
+
+/**
+ * Selects up to 2 localized signature/menu dish badges for a restaurant card in Near Me,
+ * prioritizing dishes that match the active quick category button and current UI language (km / en / zh).
+ */
+export function selectLocalizedBadgeDishesForCategory(
+  r: Restaurant,
+  quickFilterId: string,
+  language: Language
+): string[] {
+  if (!r) return [];
+  const loc = getLocalizedRestaurant(r, language);
+  const localizedPool =
+    Array.isArray(loc?.signatureDishes) && loc.signatureDishes.length > 0
+      ? loc.signatureDishes
+      : language === 'en' && Array.isArray(r.signatureDishesEn) && r.signatureDishesEn.length > 0
+      ? r.signatureDishesEn
+      : r.signatureDishesKh || [];
+
+  const khPool = r.signatureDishesKh || [];
+  const enPool = r.signatureDishesEn || [];
+
+  let categoryRegex: RegExp | null = null;
+  if (quickFilterId === 'noodles') categoryRegex = NOODLE_CATEGORY_REGEX;
+  else if (quickFilterId === 'rice_khmer') categoryRegex = RICE_KHMER_CATEGORY_REGEX;
+  else if (quickFilterId === 'coffee') categoryRegex = COFFEE_DRINK_CATEGORY_REGEX;
+  else if (quickFilterId === 'bbq_seafood') categoryRegex = BBQ_SEAFOOD_CATEGORY_REGEX;
+
+  const fallbackBadgeByLang = (): string => {
+    if (quickFilterId === 'coffee') {
+      return language === 'zh' ? '现萃咖啡与特调饮品' : language === 'en' ? 'Freshly Brewed Coffee & Drinks' : 'កាហ្វេ និងភេសជ្ជៈ';
+    }
+    if (quickFilterId === 'noodles') {
+      return language === 'zh' ? '招牌金边粿条与汤面' : language === 'en' ? 'Kuy Teav & Signature Noodle Soup' : 'គុយទាវ និងមីស៊ុប';
+    }
+    if (quickFilterId === 'bbq_seafood') {
+      return language === 'zh' ? '炭火烧烤与生猛海鲜' : language === 'en' ? 'Charcoal BBQ, Hotpot & Seafood' : 'សាច់អាំង ស៊ុប និងគ្រឿងសមុទ្រ';
+    }
+    return language === 'zh' ? '正宗高棉特色料理' : language === 'en' ? 'Traditional Khmer Cuisine' : 'បាយ និងម្ហូបខ្មែរ';
+  };
+
+  const sanitizeForLang = (items: string[]): string[] => {
+    const clean = items
+      .map((s) =>
+        String(s || '')
+          .replace(/Authentic Cambodian Cultural & Scenic Highlight/gi, '')
+          .replace(/高棉自然与文化名胜景观/g, '')
+          .replace(/^\s*[&,•·\-]+\s*|\s*[&,•·\-]+\s*$/g, '')
+          .trim()
+      )
+      .filter(Boolean);
+    const langFiltered =
+      language === 'zh'
+        ? clean
+        : clean.filter((it) => !/[\u4e00-\u9fff]/.test(it));
+    const finalItems = langFiltered.length > 0 ? langFiltered : [fallbackBadgeByLang()];
+    return Array.from(new Set(finalItems)).slice(0, 2);
+  };
+
+  if (!categoryRegex) {
+    return sanitizeForLang(localizedPool);
+  }
+
+  const matchedLocalized: string[] = [];
+  const maxLen = Math.max(localizedPool.length, khPool.length, enPool.length);
+  for (let i = 0; i < maxLen; i++) {
+    const combinedDishText = normalizeKhmerFoodText(
+      `${khPool[i] || ''} ${enPool[i] || ''} ${localizedPool[i] || ''}`
+    );
+    if (categoryRegex.test(combinedDishText)) {
+      const candidate = localizedPool[i] || khPool[i] || enPool[i];
+      if (candidate && !matchedLocalized.includes(candidate)) {
+        matchedLocalized.push(candidate);
+      }
+    }
+  }
+
+  if (matchedLocalized.length > 0) {
+    return sanitizeForLang(matchedLocalized);
+  }
+  return sanitizeForLang(localizedPool);
 }
 

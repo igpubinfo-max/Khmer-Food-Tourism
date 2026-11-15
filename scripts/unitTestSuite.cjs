@@ -545,4 +545,157 @@ test('14. Welcome Screen, Auth Modal, and App Shell maintain original aspect rat
   );
 });
 
+// 15. Nearby Food Search (6 Category Buttons, GPS, Phnom Penh Mountain Bug, Khmer Subscript ថ្មី, & 3-Language Accuracy)
+test('15. Nearby Food Search 6 category buttons, Phnom Penh mountain fix, Khmer subscript ថ្មី fix, and KM/EN/ZH accuracy', () => {
+  const { restPart1 } = require(path.join(ROOT, 'src/data/seedRestPart1.ts'));
+  const { restPart2 } = require(path.join(ROOT, 'src/data/seedRestPart2.ts'));
+  const sdMod = require(path.join(ROOT, 'src/data/seedDestinations.ts'));
+  const allDestinations = sdMod[Object.keys(sdMod)[0]];
+  const {
+    getLocalSmartCache,
+    convertGooglePlaceToRestaurant,
+    convertGooglePlaceToDestination,
+  } = require(path.join(ROOT, 'src/services/googlePlacesService.ts'));
+  const {
+    mergeNearbyFoodShops,
+    mergeNearbyTourismDestinations,
+    matchesNearMeQuickCategory,
+    selectLocalizedBadgeDishesForCategory,
+    isFoodShopGooglePlace,
+    isTourismAttractionGooglePlace,
+  } = require(path.join(ROOT, 'src/utils/nearMeEngine.ts'));
+  const { classifyShopBusinessKind } = require(path.join(ROOT, 'src/utils/foodFilters.ts'));
+
+  const allRestaurants = [...restPart1, ...restPart2];
+  const smartCache = getLocalSmartCache();
+  const ppCenter = { lat: 11.5564, lng: 104.9282 };
+
+  // 1. Verify "Cofe 223" in Phnom Penh (from user screenshot) is NEVER classified as Tourism or Mountain
+  const cofe223Polluted = {
+    placeId: 'gmap-free-11.5580_104.9250_0',
+    googlePlaceId: 'free-11.5580_104.9250_0',
+    nameKh: 'Cofe 223',
+    nameEn: 'Cofe 223',
+    category: 'tourism',
+    subCategorySlug: 'mountain',
+    province: 'រាជធានីភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'HW44+M8R, St 223, Phnom Penh, ភ្នំពេញ',
+    addressKh: 'HW44+M8R, St 223, Phnom Penh, ភ្នំពេញ',
+    lat: 11.5610,
+    lng: 104.9280,
+    phone: '',
+    openHours: '07:00 AM - 08:00 PM',
+    rating: 4.0,
+    reviewCount: 12,
+    photoUrl: '',
+    googleMapsUrl: 'https://maps.google.com',
+    source: 'google_maps_api',
+    cachedAt: new Date().toISOString(),
+  };
+
+  assert.equal(
+    isTourismAttractionGooglePlace(cofe223Polluted),
+    false,
+    'Cofe 223 in Phnom Penh must NEVER be classified as a tourism attraction'
+  );
+  assert.equal(
+    isFoodShopGooglePlace(cofe223Polluted),
+    true,
+    'Cofe 223 in Phnom Penh must be rescued as a food/drink shop even if cached as tourism'
+  );
+  const cofe223Rest = convertGooglePlaceToRestaurant(cofe223Polluted);
+  assert.equal(classifyShopBusinessKind(cofe223Rest), 'coffee_drink', 'Cofe 223 must classify as coffee_drink');
+  assert.equal(matchesNearMeQuickCategory(cofe223Rest, 'coffee'), true, 'Cofe 223 must match coffee category');
+  assert.equal(matchesNearMeQuickCategory(cofe223Rest, 'noodles'), false, 'Cofe 223 must NOT match noodles');
+  assert.equal(matchesNearMeQuickCategory(cofe223Rest, 'rice_khmer'), false, 'Cofe 223 must NOT match rice_khmer');
+  assert.equal(matchesNearMeQuickCategory(cofe223Rest, 'bbq_seafood'), false, 'Cofe 223 must NOT match bbq_seafood');
+
+  // 2. Verify convertGooglePlaceToDestination never returns empty photoUrl or false-positive mountain in Phnom Penh
+  const sampleDest = convertGooglePlaceToDestination({
+    ...cofe223Polluted,
+    nameKh: 'សួនមាត់ទន្លេចតុមុខ',
+    nameEn: 'Chaktomuk Riverside Park',
+    subCategorySlug: 'mountain',
+    photoUrl: '',
+  });
+  assert.notEqual(sampleDest.categorySlug, 'mountain', 'Phnom Penh address must not force mountain categorySlug');
+  assert.ok(sampleDest.photoUrl && sampleDest.photoUrl.length > 10, 'Destination photoUrl must never be empty string');
+
+  // 3. Verify Khmer subscript ថ្មី ("new/fresh"), MIXUE (មីស៊ូវ), steak (s-tea-k), Pteah (p-tea-h), and អង់តែន do NOT cause category cross-contamination
+  const freshCoffeePlace = convertGooglePlaceToRestaurant({
+    ...cofe223Polluted,
+    nameKh: 'ហាងកាហ្វេឆុងថ្មី ភ្នំពេញ',
+    nameEn: 'Fresh Brewed Coffee Phnom Penh',
+    category: 'cafe',
+  });
+  assert.equal(matchesNearMeQuickCategory(freshCoffeePlace, 'noodles'), false, 'កាហ្វេឆុងថ្មី (ថ្មី) must NOT match noodles');
+  assert.equal(matchesNearMeQuickCategory(freshCoffeePlace, 'coffee'), true, 'កាហ្វេឆុងថ្មី must match coffee');
+
+  const mixueShop = allRestaurants.find((r) => r.id === 'rest-483');
+  if (mixueShop) {
+    assert.equal(matchesNearMeQuickCategory(mixueShop, 'noodles'), false, 'MIXUE (មីស៊ូវ) must NOT match noodles');
+    assert.equal(matchesNearMeQuickCategory(mixueShop, 'coffee'), true, 'MIXUE (មីស៊ូវ) must match coffee & drinks');
+  }
+
+  const steakShop = allRestaurants.find((r) => r.id === 'rest-420');
+  if (steakShop) {
+    assert.equal(matchesNearMeQuickCategory(steakShop, 'coffee'), false, 'Rama Steakhouse (s-tea-k) must NOT match coffee');
+  }
+
+  const pteahShop = allRestaurants.find((r) => r.id === 'rest-400');
+  if (pteahShop) {
+    assert.equal(matchesNearMeQuickCategory(pteahShop, 'coffee'), false, 'Pteah Bay (p-tea-h) must NOT match coffee');
+    assert.equal(matchesNearMeQuickCategory(pteahShop, 'rice_khmer'), true, 'Pteah Bay must match rice_khmer');
+  }
+
+  const noodleSoupShop = allRestaurants.find((r) => r.id === 'rest-448');
+  if (noodleSoupShop) {
+    assert.equal(matchesNearMeQuickCategory(noodleSoupShop, 'noodles'), true, '3-Generation Khmer Noodle must match noodles');
+    assert.equal(matchesNearMeQuickCategory(noodleSoupShop, 'bbq_seafood'), false, 'គុយទាវទឹកស៊ុប must NOT match bbq_seafood');
+  }
+
+  // 4. Verify all 6 category buttons in Phnom Penh return non-empty, distance-sorted, category-accurate results across KM, EN, and ZH
+  const mergedFood = mergeNearbyFoodShops({
+    restaurants: allRestaurants,
+    liveNearbyRestaurants: [...smartCache, cofe223Polluted],
+    refCoords: ppCenter,
+    radiusMeters: 20000,
+    targetProvinceKh: 'រាជធានីភ្នំពេញ',
+  });
+  const mergedDest = mergeNearbyTourismDestinations({
+    destinations: allDestinations,
+    liveNearbyAttractions: [...smartCache, cofe223Polluted],
+    refCoords: ppCenter,
+    radiusMeters: 20000,
+    targetProvinceKh: 'រាជធានីភ្នំពេញ',
+  });
+
+  assert.ok(mergedFood.length >= 80, 'All Shops in Phnom Penh must return >= 80 verified food shops');
+  assert.ok(mergedDest.length >= 15 && mergedDest.length <= 30, 'Nearby Places in Phnom Penh must contain genuine attractions only');
+  assert.ok(!mergedDest.some((d) => /cofe|coffee|កាហ្វេ|គុយទាវ|ភោជនីយដ្ឋាន/i.test(d.nameKh + ' ' + d.nameEn)), 'Nearby Places must never contain cafes or restaurants');
+
+  for (const catId of ['all', 'rice_khmer', 'noodles', 'coffee', 'bbq_seafood']) {
+    const matches = mergedFood.filter((r) => matchesNearMeQuickCategory(r, catId));
+    assert.ok(matches.length >= 15, `Category [${catId}] must have >= 15 accurate shops in Phnom Penh (got ${matches.length})`);
+    for (let i = 1; i < matches.length; i++) {
+      assert.ok(
+        matches[i].distanceMeters >= matches[i - 1].distanceMeters,
+        `Category [${catId}] must be sorted nearest-first by GPS distance`
+      );
+    }
+    // Check 3-language badge accuracy on top results
+    for (const r of matches.slice(0, 10)) {
+      for (const lang of ['km', 'en', 'zh']) {
+        const badges = selectLocalizedBadgeDishesForCategory(r, catId, lang);
+        assert.ok(badges.length >= 1 && badges.length <= 2, `Badges for ${r.id} in [${catId}/${lang}] must be non-empty`);
+        if (lang !== 'zh') {
+          assert.ok(!badges.some((b) => /[\u4e00-\u9fff]/.test(b)), `No CJK in ${lang} badges for ${r.id}`);
+        }
+        assert.ok(!badges.some((b) => /Authentic Cambodian Cultural & Scenic Highlight|高棉自然与文化名胜景观/i.test(b)), `No generic tourism placeholder in dish badges for ${r.id}`);
+      }
+    }
+  }
+});
+
 console.log(`\nAll ${passed} unit test suites passed successfully!`);

@@ -188,7 +188,7 @@ export interface GooglePlacesSearchResponse {
   attributionText: string;
 }
 
-const SMART_CACHE_STORAGE_KEY = 'kft_google_places_smart_cache_v9';
+const SMART_CACHE_STORAGE_KEY = 'kft_google_places_smart_cache_v10';
 const SMART_CACHE_STATS_KEY = 'kft_google_places_cache_stats_v2';
 const GOOGLE_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30-day policy-compliant refresh window
 const DEFAULT_DAILY_GOOGLE_API_LIMIT = 150;
@@ -1386,6 +1386,7 @@ export function getLocalSmartCache(): GooglePlaceCachedItem[] {
   try {
     if (!legacySmartCacheKeysPurged) {
       legacySmartCacheKeysPurged = true;
+      localStorage.removeItem('kft_google_places_smart_cache_v9');
       localStorage.removeItem('kft_google_places_smart_cache_v8');
       localStorage.removeItem('kft_google_places_smart_cache_v3');
       localStorage.removeItem('kft_google_places_smart_cache_v2');
@@ -1433,16 +1434,32 @@ function repairCachedGooglePlaceItem(item: GooglePlaceCachedItem): GooglePlaceCa
     repairedSubCategory = 'resort';
   }
   if (repairedCategory === 'tourism' && !hasHotelName && repairedSubCategory !== 'hotel') {
-    const nameAndTypes = `${cleanNameKh} ${cleanNameEn} ${(cleanTypes || []).join(' ')} ${cleanPrimaryType || ''}`;
+    const nameAndTypes = `${cleanNameKh} ${cleanNameEn} ${(cleanTypes || []).join(' ')} ${cleanPrimaryType || ''}`.replace(
+      /រាជធានីភ្នំពេញ|ក្រុងភ្នំពេញ|ភ្នំពេញ|phnom\s*penh/gi,
+      ' '
+    );
     const isExplicitFood =
-      /(restaurant|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងអាហារ|ហាងបាយ|ម្ហូប|អាហារ|បួស|តមសាច់|vegetarian|vegeterian|vegan|veggie|cafe|coffee|café|កាហ្វេ|bakery|នំប៉័ង|bistro|eatery|diner|ចានបាយ|គុយទាវ|មី|ស៊ុប|សាច់អាំង|គ្រឿងសមុទ្រ|ផ្ទះបាយ|បង្អែម|ភេសជ្ជៈ|素食|餐厅|美食|咖啡)/i.test(
+      /(restaurant|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងអាហារ|ហាងបាយ|ហាងកាហ្វេ|ម្ហូប|អាហារ|បួស|តមសាច់|vegetarian|vegeterian|vegan|veggie|cafe|coffee|café|cofe|coffe|kopi|roastery|espresso|latte|matcha|កាហ្វេ|តែគុជ|ហាងតែ|bakery|នំប៉័ង|នំខេក|ការ៉េម|bistro|eatery|diner|ចានបាយ|គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់)|នំបញ្ចុក|លតឆា|បបរ|ស៊ុប|សាច់អាំង|គ្រឿងសមុទ្រ|ប៊ូហ្វេ|ឆ្នាំងភ្លើង|ភីហ្សា|ផ្ទះបាយ|បង្អែម|ភេសជ្ជៈ|\b(noodle|noodles|kuy\s*teav|pho|ramen|bbq|hotpot|grill|seafood|buffet|pizza|burger|steak|steakhouse|sushi|boba|milk\s*tea|tea\s*house|ice\s*cream)\b|素食|餐厅|美食|咖啡)/i.test(
         nameAndTypes
       );
-    if (isExplicitFood && !isStrictAttraction) {
+    const hasTrueTourismSignal =
+      isStrictAttraction ||
+      /(ប្រាសាទ|វត្ត|ទឹកធ្លាក់|សារមន្ទីរ|ភ្នំ(?!ពេញ)|ឆ្នេរ|កោះ|ឧទ្យានជាតិ|រមណីយដ្ឋាន|សួន|វិមាន|ព្រះបរមរាជវាំង|ស្តូប|រូបសំណាក|\b(temple|pagoda|wat\b|museum|waterfall|national\s*park|monument|palace|sanctuary|beach|island|mountain|tourist_attraction|amusement_park|water_park|park|zoo|stadium|historic)\b)/i.test(
+        nameAndTypes
+      );
+    if ((isExplicitFood && !isStrictAttraction) || !hasTrueTourismSignal) {
       const isCafeType =
         !/(ភោជនីយដ្ឋាន|restaurant|ម្ហូបបួស|អាហារបួស|អ្នកតមសាច់)/i.test(cleanTypes?.[0] || cleanPrimaryType || '') &&
-        /(coffee|cafe|café|កាហ្វេ|bakery|tea\s*house|boba|ice\s*cream)/i.test(nameAndTypes);
+        /(\b(coffee|cafe|café|cofe|coffe|kopi|roastery|espresso|latte|matcha|bakery|tea\s*house|milk\s*tea|boba|ice\s*cream|chagee|koi|gong\s*cha|mixue|starbucks)\b|កាហ្វេ|តែគុជ|ហាងតែ|នំប៉័ង|នំខេក|ការ៉េម)/i.test(
+          nameAndTypes
+        );
       repairedCategory = isCafeType ? 'cafe' : 'restaurant';
+      repairedSubCategory = undefined;
+    } else if (
+      repairedSubCategory === 'mountain' &&
+      !/ភ្នំ(?!ពេញ)|ឧទ្យានជាតិ|\b(mountain|national\s*park|hill|peak)\b/i.test(nameAndTypes)
+    ) {
+      repairedSubCategory = inferTourismSubCategory(cleanTypes || [], `${cleanNameKh} ${cleanNameEn}`);
     }
   }
   return {
@@ -1999,7 +2016,10 @@ function mapGooglePriceLevel(rawPriceLevel?: string): RestaurantPriceLevel {
 }
 
 function inferTourismSubCategory(types: string[], text: string): DestinationCategorySlug {
-  const lower = text.toLowerCase();
+  const cleanedText = String(text || '')
+    .replace(/រាជធានីភ្នំពេញ|ក្រុងភ្នំពេញ|ភ្នំពេញ|phnom\s*penh/gi, ' ')
+    .replace(/សង្កាត់\s*(?:វត្តភ្នំ|បឹងកេងកង\s*[១២៣123]?|ទន្លេបាសាក់|ក្បាលកោះ|កោះដាច់|បឹងទំពន់|បឹងត្របែក|បឹងកក់|បឹងសាឡាង|បឹងរាំង|បឹងព្រលិត)/gi, ' ');
+  const lower = cleanedText.toLowerCase();
   if (
     types.some((t) => ['hotel', 'lodging', 'motel', 'guest_house', 'guesthouse', 'hostel', 'bed_and_breakfast'].includes(t)) ||
     lower.includes('សណ្ឋាគារ') ||
@@ -2017,18 +2037,17 @@ function inferTourismSubCategory(types: string[], text: string): DestinationCate
     types.some((t) => ['hindu_temple', 'place_of_worship', 'historical_landmark', 'buddhist_temple'].includes(t)) ||
     lower.includes('ប្រាសាទ') ||
     lower.includes('វត្ត') ||
-    lower.includes('temple') ||
-    lower.includes('wat')
+    /\b(temple|pagoda|wat)\b/i.test(lower)
   ) {
     return 'temple';
   }
-  if (lower.includes('កោះ') || lower.includes('ឆ្នេរ') || lower.includes('beach') || lower.includes('island')) {
+  if (lower.includes('កោះ') || lower.includes('ឆ្នេរ') || /\b(beach|island)\b/i.test(lower)) {
     return 'beach';
   }
-  if (lower.includes('ភ្នំ') || lower.includes('mountain') || lower.includes('ឧទ្យានជាតិ')) {
+  if (/ភ្នំ(?!ពេញ)/.test(lower) || /\b(mountain|national\s*park)\b/i.test(lower) || lower.includes('ឧទ្យានជាតិ')) {
     return 'mountain';
   }
-  if (lower.includes('ទឹកធ្លាក់') || lower.includes('ធម្មជាតិ') || lower.includes('waterfall') || types.includes('national_park')) {
+  if (lower.includes('ទឹកធ្លាក់') || lower.includes('ធម្មជាតិ') || /\bwaterfall\b/i.test(lower) || types.includes('national_park')) {
     return 'nature';
   }
   return 'resort';
@@ -3575,15 +3594,30 @@ async function fetchFreeGoogleMapsTbmPlaces(
       const prov = inferCambodiaProvinceFromAddressOrGps(`${shortAddr} ${it[166] || ''}`, lat, lng);
       const fullAddr = shortAddr ? (shortAddr.toLowerCase().includes(prov.toLowerCase()) ? shortAddr : `${shortAddr}, ${prov}`) : prov;
 
-      const combinedTypeText = `${nameKh} ${nameEn} ${typeList.join(' ')} ${fullAddr}`;
-      const isTourismOrHotel =
-        ['tourism', 'temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter) ||
-        /(hotel|resort|lodging|guest\s*house|guesthouse|hostel|motel|villa|bungalow|inn|boutique|សណ្ឋាគារ|ផ្ទះសំណាក់|រីសត|បឹងហ្គាឡូ|បឹងកាឡូ|វីឡា|រមណីយដ្ឋាន|ប្រាសាទ|វត្ត|ទឹកធ្លាក់|ឆ្នេរ|កោះ|ភ្នំ|សារមន្ទីរ|tourist|attraction|temple|pagoda|museum|park|beach|waterfall)/i.test(
+      const combinedTypeText = `${nameKh} ${nameEn} ${typeList.join(' ')}`.replace(
+        /រាជធានីភ្នំពេញ|ក្រុងភ្នំពេញ|ភ្នំពេញ|phnom\s*penh/gi,
+        ' '
+      );
+      const hasExplicitFoodOrCafeSignal =
+        /(restaurant|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងអាហារ|ហាងបាយ|ហាងកាហ្វេ|កាហ្វេ|តែគុជ|ហាងតែ|គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់)|នំបញ្ចុក|លតឆា|បបរ|សាច់អាំង|ស៊ុប|គ្រឿងសមុទ្រ|ប៊ូហ្វេ|ភីហ្សា|នំប៉័ង|នំខេក|បង្អែម|ភេសជ្ជៈ|\b(cafe|café|coffee|cofe|coffe|kopi|roastery|espresso|bakery|bistro|eatery|diner|noodle|noodles|kuy\s*teav|pho|ramen|bbq|hotpot|grill|seafood|buffet|pizza|burger|steak|steakhouse|sushi|boba|milk\s*tea|tea\s*house|ice\s*cream)\b)/i.test(
           combinedTypeText
         );
+      const isTourismCategoryRequested = ['tourism', 'temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter);
+      const isExplicitFoodCategoryRequested = ['restaurant', 'cafe', 'street_food', 'seafood', 'bakery'].includes(categoryFilter);
+      const isTourismOrHotel =
+        !isExplicitFoodCategoryRequested &&
+        (isTourismCategoryRequested
+          ? !hasExplicitFoodOrCafeSignal
+          : !hasExplicitFoodOrCafeSignal &&
+            /(hotel|resort|lodging|guest\s*house|guesthouse|hostel|motel|villa|bungalow|inn|boutique|សណ្ឋាគារ|ផ្ទះសំណាក់|រីសត|បឹងហ្គាឡូ|បឹងកាឡូ|វីឡា|រមណីយដ្ឋាន|ប្រាសាទ|វត្ត|ទឹកធ្លាក់|ឆ្នេរ|កោះ|ភ្នំ(?!ពេញ)|សារមន្ទីរ|ឧទ្យានជាតិ|វិមានឯករាជ្យ|\b(tourist|attraction|temple|pagoda|museum|national\s*park|beach|waterfall|monument|palace)\b)/i.test(
+              combinedTypeText
+            ));
       const isCafe =
         !isTourismOrHotel &&
-        (categoryFilter === 'cafe' || /(coffee|cafe|café|កាហ្វេ|bakery|tea\s*house|boba|ice\s*cream)/i.test(combinedTypeText));
+        (categoryFilter === 'cafe' ||
+          /(\b(coffee|cafe|café|cofe|coffe|kopi|roastery|espresso|bakery|tea\s*house|milk\s*tea|boba|ice\s*cream|chagee|koi\s*th[eé]|gong\s*cha|mixue|starbucks)\b|ហាងកាហ្វេ|កាហ្វេ|តែគុជ|ហាងតែ|នំប៉័ង|នំខេក|ការ៉េម)/i.test(
+            combinedTypeText
+          ));
       const isStreetFood =
         !isTourismOrHotel &&
         !isCafe &&
@@ -5486,25 +5520,77 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
     reviewCount: place.reviewCount > 0 ? place.reviewCount : 0,
     signatureDishesKh: (() => {
       const meta = `${place.nameKh} ${place.nameEn} ${place.primaryTypeDisplayName || ''} ${place.editorialSummary || ''} ${(place.types || []).join(' ')}`;
-      if (place.category === 'cafe' && !/(គុយទាវ|មី|បាយ|noodle)/i.test(place.nameKh)) {
+      const isCafeMeta =
+        place.category === 'cafe' ||
+        /(\b(coffee|cafe|café|cofe|coffe|kopi|roastery|espresso|latte|matcha|tea\s*house|milk\s*tea|boba|chagee|koi\s*th[eé]|gong\s*cha|mixue|starbucks)\b|ហាងកាហ្វេ|កាហ្វេ|តែគុជ|ហាងតែ|ហាងការ៉េម)/i.test(
+          meta
+        );
+      if (
+        isCafeMeta &&
+        !/(គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់)|បាយ|\bnoodle\b)/i.test(place.nameKh)
+      ) {
         return ['កាហ្វេ និងភេសជ្ជៈ', 'នំដុត និងអាហារសម្រន់'];
       }
       if (/(vegetarian|vegeterian|vegan|veggie|បួស|ម្ហូបបួស|អាហារបួស|អ្នកតមសាច់|តមសាច់|អាហារសុខភាព|素食|斋)/i.test(meta)) {
         return ['ម្ហូបបួស និងអាហារសុខភាព', 'បន្លែធម្មជាតិ និងតៅហ៊ូ'];
       }
-      if (/(noodle|noodles|kuy\s*teav|kuyteav|pho|ramen|គុយទាវ|មី|នំបញ្ចុក|លតឆា|បាញ់កាញ់|ហ្វឺ|បបរ|អាហារព្រឹក|អាហារពេលព្រឹក|breakfast|粿条|米粉|面)/i.test(meta)) {
+      if (
+        /(\b(?:noodle|noodles|kuy\s*teav|kuyteav|pho|ramen|udon)\b|គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់|គ្រឿង|ប៉ាតេ|ប្រហិត|ពង|លាក់ខ្លួន|ជាតិ|ខ្លាឃ្មុំ)|(?<![ក-អ\u17B6-\u17D2])មី(?=\s|$|[&,/()])|បុកមី|ហាងមី|នំបញ្ចុក|លតឆា|បាញ់កាញ់|ហ្វឺ|បបរ|អាហារព្រឹក|អាហារពេលព្រឹក|\bbreakfast\b|粿条|米粉|面)/i.test(
+          meta
+        )
+      ) {
         return ['គុយទាវ និងមីស៊ុប', 'នំបញ្ចុក លតឆា និងអាហារព្រឹក', 'បបរគ្រឿង និងគុយទាវភ្នំពេញ'];
       }
       if (/(seafood|គ្រឿងសមុទ្រ|ក្តាម|បង្គា|មឹក|海鲜)/i.test(meta)) {
         return ['គ្រឿងសមុទ្រស្រស់ៗ', 'ក្តាម បង្គា និងមឹកអាំង'];
       }
-      if (/(bbq|grill|hotpot|buffet|សាច់អាំង|ប៊ូហ្វេ|ស៊ុប|ឆ្នាំងភ្លើង|烧烤|火锅)/i.test(meta)) {
+      if (/(\b(?:bbq|grill|hotpot|buffet|shabu|sukiyaki|mookata)\b|សាច់អាំង|ប៊ូហ្វេ|ស៊ុប|ឆ្នាំងភ្លើង|ឆ្នាំងដី|烧烤|火锅)/i.test(meta)) {
         return ['សាច់អាំង និងស៊ុបឆ្នាំងភ្លើង', 'ប៊ូហ្វេ និងគ្រឿងសមុទ្រ'];
       }
-      if (/(bakery|bread|cake|dessert|នំប៉័ង|នំខេក|បង្អែម|ការ៉េម|甜品|面包|蛋糕)/i.test(meta)) {
+      if (/(\b(?:bakery|bread|cake|pastry|dessert)\b|នំប៉័ង|នំខេក|បង្អែម|ការ៉េម|甜品|面包|蛋糕)/i.test(meta)) {
         return ['នំប៉័ង និងនំខេក', 'បង្អែមខ្មែរ និងភេសជ្ជៈ'];
       }
-      return ['មុខម្ហូបប្រចាំហាង', 'អាហារខ្មែរ និងភេសជ្ជៈ'];
+      if (/(\b(?:pizza|pizzeria|burger|burrito|taco|tacos|steak|steakhouse)\b|ភីហ្សា|ប៊ឺហ្គឺ|ស្ទេក)/i.test(meta)) {
+        return ['ភីហ្សា ប៊ឺហ្គឺ និងស្ទេក', 'អាហារបស្ចិមប្រទេស'];
+      }
+      return ['បាយ និងម្ហូបខ្មែរ', 'មុខម្ហូបប្រចាំហាង'];
+    })(),
+    signatureDishesEn: (() => {
+      const meta = `${place.nameKh} ${place.nameEn} ${place.primaryTypeDisplayName || ''} ${place.editorialSummary || ''} ${(place.types || []).join(' ')}`;
+      const isCafeMeta =
+        place.category === 'cafe' ||
+        /(\b(coffee|cafe|café|cofe|coffe|kopi|roastery|espresso|latte|matcha|tea\s*house|milk\s*tea|boba|chagee|koi\s*th[eé]|gong\s*cha|mixue|starbucks)\b|ហាងកាហ្វេ|កាហ្វេ|តែគុជ|ហាងតែ|ហាងការ៉េម)/i.test(
+          meta
+        );
+      if (
+        isCafeMeta &&
+        !/(គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់)|បាយ|\bnoodle\b)/i.test(place.nameKh)
+      ) {
+        return ['Freshly Brewed Coffee & Drinks', 'Pastries & Light Snacks'];
+      }
+      if (/(vegetarian|vegeterian|vegan|veggie|បួស|ម្ហូបបួស|អាហារបួស|អ្នកតមសាច់|តមសាច់|អាហារសុខភាព|素食|斋)/i.test(meta)) {
+        return ['Vegetarian & Healthy Cuisine', 'Fresh Organic Vegetables & Tofu'];
+      }
+      if (
+        /(\b(?:noodle|noodles|kuy\s*teav|kuyteav|pho|ramen|udon)\b|គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់|គ្រឿង|ប៉ាតេ|ប្រហិត|ពង|លាក់ខ្លួន|ជាតិ|ខ្លាឃ្មុំ)|(?<![ក-អ\u17B6-\u17D2])មី(?=\s|$|[&,/()])|បុកមី|ហាងមី|នំបញ្ចុក|លតឆា|បាញ់កាញ់|ហ្វឺ|បបរ|អាហារព្រឹក|អាហារពេលព្រឹក|\bbreakfast\b|粿条|米粉|面)/i.test(
+          meta
+        )
+      ) {
+        return ['Phnom Penh Kuy Teav & Noodle Soup', 'Num Banh Chok & Khmer Breakfast'];
+      }
+      if (/(seafood|គ្រឿងសមុទ្រ|ក្តាម|បង្គា|មឹក|海鲜)/i.test(meta)) {
+        return ['Fresh Coastal & River Seafood', 'Grilled Crab, Prawns & Squid'];
+      }
+      if (/(\b(?:bbq|grill|hotpot|buffet|shabu|sukiyaki|mookata)\b|សាច់អាំង|ប៊ូហ្វេ|ស៊ុប|ឆ្នាំងភ្លើង|ឆ្នាំងដី|烧烤|火锅)/i.test(meta)) {
+        return ['Charcoal BBQ & Hotpot Soup', 'Buffet & Fresh Seafood'];
+      }
+      if (/(\b(?:bakery|bread|cake|pastry|dessert)\b|នំប៉័ង|នំខេក|បង្អែម|ការ៉េម|甜品|面包|蛋糕)/i.test(meta)) {
+        return ['Freshly Baked Bread & Cakes', 'Khmer Desserts & Drinks'];
+      }
+      if (/(\b(?:pizza|pizzeria|burger|burrito|taco|tacos|steak|steakhouse)\b|ភីហ្សា|ប៊ឺហ្គឺ|ស្ទេក)/i.test(meta)) {
+        return ['Artisanal Pizza, Burgers & Steak', 'Western Specialties'];
+      }
+      return ['Steamed Rice & Traditional Khmer Cuisine', 'House Signature Dishes'];
     })(),
     status: 'approved',
     isVerified: true,
@@ -5521,7 +5607,17 @@ export function convertGooglePlaceToDestination(
 ): TouristDestination {
   const googleMeta = buildGoogleMapsMetaFromCachedItem(place);
   const resolvedProvEn = resolveProvinceGeoConfig(place.province)?.en || 'Phnom Penh';
-  const subCat: DestinationCategorySlug = place.subCategorySlug || 'resort';
+  const rawSubCat: DestinationCategorySlug = place.subCategorySlug || 'resort';
+  const subCat: DestinationCategorySlug =
+    rawSubCat === 'mountain' &&
+    !/ភ្នំ(?!ពេញ)|ឧទ្យានជាតិ|\b(mountain|national\s*park|hill|peak)\b/i.test(
+      `${place.nameKh || ''} ${place.nameEn || ''} ${(place.types || []).join(' ')}`.replace(
+        /រាជធានីភ្នំពេញ|ក្រុងភ្នំពេញ|ភ្នំពេញ|phnom\s*penh/gi,
+        ' '
+      )
+    )
+      ? inferTourismSubCategory(place.types || [], `${place.nameKh || ''} ${place.nameEn || ''}`)
+      : rawSubCat;
   const categoryLabels: Record<DestinationCategorySlug, { kh: string; en: string }> = {
     temple: { kh: 'ប្រាសាទបុរាណ & វត្តអារាម', en: 'Temples & Heritage' },
     nature: { kh: 'ធម្មជាតិ & ទឹកធ្លាក់', en: 'Nature & Waterfalls' },
@@ -5568,7 +5664,9 @@ export function convertGooglePlaceToDestination(
     categoryEn: label.en,
     descriptionKh: `${place.nameKh} មានទីតាំងស្ថិតនៅ ${place.address}។ ទាញយកទិន្នន័យ និងទីតាំង GPS ពិតប្រាកដពីផែនទី Google Maps។`,
     descriptionEn: `${place.nameEn || place.nameKh} located in ${resolvedProvEn}, Cambodia. Imported via Google Maps Platform.`,
-    photoUrl: hasRealPhoto ? rawPlacePhoto : '',
+    photoUrl: hasRealPhoto
+      ? rawPlacePhoto
+      : rawPlacePhoto || buildPlaceSpecificNoPhotoSvg(place.nameKh, place.province, 'tourism'),
     galleryPhotos: cleanGallery,
     provinceKh: place.province,
     provinceEn: resolvedProvEn,
@@ -5758,7 +5856,7 @@ export async function searchNearbyPlacesWithin500m(
   }
 
   const effectiveRadius = Math.min(50000, Math.max(radiusMeters, 500));
-  const gridKey = `v4_${lat.toFixed(4)}_${lng.toFixed(4)}_${effectiveRadius}`;
+  const gridKey = `v5_${lat.toFixed(4)}_${lng.toFixed(4)}_${effectiveRadius}`;
   const cachedMem = nearby500mMemoryCache.get(gridKey);
   if (
     !forceRefresh &&
@@ -5884,7 +5982,7 @@ export async function searchNearbyPlacesWithin500m(
               category: resolvedCategory,
               subCategorySlug:
                 resolvedCategory === 'tourism'
-                  ? inferTourismSubCategory(types, `${displayName} ${address}`)
+                  ? inferTourismSubCategory(types, displayName)
                   : undefined,
               province,
               provinceKh: province,
@@ -6073,7 +6171,7 @@ export async function searchNearbyPlacesWithin500m(
             category: cat,
             subCategorySlug:
               cat === 'tourism'
-                ? inferTourismSubCategory([cls, itemType].filter(Boolean), `${rawNameKh} ${fullAddress}`)
+                ? inferTourismSubCategory([cls, itemType].filter(Boolean), rawNameKh)
                 : undefined,
             province,
             provinceKh: province,
@@ -6175,7 +6273,7 @@ export async function searchNearbyPlacesWithin500m(
             category: cat,
             subCategorySlug:
               cat === 'tourism'
-                ? inferTourismSubCategory([placeType].filter(Boolean), `${displayName} ${fullAddress}`)
+                ? inferTourismSubCategory([placeType].filter(Boolean), displayName)
                 : undefined,
             province,
             provinceKh: province,
@@ -6208,8 +6306,16 @@ export async function searchNearbyPlacesWithin500m(
     const nearbyProvGeo = resolveProvinceGeoConfig(nearbyProv);
     const [freeGmapsBatches, nomBatches, photBatches] = await Promise.all([
       Promise.all(
-        ['ភោជនីយដ្ឋាន អាហារដ្ឋាន', 'គុយទាវ មី អាហារព្រឹក', 'ហាងកាហ្វេ Cafe', 'រមណីយដ្ឋាន សណ្ឋាគារ'].map((q) =>
-          fetchFreeGoogleMapsTbmPlaces(q, nearbyProvGeo, 'all', [], {
+        (
+          [
+            { q: 'ភោជនីយដ្ឋាន អាហារដ្ឋាន ម្ហូបខ្មែរ', cat: 'restaurant' as const },
+            { q: 'គុយទាវ មី នំបញ្ចុក អាហារព្រឹក', cat: 'street_food' as const },
+            { q: 'ហាងកាហ្វេ Cafe Coffee Tea', cat: 'cafe' as const },
+            { q: 'សាច់អាំង ស៊ុប គ្រឿងសមុទ្រ BBQ Hotpot', cat: 'seafood' as const },
+            { q: 'រមណីយដ្ឋាន ប្រាសាទ សារមន្ទីរ សួន', cat: 'tourism' as const },
+          ]
+        ).map(({ q, cat }) =>
+          fetchFreeGoogleMapsTbmPlaces(q, nearbyProvGeo, cat, [], {
             lat,
             lng,
             radiusMeters: effectiveRadius,
@@ -6239,7 +6345,9 @@ export async function searchNearbyPlacesWithin500m(
     ...liveMapItems,
     ...localPool,
     ...seedPool,
-  ]).filter(
+  ])
+    .map(repairCachedGooglePlaceItem)
+    .filter(
     (p) =>
       !isRoadOrInvalidNearbyPlaceName(p.nameKh) &&
       calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius &&

@@ -24,9 +24,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.9,
     "reviewCount": 171,
     "signatureDishesKh": [
-      "សាច់អាំងពិសេស & ស៊ុបឆ្នាំងដី",
-      "ភីហ្សាដុតថ្មី & អាហារជួបជុំគ្រួសារ",
-      "ឡុកឡាក់សាច់គោខ្មែរ"
+      "ភីហ្សាដុតឡអុសបែបអ៊ីតាលី (Artisan Wood-Fired Pizza)",
+      "ប៉ាស្តាធ្វើដោយដៃ (Homemade Pasta)",
+      "នំទីរ៉ាមីស៊ូ (Tiramisu)"
     ],
     "status": "approved",
     "isVerified": true,
@@ -259,9 +259,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.7,
     "reviewCount": 55,
     "signatureDishesKh": [
-      "កាហ្វេឆុងថ្មីពិសេសប្រចាំហាង",
-      "នំដុតថ្មី & ភេសជ្ជៈត្រជាក់",
-      "អាហារពេលព្រឹកបែបខ្មែរ-អឺរ៉ុប"
+      "ស្តេកសាច់គោអាំង (Grilled Ribeye Steak)",
+      "ឆ្អឹងជំនីរជ្រូកអាំង BBQ",
+      "សាច់គោអាំងម្រេចកំពត និងស៊ុប"
     ],
     "status": "approved",
     "isVerified": true,
@@ -339,9 +339,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.9,
     "reviewCount": 113,
     "signatureDishesKh": [
+      "សាច់គោអាំង BBQ និងស៊ុបក្តៅៗ",
       "កាហ្វេឆុងថ្មីពិសេសប្រចាំហាង",
-      "នំដុតថ្មី & ភេសជ្ជៈត្រជាក់",
-      "អាហារពេលព្រឹកបែបខ្មែរ-អឺរ៉ុប"
+      "អាហារពេលព្រឹក និងភេសជ្ជៈត្រជាក់"
     ],
     "status": "approved",
     "isVerified": true,
@@ -379,9 +379,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.6,
     "reviewCount": 142,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "គុយទាវខគោទឹកសៀងពិសេស",
+      "មីគោកសាច់ជ្រូកសាស៊ីវទឹកសៀង",
+      "នំបញ្ចុក និងបបរគ្រឿង"
     ],
     "status": "approved",
     "isVerified": true,
@@ -695,9 +695,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.6,
     "reviewCount": 84,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "សាច់អាំងកូរ៉េ និងឆ្អឹងជំនីរជ្រូកអាំង (Korean BBQ)",
+      "ស៊ុបគីមឈីឆ្នាំងដីក្តៅៗ",
+      "សាច់គោអាំងប៊ុលហ្គោហ្គី"
     ],
     "status": "approved",
     "isVerified": true,
@@ -933,8 +933,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.8,
     "reviewCount": 258,
     "signatureDishesKh": [
-      "គ្រឿងសមុទ្រស្រស់ៗ",
-      "ម្ហូបខ្មែរប្រចាំតំបន់"
+      "អាម៉ុកត្រីរ៉ស់ស្លឹកញ",
+      "ឡុកឡាក់សាច់គោម្រេចកំពត",
+      "សម្លកកូរខ្មែរ និងបាយសម្រូបសុខភាព"
     ],
     "status": "approved",
     "isVerified": true,
@@ -972,9 +973,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.9,
     "reviewCount": 287,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "មីរ៉ាមែនទឹកស៊ុបជប៉ុន (Tonkotsu Ramen)",
+      "មីឆាបែបជប៉ុន និងគាវចៀន",
+      "មីស៊ុបសាច់ជ្រូកបន្ទះ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1090,9 +1091,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.8,
     "reviewCount": 84,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "មីទាញសាច់គោ គង់ហ្វូ (Hand-Pulled Beef Noodles)",
+      "មីស៊ុបឆ្អឹងជំនីរជ្រូក និងមីហឹរ",
+      "គាវចំហុយ និងមីឆាគ្រឿងសមុទ្រ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1486,9 +1487,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.6,
     "reviewCount": 84,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "មីហឹរកូរ៉េ ៧ កម្រិត (Korean Spicy Noodles)",
+      "មីស៊ុបគីមឈីគ្រឿងសមុទ្រ",
+      "តុកបុកគី និងគីមបាប់"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1606,9 +1607,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.9,
     "reviewCount": 171,
     "signatureDishesKh": [
-      "សាច់អាំងពិសេស & ស៊ុបឆ្នាំងដី",
-      "ភីហ្សាដុតថ្មី & អាហារជួបជុំគ្រួសារ",
-      "ឡុកឡាក់សាច់គោខ្មែរ"
+      "បឺហ្គឺរសាច់គោអាំងឈីស (Craft Beef Burger)",
+      "បឺហ្គឺរសាច់មាន់ស្រួយ",
+      "ដំឡូងបារាំងបំពង និងសាឡាដ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1686,8 +1687,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.7,
     "reviewCount": 229,
     "signatureDishesKh": [
-      "គុយទាវទឹកស៊ុបឆ្ងាញ់",
-      "បាយ និងមីឆា"
+      "មីហឹរ ៧ កម្រិត Seoul",
+      "មីស៊ុបគ្រឿងសមុទ្រ",
+      "គុយទាវទឹកស៊ុបឆ្ងាញ់"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1803,9 +1805,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.6,
     "reviewCount": 316,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "ប៊ូរីតូសាច់គោអាំង (California Beef Burrito)",
+      "តាកូសាច់មាន់ (Chicken Tacos)",
+      "ណាឆូឈីស (Loaded Nachos)"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1882,9 +1884,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.8,
     "reviewCount": 84,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "តាកូសាច់គោអាំង (Bay Area Street Tacos)",
+      "ប៊ូរីតូសាច់មាន់",
+      "កេសាឌីយ៉ាឈីស (Cheese Quesadilla)"
     ],
     "status": "approved",
     "isVerified": true,
@@ -2279,9 +2281,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.6,
     "reviewCount": 84,
     "signatureDishesKh": [
-      "សាច់អាំងពិសេស & ស៊ុបឆ្នាំងដី",
-      "ភីហ្សាដុតថ្មី & អាហារជួបជុំគ្រួសារ",
-      "ឡុកឡាក់សាច់គោខ្មែរ"
+      "ឆ្អឹងជំនីរជ្រូកអាំង BBQ (BBQ Pork Ribs)",
+      "ភីហ្សាដុតថ្មីពិសេស",
+      "ស្លាបមាន់អាំងទឹកឃ្មុំ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -2832,9 +2834,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.8,
     "reviewCount": 200,
     "signatureDishesKh": [
-      "សាច់អាំងពិសេស & ស៊ុបឆ្នាំងដី",
-      "ភីហ្សាដុតថ្មី & អាហារជួបជុំគ្រួសារ",
-      "ឡុកឡាក់សាច់គោខ្មែរ"
+      "បឺហ្គឺរសាច់គោឈីសពីរជាន់ (Double Cheeseburger)",
+      "បឺហ្គឺរសាច់មាន់បំពង",
+      "ដំឡូងបារាំងបំពង"
     ],
     "status": "approved",
     "isVerified": true,
@@ -2872,9 +2874,9 @@ export const restPart2: Restaurant[] = [
     "rating": 4.9,
     "reviewCount": 229,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "ឆ្អឹងជំនីរជ្រូកអាំង BBQ (Smoked BBQ Ribs)",
+      "សាច់គោអាំង និងស្លាបមាន់អាំង",
+      "ស៊ុប និងអាហារអាំងពិសេស"
     ],
     "status": "approved",
     "isVerified": true,
@@ -3231,11 +3233,10 @@ export const restPart2: Restaurant[] = [
     "reviewCount": 390,
     "signatureDishesKh": [
       "គុយទាវភ្នំពេញគ្រឿងក្នុងពិសេស",
-      "បាយសាច់ជ្រូកខ្វៃ និងស៊ុបក្តៅៗ",
-      "កាហ្វេទឹកដោះគោទឹកកកបុរាណ",
-      "មីសួរសាច់មាន់",
+      "មីគោកសាច់ជ្រូកខ្វៃ និងស៊ុបក្តៅៗ",
       "មីស៊ុបឆ្អឹងជំនីរជ្រូក",
-      "បបរមាន់ស្រែស្លឹកខ្ទឹម"
+      "បបរមាន់ស្រែស្លឹកខ្ទឹម",
+      "មីសួរសាច់មាន់"
     ],
     "status": "approved",
     "isVerified": true,

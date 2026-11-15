@@ -1173,14 +1173,37 @@ function computeShopBusinessKindInternal(r: Restaurant): ShopBusinessKind {
   }
 
   // 3. Pure Coffee / Drink / Cafe shops (that do not serve full Khmer noodle/soup/rice meals)
-  const isCafeName =
-    /ហាងកាហ្វេ|កាហ្វេ|តែគុជ|\b(?:coffee|cafe|café|roastery|tea\s*house|espresso)\b/i.test(`${r.nameKh || ''} ${r.nameEn || ''}`);
-  if (isCafeName && !hasSavoryMealInInventory && !/ភោជនីយដ្ឋាន|អាហារដ្ឋាន|bistro|kitchen|restaurant/i.test(`${r.nameKh || ''} ${r.nameEn || ''}`)) {
+  const primaryDishZero = `${(r.signatureDishesKh || [])[0] || ''} ${(r.signatureDishesEn || [])[0] || ''}`;
+  const isCafeNameOrPrimaryDish =
+    /ហាងកាហ្វេ|កាហ្វេ|តែគុជ|ហាងតែ|ហាងការ៉េម|\b(?:coffee|cafe|café|cofe|coffe|kopi|roastery|tea\s*house|milk\s*tea|boba|chagee|koi\s*th[eé]|gong\s*cha|the\s*alley|mixue|starbucks|espresso)\b/i.test(
+      `${r.nameKh || ''} ${r.nameEn || ''} ${primaryDishZero}`
+    );
+  if (
+    isCafeNameOrPrimaryDish &&
+    !hasSavoryMealInInventory &&
+    !/ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងបាយ|bistro|kitchen|restaurant|steakhouse/i.test(`${r.nameKh || ''} ${r.nameEn || ''}`)
+  ) {
     return 'coffee_drink';
   }
 
-  // 4. Noodle & Soup shops
-  if (/គុយទាវ|មីសួរ|មីស៊ុប|មីឆា|មីគោក|មីកូឡា|នំបញ្ចុក|បបរ|លតឆា|\b(?:noodle|pho|kuy\s*teav)\b/i.test(`${nameText} ${invText}`)) {
+  // 4. Noodle & Soup shops (based on shop name/category or primary signature dish, preventing subscript ថ្មី false positives)
+  const primaryNoodleText = normalizeKhmerFoodText(
+    [
+      r.nameKh,
+      r.nameEn,
+      r.categoryKh,
+      r.categoryEn,
+      (r.signatureDishesKh || [])[0] || '',
+      (r.signatureDishesEn || [])[0] || '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+  );
+  if (
+    /គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់|គ្រឿង|ប៉ាតេ|ប្រហិត|ពង|លាក់ខ្លួន|ជាតិ)|នំបញ្ចុក|បបរ|លតឆា|បាញ់កាញ់|ហ្វឺ|\b(?:noodle|noodles|pho|ramen|kuy\s*teav|kuyteav|udon)\b/i.test(
+      primaryNoodleText
+    )
+  ) {
     return 'noodle_soup_restaurant';
   }
 

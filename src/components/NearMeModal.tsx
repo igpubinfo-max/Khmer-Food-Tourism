@@ -66,6 +66,9 @@ import {
   isTourismAttractionGooglePlace,
   resolveActiveNearMeCoords,
   compareByGpsDistanceAscending,
+  requestCambodiaGpsLocation,
+  matchesNearMeQuickCategory,
+  selectLocalizedBadgeDishesForCategory,
 } from '../utils/nearMeEngine';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 
@@ -328,32 +331,25 @@ export const NearMeModal: React.FC = () => {
     }
   };
 
-  // Request GPS without back-to-back duplicate network bursts
+  // Request GPS with Cambodia bounds validation and two-stage geolocation fallback
   const requestLocation = (forceRefresh = false) => {
     const reqSeq = ++locationReqSeqRef.current;
     setGeoStatus('requesting');
-
-    const savedGps = readSavedUserGps();
-    const defaultCenter = provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
     let fetchedCoords: { lat: number; lng: number } | null = null;
 
-    if (savedGps && !forceRefresh) {
-      setUserCoords(savedGps);
-      setManualProvince(detectClosestProvinceFromCoords(savedGps));
-      fetchedCoords = savedGps;
-      fetchLiveNearby500m(savedGps, false, selectedRadiusMeters);
-    }
-
-    if ('geolocation' in navigator) {
-      const onSuccess = (position: GeolocationPosition) => {
-        if (reqSeq !== locationReqSeqRef.current) return;
-        const nextCoords = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        saveUserGps(nextCoords);
+    requestCambodiaGpsLocation({
+      forceRefresh,
+      defaultProvinceKh: manualProvince || 'រាជធានីភ្នំពេញ',
+      isCurrentReq: () => reqSeq === locationReqSeqRef.current,
+      onImmediateSaved: (savedGps, detectedProv) => {
+        setUserCoords(savedGps);
+        setManualProvince(detectedProv);
+        fetchedCoords = savedGps;
+        fetchLiveNearby500m(savedGps, false, selectedRadiusMeters);
+      },
+      onGranted: (nextCoords, detectedProv) => {
         setUserCoords(nextCoords);
-        setManualProvince(detectClosestProvinceFromCoords(nextCoords));
+        setManualProvince(detectedProv);
         setGeoStatus('granted');
         if (
           !fetchedCoords ||
@@ -363,34 +359,17 @@ export const NearMeModal: React.FC = () => {
           fetchedCoords = nextCoords;
           fetchLiveNearby500m(nextCoords, forceRefresh, selectedRadiusMeters);
         }
-      };
-
-      const onFinalFallback = () => {
-        if (reqSeq !== locationReqSeqRef.current) return;
-        const fallback = savedGps || defaultCenter;
+      },
+      onFallback: (fallback, detectedProv) => {
         setUserCoords(fallback);
-        setManualProvince(detectClosestProvinceFromCoords(fallback));
+        setManualProvince(detectedProv);
         setGeoStatus('fallback');
         if (!fetchedCoords) {
           fetchedCoords = fallback;
           fetchLiveNearby500m(fallback, forceRefresh, selectedRadiusMeters);
         }
-      };
-
-      navigator.geolocation.getCurrentPosition(
-        onSuccess,
-        onFinalFallback,
-        { enableHighAccuracy: false, timeout: 4000, maximumAge: 180000 }
-      );
-    } else {
-      const fallback = savedGps || defaultCenter;
-      setUserCoords(fallback);
-      setManualProvince(detectClosestProvinceFromCoords(fallback));
-      setGeoStatus('fallback');
-      if (!fetchedCoords) {
-        fetchLiveNearby500m(fallback, forceRefresh, selectedRadiusMeters);
-      }
-    }
+      },
+    });
   };
 
   useEffect(() => {
@@ -401,7 +380,8 @@ export const NearMeModal: React.FC = () => {
 
   const handleSelectRadius = (newRadius: number) => {
     setSelectedRadiusMeters(newRadius);
-    fetchLiveNearby500m(baseCoords, true, newRadius);
+    const nextRef = resolveActiveNearMeCoords(baseCoords, detectedGpsProvince, manualProvince);
+    fetchLiveNearby500m(nextRef, true, newRadius);
     scrollToNearbyShopList();
   };
 
@@ -424,7 +404,7 @@ export const NearMeModal: React.FC = () => {
       mergedMap.set(r.id, r);
     }
 
-    for (const gp of liveNearbyRestaurants) {
+    for (const gp of [...liveNearbyRestaurants, ...liveNearbyAttractions]) {
       if (!isFoodShopGooglePlace(gp)) continue;
       const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, gp.lat, gp.lng);
       if (dist > maxCitySearchRadius) continue;
@@ -451,7 +431,7 @@ export const NearMeModal: React.FC = () => {
       })
       .filter((r) => Number.isFinite(r.distanceMeters) && r.distanceMeters <= maxCitySearchRadius)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [restaurants, liveNearbyRestaurants, activeNearMeCoords, selectedRadiusMeters, manualProvince]);
+  }, [restaurants, liveNearbyRestaurants, liveNearbyAttractions, activeNearMeCoords, selectedRadiusMeters, manualProvince]);
 
   const nearbyRestaurants = useMemo(() => {
     return allVerifiedCityRestaurants
@@ -497,44 +477,7 @@ export const NearMeModal: React.FC = () => {
 
   const filteredNearbyRestaurants = useMemo(() => {
     const rawQuery = nearbyQuery.trim();
-    const needZh = language === 'zh' || /[\u4e00-\u9fff]/.test(rawQuery);
-    const passesQuickFilter = (r: Restaurant): boolean => {
-      if (quickFilterId === 'all') return true;
-      const zhLoc = needZh ? getLocalizedRestaurant(r, 'zh') : null;
-      const shopKind = classifyShopBusinessKind(r);
-      const haystack = normalizeKhmerFoodText(
-        [
-          r.nameKh,
-          r.nameEn,
-          zhLoc?.name,
-          r.categoryKh,
-          r.categoryEn,
-          ...(r.signatureDishesKh || []),
-          ...(r.signatureDishesEn || []),
-          ...(zhLoc?.signatureDishes || []),
-          ...((r.menuItems || []).map((m) => `${m.nameKh} ${m.nameEn || ''}`)),
-        ]
-          .filter(Boolean)
-          .join(' ')
-      );
-
-      if (quickFilterId === 'noodles') {
-        if (shopKind === 'bakery_bread' || shopKind === 'coffee_drink' || shopKind === 'pizza_western') return false;
-        return /គុយទាវ|មី|មីសួរ|នំបញ្ចុក|លតឆា|noodle|soup|ស៊ុប|面|粉|粿条|粉丝|汤/.test(haystack);
-      }
-      if (quickFilterId === 'rice_khmer') {
-        if (shopKind === 'bakery_bread' || shopKind === 'coffee_drink' || shopKind === 'pizza_western') return false;
-        return /បាយ|ម្ហូបខ្មែរ|សម្ល|អាម៉ុក|ឡុកឡាក់|khmer|rice|restaurant|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|饭|高棉|餐厅/.test(haystack);
-      }
-      if (quickFilterId === 'coffee') {
-        return /កាហ្វេ|តែ|ភេសជ្ជៈ|នំប៉័ង|នំខេក|coffee|cafe|café|tea|bakery|咖啡|茶|烘焙/.test(haystack);
-      }
-      if (quickFilterId === 'bbq_seafood') {
-        if (shopKind === 'bakery_bread' || shopKind === 'coffee_drink') return false;
-        return /សាច់អាំង|គ្រឿងសមុទ្រ|ស៊ុប|ក្តាម|បង្គា|មឹក|bbq|seafood|grill|hotpot|buffet|烧烤|海鲜|火锅/.test(haystack);
-      }
-      return true;
-    };
+    const passesQuickFilter = (r: Restaurant): boolean => matchesNearMeQuickCategory(r, quickFilterId);
 
     const sanitizeBadgeItems = (items: string[]): string[] => {
       if (language === 'zh') return items.slice(0, 2);
@@ -553,7 +496,7 @@ export const NearMeModal: React.FC = () => {
         })
         .map((r) => ({
           ...r,
-          matchedInventoryItems: sanitizeBadgeItems(r.signatureDishesKh || []),
+          matchedInventoryItems: selectLocalizedBadgeDishesForCategory(r, quickFilterId, language),
         }))
         .sort((a, b) => compareByGpsDistanceAscending(a, b, activeNearMeCoords));
     }
@@ -583,7 +526,7 @@ export const NearMeModal: React.FC = () => {
           if (!(nameDetail.matchedInName && nameDetail.score >= 200)) continue;
           results.push({
             ...r,
-            matchedInventoryItems: sanitizeBadgeItems(r.signatureDishesKh || []),
+            matchedInventoryItems: selectLocalizedBadgeDishesForCategory(r, quickFilterId, language),
             _matchScore: Math.round(nameDetail.score / 4),
             _isExactProductMatch: nameDetail.exactName,
           });
@@ -591,11 +534,10 @@ export const NearMeModal: React.FC = () => {
         }
         results.push({
           ...r,
-          matchedInventoryItems: sanitizeBadgeItems(
-            matchRes.matchedInventoryItems.length > 0
-              ? matchRes.matchedInventoryItems
-              : (r.signatureDishesKh || [])
-          ),
+          matchedInventoryItems:
+            matchRes.matchedInventoryItems.length > 0 && language === 'km'
+              ? sanitizeBadgeItems(matchRes.matchedInventoryItems)
+              : selectLocalizedBadgeDishesForCategory(r, quickFilterId, language),
           _matchScore: matchRes.score,
           _isExactProductMatch: matchRes.isExactProductMatch,
         });
@@ -987,6 +929,15 @@ export const NearMeModal: React.FC = () => {
                     type="button"
                     id={`kft-nearme-cat-${card.id}-btn`}
                     onClick={() => {
+                      if (targetFood) {
+                        setTargetFood(null);
+                        if (
+                          nearbyQuery.trim() &&
+                          normalizeKhmerFoodText(nearbyQuery).includes(normalizeKhmerFoodText(targetFood.nameKh))
+                        ) {
+                          setNearbyQuery('');
+                        }
+                      }
                       if (card.type === 'destinations') {
                         setActiveType('destinations');
                         setQuickFilterId('all');
@@ -1359,7 +1310,7 @@ export const NearMeModal: React.FC = () => {
                     <div className="flex gap-3">
                       <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200/70">
                         <img decoding="async"
-                          src={d.photoUrl}
+                          src={d.photoUrl || buildPlaceSpecificNoPhotoSvg(d.nameKh, d.provinceKh, 'tourism')}
                           alt={dLoc.name}
                           className="w-full h-full object-cover"
                           loading="lazy"
