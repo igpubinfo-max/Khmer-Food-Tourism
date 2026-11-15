@@ -698,4 +698,106 @@ test('15. Nearby Food Search 6 category buttons, Phnom Penh mountain fix, Khmer 
   }
 });
 
-console.log(`\nAll ${passed} unit test suites passed successfully!`);
+// 16. RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclusivity & Top Search Bar Root-Cause Regression Guard
+test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclusivity & Top Search Bar Root-Cause Regression Guard', () => {
+  const path = require('path');
+  const {
+    classifyShopDirectoryCategory,
+    getShopCategoryTabTier,
+    matchesShopCategoryTab,
+    detectExplicitShopCategoryFromQuery,
+    verifyShopDataForDisplay,
+  } = require(path.join(ROOT, 'src/utils/foodFilters.ts'));
+  const { initialRestaurants } = require(path.join(ROOT, 'src/data/seedData.ts'));
+  const { isHotelBusinessRecord, isStrictVerifiedCambodiaRestaurant } = require(path.join(ROOT, 'src/types/index.ts'));
+  const { parseSmartSearchIntent } = require(path.join(ROOT, 'src/utils/aiSearchBridge.ts'));
+
+  const validShops = initialRestaurants.filter(
+    (r) => !isHotelBusinessRecord(r) && isStrictVerifiedCambodiaRestaurant(r) && verifyShopDataForDisplay(r)
+  );
+  assert.ok(validShops.length >= 270, 'Must have >= 270 verified shops');
+
+  // 1. Verify all 4 primary categories partition the directory cleanly without false-positive subscript នំ in ភ្នំពេញ
+  const counts = { restaurant_dining: 0, cafe_bistro: 0, drinks_boba: 0, fast_street: 0 };
+  for (const r of validShops) {
+    const cat = classifyShopDirectoryCategory(r);
+    assert.ok(counts[cat] !== undefined, 'Invalid primary category ' + cat);
+    counts[cat]++;
+  }
+  assert.ok(counts.restaurant_dining >= 150, 'Expected >= 150 restaurant_dining, got ' + counts.restaurant_dining);
+  assert.ok(counts.cafe_bistro >= 50, 'Expected >= 50 cafe_bistro, got ' + counts.cafe_bistro);
+  assert.ok(counts.drinks_boba >= 6, 'Expected >= 6 dedicated drinks_boba, got ' + counts.drinks_boba);
+  assert.ok(counts.fast_street >= 20 && counts.fast_street <= 45, 'Expected 20..45 fast_street shops, got ' + counts.fast_street);
+
+  // 2. Verify zero false-positive leaks into fast_street (អាហាររហ័ស) and drinks_boba (ភេសជ្ជៈ)
+  const fastStreetList = validShops.filter((r) => matchesShopCategoryTab(r, 'fast_street'));
+  assert.ok(
+    !fastStreetList.some((r) => /ម្លិះ|រំដេង|ក្រវាញ|សុវណ្ណា|គីមលី|ហូលី|ឆាជី|ខយ តេ|មីស៊ូវ|ប្រោន|ស្តារបាក់|ធ្យូប|អាម៉ាហ្សូន/i.test(r.nameKh)),
+    'fast_street must never leak fine dining, seafood, BBQ, coffee chains, or boba chains via ភ្នំពេញ or priceLevel'
+  );
+
+  const drinksList = validShops.filter((r) => matchesShopCategoryTab(r, 'drinks_boba'));
+  assert.ok(drinksList.length >= 45, 'Expected >= 45 drinks_boba matches, got ' + drinksList.length);
+  assert.ok(
+    !drinksList.some((r) => /steak|pteah|ម្លិះ|រំដេង|សុវណ្ណា|ចំការម្រេច/i.test(r.nameKh + ' ' + r.nameEn)),
+    'drinks_boba must never match steak (s-tea-k) or Pteah (p-tea-h) or traditional restaurants'
+  );
+
+  // Verify dedicated boba/tea/ice-cream shops rank Tier 2 above beverage-serving cafes (Tier 1)
+  const chagee = validShops.find((r) => /ឆាជី|chagee/i.test(r.nameKh + ' ' + r.nameEn));
+  const koi = validShops.find((r) => /ខយ តេ|koi/i.test(r.nameKh + ' ' + r.nameEn));
+  const tube = validShops.find((r) => /ធ្យូប|tube coffee/i.test(r.nameKh + ' ' + r.nameEn));
+  assert.equal(getShopCategoryTabTier(chagee, 'drinks_boba'), 2, 'CHAGEE must be Tier 2 in drinks_boba');
+  assert.equal(getShopCategoryTabTier(koi, 'drinks_boba'), 2, 'KOI Thé must be Tier 2 in drinks_boba');
+  assert.equal(getShopCategoryTabTier(tube, 'drinks_boba'), 1, 'TUBE Coffee must be Tier 1 in drinks_boba');
+
+  // 3. Verify full-service bistros/restaurants classify as restaurant_dining (ភោជនីយដ្ឋាន), never cafe_bistro
+  for (const id of ['rest-538', 'rest-22', 'rest-543']) {
+    const shop = validShops.find((r) => r.id === id);
+    if (shop) {
+      assert.equal(
+        classifyShopDirectoryCategory(shop),
+        'restaurant_dining',
+        id + ' (' + shop.nameKh + ') must classify as restaurant_dining'
+      );
+    }
+  }
+
+  // 4. Verify detectExplicitShopCategoryFromQuery across Khmer, English, and Chinese
+  assert.equal(detectExplicitShopCategoryFromQuery('កាហ្វេ'), 'cafe_bistro');
+  assert.equal(detectExplicitShopCategoryFromQuery('coffee shop'), 'cafe_bistro');
+  assert.equal(detectExplicitShopCategoryFromQuery('咖啡馆'), 'cafe_bistro');
+  assert.equal(detectExplicitShopCategoryFromQuery('ភេសជ្ជៈ'), 'drinks_boba');
+  assert.equal(detectExplicitShopCategoryFromQuery('តែគុជ'), 'drinks_boba');
+  assert.equal(detectExplicitShopCategoryFromQuery('boba'), 'drinks_boba');
+  assert.equal(detectExplicitShopCategoryFromQuery('奶茶'), 'drinks_boba');
+  assert.equal(detectExplicitShopCategoryFromQuery('អាហាររហ័ស'), 'fast_street');
+  assert.equal(detectExplicitShopCategoryFromQuery('fast food'), 'fast_street');
+  assert.equal(detectExplicitShopCategoryFromQuery('快餐'), 'fast_street');
+  assert.equal(detectExplicitShopCategoryFromQuery('ភោជនីយដ្ឋាន'), 'restaurant_dining');
+  assert.equal(detectExplicitShopCategoryFromQuery('restaurants'), 'restaurant_dining');
+  assert.equal(detectExplicitShopCategoryFromQuery('餐厅'), 'restaurant_dining');
+  assert.equal(detectExplicitShopCategoryFromQuery('នៅជិតខ្ញុំ'), 'near_me_toggle');
+  assert.equal(detectExplicitShopCategoryFromQuery('near me'), 'near_me_toggle');
+  assert.equal(detectExplicitShopCategoryFromQuery('附近店铺'), 'near_me_toggle');
+  assert.equal(detectExplicitShopCategoryFromQuery('ភីហ្សា'), null);
+  assert.equal(detectExplicitShopCategoryFromQuery('បឺហ្គឺ'), null);
+  assert.equal(detectExplicitShopCategoryFromQuery('គុយទាវ'), null);
+  assert.equal(detectExplicitShopCategoryFromQuery('ម្លិះ'), null);
+
+  // 5. Verify RestaurantView.tsx source enforces mutually exclusive active button state & clean searchFields.names
+  const rvSrc = fs.readFileSync(path.join(ROOT, 'src/components/RestaurantView.tsx'), 'utf8');
+  assert.ok(
+    rvSrc.includes('!nearMeActive && categoryFilter === cat.id'),
+    'RestaurantView.tsx must guard non-near-me category button active state with !nearMeActive'
+  );
+  assert.ok(
+    rvSrc.includes('restaurantSearchFields(r, [zhLoc.name])'),
+    'RestaurantView.tsx must only pass [zhLoc.name] into restaurantSearchFields extraNames'
+  );
+  const smartSr = parseSmartSearchIntent('កាហ្វេ សៀមរាប');
+  assert.equal(smartSr.detectedProvinceKh, 'សៀមរាប');
+  assert.equal(smartSr.coreQuery, 'កាហ្វេ');
+});
+
+console.log('\nAll ' + passed + ' unit test suites passed successfully!');

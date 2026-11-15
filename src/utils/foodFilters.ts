@@ -1350,7 +1350,7 @@ export function matchShopToProductQuery(
     (matchedProductGroups.some((g) => g.intent === 'bakery_bread') ||
       /នំប៉័ង|នំខេក|នំដុត|ក្រូសង់|\b(?:bakery|bread|pastry|banh\s*mi|croissant|n[oö]mpang)\b/i.test(combinedSearchText));
   const isSearchingCoffee = matchedProductGroups.some((g) => g.intent === 'coffee_drink') ||
-    /កាហ្វេ|តែគុជ|តែបៃតង|តែក្រូចឆ្មារ|ទឹកអំពៅ|ទឹកដូង|ទឹកត្នោត|ទឹកក្រឡុក|ភេសជ្ជៈ|coffee|cafe|café|latte|espresso|tea|boba|smoothie/i.test(combinedSearchText);
+    /កាហ្វេ|តែគុជ|តែគុច|តែបៃតង|តែក្រូចឆ្មារ|ទឹកអំពៅ|ទឹកដូង|ទឹកត្នោត|ទឹកក្រឡុក|ភេសជ្ជៈ|\b(?:coffee|cafe|café|cofe|coffe|kopi|latte|espresso|cappuccino|americano|mocha|matcha|tea|boba|smoothie|juice)\b/i.test(combinedSearchText);
   const isSearchingPizzaWestern = matchedProductGroups.some((g) => g.intent === 'pizza_western') ||
     /ភីហ្សា|ប៉ាស្តា|បឺហ្គឺ|ស្តេក|pizza|pasta|burger|steak|burrito|taco/i.test(combinedSearchText);
 
@@ -1972,4 +1972,240 @@ export function matchesPresetCravingChip(food: FoodItem, chipId: string): boolea
     default:
       return matchesStrictFoodCategory(food, chipId);
   }
+}
+
+// ============================================================================
+// CENTRALIZED SHOP DIRECTORY CATEGORY & SEARCH ENGINE (RestaurantView 6 Buttons)
+// ============================================================================
+
+export type ShopDirectoryPrimaryCategory =
+  | 'restaurant_dining'
+  | 'cafe_bistro'
+  | 'drinks_boba'
+  | 'fast_street';
+
+export type ShopDirectorySubCategory =
+  | 'cafe_bistro'
+  | 'drinks_boba'
+  | 'fast_street'
+  | 'bbq_grill'
+  | 'seafood_riverside'
+  | 'khmer_fine_dining'
+  | 'family_garden';
+
+const SHOP_DRINKS_BOBA_DEDICATED_REGEX =
+  /ហាងតែគុជ|តែគុជ|តែគុច|ហាងតែ|ហាងការ៉េម|ហាងទឹកក្រឡុក|ទឹកក្រឡុក|ទឹកផ្លែឈើ|ទឹកអំពៅ|ទឹកដូង|ទឹកត្នោត|ភេសជ្ជៈត្រជាក់|\b(?:boba|bubble\s*tea|milk\s*tea|fruit\s*tea|green\s*tea|lemon\s*tea|thai\s*tea|tea\s*house|tea\s*shop|chagee|koi\b|koi\s*th[eé]|gong\s*cha|mixue|the\s*alley|tiger\s*sugar|chatime|dakasi|sharetea|ding\s*tea|macu|smoothie|juice\s*bar|fresh\s*juice|sugar\s*cane|coconut\s*water|ice\s*cream|gelato|gelano|dairy\s*queen|swensen)\b|奶茶|珍珠奶茶|茶饮|果茶|果汁|冰激凌|冰淇淋|雪糕|蜜雪冰城|霸王茶姬|贡茶/i;
+
+const SHOP_FAST_STREET_NAME_OR_PRIMARY_REGEX =
+  /អាហាររហ័ស|អាហារសម្រន់|អាហារតាមផ្លូវ|ហាងនំប៉័ង|នំប៉័ងប៉ាតេ|នំប៉័ងសាំងវិច|នំប៉័ងដុតថ្មី|ហាងនំខេក|១៩៩០ខេក|នំខេកខួបកំណើត|បឺហ្គឺ|ហែមបឺហ្គឺ|ភីហ្សា|មាន់បំពង|សាំងវិច|ប្រហិតចៀន|ប្រហិតអាំង|ផ្លូវថ្មើរជើង|នំក្រែប|\b(?:fast\s*food|street\s*food|burger|burgers|burgershack|hamburger|pizza|pizzeria|trattoria|sandwich|sandwiches|banh\s*mi|n[oö]mpang|fried\s*chicken|kfc|lucky\s*burger|burger\s*king|pizza\s*company|pizza\s*4p|domino|papa\s*john|carl's\s*jr|texas\s*chicken|bonchon|lotteria|jollibee|taco|tacos|burrito|shawarma|kebab|hot\s*dog|hotdog|bakery|pastry|patisserie|croissant|cr[eê]pes?|tous\s*les\s*jours|1990s\s*cake|sweet\s*lab|cakes?\s*&\s*craft|bake\s*and\s*bake|the\s*wine\s*bakery|bengawan\s*solo|walk\s*street)\b|快餐|汉堡|披萨|三明治|炸鸡|面包店|蛋糕店|街头小吃/i;
+
+const SHOP_CAFE_DEDICATED_NAME_REGEX =
+  /ហាងកាហ្វេ|កាហ្វេ|\b(?:cafe|café|coffee|cofe|coffe|kopi|roastery|espresso|latte|cappuccino|americano|starbucks|brown\s*coffee|brown\s*roastery|tube\s*coffee|amazon\s*cafe|café\s*amazon|temple\s*coffee|sister\s*srey|kinyei|feel\s*good\s*coffee|brother\s*bong|epic\s*arts\s*caf[eé]|lotus\s*coffee|vr\s*coffee|zara\s*coffee|talk\s*coffee|coffee\s*today|coffee\s*culture)\b|咖啡馆|咖啡厅|咖啡店|咖啡/i;
+
+/**
+ * Strictly classifies a shop into one of the 4 primary shop categories for the
+ * 6-button Restaurant Directory ('restaurant_dining' | 'cafe_bistro' | 'drinks_boba' | 'fast_street').
+ * Prevents false positives like 'ភ្នំពេញ' matching 'នំ', 'steak'/'Pteah' matching 'tea',
+ * or full-service bistros/restaurants being misclassified as cafes.
+ */
+export function classifyShopDirectoryCategory(r: Restaurant): ShopDirectoryPrimaryCategory {
+  if (!r) return 'restaurant_dining';
+  const nameAndCat = `${r.nameKh || ''} ${r.nameEn || ''} ${r.categoryKh || ''} ${r.categoryEn || ''} ${r.businessCategory || ''}`;
+  const dish0 = `${(r.signatureDishesKh || [])[0] || ''} ${(r.signatureDishesEn || [])[0] || ''}`;
+
+  // 1. Dedicated Drinks / Boba / Milk Tea / Tea House / Smoothie / Fresh Juice / Ice Cream
+  if (
+    SHOP_DRINKS_BOBA_DEDICATED_REGEX.test(nameAndCat) &&
+    !/ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងបាយ|គុយទាវ|អាម៉ុក|សម្ល|សាច់អាំង|គ្រឿងសមុទ្រ|\b(?:restaurant|steakhouse|seafood|bbq|hotpot|bistro)\b/i.test(nameAndCat)
+  ) {
+    return 'drinks_boba';
+  }
+  if (
+    /^(?:តែគុជ|តែគុច|តែទឹកដោះគោ|ការ៉េម|ទឹកក្រឡុក|ទឹកផ្លែឈើ|ទឹកអំពៅ|ទឹកដូង)|\b(?:boba|bubble\s*tea|milk\s*tea|ice\s*cream|gelato|smoothie)\b/i.test(dish0) &&
+    !/កាហ្វេ|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងបាយ|\b(?:coffee|cafe|café|roastery|restaurant|bistro)\b/i.test(nameAndCat)
+  ) {
+    return 'drinks_boba';
+  }
+
+  // 2. Fast Food / Burger / Pizza / Sandwich / Banh Mi / Bakery / Cake / Fried Chicken / Street Snacks
+  if (
+    SHOP_FAST_STREET_NAME_OR_PRIMARY_REGEX.test(`${nameAndCat} ${dish0}`) &&
+    !/អាម៉ុក|សម្លកកូរ|សម្លម្ជូរ|គុយទាវទឹកស៊ុប|មីសួរសាច់មាន់|គ្រឿងសមុទ្រស្រស់|\b(?:fine\s*dining|seafood\s*restaurant|khmer\s*kitchen|steakhouse)\b/i.test(`${nameAndCat} ${dish0}`)
+  ) {
+    const isPrimaryCoffeeBrand =
+      /ហាងកាហ្វេ|\b(?:brown\s*coffee|brown\s*roastery|starbucks|tube\s*coffee|temple\s*coffee|caf[eé]\s*amazon|amazon\s*caf[eé]|sister\s*srey|del\s*mar\s*pastry\s*&\s*coffee|feel\s*good\s*coffee|kinyei)\b/i.test(
+        nameAndCat
+      ) &&
+      !/ហាងនំប៉័ង|ហាងនំខេក|១៩៩០ខេក|\b(?:tous\s*les\s*jours|n[oö]mpang|banh\s*mi|1990s\s*cake|sweet\s*lab|bake\s*and\s*bake|the\s*wine\s*bakery|cakes?\s*&\s*craft|bengawan\s*solo)\b/i.test(
+        nameAndCat
+      );
+    if (!isPrimaryCoffeeBrand) {
+      return 'fast_street';
+    }
+  }
+
+  // 3. Café / Coffee Shop / Roastery
+  const hasCoffeePrimaryDish =
+    /^(?:កាហ្វេ|ការហ្វេ|អេសប្រេសសូ|ឡាតេ|កាពូឈីណូ)|\b(?:latte|espresso|cappuccino|cold\s*brew|americano|flat\s*white|pour-over|iced\s*coffee)\b/i.test(
+      dish0
+    );
+  if (
+    (SHOP_CAFE_DEDICATED_NAME_REGEX.test(nameAndCat) || hasCoffeePrimaryDish) &&
+    !/ភោជនីយដ្ឋាន\s*(?:ម្លិះ|រំដេង|ក្រវាញ|សុវណ្ណា|ចន្ទ្រា|វីរោធ|គីមលី|ហូលី|បុប្ផា|សមុទ្រឈើ|ចំការម្រេច)|\b(?:steakhouse|seafood\s*restaurant)\b/i.test(
+      nameAndCat
+    )
+  ) {
+    if (
+      /សាច់គោអាំង|សាច់អាំង|សម្ល|អាម៉ុក|គុយទាវ|ឡុកឡាក់|បាយ|គ្រឿងសមុទ្រ|\b(?:bbq|steak|seafood|amok|lok\s*lak|noodle|soup)\b/i.test(
+        dish0
+      ) &&
+      /ភោជនីយដ្ឋាន/i.test(nameAndCat) &&
+      !/ហាងកាហ្វេ/i.test(nameAndCat)
+    ) {
+      return 'restaurant_dining';
+    }
+    return 'cafe_bistro';
+  }
+
+  // 4. Sit-down Restaurant / Dining
+  return 'restaurant_dining';
+}
+
+/**
+ * Classifies a shop into fine-grained sub-categories for search enrichment and cuisine filtering.
+ */
+export function classifyRestaurantSubCategory(r: Restaurant): ShopDirectorySubCategory {
+  const primary = classifyShopDirectoryCategory(r);
+  if (primary === 'cafe_bistro' || primary === 'drinks_boba' || primary === 'fast_street') {
+    return primary;
+  }
+  const text = `${r?.nameKh || ''} ${r?.nameEn || ''} ${r?.descriptionKh || ''} ${r?.descriptionEn || ''} ${(r?.signatureDishesKh || []).join(' ')} ${(r?.signatureDishesEn || []).join(' ')}`.toLowerCase();
+  if (
+    text.includes('សាច់អាំង') ||
+    /\b(?:bbq|bar\s*bq|grill|steakhouse|hotpot|shabu|sukiyaki)\b/i.test(text) ||
+    text.includes('សុវណ្ណា') ||
+    text.includes('sovanna')
+  ) {
+    return 'bbq_grill';
+  }
+  if (
+    text.includes('សមុទ្រ') ||
+    /\b(?:seafood|crab|riverside|lake|sailing|bopha)\b/i.test(text) ||
+    text.includes('មាត់ទន្លេ') ||
+    text.includes('មាត់បឹង') ||
+    text.includes('មាត់ព្រែក') ||
+    text.includes('ក្បាលកោះ')
+  ) {
+    return 'seafood_riverside';
+  }
+  if (
+    r?.priceLevel === '$$$' ||
+    text.includes('ម្លិះ') ||
+    /\b(?:malis|wat\s*damnak|chanrey\s*tree|kravanh|viroth|romdeng|cuisine\s*wat)\b/i.test(text) ||
+    text.includes('ក្រវាញ') ||
+    text.includes('រំដេង')
+  ) {
+    return 'khmer_fine_dining';
+  }
+  return 'family_garden';
+}
+
+/**
+ * Returns the match tier (2 = primary dedicated match, 1 = secondary beverage-serving cafe match, 0 = no match)
+ * for the 6 category buttons in RestaurantView.tsx.
+ */
+export function getShopCategoryTabTier(r: Restaurant, tabId: string): number {
+  if (!r) return 0;
+  if (!tabId || tabId === 'all' || tabId === 'near_me_toggle') return 2;
+
+  const primary = classifyShopDirectoryCategory(r);
+
+  if (tabId === 'restaurant_dining') {
+    return primary === 'restaurant_dining' ? 2 : 0;
+  }
+  if (tabId === 'cafe_bistro') {
+    return primary === 'cafe_bistro' ? 2 : 0;
+  }
+  if (tabId === 'fast_street') {
+    return primary === 'fast_street' ? 2 : 0;
+  }
+  if (tabId === 'drinks_boba') {
+    if (primary === 'drinks_boba') return 2;
+    if (primary === 'cafe_bistro') {
+      const cafeDrinkText = `${r.nameKh || ''} ${r.nameEn || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.signatureDishesEn || []).join(' ')}`;
+      if (
+        /តែគុជ|តែគុច|តែទឹកដោះគោ|តែបៃតង|តែក្រូចឆ្មារ|តែផាសិន|តែក្រហម|ទឹកក្រឡុក|ទឹកផ្លែឈើ|ផាសិនសូដា|ភេសជ្ជៈត្រជាក់|ការ៉េម|\b(?:milk\s*tea|green\s*tea|lemon\s*tea|fruit\s*tea|thai\s*tea|iced\s*tea|boba|bubble\s*tea|matcha|smoothie|frappuccino|frappe|fruit\s*juice|fresh\s*juice|passion\s*soda|lemonade|ice\s*cream)\b|奶茶|抹茶|果茶|冰沙|果汁/i.test(
+          cafeDrinkText
+        )
+      ) {
+        return 1;
+      }
+    }
+    return 0;
+  }
+
+  const subCat = classifyRestaurantSubCategory(r);
+  return subCat === tabId ? 2 : 0;
+}
+
+export function matchesShopCategoryTab(r: Restaurant, tabId: string): boolean {
+  return getShopCategoryTabTier(r, tabId) > 0;
+}
+
+/**
+ * Detects when a user's top-bar search query in RestaurantView explicitly targets one of the
+ * 5 shop categories ('restaurant_dining' | 'cafe_bistro' | 'drinks_boba' | 'fast_street' | 'near_me_toggle')
+ * in Khmer, English, or Chinese.
+ */
+export function detectExplicitShopCategoryFromQuery(
+  rawQuery: string
+): 'restaurant_dining' | 'cafe_bistro' | 'drinks_boba' | 'fast_street' | 'near_me_toggle' | null {
+  const q = (rawQuery || '').trim();
+  if (!q) return null;
+
+  if (
+    /^(\s*(?:នៅជិតខ្ញុំ|ហាងជិតខ្ញុំ|កន្លែងជិតខ្ញុំ|ជិតខ្ញុំ|near\s*me|nearby(?:\s*shops?|\s*restaurants?)?|shops?\s*near\s*me|restaurants?\s*near\s*me|附近(?:店铺|餐厅|美食)?)\s*)$/i.test(
+      q
+    )
+  ) {
+    return 'near_me_toggle';
+  }
+
+  // Dedicated Drinks / Boba / Milk Tea / Smoothie / Juice category query
+  if (
+    /^(\s*(?:ភេសជ្ជៈ|ហាងភេសជ្ជៈ|តែគុជ|តែគុច|ហាងតែគុជ|ហាងតែ|តែទឹកដោះគោ|ទឹកក្រឡុក|ហាងទឹកក្រឡុក|ទឹកផ្លែឈើ|ទឹកអំពៅ|ទឹកដូង|ហាងការ៉េម|ការ៉េម|drinks?|beverages?|cold\s*drinks?|boba|bubble\s*tea|milk\s*tea|fruit\s*tea|tea\s*shop|tea\s*house|smoothies?|fresh\s*juice|juice\s*bar|ice\s*cream\s*shop|饮品|饮料|饮品店|奶茶|珍珠奶茶|奶茶店|果茶|果汁|冰沙|冰淇淋店)\s*)$/i.test(
+      q
+    )
+  ) {
+    return 'drinks_boba';
+  }
+
+  // Broad Fast Food / Street Food category query (specific items like pizza/burger/bakery use product/name matching so they don't pull unrelated fast food)
+  if (
+    /^(\s*(?:អាហាររហ័ស|អាហារសម្រន់|អាហារតាមផ្លូវ|ហាងអាហាររហ័ស|fast\s*food|street\s*food|snacks?|快餐|快餐店|快餐小吃|街头小吃|小吃)\s*)$/i.test(
+      q
+    )
+  ) {
+    return 'fast_street';
+  }
+
+  // Café / Coffee Shop category query
+  if (
+    /^(\s*(?:ហាងកាហ្វេ|កាហ្វេ|ការហ្វេ|កាហ្វេឆ្ងាញ់|អេសប្រេសសូ|ឡាតេ|កាពូឈីណូ|cafes?|cafés?|coffee|coffee\s*shops?|coffee\s*house|cofe|coffe|kopi|roastery|espresso|latte|cappuccino|americano|cold\s*brew|咖啡|咖啡馆|咖啡厅|咖啡店)\s*)$/i.test(
+      q
+    )
+  ) {
+    return 'cafe_bistro';
+  }
+
+  // Sit-down Restaurant / Dining category query
+  if (
+    /^(\s*(?:ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងអាហារ|ហាងបាយ|អាហារខ្មែរ|ម្ហូបខ្មែរ|ភោជនីយដ្ឋានខ្មែរ|restaurants?|dining|fine\s*dining|khmer\s*restaurants?|餐厅|饭店|餐馆|美食店|高棉餐厅|柬埔寨餐厅)\s*)$/i.test(
+      q
+    )
+  ) {
+    return 'restaurant_dining';
+  }
+
+  return null;
 }

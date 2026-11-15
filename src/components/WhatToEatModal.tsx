@@ -3381,31 +3381,30 @@ export const WhatToEatModal: React.FC = () => {
                   );
                 })()}
 
-                {/* 6th Premium 3D Button: New Picks / Shuffle */}
+                {/* 6th Premium 3D Button: Food & Shops Near Me (GPS) — replaces the old New Picks tile (shuffle is now the small button beside the results title) */}
                 {(() => {
-                  const newPicksLabel = tr(language, 'ប្តូរមុខម្ហូបថ្មី', 'New Picks', '换一批推荐');
+                  const nearLabel = tr(language, 'ម្ហូបជិតខ្ញុំ', 'Near Me', '附近美食');
                   return (
                     <button
                       type="button"
-                      onClick={handleShowAnother}
+                      data-testid="wte-tab-nearme"
+                      onClick={() => openNearMeModal(setIsNearMeModalOpen, { tab: 'restaurants' })}
                       className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-colors duration-150 cursor-pointer select-none flex flex-col items-center justify-start"
                     >
                       <div className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-opacity duration-150 rounded-[14px] opacity-95 group-hover:opacity-100">
                         <img
-                          src="/categories/ai_cat_new_picks.png"
-                          alt={newPicksLabel}
+                          src="/categories/home_cat_nearby_food.png"
+                          alt={nearLabel}
                           decoding="async"
                           style={{
                             transform: 'none',
                           }}
-                          className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-opacity duration-150 ${
-                            isSpinning ? 'brightness-110' : ''
-                          }`}
+                          className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-opacity duration-150"
                         />
                       </div>
 
                       <span className="kft-cat-label">
-                        {newPicksLabel}
+                        {nearLabel}
                       </span>
                     </button>
                   );
@@ -3831,18 +3830,30 @@ export const WhatToEatModal: React.FC = () => {
                 data-testid="wte-results-section"
                 className="space-y-3.5 font-khmer"
               >
-                <div id="kft-wte-ai-match-banner" className="px-0.5">
-                  <h4 className="text-sm font-extrabold text-white truncate">
-                    {tr(
-                      language,
-                      `មុខម្ហូបណែនាំទាំង ${recommendedTenDishes.length} មុខ`,
-                      `Top ${recommendedTenDishes.length} Recommended Dishes`,
-                      `为您推荐的 ${recommendedTenDishes.length} 道美食`
+                <div id="kft-wte-ai-match-banner" className="px-0.5 flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm font-extrabold text-white truncate">
+                      {tr(
+                        language,
+                        `មុខម្ហូបណែនាំទាំង ${recommendedTenDishes.length} មុខ`,
+                        `Top ${recommendedTenDishes.length} Recommended Dishes`,
+                        `为您推荐的 ${recommendedTenDishes.length} 道美食`
+                      )}
+                    </h4>
+                    {activeFilterParts.length > 0 && (
+                      <p className="text-[11px] text-slate-300 truncate mt-0.5">{activeCriteriaLabel}</p>
                     )}
-                  </h4>
-                  {activeFilterParts.length > 0 && (
-                    <p className="text-[11px] text-slate-300 truncate mt-0.5">{activeCriteriaLabel}</p>
-                  )}
+                  </div>
+                  <button
+                    type="button"
+                    data-testid="wte-shuffle-small"
+                    onClick={handleShowAnother}
+                    disabled={isSpinning}
+                    className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-60 text-slate-950 text-[11px] font-extrabold shadow-[0_3px_0_#B45309] active:translate-y-0.5 active:shadow-[0_1px_0_#B45309] transition-all cursor-pointer"
+                  >
+                    <Shuffle className={`w-4 h-4 ${isSpinning ? 'animate-spin' : ''}`} strokeWidth={1.75} />
+                    <span>{tr(language, 'ប្តូរថ្មី', 'New', '换一批')}</span>
+                  </button>
                 </div>
 
                 {/* Loading State */}

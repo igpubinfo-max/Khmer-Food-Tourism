@@ -18,6 +18,18 @@ import {
   Phone,
   Image as ImageIcon,
   ArrowUp,
+  LayoutGrid,
+  Crosshair,
+  Store,
+  Utensils,
+  Leaf,
+  Soup,
+  Coffee,
+  Fish,
+  Cake,
+  Landmark,
+  BedDouble,
+  Crown,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
@@ -454,7 +466,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     }
     setSelectedPlaceIds(new Set());
     showToast(
-      tr(language, `📥 បាននាំចូលទីតាំងថ្មីចំនួន ${importedCount} ${duplicateCount > 0 ? `(រំលងទីតាំងស្ទួន ${duplicateCount})` : ''} ដោយជោគជ័យ!`, `📥 Imported ${importedCount} new places ${duplicateCount > 0 ? `(${duplicateCount} duplicates synced)` : ''}!`, `📥 成功导入 ${importedCount} 个新地点 ${duplicateCount > 0 ? `(${duplicateCount} duplicates synced)` : ''}！`),
+      tr(language, `📥 បាននាំចូលទីតាំងថ្មីចំនួន ${importedCount} ${duplicateCount > 0 ? `(រំលងទីតាំងស្ទួន ${duplicateCount})` : ''} ដោយជោគជ័យ!`, `Imported ${importedCount} new places ${duplicateCount > 0 ? `(${duplicateCount} duplicates synced)` : ''}!`, `📥 成功导入 ${importedCount} 个新地点 ${duplicateCount > 0 ? `(${duplicateCount} duplicates synced)` : ''}！`),
       'success'
     );
   };
@@ -532,25 +544,27 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         {/* Top Header (Compact & Always Accessible) */}
         <div className="kft-khmer-modal-header text-white px-4 sm:px-6 pt-3 pb-3.5 flex items-center justify-between gap-2.5 shrink-0 z-30 shadow-md">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/15 flex items-center justify-center border border-white/25 shrink-0 shadow-inner">
-              <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-300" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-[0_3px_0_#B45309]">
+              <Navigation className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.75} />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <h2 className="text-sm sm:text-lg font-extrabold tracking-tight truncate">
                   {tr(
                     language,
-                    '🧭 នាំផ្លូវ និងស្វែងរកទីតាំងលើផែនទី',
-                    '🧭 Map Navigation & Place Search',
-                    '🧭 地图搜索与路线导航'
+                    'នាំផ្លូវ និងស្វែងរកទីតាំងលើផែនទី',
+                    'Map Navigation & Place Search',
+                    '地图搜索与路线导航'
                   )}
                 </h2>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 shadow-2xs">
-                  ✓ {tr(language, 'ឥតគិតថ្លៃ • FREE', 'FREE Navigation', '免费搜索导航')}
+                  <CheckCircle className="w-3 h-3" strokeWidth={1.75} />
+                  <span>{tr(language, 'ឥតគិតថ្លៃ • FREE', 'FREE Navigation', '免费搜索导航')}</span>
                 </span>
                 {isVipActive && !isAdmin && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-950 shadow-sm">
-                    👑 VIP ✓
+                    <Crown className="w-3 h-3" strokeWidth={1.75} />
+                    <span>VIP</span>
                   </span>
                 )}
               </div>
@@ -602,59 +616,24 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           )}
           {/* Search & Add Shop Clearly Separated Sections */}
           <div ref={searchFormTopRef} className="p-3.5 sm:p-5 bg-[#1E293B] border-b border-slate-700/80 space-y-3 font-khmer">
-            {/* SECTION 1: SEARCH SHOPS ON GOOGLE MAPS */}
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2.5">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div>
-                  <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-                    <Search className="w-4 h-4 text-emerald-600" />
-                    <span>{tr(language, '១. 🔍 ស្វែងរកទីតាំងហាងលើផែនទី Google Maps', '1. 🔍 Search & Locate Shops on Google Maps', '1. 🔍 在 Google 地图上搜索与定位店铺')}</span>
+            {/* SECTION 1: SEARCH PLACES ON GOOGLE MAPS */}
+            <div className="p-3.5 sm:p-4 rounded-3xl bg-white border border-slate-200 shadow-[0_6px_0_rgba(2,6,23,0.35),0_14px_24px_rgba(2,6,23,0.30)] space-y-3">
+              <div className="flex items-start gap-3">
+                <span className="w-10 h-10 rounded-xl bg-[#064E3B] text-white flex items-center justify-center shrink-0 shadow-[0_3px_0_#03382A]">
+                  <Search className="w-5 h-5" strokeWidth={1.75} />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-extrabold text-slate-900 leading-snug">
+                    {tr(language, 'ស្វែងរកទីតាំងលើផែនទី Google Maps', 'Search places on Google Maps', '在 Google 地图上搜索地点')}
                   </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
+                  <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
                     {tr(
                       language,
-                      'វាយឈ្មោះហាង ជ្រើសរើសប្រភេទហាង ឬខេត្ត-រាជធានី ដើម្បីស្វែងរកទីតាំងពិតប្រាកដនៅលើផែនទី Google Maps។',
-                      'Enter shop name, select category or province to locate shops on Google Maps.',
-                      '输入店铺名称、选择类别或省份，在 Google 地图上查找准确位置。'
+                      'វាយឈ្មោះ ជ្រើសរើសប្រភេទ និងខេត្ត ដើម្បីរកទីតាំងពិតប្រាកដ',
+                      'Type a name, pick a category and province to find real places.',
+                      '输入名称、选择类别和省份，查找真实地点。'
                     )}
                   </p>
-                </div>
-
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={handleUseMyGpsLocation}
-                    disabled={gpsLoading || isLoading}
-                    className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
-                      searchScope === 'nearby'
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                        : 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-                    }`}
-                  >
-                    <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? 'animate-ping' : ''}`} />
-                    <span>{tr(language, '🎯 ហាងជិតខ្ញុំ (GPS)', '🎯 Near Me (GPS)', '🎯 我附近 (GPS)')}</span>
-                  </button>
-                  {searchScope === 'nearby' && gpsLocation && (
-                    <div className="inline-flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-xl border border-slate-200">
-                      {[5, 10, 15, 25].map(rKm => (
-                        <button
-                          key={rKm}
-                          type="button"
-                          onClick={() => {
-                            setGpsRadiusKm(rKm);
-                            executeSearch({ loc: gpsLocation, scope: 'nearby', radiusKm: rKm });
-                          }}
-                          className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold transition cursor-pointer ${
-                            gpsRadiusKm === rKm
-                              ? 'bg-emerald-600 text-white shadow-2xs'
-                              : 'text-slate-600 hover:bg-white'
-                          }`}
-                        >
-                          {rKm}km
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -663,147 +642,194 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   e.preventDefault();
                   executeSearch();
                 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5"
+                className="space-y-2.5"
               >
-                {/* Keyword Input */}
-                <div className="col-span-1 sm:col-span-2 lg:col-span-4 relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
-                    placeholder={tr(
-                      language,
-                      'វាយឈ្មោះហាង (ឧ. បាយមាន់, ហាងកាហ្វេ, ភោជនីយដ្ឋាន)...',
-                      'Search shop, café, restaurant, or attraction...',
-                      '输入店铺、咖啡馆或餐厅名称...'
+                {/* Keyword Input + Submit */}
+                <div className="flex items-stretch gap-2">
+                  <div className="relative flex-1 min-w-0">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" strokeWidth={1.75} />
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={query}
+                      onChange={e => setQuery(e.target.value)}
+                      placeholder={tr(
+                        language,
+                        'វាយឈ្មោះហាង (ឧ. បាយមាន់, ហាងកាហ្វេ)...',
+                        'Search shop, café, restaurant, or attraction...',
+                        '输入店铺、咖啡馆或餐厅名称...'
+                      )}
+                      className="w-full h-12 pl-10 pr-9 rounded-2xl border-2 border-slate-200 bg-slate-50 focus:bg-white text-sm text-slate-900 font-semibold placeholder:text-slate-400 focus:outline-none focus:border-emerald-600"
+                    />
+                    {query && (
+                      <button
+                        type="button"
+                        onClick={() => setQuery('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                      >
+                        <X className="w-4 h-4" strokeWidth={1.75} />
+                      </button>
                     )}
-                    className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
-                  />
-                  {query && (
-                    <button
-                      type="button"
-                      onClick={() => setQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Category Selector */}
-                <div className="col-span-1 sm:col-span-1 lg:col-span-3">
-                  <select
-                    value={category}
-                    onChange={e => {
-                      const nextCat = e.target.value as GooglePlaceSearchCategory;
-                      setCategory(nextCat);
-                      if (query.trim() || results.length > 0) {
-                        executeSearch({ cat: nextCat });
-                      }
-                    }}
-                    className="w-full px-2.5 sm:px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    {SEARCH_CATEGORIES.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.emoji} {tr(language, c.labelKh, c.labelEn, c.labelZh)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Province Selector */}
-                <div className="col-span-1 sm:col-span-1 lg:col-span-3">
-                  <select
-                    value={province}
-                    onChange={e => {
-                      const nextProv = e.target.value;
-                      setProvince(nextProv);
-                      setSearchScope(nextProv === 'ទាំងអស់' ? 'nationwide' : 'province');
-                      if (query.trim() || results.length > 0) {
-                        executeSearch({
-                          prov: nextProv,
-                          scope: nextProv === 'ទាំងអស់' ? 'nationwide' : 'province',
-                        });
-                      }
-                    }}
-                    className="w-full px-2.5 sm:px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    {CAMBODIA_PROVINCES.map(prov => (
-                      <option key={prov} value={prov}>
-                        📍{' '}
-                        {prov === 'ទាំងអស់'
-                          ? tr(language, 'គ្រប់ខេត្ត/ក្រុង', 'All Provinces', '全部省份/城市')
-                          : translateProvinceName(prov, prov, language)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Search Submit Button */}
-                <div className="col-span-1 sm:col-span-2 lg:col-span-2 flex gap-1.5">
+                  </div>
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm py-2.5 px-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="h-12 px-4 sm:px-6 rounded-2xl bg-[#064E3B] hover:bg-[#065F46] disabled:opacity-50 text-white font-extrabold text-sm shadow-[0_4px_0_#03382A] active:translate-y-0.5 active:shadow-[0_2px_0_#03382A] transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                   >
                     {isLoading ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <RefreshCw className="w-4 h-4 animate-spin" strokeWidth={1.75} />
                     ) : (
-                      <Search className="w-4 h-4" />
+                      <Search className="w-4 h-4" strokeWidth={1.75} />
                     )}
                     <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
                   </button>
                 </div>
+
+                {/* Category + Province */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="relative">
+                    <LayoutGrid className="w-4 h-4 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" strokeWidth={1.75} />
+                    <select
+                      value={category}
+                      onChange={e => {
+                        const nextCat = e.target.value as GooglePlaceSearchCategory;
+                        setCategory(nextCat);
+                        if (query.trim() || results.length > 0) {
+                          executeSearch({ cat: nextCat });
+                        }
+                      }}
+                      className="w-full h-11 pl-10 pr-3 rounded-2xl border-2 border-slate-200 bg-white text-xs sm:text-sm text-slate-800 font-bold focus:outline-none focus:border-emerald-600"
+                    >
+                      {SEARCH_CATEGORIES.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {tr(language, c.labelKh, c.labelEn, c.labelZh)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" strokeWidth={1.75} />
+                    <select
+                      value={province}
+                      onChange={e => {
+                        const nextProv = e.target.value;
+                        setProvince(nextProv);
+                        setSearchScope(nextProv === 'ទាំងអស់' ? 'nationwide' : 'province');
+                        if (query.trim() || results.length > 0) {
+                          executeSearch({
+                            prov: nextProv,
+                            scope: nextProv === 'ទាំងអស់' ? 'nationwide' : 'province',
+                          });
+                        }
+                      }}
+                      className="w-full h-11 pl-10 pr-3 rounded-2xl border-2 border-slate-200 bg-white text-xs sm:text-sm text-slate-800 font-bold focus:outline-none focus:border-emerald-600"
+                    >
+                      {CAMBODIA_PROVINCES.map(prov => (
+                        <option key={prov} value={prov}>
+                          {prov === 'ទាំងអស់'
+                            ? tr(language, 'គ្រប់ខេត្ត/ក្រុង', 'All Provinces', '全部省份/城市')
+                            : translateProvinceName(prov, prov, language)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </form>
 
-              {/* Single Clean Quick Search Row */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-                <span className="text-[11px] font-bold text-slate-500 shrink-0">
-                  {tr(language, 'ប្រភេទរហ័ស៖', 'Quick Categories:', '快捷分类：')}
-                </span>
+              {/* Near Me (GPS) */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleUseMyGpsLocation}
+                  disabled={gpsLoading || isLoading}
+                  className={`h-11 px-4 rounded-2xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-2 active:translate-y-0.5 ${
+                    searchScope === 'nearby'
+                      ? 'bg-blue-600 text-white shadow-[0_4px_0_#1E3A8A] active:shadow-[0_2px_0_#1E3A8A]'
+                      : 'bg-blue-50 text-blue-800 border-2 border-blue-200 shadow-[0_4px_0_#BFDBFE] active:shadow-[0_2px_0_#BFDBFE]'
+                  }`}
+                >
+                  <Crosshair className={`w-4 h-4 ${gpsLoading ? 'animate-ping' : ''}`} strokeWidth={1.75} />
+                  <span>{tr(language, 'ហាងជិតខ្ញុំ (GPS)', 'Near Me (GPS)', '我附近 (GPS)')}</span>
+                </button>
+                {searchScope === 'nearby' && gpsLocation && (
+                  <div className="inline-flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                    {[5, 10, 15, 25].map(rKm => (
+                      <button
+                        key={rKm}
+                        type="button"
+                        onClick={() => {
+                          setGpsRadiusKm(rKm);
+                          executeSearch({ loc: gpsLocation, scope: 'nearby', radiusKm: rKm });
+                        }}
+                        className={`px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold transition cursor-pointer ${
+                          gpsRadiusKm === rKm
+                            ? 'bg-[#064E3B] text-white shadow-[0_2px_0_#03382A]'
+                            : 'text-slate-600 hover:bg-white'
+                        }`}
+                      >
+                        {rKm}km
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Categories */}
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
                 {[
-                  { q: 'អាហារខ្មែរ Khmer Restaurant', kh: '🍲 អាហារខ្មែរ', en: '🍲 Khmer Food', zh: '🍲 柬式餐厅', cat: 'restaurant' as const },
-                  { q: 'ម្ហូបបួស Vegetarian Restaurant', kh: '🥗 ម្ហូបបួស/សុខភាព', en: '🥗 Vegetarian & Healthy', zh: '🥗 素食/健康餐', cat: 'restaurant' as const },
-                  { q: 'គុយទាវ Noodles Breakfast', kh: '🍜 គុយទាវ/អាហារព្រឹក', en: '🍜 Noodles & Breakfast', zh: '🍜 粿条/早餐', cat: 'restaurant' as const },
-                  { q: 'Coffee Cafe ហាងកាហ្វេ', kh: '☕ ហាងកាហ្វេ', en: '☕ Coffee & Café', zh: '☕ 咖啡馆', cat: 'restaurant' as const },
-                  { q: 'Seafood BBQ គ្រឿងសមុទ្រ សាច់អាំង', kh: '🦐 គ្រឿងសមុទ្រ/សាច់អាំង', en: '🦐 Seafood & BBQ', zh: '🦐 海鲜与烧烤', cat: 'restaurant' as const },
-                  { q: 'Bakery Dessert នំប៉័ង បង្អែម', kh: '🥐 នំប៉័ង/បង្អែម', en: '🥐 Bakery & Dessert', zh: '🥐 面包甜品', cat: 'restaurant' as const },
-                  { q: 'Tourist Attraction រមណីយដ្ឋាន', kh: '🏞️ រមណីយដ្ឋាន', en: '🏞️ Attractions', zh: '🏞️ 热门景点', cat: 'tourism' as const },
-                  { q: 'Hotel Resort សណ្ឋាគារ ផ្ទះសំណាក់', kh: '🏨 សណ្ឋាគារ/ផ្ទះសំណាក់', en: '🏨 Hotels & Resorts', zh: '🏨 酒店/度假村', cat: 'tourism' as const },
-                ].map((preset) => (
-                  <button
-                    key={preset.q}
-                    type="button"
-                    onClick={() => {
-                      setQuery(preset.q);
-                      setCategory(preset.cat);
-                      executeSearch({ q: preset.q, cat: preset.cat });
-                    }}
-                    className="px-2.5 py-1 rounded-full bg-slate-50 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-400 text-[11px] font-bold whitespace-nowrap transition cursor-pointer"
-                  >
-                    {tr(language, preset.kh, preset.en, preset.zh)}
-                  </button>
-                ))}
+                  { q: 'អាហារខ្មែរ Khmer Restaurant', icon: Utensils, kh: 'អាហារខ្មែរ', en: 'Khmer Food', zh: '柬式餐厅', cat: 'restaurant' as const },
+                  { q: 'ម្ហូបបួស Vegetarian Restaurant', icon: Leaf, kh: 'ម្ហូបបួស/សុខភាព', en: 'Vegetarian & Healthy', zh: '素食/健康餐', cat: 'restaurant' as const },
+                  { q: 'គុយទាវ Noodles Breakfast', icon: Soup, kh: 'គុយទាវ/អាហារព្រឹក', en: 'Noodles & Breakfast', zh: '粿条/早餐', cat: 'restaurant' as const },
+                  { q: 'Coffee Cafe ហាងកាហ្វេ', icon: Coffee, kh: 'ហាងកាហ្វេ', en: 'Coffee & Café', zh: '咖啡馆', cat: 'restaurant' as const },
+                  { q: 'Seafood BBQ គ្រឿងសមុទ្រ សាច់អាំង', icon: Fish, kh: 'គ្រឿងសមុទ្រ/សាច់អាំង', en: 'Seafood & BBQ', zh: '海鲜与烧烤', cat: 'restaurant' as const },
+                  { q: 'Bakery Dessert នំប៉័ង បង្អែម', icon: Cake, kh: 'នំប៉័ង/បង្អែម', en: 'Bakery & Dessert', zh: '面包甜品', cat: 'restaurant' as const },
+                  { q: 'Tourist Attraction រមណីយដ្ឋាន', icon: Landmark, kh: 'រមណីយដ្ឋាន', en: 'Attractions', zh: '热门景点', cat: 'tourism' as const },
+                  { q: 'Hotel Resort សណ្ឋាគារ ផ្ទះសំណាក់', icon: BedDouble, kh: 'សណ្ឋាគារ/ផ្ទះសំណាក់', en: 'Hotels & Resorts', zh: '酒店/度假村', cat: 'tourism' as const },
+                ].map(preset => {
+                  const PresetIcon = preset.icon;
+                  const active = query === preset.q;
+                  return (
+                    <button
+                      key={preset.q}
+                      type="button"
+                      onClick={() => {
+                        setQuery(preset.q);
+                        setCategory(preset.cat);
+                        executeSearch({ q: preset.q, cat: preset.cat });
+                      }}
+                      className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl text-[11px] font-extrabold whitespace-nowrap transition cursor-pointer active:translate-y-0.5 ${
+                        active
+                          ? 'bg-[#064E3B] text-white shadow-[0_3px_0_#03382A]'
+                          : 'bg-slate-50 text-slate-700 border border-slate-200 shadow-[0_3px_0_#E2E8F0] hover:border-emerald-500 hover:text-emerald-800'
+                      }`}
+                    >
+                      <PresetIcon className="w-4 h-4" strokeWidth={1.75} />
+                      <span>{tr(language, preset.kh, preset.en, preset.zh)}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* SECTION 2: ADD NEW SHOP (បន្ថែមហាងថ្មី) */}
-            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-800 to-teal-900 text-white border border-emerald-600/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs">
-              <div className="space-y-0.5">
-                <div className="text-xs sm:text-sm font-extrabold flex items-center gap-1.5">
-                  <span>➕</span>
-                  <span>{tr(language, '២. បន្ថែមហាងថ្មីចូលក្នុងកម្មវិធី (Add New Shop)', '2. Add New Shop to App', '2. 添加新店铺到应用')}</span>
+            {/* SECTION 2: ADD NEW SHOP */}
+            <div className="p-3.5 rounded-3xl bg-[#064E3B] text-white border border-emerald-600/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_5px_0_#03382A,0_12px_20px_rgba(2,6,23,0.25)]">
+              <div className="flex items-start gap-3 min-w-0">
+                <span className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0 shadow-[0_3px_0_rgba(0,0,0,0.22)]">
+                  <Store className="w-5 h-5" strokeWidth={1.75} />
+                </span>
+                <div className="space-y-0.5 min-w-0">
+                  <div className="text-sm font-extrabold">
+                    {tr(language, 'បន្ថែមហាងថ្មីចូលក្នុងកម្មវិធី', 'Add a new shop to the app', '添加新店铺到应用')}
+                  </div>
+                  <p className="text-[11px] text-emerald-100/90 leading-snug">
+                    {tr(
+                      language,
+                      'ប្រសិនបើរកមិនឃើញហាងរបស់អ្នក សូមបន្ថែមព័ត៌មានហាងថ្មីដោយខ្លួនឯង។',
+                      'Can\'t find your shop? Add its details yourself.',
+                      '找不到您的店铺？请自行添加店铺信息。'
+                    )}
+                  </p>
                 </div>
-                <p className="text-[11px] text-emerald-100/90 leading-snug">
-                  {tr(
-                    language,
-                    'Google Maps គឺសម្រាប់ស្វែងរក និងជ្រើសរើសទីតាំងហាង។ ដើម្បីបញ្ចូលព័ត៌មានហាងថ្មី សូមចុចប៊ូតុង «+ បន្ថែមហាងថ្មី»៖',
-                    'Google Maps is for locating shops. To enter new shop details, tap "+ Add New Shop":',
-                    'Google 地图用于查找和选择位置。如需填写新店铺信息，请点击“+ 添加新店铺”：'
-                  )}
-                </p>
               </div>
               <button
                 type="button"
@@ -816,10 +842,10 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
                   setIsVipAddRestaurantModalOpen(true);
                 }}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 text-slate-950 font-black text-xs shadow-md flex items-center justify-center gap-1.5 shrink-0 transition active:scale-95 cursor-pointer"
+                className="h-11 px-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-[0_4px_0_#B45309] active:translate-y-0.5 active:shadow-[0_2px_0_#B45309] flex items-center justify-center gap-1.5 shrink-0 transition-all cursor-pointer"
               >
-                <PlusCircle className="w-4 h-4 shrink-0" />
-                <span>{tr(language, '+ បន្ថែមហាងថ្មី (+ Add New Shop)', '+ Add New Shop', '+ 添加新店铺')}</span>
+                <PlusCircle className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+                <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add New Shop', '添加新店铺')}</span>
               </button>
             </div>
           </div>
@@ -832,7 +858,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             <div className="sticky top-0 z-20 px-3.5 sm:px-6 py-2.5 bg-indigo-50/95 border-b border-indigo-200 flex items-center justify-between gap-2 flex-wrap shadow-sm">
               <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-700 text-white text-xs font-extrabold shadow-sm">
-                  <span>📊</span>
+                  <Database className="w-3.5 h-3.5" strokeWidth={1.75} />
                   <span>
                     {tr(
                       language,
@@ -890,9 +916,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     <span>
                       {tr(
                         language,
-                        `📥 នាំចូល (${selectedPlaceIds.size}) ចូលកម្មវិធី`,
-                        `📥 Import (${selectedPlaceIds.size})`,
-                        `📥 导入 (${selectedPlaceIds.size})`
+                        `នាំចូល (${selectedPlaceIds.size}) ចូលកម្មវិធី`,
+                        `Import (${selectedPlaceIds.size})`,
+                        `导入 (${selectedPlaceIds.size})`
                       )}
                     </span>
                   </button>
@@ -966,9 +992,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                       <span>
                         {tr(
                           language,
-                          `🗺️ បើកស្វែងរក "${query.trim()}" ផ្ទាល់នៅលើ Google Maps`,
-                          `🗺️ Open "${query.trim()}" in Google Maps`,
-                          `🗺️ 在 Google 地图中搜索 “${query.trim()}”`
+                          `បើកស្វែងរក "${query.trim()}" ផ្ទាល់នៅលើ Google Maps`,
+                          `Open "${query.trim()}" in Google Maps`,
+                          `在 Google 地图中搜索 “${query.trim()}”`
                         )}
                       </span>
                     </a>

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronLeft, ExternalLink, Share2, MapPin, LocateFixed } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, Share2, MapPin, LocateFixed } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { tr } from '../utils/i18n';
 import { shareText } from '../utils/shareApp';
@@ -196,7 +196,7 @@ export const FoodTripTemplates: React.FC = () => {
         }
         setSelectedArea(nearestId);
         showToast(
-          tr(language, '📍 បានចាប់ទីតាំងតំបន់របស់អ្នកដោយស្វ័យប្រវត្តិ!', '📍 Detected your starting area via GPS!', '📍 已通过 GPS 自动定位您的起始区域！'),
+          tr(language, 'បានចាប់ទីតាំងតំបន់របស់អ្នកដោយស្វ័យប្រវត្តិ!', 'Detected your starting area via GPS!', '已通过 GPS 自动定位您的起始区域！'),
           'success'
         );
       },
@@ -210,7 +210,6 @@ export const FoodTripTemplates: React.FC = () => {
 
   const typeLabel = (t: TripStop['type']) =>
     t === 'food' ? tr(language, 'ម្ហូប', 'Dish', '菜品') : t === 'restaurant' ? tr(language, 'ហាង', 'Place', '餐厅') : tr(language, 'ទេសចរណ៍', 'Sight', '景点');
-  const typeEmoji = (t: TripStop['type']) => (t === 'food' ? '🍲' : t === 'restaurant' ? '🏪' : '🏛️');
 
   const tplTitle = (t: FoodTripTemplate) => tr(language, t.titleKh, t.titleEn, t.titleZh);
   const tplSub = (t: FoodTripTemplate) => tr(language, t.subtitleKh, t.subtitleEn, t.subtitleZh);
@@ -224,13 +223,13 @@ export const FoodTripTemplates: React.FC = () => {
   }, [selectedArea, allTemplates]);
 
   const shareTrip = (tpl: FoodTripTemplate) => {
-    const lines: string[] = [`🗺️ ${tplTitle(tpl)} (${tplProvince(tpl)})`];
+    const lines: string[] = [`${tplTitle(tpl)} (${tplProvince(tpl)})`];
     for (const slot of tpl.slots) {
       const lbl = SLOT_LABELS[slot.slot];
-      lines.push(`${lbl.emoji} ${tr(language, lbl.kh, lbl.en, lbl.zh)}`);
+      lines.push(`${tr(language, lbl.kh, lbl.en, lbl.zh)}`);
       for (const stop of slot.stops) {
         const rs = resolve(tpl, stop);
-        if (rs) lines.push(`  ${typeEmoji(rs.type)} ${rs.name} — ${rs.mapLink}`);
+        if (rs) lines.push(`  • ${rs.name} — ${rs.mapLink}`);
       }
     }
     shareText(language, tplTitle(tpl), lines.join('\n'), showToast);
@@ -239,13 +238,13 @@ export const FoodTripTemplates: React.FC = () => {
   const open = openId ? allTemplates.find((t) => t.id === openId) : null;
 
   return (
-    <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50 to-emerald-50 border-2 border-amber-300/70 space-y-3 font-khmer">
+    <div className="p-3.5 rounded-3xl bg-white border border-slate-200 space-y-3 font-khmer shadow-2xs">
       {!open ? (
         <>
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div>
-              <h4 className="font-moul text-sm text-[#064E3B]">
-                🗺️ {tr(language, 'ដំណើរម្ហូប ១ ថ្ងៃ (រួចរាល់)', 'Ready-made 1-Day Food Trips', '现成一日美食行程')}
+              <h4 className="font-moul text-[15px] text-[#064E3B] leading-[1.7]">
+                {tr(language, 'ដំណើរម្ហូប ១ ថ្ងៃ (រួចរាល់)', 'Ready-made 1-Day Food Trips', '现成一日美食行程')}
               </h4>
               <p className="text-xs text-slate-600">
                 {tr(language, 'កាលវិភាគក្នុងតំបន់ភូមិសាស្ត្រតែមួយ មិនលោតខេត្តឆ្ងាយឡើយ', 'Single-area geographic consistency for consecutive meals', '同一地理区域内一日行程规划，路线连贯无跨省跳跃')}
@@ -254,10 +253,10 @@ export const FoodTripTemplates: React.FC = () => {
           </div>
 
           {/* Starting Area / Province Selector with GPS Button (All 25 Cambodian Provinces & Cities) */}
-          <div className="p-2.5 bg-white rounded-xl border border-emerald-200 space-y-1.5 shadow-2xs">
+          <div className="p-2.5 bg-white rounded-2xl border border-emerald-200 space-y-2 shadow-2xs">
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-slate-800 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                <MapPin className="w-4 h-4 text-emerald-600" strokeWidth={1.75} />
                 <span>{tr(language, 'ជ្រើសរើសតំបន់ចាប់ផ្តើម (២៥ ខេត្ត/រាជធានី)៖', 'Starting Area / Province (All 25):', '选择出发区域 / 省份（全柬 25 省市）：')}</span>
               </span>
               <button
@@ -266,8 +265,8 @@ export const FoodTripTemplates: React.FC = () => {
                 disabled={isLocatingGps}
                 className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer disabled:opacity-50"
               >
-                <LocateFixed className="w-3 h-3 text-emerald-600" />
-                <span>{isLocatingGps ? tr(language, 'កំពុងចាប់ GPS...', 'Locating...', '正在定位...') : tr(language, '📍 ចាប់ GPS ខ្ញុំ', '📍 Auto GPS', '📍 GPS 自动定位')}</span>
+                <LocateFixed className="w-4 h-4 text-emerald-600" strokeWidth={1.75} />
+                <span>{isLocatingGps ? tr(language, 'កំពុងចាប់ GPS...', 'Locating...', '正在定位...') : tr(language, 'ចាប់ GPS ខ្ញុំ', 'Auto GPS', 'GPS 自动定位')}</span>
               </button>
             </div>
 
@@ -275,7 +274,7 @@ export const FoodTripTemplates: React.FC = () => {
               <select
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
-                className="w-full text-xs font-bold font-khmer px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full text-[13px] font-bold font-khmer px-3.5 py-2.5 bg-white border border-emerald-300 rounded-xl text-slate-900 outline-none focus:ring-2 focus:ring-emerald-400"
               >
                 {ALL_25_FOOD_TRIP_PROVINCE_OPTIONS.map((opt) => (
                   <option key={opt.id} value={opt.id}>
@@ -293,18 +292,20 @@ export const FoodTripTemplates: React.FC = () => {
                 key={t.id}
                 type="button"
                 onClick={() => setOpenId(t.id)}
-                className="w-full min-h-[56px] flex items-center gap-3 p-2.5 rounded-xl bg-white border border-slate-200 text-left active:scale-[0.98] transition cursor-pointer hover:border-emerald-500 shadow-2xs"
+                className="w-full min-h-[60px] flex items-center gap-3 p-2.5 rounded-2xl bg-white border border-slate-200 text-left active:scale-[0.98] transition cursor-pointer hover:border-emerald-500"
               >
                 <span className="text-2xl shrink-0">{t.emoji}</span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center justify-between gap-1">
                     <span className="block text-sm font-bold text-slate-900 leading-snug truncate">{tplTitle(t)}</span>
-                    <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold shrink-0">
-                      📍 {tplProvince(t)}
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold shrink-0">
+                      <MapPin className="w-3 h-3 text-emerald-700" strokeWidth={1.75} />
+                      <span>{tplProvince(t)}</span>
                     </span>
                   </span>
                   <span className="block text-xs text-slate-500 line-clamp-1 mt-0.5">{tplSub(t)}</span>
                 </span>
+                <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" strokeWidth={1.75} />
               </button>
             ))}
           </div>
@@ -318,13 +319,14 @@ export const FoodTripTemplates: React.FC = () => {
               className="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0 cursor-pointer"
               aria-label={tr(language, 'ត្រឡប់', 'Back', '返回')}
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-5 h-5" strokeWidth={1.75} />
             </button>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <h4 className="font-bold text-sm text-slate-900 leading-snug">{open.emoji} {tplTitle(open)}</h4>
-                <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                  📍 {tplProvince(open)}
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                  <MapPin className="w-3 h-3 text-emerald-700" strokeWidth={1.75} />
+                  <span>{tplProvince(open)}</span>
                 </span>
               </div>
               <p className="text-xs text-slate-500">{tplSub(open)}</p>
@@ -334,7 +336,7 @@ export const FoodTripTemplates: React.FC = () => {
               onClick={() => shareTrip(open)}
               className="min-h-[44px] px-3 rounded-xl bg-[#064E3B] text-white text-sm font-bold flex items-center gap-1.5 active:scale-95 transition cursor-pointer shrink-0"
             >
-              <Share2 className="w-4 h-4" />
+              <Share2 className="w-4 h-4" strokeWidth={1.75} />
               {tr(language, 'ចែករំលែក', 'Share', '分享')}
             </button>
           </div>
@@ -346,14 +348,14 @@ export const FoodTripTemplates: React.FC = () => {
             return (
               <div key={slot.slot} className="space-y-1.5">
                 <p className="text-sm font-extrabold text-[#064E3B]">
-                  {lbl.emoji} {tr(language, lbl.kh, lbl.en, lbl.zh)}
+                  {tr(language, lbl.kh, lbl.en, lbl.zh)}
                 </p>
                 {stops.map((st) => (
                   <div key={`${slot.slot}-${st.key}`} className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200">
                     {st.photoUrl && <img decoding="async" src={st.photoUrl} alt={st.name} loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-100" />}
                     <button type="button" onClick={st.onOpen} className="min-w-0 flex-1 text-left cursor-pointer">
                       <span className="block text-sm font-bold text-slate-900 line-clamp-2 leading-snug">{st.name}</span>
-                      <span className="text-[11px] text-slate-500">{typeEmoji(st.type)} {typeLabel(st.type)}</span>
+                      <span className="text-[11px] text-slate-500">{typeLabel(st.type)}</span>
                     </button>
                     <button
                       type="button"
@@ -361,7 +363,7 @@ export const FoodTripTemplates: React.FC = () => {
                       className="min-h-[44px] px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 shrink-0 active:scale-95 transition cursor-pointer"
                       title={tr(language, 'បើកក្នុង Google Maps', 'Open in Google Maps', '在谷歌地图中打开')}
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
+                      <ExternalLink className="w-4 h-4" strokeWidth={1.75} />
                       <span>Maps</span>
                     </button>
                   </div>

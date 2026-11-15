@@ -53,7 +53,16 @@ import {
 import { analyzeSearchQuery, scoreSearchRecord, restaurantSearchFields } from '../utils/searchEngine';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
-import { DISH_PROVINCES, matchShopToProductQuery, verifyShopDataForDisplay } from '../utils/foodFilters';
+import {
+  DISH_PROVINCES,
+  matchShopToProductQuery,
+  verifyShopDataForDisplay,
+  classifyShopDirectoryCategory,
+  classifyRestaurantSubCategory,
+  getShopCategoryTabTier,
+  matchesShopCategoryTab,
+  detectExplicitShopCategoryFromQuery,
+} from '../utils/foodFilters';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 
@@ -205,7 +214,31 @@ export const RestaurantView: React.FC = () => {
   }, [scrollRequestTick]);
 
   const handleExecuteShopSearch = () => {
-    setDebouncedShopSearchQuery(shopSearchQuery);
+    const trimmed = shopSearchQuery.trim();
+    setDebouncedShopSearchQuery(trimmed);
+    if (trimmed) {
+      const smart = parseSmartSearchIntent(trimmed);
+      const coreOrRaw = (
+        smart && (smart.detectedProvinceKh || smart.isConversationalPrompt)
+          ? smart.coreQuery
+          : trimmed
+      ).trim();
+      const explicitCat =
+        detectExplicitShopCategoryFromQuery(coreOrRaw) ||
+        detectExplicitShopCategoryFromQuery(trimmed);
+      if (explicitCat === 'near_me_toggle') {
+        setCategoryFilter('all');
+        setNearMeActive(true);
+        setSortMode('nearest');
+        requestLocation(false);
+      } else if (explicitCat) {
+        setNearMeActive(false);
+        setCategoryFilter(explicitCat);
+        setSortMode('nearest');
+      } else if (categoryFilter !== 'all') {
+        setCategoryFilter('all');
+      }
+    }
     searchInputRef.current?.blur();
     scrollToShopList();
   };
@@ -338,11 +371,16 @@ export const RestaurantView: React.FC = () => {
   };
 
   const handleToggleNearMe = () => {
-    if (nearMeActive) {
+    if (shopSearchQuery || debouncedShopSearchQuery) {
+      setShopSearchQuery('');
+      setDebouncedShopSearchQuery('');
+    }
+    if (nearMeActive && categoryFilter === 'all') {
       setNearMeActive(false);
-      setSortMode('popular');
+      setSortMode('nearest');
       return;
     }
+    setCategoryFilter('all');
     setNearMeActive(true);
     setSortMode('nearest');
     requestLocation(false);
@@ -358,98 +396,11 @@ export const RestaurantView: React.FC = () => {
   };
 
   const classifyRestaurantCategory = (r: Restaurant): string => {
-    const text = `${r.nameKh || ''} ${r.nameEn || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.signatureDishesEn || []).join(' ')}`.toLowerCase();
-    if (
-      text.includes('កាហ្វេ') ||
-      text.includes('តែគុជ') ||
-      text.includes('ប៊ីស្រ្តូ') ||
-      text.includes('cafe') ||
-      text.includes('café') ||
-      text.includes('coffee') ||
-      text.includes('roastery') ||
-      text.includes('atelier') ||
-      text.includes('kinyei') ||
-      text.includes('bistro') ||
-      text.includes('brown ') ||
-      text.includes('tube ') ||
-      text.includes('starbucks') ||
-      text.includes('amazon') ||
-      text.includes('chagee') ||
-      text.includes('koi ') ||
-      text.includes('mixue') ||
-      text.includes('boba') ||
-      text.includes('bakery') ||
-      text.includes('pastry') ||
-      text.includes('sister srey') ||
-      text.includes('ministry of cat') ||
-      text.includes('camping')
-    ) {
-      return 'cafe_bistro';
-    }
-    if (
-      text.includes('សាច់អាំង') ||
-      text.includes('bbq') ||
-      text.includes('grill') ||
-      text.includes('សុវណ្ណា') ||
-      text.includes('sovanna')
-    ) {
-      return 'bbq_grill';
-    }
-    if (
-      text.includes('សមុទ្រ') ||
-      text.includes('seafood') ||
-      text.includes('crab') ||
-      text.includes('មាត់ទន្លេ') ||
-      text.includes('មាត់បឹង') ||
-      text.includes('មាត់ព្រែក') ||
-      text.includes('riverside') ||
-      text.includes('lake') ||
-      text.includes('sailing') ||
-      text.includes('bopha') ||
-      text.includes('ក្បាលកោះ')
-    ) {
-      return 'seafood_riverside';
-    }
-    if (
-      r.priceLevel === '$$$' ||
-      text.includes('ម្លិះ') ||
-      text.includes('malis') ||
-      text.includes('wat damnak') ||
-      text.includes('chanrey tree') ||
-      text.includes('ក្រវាញ') ||
-      text.includes('kravanh') ||
-      text.includes('viroth') ||
-      text.includes('រំដេង') ||
-      text.includes('romdeng')
-    ) {
-      return 'khmer_fine_dining';
-    }
-    return 'family_garden';
+    return classifyRestaurantSubCategory(r);
   };
 
   const matchesPrimaryTabPill = (r: Restaurant, tabId: string): boolean => {
-    if (tabId === 'all') return true;
-    const text = `${r.nameKh || ''} ${r.nameEn || ''} ${r.categoryKh || ''} ${r.categoryEn || ''} ${r.descriptionKh || ''} ${(r.signatureDishesKh || []).join(' ')}`.toLowerCase();
-    const subCat = classifyRestaurantCategory(r);
-    if (tabId === 'cafe_bistro') {
-      return subCat === 'cafe_bistro';
-    }
-    if (tabId === 'drinks_boba') {
-      return /ភេសជ្ជៈ|តែគុជ|ទឹកក្រឡុក|ទឹកផ្លែឈើ|ការ៉េម|boba|tea|chagee|koi|mixue|smoothie|juice|drink|cafe|កាហ្វេ/.test(
-        text
-      );
-    }
-    if (tabId === 'fast_street') {
-      return (
-        /អាហារសម្រន់|អាហាររហ័ស|នំប៉័ង|បឺហ្គឺ|ភីហ្សា|មីឆា|គុយទាវ|បាយឆា|បាញ់ឆែវ|ប្រហិត|នំ|bakery|fast|street|burger|pizza|sandwich|noodle|kuyteav/.test(
-          text
-        ) || r.priceLevel === '$'
-      );
-    }
-    if (tabId === 'restaurant_dining') {
-      return subCat !== 'cafe_bistro';
-    }
-    return subCat === tabId;
+    return matchesShopCategoryTab(r, tabId);
   };
 
   // 6 Premium 3D Gold-Bordered Category Buttons in 3x2 Grid
@@ -610,74 +561,172 @@ export const RestaurantView: React.FC = () => {
   }, [preRotatedRestaurants, nearbyMergedShops, nearMeActive, activeNearMeCoords, baseCoords]);
 
   const sortedRestaurants = useMemo(() => {
-    const rawTrimmed = debouncedShopSearchQuery.trim();
+    const rawTrimmed = (shopSearchQuery.trim() || debouncedShopSearchQuery.trim());
     const smartIntent = rawTrimmed ? parseSmartSearchIntent(rawTrimmed) : null;
-    const effectiveProvince = cleanSelectedProvince || (smartIntent?.detectedProvinceKh || '');
+    const queryProvince = (smartIntent?.detectedProvinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim();
+    const effectiveProvince = queryProvince || cleanSelectedProvince;
     const effectiveRawQuery = (
-      smartIntent?.isConversationalPrompt && smartIntent.coreQuery ? smartIntent.coreQuery : rawTrimmed
+      smartIntent && (smartIntent.detectedProvinceKh || smartIntent.isConversationalPrompt)
+        ? smartIntent.coreQuery
+        : rawTrimmed
     ).trim();
     const q = normalizeKhmerSearchText(effectiveRawQuery);
     const analyzed = effectiveRawQuery ? analyzeSearchQuery(effectiveRawQuery) : null;
+    const queryExplicitCat =
+      detectExplicitShopCategoryFromQuery(effectiveRawQuery) ||
+      detectExplicitShopCategoryFromQuery(rawTrimmed);
 
-    const scored: { item: Restaurant; score: number }[] = [];
-    const fallbackUnfilteredScored: { item: Restaurant; score: number }[] = [];
+    const scored: { item: Restaurant; score: number; tier: number }[] = [];
+    const fallbackUnfilteredScored: { item: Restaurant; score: number; tier: number }[] = [];
     const seenIds = new Set<string>();
     const seenFallbackIds = new Set<string>();
 
-    const candidatePool: Restaurant[] = nearMeActive ? nearbyMergedShops : preRotatedRestaurants;
+    const cleanManualProv = (manualProvince || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim();
+    const useNearMePool =
+      (nearMeActive || queryExplicitCat === 'near_me_toggle') &&
+      (!queryProvince || queryProvince === cleanManualProv);
+
+    const candidatePool: Restaurant[] = useNearMePool
+      ? nearbyMergedShops.length > 0
+        ? nearbyMergedShops
+        : mergeNearbyFoodShops({
+            restaurants: validDirectoryRestaurants,
+            liveNearbyRestaurants,
+            refCoords: activeNearMeCoords,
+            radiusMeters: selectedRadiusMeters,
+            targetProvinceKh: manualProvince,
+          })
+      : preRotatedRestaurants;
 
     for (const r of candidatePool) {
       if (!r?.id) continue;
       const cleanRestProvince = (r.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim();
-      const matchesProvince = nearMeActive
+      const matchesProvince = useNearMePool
         ? true
         : !effectiveProvince ||
           cleanRestProvince === effectiveProvince ||
           (r.provinceKh || '').includes(effectiveProvince) ||
           (r.addressKh || '').includes(effectiveProvince);
       const matchesPrice = priceFilter === 'all' || r.priceLevel === priceFilter;
-      const matchesCategory = matchesPrimaryTabPill(r, categoryFilter);
+
+      const activeTabForMatch =
+        queryExplicitCat && queryExplicitCat !== 'near_me_toggle'
+          ? queryExplicitCat
+          : q
+            ? 'all'
+            : categoryFilter;
+
+      const tabTier = getShopCategoryTabTier(r, activeTabForMatch);
+      const matchesCategory = tabTier > 0;
       const matchesCuisine = cuisineFilter === 'all' || classifyRestaurantCategory(r) === cuisineFilter;
       const matchesRating =
         ratingFilter === 'all' ||
         (ratingFilter === '4.5' ? Number(r.rating || 4.6) >= 4.5 : Number(r.rating || 4.6) >= 4.0);
 
       let relevance = 1;
+      let matchTier = tabTier;
+
       if (q && analyzed) {
-        const subCatKey = classifyRestaurantCategory(r);
-        const extraCatLabels =
-          subCatKey === 'cafe_bistro'
-            ? 'កាហ្វេ cafe coffee bistro តែគុជ ភេសជ្ជៈ drinks boba 咖啡 饮品 咖啡馆 奶茶 甜品'
-            : subCatKey === 'bbq_grill'
-              ? 'សាច់អាំង bbq grill ភោជនីយដ្ឋាន restaurant 烧烤 餐厅 烤肉 火锅'
-              : subCatKey === 'seafood_riverside'
-                ? 'គ្រឿងសមុទ្រ seafood មាត់ទន្លេ riverside ភោជនីយដ្ឋាន restaurant 海鲜 餐厅 河畔 螃蟹 虾 鱼'
-                : 'ភោជនីយដ្ឋាន អាហារដ្ឋាន ហាងអាហារ អាហាររហ័ស restaurant dining fast food 餐厅 快餐 高棉菜 柬埔寨菜';
-        const zhLoc = getLocalizedRestaurant(r, 'zh');
-        const searchFields = restaurantSearchFields(r, [
-          zhLoc.name,
-          ...(zhLoc.signatureDishes || []),
-          zhLoc.province || '',
-          zhLoc.address || '',
-        ]);
-        searchFields.categories = [...(searchFields.categories || []), extraCatLabels];
-        searchFields.texts = [...(searchFields.texts || []), zhLoc.description || ''].filter(Boolean);
-        const nameDetail = scoreSearchRecord(analyzed, searchFields);
-        const productMatch = matchShopToProductQuery(r, effectiveRawQuery);
-        relevance = Math.max(nameDetail.score, productMatch.matches ? productMatch.score : 0);
-        if (relevance <= 0) {
-          const hay = normalizeKhmerSearchText(
-            `${r.nameKh || ''} ${r.nameEn || ''} ${zhLoc.name || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${zhLoc.province || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${zhLoc.address || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${zhLoc.description || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.signatureDishesEn || []).join(' ')} ${(zhLoc.signatureDishes || []).join(' ')}`
+        if (queryExplicitCat === 'near_me_toggle') {
+          relevance = 100;
+          matchTier = 2;
+        } else {
+          const primaryCat = classifyShopDirectoryCategory(r);
+          const subCatKey = classifyRestaurantSubCategory(r);
+          const extraCatLabels =
+            primaryCat === 'drinks_boba'
+              ? 'ភេសជ្ជៈ ហាងភេសជ្ជៈ តែគុជ តែគុច ហាងតែ ទឹកក្រឡុក ទឹកផ្លែឈើ ការ៉េម drinks beverages boba bubble tea milk tea smoothie juice ice cream 饮品 饮料 奶茶 珍珠奶茶 果汁 冰淇淋'
+              : primaryCat === 'fast_street'
+                ? 'អាហាររហ័ស អាហារសម្រន់ អាហារតាមផ្លូវ បឺហ្គឺ ភីហ្សា នំប៉័ង សាំងវិច មាន់បំពង ហាងនំខេក fast food street food burger pizza sandwich banh mi bakery fried chicken 快餐 街头小吃 汉堡 披萨 三明治 炸鸡 面包店'
+                : primaryCat === 'cafe_bistro'
+                  ? 'កាហ្វេ ហាងកាហ្វេ cafe café coffee roastery espresso latte cappuccino 咖啡 咖啡馆 咖啡厅 咖啡店'
+                  : subCatKey === 'bbq_grill'
+                    ? 'សាច់អាំង bbq grill steakhouse hotpot ភោជនីយដ្ឋាន អាហារដ្ឋាន ហាងអាហារ restaurant dining 烧烤 餐厅 烤肉 火锅'
+                    : subCatKey === 'seafood_riverside'
+                      ? 'គ្រឿងសមុទ្រ seafood មាត់ទន្លេ riverside ភោជនីយដ្ឋាន អាហារដ្ឋាន ហាងអាហារ restaurant dining 海鲜 餐厅 河畔 螃蟹 虾 鱼'
+                      : 'ភោជនីយដ្ឋាន អាហារដ្ឋាន ហាងអាហារ អាហារខ្មែរ ម្ហូបខ្មែរ restaurant dining khmer food 餐厅 饭店 高棉菜 柬埔寨菜';
+
+          const zhLoc = getLocalizedRestaurant(r, 'zh');
+          const searchFields = restaurantSearchFields(r, [zhLoc.name]);
+          searchFields.categories = [...(searchFields.categories || []), extraCatLabels];
+          searchFields.locations = [
+            ...(searchFields.locations || []),
+            zhLoc.province || '',
+            zhLoc.address || '',
+          ].filter(Boolean);
+          searchFields.texts = [
+            ...(searchFields.texts || []),
+            ...(zhLoc.signatureDishes || []),
+            zhLoc.description || '',
+          ].filter(Boolean);
+          const nameDetail = scoreSearchRecord(analyzed, searchFields);
+          const productMatch = matchShopToProductQuery(r, effectiveRawQuery);
+
+          const nameNorm = normalizeKhmerSearchText(`${r.nameKh || ''} ${r.nameEn || ''} ${zhLoc.name || ''}`);
+          const dish0Norm = normalizeKhmerSearchText(
+            `${(r.signatureDishesKh || [])[0] || ''} ${(r.signatureDishesEn || [])[0] || ''} ${(zhLoc.signatureDishes || [])[0] || ''}`
           );
-          if (hay.includes(q)) {
-            relevance = 25;
+          const allDishesNorm = normalizeKhmerSearchText(
+            `${(r.signatureDishesKh || []).join(' ')} ${(r.signatureDishesEn || []).join(' ')} ${(zhLoc.signatureDishes || []).join(' ')}`
+          );
+
+          const hasDirectNameMatch =
+            nameDetail.exactName ||
+            (analyzed.distinctive.length > 0 && nameDetail.matchedInName) ||
+            (q.length >= 2 && nameNorm.includes(q));
+          const hasPrimaryDishMatch =
+            (q.length >= 2 && dish0Norm.includes(q)) ||
+            (productMatch.isExactProductMatch && productMatch.score >= 1000);
+          const hasAnyDishMatch =
+            (q.length >= 2 && allDishesNorm.includes(q)) || productMatch.isExactProductMatch;
+
+          // Prevent location-only token noise when searching for a shop name, category, or dish
+          const isLocationOnlyNoise =
+            nameDetail.score > 0 &&
+            !hasDirectNameMatch &&
+            !hasAnyDishMatch &&
+            !productMatch.matches &&
+            Boolean(queryProvince || queryExplicitCat);
+
+          const cleanNameScore = isLocationOnlyNoise ? 0 : nameDetail.score;
+          const prodScore = productMatch.matches ? productMatch.score : 0;
+
+          if (queryExplicitCat) {
+            if (!matchesShopCategoryTab(r, queryExplicitCat)) {
+              relevance = 0;
+              matchTier = 0;
+            } else {
+              const catTier = getShopCategoryTabTier(r, queryExplicitCat);
+              matchTier = catTier;
+              relevance = Math.max(100 * catTier, cleanNameScore, prodScore);
+            }
+          } else {
+            relevance = Math.max(cleanNameScore, prodScore);
+            if (relevance <= 0 && (hasDirectNameMatch || hasAnyDishMatch)) {
+              relevance = 120;
+            }
+            if (hasDirectNameMatch) {
+              matchTier = 4;
+              relevance = Math.max(relevance, 1200);
+            } else if (hasPrimaryDishMatch) {
+              matchTier = 3;
+              relevance = Math.max(relevance, 900);
+            } else if (hasAnyDishMatch) {
+              matchTier = 2;
+              relevance = Math.max(relevance, 600);
+            } else if (relevance > 0) {
+              matchTier = 1;
+            } else {
+              matchTier = 0;
+            }
           }
-        }
-        if (smartIntent?.semanticCategory === 'cafe' && classifyRestaurantCategory(r) === 'cafe_bistro') {
-          relevance += 35;
-        }
-        if (relevance > 0 && isShopSubscriptionActive(r)) {
-          relevance += 250;
+
+          if (relevance > 0 && smartIntent?.semanticCategory === 'cafe' && primaryCat === 'cafe_bistro') {
+            relevance += 35;
+          }
+          if (relevance > 0 && isShopSubscriptionActive(r)) {
+            relevance += 250;
+          }
         }
       }
 
@@ -685,33 +734,55 @@ export const RestaurantView: React.FC = () => {
         if (matchesProvince && matchesPrice && matchesCategory && matchesCuisine && matchesRating) {
           if (!seenIds.has(r.id)) {
             seenIds.add(r.id);
-            scored.push({ item: r, score: relevance });
+            scored.push({ item: r, score: relevance, tier: matchTier });
           }
         }
-        if (q && !nearMeActive && !seenFallbackIds.has(r.id)) {
+        if (q && !useNearMePool && !seenFallbackIds.has(r.id)) {
           seenFallbackIds.add(r.id);
-          fallbackUnfilteredScored.push({ item: r, score: relevance });
+          fallbackUnfilteredScored.push({ item: r, score: relevance, tier: matchTier });
         }
       }
     }
 
-    const activeList =
-      q && !nearMeActive && scored.length === 0 && fallbackUnfilteredScored.length > 0
+    let activeList =
+      q && !useNearMePool && scored.length === 0 && fallbackUnfilteredScored.length > 0
         ? fallbackUnfilteredScored
         : scored;
 
+    // When searching for a specific shop name or dish, if strong direct/dish matches (tier >= 2) exist,
+    // drop weak description-only noise (tier 1) so results stay 100% relevant.
+    if (q && !queryExplicitCat) {
+      const strongMatches = activeList.filter((entry) => entry.tier >= 2);
+      if (strongMatches.length > 0) {
+        activeList = strongMatches;
+      }
+    }
+
     const hasActiveUserGps = Boolean(userCoords || readSavedUserGps());
-    if (sortMode === 'rating' && !q && !nearMeActive) {
+    if (sortMode === 'rating' && !q && !useNearMePool) {
       activeList.sort((a, b) => {
+        if (b.tier !== a.tier) return b.tier - a.tier;
         const rDiff = Number(b.item.rating || 0) - Number(a.item.rating || 0);
         if (rDiff !== 0) return rDiff;
         return (distanceMetersMap.get(a.item.id) ?? 9999999) - (distanceMetersMap.get(b.item.id) ?? 9999999);
       });
-    } else if (nearMeActive || sortMode === 'nearest' || q || categoryFilter !== 'all' || cuisineFilter !== 'all' || hasActiveUserGps) {
-      // Global Rule: Always sort search and category results by actual GPS distance ascending (closest to farthest)
-      // when GPS is available; use search relevance score and rating as fallback when GPS is unavailable or tied.
+    } else if (
+      useNearMePool ||
+      sortMode === 'nearest' ||
+      q ||
+      categoryFilter !== 'all' ||
+      cuisineFilter !== 'all' ||
+      hasActiveUserGps
+    ) {
       activeList.sort((a, b) => {
-        if (hasActiveUserGps || nearMeActive || sortMode === 'nearest') {
+        // 1. Always respect primary category tier / search relevance tier first so dedicated
+        // matches (e.g. exact shop name, primary dish, or dedicated boba shop) never get buried by unrelated nearby shops.
+        if (b.tier !== a.tier) return b.tier - a.tier;
+        if (q && a.tier >= 3 && Math.abs(b.score - a.score) >= 80) {
+          return b.score - a.score;
+        }
+        // 2. Within the same match tier, sort by actual GPS distance ascending (closest to farthest)
+        if (hasActiveUserGps || useNearMePool || sortMode === 'nearest') {
           const dA = distanceMetersMap.get(a.item.id) ?? 9999999;
           const dB = distanceMetersMap.get(b.item.id) ?? 9999999;
           if (dA !== dB) return dA - dB;
@@ -725,6 +796,11 @@ export const RestaurantView: React.FC = () => {
   }, [
     nearMeActive,
     nearbyMergedShops,
+    validDirectoryRestaurants,
+    liveNearbyRestaurants,
+    activeNearMeCoords,
+    selectedRadiusMeters,
+    manualProvince,
     preRotatedRestaurants,
     cleanSelectedProvince,
     priceFilter,
@@ -733,6 +809,7 @@ export const RestaurantView: React.FC = () => {
     ratingFilter,
     sortMode,
     distanceMetersMap,
+    shopSearchQuery,
     debouncedShopSearchQuery,
     userCoords,
   ]);
@@ -1041,7 +1118,10 @@ export const RestaurantView: React.FC = () => {
         >
           <div className="kft-cat-grid grid grid-cols-3 gap-x-1.5 min-[360px]:gap-x-2 sm:gap-x-3 gap-y-2 min-[360px]:gap-y-2.5 sm:gap-y-3 items-stretch">
             {primaryCategoryPills.map((cat) => {
-              const active = cat.id === 'near_me_toggle' ? nearMeActive : categoryFilter === cat.id;
+              const active =
+                cat.id === 'near_me_toggle'
+                  ? nearMeActive
+                  : !nearMeActive && categoryFilter === cat.id;
               const titleText = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
               return (
                 <button
@@ -1051,14 +1131,16 @@ export const RestaurantView: React.FC = () => {
                   onClick={() => {
                     recordRestaurantStep('shop-cat:' + cat.id);
                     setShowFilterDrawer(false);
+                    if (shopSearchQuery || debouncedShopSearchQuery) {
+                      setShopSearchQuery('');
+                      setDebouncedShopSearchQuery('');
+                    }
                     if (cat.id === 'near_me_toggle') {
                       handleToggleNearMe();
-                    } else if (cat.id === 'all') {
-                      setCategoryFilter('all');
-                      setNearMeActive(false);
-                      setSortMode('popular');
                     } else {
+                      setNearMeActive(false);
                       setCategoryFilter(cat.id);
+                      setSortMode('nearest');
                     }
                     scrollToShopList();
                   }}

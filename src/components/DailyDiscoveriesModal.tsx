@@ -46,6 +46,7 @@ import { IconProvinceFood } from './icons/HandcraftedIcons';
 import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { searchKhmerFoods, normalizeKhmerFoodText } from '../utils/khmerFoodSearch';
 import type { Restaurant } from '../types';
+import { ProvinceDirectoryHub } from './ProvinceDirectoryHub';
 
 type VipAiTasteId = 'all' | 'soup_kroeung' | 'grill_seafood' | 'street_dessert';
 
@@ -765,87 +766,13 @@ export const DailyDiscoveriesModal: React.FC = () => {
               </div>
             </div>
           ) : (
-            /* Complete List of All 25 Cambodian Provinces & Capital City on Clean White Cards */
-            <div className="space-y-3">
-              <div className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-[0_4px_14px_rgba(15,23,42,0.04)] flex items-center justify-between gap-2 text-xs">
-                <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <span
-                    style={{
-                      background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
-                    }}
-                    className="w-9 h-9 rounded-xl text-white flex items-center justify-center shrink-0 font-black shadow-xs"
-                  >
-                    25
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-extrabold text-slate-900 leading-[1.65] break-words">
-                      {tr(
-                        language,
-                        'បញ្ជីរាជធានី-ខេត្តទាំង ២៥',
-                        'All 25 Cambodian Provinces & Capital',
-                        '柬埔寨全部 25 个省市列表'
-                      )}
-                    </div>
-                    <div className="text-[11px] text-slate-500 leading-[1.55] break-words">
-                      {tr(
-                        language,
-                        'ចុចលើខេត្ត-រាជធានីណាមួយខាងក្រោម ដើម្បីមើលមុខម្ហូបប្រចាំខេត្ត និងផែនទី',
-                        'Tap any province below to view its signature dishes & map',
-                        '点击下方任意省市查看代表美食与地图'
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Complete 25-Location Directory Grid (1 Capital + 24 Provinces = 25 Locations) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {visibleProvinces.map((prov) => {
-                  const globalIndex = DISH_PROVINCES.findIndex((p) => p.id === prov.id);
-                  const globalNumber = globalIndex + 1;
-                  const badgeGradient =
-                    PROVINCE_BADGE_GRADIENTS[globalIndex % PROVINCE_BADGE_GRADIENTS.length];
-
-                  return (
-                    <button
-                      key={prov.id}
-                      type="button"
-                      data-testid={`province-card-${prov.id}`}
-                      onClick={() => handleSelectProvince(prov.id)}
-                      className="w-full p-3 rounded-[20px] bg-white hover:bg-emerald-50/40 border border-slate-200/90 hover:border-emerald-500/60 transition flex items-center justify-between gap-2.5 text-left shadow-[0_4px_14px_rgba(15,23,42,0.05)] active:scale-[0.99] cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <span
-                          style={{ background: badgeGradient }}
-                          className="w-8 h-8 rounded-xl text-white text-xs font-black font-mono flex items-center justify-center shrink-0 shadow-xs"
-                        >
-                          {globalNumber}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-extrabold text-[13px] text-slate-900 leading-[1.65] break-words group-hover:text-emerald-700">
-                              {getProvinceDisplayName(prov)}
-                            </span>
-                            {!isKm && (
-                              <span className="text-[10.5px] text-slate-500 leading-[1.5] break-words">({prov.kh})</span>
-                            )}
-                            {isKm && (
-                              <span className="text-[10.5px] text-slate-500 font-sans leading-[1.5] break-words">({prov.en})</span>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-slate-500 line-clamp-2 break-words leading-[1.55] mt-0.5">
-                            {getProvinceSpecialty(prov)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center shrink-0">
-                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition" />
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <ProvinceDirectoryHub
+              language={language}
+              provinces={visibleProvinces}
+              dishes={verifiedDishes}
+              onSelectProvince={(id) => handleSelectProvince(id)}
+              onOpenMap={(prov) => handleOpenProvinceMap(prov)}
+            />
           )}
 
           {/* Loading Indicator when switching provinces */}
