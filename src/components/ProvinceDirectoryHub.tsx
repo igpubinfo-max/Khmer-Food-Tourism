@@ -199,9 +199,8 @@ export const ProvinceDirectoryHub: React.FC<Props> = ({
                     : undefined
                 }
               >
-                <span>{r === 'all' ? '🇰🇭' : REGION_META[r].emoji}</span>
+                <MapPin className="w-3.5 h-3.5 shrink-0" />
                 <span>{r === 'all' ? tr(language, 'គ្រប់តំបន់', 'All regions', '全部片区') : regionLabel(r)}</span>
-                <span className={`px-1.5 rounded-full text-[10px] ${active ? 'bg-white/25' : 'bg-white/10'}`}>{count}</span>
               </button>
             );
           })}
@@ -211,7 +210,6 @@ export const ProvinceDirectoryHub: React.FC<Props> = ({
           <h4 className="text-[13px] font-extrabold text-white leading-[1.6] flex items-center gap-1.5">
             <MapPin className="w-4 h-4 text-emerald-400" />
             {tr(language, 'ជ្រើសរើសខេត្តដើម្បីមើលម្ហូប', 'Pick a province to see its dishes', '选择省市查看美食')}
-            <span className="text-slate-400 font-bold">({list.length})</span>
           </h4>
           <button
             type="button"
@@ -291,7 +289,7 @@ export const ProvinceDirectoryHub: React.FC<Props> = ({
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white/95 border border-white/15"
                       style={{ background: 'rgba(255,255,255,0.06)' }}
                     >
-                      {meta.emoji} {regionLabel(p.region)}
+                      <MapPin className="w-3 h-3 text-emerald-400 shrink-0" /> <span>{regionLabel(p.region)}</span>
                     </span>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">

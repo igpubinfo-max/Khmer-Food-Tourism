@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, ExternalLink, Share2, MapPin, LocateFixed } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, Share2, MapPin, LocateFixed, Utensils, Fish, TrainFront, Waves, Compass } from 'lucide-react';
+import { IconNavTourism, IconKhmerFoodBowl } from './icons/HandcraftedIcons';
 import { useApp } from '../context/AppContext';
 import { tr } from '../utils/i18n';
 import { shareText } from '../utils/shareApp';
@@ -211,6 +212,25 @@ export const FoodTripTemplates: React.FC = () => {
   const typeLabel = (t: TripStop['type']) =>
     t === 'food' ? tr(language, 'ម្ហូប', 'Dish', '菜品') : t === 'restaurant' ? tr(language, 'ហាង', 'Place', '餐厅') : tr(language, 'ទេសចរណ៍', 'Sight', '景点');
 
+  const renderTripIcon = (id: string, sizeCls = 'w-5 h-5') => {
+    switch (id) {
+      case 'trip-phnom-penh-street':
+        return <Utensils className={sizeCls} strokeWidth={1.85} />;
+      case 'trip-siem-reap-classics':
+        return <IconNavTourism className={sizeCls} />;
+      case 'trip-kampot-kep-seafood':
+        return <Fish className={sizeCls} strokeWidth={1.85} />;
+      case 'trip-battambang-local':
+        return <TrainFront className={sizeCls} strokeWidth={1.85} />;
+      case 'trip-noodle-hunter':
+        return <IconKhmerFoodBowl className={sizeCls} />;
+      case 'trip-sihanoukville-seafood':
+        return <Waves className={sizeCls} strokeWidth={1.85} />;
+      default:
+        return <Compass className={sizeCls} strokeWidth={1.85} />;
+    }
+  };
+
   const tplTitle = (t: FoodTripTemplate) => tr(language, t.titleKh, t.titleEn, t.titleZh);
   const tplSub = (t: FoodTripTemplate) => tr(language, t.subtitleKh, t.subtitleEn, t.subtitleZh);
   const tplProvince = (t: FoodTripTemplate) => tr(language, t.provinceKh, t.provinceEn, t.provinceZh);
@@ -294,7 +314,7 @@ export const FoodTripTemplates: React.FC = () => {
                 onClick={() => setOpenId(t.id)}
                 className="w-full min-h-[60px] flex items-center gap-3 p-2.5 rounded-2xl bg-white border border-slate-200 text-left active:scale-[0.98] transition cursor-pointer hover:border-emerald-500"
               >
-                <span className="text-2xl shrink-0">{t.emoji}</span>
+                <span className="w-10 h-10 rounded-xl bg-emerald-50 text-[#064E3B] border border-emerald-200/80 flex items-center justify-center shrink-0">{renderTripIcon(t.id)}</span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center justify-between gap-1">
                     <span className="block text-sm font-bold text-slate-900 leading-snug truncate">{tplTitle(t)}</span>
@@ -323,7 +343,7 @@ export const FoodTripTemplates: React.FC = () => {
             </button>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="font-bold text-sm text-slate-900 leading-snug">{open.emoji} {tplTitle(open)}</h4>
+                <h4 className="font-bold text-sm text-slate-900 leading-snug inline-flex items-center gap-1.5"><span className="w-7 h-7 rounded-lg bg-emerald-50 text-[#064E3B] border border-emerald-200/80 inline-flex items-center justify-center shrink-0">{renderTripIcon(open.id, "w-4 h-4")}</span><span>{tplTitle(open)}</span></h4>
                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
                   <MapPin className="w-3 h-3 text-emerald-700" strokeWidth={1.75} />
                   <span>{tplProvince(open)}</span>
