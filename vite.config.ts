@@ -36,7 +36,14 @@ function kftVersionManifestPlugin(): Plugin {
         version: `v${versionName}`,
         versionName,
         buildCode,
+        minRequiredBuildCode: buildCode,
+        minRequiredVersion: versionName,
+        forceUpdate: true,
         releasedAt: new Date().toISOString(),
+        releaseNotesKh:
+          'កំណែអាប់ដេតសំខាន់ចាំបាច់៖ បង្កើនល្បឿនស្វែងរកហាងអាហារបួស ការពារសុវត្ថិភាពគណនី VIP និងកែលម្អប្រព័ន្ធផែនទី។ សូមអាប់ដេតឥឡូវនេះដើម្បីបន្តប្រើប្រាស់កម្មវិធី។',
+        releaseNotesEn:
+          'Mandatory Update: Faster Vegetarian search, enhanced VIP account security, and improved map navigation. Please update now to continue using the app.',
         playStoreUrl: 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
       },
       null,

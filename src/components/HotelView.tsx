@@ -700,7 +700,8 @@ export const HotelView: React.FC = () => {
         mapUrl: eff.mapUrl || `https://www.google.com/maps/search/?api=1&query=${eff.latitude},${eff.longitude}`,
         latitude: eff.latitude,
         longitude: eff.longitude,
-        googlePlaceId: eff.googlePlaceId,
+        googlePlaceId: eff.googlePlaceId || eff.googleMapsMeta?.placeId,
+        googleMapsMeta: eff.googleMapsMeta,
         rating: typeof eff.rating === 'number' ? eff.rating : 0,
         reviewCount: typeof eff.reviewCount === 'number' ? eff.reviewCount : 0,
         highlightsKh: eff.signatureDishesKh?.length

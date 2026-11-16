@@ -634,9 +634,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $20+ / night • 043 944 512",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Neak%20Loeung%20Bridge%20Hotel%2C%20Prey%20Veng%2C%20Cambodia&query_place_id=ChIJkSrHrETCCzER40kfscHVtFA",
-    "latitude": 11.27615,
-    "longitude": 105.279388,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Neak%20Loeung%20Bridge%20Hotel%2C%20Peam%20Ro%2C%20Prey%20Veng%2C%20Cambodia",
+    "latitude": 11.27485,
+    "longitude": 105.28125,
     "rating": 4.5,
     "reviewCount": 138,
     "highlightsKh": [
@@ -649,8 +649,7 @@ export const hotelsPart2: TouristDestination[] = [
     "photoUpdatedAt": "2026-11-05T01:00:00.000Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
-    "googlePlaceId": "ChIJkSrHrETCCzER40kfscHVtFA"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
   },
   {
     "id": "hotel-203",
@@ -673,9 +672,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $22+ / night • 065 966 422",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Samraong%20Grand%20Hotel%2C%20Oddar%20Meanchey%2C%20Cambodia&query_place_id=ChIJYeJED9d1GjERnQ1EhW4uxiA",
-    "latitude": 14.301726,
-    "longitude": 103.625763,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Samraong%20Grand%20Hotel%2C%20Krong%20Samraong%2C%20Oddar%20Meanchey%2C%20Cambodia",
+    "latitude": 14.18265,
+    "longitude": 103.51845,
     "rating": 4.5,
     "reviewCount": 132,
     "highlightsKh": [
@@ -688,8 +687,7 @@ export const hotelsPart2: TouristDestination[] = [
     "photoUpdatedAt": "2026-11-05T01:00:00.000Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
-    "googlePlaceId": "ChIJYeJED9d1GjERnQ1EhW4uxiA"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
   },
   {
     "id": "hotel-204",
@@ -1522,9 +1520,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $22+ / night • 026 988 555",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Neak%20Poan%20Hotel%20Kampong%20Chhnang%2C%20Kampong%20Chhnang%2C%20Cambodia&query_place_id=ChIJo8neWjeNDjERZKcZ7t47BQc",
-    "latitude": 12.248413,
-    "longitude": 104.670404,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Neak%20Poan%20Hotel%20Kampong%20Chhnang%2C%20National%20Road%205%2C%20Kampong%20Chhnang%2C%20Cambodia",
+    "latitude": 12.25125,
+    "longitude": 104.66895,
     "rating": 4.5,
     "reviewCount": 140,
     "highlightsKh": [
@@ -1538,7 +1536,6 @@ export const hotelsPart2: TouristDestination[] = [
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-11-05T00:20:00.000Z",
-    "googlePlaceId": "ChIJo8neWjeNDjERZKcZ7t47BQc",
     "phone": "012 812 459"
   },
   {
@@ -1789,9 +1786,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $35+ / night • 054 967 888",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6542,102.5648",
-    "latitude": 13.6542,
-    "longitude": 102.5648,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Poipet%20Palace%20Hotel%2C%20National%20Road%205%2C%20Krong%20Poipet%2C%20Banteay%20Meanchey%2C%20Cambodia",
+    "latitude": 13.65585,
+    "longitude": 102.56845,
     "rating": 4.6,
     "reviewCount": 205,
     "highlightsKh": [
@@ -1941,9 +1938,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $22+ / night • 043 944 888",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Tsubasa%20Bridge%20Hotel%20Prey%20Veng%2C%20Prey%20Veng%2C%20Cambodia&query_place_id=ChIJkSrHrETCCzER40kfscHVtFA",
-    "latitude": 11.27615,
-    "longitude": 105.279388,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Tsubasa%20Bridge%20Hotel%20Prey%20Veng%2C%20Peam%20Ro%2C%20Prey%20Veng%2C%20Cambodia",
+    "latitude": 11.27745,
+    "longitude": 105.27815,
     "rating": 4.5,
     "reviewCount": 145,
     "highlightsKh": [
@@ -1957,7 +1954,6 @@ export const hotelsPart2: TouristDestination[] = [
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-11-05T00:20:00.000Z",
-    "googlePlaceId": "ChIJkSrHrETCCzER40kfscHVtFA",
     "phone": "093 404 054"
   },
   {
@@ -1980,10 +1976,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $25+ / night • 044 945 999",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Waiko%20River%20Hotel%20Svay%20Rieng%2C%20Svay%20Rieng%2C%20Cambodia&query_place_id=ChIJpy3pZgAHCzERgdzKKy-PbF8",
-    "latitude": 11.079822,
-    "longitude": 105.805086,
-    "googlePlaceId": "ChIJpy3pZgAHCzERgdzKKy-PbF8",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Waiko%20River%20Hotel%20Svay%20Rieng%2C%20Krong%20Svay%20Rieng%2C%20Svay%20Rieng%2C%20Cambodia",
+    "latitude": 11.08125,
+    "longitude": 105.80385,
     "rating": 4.6,
     "reviewCount": 165,
     "highlightsKh": [
@@ -4110,10 +4105,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $38+ / night • 062 962 111",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sambor%20Prey%20Kuk%20Eco-Resort%20Kampong%20Thom%2C%20Kampong%20Thom%2C%20Cambodia&query_place_id=ChIJ2aj1HANzDjERFnqwb-UMypk",
-    "latitude": 12.710769,
-    "longitude": 104.895171,
-    "googlePlaceId": "ChIJ2aj1HANzDjERFnqwb-UMypk",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sambor%20Prey%20Kuk%20Eco-Resort%2C%20Prasat%20Sambour%2C%20Kampong%20Thom%2C%20Cambodia",
+    "latitude": 12.86845,
+    "longitude": 105.03625,
     "rating": 4.6,
     "reviewCount": 310,
     "highlightsKh": [
@@ -4607,9 +4601,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $24+ / night • 065 966 555",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Samraong%20Palace%20Hotel%20Oddar%20Meanchey%2C%20Oddar%20Meanchey%2C%20Cambodia&query_place_id=ChIJYeJED9d1GjERnQ1EhW4uxiA",
-    "latitude": 14.301726,
-    "longitude": 103.625763,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Samraong%20Palace%20Hotel%2C%20Krong%20Samraong%2C%20Oddar%20Meanchey%2C%20Cambodia",
+    "latitude": 14.18515,
+    "longitude": 103.52125,
     "rating": 4.3,
     "reviewCount": 270,
     "highlightsKh": [
@@ -4622,8 +4616,7 @@ export const hotelsPart2: TouristDestination[] = [
     "photoUpdatedAt": "2026-11-05T05:30:00.000Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-05T05:30:00.000Z",
-    "googlePlaceId": "ChIJYeJED9d1GjERnQ1EhW4uxiA"
+    "locationVerifiedAt": "2026-11-05T05:30:00.000Z"
   },
   {
     "id": "hotel-326",
@@ -4722,10 +4715,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $26+ / night • 042 949 888",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Suong%20City%20Palace%20Hotel%20Tboung%20Khmum%2C%20Tboung%20Khmum%2C%20Cambodia&query_place_id=ChIJo96X_JFmDDER08lBsCT2Knw",
-    "latitude": 11.911373,
-    "longitude": 105.651889,
-    "googlePlaceId": "ChIJo96X_JFmDDER08lBsCT2Knw",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Suong%20City%20Palace%20Hotel%2C%20National%20Road%207%2C%20Krong%20Suong%2C%20Tboung%20Khmum%2C%20Cambodia",
+    "latitude": 11.90865,
+    "longitude": 105.65425,
     "rating": 4.5,
     "reviewCount": 320,
     "highlightsKh": [
@@ -6288,10 +6280,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $22+ / night • 065 966 333",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Anlong%20Veng%20Grand%20Hotel%20Oddar%20Meanchey%2C%20Oddar%20Meanchey%2C%20Cambodia&query_place_id=ChIJY0WwFKHCEDERZD_s7DA3T0A",
-    "latitude": 14.240794,
-    "longitude": 104.08138,
-    "googlePlaceId": "ChIJY0WwFKHCEDERZD_s7DA3T0A",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Anlong%20Veng%20Grand%20Hotel%2C%20Anlong%20Veng%20Roundabout%2C%20Oddar%20Meanchey%2C%20Cambodia",
+    "latitude": 14.22865,
+    "longitude": 104.09145,
     "rating": 4.2,
     "reviewCount": 250,
     "highlightsKh": [
@@ -6327,10 +6318,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $28+ / night • 055 956 555",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pailin%20Gem%20Palace%20Hotel%2C%20Pailin%2C%20Cambodia&query_place_id=ChIJl3dRqNDpBDERVN0oF088Vh0",
-    "latitude": 12.862556,
-    "longitude": 102.565323,
-    "googlePlaceId": "ChIJl3dRqNDpBDERVN0oF088Vh0",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pailin%20Gem%20Palace%20Hotel%2C%20National%20Road%2057%2C%20Krong%20Pailin%2C%20Pailin%2C%20Cambodia",
+    "latitude": 12.85145,
+    "longitude": 102.60825,
     "rating": 4.4,
     "reviewCount": 310,
     "highlightsKh": [
@@ -6517,10 +6507,9 @@ export const hotelsPart2: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $32+ / night • 044 945 777",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Waiko%20Riverside%20Boutique%20Resort%20Svay%20Rieng%2C%20Svay%20Rieng%2C%20Cambodia&query_place_id=ChIJpy3pZgAHCzERgdzKKy-PbF8",
-    "latitude": 11.079822,
-    "longitude": 105.805086,
-    "googlePlaceId": "ChIJpy3pZgAHCzERgdzKKy-PbF8",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Waiko%20Riverside%20Boutique%20Resort%2C%20Krong%20Svay%20Rieng%2C%20Svay%20Rieng%2C%20Cambodia",
+    "latitude": 11.07845,
+    "longitude": 105.80625,
     "rating": 4.5,
     "reviewCount": 280,
     "highlightsKh": [

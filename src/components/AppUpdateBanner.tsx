@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Lock, RefreshCw, ShieldAlert, ShieldCheck, X } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Download, RefreshCw, ShieldCheck, X, ShieldAlert, Lock } from 'lucide-react';
+import { App as CapApp } from '@capacitor/app';
 import { useApp } from '../context/AppContext';
 import { tr } from '../utils/i18n';
 import {
   CHECK_APP_UPDATE_EVENT,
   checkLiveAppUpdate,
+  evaluateSyncUpdateStatus,
   isUpdateSnoozed,
   snoozeUpdateAlert,
   subscribeToInstallState,
@@ -12,61 +14,83 @@ import {
   type AppUpdateStatus,
 } from '../services/appUpdateService';
 
-const MIN_AUTO_CHECK_COOLDOWN_MS = 5 * 60 * 1000; // 5-minute cooldown between automatic background checks
-
 export const AppUpdateBanner: React.FC = () => {
-  const { language, appSettings, currentUser, showToast } = useApp();
-  const [updateStatus, setUpdateStatus] = useState<AppUpdateStatus | null>(null);
-  const [visible, setVisible] = useState(false);
+  const { language, appSettings, showToast } = useApp();
+
+  const syncStatus = useMemo(() => evaluateSyncUpdateStatus(appSettings), [
+    appSettings?.forceAppUpdate,
+    appSettings?.latestAppBuildCode,
+    appSettings?.minRequiredBuildCode,
+    appSettings?.latestAppVersion,
+    appSettings?.minRequiredVersion,
+    appSettings?.updateReleaseNotesKh,
+    appSettings?.updateReleaseNotesEn,
+  ]);
+
+  const [asyncStatus, setAsyncStatus] = useState<AppUpdateStatus | null>(null);
+  const [visible, setVisible] = useState<boolean>(() => Boolean(syncStatus.hasUpdate && syncStatus.forceUpdate));
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isRechecking, setIsRechecking] = useState(false);
   const [downloadProgressPct, setDownloadProgressPct] = useState<number | null>(null);
-  const [adminTempDismissed, setAdminTempDismissed] = useState(false);
+
   const checkingRef = useRef(false);
-  const lastAutoCheckAtRef = useRef(0);
-  const latestContextRef = useRef({ appSettings, language, showToast });
-  latestContextRef.current = { appSettings, language, showToast };
+  const pendingRecheckRef = useRef(false);
+  const pendingManualRef = useRef(false);
+  const latestContextRef = useRef({ language, appSettings, showToast });
+  latestContextRef.current = { language, appSettings, showToast };
 
-  const isAdminAccount =
-    currentUser?.role === 'admin' ||
-    currentUser?.id === 'admin-authorized-single' ||
-    currentUser?.username === 'admin' ||
-    currentUser?.username === 'cheasavuth';
+  // Merge synchronous status with latest async network status so Force Update locks in 0ms
+  const updateStatus: AppUpdateStatus | null = useMemo(() => {
+    if (!asyncStatus) return syncStatus;
+    const hasUpdate = Boolean(asyncStatus.hasUpdate || syncStatus.hasUpdate);
+    const forceUpdate = Boolean(
+      hasUpdate && (asyncStatus.forceUpdate || syncStatus.forceUpdate)
+    );
+    const latestBuildCode = Math.max(
+      asyncStatus.latestBuildCode || 0,
+      syncStatus.latestBuildCode || 0
+    );
+    return {
+      ...asyncStatus,
+      hasUpdate,
+      forceUpdate,
+      latestBuildCode,
+      latestVersion:
+        (syncStatus.latestBuildCode || 0) > (asyncStatus.latestBuildCode || 0)
+          ? syncStatus.latestVersion
+          : asyncStatus.latestVersion,
+      minRequiredBuildCode:
+        Math.max(
+          Number(asyncStatus.minRequiredBuildCode || 0),
+          Number(syncStatus.minRequiredBuildCode || 0)
+        ) || undefined,
+      minRequiredVersion: asyncStatus.minRequiredVersion || syncStatus.minRequiredVersion,
+      releaseNotesKh: asyncStatus.releaseNotesKh || syncStatus.releaseNotesKh,
+      releaseNotesEn: asyncStatus.releaseNotesEn || syncStatus.releaseNotesEn,
+    };
+  }, [asyncStatus, syncStatus]);
 
-  const runCheck = useCallback(async (isManual = false) => {
-    if (checkingRef.current) return;
-    if (!isManual && Date.now() - lastAutoCheckAtRef.current < MIN_AUTO_CHECK_COOLDOWN_MS) {
+  const runCheck = useCallback(async (isManual: boolean) => {
+    if (checkingRef.current) {
+      pendingRecheckRef.current = true;
+      if (isManual) pendingManualRef.current = true;
       return;
     }
-    const { appSettings: curSettings, language: curLang, showToast: toastFn } = latestContextRef.current;
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-      if (isManual) {
-        toastFn(
-          tr(
-            curLang,
-            'សូមភ្ជាប់អ៊ីនធឺណិតដើម្បីពិនិត្យកំណែអាប់ដេតថ្មី',
-            'Please connect to the internet to check for updates',
-            '请连接网络以检查新版本'
-          ),
-          'info'
-        );
-      }
-      return;
-    }
+
+    const { language: curLang, appSettings: curSettings, showToast: toastFn } = latestContextRef.current;
 
     checkingRef.current = true;
-    if (!isManual) {
-      lastAutoCheckAtRef.current = Date.now();
-    }
+    if (isManual) setIsRechecking(true);
     try {
       const status = await checkLiveAppUpdate(curSettings);
-      setUpdateStatus(status);
+      setAsyncStatus(status);
 
       if (status.hasUpdate) {
         if (
           isManual ||
           status.forceUpdate ||
           status.updateDownloaded ||
-          !isUpdateSnoozed(status.latestBuildCode, status.latestVersion)
+          !isUpdateSnoozed(status.latestBuildCode, status.latestVersion, status.forceUpdate)
         ) {
           setVisible(true);
         } else {
@@ -87,45 +111,109 @@ export const AppUpdateBanner: React.FC = () => {
         }
       }
     } catch {
-      // Silent fail on background network hiccups
+      const fallback = evaluateSyncUpdateStatus(curSettings);
+      setAsyncStatus(fallback);
+      if (fallback.hasUpdate && fallback.forceUpdate) {
+        setVisible(true);
+      }
     } finally {
       checkingRef.current = false;
+      setIsRechecking(false);
+      if (pendingRecheckRef.current) {
+        const nextManual = pendingManualRef.current;
+        pendingRecheckRef.current = false;
+        pendingManualRef.current = false;
+        window.setTimeout(() => {
+          runCheck(nextManual);
+        }, 120);
+      }
     }
   }, []);
 
-  // Initial check once on app startup + manual check trigger
+  // Immediately show modal if synchronous check detects a mandatory update
+  useEffect(() => {
+    if (syncStatus.hasUpdate && syncStatus.forceUpdate) {
+      setVisible(true);
+    }
+  }, [syncStatus.hasUpdate, syncStatus.forceUpdate]);
+
+  // Check on every app open, window focus, visibility resume, network online, Capacitor foreground resume, and every 60s
   useEffect(() => {
     const initialTimer = window.setTimeout(() => {
       runCheck(false);
-    }, 3500);
+    }, 80);
+
+    const followupTimer = window.setTimeout(() => {
+      runCheck(false);
+    }, 2200);
+
+    const periodicTimer = window.setInterval(() => {
+      runCheck(false);
+    }, 60 * 1000);
 
     const onManualEvent = (evt: Event) => {
       const custom = evt as CustomEvent<{ manual?: boolean }>;
-      setAdminTempDismissed(false);
       runCheck(Boolean(custom?.detail?.manual ?? true));
     };
 
+    const onVisibilityChange = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        runCheck(false);
+      }
+    };
+
+    const onWindowFocus = () => {
+      runCheck(false);
+    };
+
+    const onNetworkOnline = () => {
+      runCheck(false);
+    };
+
     window.addEventListener(CHECK_APP_UPDATE_EVENT, onManualEvent as EventListener);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('focus', onWindowFocus);
+    window.addEventListener('online', onNetworkOnline);
+
+    let capStateListener: { remove: () => Promise<void> } | null = null;
+    try {
+      CapApp.addListener('appStateChange', ({ isActive }) => {
+        if (isActive) {
+          runCheck(false);
+        }
+      })
+        .then((handle) => {
+          capStateListener = handle;
+        })
+        .catch(() => {});
+    } catch {}
 
     return () => {
       window.clearTimeout(initialTimer);
+      window.clearTimeout(followupTimer);
+      window.clearInterval(periodicTimer);
       window.removeEventListener(CHECK_APP_UPDATE_EVENT, onManualEvent as EventListener);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('focus', onWindowFocus);
+      window.removeEventListener('online', onNetworkOnline);
+      if (capStateListener) {
+        capStateListener.remove().catch(() => {});
+      }
     };
   }, [runCheck]);
 
-  // Re-evaluate immediately when Cloud Sync updates forceAppUpdate / latestAppBuildCode / minRequiredBuildCode / latestAppVersion
+  // Re-evaluate immediately when Cloud Sync updates forceAppUpdate / latestAppBuildCode / minRequiredBuildCode / latestAppVersion / minRequiredVersion
   useEffect(() => {
-    setAdminTempDismissed(false);
     const syncTimer = window.setTimeout(() => {
-      lastAutoCheckAtRef.current = 0;
       runCheck(false);
-    }, 400);
+    }, 100);
     return () => window.clearTimeout(syncTimer);
   }, [
     appSettings?.forceAppUpdate,
     appSettings?.latestAppBuildCode,
     appSettings?.minRequiredBuildCode,
     appSettings?.latestAppVersion,
+    appSettings?.minRequiredVersion,
     runCheck,
   ]);
 
@@ -147,11 +235,53 @@ export const AppUpdateBanner: React.FC = () => {
     };
   }, []);
 
-  if (!visible || !updateStatus || !updateStatus.hasUpdate) {
+  const isBlockingForceUpdate = Boolean(
+    updateStatus && updateStatus.hasUpdate && updateStatus.forceUpdate
+  );
+
+  // Strict Anti-Bypass Lock: block Escape key, Android hardware Back button, and background scroll when Force Update is active
+  useEffect(() => {
+    if (!isBlockingForceUpdate) return;
+
+    const prevOverflow = typeof document !== 'undefined' ? document.body.style.overflow : '';
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+    }
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Backspace') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown, true);
+
+    let backHandle: { remove: () => Promise<void> } | null = null;
+    try {
+      CapApp.addListener('backButton', () => {
+        // Intercept hardware back button on all Android devices so Force Update cannot be dismissed
+      })
+        .then((h) => {
+          backHandle = h;
+        })
+        .catch(() => {});
+    } catch {}
+
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = prevOverflow;
+      }
+      window.removeEventListener('keydown', onKeyDown, true);
+      if (backHandle) {
+        backHandle.remove().catch(() => {});
+      }
+    };
+  }, [isBlockingForceUpdate]);
+
+  if (!updateStatus || !updateStatus.hasUpdate || (!visible && !isBlockingForceUpdate)) {
     return null;
   }
-
-  const isBlockingForceUpdate = Boolean(updateStatus.forceUpdate) && !adminTempDismissed;
 
   const handleUpdateNow = async () => {
     if (isUpdating) return;
@@ -161,7 +291,12 @@ export const AppUpdateBanner: React.FC = () => {
       setVisible(false);
     }
     try {
-      await triggerAutoAppUpdate(updateStatus.latestBuildCode, appSettings, updateStatus.latestVersion);
+      await triggerAutoAppUpdate(
+        updateStatus.latestBuildCode,
+        appSettings,
+        updateStatus.latestVersion,
+        updateStatus.forceUpdate
+      );
     } finally {
       window.setTimeout(() => {
         setIsUpdating(false);
@@ -171,9 +306,6 @@ export const AppUpdateBanner: React.FC = () => {
 
   const handleSnooze = () => {
     if (updateStatus.forceUpdate) {
-      if (isAdminAccount) {
-        setAdminTempDismissed(true);
-      }
       return;
     }
     snoozeUpdateAlert(updateStatus.latestBuildCode, updateStatus.latestVersion);
@@ -190,14 +322,14 @@ export const AppUpdateBanner: React.FC = () => {
       ? updateStatus.releaseNotesKh
       : updateStatus.releaseNotesEn || updateStatus.releaseNotesKh;
 
-  // Full-Screen Mandatory Force-Update Lock Modal (prevents using outdated app versions when forceUpdate / minRequiredBuildCode is active)
+  // Full-Screen Mandatory Force-Update Lock Modal (prevents any phone or account from bypassing required updates)
   if (isBlockingForceUpdate) {
     return (
       <div
         role="alertdialog"
         aria-modal="true"
         aria-live="assertive"
-        className="fixed inset-0 z-[9999] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 pointer-events-auto font-khmer animate-in fade-in duration-200"
+        className="fixed inset-0 z-[99999] bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 pointer-events-auto font-khmer animate-in fade-in duration-200 select-none"
       >
         <div className="w-full max-w-md rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#0F172A] border-2 border-amber-400 shadow-2xl p-6 text-white space-y-4">
           <div className="flex flex-col items-center text-center space-y-2.5">
@@ -232,7 +364,7 @@ export const AppUpdateBanner: React.FC = () => {
               </span>
               <span className="text-amber-300 font-bold">→</span>
               <span className="px-2.5 py-1 rounded-lg bg-amber-400/25 border border-amber-300/50 text-amber-200 font-bold">
-                {tr(language, 'កំណែថ្មី៖', 'Latest:', '最新版本:')} {versionBadgeText}
+                {tr(language, 'កំណែថ្មី៖', 'Required:', '要求版本:')} {versionBadgeText}
               </span>
             </div>
           </div>
@@ -288,20 +420,22 @@ export const AppUpdateBanner: React.FC = () => {
               )}
             </button>
 
-            {isAdminAccount && (
-              <button
-                type="button"
-                onClick={handleSnooze}
-                className="w-full min-h-[38px] px-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-emerald-100 text-xs font-semibold transition cursor-pointer"
-              >
+            <button
+              type="button"
+              onClick={() => runCheck(true)}
+              disabled={isRechecking || isUpdating}
+              className="w-full min-h-[38px] px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-emerald-100 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRechecking ? 'animate-spin' : ''}`} />
+              <span>
                 {tr(
                   language,
-                  '🛡️ ចូលផ្ទាំង Admin បណ្តោះអាសន្ន (សម្រាប់តែ Admin)',
-                  '🛡️ Temporary Admin Bypass (Admin Only)',
-                  '🛡️ 管理员临时进入后台（仅限管理员）'
+                  'ពិនិត្យកំណែម្ដងទៀតបន្ទាប់ពីអាប់ដេតរួច',
+                  'Re-verify Version After Updating',
+                  '更新完成后重新验证版本'
                 )}
-              </button>
-            )}
+              </span>
+            </button>
           </div>
         </div>
       </div>

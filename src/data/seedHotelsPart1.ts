@@ -3793,9 +3793,9 @@ export const hotelsPart1: TouristDestination[] = [
     "entranceFeeEn": "Room Rate: $ • 035 936 789",
     "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
     "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Apex%20Koh%20Kong%20Hotel%20%26%20Guesthouse%2C%20Koh%20Kong%2C%20Cambodia&query_place_id=ChIJv2rV6qN6BjERw7dVXBQxxI0",
-    "latitude": 11.611443,
-    "longitude": 102.98217,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Apex%20Koh%20Kong%20Guesthouse%2C%20Khemarak%20Phoumin%2C%20Koh%20Kong%2C%20Cambodia",
+    "latitude": 11.61225,
+    "longitude": 102.98165,
     "rating": 4.8,
     "reviewCount": 288,
     "highlightsKh": [
@@ -3808,7 +3808,6 @@ export const hotelsPart1: TouristDestination[] = [
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-11-04T15:30:00.000Z",
-    "googlePlaceId": "ChIJv2rV6qN6BjERw7dVXBQxxI0",
     "phone": "016 307 919"
   },
   {

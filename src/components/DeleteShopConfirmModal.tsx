@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Trash2, AlertTriangle, X } from 'lucide-react';
+import { Trash2, AlertTriangle, X, EyeOff } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 
@@ -9,6 +9,7 @@ export const DeleteShopConfirmModal: React.FC = () => {
     pendingDeleteRestaurant,
     confirmDeleteRestaurant,
     cancelDeleteRestaurant,
+    excludeRestaurantFromSearch,
     language,
   } = useApp();
 
@@ -94,6 +95,23 @@ export const DeleteShopConfirmModal: React.FC = () => {
             )}
           </p>
         </div>
+
+        {/* Recommended Non-Destructive Option: Hide / Exclude Irrelevant Shop from Search Results */}
+        <button
+          type="button"
+          onClick={() => excludeRestaurantFromSearch(pendingDeleteRestaurant)}
+          className="w-full mb-2.5 flex items-center justify-center gap-2 py-3 px-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold shadow-md transition active:scale-95 cursor-pointer"
+        >
+          <EyeOff className="w-4 h-4 shrink-0" />
+          <span>
+            {tr(
+              language,
+              'លាក់ចេញពីការស្វែងរក (មិនលុបទិន្នន័យដើម)',
+              'Exclude from Search Results Only (Do Not Delete)',
+              '仅从搜索结果中排除（不删除原始记录）'
+            )}
+          </span>
+        </button>
 
         {/* Action Buttons: Cancel & Confirm Delete */}
         <div className="grid grid-cols-2 gap-2.5">

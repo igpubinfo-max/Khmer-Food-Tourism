@@ -650,6 +650,27 @@ export function generateConversationalAiResponse(params: {
   const trimmed = userInput.trim();
   const nextSeed = (safeMemory.turnSeed || 1) + 1;
 
+  if (trimmed && isThaiRelatedText(trimmed)) {
+    return {
+      reply: {
+        id: `ai-${Date.now()}`,
+        role: 'assistant',
+        timestamp: new Date().toISOString(),
+        intent: 'clarification',
+        isScopeRefusal: true,
+        suppressDishCard: true,
+        source: 'rules',
+        text: tr(
+          language,
+          'កម្មវិធីនេះផ្តោតលើម្ហូបអាហារខ្មែរ និងម្ហូបដែលមានក្នុងបញ្ជីកម្ពុជាប៉ុណ្ណោះ។ សូមសាកល្បងសួរពីមុខម្ហូបខ្មែរ ដូចជា អាម៉ុកត្រី សម្លកកូរ នំបញ្ចុក ឬបាយសាច់ជ្រូក។',
+          'This app focuses on authentic Cambodian cuisine and verified catalog dishes in Cambodia. Try asking about Khmer dishes such as Fish Amok, Samlor Korko, Num Banh Chok, or Bai Sach Chrouk.',
+          '本应用专注于正宗高棉美食及柬埔寨认证菜单菜品。您可以询问阿莫克鱼、高棉百蔬浓汤、高棉米粉或烤猪肉饭等柬埔寨名菜。'
+        ),
+      },
+      nextMemory: { ...safeMemory, turnSeed: nextSeed },
+    };
+  }
+
   // 1. STRICT MEDICAL / HEALTH / DISEASE SCOPE BOUNDARY REFUSAL
   // Never diagnose, never recommend food for illnesses, never output medical disclaimers.
   if (isMedicalOrHealthQuery(trimmed)) {

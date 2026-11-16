@@ -1,5 +1,10 @@
 import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor/core';
 import { APP_BUILD_CODE, APP_VERSION, APP_VERSION_NAME, type AppSettings } from '../types';
+import {
+  fetchAuthoritativeAppSettingsFromServer,
+  normalizeAuthoritativeAppSettings,
+  pullCloudDocument,
+} from './supabaseService';
 
 export interface NativePlayUpdateInfo {
   playStoreSupported: boolean;
@@ -42,9 +47,14 @@ interface NativeAppUpdateBridge {
 const NativeAppUpdate = registerPlugin<NativeAppUpdateBridge>('NativeAppUpdate');
 
 const OFFICIAL_PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism';
-const REMOTE_MANIFEST_URL = 'https://igpubinfo-max.github.io/Khmer-Food-Tourism/version.json';
+const PRIMARY_REMOTE_MANIFEST_URL =
+  (import.meta as any).env?.VITE_UPDATE_MANIFEST_URL ||
+  'https://igpubinfo-max.github.io/Khmer-Food-Tourism/version.json';
+const FALLBACK_REMOTE_MANIFEST_URL =
+  'https://kimseng-prog.github.io/Khmer-Food-Tourism/version.json';
 const SNOOZE_STORAGE_KEY = 'kft_snoozed_app_update_v1';
-const SNOOZE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours so the banner never nags repeatedly
+const ENFORCED_POLICY_CACHE_KEY = 'kft_enforced_update_policy_v1';
+const SNOOZE_DURATION_MS = 24 * 60 * 60 * 1000;
 
 export const CHECK_APP_UPDATE_EVENT = 'kft:check-app-update';
 
@@ -53,6 +63,7 @@ export interface RemoteVersionManifest {
   versionName?: string;
   buildCode?: number;
   minRequiredBuildCode?: number;
+  minRequiredVersion?: string;
   releasedAt?: string;
   playStoreUrl?: string;
   releaseNotesKh?: string;
@@ -66,12 +77,26 @@ export interface AppUpdateStatus {
   currentBuildCode: number;
   latestVersion: string;
   latestBuildCode: number;
+  minRequiredBuildCode?: number;
+  minRequiredVersion?: string;
   forceUpdate: boolean;
   releaseNotesKh?: string;
   releaseNotesEn?: string;
   playStoreInAppSupported: boolean;
   updateDownloaded: boolean;
   source: 'play_store' | 'remote_manifest' | 'cloud_settings' | 'none';
+}
+
+interface CachedEnforcedUpdatePolicy {
+  latestVersion?: string;
+  latestBuildCode?: number;
+  minRequiredVersion?: string;
+  minRequiredBuildCode?: number;
+  forceUpdate?: boolean;
+  releaseNotesKh?: string;
+  releaseNotesEn?: string;
+  playStoreUrl?: string;
+  updatedAtMs?: number;
 }
 
 function normalizeSemver(raw?: string): number[] {
@@ -95,7 +120,63 @@ export function compareSemver(a?: string, b?: string): number {
   return 0;
 }
 
-async function fetchJsonWithTimeout(url: string, timeoutMs = 5000): Promise<RemoteVersionManifest | null> {
+function formatVersionTag(ver?: string): string {
+  const cleaned = String(ver || '').trim().replace(/^v/i, '');
+  return cleaned ? `v${cleaned}` : APP_VERSION;
+}
+
+function pickHigherSemver(a?: string, b?: string): string | undefined {
+  const ca = String(a || '').trim().replace(/^v/i, '');
+  const cb = String(b || '').trim().replace(/^v/i, '');
+  if (!ca && !cb) return undefined;
+  if (!ca) return cb;
+  if (!cb) return ca;
+  return compareSemver(ca, cb) >= 0 ? ca : cb;
+}
+
+function readCachedEnforcedPolicy(): CachedEnforcedUpdatePolicy | null {
+  try {
+    if (typeof localStorage === 'undefined') return null;
+    const raw = localStorage.getItem(ENFORCED_POLICY_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? (parsed as CachedEnforcedUpdatePolicy) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedEnforcedPolicy(policy: CachedEnforcedUpdatePolicy): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    const existing = readCachedEnforcedPolicy();
+    const merged: CachedEnforcedUpdatePolicy = {
+      latestBuildCode: Math.max(
+        Number(existing?.latestBuildCode) || 0,
+        Number(policy.latestBuildCode) || 0
+      ) || undefined,
+      minRequiredBuildCode: Math.max(
+        Number(existing?.minRequiredBuildCode) || 0,
+        Number(policy.minRequiredBuildCode) || 0
+      ) || undefined,
+      latestVersion: pickHigherSemver(existing?.latestVersion, policy.latestVersion),
+      minRequiredVersion: pickHigherSemver(existing?.minRequiredVersion, policy.minRequiredVersion),
+      forceUpdate:
+        policy.forceUpdate !== undefined
+          ? Boolean(policy.forceUpdate)
+          : Boolean(existing?.forceUpdate),
+      releaseNotesKh: policy.releaseNotesKh || existing?.releaseNotesKh,
+      releaseNotesEn: policy.releaseNotesEn || existing?.releaseNotesEn,
+      playStoreUrl: policy.playStoreUrl || existing?.playStoreUrl,
+      updatedAtMs: Date.now(),
+    };
+    localStorage.setItem(ENFORCED_POLICY_CACHE_KEY, JSON.stringify(merged));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+async function fetchJsonWithTimeout(url: string, timeoutMs = 4500): Promise<RemoteVersionManifest | null> {
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
   try {
@@ -106,13 +187,14 @@ async function fetchJsonWithTimeout(url: string, timeoutMs = 5000): Promise<Remo
       cache: 'no-store',
       headers: {
         Accept: 'application/json',
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
       },
       signal: controller?.signal,
     });
     if (!res.ok) return null;
     const data = await res.json();
-    if (data && typeof data === 'object') {
+    if (data && typeof data === 'object' && (data.buildCode || data.versionName || data.version)) {
       return data as RemoteVersionManifest;
     }
     return null;
@@ -126,14 +208,17 @@ async function fetchJsonWithTimeout(url: string, timeoutMs = 5000): Promise<Remo
 async function fetchRemoteVersionManifest(): Promise<RemoteVersionManifest | null> {
   const isNative = Capacitor.isNativePlatform();
   if (!isNative && typeof window !== 'undefined') {
-    // On Web / PWA, check same-origin deployed version.json first
-    const localRel = await fetchJsonWithTimeout('./version.json', 4500);
+    const localRel = await fetchJsonWithTimeout('./version.json', 3500);
     if (localRel && (localRel.buildCode || localRel.versionName || localRel.version)) {
       return localRel;
     }
   }
-  // Check official live GitHub Pages deployment manifest
-  return fetchJsonWithTimeout(REMOTE_MANIFEST_URL, 5000);
+  const primary = await fetchJsonWithTimeout(PRIMARY_REMOTE_MANIFEST_URL, 4500);
+  if (primary) return primary;
+  if (FALLBACK_REMOTE_MANIFEST_URL !== PRIMARY_REMOTE_MANIFEST_URL) {
+    return fetchJsonWithTimeout(FALLBACK_REMOTE_MANIFEST_URL, 3500);
+  }
+  return null;
 }
 
 async function checkNativePlayStoreUpdate(): Promise<NativePlayUpdateInfo | null> {
@@ -149,75 +234,193 @@ async function checkNativePlayStoreUpdate(): Promise<NativePlayUpdateInfo | null
 }
 
 /**
- * Checks all authoritative live update channels (Google Play In-App Updates API,
- * deployed `version.json` manifest, and Cloud `AppSettings`) without blocking UI.
+ * Synchronous evaluation of update status from known AppSettings and cached server policy.
+ * Used on initial render (0ms) and when offline so Force Update cannot be bypassed by disabling internet.
  */
-export async function checkLiveAppUpdate(appSettings?: Partial<AppSettings> | null): Promise<AppUpdateStatus> {
+export function evaluateSyncUpdateStatus(appSettings?: Partial<AppSettings> | null): AppUpdateStatus {
   const currentBuildCode = APP_BUILD_CODE;
   const currentVersion = APP_VERSION;
+  const cached = readCachedEnforcedPolicy();
 
-  const [playInfo, manifest] = await Promise.all([
+  const cloudBuild = Math.max(
+    Number(appSettings?.latestAppBuildCode || 0),
+    Number(cached?.latestBuildCode || 0)
+  );
+  const minRequiredBuild = Math.max(
+    Number(appSettings?.minRequiredBuildCode || 0),
+    Number(cached?.minRequiredBuildCode || 0),
+    Boolean(appSettings?.forceAppUpdate) && cloudBuild > 0 ? cloudBuild : 0
+  );
+  const cloudVer = pickHigherSemver(appSettings?.latestAppVersion, cached?.latestVersion);
+  const minRequiredVer = pickHigherSemver(
+    appSettings?.minRequiredVersion,
+    pickHigherSemver(
+      cached?.minRequiredVersion,
+      Boolean(appSettings?.forceAppUpdate) && cloudVer ? cloudVer : undefined
+    )
+  );
+
+  const isBelowMinBuild = minRequiredBuild > 0 && currentBuildCode < minRequiredBuild;
+  const isBelowMinVersion = Boolean(minRequiredVer && compareSemver(minRequiredVer, APP_VERSION_NAME) > 0);
+  const isBelowMinRequired = isBelowMinBuild || isBelowMinVersion;
+
+  const isBuildNewer = cloudBuild > currentBuildCode;
+  const isVersionNewer = Boolean(cloudVer && compareSemver(cloudVer, APP_VERSION_NAME) > 0);
+  const hasUpdate = isBelowMinRequired || isBuildNewer || isVersionNewer;
+
+  const latestBuildCode = Math.max(currentBuildCode, cloudBuild, minRequiredBuild);
+  const resolvedVerRaw = pickHigherSemver(APP_VERSION_NAME, pickHigherSemver(cloudVer, minRequiredVer));
+  const latestVersion = formatVersionTag(resolvedVerRaw);
+
+  const forceFlag = Boolean(appSettings?.forceAppUpdate || cached?.forceUpdate);
+  const forceUpdate = hasUpdate && (isBelowMinRequired || forceFlag);
+
+  if (forceUpdate) {
+    clearUpdateSnooze();
+  }
+
+  return {
+    hasUpdate,
+    currentVersion,
+    currentBuildCode,
+    latestVersion,
+    latestBuildCode,
+    minRequiredBuildCode: minRequiredBuild > 0 ? minRequiredBuild : undefined,
+    minRequiredVersion: minRequiredVer,
+    forceUpdate,
+    releaseNotesKh: appSettings?.updateReleaseNotesKh || cached?.releaseNotesKh,
+    releaseNotesEn: appSettings?.updateReleaseNotesEn || cached?.releaseNotesEn,
+    playStoreInAppSupported: false,
+    updateDownloaded: false,
+    source: hasUpdate ? 'cloud_settings' : 'none',
+  };
+}
+
+/**
+ * Checks all authoritative live update channels simultaneously:
+ * 1. Direct Cloud Server Settings (`kft_cloud_version_policy_v1`, `kft_cloud_admin_vip_pricing_v2`, `kft_cloud_app_settings_v1`)
+ * 2. Live Remote Manifest (`version.json` on GitHub Pages)
+ * 3. Official Google Play In-App Updates API (Android)
+ * 4. Offline-persisted Enforced Update Policy (`kft_enforced_update_policy_v1`)
+ */
+export async function checkLiveAppUpdate(appSettings?: Partial<AppSettings> | null): Promise<AppUpdateStatus> {
+  const [playInfo, manifest, serverSettingsRes, versionPolicyDoc] = await Promise.all([
     checkNativePlayStoreUpdate(),
     fetchRemoteVersionManifest(),
+    fetchAuthoritativeAppSettingsFromServer(appSettings || undefined, 4500).catch(() => ({
+      ok: false,
+      settings: null,
+    })),
+    pullCloudDocument<Partial<AppSettings>>('kft_cloud_version_policy_v1', 4000).catch(() => null),
   ]);
 
+  let effectiveSettings: Partial<AppSettings> = appSettings ? { ...appSettings } : {};
+  if (serverSettingsRes?.settings) {
+    effectiveSettings = normalizeAuthoritativeAppSettings(serverSettingsRes.settings, effectiveSettings);
+  }
+  if (versionPolicyDoc && typeof versionPolicyDoc === 'object') {
+    effectiveSettings = normalizeAuthoritativeAppSettings(versionPolicyDoc, effectiveSettings);
+  }
+
+  const cached = readCachedEnforcedPolicy();
+
+  // If Android PackageManager reports a lower installed native APK versionCode, enforce against the actual installed APK build
+  const nativeInstalledBuild =
+    playInfo && Number(playInfo.currentVersionCode || 0) > 0
+      ? Number(playInfo.currentVersionCode)
+      : APP_BUILD_CODE;
+  const currentBuildCode = Math.min(APP_BUILD_CODE, nativeInstalledBuild);
+  const currentVersionName =
+    playInfo?.currentVersionName && compareSemver(APP_VERSION_NAME, playInfo.currentVersionName) > 0
+      ? playInfo.currentVersionName
+      : APP_VERSION_NAME;
+  const currentVersion = formatVersionTag(currentVersionName);
+
   let latestBuildCode = currentBuildCode;
-  let latestVersion = currentVersion;
+  let latestVersionName = currentVersionName;
   let hasUpdate = false;
   let source: AppUpdateStatus['source'] = 'none';
-  let forceUpdate = Boolean(appSettings?.forceAppUpdate);
-  let releaseNotesKh = appSettings?.updateReleaseNotesKh;
-  let releaseNotesEn = appSettings?.updateReleaseNotesEn;
+  let releaseNotesKh = effectiveSettings?.updateReleaseNotesKh || cached?.releaseNotesKh;
+  let releaseNotesEn = effectiveSettings?.updateReleaseNotesEn || cached?.releaseNotesEn;
 
-  // 1. Check Cloud AppSettings (Admin-published version metadata & Minimum Required Build Lock)
-  const cloudBuild = Number(appSettings?.latestAppBuildCode || 0);
-  const minRequiredBuild = Number(appSettings?.minRequiredBuildCode || 0);
-  const cloudVer = appSettings?.latestAppVersion?.trim();
-  const isBelowMinRequired = minRequiredBuild > 0 && currentBuildCode < minRequiredBuild;
-  const isCloudNewer =
-    isBelowMinRequired ||
-    (cloudBuild > 0
-      ? cloudBuild > latestBuildCode
-      : Boolean(cloudVer && compareSemver(cloudVer, APP_VERSION_NAME) > 0));
-  if (isCloudNewer) {
+  // 1. Evaluate Cloud Settings & Cached Enforced Policy (checks BOTH build number AND semver!)
+  const cloudBuild = Math.max(
+    Number(effectiveSettings?.latestAppBuildCode || 0),
+    Number(cached?.latestBuildCode || 0)
+  );
+  const cloudVer = pickHigherSemver(effectiveSettings?.latestAppVersion, cached?.latestVersion);
+  const cloudForce = Boolean(effectiveSettings?.forceAppUpdate || cached?.forceUpdate);
+
+  const minRequiredBuild = Math.max(
+    Number(effectiveSettings?.minRequiredBuildCode || 0),
+    Number(cached?.minRequiredBuildCode || 0),
+    cloudForce && cloudBuild > 0 ? cloudBuild : 0
+  );
+  const minRequiredVer = pickHigherSemver(
+    effectiveSettings?.minRequiredVersion,
+    pickHigherSemver(cached?.minRequiredVersion, cloudForce && cloudVer ? cloudVer : undefined)
+  );
+
+  const isBelowCloudMinBuild = minRequiredBuild > 0 && currentBuildCode < minRequiredBuild;
+  const isBelowCloudMinVer = Boolean(minRequiredVer && compareSemver(minRequiredVer, currentVersionName) > 0);
+  const isCloudBuildNewer = cloudBuild > currentBuildCode;
+  const isCloudVerNewer = Boolean(cloudVer && compareSemver(cloudVer, currentVersionName) > 0);
+
+  if (isBelowCloudMinBuild || isBelowCloudMinVer || isCloudBuildNewer || isCloudVerNewer) {
     hasUpdate = true;
     source = 'cloud_settings';
     const targetBuild = Math.max(cloudBuild, minRequiredBuild);
     if (targetBuild > latestBuildCode) latestBuildCode = targetBuild;
-    if (cloudVer) latestVersion = cloudVer.startsWith('v') ? cloudVer : `v${cloudVer}`;
-  }
-  if (isBelowMinRequired) {
-    forceUpdate = true;
+    const targetVer = pickHigherSemver(cloudVer, minRequiredVer);
+    if (targetVer && compareSemver(targetVer, latestVersionName) > 0) {
+      latestVersionName = targetVer;
+    }
   }
 
-  // 2. Check Live Remote Manifest (`version.json`)
+  let isBelowAnyMinRequired = isBelowCloudMinBuild || isBelowCloudMinVer;
+  let forceFlag = cloudForce;
+
+  // 2. Evaluate Live Remote Manifest (`version.json`) — checks BOTH buildCode AND versionName/version
   if (manifest) {
     const remoteBuild = Number(manifest.buildCode || 0);
-    const remoteVerRaw = (manifest.versionName || manifest.version || '').trim();
-    const isRemoteNewer =
-      remoteBuild > 0
-        ? remoteBuild > latestBuildCode
-        : Boolean(remoteVerRaw && compareSemver(remoteVerRaw, APP_VERSION_NAME) > 0);
-    if (isRemoteNewer) {
+    const remoteVerRaw = String(manifest.versionName || manifest.version || '').trim().replace(/^v/i, '');
+    const remoteMinBuild = Math.max(
+      Number(manifest.minRequiredBuildCode || 0),
+      manifest.forceUpdate && remoteBuild > 0 ? remoteBuild : 0
+    );
+    const remoteMinVer = String(
+      manifest.minRequiredVersion || (manifest.forceUpdate && remoteVerRaw ? remoteVerRaw : '')
+    )
+      .trim()
+      .replace(/^v/i, '');
+
+    const isBelowRemoteMinBuild = remoteMinBuild > 0 && currentBuildCode < remoteMinBuild;
+    const isBelowRemoteMinVer = Boolean(remoteMinVer && compareSemver(remoteMinVer, currentVersionName) > 0);
+    const isRemoteBuildNewer = remoteBuild > currentBuildCode;
+    const isRemoteVerNewer = Boolean(remoteVerRaw && compareSemver(remoteVerRaw, currentVersionName) > 0);
+
+    if (isBelowRemoteMinBuild || isBelowRemoteMinVer || isRemoteBuildNewer || isRemoteVerNewer) {
       hasUpdate = true;
       source = 'remote_manifest';
-      if (remoteBuild > latestBuildCode) latestBuildCode = remoteBuild;
-      if (remoteVerRaw) {
-        latestVersion = remoteVerRaw.startsWith('v') ? remoteVerRaw : `v${remoteVerRaw}`;
+      const targetRemoteBuild = Math.max(remoteBuild, remoteMinBuild);
+      if (targetRemoteBuild > latestBuildCode) latestBuildCode = targetRemoteBuild;
+      const targetRemoteVer = pickHigherSemver(remoteVerRaw, remoteMinVer);
+      if (targetRemoteVer && compareSemver(targetRemoteVer, latestVersionName) > 0) {
+        latestVersionName = targetRemoteVer;
       }
     }
-    const remoteMinBuild = Number(manifest.minRequiredBuildCode || 0);
-    if (remoteMinBuild > 0 && currentBuildCode < remoteMinBuild) {
-      hasUpdate = true;
-      forceUpdate = true;
-      if (remoteMinBuild > latestBuildCode) latestBuildCode = remoteMinBuild;
+
+    if (isBelowRemoteMinBuild || isBelowRemoteMinVer) {
+      isBelowAnyMinRequired = true;
     }
-    if (manifest.forceUpdate) forceUpdate = true;
+    if (manifest.forceUpdate) {
+      forceFlag = true;
+    }
     if (!releaseNotesKh && manifest.releaseNotesKh) releaseNotesKh = manifest.releaseNotesKh;
     if (!releaseNotesEn && manifest.releaseNotesEn) releaseNotesEn = manifest.releaseNotesEn;
   }
 
-  // 3. Check Official Google Play Store In-App Update API (Android)
+  // 3. Evaluate Official Google Play Store In-App Update API (Android)
   const playAvailableVc = Number(playInfo?.availableVersionCode || 0);
   if (playInfo && (playInfo.updateAvailable || playInfo.updateDownloaded || playAvailableVc > currentBuildCode)) {
     hasUpdate = true;
@@ -227,12 +430,44 @@ export async function checkLiveAppUpdate(appSettings?: Partial<AppSettings> | nu
     }
   }
 
+  const finalMinBuild = Math.max(
+    minRequiredBuild,
+    Number(manifest?.minRequiredBuildCode || 0),
+    forceFlag && latestBuildCode > currentBuildCode ? latestBuildCode : 0
+  );
+  const finalMinVer = pickHigherSemver(
+    minRequiredVer,
+    pickHigherSemver(manifest?.minRequiredVersion, forceFlag ? latestVersionName : undefined)
+  );
+
+  const forceUpdate = hasUpdate && (isBelowAnyMinRequired || forceFlag);
+
+  // Persist authoritative requirement locally so offline mode / airplane mode can never bypass Force Update
+  if (latestBuildCode > currentBuildCode || compareSemver(latestVersionName, currentVersionName) > 0 || forceFlag) {
+    writeCachedEnforcedPolicy({
+      latestBuildCode,
+      latestVersion: latestVersionName,
+      minRequiredBuildCode: finalMinBuild > 0 ? finalMinBuild : undefined,
+      minRequiredVersion: finalMinVer,
+      forceUpdate: forceFlag || isBelowAnyMinRequired,
+      releaseNotesKh,
+      releaseNotesEn,
+      playStoreUrl: effectiveSettings?.playStoreUrl || manifest?.playStoreUrl || OFFICIAL_PLAY_STORE_URL,
+    });
+  }
+
+  if (forceUpdate) {
+    clearUpdateSnooze();
+  }
+
   return {
     hasUpdate,
     currentVersion,
     currentBuildCode,
-    latestVersion,
+    latestVersion: formatVersionTag(latestVersionName),
     latestBuildCode,
+    minRequiredBuildCode: finalMinBuild > 0 ? finalMinBuild : undefined,
+    minRequiredVersion: finalMinVer,
     forceUpdate,
     releaseNotesKh,
     releaseNotesEn,
@@ -243,24 +478,26 @@ export async function checkLiveAppUpdate(appSettings?: Partial<AppSettings> | nu
 }
 
 /**
- * Subscribe to native Google Play In-App Update download progress (Android).
+ * Subscribe to Google Play In-App Update download progress on Android.
  */
 export async function subscribeToInstallState(
-  cb: (event: NativeInstallStateEvent) => void
-): Promise<(() => void) | null> {
-  if (Capacitor.getPlatform() !== 'android') return null;
+  callback: (event: NativeInstallStateEvent) => void
+): Promise<() => void> {
+  if (Capacitor.getPlatform() !== 'android') {
+    return () => {};
+  }
   try {
-    const handle = await NativeAppUpdate.addListener('installStateChange', cb);
+    const handle = await NativeAppUpdate.addListener('installStateChange', callback);
     return () => {
       handle.remove().catch(() => {});
     };
   } catch {
-    return null;
+    return () => {};
   }
 }
 
 /**
- * Triggers automatic update for the user's current platform:
+ * Performs the update action when the user clicks "Update Now":
  * - Android: Launches official Google Play In-App Update (`IMMEDIATE` / `FLEXIBLE` with auto-complete),
  *   falling back cleanly to the app's official Google Play Store Update screen.
  * - iOS: Opens the official App Store page.
@@ -270,12 +507,19 @@ export async function subscribeToInstallState(
 export async function triggerAutoAppUpdate(
   latestBuildCode?: number,
   appSettings?: Partial<AppSettings> | null,
-  latestVersion?: string
+  latestVersion?: string,
+  isForceUpdate?: boolean
 ): Promise<void> {
-  // Snooze optional updates when user clicks Update Now so it never nags repeatedly; never snooze mandatory force-updates
-  const isMandatory = Boolean(appSettings?.forceAppUpdate) || (Number(appSettings?.minRequiredBuildCode || 0) > APP_BUILD_CODE);
+  const isMandatory =
+    Boolean(isForceUpdate) ||
+    Boolean(appSettings?.forceAppUpdate) ||
+    Number(appSettings?.minRequiredBuildCode || 0) > APP_BUILD_CODE ||
+    Boolean(appSettings?.minRequiredVersion && compareSemver(appSettings.minRequiredVersion, APP_VERSION_NAME) > 0);
+
   if (!isMandatory) {
     snoozeUpdateAlert(latestBuildCode || APP_BUILD_CODE, latestVersion);
+  } else {
+    clearUpdateSnooze();
   }
 
   const platform = Capacitor.getPlatform();
@@ -306,7 +550,7 @@ export async function triggerAutoAppUpdate(
     return;
   }
 
-  // Web / PWA: Clear stale Service Worker & HTTP Cache Storage (preserving localStorage user & VIP state!) and reload
+  // Web / PWA: Clear stale Service Worker & HTTP Cache Storage (strictly preserving localStorage user & VIP state!) and reload
   try {
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
@@ -330,7 +574,8 @@ export async function triggerAutoAppUpdate(
   }
 }
 
-export function isUpdateSnoozed(buildCode: number, latestVersion?: string): boolean {
+export function isUpdateSnoozed(buildCode: number, latestVersion?: string, forceUpdate?: boolean): boolean {
+  if (forceUpdate) return false;
   try {
     const raw = localStorage.getItem(SNOOZE_STORAGE_KEY);
     if (!raw) return false;

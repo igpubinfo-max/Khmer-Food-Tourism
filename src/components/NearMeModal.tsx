@@ -46,6 +46,7 @@ import {
   openDestinationGoogleExternal,
 } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
+import { isShopExcludedFromSearch, EXCLUDED_SHOPS_UPDATED_EVENT } from '../utils/excludedShopsRegistry';
 import { getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import {
   classifyShopBusinessKind,
@@ -213,6 +214,16 @@ export const NearMeModal: React.FC = () => {
   const [manualProvince, setManualProvince] = useState<string>('រាជធានីភ្នំពេញ');
   const [selectedRadiusMeters, setSelectedRadiusMeters] = useState<number>(MAX_NEARBY_RADIUS_METERS);
   const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
+  const [excludedShopsTick, setExcludedShopsTick] = useState<number>(0);
+
+  useEffect(() => {
+    const onExcludedUpdated = () => {
+      setExcludedShopsTick((t) => t + 1);
+      setLiveNearbyRestaurants((prev) => prev.filter((p) => !isShopExcludedFromSearch(p)));
+    };
+    window.addEventListener(EXCLUDED_SHOPS_UPDATED_EVENT, onExcludedUpdated);
+    return () => window.removeEventListener(EXCLUDED_SHOPS_UPDATED_EVENT, onExcludedUpdated);
+  }, []);
   const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>(() => {
     const initCoords = readSavedUserGps() || { lat: 11.5564, lng: 104.9282 };
     return getInstantCachedNearbyPlaces(initCoords.lat, initCoords.lng, MAX_NEARBY_RADIUS_METERS).restaurants;
@@ -429,7 +440,7 @@ export const NearMeModal: React.FC = () => {
     };
 
     for (const r of restaurants) {
-      if (!r || isHotelBusinessRecord(r)) continue;
+      if (!r || isHotelBusinessRecord(r) || isShopExcludedFromSearch(r)) continue;
       if (!verifyShopDataForDisplay(r)) continue;
       const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, r.latitude, r.longitude);
       if (dist > maxCitySearchRadius) continue;
@@ -438,7 +449,7 @@ export const NearMeModal: React.FC = () => {
     }
 
     for (const gp of [...liveNearbyRestaurants, ...liveNearbyAttractions]) {
-      if (!isFoodShopGooglePlace(gp)) continue;
+      if (!isFoodShopGooglePlace(gp) || isShopExcludedFromSearch(gp)) continue;
       const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, gp.lat, gp.lng);
       if (dist > maxCitySearchRadius) continue;
       if (!doesPlaceBelongToProvince(gp.lat, gp.lng, gp.provinceKh || gp.province, manualProvince)) continue;
@@ -464,7 +475,7 @@ export const NearMeModal: React.FC = () => {
       })
       .filter((r) => Number.isFinite(r.distanceMeters) && r.distanceMeters <= maxCitySearchRadius)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [restaurants, liveNearbyRestaurants, liveNearbyAttractions, activeNearMeCoords, selectedRadiusMeters, manualProvince]);
+  }, [restaurants, liveNearbyRestaurants, liveNearbyAttractions, activeNearMeCoords, selectedRadiusMeters, manualProvince, excludedShopsTick]);
 
   const nearbyRestaurants = useMemo(() => {
     return allVerifiedCityRestaurants

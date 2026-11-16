@@ -10,6 +10,7 @@ import { useApp } from '../context/AppContext';
 import {
   Edit2,
   Trash2,
+  EyeOff,
   MapPin,
   Phone,
   Heart,
@@ -47,7 +48,8 @@ interface RestaurantCardViewProps {
   onToggleBookmark: (id: string) => void;
   setSelectedRestaurant: (r: Restaurant | null) => void;
   openManageMyVipStore: (id?: string) => void;
-  deleteRestaurant: (id: string) => void;
+  excludeRestaurantFromSearch: (targetOrId: Restaurant | string, reason?: string) => void;
+  deleteRestaurant: (idOrRest: string | Restaurant) => void;
   trackRestaurantView: (id: string) => void;
   trackRestaurantCall: (id: string) => void;
   trackRestaurantMap: (id: string) => void;
@@ -118,6 +120,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
     onToggleBookmark,
     setSelectedRestaurant,
     openManageMyVipStore,
+    excludeRestaurantFromSearch,
     deleteRestaurant,
     trackRestaurantView,
     trackRestaurantCall,
@@ -205,10 +208,26 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            deleteRestaurant(restaurant.id);
+            excludeRestaurantFromSearch(restaurant);
+          }}
+          className="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-800 text-amber-300 border border-amber-400/50 transition-colors active:scale-95 cursor-pointer"
+          title={tr(
+            language,
+            'លាក់ហាងមិនពាក់ព័ន្ធចេញពីការស្វែងរក (មិនលុបទិន្នន័យដើម)',
+            'Hide / Exclude Irrelevant Shop from Search Results (Do Not Delete)',
+            '从搜索结果中隐藏/排除无关店铺（不删除原始数据）'
+          )}
+        >
+          <EyeOff className="w-3.5 h-3.5" strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            deleteRestaurant(restaurant);
           }}
           className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-colors active:scale-95 cursor-pointer"
-          title={tr(language, 'លុបហាងនេះ (Admin)', 'Delete Shop (Admin)', '删除店铺（管理员）')}
+          title={tr(language, 'លុប ឬលាក់ហាងនេះ (Admin)', 'Exclude or Delete Shop (Admin)', '排除或删除店铺（管理员）')}
         >
           <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
         </button>
@@ -476,6 +495,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({
     toggleBookmark,
     setSelectedRestaurant,
     openManageMyVipStore,
+    excludeRestaurantFromSearch,
     deleteRestaurant,
     trackRestaurantView,
     trackRestaurantCall,
@@ -496,6 +516,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({
       onToggleBookmark={toggleBookmark}
       setSelectedRestaurant={setSelectedRestaurant}
       openManageMyVipStore={openManageMyVipStore}
+      excludeRestaurantFromSearch={excludeRestaurantFromSearch}
       deleteRestaurant={deleteRestaurant}
       trackRestaurantView={trackRestaurantView}
       trackRestaurantCall={trackRestaurantCall}

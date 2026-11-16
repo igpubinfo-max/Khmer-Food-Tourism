@@ -1,4 +1,10 @@
 import { verifyAppCloneIntegrity } from '../utils/appCloneIntegrityGuard';
+import {
+  excludeShopFromSearch,
+  restoreExcludedShopToSearch,
+  loadExcludedShopsMap,
+  EXCLUDED_SHOPS_CLOUD_KEY,
+} from '../utils/excludedShopsRegistry';
 import { verifyVipPurchaseOnServer, claimConsumerTrialOnServer, fetchCentralizedPaymentRegistryAndAudit, adminApproveAndLockTransactionOnServer, adminRejectTransactionOnServer, type UsedAbaTransactionRecord, type PaymentAuditLogRecord } from '../services/vipPurchaseClient';
 import { getDeviceHashForTrialOrPromoClaim, checkDeviceAccountRegistrationEligibility, recordDeviceAccountRegistration } from '../services/deviceIdentityService';
 import {
@@ -52,6 +58,9 @@ import {
   isValidCambodiaCoordinates,
   isValidOfficialGooglePlaceId,
   buildCanonicalGoogleMapsPinUrl,
+  extractOfficialPlaceIdFromMapUrl,
+  buildSpecificPlaceSearchQuery,
+  isDefaultProvinceCenterCoordinates,
   isStrictVerifiedCambodiaRestaurant,
   SEED_FOOD_PHOTO_BASELINE_MS,
   sanitizeVerifiedShopPhotoUrl,
@@ -234,6 +243,7 @@ import {
 import {
   GooglePlaceCachedItem,
   convertGooglePlaceToRestaurant,
+  getLocalSmartCache,
   convertGooglePlaceToDestination,
   findDuplicateRestaurantForGooglePlace,
   findDuplicateDestinationForGooglePlace,
@@ -387,11 +397,13 @@ interface AppContextType {
   ) => Promise<{ success: boolean; transactionId: string; autoVerified?: boolean; error?: string }>;
   getCurrentUserStoreQuota: (targetUser?: User | null) => UserStoreQuotaSummary;
   updateRestaurant: (rest: Restaurant) => void;
-  deleteRestaurant: (id: string) => void;
-  requestDeleteRestaurant: (id: string) => void;
+  deleteRestaurant: (idOrRest: string | Restaurant) => void;
+  requestDeleteRestaurant: (idOrRest: string | Restaurant) => void;
   confirmDeleteRestaurant: () => void;
   cancelDeleteRestaurant: () => void;
   pendingDeleteRestaurant: Restaurant | null;
+  excludeRestaurantFromSearch: (targetOrId: Restaurant | string, reason?: string) => void;
+  restoreExcludedRestaurantToSearch: (idOrKey: string) => void;
   approveRestaurant: (id: string) => void;
   rejectRestaurant: (id: string, reasonKh?: string) => void;
   toggleVerifyRestaurant: (id: string) => void;
@@ -1579,7 +1591,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       openingHoursEn: stripForeignScripts(r.openingHoursEn || (isHotel ? 'Open 24 Hours' : '07:00 AM - 09:00 PM')),
       priceLevel: r.priceLevel || '$$',
       ...(() => {
-        const cleanGpid = isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId : undefined;
+        const cleanGpid = isValidOfficialGooglePlaceId(r.googlePlaceId)
+          ? r.googlePlaceId
+          : isValidOfficialGooglePlaceId(r.googleMapsMeta?.placeId)
+            ? r.googleMapsMeta.placeId
+            : extractOfficialPlaceIdFromMapUrl(r.mapUrl);
         let lat = typeof r.latitude === 'number' ? r.latitude : 0;
         let lng = typeof r.longitude === 'number' ? r.longitude : 0;
         if (!isValidCambodiaCoordinates(lat, lng) && isValidGoogleMapsUrl(r.mapUrl)) {
@@ -1613,12 +1629,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             locationVerifiedAt: undefined,
           };
         }
+        const isDefaultCenter = isDefaultProvinceCenterCoordinates(lat, lng, restId);
+        const trimmedRawMapUrl = (r.mapUrl || '').trim();
+        const isBareKhmerOnlyQueryUrl =
+          hasValidUserMapUrl &&
+          /^https?:\/\/(?:www\.)?maps\.google\.com\/\?q=/i.test(trimmedRawMapUrl) &&
+          !trimmedRawMapUrl.includes('query_place_id');
+        const isRawDefaultCoordUrl =
+          isDefaultCenter &&
+          hasValidUserMapUrl &&
+          /[?&](?:query|q)=-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/i.test(trimmedRawMapUrl);
         const preservedMapUrl =
-          hasValidUserMapUrl && (r.isAdminEdited || r.dataSource === 'vip_owner' || Boolean(r.ownerId) || !hasValidCoords)
-            ? r.mapUrl.trim()
-            : hasValidCoords
-              ? buildCanonicalGoogleMapsPinUrl(lat, lng, cleanGpid)
-              : (r.mapUrl || '').trim();
+          isDefaultCenter && !cleanGpid && (!hasValidUserMapUrl || isBareKhmerOnlyQueryUrl || isRawDefaultCoordUrl)
+            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                buildSpecificPlaceSearchQuery({
+                  nameEn: r.nameEn,
+                  nameKh: r.nameKh,
+                  addressEn: r.addressEn,
+                  addressKh: r.addressKh,
+                  provinceEn: r.provinceEn,
+                  provinceKh: r.provinceKh,
+                })
+              )}`
+            : hasValidUserMapUrl && (r.isAdminEdited || r.dataSource === 'vip_owner' || Boolean(r.ownerId) || !hasValidCoords)
+              ? trimmedRawMapUrl
+              : hasValidCoords
+                ? buildCanonicalGoogleMapsPinUrl(lat, lng, cleanGpid)
+                : trimmedRawMapUrl;
         return {
           mapUrl: preservedMapUrl,
           latitude: hasValidCoords ? lat : 0,
@@ -11444,7 +11481,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 1. If a specific shop ID was explicitly requested (e.g. from a RestaurantCard or switcher), load that exact shop
     if (preferredShopId) {
-      const explicitShop = restaurants.find(r => r.id === preferredShopId);
+      const explicitShop = resolveRestaurantTarget(preferredShopId);
       if (explicitShop) {
         setManagingRestaurant(explicitShop);
         setIsManageMenuModalOpen(true);
@@ -12079,9 +12116,82 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   };
 
-  const executeDeleteRestaurant = (id: string) => {
-    const target = restaurants.find(r => r.id === id);
+  const resolveRestaurantTarget = (idOrRest: string | Restaurant | null | undefined): Restaurant | null => {
+    if (!idOrRest) return null;
+    if (typeof idOrRest === 'object' && idOrRest.id) {
+      return restaurants.find((r) => r.id === idOrRest.id) || idOrRest;
+    }
+    const idStr = String(idOrRest).trim();
+    const inState = restaurants.find((r) => r.id === idStr);
+    if (inState) return inState;
+    if (pendingDeleteRestaurant && pendingDeleteRestaurant.id === idStr) return pendingDeleteRestaurant;
+    if (selectedRestaurant && selectedRestaurant.id === idStr) return selectedRestaurant;
+    try {
+      const cached = getLocalSmartCache().find(
+        (p) => p.placeId === idStr || p.googlePlaceId === idStr || `gmap-${p.googlePlaceId}` === idStr
+      );
+      if (cached) return convertGooglePlaceToRestaurant(cached);
+    } catch {}
+    return null;
+  };
+
+  const excludeRestaurantFromSearch = (targetOrId: Restaurant | string, reason?: string) => {
+    const target = resolveRestaurantTarget(targetOrId);
     if (!target) return;
+    const { isAdmin } = checkCanDeleteRestaurant(target);
+    if (!isAdmin) {
+      showToast(
+        tr(language, '⛔ មានតែ Admin ប៉ុណ្ណោះដែលអាចលាក់ហាងមិនពាក់ព័ន្ធចេញពីការស្វែងរកបាន។', '⛔ Only Admin can exclude irrelevant shops from search results.', '⛔ 仅管理员可以从搜索结果中排除无关店铺。'),
+        'warning'
+      );
+      return;
+    }
+    const entry = excludeShopFromSearch(target, {
+      reason: reason || 'Irrelevant / non-restaurant listing excluded by Admin',
+      excludedBy: currentUser?.name || currentUser?.username || 'Admin',
+    });
+    if (isSupabaseConfigured()) {
+      pushCloudDocument(EXCLUDED_SHOPS_CLOUD_KEY, loadExcludedShopsMap()).catch(() => {});
+    }
+    if (pendingDeleteRestaurant && pendingDeleteRestaurant.id === target.id) {
+      setPendingDeleteRestaurant(null);
+    }
+    if (selectedRestaurant && selectedRestaurant.id === target.id) {
+      setSelectedRestaurant(null);
+    }
+    const displayShopName =
+      language === 'km' ? target.nameKh || target.nameEn || entry.nameKh : target.nameEn || target.nameKh || entry.nameKh;
+    showToast(
+      tr(
+        language,
+        `🙈 បានលាក់ហាង "${displayShopName}" ចេញពីលទ្ធផលស្វែងរក (មិនបានលុបទិន្នន័យដើមទេ)`,
+        `🙈 Excluded "${displayShopName}" from search results (original record preserved)`,
+        `🙈 已将 "${displayShopName}" 从搜索结果中隐藏（未删除原始记录）`
+      ),
+      'info'
+    );
+  };
+
+  const restoreExcludedRestaurantToSearch = (idOrKey: string) => {
+    restoreExcludedShopToSearch(idOrKey);
+    if (isSupabaseConfigured()) {
+      pushCloudDocument(EXCLUDED_SHOPS_CLOUD_KEY, loadExcludedShopsMap()).catch(() => {});
+    }
+    showToast(
+      tr(
+        language,
+        '✅ បានដាក់បង្ហាញហាងក្នុងលទ្ធផលស្វែងរកឡើងវិញ!',
+        '✅ Restored shop to search results!',
+        '✅ 已恢复该店铺在搜索结果中的显示！'
+      ),
+      'success'
+    );
+  };
+
+  const executeDeleteRestaurant = (idOrRest: string | Restaurant) => {
+    const target = resolveRestaurantTarget(idOrRest);
+    if (!target) return;
+    const id = target.id;
     const { allowed } = checkCanDeleteRestaurant(target);
     if (!allowed) {
       showToast(
@@ -12199,8 +12309,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  const requestDeleteRestaurant = (id: string) => {
-    const target = restaurants.find(r => r.id === id);
+  const requestDeleteRestaurant = (idOrRest: string | Restaurant) => {
+    const target = resolveRestaurantTarget(idOrRest);
     if (!target) return;
     const { allowed } = checkCanDeleteRestaurant(target);
     if (!allowed) {
@@ -12215,17 +12325,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const confirmDeleteRestaurant = () => {
     if (!pendingDeleteRestaurant) return;
-    const targetId = pendingDeleteRestaurant.id;
+    const targetToDelete = pendingDeleteRestaurant;
     setPendingDeleteRestaurant(null);
-    executeDeleteRestaurant(targetId);
+    executeDeleteRestaurant(targetToDelete);
   };
 
   const cancelDeleteRestaurant = () => {
     setPendingDeleteRestaurant(null);
   };
 
-  const deleteRestaurant = (id: string) => {
-    requestDeleteRestaurant(id);
+  const deleteRestaurant = (idOrRest: string | Restaurant) => {
+    requestDeleteRestaurant(idOrRest);
   };
 
   const approveRestaurant = (id: string) => {
@@ -17955,6 +18065,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         confirmDeleteRestaurant,
         cancelDeleteRestaurant,
         pendingDeleteRestaurant,
+        excludeRestaurantFromSearch,
+        restoreExcludedRestaurantToSearch,
         approveRestaurant,
         rejectRestaurant,
         toggleVerifyRestaurant,

@@ -4,6 +4,8 @@ import {
   isAdminAccount,
   isEphemeralDeadImageUrl,
   getDestinationGoogleExternalUrl,
+  buildSpecificPlaceSearchQuery,
+  isDefaultProvinceCenterCoordinates,
   openExternalUrlNativeSafe,
 } from '../types';
 import { useApp } from '../context/AppContext';
@@ -60,13 +62,12 @@ function getDirectDestinationMapsUrl(destination: TouristDestination): string {
     Number.isFinite(destination.latitude) &&
     Number.isFinite(destination.longitude) &&
     destination.latitude !== 0 &&
-    destination.longitude !== 0
+    destination.longitude !== 0 &&
+    !isDefaultProvinceCenterCoordinates(destination.latitude, destination.longitude, destination.id)
   ) {
     return `https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}`;
   }
-  const query = [destination.nameEn || destination.nameKh, destination.provinceEn || destination.provinceKh, 'Cambodia']
-    .filter(Boolean)
-    .join(' ');
+  const query = buildSpecificPlaceSearchQuery(destination);
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 

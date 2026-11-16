@@ -15,6 +15,7 @@ import {
   Crown,
   Edit2,
   Trash2,
+  EyeOff,
 } from 'lucide-react';
 import {
   isUserVipActive,
@@ -63,6 +64,7 @@ export const RestaurantDetailModal: React.FC = () => {
     trackRestaurantShare,
     updateRestaurant,
     deleteRestaurant,
+    excludeRestaurantFromSearch,
     openAddToWishlist,
     openUpgradeVipModal,
     registerModalBackHandler,
@@ -649,7 +651,21 @@ export const RestaurantDetailModal: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => deleteRestaurant(selectedRestaurant.id)}
+                    onClick={() => excludeRestaurantFromSearch(selectedRestaurant)}
+                    className="px-2.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow flex items-center gap-1 transition active:scale-95 cursor-pointer"
+                    title={tr(
+                      language,
+                      'លាក់ហាងមិនពាក់ព័ន្ធចេញពីការស្វែងរក (មិនលុបទិន្នន័យដើម)',
+                      'Exclude from Search Results Only (Do Not Delete)',
+                      '仅从搜索结果中排除（不删除原始记录）'
+                    )}
+                  >
+                    <EyeOff className="w-3.5 h-3.5" />
+                    <span>{tr(language, 'លាក់', 'Exclude', '排除')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteRestaurant(selectedRestaurant)}
                     className="px-2.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow flex items-center gap-1 transition active:scale-95 cursor-pointer"
                     title={tr(language, 'លុបហាងនេះ', 'Delete this shop', '删除此店铺')}
                   >

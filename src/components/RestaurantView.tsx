@@ -66,6 +66,7 @@ import {
   detectExplicitShopCategoryFromQuery,
 } from '../utils/foodFilters';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
+import { isShopExcludedFromSearch, EXCLUDED_SHOPS_UPDATED_EVENT } from '../utils/excludedShopsRegistry';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 
 const RESTAURANT_BATCH_SIZE = 24;
@@ -152,6 +153,17 @@ export const RestaurantView: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState<number>(RESTAURANT_BATCH_SIZE);
   const [showFilterDrawer, setShowFilterDrawer] = useState<boolean>(false);
   const [nowTickMs, setNowTickMs] = useState<number>(() => Date.now());
+  const [excludedShopsTick, setExcludedShopsTick] = useState<number>(0);
+
+  useEffect(() => {
+    const onExcludedUpdated = () => {
+      setExcludedShopsTick((t) => t + 1);
+      setLiveNearbyRestaurants((prev) => prev.filter((p) => !isShopExcludedFromSearch(p)));
+      setLivePubNightlife((prev) => prev.filter((p) => !isShopExcludedFromSearch(p)));
+    };
+    window.addEventListener(EXCLUDED_SHOPS_UPDATED_EVENT, onExcludedUpdated);
+    return () => window.removeEventListener(EXCLUDED_SHOPS_UPDATED_EVENT, onExcludedUpdated);
+  }, []);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const shopListStartRef = useRef<HTMLDivElement | null>(null);
@@ -569,7 +581,7 @@ export const RestaurantView: React.FC = () => {
       ...sessionShuffledRestaurants.filter((r) => r && isSeedRestaurantId(r.id)),
     ];
     return customFirst.filter((r) => {
-      if (isHotelBusinessRecord(r)) {
+      if (isHotelBusinessRecord(r) || isShopExcludedFromSearch(r)) {
         return false;
       }
       if (!isStrictVerifiedCambodiaRestaurant(r)) {
@@ -598,7 +610,7 @@ export const RestaurantView: React.FC = () => {
       if (normNameKey.length > 3) seenNameKeys.add(normNameKey);
       return true;
     });
-  }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id, isAdmin]);
+  }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id, isAdmin, excludedShopsTick]);
 
   const cleanSelectedProvince = useMemo(() => {
     const raw = (selectedProvince || '').trim();
@@ -712,7 +724,7 @@ export const RestaurantView: React.FC = () => {
       : preRotatedRestaurants;
 
     for (const r of candidatePool) {
-      if (!r?.id) continue;
+      if (!r?.id || isShopExcludedFromSearch(r)) continue;
       const cleanRestProvince = (r.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim();
       const matchesProvince = useNearMePool
         ? true

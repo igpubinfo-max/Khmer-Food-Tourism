@@ -228,7 +228,8 @@ export const AdminDashboard: React.FC = () => {
   const [forceAppUpdateInput, setForceAppUpdateInput] = useState<boolean>(() => Boolean(appSettings.forceAppUpdate));
   const [latestAppVersionInput, setLatestAppVersionInput] = useState<string>(() => appSettings.latestAppVersion || APP_VERSION_NAME);
   const [latestAppBuildCodeInput, setLatestAppBuildCodeInput] = useState<string>(() => String(appSettings.latestAppBuildCode || APP_BUILD_CODE));
-  const [minRequiredBuildCodeInput, setMinRequiredBuildCodeInput] = useState<string>(() => String(appSettings.minRequiredBuildCode || ''));
+  const [minRequiredBuildCodeInput, setMinRequiredBuildCodeInput] = useState<string>(() => String(appSettings.minRequiredBuildCode || (appSettings.forceAppUpdate ? (appSettings.latestAppBuildCode || APP_BUILD_CODE) : '')));
+  const [minRequiredVersionInput, setMinRequiredVersionInput] = useState<string>(() => appSettings.minRequiredVersion || (appSettings.forceAppUpdate ? (appSettings.latestAppVersion || APP_VERSION_NAME) : ''));
   const [updateReleaseNotesKhInput, setUpdateReleaseNotesKhInput] = useState<string>(() => appSettings.updateReleaseNotesKh || '');
   const [updateReleaseNotesEnInput, setUpdateReleaseNotesEnInput] = useState<string>(() => appSettings.updateReleaseNotesEn || '');
   const [supportQrUrl, setSupportQrUrl] = useState(appSettings.supportQrImageUrl);
@@ -299,7 +300,8 @@ export const AdminDashboard: React.FC = () => {
     setForceAppUpdateInput(Boolean(s.forceAppUpdate));
     setLatestAppVersionInput(s.latestAppVersion || APP_VERSION_NAME);
     setLatestAppBuildCodeInput(String(s.latestAppBuildCode || APP_BUILD_CODE));
-    setMinRequiredBuildCodeInput(s.minRequiredBuildCode ? String(s.minRequiredBuildCode) : '');
+    setMinRequiredBuildCodeInput(s.minRequiredBuildCode ? String(s.minRequiredBuildCode) : (s.forceAppUpdate ? String(s.latestAppBuildCode || APP_BUILD_CODE) : ''));
+    setMinRequiredVersionInput(s.minRequiredVersion || (s.forceAppUpdate ? (s.latestAppVersion || APP_VERSION_NAME) : ''));
     setUpdateReleaseNotesKhInput(s.updateReleaseNotesKh || '');
     setUpdateReleaseNotesEnInput(s.updateReleaseNotesEn || '');
     setSupportQrUrl(s.supportQrImageUrl);
@@ -1005,14 +1007,32 @@ export const AdminDashboard: React.FC = () => {
     }
     const parsedLatestBuild = parseInt(latestAppBuildCodeInput.trim(), 10);
     const parsedMinBuild = parseInt(minRequiredBuildCodeInput.trim(), 10);
+    const effectiveLatestBuild =
+      Number.isFinite(parsedLatestBuild) && parsedLatestBuild > 0
+        ? Math.max(parsedLatestBuild, APP_BUILD_CODE)
+        : APP_BUILD_CODE;
+    const effectiveLatestVersion = (latestAppVersionInput.trim() || APP_VERSION_NAME).replace(/^v/i, '');
+    const effectiveMinBuild = forceAppUpdateInput
+      ? Number.isFinite(parsedMinBuild) && parsedMinBuild > 0
+        ? Math.max(parsedMinBuild, effectiveLatestBuild)
+        : effectiveLatestBuild
+      : Number.isFinite(parsedMinBuild) && parsedMinBuild > 0
+        ? parsedMinBuild
+        : undefined;
+    const effectiveMinVersion = forceAppUpdateInput
+      ? (minRequiredVersionInput.trim() || effectiveLatestVersion).replace(/^v/i, '')
+      : minRequiredVersionInput.trim()
+        ? minRequiredVersionInput.trim().replace(/^v/i, '')
+        : undefined;
     const res = await saveSettingsSubset({
       apkDownloadUrl: '',
       playStoreUrl: url,
       appStoreUrl: appStoreUrl.trim(),
       forceAppUpdate: forceAppUpdateInput,
-      latestAppVersion: latestAppVersionInput.trim() || APP_VERSION_NAME,
-      latestAppBuildCode: Number.isFinite(parsedLatestBuild) && parsedLatestBuild > 0 ? parsedLatestBuild : APP_BUILD_CODE,
-      minRequiredBuildCode: Number.isFinite(parsedMinBuild) && parsedMinBuild > 0 ? parsedMinBuild : undefined,
+      latestAppVersion: effectiveLatestVersion,
+      latestAppBuildCode: effectiveLatestBuild,
+      minRequiredBuildCode: effectiveMinBuild,
+      minRequiredVersion: effectiveMinVersion,
       updateReleaseNotesKh: updateReleaseNotesKhInput.trim() || undefined,
       updateReleaseNotesEn: updateReleaseNotesEnInput.trim() || undefined,
     });
@@ -5445,8 +5465,19 @@ export const AdminDashboard: React.FC = () => {
                           type="checkbox"
                           checked={forceAppUpdateInput}
                           onChange={e => {
+                            const checked = e.target.checked;
                             isSupportFormDirtyRef.current = true;
-                            setForceAppUpdateInput(e.target.checked);
+                            setForceAppUpdateInput(checked);
+                            if (checked) {
+                              const curLatestB = parseInt(latestAppBuildCodeInput.trim(), 10) || APP_BUILD_CODE;
+                              const curMinB = parseInt(minRequiredBuildCodeInput.trim(), 10) || 0;
+                              if (curMinB < curLatestB) {
+                                setMinRequiredBuildCodeInput(String(curLatestB));
+                              }
+                              if (!minRequiredVersionInput.trim()) {
+                                setMinRequiredVersionInput(latestAppVersionInput.trim() || APP_VERSION_NAME);
+                              }
+                            }
                           }}
                           className="w-4 h-4 accent-amber-600 rounded cursor-pointer"
                         />
@@ -5458,7 +5489,7 @@ export const AdminDashboard: React.FC = () => {
                       </label>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                       <div>
                         <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300 text-[11px]">
                           {tr(language, 'កំណែថ្មី (Latest Version)', 'Latest Version Name', '最新版本号')}
@@ -5470,6 +5501,9 @@ export const AdminDashboard: React.FC = () => {
                           onChange={e => {
                             isSupportFormDirtyRef.current = true;
                             setLatestAppVersionInput(e.target.value);
+                            if (forceAppUpdateInput) {
+                              setMinRequiredVersionInput(e.target.value);
+                            }
                           }}
                           className="w-full px-3 py-1.5 rounded-xl border bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 font-mono text-xs"
                         />
@@ -5486,6 +5520,9 @@ export const AdminDashboard: React.FC = () => {
                           onChange={e => {
                             isSupportFormDirtyRef.current = true;
                             setLatestAppBuildCodeInput(e.target.value);
+                            if (forceAppUpdateInput) {
+                              setMinRequiredBuildCodeInput(e.target.value);
+                            }
                           }}
                           className="w-full px-3 py-1.5 rounded-xl border bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 font-mono text-xs"
                         />
@@ -5493,11 +5530,27 @@ export const AdminDashboard: React.FC = () => {
 
                       <div>
                         <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300 text-[11px]">
-                          {tr(language, 'Build អប្បបរមាដែលអនុញ្ញាត (Min Build)', 'Min Required Build (Lock <)', '最低允许 Build')}
+                          {tr(language, 'កំណែអប្បបរមា (Min Version)', 'Min Required Version', '最低允许版本')}
+                        </label>
+                        <input
+                          type="text"
+                          placeholder={APP_VERSION_NAME}
+                          value={minRequiredVersionInput}
+                          onChange={e => {
+                            isSupportFormDirtyRef.current = true;
+                            setMinRequiredVersionInput(e.target.value);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-xl border bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 font-mono text-xs"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold mb-1 text-stone-700 dark:text-stone-300 text-[11px]">
+                          {tr(language, 'Build អប្បបរមា (Min Build)', 'Min Required Build (Lock <)', '最低允许 Build')}
                         </label>
                         <input
                           type="number"
-                          placeholder={tr(language, 'ឧ. 1605 (ទទេ = មិនកំណត់)', 'e.g. 1605 (optional)', '如 1605（留空不限）')}
+                          placeholder={String(APP_BUILD_CODE)}
                           value={minRequiredBuildCodeInput}
                           onChange={e => {
                             isSupportFormDirtyRef.current = true;

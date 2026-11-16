@@ -15,6 +15,7 @@ import {
   normalizeKhmerSearchText,
 } from '../services/googlePlacesService';
 import { classifyShopBusinessKind, verifyShopDataForDisplay, isVegetarianShop } from './foodFilters';
+import { isShopExcludedFromSearch } from './excludedShopsRegistry';
 import { normalizeKhmerFoodText } from './khmerFoodSearch';
 import { getLocalizedRestaurant } from './zhDynamicTranslator';
 
@@ -683,9 +684,57 @@ export function isTourismAttractionGooglePlace(gp: GooglePlaceCachedItem): boole
   return isCuratedSeedDest || hasTourismGoogleType || TOURISM_ONLY_KEYWORD_REGEX.test(cleanText);
 }
 
+const NON_FOOD_STORE_GOOGLE_TYPES = new Set([
+  'car_repair',
+  'car_dealer',
+  'car_wash',
+  'car_rental',
+  'auto_parts_store',
+  'gas_station',
+  'hardware_store',
+  'electronics_store',
+  'home_goods_store',
+  'furniture_store',
+  'clothing_store',
+  'shoe_store',
+  'jewelry_store',
+  'hair_care',
+  'beauty_salon',
+  'laundry',
+  'hospital',
+  'doctor',
+  'dentist',
+  'pharmacy',
+  'bank',
+  'atm',
+  'accounting',
+  'insurance_agency',
+  'real_estate_agency',
+  'lawyer',
+  'locksmith',
+  'plumber',
+  'electrician',
+  'moving_company',
+  'storage',
+  'veterinary_care',
+]);
+
 export function isFoodShopGooglePlace(gp: GooglePlaceCachedItem): boolean {
   if (!gp) return false;
+  if (isShopExcludedFromSearch(gp)) return false;
   if (isHotelGooglePlace(gp)) return false;
+  const gpTypes = (gp.types || []).map((t) => String(t || '').toLowerCase());
+  const fullMetaText = `${gp.nameKh || ''} ${gp.nameEn || ''} ${gp.primaryTypeDisplayName || ''}`;
+  if (
+    /\b(?:13\s*club|auto\s*parts?|car\s*parts?|car\s*repair|spare\s*parts?|motor\s*parts?|garage|hardware\s*store)\b|គ្រឿងបន្លាស់|ជួសជុលរថយន្ត|យានដ្ឋាន/i.test(
+      fullMetaText
+    )
+  ) {
+    return false;
+  }
+  if (gpTypes.some((t) => NON_FOOD_STORE_GOOGLE_TYPES.has(t)) && !FOOD_SHOP_KEYWORD_REGEX.test(fullMetaText)) {
+    return false;
+  }
   const cleanText = `${gp.nameKh || ''} ${gp.nameEn || ''}`.replace(
     /រាជធានីភ្នំពេញ|ក្រុងភ្នំពេញ|ភ្នំពេញ|phnom\s*penh/gi,
     ' '
@@ -736,7 +785,7 @@ export function mergeNearbyFoodShops(params: {
   };
 
   for (const r of restaurants) {
-    if (!r || isHotelBusinessRecord(r)) continue;
+    if (!r || isHotelBusinessRecord(r) || isShopExcludedFromSearch(r)) continue;
     if (!verifyShopDataForDisplay(r)) continue;
     const dist = calculateDistanceMeters(refCoords.lat, refCoords.lng, r.latitude, r.longitude);
     if (dist > radiusMeters) continue;
@@ -746,7 +795,7 @@ export function mergeNearbyFoodShops(params: {
   }
 
   for (const gp of liveNearbyRestaurants) {
-    if (!isFoodShopGooglePlace(gp)) continue;
+    if (!isFoodShopGooglePlace(gp) || isShopExcludedFromSearch(gp)) continue;
     const dist = calculateDistanceMeters(refCoords.lat, refCoords.lng, gp.lat, gp.lng);
     if (dist > radiusMeters) continue;
     if (!doesPlaceBelongToProvince(gp.lat, gp.lng, gp.provinceKh || gp.province, targetProvinceKh)) continue;

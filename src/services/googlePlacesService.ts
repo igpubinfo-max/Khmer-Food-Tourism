@@ -28,6 +28,8 @@ import {
   isThaiRelatedRecord,
   isThaiRelatedText,
   doesVerifiedPlaceNameMatchTarget,
+  isDefaultProvinceCenterCoordinates,
+  isSeedRestaurantId,
   getCachedVerifiedPlaceForCoords,
   saveCachedVerifiedPlaceForCoords,
   buildCanonicalGoogleMapsPinUrl,
@@ -56,6 +58,7 @@ import {
 } from '../utils/searchEngine';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { isPubNightlifeText } from '../utils/pubNightlife';
+import { isShopExcludedFromSearch, EXCLUDED_SHOPS_UPDATED_EVENT } from '../utils/excludedShopsRegistry';
 import { initial100Restaurants as SEED_RESTAURANTS } from '../data/seedRestaurants';
 import { youthBrandedCafes30 } from '../data/seedYouthBrandedCafes';
 import { initial100Destinations as SEED_DESTINATIONS, loadExtendedDestinationsAndHotels } from '../data/seedDestinations';
@@ -2046,7 +2049,7 @@ function buildLocalSmartCache(raw: string | null): GooglePlaceCachedItem[] {
   } catch {
     // ignore
   }
-  return Array.from(mergedMap.values());
+  return Array.from(mergedMap.values()).filter((p) => !isShopExcludedFromSearch(p));
 }
 
 /**
@@ -4311,14 +4314,17 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
   lng?: number | null;
   googlePlaceId?: string | null;
 }): Promise<VerifiedGooglePlaceCoordEntry | null> {
+  if (!item.id) return null;
   const lat = typeof item.latitude === 'number' ? item.latitude : item.lat;
   const lng = typeof item.longitude === 'number' ? item.longitude : item.lng;
   if (!isValidCambodiaCoordinates(lat, lng)) return null;
+  // Never resolve or cache coordinate-based Place IDs for default province-center placeholder coordinates
+  if (isDefaultProvinceCenterCoordinates(lat, lng, item.id)) return null;
 
   if (isValidOfficialGooglePlaceId(item.googlePlaceId)) {
     const existingEntry: VerifiedGooglePlaceCoordEntry = {
       placeId: item.googlePlaceId!.trim(),
-      officialName: (item.nameKh || item.nameEn || '').trim(),
+      officialName: (item.nameEn || item.nameKh || '').trim(),
       lat: lat!,
       lng: lng!,
       updatedAt: new Date().toISOString(),
@@ -4332,7 +4338,7 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
     return cached;
   }
 
-  const lockKey = item.id || `coord:${lat!.toFixed(4)},${lng!.toFixed(4)}`;
+  const lockKey = item.id;
   const active = inFlightCoordPlaceResolvers.get(lockKey);
   if (active) return active;
 
@@ -4340,14 +4346,14 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
     try {
       const localCache = getLocalSmartCache();
       let bestCandidate: GooglePlaceCachedItem | null = null;
-      let bestDist = 1500;
+      let bestDist = 120; // Strict 120m radius so neighboring or distant shops never hijack the pin
 
       for (const c of localCache) {
         if (!isValidOfficialGooglePlaceId(c.googlePlaceId)) continue;
         const d = calculateHaversineMeters(lat!, lng!, c.lat, c.lng);
-        if (d > 1500) continue;
+        if (d > 120) continue;
         const nameMatch = doesVerifiedPlaceNameMatchTarget(
-          `${c.nameKh || ''} ${c.nameEn || ''}`,
+          (c.nameKh || '') + ' ' + (c.nameEn || ''),
           item.nameKh,
           item.nameEn
         );
@@ -4357,40 +4363,11 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
         }
       }
 
-      if (!bestCandidate) {
-        const provGeo = resolveProvinceGeoConfig(item.provinceKh || item.provinceEn);
-        const queries = Array.from(
-          new Set(
-            [
-              item.nameEn ? `${item.nameEn} ${item.provinceEn || item.provinceKh || ''}`.trim() : '',
-              item.nameKh ? `${item.nameKh} ${item.provinceKh || item.provinceEn || ''}`.trim() : '',
-            ].filter((q) => q.length >= 3)
-          )
-        );
-        for (const q of queries) {
-          const tbmItems = await fetchFreeGoogleMapsTbmPlaces(q, provGeo, 'all', []);
-          for (const c of tbmItems) {
-            if (!isValidOfficialGooglePlaceId(c.googlePlaceId)) continue;
-            const d = calculateHaversineMeters(lat!, lng!, c.lat, c.lng);
-            if (d > 1500) continue;
-            const nameMatch = doesVerifiedPlaceNameMatchTarget(
-              `${c.nameKh || ''} ${c.nameEn || ''}`,
-              item.nameKh,
-              item.nameEn
-            );
-            if (nameMatch && d < bestDist) {
-              bestDist = d;
-              bestCandidate = c;
-            }
-          }
-          if (bestCandidate && bestDist <= 800) break;
-        }
-      }
-
       if (bestCandidate && isValidOfficialGooglePlaceId(bestCandidate.googlePlaceId)) {
         const resolvedEntry: VerifiedGooglePlaceCoordEntry = {
           placeId: bestCandidate.googlePlaceId!.trim(),
-          officialName: (item.nameEn || item.nameKh || bestCandidate.nameEn || bestCandidate.nameKh || '').trim(),
+          // Always store the candidate's true official name so name verification cannot be bypassed
+          officialName: (bestCandidate.nameEn || bestCandidate.nameKh || '').trim(),
           lat: bestCandidate.lat,
           lng: bestCandidate.lng,
           googleMapsUri: bestCandidate.googleMapsUrl,
@@ -6282,11 +6259,27 @@ export function mergeGoogleMapsPlaceWithExistingRestaurant(
     existing.isAdminEdited ||
     existing.ownerId ||
     (existing.photoUrl && !existing.photoUrl.startsWith('data:image/svg+xml'));
+  const isProtectedCustomShop = Boolean(
+    existing.isAdminEdited || existing.ownerId || !isSeedRestaurantId(existing.id)
+  );
+  const isSameOfficialPlace = Boolean(
+    existing.googlePlaceId && place.googlePlaceId && existing.googlePlaceId === place.googlePlaceId
+  );
+
+  // Never overwrite a custom/VIP/Admin-edited shop's location or Place ID with a different Google Maps place
+  if (isProtectedCustomShop && !isSameOfficialPlace && existing.latitude && existing.longitude) {
+    return {
+      ...existing,
+      photoUrl: preserveCustomPhoto ? existing.photoUrl : existing.photoUrl || place.photoUrl,
+      profileImage: preserveCustomPhoto ? (existing.profileImage || existing.photoUrl) : existing.profileImage || place.photoUrl,
+      phone: existing.phone || formatDisplayPhone(place.phone),
+    };
+  }
 
   return {
     ...existing,
     googlePlaceId: existing.googlePlaceId || googleMeta.placeId,
-    googleMapsMeta: googleMeta,
+    googleMapsMeta: existing.googleMapsMeta || googleMeta,
     // Preserve Admin/Owner name, photo, gallery, description, phone, and menuItems
     nameKh: existing.nameKh || place.nameKh,
     nameEn: existing.nameEn || place.nameEn || place.nameKh,
@@ -6296,7 +6289,7 @@ export function mergeGoogleMapsPlaceWithExistingRestaurant(
       existing.galleryPhotos && existing.galleryPhotos.length > 0
         ? existing.galleryPhotos
         : place.photoUrls || [place.photoUrl],
-    addressKh: existing.isAdminEdited ? existing.addressKh : place.address || existing.addressKh,
+    addressKh: existing.isAdminEdited || existing.addressKh ? existing.addressKh : place.address || existing.addressKh,
     phone: existing.phone || formatDisplayPhone(place.phone),
     mapUrl: existing.mapUrl || place.googleMapsUrl,
     latitude: existing.latitude || place.lat,
@@ -7052,7 +7045,7 @@ export async function searchNearbyPlacesWithin500m(
       calculateHaversineMeters(lat, lng, b.lat, b.lng)
   );
 
-  const restaurants = combinedAll.filter((p) => p.category !== 'tourism');
+  const restaurants = combinedAll.filter((p) => p.category !== 'tourism' && !isShopExcludedFromSearch(p));
   const attractions = combinedAll.filter((p) => p.category === 'tourism');
 
   const providerUsed: 'google_maps_api' | 'smart_cache' | 'online_cambodia_map' = usedGoogleApi
@@ -7112,9 +7105,20 @@ const PUB_NIGHTLIFE_QUERIES = [
 ];
 
 function isPubNightlifeCachedItem(it: GooglePlaceCachedItem): boolean {
+  if (!it || isShopExcludedFromSearch(it)) return false;
   return isPubNightlifeText(
     [it.nameKh, it.nameEn, it.primaryTypeDisplayName, ...(it.types || [])].filter(Boolean).join(' ')
   );
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener(EXCLUDED_SHOPS_UPDATED_EVENT, () => {
+    pubNightlifeMemoryCache.clear();
+    try {
+      nearby500mMemoryCache.clear();
+    } catch {}
+    smartCacheMemoResult = null;
+  });
 }
 
 /**

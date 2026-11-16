@@ -3,7 +3,7 @@ import { BedDouble, Landmark, MapPin, Navigation, Star, Utensils } from 'lucide-
 import { useApp } from '../../context/AppContext';
 import { tr } from '../../utils/i18n';
 import { getLocalizedDestination, getLocalizedRestaurant } from '../../utils/zhDynamicTranslator';
-import { isHotelBusinessRecord, openExternalUrlNativeSafe } from '../../types';
+import { isHotelBusinessRecord, openRestaurantGoogleExternal, openDestinationGoogleExternal } from '../../types';
 import type { Language, Restaurant, TouristDestination } from '../../types';
 import { CambodiaChoiceBadge, isCambodiaChoiceEligible } from './CambodiaChoiceAndRatings';
 
@@ -93,12 +93,11 @@ export const NearbyEcosystemSection: React.FC<NearbyEcosystemProps> = ({ languag
 
   const directions = (e: NearbyEntry, ev: React.MouseEvent) => {
     ev.stopPropagation();
-    const { latitude, longitude, mapUrl } = e.item as { latitude?: number; longitude?: number; mapUrl?: string };
-    openExternalUrlNativeSafe(
-      validCoord(latitude, longitude)
-        ? `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`
-        : mapUrl || 'https://www.google.com/maps'
-    );
+    if (e.type === 'restaurant') {
+      openRestaurantGoogleExternal(e.item, 'directions');
+    } else {
+      openDestinationGoogleExternal(e.item, 'directions');
+    }
   };
 
   const renderGroup = (

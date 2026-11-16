@@ -847,9 +847,9 @@ export const restPart2: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Artisans%20by%20Atelier%20Kampot%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJnY4d-Ig2CDERxHr09Y3SrbM",
-    "latitude": 10.60721,
-    "longitude": 104.179287,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Artisans%20by%20Atelier%20Kampot%2C%20Street%20735%2C%20Krong%20Kampot%2C%20Kampot%2C%20Cambodia",
+    "latitude": 10.60765,
+    "longitude": 104.17985,
     "rating": 4.6,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -867,8 +867,7 @@ export const restPart2: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
-    "googlePlaceId": "ChIJnY4d-Ig2CDERxHr09Y3SrbM"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
   },
   {
     "id": "rest-452",
@@ -1364,8 +1363,8 @@ export const restPart2: Restaurant[] = [
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=Any%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ42tqxz1RCTERuyW1WugOAZw",
-    "latitude": 11.556374,
-    "longitude": 104.92821,
+    "latitude": 11.53385,
+    "longitude": 104.91625,
     "rating": 4.7,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -3938,9 +3937,9 @@ export const restPart2: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Takeo%20Giant%20River%20Prawn%20House%2C%20Takeo%2C%20Cambodia&query_place_id=ChIJNXQF9zl2CTERQTy2PappA4Y",
-    "latitude": 10.993453,
-    "longitude": 104.78623,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Takeo%20Giant%20River%20Prawn%20House%2C%20Lakeside%20Road%2C%20Krong%20Doun%20Kaev%2C%20Takeo%2C%20Cambodia",
+    "latitude": 10.99185,
+    "longitude": 104.78845,
     "rating": 4.8,
     "reviewCount": 312,
     "signatureDishesKh": [
@@ -3958,8 +3957,7 @@ export const restPart2: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
-    "googlePlaceId": "ChIJNXQF9zl2CTERQTy2PappA4Y"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
   },
   {
     "id": "rest-550",
@@ -3978,9 +3976,9 @@ export const restPart2: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Waiko%20Riverfront%20Restaurant%2C%20Svay%20Rieng%2C%20Cambodia&query_place_id=ChIJpy3pZgAHCzERgdzKKy-PbF8",
-    "latitude": 11.079822,
-    "longitude": 105.805086,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Waiko%20Riverfront%20Restaurant%2C%20Krong%20Svay%20Rieng%2C%20Svay%20Rieng%2C%20Cambodia",
+    "latitude": 11.08045,
+    "longitude": 105.80445,
     "rating": 4.6,
     "reviewCount": 164,
     "signatureDishesKh": [
@@ -3998,8 +3996,7 @@ export const restPart2: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
-    "googlePlaceId": "ChIJpy3pZgAHCzERgdzKKy-PbF8"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
   },
   {
     "id": "rest-551",

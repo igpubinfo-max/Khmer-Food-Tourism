@@ -463,6 +463,7 @@ export function isKeyEligibleForSecondaryFailover(key: string): boolean {
   if (key.startsWith('kft_ov_food_')) return true;
   if (key.startsWith('kft_ov_dest_')) return true;
   if (key.startsWith('kft_ov_trend_')) return true;
+  if (key === 'kft_cloud_version_policy_v1') return true;
   return key === 'kft_cloud_deleted_restaurants_v1';
 }
 
@@ -1647,12 +1648,38 @@ export function normalizeAuthoritativeAppSettings(
     ...merged,
     apkDownloadUrl: '',
     playStoreUrl: merged.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
-    latestAppBuildCode: Number.isFinite(Number(merged.latestAppBuildCode)) && Number(merged.latestAppBuildCode) > 0 ? Math.round(Number(merged.latestAppBuildCode)) : undefined,
-    latestAppVersion: merged.latestAppVersion ? String(merged.latestAppVersion).trim() : undefined,
-    minRequiredBuildCode: Number.isFinite(Number(merged.minRequiredBuildCode)) && Number(merged.minRequiredBuildCode) > 0 ? Math.round(Number(merged.minRequiredBuildCode)) : undefined,
-    forceAppUpdate: Boolean(merged.forceAppUpdate),
-    updateReleaseNotesKh: merged.updateReleaseNotesKh ? String(merged.updateReleaseNotesKh).trim() : undefined,
-    updateReleaseNotesEn: merged.updateReleaseNotesEn ? String(merged.updateReleaseNotesEn).trim() : undefined,
+    latestAppBuildCode: (() => {
+      const rB = Number(raw?.latestAppBuildCode) || 0;
+      const fB = Number(fallback?.latestAppBuildCode) || 0;
+      const mB = Math.max(rB, fB, Number(merged.latestAppBuildCode) || 0);
+      return Number.isFinite(mB) && mB > 0 ? Math.round(mB) : undefined;
+    })(),
+    latestAppVersion: (() => {
+      const rB = Number(raw?.latestAppBuildCode) || 0;
+      const fB = Number(fallback?.latestAppBuildCode) || 0;
+      const chosen = rB >= fB && raw?.latestAppVersion ? raw.latestAppVersion : merged.latestAppVersion;
+      return chosen ? String(chosen).trim() : undefined;
+    })(),
+    minRequiredBuildCode: (() => {
+      const rM = Number(raw?.minRequiredBuildCode) || 0;
+      const fM = Number(fallback?.minRequiredBuildCode) || 0;
+      const mM = Math.max(rM, fM, Number(merged.minRequiredBuildCode) || 0);
+      return Number.isFinite(mM) && mM > 0 ? Math.round(mM) : undefined;
+    })(),
+    minRequiredVersion: (() => {
+      const rM = Number(raw?.minRequiredBuildCode) || 0;
+      const fM = Number(fallback?.minRequiredBuildCode) || 0;
+      const chosen = rM >= fM && raw?.minRequiredVersion ? raw.minRequiredVersion : (merged.minRequiredVersion || fallback?.minRequiredVersion);
+      return chosen ? String(chosen).trim() : undefined;
+    })(),
+    forceAppUpdate: (() => {
+      const rHigher = (Number(raw?.minRequiredBuildCode) || 0) > (Number(fallback?.minRequiredBuildCode) || 0) ||
+                      (Number(raw?.latestAppBuildCode) || 0) > (Number(fallback?.latestAppBuildCode) || 0);
+      if (rHigher && raw?.forceAppUpdate !== undefined) return Boolean(raw.forceAppUpdate);
+      return Boolean(merged.forceAppUpdate || raw?.forceAppUpdate);
+    })(),
+    updateReleaseNotesKh: (raw?.updateReleaseNotesKh || merged.updateReleaseNotesKh) ? String(raw?.updateReleaseNotesKh || merged.updateReleaseNotesKh).trim() : undefined,
+    updateReleaseNotesEn: (raw?.updateReleaseNotesEn || merged.updateReleaseNotesEn) ? String(raw?.updateReleaseNotesEn || merged.updateReleaseNotesEn).trim() : undefined,
     settingsVersion: Math.max(100, ver),
     supportQrImageUrl: (!merged.supportQrImageUrl || merged.supportQrImageUrl === '/donation-qr.png' || merged.supportQrImageUrl === '/images/aba_khqr_official_kimseng.png') ? '/images/aba_khqr_official_savuth.png' : merged.supportQrImageUrl,
     supportAccountName: (!merged.supportAccountName || merged.supportAccountName.toUpperCase().includes('KIMSENG')) ? 'CHEA SAVUTH' : merged.supportAccountName,
@@ -1718,14 +1745,20 @@ export async function fetchAuthoritativeAppSettingsFromServer(
   }
 
   try {
-    const [v2Payload, v1Payload] = await Promise.all([
+    const [v2Payload, v1Payload, versionPolicyPayload] = await Promise.all([
       pullCloudDocument<Partial<AppSettings>>('kft_cloud_admin_vip_pricing_v2', timeoutMs),
       pullCloudDocument<Partial<AppSettings>>('kft_cloud_app_settings_v1', timeoutMs),
+      pullCloudDocument<Partial<AppSettings>>('kft_cloud_version_policy_v1', timeoutMs),
     ]);
 
-    let chosenPayload = v2Payload || v1Payload;
+    let chosenPayload = v2Payload || v1Payload || versionPolicyPayload;
     if (v2Payload && v1Payload) {
       chosenPayload = normalizeAuthoritativeAppSettings(v2Payload, v1Payload);
+    }
+    if (versionPolicyPayload && typeof versionPolicyPayload === 'object') {
+      chosenPayload = chosenPayload
+        ? normalizeAuthoritativeAppSettings(versionPolicyPayload, chosenPayload)
+        : versionPolicyPayload;
     }
     if (chosenPayload && typeof chosenPayload === 'object') {
       const normalized = normalizeAuthoritativeAppSettings(chosenPayload, fallback);
@@ -1841,36 +1874,59 @@ export async function saveAuthoritativeAppSettingsToServer(
     const { adminPasswordHash: _omitHash, ...rest } = normalized as AppSettings & { adminPasswordHash?: string };
     publicDoc = rest as AppSettings;
   }
-  const [pushedV2, pushedV1] = await Promise.all([
+  const versionPolicyDoc = {
+    latestAppVersion: normalized.latestAppVersion,
+    latestAppBuildCode: normalized.latestAppBuildCode,
+    minRequiredVersion: normalized.minRequiredVersion || (normalized.forceAppUpdate ? normalized.latestAppVersion : undefined),
+    minRequiredBuildCode: normalized.minRequiredBuildCode || (normalized.forceAppUpdate ? normalized.latestAppBuildCode : undefined),
+    forceAppUpdate: Boolean(normalized.forceAppUpdate),
+    updateReleaseNotesKh: normalized.updateReleaseNotesKh,
+    updateReleaseNotesEn: normalized.updateReleaseNotesEn,
+    playStoreUrl: normalized.playStoreUrl,
+    appStoreUrl: normalized.appStoreUrl,
+    settingsVersion: normalized.settingsVersion,
+    settingsUpdatedAt: nowIso,
+  };
+
+  const [pushedV2, pushedV1, pushedPolicy] = await Promise.all([
     pushCloudDocument('kft_cloud_admin_vip_pricing_v2', publicDoc, timeoutMs),
     pushCloudDocument('kft_cloud_app_settings_v1', publicDoc, timeoutMs),
+    pushCloudDocument('kft_cloud_version_policy_v1', versionPolicyDoc, timeoutMs),
   ]);
+  void pushedV1;
+  // Always mirror the public version policy to the real-time secondary failover topic so all devices receive Force Update even during Supabase 522/402 maintenance
+  pushToSecondaryCloudFailover('kft_cloud_version_policy_v1', versionPolicyDoc, 5000).catch(() => {});
 
-  if (!pushedV2) {
+  if (!pushedV2 && !pushedPolicy) {
     return {
       ok: false,
       settings: normalized,
-      error: 'Could not save VIP settings to cloud database. Please check your internet connection and try again.',
+      error: 'Could not save settings to cloud database. Please check your internet connection and try again.',
     };
   }
 
-  // Verify database persistence by reading back the authoritative record
-  const verifiedV2 = await pullCloudDocument<Partial<AppSettings>>('kft_cloud_admin_vip_pricing_v2', 5000);
-  if (
-    !verifiedV2 ||
-    Number(verifiedV2.vipShortDurationDays) !== shortDays ||
-    Math.abs(Number(verifiedV2.vipShortPriceUsd) - shortPrice) > 0.001 ||
-    Number(verifiedV2.vipLongDurationDays) !== longDays ||
-    Math.abs(Number(verifiedV2.vipLongPriceUsd) - longPrice) > 0.001
-  ) {
-    return {
-      ok: false,
-      settings: normalized,
-      error: 'Database verification failed: saved VIP values did not match on read-back.',
-    };
+  let confirmedSettings = normalized;
+  if (pushedV2) {
+    // Verify database persistence by reading back the authoritative record
+    const verifiedV2 = await pullCloudDocument<Partial<AppSettings>>('kft_cloud_admin_vip_pricing_v2', 5000);
+    if (
+      !verifiedV2 ||
+      Number(verifiedV2.vipShortDurationDays) !== shortDays ||
+      Math.abs(Number(verifiedV2.vipShortPriceUsd) - shortPrice) > 0.001 ||
+      Number(verifiedV2.vipLongDurationDays) !== longDays ||
+      Math.abs(Number(verifiedV2.vipLongPriceUsd) - longPrice) > 0.001
+    ) {
+      if (!pushedPolicy) {
+        return {
+          ok: false,
+          settings: normalized,
+          error: 'Database verification failed: saved VIP values did not match on read-back.',
+        };
+      }
+    } else {
+      confirmedSettings = normalizeAuthoritativeAppSettings(verifiedV2, normalized);
+    }
   }
-
-  const confirmedSettings = normalizeAuthoritativeAppSettings(verifiedV2, normalized);
 
   try {
     if (typeof localStorage !== 'undefined') {
@@ -4373,8 +4429,14 @@ export async function syncAllAppDataWithSupabase(localState: {
     const allowLegacyAggregatePull = isAdminDevice || shouldFetchHeavyAdminVaults || needLegacyAggregateFallback;
     const cloudUsers =
       cloudUsersV2 || !allowLegacyAggregatePull ? null : await pullCloudDocument<User[]>('kft_cloud_users_v1');
-    const cloudSettingsV1 = cloudSettingsV2 ? null : await pullCloudDocument<AppSettings>('kft_cloud_app_settings_v1');
-    const cloudSettings = cloudSettingsV2 || cloudSettingsV1;
+    const [cloudSettingsV1, cloudVersionPolicy] = await Promise.all([
+      cloudSettingsV2 ? Promise.resolve(null) : pullCloudDocument<AppSettings>('kft_cloud_app_settings_v1'),
+      pullCloudDocument<Partial<AppSettings>>('kft_cloud_version_policy_v1', 4500),
+    ]);
+    const baseCloudSettings = cloudSettingsV2 || cloudSettingsV1;
+    const cloudSettings = cloudVersionPolicy
+      ? normalizeAuthoritativeAppSettings(cloudVersionPolicy, baseCloudSettings || undefined)
+      : baseCloudSettings;
 
     // 1b. Merge Deleted Users Registry (with timestamp-aware superseding for re-invited testers)
     const deletedMap = new Map<string, DeletedUserRecord>();

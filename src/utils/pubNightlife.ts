@@ -7,13 +7,15 @@
  * coffee shops/cafés, boba/juice/smoothie shops, vegetarian shops, and ordinary restaurants.
  */
 
-// 1. Compound phrases where "bar" is NOT an alcohol/nightlife venue
+import { isShopExcludedFromSearch } from './excludedShopsRegistry';
+
+// 1. Compound phrases where "bar" or "club" is NOT an alcohol/nightlife venue
 const NOT_PUB_PHRASE_RE =
   /\b(?:juice|salad|snack|sushi|coffee|espresso|latte|matcha|milk|tea|boba|bubble\s*tea|ice\s*cream|gelato|noodle|ramen|pho|kuy\s*teav|soup|congee|smoothie|protein|candy|chocolate|breakfast|brunch|bakery|pastry|croissant|baguette|bread|cake|dessert|sandwich|burger|pizza|taco|burrito|dim\s*sum|oyster|yogurt|cereal|oxygen|energy|tapas?\s*to\s*go)\s*bars?\b|\bbar[\s-]*b[\s-]*q\b|\bbarbe?r\w*|\bbarista\w*/gi;
 
-// 2. Hard exclusions: bakeries, morning noodle/breakfast shops, coffee/boba/juice shops, vegetarian shops, fast-food chains
+// 2. Hard exclusions: bakeries, morning noodle/breakfast shops, coffee/boba/juice shops, vegetarian shops, fast-food chains, auto parts / garages / non-food stores
 const STRICT_NON_PUB_VENUE_RE =
-  /ហាងនំប៉័ង|នំប៉័ង|នំខេក|ហាងនំ|១៩៩០ខេក|បង្អែម|ការ៉េម|ហាងការ៉េម|គុយទាវ|នំបញ្ចុក|បបរ|លតឆា|បាញ់កាញ់|មីស៊ុប|មីគោក|មីឆា|មីទាញ|ហ្វឺ|អាហារព្រឹក|អាហារពេលព្រឹក|បាយព្រឹក|បាយសាច់ជ្រូក|បាយមាន់|ហាងកាហ្វេ|កាហ្វេ|ការហ្វេ|តែគុជ|តែគុច|តែទឹកដោះគោ|ហាងតែ|ទឹកក្រឡុក|ទឹកផ្លែឈើ|ទឹកអំពៅ|ទឹកដូង|អាហារបួស|ម្ហូបបួស|ហាងបួស|តមសាច់|\b(?:bakery|bakeries|pastry|patisserie|croissant|baguette|banh\s*mi|n[oö]mpang|bread\s*shop|cake\s*shop|cupcake|donut|doughnut|ice\s*cream|gelato|sweet\s*lab|tous\s*les\s*jours|bengawan\s*solo|kuy\s*teav|kuyteav|noodle\s*shop|noodle\s*restaurant|noodle\s*house|rice\s*noodle|pho\s*shop|congee|porridge|breakfast\s*restaurant|morning\s*food|coffee\s*shop|coffee\s*house|coffee\s*roasters?|roastery|cafe|café|cofe|coffe|kopi|espresso|cappuccino|matcha|boba|bubble\s*tea|milk\s*tea|tea\s*house|tea\s*shop|smoothie|fruit\s*juice|fresh\s*juice|juice\s*bar|starbucks|brown\s*coffee|tube\s*coffee|amazon\s*cafe|chagee|koi\s*th[eé]|gong\s*cha|mixue|vegetarian|vegeterian|vegan|veggie|kfc|burger\s*king|lucky\s*burger|pizza\s*company|domino|lotteria|jollibee|texas\s*chicken|carl's\s*jr|bonchon|mcdonald)\b|面包店|蛋糕店|烘焙|甜品店|冰淇淋|粿条|米粉|面馆|早餐店|咖啡馆|咖啡厅|咖啡店|奶茶店|果汁|素食|斋/i;
+  /ហាងនំប៉័ង|នំប៉័ង|នំខេក|ហាងនំ|១៩៩០ខេក|បង្អែម|ការ៉េម|ហាងការ៉េម|គុយទាវ|នំបញ្ចុក|បបរ|លតឆា|បាញ់កាញ់|មីស៊ុប|មីគោក|មីឆា|មីទាញ|ហ្វឺ|អាហារព្រឹក|អាហារពេលព្រឹក|បាយព្រឹក|បាយសាច់ជ្រូក|បាយមាន់|ហាងកាហ្វេ|កាហ្វេ|ការហ្វេ|តែគុជ|តែគុច|តែទឹកដោះគោ|ហាងតែ|ទឹកក្រឡុក|ទឹកផ្លែឈើ|ទឹកអំពៅ|ទឹកដូង|អាហារបួស|ម្ហូបបួស|ហាងបួស|តមសាច់|\b(?:bakery|bakeries|pastry|patisserie|croissant|baguette|banh\s*mi|n[oö]mpang|bread\s*shop|cake\s*shop|cupcake|donut|doughnut|ice\s*cream|gelato|sweet\s*lab|tous\s*les\s*jours|bengawan\s*solo|kuy\s*teav|kuyteav|noodle\s*shop|noodle\s*restaurant|noodle\s*house|rice\s*noodle|pho\s*shop|congee|porridge|breakfast\s*restaurant|morning\s*food|coffee\s*shop|coffee\s*house|coffee\s*roasters?|roastery|cafe|café|cofe|coffe|kopi|espresso|cappuccino|matcha|boba|bubble\s*tea|milk\s*tea|tea\s*house|tea\s*shop|smoothie|fruit\s*juice|fresh\s*juice|juice\s*bar|starbucks|brown\s*coffee|tube\s*coffee|amazon\s*cafe|chagee|koi\s*th[eé]|gong\s*cha|mixue|vegetarian|vegeterian|vegan|veggie|kfc|burger\s*king|lucky\s*burger|pizza\s*company|domino|lotteria|jollibee|texas\s*chicken|carl's\s*jr|bonchon|mcdonald|13\s*club|auto\s*parts?|auto\s*supply|auto\s*service|car\s*parts?|car\s*repair|car\s*wash|car\s*dealer|spare\s*parts?|motor\s*parts?|motorcycle\s*parts?|garage|mechanic|tire\s*shop|tyre\s*shop|hardware\s*store|electronics\s*store|auto_parts_store|car_repair|car_dealer|car_wash|gas_station|hardware_store)\b|គ្រឿងបន្លាស់|ជួសជុលរថយន្ត|ជួសជុលម៉ូតូ|យានដ្ឋាន|លាងឡាន|លក់គ្រឿងបន្លាស់|面包店|蛋糕店|烘焙|甜品店|冰淇淋|粿条|米粉|面馆|早餐店|咖啡馆|咖啡厅|咖啡店|奶茶店|果汁|素食|斋|汽配|汽车配件|修车/i;
 
 // 3. Positive pub / bar / beer garden / skybar / nightclub / karaoke / lounge signals
 const STRONG_PUB_RE =
@@ -25,6 +27,7 @@ const CAFEISH_OR_PLAIN_REST_RE =
 
 export function isPubNightlifeText(raw: string | null | undefined): boolean {
   if (!raw) return false;
+  if (isShopExcludedFromSearch({ nameKh: raw, nameEn: raw })) return false;
   const cleaned = String(raw).replace(NOT_PUB_PHRASE_RE, ' ');
   if (STRICT_NON_PUB_VENUE_RE.test(cleaned)) {
     return false;

@@ -873,9 +873,44 @@ test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclus
     'គុយទាវពេលព្រឹក ភ្នំពេញ',
     'Specialty Cambodian espresso bar and training café',
     'BROWN Coffee and Bakery Roastery',
+    '13 Club',
+    '13 Club Auto Parts Store',
   ]) {
     assert.equal(isPubNightlifeText(no), false, 'must NOT be pub/nightlife: ' + no);
   }
+  const {
+    isShopExcludedFromSearch,
+    excludeShopFromSearch,
+    restoreExcludedShopToSearch,
+  } = require(path.join(ROOT, 'src/utils/excludedShopsRegistry.ts'));
+  assert.equal(
+    isShopExcludedFromSearch({ id: 'gmap-13-club', nameKh: '13 Club', nameEn: '13 Club' }),
+    true,
+    '"13 Club" auto parts store must be excluded from restaurant/nightlife search results'
+  );
+  const sampleGmapShop = {
+    id: 'gmap-test-irrelevant-auto-parts',
+    googlePlaceId: 'ChIJTestIrrelevantAutoParts',
+    nameKh: 'ហាងលក់គ្រឿងបន្លាស់ Test Club',
+    nameEn: 'Test Auto Parts Club',
+  };
+  excludeShopFromSearch(sampleGmapShop, { reason: 'Auto parts store' });
+  assert.equal(
+    isShopExcludedFromSearch({ id: 'gmap-test-irrelevant-auto-parts', nameKh: 'ហាងលក់គ្រឿងបន្លាស់ Test Club' }),
+    true,
+    'Admin-excluded Google Maps listing must be hidden from search'
+  );
+  assert.equal(
+    isShopExcludedFromSearch({ googlePlaceId: 'ChIJTestIrrelevantAutoParts', nameKh: 'Other Name' }),
+    true,
+    'Admin-excluded Google Maps listing must match by googlePlaceId'
+  );
+  restoreExcludedShopToSearch(sampleGmapShop);
+  assert.equal(
+    isShopExcludedFromSearch({ id: 'gmap-test-irrelevant-auto-parts', nameKh: 'ហាងលក់គ្រឿងបន្លាស់ Test Club' }),
+    false,
+    'Restored Google Maps listing must be unhidden when restored by Admin'
+  );
   assert.ok(rvSrc.includes("nameKh: 'កម្សាន្ត និងជួបជុំ'"), 'Button 4 must be named កម្សាន្ត និងជួបជុំ');
   assert.ok(rvSrc.includes("imageSrc: '/categories/shop_cat_pub_nightlife.png'"), 'Button 4 must use shop_cat_pub_nightlife.png');
   assert.ok(rvSrc.includes("nameKh: 'កាហ្វេ/ភេសជ្ជៈ'"), 'Button 3 must be named កាហ្វេ/ភេសជ្ជៈ');
@@ -923,6 +958,152 @@ test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclus
     'isStrictVerifiedCambodiaRestaurant must reject Thai restaurants'
   );
   assert.equal(isThaiRelatedText('ទឹកធ្លាក់តាតៃ Koh Kong Tatai Waterfall'), false, 'Tatai Waterfall must be preserved');
+
+  // 9. Google Maps & Directions Location Integration Audit (Zero Cross-Shop Hijacking & Default Coordinate Guard)
+  const {
+    doesVerifiedPlaceNameMatchTarget,
+    isDefaultProvinceCenterCoordinates,
+    getRestaurantGoogleExternalUrl,
+    getRestaurantDirectGoogleMapsUrl,
+    getDestinationGoogleExternalUrl,
+    getCachedVerifiedPlaceForCoords,
+    saveCachedVerifiedPlaceForCoords,
+  } = require(path.join(ROOT, 'src/types/index.ts'));
+  const { hotelsPart1 } = require(path.join(ROOT, 'src/data/seedHotelsPart1.ts')); const { hotelsPart2 } = require(path.join(ROOT, 'src/data/seedHotelsPart2.ts')); const initialHotels100 = [...hotelsPart1, ...hotelsPart2];
+  const { initial100Destinations } = require(path.join(ROOT, 'src/data/seedDestinations.ts'));
+
+  // 9a. MIX CAFÉ (មីគសិកាហ្វេ) must NEVER match Sun Immixon Vegetarian Restaurant
+  assert.equal(
+    doesVerifiedPlaceNameMatchTarget(
+      'Sun Immixon Vegetarian Restaurant (ហាងម្ហូបបួស ស៊ុនអ៊ីម៉ិស៊ីគ័ន)',
+      'មីគសិកាហ្វេ',
+      'MIX CAFÉ'
+    ),
+    false,
+    'MIX CAFÉ must never substring-match Sun Immixon Vegetarian Restaurant'
+  );
+  assert.equal(
+    doesVerifiedPlaceNameMatchTarget('Mi Chay Vegetarian Food', 'ហ្គុងឆា', 'Gong cha'),
+    false,
+    'Gong cha must never substring-match Mi Chay'
+  );
+  assert.equal(
+    doesVerifiedPlaceNameMatchTarget('One More Restaurant Toul Kork', 'អ៊ីលេវិន វ័ន ឃីតឆិន', 'Eleven One Kitchen'),
+    false,
+    'Eleven One Kitchen must never match One More Restaurant via generic word "one"'
+  );
+  assert.equal(
+    doesVerifiedPlaceNameMatchTarget('Malis Restaurant Phnom Penh', 'ភោជនីយដ្ឋាន ម្លិះ', 'Malis Restaurant'),
+    true,
+    'Malis Restaurant must match Malis Restaurant Phnom Penh'
+  );
+
+  // 9b. Default province center coordinates (11.5564, 104.9282) must never be used as building pins or shared cache keys
+  const mixCafeShop = {
+    id: 'rest-vip-google-cheamasiya_gmail_com-1793173835816',
+    nameKh: 'មីគសិកាហ្វេ',
+    nameEn: 'MIX CAFÉ',
+    addressKh: '#20A, st 288, Phnom Penh',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    latitude: 11.5564,
+    longitude: 104.9282,
+    mapUrl: 'https://maps.google.com/?q=%E1%9E%98%E1%9E%B8%E1%9E%82%E1%9E%9F%E1%9E%B7%E1%9E%80%E1%9E%B6%E1%9E%A0%E1%9F%92%E1%9E%9C%E1%9F%81',
+  };
+  assert.equal(
+    isDefaultProvinceCenterCoordinates(11.5564, 104.9282, mixCafeShop.id),
+    true,
+    'Default Phnom Penh center (11.5564, 104.9282) must be recognized as placeholder for shops'
+  );
+  assert.equal(
+    isDefaultProvinceCenterCoordinates(11.5564, 104.9282, 'dest-4'),
+    false,
+    'dest-4 (Independence Monument) is genuinely at 11.5564, 104.9282'
+  );
+  const mixMapsUrl = getRestaurantGoogleExternalUrl(mixCafeShop, 'maps');
+  const mixDirUrl = getRestaurantGoogleExternalUrl(mixCafeShop, 'directions');
+  const mixDirectUrl = getRestaurantDirectGoogleMapsUrl(mixCafeShop);
+  assert.ok(
+    mixMapsUrl.includes('MIX%20CAF%C3%89') && mixMapsUrl.includes('st%20288') && !mixMapsUrl.includes('11.5564') && !mixMapsUrl.includes('Immixon'),
+    'MIX CAFÉ maps URL must use its own name + #20A, st 288 address and never default center or Sun Immixon: ' + mixMapsUrl
+  );
+  assert.ok(
+    mixDirUrl.includes('MIX%20CAF%C3%89') && mixDirUrl.includes('st%20288') && !mixDirUrl.includes('11.5564'),
+    'MIX CAFÉ directions URL must route to its own name + #20A, st 288 address: ' + mixDirUrl
+  );
+  assert.ok(
+    mixDirectUrl.includes('MIX%20CAF%C3%89') && mixDirectUrl.includes('st%20288'),
+    'MIX CAFÉ direct card map URL must use its own name + #20A, st 288 address: ' + mixDirectUrl
+  );
+
+  // 9c. Verify coordinate cache never leaks across different shop IDs Sharing the same coordinate
+  saveCachedVerifiedPlaceForCoords('shop-a-exact', 11.5611, 104.9211, {
+    placeId: 'ChIJScMkKgBRCTER7BNkdun3xNw',
+    officialName: 'Magnolia Veggie Restaurant',
+    lat: 11.5611,
+    lng: 104.9211,
+    updatedAt: new Date().toISOString(),
+  });
+  assert.equal(
+    getCachedVerifiedPlaceForCoords('shop-b-different-id', 11.5611, 104.9211),
+    null,
+    'Different shop at same coordinates must NEVER inherit shop-a cached Place ID'
+  );
+
+  // 9d. Verify all restaurants, hotels, and tourist destinations produce valid non-empty Maps & Directions URLs
+  for (const r of validShops) {
+    const mUrl = getRestaurantGoogleExternalUrl(r, 'maps');
+    const dUrl = getRestaurantGoogleExternalUrl(r, 'directions');
+    assert.ok(mUrl.startsWith('https://'), 'Empty or invalid maps URL for restaurant ' + r.id);
+    assert.ok(dUrl.startsWith('https://www.google.com/maps/dir/'), 'Invalid directions URL for restaurant ' + r.id);
+  }
+  const rest549 = validShops.find((r) => r.id === 'rest-549');
+  if (rest549) {
+    assert.ok(
+      !getRestaurantGoogleExternalUrl(rest549, 'maps').includes('ChIJNXQF9zl2CTERQTy2PappA4Y'),
+      'rest-549 (Takeo Giant River Prawn House) must not use Stung Takeo Place ID'
+    );
+  }
+  for (const h of initialHotels100) {
+    const mUrl = getDestinationGoogleExternalUrl(h, 'maps');
+    const dUrl = getDestinationGoogleExternalUrl(h, 'directions');
+    assert.ok(mUrl.startsWith('https://'), 'Empty or invalid maps URL for hotel ' + h.id);
+    assert.ok(dUrl.startsWith('https://www.google.com/maps/dir/'), 'Invalid directions URL for hotel ' + h.id);
+  }
+  const hotel241 = initialHotels100.find((h) => h.id === 'hotel-241');
+  if (hotel241) {
+    assert.ok(
+      !getDestinationGoogleExternalUrl(hotel241, 'maps').includes('ChIJo8neWjeNDjERZKcZ7t47BQc'),
+      'hotel-241 (Neak Poan Hotel) must not use Sovannphum Hotel Place ID'
+    );
+  }
+  const { isCoordinateMatchingCambodiaProvince } = require(path.join(ROOT, 'src/types/index.ts'));
+  const racDestinations = [];
+  for (let i = 1; i <= 9; i++) {
+    const mod = require(path.join(ROOT, 'src/data/seedRacPart' + i + '.ts'));
+    racDestinations.push(...Object.values(mod).flat());
+  }
+  const all1831TourismAndHotels = [...initial100Destinations, ...racDestinations, ...initialHotels100];
+  assert.ok(
+    all1831TourismAndHotels.length >= 1831,
+    'Expected at least 1,831 tourism & hotel destinations (296 + 1,168 RAC + 367 hotels), got ' + all1831TourismAndHotels.length
+  );
+  for (const d of all1831TourismAndHotels) {
+    assert.equal(
+      isDefaultProvinceCenterCoordinates(d.latitude, d.longitude, d.id),
+      false,
+      'Tourism/hotel destination must not use default province center placeholder: ' + d.id
+    );
+    assert.equal(
+      isCoordinateMatchingCambodiaProvince(d.latitude, d.longitude, d.provinceKh || d.provinceEn),
+      true,
+      'Tourism/hotel destination coordinates must match its declared province: ' + d.id
+    );
+    const mUrl = getDestinationGoogleExternalUrl(d, 'maps');
+    const dUrl = getDestinationGoogleExternalUrl(d, 'directions');
+    assert.ok(mUrl.startsWith('https://'), 'Empty or invalid maps URL for destination ' + d.id);
+    assert.ok(dUrl.startsWith('https://www.google.com/maps/dir/'), 'Invalid directions URL for destination ' + d.id);
+  }
 });
 
 console.log('\nAll ' + passed + ' unit test suites passed successfully!');
