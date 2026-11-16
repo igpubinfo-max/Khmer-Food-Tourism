@@ -635,7 +635,15 @@ export const NearMeModal: React.FC = () => {
   };
 
   // 6 Premium 3D Gold-Framed Main Categories (3x2 grid)
-  const mainCategoryButtons = [
+  const mainCategoryButtons: Array<{
+    id: string;
+    type: 'restaurants' | 'destinations';
+    label: string;
+    count?: number;
+    imageSrc: string;
+    gradient: string;
+    icon: React.ReactNode;
+  }> = [
     {
       id: 'all',
       type: 'restaurants' as const,
@@ -678,13 +686,12 @@ export const NearMeModal: React.FC = () => {
       icon: <Flame className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
     },
     {
-      id: 'destinations',
-      type: 'destinations' as const,
-      label: tr(language, 'កន្លែងជិតខ្ញុំ', 'Nearby Places', '附近景点'),
-      count: nearbyDestinations.length,
-      imageSrc: '/categories/shop_cat_nearme.png',
-      gradient: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
-      icon: <Compass className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
+      id: 'vegetarian',
+      type: 'restaurants' as const,
+      label: tr(language, 'អាហារបួស', 'Vegetarian', '素食'),
+      imageSrc: '/categories/shop_cat_vegetarian.png',
+      gradient: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+      icon: <Utensils className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
     },
   ];
 

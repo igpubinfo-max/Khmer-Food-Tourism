@@ -2148,7 +2148,8 @@ export function getShopCategoryTabTier(r: Restaurant, tabId: string): number {
   const primary = classifyShopDirectoryCategory(r);
 
   if (tabId === 'restaurant_dining') {
-    return primary === 'restaurant_dining' ? 2 : 0;
+    // Vegetarian shops live only in the dedicated vegetarian button (no overlap)
+    return primary === 'restaurant_dining' && !isVegetarianShop(r) ? 2 : 0;
   }
   if (tabId === 'cafe_bistro') {
     return primary === 'cafe_bistro' ? 2 : 0;

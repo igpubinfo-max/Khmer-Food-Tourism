@@ -675,9 +675,17 @@ test('15. Nearby Food Search 6 category buttons, Phnom Penh mountain fix, Khmer 
   assert.ok(mergedDest.length >= 15 && mergedDest.length <= 30, 'Nearby Places in Phnom Penh must contain genuine attractions only');
   assert.ok(!mergedDest.some((d) => /cofe|coffee|កាហ្វេ|គុយទាវ|ភោជនីយដ្ឋាន/i.test(d.nameKh + ' ' + d.nameEn)), 'Nearby Places must never contain cafes or restaurants');
 
-  for (const catId of ['all', 'rice_khmer', 'noodles', 'coffee', 'bbq_seafood']) {
+  // The 5 specific buttons are mutually exclusive: no shop may appear under two of them
+  const exclusiveIds = ['rice_khmer', 'noodles', 'coffee', 'bbq_seafood', 'vegetarian'];
+  for (const shop of mergedFood) {
+    const hits = exclusiveIds.filter((id) => matchesNearMeQuickCategory(shop, id));
+    assert.ok(hits.length <= 1, `Shop ${shop.id} (${shop.nameEn}) must not match several category buttons: ${hits.join(', ')}`);
+  }
+  const minPerCat = { all: 15, rice_khmer: 15, noodles: 15, coffee: 15, bbq_seafood: 8, vegetarian: 1 };
+  for (const catId of ['all', 'rice_khmer', 'noodles', 'coffee', 'bbq_seafood', 'vegetarian']) {
     const matches = mergedFood.filter((r) => matchesNearMeQuickCategory(r, catId));
-    assert.ok(matches.length >= 15, `Category [${catId}] must have >= 15 accurate shops in Phnom Penh (got ${matches.length})`);
+    if (process.env.KFT_DEBUG_COUNTS) console.log('[count]', catId, matches.length);
+    assert.ok(matches.length >= minPerCat[catId], `Category [${catId}] must have >= ${minPerCat[catId]} accurate shops in Phnom Penh (got ${matches.length})`);
     for (let i = 1; i < matches.length; i++) {
       assert.ok(
         matches[i].distanceMeters >= matches[i - 1].distanceMeters,

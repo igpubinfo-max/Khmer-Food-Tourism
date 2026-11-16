@@ -14,7 +14,7 @@ import {
   mergeGoogleMapsPlaceWithExistingRestaurant,
   normalizeKhmerSearchText,
 } from '../services/googlePlacesService';
-import { classifyShopBusinessKind, verifyShopDataForDisplay } from './foodFilters';
+import { classifyShopBusinessKind, verifyShopDataForDisplay, isVegetarianShop } from './foodFilters';
 import { normalizeKhmerFoodText } from './khmerFoodSearch';
 import { getLocalizedRestaurant } from './zhDynamicTranslator';
 
@@ -886,15 +886,8 @@ const COFFEE_DRINK_CATEGORY_REGEX =
 const BBQ_SEAFOOD_CATEGORY_REGEX =
   /សាច់អាំង|សាច់គោអាំង|គ្រឿងសមុទ្រ|ស៊ុបឆ្នាំងដី|ស៊ុបឆ្នាំងភ្លើង|ស៊ុបគោ|ស៊ុបម្រះ|ស៊ុបពិសេស|ស៊ុបសាច់គោ|ស៊ុបពពែ|ស៊ុបខួរ|ស៊ុបហឹរ|ឆ្នាំងភ្លើង|ឆ្នាំងដី|ហតផត|ប៊ូហ្វេ|ក្តាម|បង្គា|មឹក|អយស្ទ័រ|ងៀត|ត្រីដុត|បង្កង|\b(?:bbq|barbecue|seafood|grill|grilled|hotpot|hot\s*pot|shabu|sukiyaki|mookata|buffet|crab|prawns?|shrimp|squid|oyster|lobster|yakiniku)\b|烧烤|烤肉|海鲜|火锅|自助餐|螃蟹|大虾|鱿鱼/i;
 
-/**
- * Evaluates whether a verified restaurant matches one of the 5 food category buttons in Near Me:
- * - 'all' (ហាងទាំងអស់ / All Shops / 全部店铺)
- * - 'rice_khmer' (បាយ & ម្ហូបខ្មែរ / Rice & Khmer / 柬式简餐)
- * - 'noodles' (គុយទាវ & មី / Noodles / 粉面汤品)
- * - 'coffee' (កាហ្វេ & ភេសជ្ជៈ / Café & Drinks / 咖啡饮品)
- * - 'bbq_seafood' (សាច់អាំង & ស៊ុប / BBQ & Hotpot / 烧烤海鲜)
- */
-export function matchesNearMeQuickCategory(r: Restaurant, quickFilterId: string): boolean {
+/** Eligibility only (a shop may be eligible for several of these) — see matchesNearMeQuickCategory for the exclusive result. */
+function isEligibleForNearMeCategory(r: Restaurant, quickFilterId: string): boolean {
   if (!r) return false;
   if (!quickFilterId || quickFilterId === 'all') return true;
 
@@ -1006,6 +999,52 @@ export function matchesNearMeQuickCategory(r: Restaurant, quickFilterId: string)
   return true;
 }
 
+export type NearMePrimaryCategory = 'vegetarian' | 'coffee' | 'noodles' | 'bbq_seafood' | 'rice_khmer';
+
+/**
+ * Assigns every food shop to AT MOST ONE of the 5 specific Near Me categories so the buttons never overlap
+ * (only 'all' shows every shop). Priority: vegetarian → café & drinks → name hint (noodles / BBQ) →
+ * first signature dish hint → general Khmer rice (default).
+ */
+export function classifyNearMePrimaryCategory(r: Restaurant): NearMePrimaryCategory | null {
+  if (!r) return null;
+  if (isVegetarianShop(r)) return 'vegetarian';
+  if (isEligibleForNearMeCategory(r, 'coffee')) return 'coffee';
+
+  const eligNoodles = isEligibleForNearMeCategory(r, 'noodles');
+  const eligBbq = isEligibleForNearMeCategory(r, 'bbq_seafood');
+  const eligRice = isEligibleForNearMeCategory(r, 'rice_khmer');
+  if (!eligNoodles && !eligBbq && !eligRice) return null;
+  if (eligNoodles && !eligBbq && !eligRice) return 'noodles';
+  if (eligBbq && !eligNoodles && !eligRice) return 'bbq_seafood';
+  if (eligRice && !eligNoodles && !eligBbq) return 'rice_khmer';
+
+  const nameAndCat = normalizeKhmerFoodText(
+    [r.nameKh, r.nameEn, r.categoryKh, r.categoryEn, r.businessCategory].filter(Boolean).join(' ')
+  );
+  if (eligNoodles && NOODLE_CATEGORY_REGEX.test(nameAndCat)) return 'noodles';
+  if (eligBbq && BBQ_SEAFOOD_CATEGORY_REGEX.test(nameAndCat)) return 'bbq_seafood';
+
+  const firstDish = normalizeKhmerFoodText(
+    `${(r.signatureDishesKh || [])[0] || ''} ${(r.signatureDishesEn || [])[0] || ''}`
+  );
+  if (eligNoodles && NOODLE_CATEGORY_REGEX.test(firstDish)) return 'noodles';
+  if (eligBbq && BBQ_SEAFOOD_CATEGORY_REGEX.test(firstDish)) return 'bbq_seafood';
+  if (eligRice) return 'rice_khmer';
+  return eligNoodles ? 'noodles' : 'bbq_seafood';
+}
+
+/**
+ * Near Me category buttons (mutually exclusive except 'all'):
+ * - 'all' (ហាងទាំងអស់) · 'rice_khmer' (បាយ & ម្ហូបខ្មែរ) · 'noodles' (គុយទាវ & មី)
+ * - 'coffee' (កាហ្វេ & ភេសជ្ជៈ) · 'bbq_seafood' (សាច់អាំង & ស៊ុប) · 'vegetarian' (អាហារបួស)
+ */
+export function matchesNearMeQuickCategory(r: Restaurant, quickFilterId: string): boolean {
+  if (!r) return false;
+  if (!quickFilterId || quickFilterId === 'all') return true;
+  return classifyNearMePrimaryCategory(r) === quickFilterId;
+}
+
 /**
  * Selects up to 2 localized signature/menu dish badges for a restaurant card in Near Me,
  * prioritizing dishes that match the active quick category button and current UI language (km / en / zh).
@@ -1032,6 +1071,7 @@ export function selectLocalizedBadgeDishesForCategory(
   else if (quickFilterId === 'rice_khmer') categoryRegex = RICE_KHMER_CATEGORY_REGEX;
   else if (quickFilterId === 'coffee') categoryRegex = COFFEE_DRINK_CATEGORY_REGEX;
   else if (quickFilterId === 'bbq_seafood') categoryRegex = BBQ_SEAFOOD_CATEGORY_REGEX;
+  else if (quickFilterId === 'vegetarian') categoryRegex = /បួស|បន្លែ|តៅហ៊ូ|vegetarian|vegan|veggie|vegetable|tofu|素|蔬|豆腐/i;
 
   const fallbackBadgeByLang = (): string => {
     if (quickFilterId === 'coffee') {
@@ -1039,6 +1079,9 @@ export function selectLocalizedBadgeDishesForCategory(
     }
     if (quickFilterId === 'noodles') {
       return language === 'zh' ? '招牌金边粿条与汤面' : language === 'en' ? 'Kuy Teav & Signature Noodle Soup' : 'គុយទាវ និងមីស៊ុប';
+    }
+    if (quickFilterId === 'vegetarian') {
+      return language === 'zh' ? '素食与健康餐点' : language === 'en' ? 'Vegetarian & Healthy Dishes' : 'ម្ហូបបួស និងអាហារសុខភាព';
     }
     if (quickFilterId === 'bbq_seafood') {
       return language === 'zh' ? '炭火烧烤与生猛海鲜' : language === 'en' ? 'Charcoal BBQ, Hotpot & Seafood' : 'សាច់អាំង ស៊ុប និងគ្រឿងសមុទ្រ';
