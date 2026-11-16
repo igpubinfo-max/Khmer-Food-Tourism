@@ -93,17 +93,31 @@ public class NativeAppUpdatePlugin extends Plugin {
 
     private void launchPlayStoreFallback(Context context, String customPlayUrl) {
         String targetPkg = OFFICIAL_PLAY_PACKAGE;
+        String webUrl = (customPlayUrl != null && !customPlayUrl.trim().isEmpty())
+                ? customPlayUrl.trim()
+                : ("https://play.google.com/store/apps/details?id=" + targetPkg);
         try {
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + targetPkg));
-            marketIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(marketIntent);
-        } catch (Exception eMarket) {
-            String webUrl = (customPlayUrl != null && !customPlayUrl.trim().isEmpty())
-                    ? customPlayUrl.trim()
-                    : ("https://play.google.com/store/apps/details?id=" + targetPkg);
+            // Explicitly target Official Google Play Store ("com.android.vending") first so Xiaomi (GetApps),
+            // Oppo (App Market), Vivo (V-Appstore), and Realme never hijack the market:// intent
+            Intent googlePlayIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + targetPkg));
+            googlePlayIntent.setPackage("com.android.vending");
+            googlePlayIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(googlePlayIntent);
+            return;
+        } catch (Exception ignoredGooglePlay) {
+            // Fallback for Huawei / Honor / non-GMS devices where com.android.vending is not installed
+        }
+        try {
             Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUrl));
             webIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(webIntent);
+        } catch (Exception eWeb) {
+            try {
+                Intent genericMarketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + targetPkg));
+                genericMarketIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(genericMarketIntent);
+            } catch (Exception ignored) {
+            }
         }
     }
 

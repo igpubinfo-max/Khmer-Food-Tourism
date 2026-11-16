@@ -221,15 +221,24 @@ async function fetchRemoteVersionManifest(): Promise<RemoteVersionManifest | nul
   return null;
 }
 
-async function checkNativePlayStoreUpdate(): Promise<NativePlayUpdateInfo | null> {
+async function checkNativePlayStoreUpdate(timeoutMs = 3500): Promise<NativePlayUpdateInfo | null> {
   if (Capacitor.getPlatform() !== 'android') {
     return null;
   }
+  let timer: ReturnType<typeof setTimeout> | null = null;
   try {
-    const info = await NativeAppUpdate.checkForUpdate();
+    const timeoutPromise = new Promise<null>((resolve) => {
+      timer = setTimeout(() => resolve(null), timeoutMs);
+    });
+    const info = await Promise.race([
+      NativeAppUpdate.checkForUpdate().catch(() => null),
+      timeoutPromise,
+    ]);
     return info || null;
   } catch {
     return null;
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 
@@ -526,12 +535,19 @@ export async function triggerAutoAppUpdate(
   const playStoreUrl = appSettings?.playStoreUrl || OFFICIAL_PLAY_STORE_URL;
 
   if (platform === 'android') {
+    let timer: ReturnType<typeof setTimeout> | null = null;
     try {
-      await NativeAppUpdate.startInAppUpdate({
-        mode: 'immediate',
-        playStoreUrl,
-        autoComplete: true,
+      const timeoutPromise = new Promise<{ started: boolean }>((_, reject) => {
+        timer = setTimeout(() => reject(new Error('startInAppUpdate timeout')), 3500);
       });
+      await Promise.race([
+        NativeAppUpdate.startInAppUpdate({
+          mode: 'immediate',
+          playStoreUrl,
+          autoComplete: true,
+        }),
+        timeoutPromise,
+      ]);
       return;
     } catch {
       try {
@@ -541,6 +557,8 @@ export async function triggerAutoAppUpdate(
         window.open(playStoreUrl, '_blank', 'noopener,noreferrer');
         return;
       }
+    } finally {
+      if (timer) clearTimeout(timer);
     }
   }
 

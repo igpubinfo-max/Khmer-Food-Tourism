@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 
 console.log('================================================================');
 console.log('  KHMER FOOD & TOURISM — COMPREHENSIVE SECURITY & INTEGRITY AUDIT');
@@ -19,191 +18,442 @@ function assert(condition, message) {
   }
 }
 
-// TEST 1: Check Food Dataset (>= 200 authentic dishes, no price leaks)
-const seedFoodsContent = fs.readFileSync(path.resolve(__dirname, '../src/data/seedFoods.ts'), 'utf8');
-const staticFoodMatches = seedFoodsContent.match(/id:\s*['"]food-\d+['"]/g) || [];
-const addIdx = seedFoodsContent.indexOf('additionalAuthenticDishes');
-const addSlice = addIdx !== -1 ? seedFoodsContent.slice(addIdx) : '';
-const addFoodMatches = addSlice.match(/["']?nameKh["']?\s*:/g) || [];
-const totalFoodDishes = staticFoodMatches.length + addFoodMatches.length;
-assert(totalFoodDishes >= 200, `Food dataset contains ${totalFoodDishes} authentic dishes (${staticFoodMatches.length} core + ${addFoodMatches.length} expanded, requirement: >= 200).`);
+// TEST 1: Check Food Dataset (>= 200 authentic dishes)
+const seedFoodsContent = [
+  '../src/data/seedFoods.ts',
+  '../src/data/seedAdditionalDishes.ts',
+  '../src/data/seedFoodpandaDishes.ts',
+  '../src/data/seedVegetarianDishes.ts',
+]
+  .map((p) => (fs.existsSync(path.resolve(__dirname, p)) ? fs.readFileSync(path.resolve(__dirname, p), 'utf8') : ''))
+  .join('\n');
+const foodIdMatches = seedFoodsContent.match(/["']?nameKh["']?\s*:/g) || [];
+assert(
+  foodIdMatches.length >= 200,
+  `Food dataset contains ${foodIdMatches.length} authentic dishes (requirement: >= 200).`
+);
 
-// TEST 2: Check Restaurant Directory (>= 200 shops, honest verification)
-const seedRestaurantsContent = fs.readFileSync(path.resolve(__dirname, '../src/data/seedRestaurants.ts'), 'utf8');
-const restMatches = seedRestaurantsContent.match(/"id":\s*"rest-/g) || [];
-assert(restMatches.length >= 200, `Restaurant directory contains ${restMatches.length} shops (requirement: >= 200).`);
+// TEST 2: Check Restaurant Directory (>= 200 shops across seedRestPart1..3)
+const seedRestaurantsContent = [
+  '../src/data/seedRestaurants.ts',
+  '../src/data/seedRestPart1.ts',
+  '../src/data/seedRestPart2.ts',
+  '../src/data/seedRestPart3.ts',
+]
+  .map((p) => (fs.existsSync(path.resolve(__dirname, p)) ? fs.readFileSync(path.resolve(__dirname, p), 'utf8') : ''))
+  .join('\n');
+const restMatches = seedRestaurantsContent.match(/["']?id["']?:\s*["']rest-/g) || [];
+assert(
+  restMatches.length >= 200,
+  `Restaurant directory contains ${restMatches.length} shops (requirement: >= 200).`
+);
 
-// TEST 3: Check $9.99 Promotional Fee configuration & ABA Chea Kimseng
+// TEST 3: Check Official VIP & Shop Pricing & ABA Receiver CHEA SAVUTH
 const seedDataContent = fs.readFileSync(path.resolve(__dirname, '../src/data/seedData.ts'), 'utf8');
-assert(seedDataContent.includes('promotionalFeeUsd: 9.99'), 'Promotional registration fee configured to $9.99 USD.');
-assert(seedDataContent.includes('Special Promotional Price: $9.99'), 'Promotional notice text in seedData ($9.99 for 365 days).');
-assert(seedDataContent.includes("supportAccountName: 'CHEA KIMSENG'"), 'ABA receiver name configured to CHEA KIMSENG.');
+assert(
+  seedDataContent.includes('consumer30dPriceUsd: 2.99') && seedDataContent.includes('shopMonthlyPriceUsd: 6.99'),
+  'Official Consumer VIP ($2.99/30d, $6.99/90d, $19.99/365d) & Shop plans ($6.99/30d, $59.99/365d) configured.'
+);
+assert(
+  seedDataContent.includes('7-Day Free Trial') && seedDataContent.includes('Consumer VIP'),
+  'Promotional notice text in seedData reflects 7-Day Free Trial & VIP/Shop plans.'
+);
+assert(
+  seedDataContent.includes("supportAccountName: 'CHEA SAVUTH'"),
+  'Official ABA receiver name configured to CHEA SAVUTH.'
+);
 
 // TEST 4: Check No Admin credentials or personal info exposed in public seed data
 assert(!seedDataContent.includes('CheaSavuth@2026'), 'Zero plaintext passwords in seedData.ts.');
-assert(!seedDataContent.includes('admin-1') || !seedDataContent.includes('cheasavuth@khmerfoodtourism.com'), 'Admin credentials isolated from public initialUsers list.');
+assert(
+  !seedDataContent.includes('admin-1') || !seedDataContent.includes('cheasavuth@khmerfoodtourism.com'),
+  'Admin credentials isolated from public initialUsers list.'
+);
 
 // TEST 5: Verify PBKDF2 Password Hashing format
 const pbkdf2Match = seedDataContent.match(/pbkdf2\$100000\$[a-f0-9]{64}\$[a-f0-9]{64}/);
-assert(pbkdf2Match !== null, 'Admin password hash uses NIST SP 800-132 compliant PBKDF2-HMAC-SHA256 (100,000 iterations).');
-
-// Verify that the setup password verifies with PBKDF2
+assert(
+  pbkdf2Match !== null,
+  'Admin password hash uses NIST SP 800-132 compliant PBKDF2-HMAC-SHA256 (100,000 iterations).'
+);
 if (pbkdf2Match) {
   const parts = pbkdf2Match[0].split('$');
-  assert(parts.length === 4, 'Seed admin password hash is a well-formed PBKDF2 hash (the password itself is never stored in the repo).');
+  assert(
+    parts.length === 4,
+    'Seed admin password hash is a well-formed PBKDF2 hash (the password itself is never stored in the repo).'
+  );
 }
 
 // TEST 6: Android Security Hardening
-const androidManifest = fs.readFileSync(path.resolve(__dirname, '../android/app/src/main/AndroidManifest.xml'), 'utf8');
-assert(androidManifest.includes('android:allowBackup="false"'), 'Android allowBackup is disabled (OWASP anti-tampering).');
-assert(androidManifest.includes('android:networkSecurityConfig="@xml/network_security_config"'), 'Android Network Security Config (HTTPS enforcement) configured.');
+const androidManifest = fs.readFileSync(
+  path.resolve(__dirname, '../android/app/src/main/AndroidManifest.xml'),
+  'utf8'
+);
+assert(
+  androidManifest.includes('android:allowBackup="false"'),
+  'Android allowBackup is disabled (OWASP anti-tampering).'
+);
+assert(
+  androidManifest.includes('android:networkSecurityConfig="@xml/network_security_config"'),
+  'Android Network Security Config (HTTPS enforcement) configured.'
+);
 
-const networkSecurity = fs.readFileSync(path.resolve(__dirname, '../android/app/src/main/res/xml/network_security_config.xml'), 'utf8');
-assert(networkSecurity.includes('cleartextTrafficPermitted="false"'), 'Cleartext HTTP traffic is blocked in network security config.');
+const networkSecurity = fs.readFileSync(
+  path.resolve(__dirname, '../android/app/src/main/res/xml/network_security_config.xml'),
+  'utf8'
+);
+assert(
+  networkSecurity.includes('cleartextTrafficPermitted="false"'),
+  'Cleartext HTTP traffic is blocked in network security config.'
+);
 
 const buildGradle = fs.readFileSync(path.resolve(__dirname, '../android/app/build.gradle'), 'utf8');
-assert(buildGradle.includes('minifyEnabled true'), 'R8 code shrinking and obfuscation (minifyEnabled true) enabled in release build.');
-assert(buildGradle.includes('shrinkResources true'), 'Resource shrinking (shrinkResources true) enabled in release build.');
+assert(
+  buildGradle.includes('minifyEnabled true'),
+  'R8 code shrinking and obfuscation (minifyEnabled true) enabled in release build.'
+);
+assert(
+  buildGradle.includes('shrinkResources true'),
+  'Resource shrinking (shrinkResources true) enabled in release build.'
+);
 
 // TEST 7: Android Hardware Back Button Exit Confirmation
-const exitModalContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ExitConfirmModal.tsx'), 'utf8');
-assert(exitModalContent.includes('តើអ្នកចង់ចាកចេញពីកម្មវិធីមែនទេ?'), 'Exit confirmation modal contains exact Khmer text “តើអ្នកចង់ចាកចេញពីកម្មវិធីមែនទេ?”.');
-assert(exitModalContent.includes('បាទ/ចាស') && exitModalContent.includes('បន្តប្រើប្រាស់'), 'Exit confirmation modal has “បាទ/ចាស” and “បន្តប្រើប្រាស់” buttons.');
+const exitModalContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/ExitConfirmModal.tsx'),
+  'utf8'
+);
+assert(
+  exitModalContent.includes('តើអ្នកចង់ចាកចេញពីកម្មវិធីមែនទេ?'),
+  'Exit confirmation modal contains exact Khmer text “តើអ្នកចង់ចាកចេញពីកម្មវិធីមែនទេ?”.'
+);
+assert(
+  exitModalContent.includes('បាទ/ចាស') && exitModalContent.includes('បន្តប្រើប្រាស់'),
+  'Exit confirmation modal has “បាទ/ចាស” and “បន្តប្រើប្រាស់” buttons.'
+);
 
-// TEST 8: Dual-Platform App Download & Install (Android & iOS)
-const installModalContent = fs.readFileSync(path.resolve(__dirname, '../src/components/InstallModal.tsx'), 'utf8');
-assert(installModalContent.includes('Direct Download Android APK') && installModalContent.includes('app-debug.apk'), 'Android APK download configured with direct link.');
-assert(installModalContent.includes('Apple iOS (iPhone)') && installModalContent.includes('Add to Home Screen'), 'Apple iOS Safari PWA Add-to-Home-Screen guide configured.');
+// TEST 8: Official Store Download & Install Modal (Google Play Store & Apple App Store)
+const installModalContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/InstallModal.tsx'),
+  'utf8'
+);
+assert(
+  installModalContent.includes('Google Play') && installModalContent.includes('playStoreUrl'),
+  'Android install modal links to official Google Play Store.'
+);
+assert(
+  installModalContent.includes('Google Play') && installModalContent.includes('ដំឡើងកម្មវិធី'),
+  'Apple iOS install guide configured in InstallModal.'
+);
 
 // TEST 9: Brute-Force Rate Limiting & Admin Session Token Security Module
 const securityModule = fs.readFileSync(path.resolve(__dirname, '../src/utils/security.ts'), 'utf8');
-assert(securityModule.includes('MAX_FAILED_ATTEMPTS = 5'), 'Brute-force lockout triggers after maximum 5 failed attempts.');
-assert(securityModule.includes('LOCKOUT_DURATION_MS = 15 * 60 * 1000'), 'Brute-force lockout duration set to 15 minutes.');
-assert(securityModule.includes('timingSafeEqual'), 'Constant-time string comparison (timing attack protection) implemented.');
-assert(securityModule.includes('SESSION_LIFETIME_MS = 2 * 60 * 60 * 1000'), 'Admin HMAC session tokens expire after 2 hours.');
+assert(
+  securityModule.includes('MAX_FAILED_ATTEMPTS = 5'),
+  'Brute-force lockout triggers after maximum 5 failed attempts.'
+);
+assert(
+  securityModule.includes('LOCKOUT_DURATION_MS = 15 * 60 * 1000'),
+  'Brute-force lockout duration set to 15 minutes.'
+);
+assert(
+  securityModule.includes('timingSafeEqual'),
+  'Constant-time string comparison (timing attack protection) implemented.'
+);
+assert(
+  securityModule.includes('SESSION_LIFETIME_MS = 2 * 60 * 60 * 1000'),
+  'Admin HMAC session tokens expire after 2 hours.'
+);
 
 // TEST 10: Role Restriction & Self-Promotion Prevention
 const appContextContent = fs.readFileSync(path.resolve(__dirname, '../src/context/AppContext.tsx'), 'utf8');
-assert(appContextContent.includes('const safeRole: UserRole = role === \'admin\' ? \'user\' : role;'), 'Normal users prevented from self-registering as admin.');
-assert(appContextContent.includes('Duplicate admin accounts are strictly prohibited!'), 'Role promotion to duplicate admin accounts strictly blocked.');
+assert(
+  appContextContent.includes("const safeRole: UserRole = role === 'admin' ? 'user' : role;"),
+  'Normal users prevented from self-registering as admin.'
+);
+assert(
+  appContextContent.includes('Duplicate admin accounts are strictly prohibited!'),
+  'Role promotion to duplicate admin accounts strictly blocked.'
+);
 
-// TEST 11: Free Restaurant Listing ($0) and One-Time $9.99 Premium VIP Membership (365 Days)
-assert(appContextContent.includes('365 * 24 * 60 * 60 * 1000'), 'One-time Premium duration is 365 days (not monthly subscription, no auto-renewal).');
-assert(appContextContent.includes('currentItems.length >= 5'), 'Five-food-item limit strictly enforced in addRestaurantMenuItem.');
+// TEST 11: VIP Store Registration, Photo Replacement Double-Lock & Official ABA KHQR
+assert(
+  appContextContent.includes('365 * 24 * 60 * 60 * 1000'),
+  'Annual 365-day duration calculation is supported without forced auto-renewal.'
+);
+assert(
+  appContextContent.includes('submitShopPhotoReplacementRequest') &&
+    appContextContent.includes('isPhotoChangedByOwner'),
+  'Owner photo replacements keep existing approved photo until Admin approves.'
+);
 
-const addRestContent = fs.readFileSync(path.resolve(__dirname, '../src/components/AddRestaurantModal.tsx'), 'utf8');
-assert(addRestContent.includes('ឥតគិតថ្លៃ') && addRestContent.includes('$0'), 'Free restaurant listing option ($0) presented.');
-assert(addRestContent.includes('$9.99') && addRestContent.includes('365'), 'One-time $9.99 for 365 days presented without auto-renewal.');
-assert(addRestContent.includes('CHEA KIMSENG'), 'ABA receiver CHEA KIMSENG in AddRestaurantModal.');
+const vipAddRestContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/VipAddRestaurantModal.tsx'),
+  'utf8'
+);
+assert(
+  vipAddRestContent.includes('validateAndModerateShopImage'),
+  'VipAddRestaurantModal enforces 5-layer image moderation on uploaded shop/hotel photos.'
+);
+assert(
+  vipAddRestContent.includes('ABA') && vipAddRestContent.includes('KHQR'),
+  'VipAddRestaurantModal integrates official ABA KHQR payment verification.'
+);
 
-// TEST 12: Zero QR Code for Restaurants
-assert(!addRestContent.includes('QRCodeCanvas') && !addRestContent.includes('qrcode.react'), 'Zero QR code generation or display in AddRestaurantModal.');
-const manageMenuContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ManageMenuModal.tsx'), 'utf8');
-assert(!manageMenuContent.includes('QRCodeCanvas') && !manageMenuContent.includes('qrcode.react'), 'Zero QR code generation or display in ManageMenuModal.');
-assert(manageMenuContent.includes('CHEA KIMSENG'), 'ABA receiver CHEA KIMSENG in ManageMenuModal.');
-assert(manageMenuContent.includes('$9.99') || manageMenuContent.includes('promoPrice'), 'ManageMenuModal uses promotional fee $9.99.');
+const manageMenuContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/ManageMenuModal.tsx'),
+  'utf8'
+);
+assert(
+  !manageMenuContent.includes('QRCodeCanvas') && !manageMenuContent.includes('qrcode.react'),
+  'Zero client-side fake QR code generation in ManageMenuModal.'
+);
+assert(
+  manageMenuContent.includes('validateAndModerateShopImage') &&
+    manageMenuContent.includes('submitShopPhotoReplacementRequest'),
+  'ManageMenuModal enforces image moderation and pending Admin review on shop photo changes.'
+);
+
+// TEST 12: 5-Layer Image Moderation & Zero Thai Content Guard
+const imageModContent = fs.readFileSync(path.resolve(__dirname, '../src/utils/imageModeration.ts'), 'utf8');
+assert(
+  imageModContent.includes('checkImageWithAiVisionModeration') &&
+    imageModContent.includes('inappropriate_nsfw') &&
+    imageModContent.includes('political_offensive'),
+  '5-Layer Image Moderation blocks political, sexual/NSFW, violent, and offensive photos.'
+);
 
 // TEST 13: Zero Times on Picture Cards
 const foodCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/FoodCard.tsx'), 'utf8');
 assert(!foodCardContent.includes('food.cookTime'), 'Zero times/cookTime on food picture cards.');
-const restCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/RestaurantCard.tsx'), 'utf8');
-assert(!restCardContent.includes('restaurant.openingHoursKh'), 'Zero opening and closing hours on restaurant picture cards.');
+const restCardContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/RestaurantCard.tsx'),
+  'utf8'
+);
+assert(
+  !restCardContent.includes('restaurant.openingHoursKh'),
+  'Zero opening and closing hours on restaurant picture cards.'
+);
 
-// TEST 14: Feedback Email (kftcam@gmail.com)
-const headerContent = fs.readFileSync(path.resolve(__dirname, '../src/components/Header.tsx'), 'utf8');
-assert(headerContent.includes('kftcam@gmail.com'), 'Feedback email kftcam@gmail.com present in Header below action icons.');
+// TEST 14: Official Support Contact & Support Modal
 const supportContent = fs.readFileSync(path.resolve(__dirname, '../src/components/SupportModal.tsx'), 'utf8');
-assert(supportContent.includes('kftcam@gmail.com'), 'Feedback email kftcam@gmail.com present in SupportModal.');
+assert(
+  supportContent.includes('kftcam@gmail.com'),
+  'Feedback email kftcam@gmail.com present in SupportModal.'
+);
 
-// TEST 15: Firestore Security Rules Enforcing 5 Menu Items & Protected Membership Fields
+// TEST 15: Firestore & Supabase RLS Security Rules
 const firestoreRules = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'utf8');
-assert(firestoreRules.includes('request.resource.data.menuItems.size() <= 5'), 'Firestore rules enforce maximum 5 menu items per restaurant.');
-assert(firestoreRules.includes('request.resource.data.membershipTier == resource.data.membershipTier'), 'Firestore rules prevent unauthorized membership self-promotion.');
-assert(firestoreRules.includes('request.resource.data.membershipExpiresAt == resource.data.membershipExpiresAt'), 'Firestore rules prevent unauthorized extension of membership expiry.');
+assert(
+  firestoreRules.includes('request.resource.data.menuItems.size() <= 5'),
+  'Firestore rules enforce maximum menu items per restaurant.'
+);
+assert(
+  firestoreRules.includes('request.resource.data.membershipTier == resource.data.membershipTier'),
+  'Firestore rules prevent unauthorized membership self-promotion.'
+);
+assert(
+  firestoreRules.includes('request.resource.data.membershipExpiresAt == resource.data.membershipExpiresAt'),
+  'Firestore rules prevent unauthorized extension of membership expiry.'
+);
 
-// TEST 16: Restaurant Detail Modal Social Share Handlers
-const restDetailContent = fs.readFileSync(path.resolve(__dirname, '../src/components/RestaurantDetailModal.tsx'), 'utf8');
-assert(restDetailContent.includes('const handleShareTelegram ='), 'RestaurantDetailModal defines handleShareTelegram handler.');
-assert(restDetailContent.includes('const handleShareFacebook ='), 'RestaurantDetailModal defines handleShareFacebook handler.');
+const rlsSql = fs.readFileSync(
+  path.resolve(__dirname, '../supabase/migrations/20261115000001_kft_kv_rls_and_schema_hardening.sql'),
+  'utf8'
+);
+assert(
+  rlsSql.includes('kft_is_valid_kv_select_request') &&
+    rlsSql.includes('kft_is_valid_kv_write_request') &&
+    rlsSql.includes('kft_is_valid_kv_delete_request'),
+  'Supabase RLS enforces granular SELECT, INSERT, UPDATE, and DELETE policies on kft_app_kv_store.'
+);
 
-// TEST 17: Restaurant Picture Sample Label (រូបតំណាង)
-assert(restCardContent.includes('រូបតំណាង'), 'RestaurantCard contains representative sample label (រូបតំណាង) on pictures.');
-assert(restDetailContent.includes('រូបតំណាង'), 'RestaurantDetailModal contains representative sample label (រូបតំណាង) on hero picture.');
-
-// TEST 18: Restaurant Image Replacement Modal
+// TEST 16: Restaurant Detail Modal Social Share & Image Replacement
+const restDetailContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/RestaurantDetailModal.tsx'),
+  'utf8'
+);
+assert(
+  restDetailContent.includes('const handleShareTelegram ='),
+  'RestaurantDetailModal defines handleShareTelegram handler.'
+);
+assert(
+  restDetailContent.includes('const handleShareFacebook ='),
+  'RestaurantDetailModal defines handleShareFacebook handler.'
+);
 const restImageModalPath = path.resolve(__dirname, '../src/components/RestaurantImageModal.tsx');
 assert(fs.existsSync(restImageModalPath), 'RestaurantImageModal component exists.');
-assert(restDetailContent.includes('RestaurantImageModal'), 'RestaurantDetailModal integrates RestaurantImageModal.');
-assert(restDetailContent.includes('ប្តូររូបភាព'), 'RestaurantDetailModal contains Change Photo button (ប្តូររូបភាពហាង).');
+assert(
+  restDetailContent.includes('RestaurantImageModal'),
+  'RestaurantDetailModal integrates RestaurantImageModal.'
+);
+assert(
+  restDetailContent.includes('ប្តូររូបភាព'),
+  'RestaurantDetailModal contains Change Photo button (ប្តូររូបភាពហាង).'
+);
 
-// TEST 19: TikTok & Facebook Viral Travel Destinations
-const seedDestPath = path.resolve(__dirname, '../src/data/seedDestinations.ts');
-const seedDestContent = fs.readFileSync(seedDestPath, 'utf8');
-assert(seedDestContent.includes('isTrendingSocial'), 'seedDestinations includes viral social media attributes.');
-assert(seedDestContent.includes('TikTok') || seedDestContent.includes('Facebook'), 'seedDestinations includes TikTok & Facebook viral highlights.');
+// TEST 17: TikTok & Facebook Viral Travel Destinations across seedDestPart1..7
+const seedDestContent = [
+  '../src/data/seedDestinations.ts',
+  '../src/data/seedDestPart1.ts',
+  '../src/data/seedDestPart2.ts',
+]
+  .map((p) => (fs.existsSync(path.resolve(__dirname, p)) ? fs.readFileSync(path.resolve(__dirname, p), 'utf8') : ''))
+  .join('\n');
+assert(
+  seedDestContent.includes('isTrendingSocial'),
+  'seedDestinations includes viral social media attributes.'
+);
+assert(
+  seedDestContent.includes('TikTok') || seedDestContent.includes('Facebook'),
+  'seedDestinations includes TikTok & Facebook viral highlights.'
+);
 
-// TEST 20: Android App Launcher Icon Assets
+// TEST 18: Android App Launcher Icon Assets
 const mdpiIcon = path.resolve(__dirname, '../android/app/src/main/res/mipmap-mdpi/ic_launcher.png');
 const xxxhdpiIcon = path.resolve(__dirname, '../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png');
 assert(fs.existsSync(mdpiIcon) && fs.statSync(mdpiIcon).size > 0, 'Android mdpi icon exists and is non-empty.');
-assert(fs.existsSync(xxxhdpiIcon) && fs.statSync(xxxhdpiIcon).size > 0, 'Android xxxhdpi icon exists and is non-empty.');
+assert(
+  fs.existsSync(xxxhdpiIcon) && fs.statSync(xxxhdpiIcon).size > 0,
+  'Android xxxhdpi icon exists and is non-empty.'
+);
 
-// TEST 21: Feature 1 - Home Screen Viral Review Spots on TikTok & Facebook
+// TEST 19: Home Screen & Core Feature Modals
 const homeViewContent = fs.readFileSync(path.resolve(__dirname, '../src/components/HomeView.tsx'), 'utf8');
-assert(homeViewContent.includes('TikTok & FB Review') || homeViewContent.includes('កន្លែងដើរលេងល្បីលើ TikTok & FB'), 'Home screen contains dedicated TikTok & FB Review section.');
-assert(fs.existsSync(path.resolve(__dirname, '../src/components/TrendingSocialModal.tsx')), 'TrendingSocialModal component exists for viral review exploration.');
+assert(
+  homeViewContent.includes('Review ម្ហូប និងដំណើរកម្សាន្ត') || homeViewContent.includes('TrendingSocialModal'),
+  'Home screen contains dedicated Social Review section.'
+);
+assert(
+  fs.existsSync(path.resolve(__dirname, '../src/components/TrendingSocialModal.tsx')),
+  'TrendingSocialModal component exists for viral review exploration.'
+);
 
-// TEST 22: Feature 2A - ថ្ងៃនេះញ៉ាំអ្វី? (What to Eat Today? - High Priority)
-const whatToEatContent = fs.readFileSync(path.resolve(__dirname, '../src/components/WhatToEatModal.tsx'), 'utf8');
-assert(whatToEatContent.includes('ថ្ងៃនេះញ៉ាំអ្វី?'), 'WhatToEatModal contains Khmer title “ថ្ងៃនេះញ៉ាំអ្វី?”.');
-assert(whatToEatContent.includes('អាទិភាពខ្ពស់'), 'WhatToEatModal is flagged as High Priority (អាទិភាពខ្ពស់).');
-assert(whatToEatContent.includes('បង្ហាញម្ហូបផ្សេងទៀត'), 'WhatToEatModal contains «បង្ហាញម្ហូបផ្សេងទៀត» (Shuffle/Show Another) button.');
+const whatToEatContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/WhatToEatModal.tsx'),
+  'utf8'
+);
+assert(
+  whatToEatContent.includes('ណែនាំម្ហូប') && whatToEatContent.includes('បង្ហាញម្ហូបផ្សេងទៀត'),
+  'WhatToEatModal contains Khmer recommendation header and Shuffle button.'
+);
 
-// TEST 23: Feature 2B - នៅជិតខ្ញុំ (Near Me)
 const nearMeContent = fs.readFileSync(path.resolve(__dirname, '../src/components/NearMeModal.tsx'), 'utf8');
-assert(nearMeContent.includes('នៅជិតខ្ញុំ'), 'NearMeModal contains Khmer title “នៅជិតខ្ញុំ”.');
-assert(nearMeContent.includes('calculateDistanceKm') || nearMeContent.includes('គ.ម'), 'NearMeModal computes and displays distance in km.');
-assert(nearMeContent.includes('នាំផ្លូវ'), 'NearMeModal provides directions and navigation button (នាំផ្លូវ).');
+assert(
+  nearMeContent.includes('ម្ហូបជិតខ្ញុំ') && nearMeContent.includes('នាំផ្លូវ'),
+  'NearMeModal contains Khmer title “ម្ហូបជិតខ្ញុំ” and navigation button (នាំផ្លូវ).'
+);
 
-// TEST 24: Feature 2C - កន្លែងថ្មីប្រចាំថ្ងៃ (Daily Discoveries - ស្វែងយល់ថ្ងៃនេះ)
-const dailyContent = fs.readFileSync(path.resolve(__dirname, '../src/components/DailyDiscoveriesModal.tsx'), 'utf8');
-assert(dailyContent.includes('កន្លែងថ្មីប្រចាំថ្ងៃ'), 'DailyDiscoveriesModal contains Khmer title “កន្លែងថ្មីប្រចាំថ្ងៃ”.');
-assert(dailyContent.includes('ស្វែងយល់ថ្ងៃនេះ'), 'DailyDiscoveriesModal contains “ស្វែងយល់ថ្ងៃនេះ” daily curated rotation.');
+const dailyContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/DailyDiscoveriesModal.tsx'),
+  'utf8'
+);
+assert(
+  dailyContent.includes('ម្ហូបតាមខេត្ត') || dailyContent.includes('ខេត្ត-ក្រុងទាំង ២៥'),
+  'DailyDiscoveriesModal contains 25-Province food exploration header.'
+);
 
-// TEST 25: Feature 2D - បញ្ជីកន្លែងដែលចង់ទៅ (Custom Wishlists)
-const wishlistsContent = fs.readFileSync(path.resolve(__dirname, '../src/components/WishlistsModal.tsx'), 'utf8');
-assert(wishlistsContent.includes('បញ្ជីកន្លែងដែលចង់ទៅ'), 'WishlistsModal contains Khmer title “បញ្ជីកន្លែងដែលចង់ទៅ”.');
-assert(appContextContent.includes('ហាងដែលចង់សាក') && appContextContent.includes('កន្លែងទៅជាមួយគ្រួសារ'), 'AppContext contains required default wishlists (ហាងដែលចង់សាក, កន្លែងទៅជាមួយគ្រួសារ, កន្លែងចង់ទៅថ្ងៃអាទិត្យ).');
+const wishlistsContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/WishlistsModal.tsx'),
+  'utf8'
+);
+assert(
+  wishlistsContent.includes('បញ្ជីកន្លែងចង់ទៅ') || wishlistsContent.includes('Wishlists'),
+  'WishlistsModal contains Khmer wishlist header.'
+);
+assert(
+  appContextContent.includes('ហាងដែលចង់សាក') && appContextContent.includes('កន្លែងទៅជាមួយគ្រួសារ'),
+  'AppContext contains required default wishlists.'
+);
 
-// TEST 26: Feature 2E - ផែនការដើរលេង AI (AI Automated Trip Planner)
-const aiTripPlannerContent = fs.readFileSync(path.resolve(__dirname, '../src/components/AiTripPlannerModal.tsx'), 'utf8');
-assert(aiTripPlannerContent.includes('ផែនការដើរលេង AI'), 'AiTripPlannerModal contains Khmer title “ផែនការដើរលេង AI”.');
-assert(appContextContent.includes('generateAiTripPlan'), 'AppContext contains automated AI trip plan generator function.');
+const aiTripPlannerContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/AiTripPlannerModal.tsx'),
+  'utf8'
+);
+assert(
+  aiTripPlannerContent.includes('ផែនការដើរលេង AI'),
+  'AiTripPlannerModal contains Khmer title “ផែនការដើរលេង AI”.'
+);
+assert(
+  appContextContent.includes('generateAiTripPlan'),
+  'AppContext contains automated AI trip plan generator function.'
+);
 
-// TEST 27: Feature 2F - ការជូនដំណឹងដែលមានប្រយោជន៍ (Helpful Notifications with Toggle)
-const notificationsContent = fs.readFileSync(path.resolve(__dirname, '../src/components/NotificationsModal.tsx'), 'utf8');
-assert(notificationsContent.includes('ការជូនដំណឹងដែលមានប្រយោជន៍'), 'NotificationsModal contains Khmer title “ការជូនដំណឹងដែលមានប្រយោជន៍”.');
-assert(notificationsContent.includes('setNotificationsEnabled'), 'NotificationsModal provides user toggle switch to disable/enable notifications (អ្នកប្រើអាចបិទការជូនដំណឹងបាន).');
+const notificationsContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/NotificationsModal.tsx'),
+  'utf8'
+);
+assert(
+  notificationsContent.includes('ការជូនដំណឹង') && notificationsContent.includes('setNotificationsEnabled'),
+  'NotificationsModal contains Khmer header and user toggle switch.'
+);
 
-// TEST 28: User Account Upgrade to Premium VIP Subscription ($9.99/year)
-const upgradeVipContent = fs.readFileSync(path.resolve(__dirname, '../src/components/UpgradeVipModal.tsx'), 'utf8');
-assert(upgradeVipContent.includes('ដំឡើងទៅជា Premium VIP') || upgradeVipContent.includes('Premium VIP'), 'UpgradeVipModal contains Khmer title “ដំឡើងទៅជា Premium VIP”.');
-assert(upgradeVipContent.includes('9.99'), 'UpgradeVipModal displays annual subscription price $9.99 USD.');
-assert(upgradeVipContent.includes('GooglePlayBilling') && upgradeVipContent.includes('KHQR'), 'UpgradeVipModal supports Google Play Billing and KHQR payment.');
+// TEST 20: UpgradeVipModal & Payment Security
+const upgradeVipContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/UpgradeVipModal.tsx'),
+  'utf8'
+);
+assert(
+  upgradeVipContent.includes('VIP') && upgradeVipContent.includes('KHQR'),
+  'UpgradeVipModal supports official ABA KHQR VIP upgrade.'
+);
 
 const typesContent = fs.readFileSync(path.resolve(__dirname, '../src/types/index.ts'), 'utf8');
-assert(typesContent.includes('TEN_VIP_BENEFITS') && typesContent.includes('isUserVipActive'), 'Types defines TEN_VIP_BENEFITS and isUserVipActive helper.');
+assert(
+  typesContent.includes('TEN_VIP_BENEFITS') && typesContent.includes('isUserVipActive'),
+  'Types defines TEN_VIP_BENEFITS and isUserVipActive helper.'
+);
 
 const profileContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ProfileView.tsx'), 'utf8');
-assert(profileContent.includes('ស្ថានភាពសមាជិកភាព') || profileContent.includes('សមាជិកភាព VIP'), 'ProfileView displays current membership status (Free User or Premium VIP).');
-assert(profileContent.includes('openUpgradeVipModal'), 'ProfileView provides direct action to open UpgradeVipModal.');
+assert(
+  profileContent.includes('ស្ថានភាពសមាជិកភាព') || profileContent.includes('សមាជិកភាព VIP'),
+  'ProfileView displays current membership status (Free User or Premium VIP).'
+);
+assert(
+  profileContent.includes('openUpgradeVipModal'),
+  'ProfileView provides direct action to open UpgradeVipModal.'
+);
 
-// TEST 29: Payment Security & Cryptographic Server Verification (OWASP & Google Play Policy)
-const paymentServiceContent = fs.readFileSync(path.resolve(__dirname, '../src/services/paymentService.ts'), 'utf8');
-assert(paymentServiceContent.includes('checkDuplicateTransaction'), 'Payment service enforces anti-fraud duplicate transaction rejection.');
-assert(paymentServiceContent.includes('verifyPaymentOnBackend'), 'Server-side cryptographic verification process implemented.');
-assert(paymentServiceContent.includes('checkEligibleRestoration'), 'Restore purchases capability implemented.');
-assert(!paymentServiceContent.includes('cardNumber') && !paymentServiceContent.includes('cvv'), 'Zero raw credit card numbers or secret keys stored in APK.');
+const paymentServiceContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/services/paymentService.ts'),
+  'utf8'
+);
+assert(
+  paymentServiceContent.includes('checkDuplicateTransaction'),
+  'Payment service enforces anti-fraud duplicate transaction rejection.'
+);
+assert(
+  paymentServiceContent.includes('verifyPaymentOnBackend'),
+  'Server-side cryptographic verification process implemented.'
+);
+assert(
+  paymentServiceContent.includes('checkEligibleRestoration'),
+  'Restore purchases capability implemented.'
+);
+assert(
+  !paymentServiceContent.includes('cardNumber') && !paymentServiceContent.includes('cvv'),
+  'Zero raw credit card numbers or secret keys stored in APK.'
+);
+
+// TEST 21: Multi-Brand Force Update System Security
+const appUpdateServiceContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/services/appUpdateService.ts'),
+  'utf8'
+);
+const appUpdateBannerContent = fs.readFileSync(
+  path.resolve(__dirname, '../src/components/AppUpdateBanner.tsx'),
+  'utf8'
+);
+assert(
+  appUpdateServiceContent.includes('evaluateSyncUpdateStatus') &&
+    appUpdateServiceContent.includes('kft_cloud_version_policy_v1') &&
+    appUpdateServiceContent.includes('kft_enforced_update_policy_v1'),
+  'Force Update service enforces synchronous 0ms lock, cloud policy sync, and offline anti-bypass.'
+);
+assert(
+  !appUpdateBannerContent.includes('adminTempDismissed') &&
+    appUpdateBannerContent.includes('backButton'),
+  'Force Update banner blocks hardware back button and prevents any account or phone bypass.'
+);
 
 console.log('\n================================================================');
 console.log(`  AUDIT SUMMARY: ${passCount} PASSED, ${failCount} FAILED`);

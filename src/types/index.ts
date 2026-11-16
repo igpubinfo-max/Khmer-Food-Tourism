@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1618;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1619;
 export const APP_RELEASE_DATE = '2026-11-16';
 
 /**
@@ -4364,7 +4364,7 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   // Detect genuine legacy synthetic 365-day inflation OR single-package double-grant inflation (e.g. 30-day plan showing 60 days remaining)
   const distinctActiveCycleGrants = activeGrants.filter(g => g.isCurrentCycle).length;
   const hasSinglePackageDoubleGrantInflation =
-    distinctActiveCycleGrants <= 1 &&
+    distinctActiveCycleGrants === 1 &&
     actualPlanDays >= 1 &&
     (remainingDays > actualPlanDays || spanDays > actualPlanDays + 1);
 

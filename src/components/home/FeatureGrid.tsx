@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Language } from '../../types';
+import { APP_BUILD_CODE, type Language } from '../../types';
 import { tr } from '../../utils/i18n';
 
 interface Props {
@@ -32,37 +32,37 @@ const FeatureGridImpl: React.FC<Props> = ({
   const items: FeatureItem[] = [
     {
       id: 'nearby-food',
-      imageSrc: '/categories/home_cat_nearby_food.png',
+      imageSrc: `/categories/home_cat_nearby_food.png?v=${APP_BUILD_CODE}`,
       label: tr(language, 'ម្ហូបជិតខ្ញុំ', 'Nearby Food', '附近美食'),
       onClick: onNearbyFoodSearch,
     },
     {
       id: 'compare-dishes',
-      imageSrc: '/categories/home_cat_drinks.png',
+      imageSrc: `/categories/home_cat_drinks.png?v=${APP_BUILD_CODE}`,
       label: tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佳肴与饮品'),
       onClick: onNearbyPlaces,
     },
     {
       id: 'food-recommend',
-      imageSrc: '/categories/home_cat_recommend.png',
+      imageSrc: `/categories/home_cat_recommend.png?v=${APP_BUILD_CODE}`,
       label: tr(language, 'ណែនាំម្ហូប', 'Food Picks', '美食推荐'),
       onClick: onFoodRecommendations,
     },
     {
       id: 'daily-food',
-      imageSrc: '/categories/home_cat_province_food.png',
+      imageSrc: `/categories/home_cat_province_food.png?v=${APP_BUILD_CODE}`,
       label: tr(language, 'ម្ហូបតាមខេត្ត', 'Food by Province', '各省美食'),
       onClick: onDailyFoodDiscovery,
     },
     {
       id: 'map-nav',
-      imageSrc: '/categories/home_cat_map_route.png',
+      imageSrc: `/categories/home_cat_map_route.png?v=${APP_BUILD_CODE}`,
       label: tr(language, 'ផែនទីធ្វើដំណើរ', 'Map Route', '地图导航'),
       onClick: onMapNavigation,
     },
     {
       id: 'smart-ai',
-      imageSrc: '/categories/home_cat_smart_ai.png',
+      imageSrc: `/categories/home_cat_smart_ai.png?v=${APP_BUILD_CODE}`,
       label: tr(language, 'ជំនួយការឆ្លាតវៃ Ai', 'Smart AI', 'AI 智能助手'),
       onClick: onSmartAiAssistant,
     },
@@ -88,7 +88,7 @@ const FeatureGridImpl: React.FC<Props> = ({
           >
             {/* 3D Gold-Bordered Category Illustration Button */}
             <div
-              className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200"
+              className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[1024/456] overflow-visible transition-all duration-200"
               style={{
                 transform: 'none',
               }}
