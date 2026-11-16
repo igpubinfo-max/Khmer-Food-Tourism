@@ -1162,4 +1162,108 @@ test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclus
   }
 });
 
+test('17. TikTok Video System Audit: 180+ Unique Playable Streams, Zero YouTube Hijack, Strict Deduplication & Non-Repeating Playback', () => {
+  const memStore = new Map();
+  globalThis.localStorage = {
+    getItem: (k) => (memStore.has(k) ? memStore.get(k) : null),
+    setItem: (k, v) => memStore.set(k, String(v)),
+    removeItem: (k) => memStore.delete(k),
+  };
+
+  const {
+    CURATED_TIKTOK_FACEBOOK_REVIEWS,
+    extractEmbedPlayerInfo,
+    isDirectVideoUrlFreshAndPlayable,
+    deduplicateSingleVideoList,
+    rotateLatestVideosForScope,
+    recordPlayedSocialVideo,
+    getPlayedSocialVideoKeys,
+    getCanonicalSocialVideoKey,
+    advanceVideoRotationCycle,
+  } = require(path.join(ROOT, 'src/services/onlineFoodDiscoveryService.ts'));
+
+  const tiktokItems = CURATED_TIKTOK_FACEBOOK_REVIEWS.filter((x) => x.platform === 'tiktok');
+  assert.ok(
+    tiktokItems.length >= 180,
+    'Expected at least 180 unique verified TikTok videos in CURATED_TIKTOK_FACEBOOK_REVIEWS, got ' + tiktokItems.length
+  );
+
+  const uniqueVideoIds = new Set();
+  const uniqueStreamPaths = new Set();
+  const uniqueEmbedUrls = new Set();
+
+  for (const item of tiktokItems) {
+    const info = extractEmbedPlayerInfo(item);
+    assert.ok(
+      !info.embedUrl || !info.embedUrl.includes('youtube.com'),
+      'TikTok item must NEVER use a YouTube embed URL: ' + item.id + ' -> ' + info.embedUrl
+    );
+    assert.ok(
+      info.embedUrl && info.embedUrl.startsWith('https://www.tiktok.com/player/v1/'),
+      'TikTok item embedUrl must use official TikTok player/v1: ' + item.id
+    );
+    assert.ok(info.videoId && /^\d{15,22}$/.test(info.videoId), 'Invalid 19-digit TikTok videoId for ' + item.id);
+    assert.ok(info.directVideoUrl, 'Missing directVideoUrl for TikTok item ' + item.id);
+    assert.equal(
+      isDirectVideoUrlFreshAndPlayable(info.directVideoUrl),
+      true,
+      'directVideoUrl failed isDirectVideoUrlFreshAndPlayable for ' + item.id
+    );
+
+    uniqueVideoIds.add(info.videoId);
+    uniqueStreamPaths.add(info.directVideoUrl.split('?')[0]);
+    uniqueEmbedUrls.add(info.embedUrl);
+  }
+
+  assert.equal(
+    uniqueVideoIds.size,
+    tiktokItems.length,
+    'Every TikTok item must have a 100% unique 19-digit videoId'
+  );
+  assert.equal(
+    uniqueStreamPaths.size,
+    tiktokItems.length,
+    'Every TikTok item must have a 100% unique direct MP4 stream path'
+  );
+  assert.equal(
+    uniqueEmbedUrls.size,
+    tiktokItems.length,
+    'Every TikTok item must have a 100% unique official TikTok embedUrl'
+  );
+
+  // Verify strict deduplication so displayed count matches actual unique playable videos
+  const injectedWithDups = [
+    ...tiktokItems,
+    tiktokItems[0],
+    { ...tiktokItems[1], id: 'dup-id-variant' },
+    { ...tiktokItems[2], id: 'dup-stream-variant', inlineVideoId: '7799999999999999999' },
+  ];
+  const deduped = deduplicateSingleVideoList(injectedWithDups);
+  assert.equal(
+    deduped.length,
+    tiktokItems.length,
+    'deduplicateSingleVideoList must eliminate ID, videoId, stream-path, and title duplicates'
+  );
+
+  // Verify playback history pushes watched videos to the back so they do not repeat unnecessarily
+  const c1 = advanceVideoRotationCycle();
+  const rot1 = rotateLatestVideosForScope(tiktokItems, 'tiktok|all|all', c1);
+  const watchedItem = rot1[0];
+  recordPlayedSocialVideo(watchedItem);
+  assert.equal(
+    getPlayedSocialVideoKeys().has(getCanonicalSocialVideoKey(watchedItem)),
+    true,
+    'recordPlayedSocialVideo must persist canonical video key'
+  );
+
+  const c2 = advanceVideoRotationCycle();
+  const rot2 = rotateLatestVideosForScope(tiktokItems, 'tiktok|all|all', c2);
+  assert.equal(
+    rot2[rot2.length - 1].id,
+    watchedItem.id,
+    'Already-played video must be pushed to the back of the rotation queue'
+  );
+});
+
 console.log('\nAll ' + passed + ' unit test suites passed successfully!');
+

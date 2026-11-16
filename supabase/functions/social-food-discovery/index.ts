@@ -41,6 +41,8 @@ interface SocialDiscoveryItem {
   provinceKh: string;
   provinceEn: string;
   relevanceScore: number;
+  inlineVideoId?: string;
+  directVideoUrl?: string;
 }
 
 interface PlatformCapabilityStatus {
@@ -411,6 +413,8 @@ async function fetchPriorityTikTokCreatorEmbeds(): Promise<SocialDiscoveryItem[]
             descriptionZh: desc || `来自 @${creator.handle} 的柬埔寨美食视频`,
             thumbnailUrl: String(v?.coverUrl || v?.originCoverUrl || creator.defaultThumb),
             sourceUrl: `https://www.tiktok.com/@${creator.handle}/video/${vid}`,
+            inlineVideoId: vid,
+            directVideoUrl: String(v?.playAddr || '').trim() || undefined,
             sourceName: creator.displayName,
             authorHandle: `@${creator.handle}`,
             publishedOrUpdatedAt: pubDate,
@@ -471,6 +475,8 @@ async function fetchPriorityTikTokCreatorEmbeds(): Promise<SocialDiscoveryItem[]
             descriptionZh: desc,
             thumbnailUrl: String(v?.coverUrl || v?.originCoverUrl || '/foods/food-19.jpg'),
             sourceUrl: `https://www.tiktok.com/@${authorHandle}/video/${vid}`,
+            inlineVideoId: vid,
+            directVideoUrl: String(v?.playAddr || '').trim() || undefined,
             sourceName: `@${authorHandle}`,
             authorHandle: `@${authorHandle}`,
             publishedOrUpdatedAt: pubDate,
