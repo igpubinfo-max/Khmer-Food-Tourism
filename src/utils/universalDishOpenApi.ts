@@ -7,6 +7,7 @@
  *   4. Strict Food-Only Guard (`prop=pageimages|description` + non-food rejection) across TheMealDB, Wikipedia & Wikimedia Commons
  */
 
+import { isThaiRelatedText } from '../types';
 import { normalizeKhmerFoodText } from './khmerFoodSearch';
 import { isQuestionOrCriteriaQuery } from './foodQueryClassifier';
 
@@ -37,14 +38,14 @@ const SPECIFIC_DISH_LEXICON: DishRule[] = [
   { re: /ផ្អកចំហុយ|ចំហុយផ្អក|ផ្អកចៀន|ផ្អកត្រី|ផ្អកសាច់ជ្រូក|ផ្អក/i, enName: 'Cambodian Fermented Fish & Pork Specialty (Pha-ok)', wikiQuery: 'Prahok', commonsQuery: 'Fried Prahok meal' },
   { re: /ម៉ាំចំហុយ|ចំហុយម៉ាំ|ម៉ាំល្ហុង|ម៉ាំត្រី|ម៉ាំពងទា|ម៉ាំ/i, enName: 'Cambodian Savory Fermented Fish Dish (Mam)', wikiQuery: 'Prahok', commonsQuery: 'Fried Prahok meal' },
   { re: /ទឹកគ្រឿង|teuk\s*kroeung/i, enName: 'Cambodian Herbal Fish Dipping Sauce with Crudités (Teuk Kroeung)', wikiQuery: 'Prahok ktis' },
-  { re: /កាពិផាវ|ទឹកកាពិ|បុកកាពិ|បាយកាពិ|កាពិ/i, enName: 'Cambodian Savory Shrimp Paste Dip (Kapi Phav)', wikiQuery: 'Shrimp paste', commonsQuery: 'Nam phrik kapi' },
+  { re: /កាពិផាវ|ទឹកកាពិ|បុកកាពិ|បាយកាពិ|កាពិ/i, enName: 'Cambodian Savory Shrimp Paste Dip (Kapi Phav)', wikiQuery: 'Shrimp paste', commonsQuery: 'Shrimp paste dip' },
 
   // Classic Cambodian Countryside, Wild Herb & Regional Dishes
-  { re: /(?:ញាំ|ញ៉ាំ)ស្តៅ|ស្តៅត្រីឆ្អើរ|ស្តៅ/i, enName: 'Cambodian Neem Flower & Smoked Fish Salad (Nhoam Sdao)', wikiQuery: 'Thai salads', commonsQuery: 'Yam sadao' },
+  { re: /(?:ញាំ|ញ៉ាំ)ស្តៅ|ស្តៅត្រីឆ្អើរ|ស្តៅ/i, enName: 'Cambodian Neem Flower & Smoked Fish Salad (Nhoam Sdao)', wikiQuery: 'Azadirachta indica', commonsQuery: 'Neem flower salad' },
   { re: /(?:ញាំ|ញ៉ាំ)ត្រយូងចេក|ត្រយូងចេក/i, enName: 'Cambodian Banana Blossom Herb Salad (Nhoam Trayoung Chek)', wikiQuery: 'Banana flower', commonsQuery: 'Banana blossom salad' },
   { re: /(?:ញាំ|ញ៉ាំ)ផ្កាស្នោ|ឆាផ្កាស្នោ|ពងទាចៀនផ្កាស្នោ|ផ្កាស្នោ/i, enName: 'Cambodian Sesbania Flower Dish (Phka Snao)', wikiQuery: 'Sesbania grandiflora' },
-  { re: /(?:ញាំ|ញ៉ាំ)មីសួរ/i, enName: 'Cambodian Glass Noodle & Prawn Salad (Nhoam Mi Suor)', wikiQuery: 'Yam wun sen' },
-  { re: /(?:ញាំ|ញ៉ាំ)ក្រូចថ្លុង/i, enName: 'Cambodian Pomelo Herb Salad', wikiQuery: 'Pomelo', commonsQuery: 'Yam som-o' },
+  { re: /(?:ញាំ|ញ៉ាំ)មីសួរ/i, enName: 'Cambodian Glass Noodle & Prawn Salad (Nhoam Mi Suor)', wikiQuery: 'Cellophane noodles' },
+  { re: /(?:ញាំ|ញ៉ាំ)ក្រូចថ្លុង/i, enName: 'Cambodian Pomelo Herb Salad', wikiQuery: 'Pomelo', commonsQuery: 'Pomelo salad' },
   { re: /(?:ញាំ|ញ៉ាំ)ម្កាក់ត្រីឆ្អើរ|(?:ញាំ|ញ៉ាំ)ម្កាក់|ម្កាក់ត្រីឆ្អើរ|ម្កាក់/i, enName: 'Cambodian Ambarella Salad with Smoked Fish (Nhoam Mkak Trey Chh-oe)', wikiQuery: 'Spondias dulcis', commonsQuery: 'Kedondong' },
   { re: /សាច់គោឆាអង្ក្រង|ឆាអង្ក្រង|គោឆាអង្ក្រង|អង្ក្រង/i, enName: 'Cambodian Stir-Fried Beef with Red Weaver Ants', wikiQuery: 'Beef stir fry' },
   { re: /ត្រីបឹងកញ្ឆែត/i, enName: 'Cambodian Crispy Fish over Water Mimosa Hotpot (Trey Boeung Kanhchet)', wikiQuery: 'Fried fish' },
@@ -55,7 +56,7 @@ const SPECIFIC_DISH_LEXICON: DishRule[] = [
   { re: /សម្លប្រហើរ|ប្រហើរ/i, enName: 'Cambodian Fragrant Lemongrass Mushroom & Vegetable Soup (Samlor Proher)', wikiQuery: 'Samlor korko' },
   { re: /សម្លម្ជូរគ្រឿង/i, enName: 'Cambodian Sour Kroeung Stew (Samlor Machu Kroeung)', wikiQuery: 'Samlor machu' },
   { re: /សម្លម្ជូរព្រលិត|សម្លម្ជូរត្រួយអំពិល|សម្លម្ជូរក្រអៅឈូក|សម្លម្ជូរព្រៃ|សម្លម្ជូរយួន|សម្លម្ជូរ/i, enName: 'Cambodian Traditional Tamarind Sour Soup (Samlor Machu)', wikiQuery: 'Samlor machu', commonsQuery: 'Canh chua' },
-  { re: /ស្ងោរជ្រក់ត្រី|ស្ងោរជ្រក់មាន់|ស្ងោរជ្រក់បង្គា|ស្ងោរជ្រក់/i, enName: 'Cambodian Clear Lime & Herb Soup (Sngor Chruok)', wikiQuery: 'Tom yum' },
+  { re: /ស្ងោរជ្រក់ត្រី|ស្ងោរជ្រក់មាន់|ស្ងោរជ្រក់បង្គា|ស្ងោរជ្រក់/i, enName: 'Cambodian Clear Lime & Herb Soup (Sngor Chruok)', wikiQuery: 'Samlor machu' },
   { re: /បាញ់ឆែវ|banh\s*chao|banh\s*xeo/i, enName: 'Cambodian Crispy Turmeric Rice Crepe (Banh Chao)', wikiQuery: 'Banh xeo' },
   { re: /បាញ់ស៊ុង|banh\s*sung/i, enName: 'Cambodian Rice Vermicelli with Coconut Cream & Herbs (Banh Sung)', wikiQuery: 'Banh tam bi' },
   { re: /ណែមឆៅ|គួង|ស្ព្រីងរ៉ូល|fresh\s*spring\s*roll/i, enName: 'Fresh Rice-Paper Herb Spring Rolls', wikiQuery: 'Goi cuon' },
@@ -64,10 +65,10 @@ const SPECIFIC_DISH_LEXICON: DishRule[] = [
 
   // Shellfish, Crustaceans & Aquatic Specialties
   { re: /ងាវអាំង|ngav\s*ang|grilled\s*(?:blood\s*)?cockle/i, enName: 'Grilled Blood Cockles (Ngav Ang)', wikiQuery: 'Blood cockle', commonsQuery: 'Kkomak Tegillarca granosa' },
-  { re: /ងាវឆា|stir[\s-]*fried\s*(?:blood\s*)?cockle/i, enName: 'Stir-Fried Blood Cockles with Tamarind', wikiQuery: 'Blood cockle', commonsQuery: 'Yam hoi khraeng' },
+  { re: /ងាវឆា|stir[\s-]*fried\s*(?:blood\s*)?cockle/i, enName: 'Stir-Fried Blood Cockles with Tamarind', wikiQuery: 'Blood cockle', commonsQuery: 'Tegillarca granosa' },
   { re: /ងាវស្រុះ|blanched\s*(?:blood\s*)?cockle/i, enName: 'Blanched Blood Cockles', wikiQuery: 'Blood cockle', commonsQuery: 'Kkomak Tegillarca granosa' },
-  { re: /ភ្លាងាវ|(?:ញាំ|ញ៉ាំ)ងាវ|cockle\s*salad/i, enName: 'Spicy Blood Cockle Salad', wikiQuery: 'Blood cockle', commonsQuery: 'Yam hoi khraeng' },
-  { re: /ងាវ|blood\s*cockle|\bcockles?\b|血蚶/i, enName: 'Cambodian Blood Cockles', wikiQuery: 'Blood cockle', commonsQuery: 'Yam hoi khraeng' },
+  { re: /ភ្លាងាវ|(?:ញាំ|ញ៉ាំ)ងាវ|cockle\s*salad/i, enName: 'Spicy Blood Cockle Salad', wikiQuery: 'Blood cockle', commonsQuery: 'Tegillarca granosa' },
+  { re: /ងាវ|blood\s*cockle|\bcockles?\b|血蚶/i, enName: 'Cambodian Blood Cockles', wikiQuery: 'Blood cockle', commonsQuery: 'Tegillarca granosa' },
   { re: /លាសហាល|លៀសហាល|lies\s*hal|sun[\s-]*dried.*clam/i, enName: 'Sun-Dried Spiced Freshwater Clams (Lies Hal)', wikiQuery: 'Clam', commonsQuery: 'Clams dish' },
   { re: /លាសឆា|លៀសឆា/i, enName: 'Stir-Fried Freshwater Clams with Basil', wikiQuery: 'Clam', commonsQuery: 'Stir fried clams' },
   { re: /លាស|លៀស|\bclams?\b|蛤蜊|花甲/i, enName: 'Freshwater Clams Dish', wikiQuery: 'Clam', commonsQuery: 'Clams dish' },
@@ -110,8 +111,8 @@ const SPECIFIC_DISH_LEXICON: DishRule[] = [
   { re: /ចង្រិតបំពង|កណ្តូបបំពង|ដង្កូវនាងបំពង|អាពីងបំពង/i, enName: 'Crispy Spiced Fried Crickets & Insects', wikiQuery: 'Insects as food', commonsQuery: 'Fried crickets' },
   { re: /ក្រួចអាំង|ក្រួចបំពង|សាច់ក្រួច|\bquail\b/i, enName: 'Roasted Spiced Quail', wikiQuery: 'Quail as food' },
   { re: /ពងទាចៀនត្រីប្រម៉ា|ពងទាចៀនប្រហុក|ពងទាចៀនសាច់ចិញ្ច្រាំ|ពងទាចៀនស្អំ|ពងទាចៀន|ពងមាន់ចៀន|\bomelette\b|\bomelet\b|煎蛋/i, enName: 'Cambodian Savory Fried Omelette', wikiQuery: 'Omelette', mealDbQuery: 'Omelette' },
-  { re: /បុកកន្ទុយហេស|បុកស្វាយ|(?:ញាំ|ញ៉ាំ)ស្វាយ|green\s*mango\s*salad/i, enName: 'Spicy Green Mango Salad', wikiQuery: 'Green mango salad', commonsQuery: 'Yam mamuang' },
-  { re: /បុកមីកញ្ចប់|បុកមី/i, enName: 'Cambodian Spicy Pounded Instant Noodles Salad (Bok Mee Kanchop)', wikiQuery: 'Green papaya salad', commonsQuery: 'Som tam' },
+  { re: /បុកកន្ទុយហេស|បុកស្វាយ|(?:ញាំ|ញ៉ាំ)ស្វាយ|green\s*mango\s*salad/i, enName: 'Spicy Green Mango Salad', wikiQuery: 'Green mango salad', commonsQuery: 'Green mango salad' },
+  { re: /បុកមីកញ្ចប់|បុកមី/i, enName: 'Cambodian Spicy Pounded Instant Noodles Salad (Bok Mee Kanchop)', wikiQuery: 'Green papaya salad', commonsQuery: 'Papaya salad' },
   { re: /បុកល្ហុង|បុកក្តាមប្រៃ|បុកពោត|បុកអំពិល|បុកសណ្តែក/i, enName: 'Cambodian Spicy Mortar Salad (Bok Lhong)', wikiQuery: 'Green papaya salad' },
   { re: /មីសួរសាច់មាន់|ស៊ុបមីសួរសាច់មាន់|មីសួរមាន់/i, enName: 'Cambodian Chicken Glass Noodle Soup (Mi Suor Sach Moan)', wikiQuery: 'Chicken soup', mealDbQuery: 'Chicken Soup' },
   { re: /មីឆាសាច់គោ/i, enName: 'Khmer Stir-Fried Noodles with Beef (Mee Cha Sach Ko)', wikiQuery: 'Mie goreng', mealDbQuery: 'Beef Lo Mein' },
@@ -122,14 +123,14 @@ const SPECIFIC_DISH_LEXICON: DishRule[] = [
   // Traditional Khmer Cakes, Desserts & Local Beverages (នំខ្មែរ, បង្អែមខ្មែរ, ភេសជ្ជៈខ្មែរ)
   { re: /អន្សមជ្រូក|អន្សមចេក|នំអន្សម|អន្សម/i, enName: 'Cambodian Banana-Leaf Sticky Rice Cake (Num Ansom)', wikiQuery: 'Banh tet' },
   { re: /នំគម/i, enName: 'Cambodian Pyramid Sweet Coconut Sticky Rice Cake (Num Kom)', wikiQuery: 'Kue koci' },
-  { re: /នំអាកោត្នោត|នំត្នោត/i, enName: 'Cambodian Steamed Sugar Palm Rice Cake (Num Ako Tnot)', wikiQuery: 'Khanom tan' },
+  { re: /នំអាកោត្នោត|នំត្នោត/i, enName: 'Cambodian Steamed Sugar Palm Rice Cake (Num Ako Tnot)', wikiQuery: 'Borassus flabellifer' },
   { re: /នំអាកោ/i, enName: 'Cambodian Steamed Rice Flour Muffin (Num Ako)', wikiQuery: 'Banh bo' },
   { re: /នំផ្លែអាយ/i, enName: 'Cambodian Palm-Sugar Stuffed Sticky Rice Balls (Num Plae Ai)', wikiQuery: 'Klepon' },
-  { re: /នំគ្រក់/i, enName: 'Cambodian Crispy Coconut Rice Pancakes (Num Krok)', wikiQuery: 'Khanom khrok' },
+  { re: /នំគ្រក់/i, enName: 'Cambodian Crispy Coconut Rice Pancakes (Num Krok)', wikiQuery: 'Num krok' },
   { re: /នំចាក់ចុល|នំកង/i, enName: 'Cambodian Crispy Rice-Flour Ring Doughnut (Num Kong)', wikiQuery: 'Doughnut' },
   { re: /នំល្ពៅ|នំបត់|នំធ្មៃ|នំកូរ|នំចាំង/i, enName: 'Traditional Cambodian Steamed Rice Cake', wikiQuery: 'Kuih' },
   { re: /ក្រឡាន|\bkralan\b/i, enName: 'Cambodian Bamboo-Roasted Sticky Rice with Beans & Coconut (Kralan)', wikiQuery: 'Kralan' },
-  { re: /សង់ខ្យាល្ពៅ|ល្ពៅសង់ខ្យា|sankhya/i, enName: 'Cambodian Whole Pumpkin Coconut Egg Custard (Sankhya Lapov)', wikiQuery: 'Coconut jam', commonsQuery: 'Sangkhaya fakthong' },
+  { re: /សង់ខ្យាល្ពៅ|ល្ពៅសង់ខ្យា|sankhya/i, enName: 'Cambodian Whole Pumpkin Coconut Egg Custard (Sankhya Lapov)', wikiQuery: 'Coconut jam', commonsQuery: 'Pumpkin custard' },
   { re: /ចេកខ្ទិះ|បង្អែមចេក/i, enName: 'Cambodian Banana in Warm Coconut Cream & Tapioca Pearls (Chek Ktis)', wikiQuery: 'Che chuoi', commonsQuery: 'Banana coconut milk dessert' },
   { re: /បង្អែមត្រាវ|បបរត្រាវ/i, enName: 'Cambodian Sweet Taro Coconut Dessert', wikiQuery: 'Taro', commonsQuery: 'Taro sago coconut milk' },
   { re: /បង្អែមសណ្តែក|បបរសណ្តែក/i, enName: 'Cambodian Sweet Mung Bean Coconut Dessert', wikiQuery: 'Tong sui' },
@@ -172,13 +173,8 @@ const SPECIFIC_DISH_LEXICON: DishRule[] = [
   { re: /បាយការីជប៉ុន|japanese\s*curry|日式咖喱饭/i, enName: 'Japanese Katsu Curry Rice', wikiQuery: 'Japanese curry' },
   { re: /តេមភូរ៉ា|\btempura\b|天妇罗/i, enName: 'Crispy Shrimp & Vegetable Tempura', wikiQuery: 'Tempura' },
 
-  // Thai & Vietnamese Dishes
-  { re: /ផាត់ថៃ|pad\s*thai|泰式炒河粉/i, enName: 'Pad Thai Stir-Fried Noodles', wikiQuery: 'Pad thai', mealDbQuery: 'Pad Thai' },
-  { re: /តុំយ៉ាំ|tom\s*yum|冬阴功/i, enName: 'Tom Yum Spicy Prawn Soup', wikiQuery: 'Tom yum' },
-  { re: /ការីបៃតង|green\s*curry|泰式绿咖喱/i, enName: 'Thai Green Curry', wikiQuery: 'Green curry', mealDbQuery: 'Thai Green Curry' },
-  { re: /បាយដំណើបស្វាយទុំ|បាយដំណើបស្វាយ|mango\s*sticky\s*rice|芒果糯米饭/i, enName: 'Mango Sticky Rice', wikiQuery: 'Mango sticky rice' },
-  { re: /ឡាបសាច់គោ|ឡាបសាច់ជ្រូក|ឡាបមាន់|\blarb\b|\blaab\b/i, enName: 'Spicy Minced Meat Herb Salad (Larb)', wikiQuery: 'Larb' },
-  { re: /គុយទាវទូក|boat\s*noodles?|船面/i, enName: 'Boat Noodle Soup', wikiQuery: 'Boat noodles' },
+  // Vietnamese & Regional Dishes
+  { re: /បាយដំណើបស្វាយទុំ|បាយដំណើបស្វាយ|mango\s*sticky\s*rice|芒果糯米饭/i, enName: 'Cambodian Mango Sticky Rice (Bay Damnaeb Svay Tum)', wikiQuery: 'Glutinous rice' },
   { re: /ហ្វឺសាច់គោ|ហ្វឺមាន់|ហ្វឺ|\bpho\b|越南河粉/i, enName: 'Vietnamese Beef Pho Noodle Soup', wikiQuery: 'Pho' },
   { re: /បាញ់មី|នំប៉័ងប៉ាតេ|នំប៉័ងសាច់|banh\s*mi|bánh\s*mì|越南法棍/i, enName: 'Crispy Baguette Sandwich (Banh Mi)', wikiQuery: 'Banh mi' },
 
@@ -315,7 +311,7 @@ const KHMER_INGREDIENTS: Array<{ re: RegExp; en: string; wiki?: string; mealDb?:
   { re: /ព្រលិត/g, en: 'Water Lily Stems', wiki: 'Nymphaea' },
   { re: /ក្រអៅឈូក|មើមឈូក|គ្រាប់ឈូក/g, en: 'Lotus Root', wiki: 'Lotus root' },
   { re: /ត្រយូងចេក/g, en: 'Banana Blossom', wiki: 'Banana flower' },
-  { re: /ម្រះព្រៅ/g, en: 'Holy Basil', wiki: 'Phat kaphrao' },
+  { re: /ម្រះព្រៅ/g, en: 'Holy Basil', wiki: 'Ocimum tenuiflorum' },
   { re: /ម្រះ/g, en: 'Bitter Melon', wiki: 'Stuffed bitter melon soup' },
   { re: /ត្រប់ពុតលំញង|ត្រប់ស្រួយ|ត្រប់វែង|ត្រប់/g, en: 'Eggplant', wiki: 'Eggplant' },
   { re: /ទំពាំងជ្រក់|ទំពាំង/g, en: 'Bamboo Shoots', wiki: 'Bamboo shoot' },
@@ -364,6 +360,9 @@ const KHMER_CONNECTOR_OR_FLAVOR_MODIFIER_RE =
 
 export function translateUniversalDishQuery(dishQuery: string): UniversalDishTranslation {
   const clean = (dishQuery || '').trim();
+  if (!clean || isThaiRelatedText(clean)) {
+    return { enName: '', wikiQuery: '', hasLexiconMatch: false };
+  }
   const norm = normalizeKhmerFoodText(clean);
 
   // 1. Check 260+ high-precision specific dishes lexicon against normalized & raw text

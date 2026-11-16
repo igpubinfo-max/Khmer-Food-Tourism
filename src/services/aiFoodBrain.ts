@@ -904,7 +904,7 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     id: 'asian_foreign',
     emoji: '🍲',
     mode: 'bridge',
-    test: /pad thai|tom yum|thai food|vietnam|banh mi|chinese food|japanese food|ថៃ|វៀតណាម|泰国菜|越南菜|中餐|日料/i,
+    test: /vietnam|banh mi|chinese food|japanese food|វៀតណាម|越南菜|中餐|日料/i,
     headline: ['AI យល់ថាអ្នកចង់ញ៉ាំម្ហូបអាស៊ីផ្សេង 🍲', 'AI thinks you want regional Asian flavours 🍲', 'AI 觉得您想吃亚洲风味 🍲'],
     explain: [
       'ខ្មែរមានរសជាតិជូរ ហឹរ ផ្អែម ប្រៃ ដូចជិតខាង — AI បានរកមុខម្ហូបខ្មែរដែលជិតស្និទ្ធបំផុតជាមួយរសជាតិនោះ។',
@@ -917,9 +917,9 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     surprise: {
       title: DID_YOU_KNOW,
       text: [
-        'សម្លម្ជូរគ្រឿងសាច់ត្រី មានរសជាតិជូរសម្បូរស្មៅ ស្រដៀង Tom Yum ប៉ុន្តែប្រើអំពិល ស្លឹកម្រះព្រៅ និងគ្រឿងបុកខ្មែរ។',
-        'Khmer sour soup (samlor machu) is herb-rich and tangy like Tom Yum but built on tamarind, holy basil and Khmer kroeung.',
-        '高棉酸汤（Samlor Machu）与冬阴功一样香草浓郁、酸爽，但以罗望子、圣罗勒和高棉香料泥为底。',
+        'សម្លម្ជូរគ្រឿងសាច់ត្រី មានរសជាតិជូរស្រស់ពីអំពិល ស្លឹកម្រះព្រៅ និងគ្រឿងបុកខ្មែរឈ្ងុយឆ្ងាញ់។',
+        'Khmer sour soup (samlor machu) is herb-rich and tangy, built on tamarind, holy basil and traditional Khmer kroeung.',
+        '高棉酸汤（Samlor Machu）香草浓郁、酸爽开胃，以罗望子、圣罗勒和传统高棉香料泥为底。',
       ],
     },
     tips: [['សុំកម្រិតហឹរតាមចំណូលចិត្ត មុនអ្នកលក់ចម្អិន។', 'Tell the cook your preferred spice level before they start.', '下单时告诉厨师您喜欢的辣度。']],

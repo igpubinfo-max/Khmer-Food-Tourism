@@ -25,6 +25,8 @@ import {
   isValidCambodiaCoordinates,
   isValidOfficialGooglePlaceId,
   isPlaceLocationVerified,
+  isThaiRelatedRecord,
+  isThaiRelatedText,
   doesVerifiedPlaceNameMatchTarget,
   getCachedVerifiedPlaceForCoords,
   saveCachedVerifiedPlaceForCoords,
@@ -53,6 +55,7 @@ import {
   type SearchableFields,
 } from '../utils/searchEngine';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
+import { isPubNightlifeText } from '../utils/pubNightlife';
 import { initial100Restaurants as SEED_RESTAURANTS } from '../data/seedRestaurants';
 import { youthBrandedCafes30 } from '../data/seedYouthBrandedCafes';
 import { initial100Destinations as SEED_DESTINATIONS, loadExtendedDestinationsAndHotels } from '../data/seedDestinations';
@@ -372,6 +375,7 @@ function isNonBusinessInstitutionName(name: string, category?: string): boolean 
 export function isValidSmartCachePlace(item: any): item is GooglePlaceCachedItem {
   if (!item || typeof item !== 'object' || !item.placeId) return false;
   if (String(item.placeId).startsWith('osm-kh-')) return false;
+  if (isThaiRelatedRecord(item)) return false;
   const lat = Number(item.lat ?? item.latitude);
   const lng = Number(item.lng ?? item.longitude);
   if (!isValidCambodiaCoordinates(lat, lng)) return false;
@@ -1363,6 +1367,528 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
   },
+  {
+    placeId: 'gmap-pp-bassac-lane-nightlife',
+    googlePlaceId: '',
+    nameKh: 'បាសាក់ឡេន បារ និងកន្លែងជួបជុំ (Bassac Lane Pubs & Bars)',
+    nameEn: 'Bassac Lane Pubs & Cocktail Bars',
+    nameZh: '金边百色巷酒吧街 (Bassac Lane)',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Pub & Cocktail Bar • កម្សាន្ត និងជួបជុំ',
+    editorialSummary: 'Vibrant alleyway of craft cocktail bars, micro-pubs, live music lounges, and evening gathering spots in Tonle Bassac.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'Street 308, Sangkat Tonle Bassac, Chamkarmon, Phnom Penh',
+    addressKh: 'ផ្លូវលេខ ៣០៨ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ',
+    lat: 11.5518,
+    lng: 104.9292,
+    phone: '012 889 308',
+    openHours: '05:00 PM - 02:00 AM',
+    priceLevel: '$$',
+    rating: 4.7,
+    reviewCount: 980,
+    photoUrl: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5518,104.9292',
+    types: ['bar', 'pub', 'night_club'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-botanico-beer-garden',
+    googlePlaceId: '',
+    nameKh: 'បូតានីកូ បៀរហ្គាឌិន (Botanico Craft Beer Garden)',
+    nameEn: 'Botanico Craft Beer Garden & Wine Bar',
+    nameZh: '金边 Botanico 精酿啤酒花园',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Beer Garden & Craft Brewery • បៀរហ្គាឌិន និងស្រាបៀរ',
+    editorialSummary: 'Lush tropical beer garden in BKK1 serving Cambodian craft beers brewed on-site, wood-fired platters, and live acoustic music.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'No. 9 Street 29, Sangkat Tonle Bassac, Phnom Penh',
+    addressKh: 'ផ្ទះលេខ ៩ ផ្លូវលេខ ២៩ សង្កាត់ទន្លេបាសាក់ រាជធានីភ្នំពេញ',
+    lat: 11.5539,
+    lng: 104.9281,
+    phone: '023 224 089',
+    openHours: '11:30 AM - 11:30 PM',
+    priceLevel: '$$',
+    rating: 4.6,
+    reviewCount: 840,
+    photoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5539,104.9281',
+    types: ['bar', 'pub', 'brewery'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-hops-craft-beer-garden',
+    googlePlaceId: '',
+    nameKh: 'ហបស៍ បៀរហ្គាឌិន (Hops Craft Beer Garden)',
+    nameEn: 'Hops Craft Beer Garden & Pub Phnom Penh',
+    nameZh: '金边 Hops 精酿啤酒花园与酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Beer Garden & Pub • បៀរហ្គាឌិន និងផាប់',
+    editorialSummary: 'Popular garden pub and craft brewery in central Phnom Penh with outdoor courtyard seating, pool tables, and draft beer.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'No. 17 Street 228, Sangkat Chaktomuk, Daun Penh, Phnom Penh',
+    addressKh: 'ផ្ទះលេខ ១៧ ផ្លូវលេខ ២២៨ សង្កាត់ចតុមុខ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
+    lat: 11.5594,
+    lng: 104.9242,
+    phone: '023 986 008',
+    openHours: '11:30 AM - 12:00 AM',
+    priceLevel: '$$',
+    rating: 4.5,
+    reviewCount: 720,
+    photoUrl: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5594,104.9242',
+    types: ['bar', 'pub', 'brewery'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-sora-skybar',
+    googlePlaceId: '',
+    nameKh: 'សូរ៉ា ស្កាយបារ (Sora Skybar Phnom Penh)',
+    nameEn: 'Sora Skybar Rooftop Lounge Phnom Penh',
+    nameZh: '金边 Sora 高空天际酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Skybar & Cocktail Lounge • ស្កាយបារ និងឡៅជ៍',
+    editorialSummary: 'Cantilevered rooftop skybar on the 37th floor of Vattanac Capital Tower offering panoramic Phnom Penh skyline views and signature cocktails.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'Vattanac Capital Tower, Level 37, 66 Monivong Blvd, Phnom Penh',
+    addressKh: 'អគារ វឌ្ឍនៈកាពីតាល ជាន់ទី៣៧ មហាវិថីព្រះមុនីវង្ស រាជធានីភ្នំពេញ',
+    lat: 11.5729,
+    lng: 104.9197,
+    phone: '023 936 888',
+    openHours: '05:00 PM - 12:00 AM',
+    priceLevel: '$$$',
+    rating: 4.8,
+    reviewCount: 1150,
+    photoUrl: 'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5729,104.9197',
+    types: ['bar', 'night_club'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-eclipse-sky-bar',
+    googlePlaceId: '',
+    nameKh: 'អ៊ីឃ្លីប ស្កាយបារ (Eclipse Sky Bar)',
+    nameEn: 'Eclipse Sky Bar Rooftop Pub Phnom Penh',
+    nameZh: '金边 Eclipse 高空酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Rooftop Sky Bar • ស្កាយបារ និងកន្លែងជួបជុំ',
+    editorialSummary: 'Open-air 23rd-floor rooftop bar atop Phnom Penh Tower with 360-degree city sunset views, cocktails, draft beer, and tapas.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'Phnom Penh Tower, 23rd Floor, 445 Monivong Blvd, Phnom Penh',
+    addressKh: 'អគារ ភ្នំពេញថៅវើ ជាន់ទី២៣ មហាវិថីព្រះមុនីវង្ស រាជធានីភ្នំពេញ',
+    lat: 11.5612,
+    lng: 104.9202,
+    phone: '023 964 171',
+    openHours: '05:00 PM - 01:00 AM',
+    priceLevel: '$$',
+    rating: 4.5,
+    reviewCount: 890,
+    photoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5612,104.9202',
+    types: ['bar', 'pub', 'night_club'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-le-moon-rooftop',
+    googlePlaceId: '',
+    nameKh: 'ឡឺមូន ស្កាយបារ មាត់ទន្លេ (Le Moon Rooftop Lounge)',
+    nameEn: 'Le Moon Rooftop Bar & Lounge Riverside',
+    nameZh: '金边河畔 Le Moon 露台酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Rooftop Bar & Lounge • បារ និងឡៅជ៍មាត់ទន្លេ',
+    editorialSummary: 'Riverside rooftop lounge overlooking the Tonle Sap and Mekong confluence with sunset cocktails, DJ beats, and tapas.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'Corner Sisowath Quay & Street 154, Daun Penh, Phnom Penh',
+    addressKh: 'កែងតីរវិថីព្រះស៊ីសុវត្ថិ និងផ្លូវ ១៥៤ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
+    lat: 11.5701,
+    lng: 104.9301,
+    phone: '012 790 886',
+    openHours: '04:30 PM - 01:00 AM',
+    priceLevel: '$$',
+    rating: 4.6,
+    reviewCount: 640,
+    photoUrl: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5701,104.9301',
+    types: ['bar', 'night_club'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-score-sports-bar',
+    googlePlaceId: '',
+    nameKh: 'ស្ករ ស្ពតបារ និងផាប់ (Score Sports Bar & Grill)',
+    nameEn: 'Score Sports Bar & Grill BKK1',
+    nameZh: '金边 Score 体育酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Sports Bar & Pub • បារកីឡា និងផាប់',
+    editorialSummary: 'Lively sports bar and pub in BKK1 with big-screen live football, pool tables, cold draft beers, and pub platters.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'No. 5 Street 282, Sangkat Boeng Keng Kang 1, Phnom Penh',
+    addressKh: 'ផ្ទះលេខ ៥ ផ្លូវលេខ ២៨២ សង្កាត់បឹងកេងកងទី១ រាជធានីភ្នំពេញ',
+    lat: 11.5551,
+    lng: 104.9268,
+    phone: '023 210 698',
+    openHours: '10:00 AM - 01:00 AM',
+    priceLevel: '$$',
+    rating: 4.5,
+    reviewCount: 590,
+    photoUrl: 'https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5551,104.9268',
+    types: ['bar', 'pub', 'bar_and_grill'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-bouchon-wine-bar',
+    googlePlaceId: '',
+    nameKh: 'ប៊ូឆុង វ៉ាញបារ (Bouchon Wine Bar)',
+    nameEn: 'Bouchon Wine Bar & Cocktail Lounge',
+    nameZh: '金边 Bouchon 红酒与鸡尾酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Wine Bar & Lounge • បារស្រាទំពាំងបាយជូរ និងជួបជុំ',
+    editorialSummary: 'Heritage colonial wine bar and cocktail lounge in downtown Phnom Penh with outdoor terrace, curated wines, and DJ nights.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'No. 82 Street 174, Sangkat Phsar Thmei 3, Daun Penh, Phnom Penh',
+    addressKh: 'ផ្ទះលេខ ៨២ ផ្លូវលេខ ១៧៤ សង្កាត់ផ្សារថ្មីទី៣ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
+    lat: 11.5646,
+    lng: 104.9255,
+    phone: '077 881 102',
+    openHours: '04:00 PM - 01:00 AM',
+    priceLevel: '$$',
+    rating: 4.6,
+    reviewCount: 610,
+    photoUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5646,104.9255',
+    types: ['wine_bar', 'bar'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-sundown-social-club',
+    googlePlaceId: '',
+    nameKh: 'សាន់ដោន សូសលក្លឹប បារ (Sundown Social Club Rooftop Bar)',
+    nameEn: 'Sundown Social Club Rooftop Bar',
+    nameZh: '金边俄罗斯市场 Sundown 露台酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Rooftop Bar & Pub • បារដំបូល និងកន្លែងជួបជុំ',
+    editorialSummary: 'Relaxed rooftop bar overlooking Russian Market in Tuol Tompoung serving tropical cocktails, craft beers, and evening bar bites.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'No. 86 Street 440, Sangkat Tuol Tompoung 1, Chamkarmon, Phnom Penh',
+    addressKh: 'ផ្ទះលេខ ៨៦ ផ្លូវលេខ ៤៤០ សង្កាត់ទួលទំពូងទី១ ខណ្ឌចំការមន រាជធានីភ្នំពេញ',
+    lat: 11.5404,
+    lng: 104.9146,
+    phone: '015 526 242',
+    openHours: '04:00 PM - 12:00 AM',
+    priceLevel: '$$',
+    rating: 4.6,
+    reviewCount: 530,
+    photoUrl: 'https://images.unsplash.com/photo-1536935338788-846bb9981813?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1536935338788-846bb9981813?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5404,104.9146',
+    types: ['bar', 'pub'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-himawari-microbrewery',
+    googlePlaceId: '',
+    nameKh: 'ហ៊ីម៉ាវ៉ារី ប្រ៊ូវើរី និងផាប់ មាត់ទន្លេ (Himawari Microbrewery & Pub)',
+    nameEn: 'Himawari Microbrewery & Riverside Pub',
+    nameZh: '金边向日葵河畔精酿啤酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Microbrewery & Pub • បៀរហ្គាឌិន និងផាប់មាត់ទន្លេ',
+    editorialSummary: 'Riverside microbrewery and pub overlooking the Mekong River, famed for award-winning handcrafted ales, stouts, and outdoor gathering tables.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: '313 Sisowath Quay, Sangkat Chaktomuk, Phnom Penh',
+    addressKh: 'លេខ ៣១៣ តីរវិថីព្រះស៊ីសុវត្ថិ សង្កាត់ចតុមុខ រាជធានីភ្នំពេញ',
+    lat: 11.5582,
+    lng: 104.9334,
+    phone: '023 214 555',
+    openHours: '11:00 AM - 11:30 PM',
+    priceLevel: '$$',
+    rating: 4.5,
+    reviewCount: 470,
+    photoUrl: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5582,104.9334',
+    types: ['brewery', 'pub', 'bar'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-heart-of-darkness',
+    googlePlaceId: '',
+    nameKh: 'ហាតអហ្វដាកនេស ក្លឹបរាត្រី និងបារ (Heart of Darkness Nightclub & Bar)',
+    nameEn: 'Heart of Darkness Nightclub & Cocktail Bar',
+    nameZh: '金边 Heart of Darkness 夜店酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Nightclub & Bar • ក្លឹបរាត្រី និងបារ',
+    editorialSummary: 'Iconic Phnom Penh nightlife venue and multi-level bar on Street 51 featuring international DJs, dance floor, and signature cocktails.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'No. 38 Street 51 (Pasteur), Sangkat Phsar Thmei 3, Phnom Penh',
+    addressKh: 'ផ្ទះលេខ ៣៨ ផ្លូវលេខ ៥១ (ប៉ាស្ទ័រ) ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
+    lat: 11.5668,
+    lng: 104.9241,
+    phone: '012 496 293',
+    openHours: '08:00 PM - 04:00 AM',
+    priceLevel: '$$',
+    rating: 4.4,
+    reviewCount: 680,
+    photoUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5668,104.9241',
+    types: ['night_club', 'bar'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-pontoon-nightclub',
+    googlePlaceId: '',
+    nameKh: 'ផន់ធូន ក្លឹបរាត្រី និងឡៅជ៍ (Pontoon Pulse Nightclub & Lounge)',
+    nameEn: 'Pontoon Nightclub & Pulse Lounge Phnom Penh',
+    nameZh: '金边 Pontoon 夜总会与酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Nightclub & Lounge • ក្លឹបរាត្រី និងឡៅជ៍',
+    editorialSummary: 'Premier late-night dance club and cocktail lounge in Daun Penh hosting live DJ sets, VIP booths, and social nightlife gatherings.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'No. 80 Street 172, Sangkat Wat Phnom, Daun Penh, Phnom Penh',
+    addressKh: 'ផ្ទះលេខ ៨០ ផ្លូវលេខ ១៧២ សង្កាត់វត្តភ្នំ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
+    lat: 11.5715,
+    lng: 104.9262,
+    phone: '016 800 172',
+    openHours: '09:00 PM - 04:00 AM',
+    priceLevel: '$$',
+    rating: 4.4,
+    reviewCount: 540,
+    photoUrl: 'https://images.unsplash.com/photo-1545128485-c400e7702796?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1545128485-c400e7702796?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5715,104.9262',
+    types: ['night_club', 'bar'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-koh-pich-beer-garden',
+    googlePlaceId: '',
+    nameKh: 'បៀរហ្គាឌិន កោះពេជ្រ មាត់ទន្លេ (Koh Pich Riverside Beer Garden)',
+    nameEn: 'Koh Pich Riverside Beer Garden & Lounge',
+    nameZh: '金边钻石岛河畔啤酒花园',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Beer Garden & Nightlife • បៀរហ្គាឌិន និងជួបជុំមិត្តភក្តិ',
+    editorialSummary: 'Open-air riverside beer garden on Diamond Island (Koh Pich) with live bands, draft beer towers, grilled skewers, and group seating.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'Diamond Island (Koh Pich) Riverside Promenade, Tonle Bassac, Phnom Penh',
+    addressKh: 'វិថីមាត់ទន្លេកោះពេជ្រ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ',
+    lat: 11.5495,
+    lng: 104.9422,
+    phone: '012 990 422',
+    openHours: '04:00 PM - 12:30 AM',
+    priceLevel: '$$',
+    rating: 4.5,
+    reviewCount: 620,
+    photoUrl: 'https://images.unsplash.com/photo-1575037614876-c38a4d44f5b8?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1575037614876-c38a4d44f5b8?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5495,104.9422',
+    types: ['bar', 'pub'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-tuol-kork-beer-garden',
+    googlePlaceId: '',
+    nameKh: 'ថោន បៀរហ្គាឌិន ទួលគោក (Town Beer Garden & Pub Tuol Kork)',
+    nameEn: 'Town Beer Garden & Night Lounge Tuol Kork',
+    nameZh: '金边堆谷 Town 啤酒花园与聚会吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Beer Garden & Gathering • បៀរហ្គាឌិន និងជួបជុំ',
+    editorialSummary: 'Spacious evening beer garden and social gathering hub in Tuol Kork featuring live Khmer music, chilled beer towers, and private KTV rooms.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'Street 315, Sangkat Boeng Kak 2, Tuol Kork, Phnom Penh',
+    addressKh: 'ផ្លូវលេខ ៣១៥ សង្កាត់បឹងកក់ទី២ ខណ្ឌទួលគោក រាជធានីភ្នំពេញ',
+    lat: 11.5785,
+    lng: 104.8962,
+    phone: '070 888 315',
+    openHours: '04:00 PM - 12:30 AM',
+    priceLevel: '$$',
+    rating: 4.5,
+    reviewCount: 510,
+    photoUrl: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5785,104.8962',
+    types: ['bar', 'pub', 'karaoke'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-riel-brewing-taproom',
+    googlePlaceId: '',
+    nameKh: 'រៀល ប្រ៊ូវីង ស្រាបៀរសិប្បកម្ម (Riel Brewing & Taproom)',
+    nameEn: 'Riel Brewing & Craft Beer Taproom Phnom Penh',
+    nameZh: '金边 Riel 精酿啤酒屋',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Craft Brewery & Taproom • ស្រាបៀរសិប្បកម្ម និងបារ',
+    editorialSummary: 'Local craft brewery and taproom pouring fresh Cambodian IPAs, passionfruit wheat beers, and stouts in a relaxed garden setting.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: 'Street 454, Sangkat Tuol Tompoung, Phnom Penh',
+    addressKh: 'ផ្លូវលេខ ៤៥៤ សង្កាត់ទួលទំពូង រាជធានីភ្នំពេញ',
+    lat: 11.5368,
+    lng: 104.9162,
+    phone: '096 234 5454',
+    openHours: '03:00 PM - 11:30 PM',
+    priceLevel: '$$',
+    rating: 4.7,
+    reviewCount: 410,
+    photoUrl: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5368,104.9162',
+    types: ['brewery', 'bar', 'pub'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-pp-paddy-rice-irish-pub',
+    googlePlaceId: '',
+    nameKh: 'ផាឌីរ៉ាយ ផាប់ មាត់ទន្លេ (Paddy Rice Irish Pub Riverside)',
+    nameEn: 'Paddy Rice Irish Pub & Sports Bar',
+    nameZh: '金边河畔 Paddy Rice 爱尔兰酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Irish Pub & Sports Bar • ផាប់ និងបារមាត់ទន្លេ',
+    editorialSummary: 'Classic riverside Irish pub on Sisowath Quay with draft Guinness, cold beers, live sports broadcasts, and river breeze seating.',
+    province: 'ភ្នំពេញ',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    address: '213 Sisowath Quay, Sangkat Phsar Kandal 1, Daun Penh, Phnom Penh',
+    addressKh: 'លេខ ២១៣ តីរវិថីព្រះស៊ីសុវត្ថិ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
+    lat: 11.5688,
+    lng: 104.9298,
+    phone: '023 990 321',
+    openHours: '10:00 AM - 01:00 AM',
+    priceLevel: '$$',
+    rating: 4.4,
+    reviewCount: 495,
+    photoUrl: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5688,104.9298',
+    types: ['irish_pub', 'pub', 'bar'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-sr-pub-street-angkor-what',
+    googlePlaceId: '',
+    nameKh: 'ផាប់ស្ទ្រីត អង្គរវ៉ាត់ បារ សៀមរាប (Angkor What? Bar Pub Street)',
+    nameEn: 'Angkor What? Bar & Pub Street Nightlife Siem Reap',
+    nameZh: '暹粒酒吧街 Angkor What? 酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Pub & Nightlife • ផាប់ និងកន្លែងកម្សាន្តរាត្រី',
+    editorialSummary: 'Legendary first pub on Siem Reap Pub Street serving bucket cocktails, draft beer, and late-night music since 1998.',
+    province: 'សៀមរាប',
+    provinceKh: 'ខេត្តសៀមរាប',
+    address: 'Street 08 (Pub Street), Krong Siem Reap',
+    addressKh: 'ផ្លូវលេខ ០៨ (ផាប់ស្ទ្រីត) ក្រុងសៀមរាប ខេត្តសៀមរាប',
+    lat: 13.3548,
+    lng: 103.8549,
+    phone: '063 964 901',
+    openHours: '05:00 PM - 03:00 AM',
+    priceLevel: '$$',
+    rating: 4.5,
+    reviewCount: 1420,
+    photoUrl: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.3548,103.8549',
+    types: ['pub', 'bar', 'night_club'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
+  {
+    placeId: 'gmap-sr-miss-wong-cocktail-bar',
+    googlePlaceId: '',
+    nameKh: 'មីសវ៉ុង បារស្រាក្រឡុក សៀមរាប (Miss Wong Cocktail Bar)',
+    nameEn: 'Miss Wong Cocktail Bar Siem Reap',
+    nameZh: '暹粒 Miss Wong 鸡尾酒吧',
+    category: 'restaurant',
+    primaryTypeDisplayName: 'Cocktail Bar & Lounge • បារស្រាក្រឡុក និងឡៅជ៍',
+    editorialSummary: 'Atmospheric 1930s Shanghai-inspired cocktail lounge in Siem Reap crafting signature Asian-infused cocktails and dim sum bites.',
+    province: 'សៀមរាប',
+    provinceKh: 'ខេត្តសៀមរាប',
+    address: 'Street 26, Wat Bo Area, Krong Siem Reap',
+    addressKh: 'ផ្លូវលេខ ២៦ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប',
+    lat: 13.3568,
+    lng: 103.8562,
+    phone: '092 428 332',
+    openHours: '06:00 PM - 01:00 AM',
+    priceLevel: '$$',
+    rating: 4.8,
+    reviewCount: 910,
+    photoUrl: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80',
+    photoUrls: ['https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80'],
+    hasOfficialGooglePhoto: true,
+    hasRealGooglePhoto: true,
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.3568,103.8562',
+    types: ['bar', 'wine_bar'],
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-11-16T00:00:00.000Z',
+  },
 ];
 
 function getTodayDateKey(): string {
@@ -1419,6 +1945,15 @@ function repairCachedGooglePlaceItem(item: GooglePlaceCachedItem): GooglePlaceCa
   const cleanPrimaryType = item.primaryTypeDisplayName
     ? String(item.primaryTypeDisplayName).replace(/[\u200B-\u200D\uFEFF]/g, '').trim()
     : undefined;
+  const cleanedEditorial = item.editorialSummary
+    ? String(item.editorialSummary)
+        .replace(
+          /(?:^|\s*•\s*)(?:bar|pub|beer\s*garden|beer\s*restaurant|night\s*club|karaoke\s*KTV|lounge\s*cocktail|sports\s*bar|live\s*music\s*bar|rooftop\s*sky\s*bar|ហាងផឹកស៊ី|កម្សាន្ត\s*និង\s*ជួបជុំ|ស្រាបៀរ|ខារ៉ាអូខេ|酒吧\s*夜店)(?=\s*•|$)/gi,
+          ''
+        )
+        .replace(/^\s*•\s*|\s*•\s*$/g, '')
+        .trim() || undefined
+    : undefined;
   let repairedCategory = item.category;
   let repairedSubCategory = item.subCategorySlug;
   const nameOnly = `${cleanNameKh} ${cleanNameEn}`;
@@ -1468,6 +2003,7 @@ function repairCachedGooglePlaceItem(item: GooglePlaceCachedItem): GooglePlaceCa
     nameEn: cleanNameEn || item.nameEn,
     types: cleanTypes,
     primaryTypeDisplayName: cleanPrimaryType || cleanTypes?.[0] || item.primaryTypeDisplayName,
+    editorialSummary: cleanedEditorial,
     category: repairedCategory,
     subCategorySlug: repairedSubCategory,
   };
@@ -1703,8 +2239,12 @@ export function inferCambodiaProvinceFromAddressOrGps(
   return 'ភ្នំពេញ';
 }
 
+const normPlaceNameCache = new Map<string, string>();
+
 export function normalizePlaceNameForComparison(name?: string): string {
   if (!name) return '';
+  const hit = normPlaceNameCache.get(name);
+  if (hit !== undefined) return hit;
   const rawCleaned = name
     .replace(/[\u200B-\u200D\uFEFF]/g, '')
     .toLowerCase()
@@ -1716,7 +2256,13 @@ export function normalizePlaceNameForComparison(name?: string): string {
     .replace(/ភោជនីយដ្ឋាន|ហាងអាហារ|ហាងកាហ្វេ|អាហារដ្ឋាន|តំបន់ទេសចរណ៍|រមណីយដ្ឋាន|ប្រាសាទ|restaurant|cafe|café|coffee|resort|cambodia|phnom penh/gi, '')
     .replace(/[\s\-_().,/\\|]+/g, '')
     .trim();
-  return stripped.length >= 3 ? stripped : rawCleaned;
+  const result = stripped.length >= 3 ? stripped : rawCleaned;
+  if (normPlaceNameCache.size >= 4000) {
+    const firstKey = normPlaceNameCache.keys().next().value;
+    if (firstKey !== undefined) normPlaceNameCache.delete(firstKey);
+  }
+  normPlaceNameCache.set(name, result);
+  return result;
 }
 
 export function calculateHaversineMeters(
@@ -1828,6 +2374,10 @@ export function openExternalPlaceInGoogleMaps(
   openExternalUrlNativeSafe(targetUrl);
 }
 
+const GENERIC_PLACE_NAMES = new Set([
+  'restaurant', 'cafe', 'coffee', 'ភោជនីយដ្ឋាន', 'ហាងកាហ្វេ', 'កាហ្វេ', 'អាហារដ្ឋាន', 'ហាងបាយ', 'គុយទាវ', 'មី'
+]);
+
 /**
  * Requirement 4: Accurate Place Matching — Match using Google Place ID first,
  * with strict name + location proximity fallback so unrelated places with similar names
@@ -1839,9 +2389,10 @@ export function findDuplicateRestaurantForGooglePlace(
 ): Restaurant | undefined {
   const normTargetKh = normalizePlaceNameForComparison(place.nameKh);
   const normTargetEn = normalizePlaceNameForComparison(place.nameEn);
-  const genericNames = new Set([
-    'restaurant', 'cafe', 'coffee', 'ភោជនីយដ្ឋាន', 'ហាងកាហ្វេ', 'កាហ្វេ', 'អាហារដ្ឋាន', 'ហាងបាយ', 'គុយទាវ', 'មី'
-  ]);
+  const pKhLower = (place.nameKh || '').trim().toLowerCase();
+  const pEnLower = (place.nameEn || '').trim().toLowerCase();
+  const isGenericPlace = GENERIC_PLACE_NAMES.has(pKhLower) || GENERIC_PLACE_NAMES.has(pEnLower);
+  const hasPlaceCoords = Number.isFinite(place.lat) && Number.isFinite(place.lng);
 
   return existingRestaurants.find((r) => {
     // 1. Direct ID or Google Place ID match
@@ -1859,13 +2410,21 @@ export function findDuplicateRestaurantForGooglePlace(
       return true;
     }
 
+    // Fast bounding-box rejection (~4.0km max for 3500m radius) before trig Haversine or regex normalization
+    if (
+      hasPlaceCoords &&
+      Number.isFinite(r.latitude) &&
+      Number.isFinite(r.longitude) &&
+      (Math.abs(place.lat - r.latitude) > 0.036 || Math.abs(place.lng - r.longitude) > 0.036)
+    ) {
+      return false;
+    }
+
     const rKhLower = (r.nameKh || '').trim().toLowerCase();
     const rEnLower = (r.nameEn || '').trim().toLowerCase();
-    const pKhLower = (place.nameKh || '').trim().toLowerCase();
-    const pEnLower = (place.nameEn || '').trim().toLowerCase();
 
     // Never match generic single-word category names unless coordinates are virtually identical (< 40m)
-    if (genericNames.has(pKhLower) || genericNames.has(pEnLower)) {
+    if (isGenericPlace) {
       const dist = calculateHaversineMeters(place.lat, place.lng, r.latitude, r.longitude);
       return dist <= 40 && rKhLower === pKhLower;
     }
@@ -1886,13 +2445,14 @@ export function findDuplicateRestaurantForGooglePlace(
     }
 
     // 3. Normalized name + strict GPS proximity (<= 180m) so branches in different districts don't collide
+    if (dist > 180) return false;
     const normRestKh = normalizePlaceNameForComparison(r.nameKh);
     const normRestEn = normalizePlaceNameForComparison(r.nameEn);
     const nameSimilar =
       (normTargetKh.length >= 5 && (normRestKh === normTargetKh || normRestEn === normTargetKh)) ||
       (normTargetEn.length >= 5 && (normRestEn === normTargetEn || normRestKh === normTargetEn));
 
-    if (nameSimilar && dist <= 180) {
+    if (nameSimilar) {
       return true;
     }
 
@@ -3488,6 +4048,7 @@ async function fetchFreeGoogleMapsTbmPlaces(
   gpsOpts?: { lat?: number; lng?: number; radiusMeters?: number; offset?: number }
 ): Promise<GooglePlaceCachedItem[]> {
   const cleanQ = (rawQuery || '').trim();
+  if (isThaiRelatedText(cleanQ)) return [];
   const catHint = categoryFilter !== 'all' ? CATEGORY_SEARCH_KEYWORD_MAP[categoryFilter] || '' : '';
   const hasGpsViewport =
     Boolean(gpsOpts && typeof gpsOpts.lat === 'number' && typeof gpsOpts.lng === 'number') ||
@@ -3683,8 +4244,12 @@ async function fetchFreeGoogleMapsTbmPlaces(
         ? rawImgs[0]
         : buildPlaceSpecificNoPhotoSvg(nameKh, prov, cat);
 
+      const isPubSearchQuery = isPubNightlifeText(cleanQ);
       const queryContextTag =
-        distinctiveTokens.length === 0 && cleanQ.length >= 2 && ((cat === 'tourism') === (categoryFilter === 'tourism' || isTourismOrHotel))
+        !isPubSearchQuery &&
+        distinctiveTokens.length === 0 &&
+        cleanQ.length >= 2 &&
+        ((cat === 'tourism') === (categoryFilter === 'tourism' || isTourismOrHotel))
           ? cleanQ
           : '';
       const combinedEditorial = [normalizedTypeList.join(' • '), queryContextTag].filter(Boolean).join(' • ') || undefined;
@@ -4666,7 +5231,9 @@ export async function searchGoogleMapsPlacesAdvanced(
       googleRankById?: Map<string, number>;
     }
   ): GooglePlacesSearchResponse => {
-    let deduped = deduplicateGooglePlacesList(items);
+    let deduped = deduplicateGooglePlacesList(
+      isThaiRelatedText(cleanQuery) ? [] : items.filter((it) => !isThaiRelatedRecord(it))
+    );
 
     const effectiveGoogleRankById = new Map<string, number>(opts?.googleRankById ? Array.from(opts.googleRankById.entries()) : []);
     let autoGoogleIdx = effectiveGoogleRankById.size;
@@ -4801,6 +5368,10 @@ export async function searchGoogleMapsPlacesAdvanced(
       attributionText: fromSmartCache ? 'Powered by Google Maps • Smart Cache' : 'Powered by Google Maps',
     };
   };
+
+  if (isThaiRelatedText(cleanQuery)) {
+    return buildResponse([], true, 'smart_cache');
+  }
 
   // Require at least a 2-char query OR a category/province/GPS selection
   if (
@@ -5491,7 +6062,10 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
     ? [rawPlacePhoto]
     : [];
 
-  return {
+  const isPubPlace = isPubNightlifeText(
+    `${place.nameKh} ${place.nameEn} ${place.primaryTypeDisplayName || ''} ${(place.types || []).join(' ')}`
+  );
+  const baseRestaurant: Restaurant = {
     id: place.placeId,
     googlePlaceId: googleMeta.placeId,
     dataSource: 'google_maps',
@@ -5544,7 +6118,7 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
       if (/(seafood|គ្រឿងសមុទ្រ|ក្តាម|បង្គា|មឹក|海鲜)/i.test(meta)) {
         return ['គ្រឿងសមុទ្រស្រស់ៗ', 'ក្តាម បង្គា និងមឹកអាំង'];
       }
-      if (/(\b(?:bbq|grill|hotpot|buffet|shabu|sukiyaki|mookata)\b|សាច់អាំង|ប៊ូហ្វេ|ស៊ុប|ឆ្នាំងភ្លើង|ឆ្នាំងដី|烧烤|火锅)/i.test(meta)) {
+      if (/(\b(?:bbq|grill|hotpot|buffet|shabu|sukiyaki)\b|សាច់អាំង|ប៊ូហ្វេ|ស៊ុប|ឆ្នាំងភ្លើង|ឆ្នាំងដី|烧烤|火锅)/i.test(meta)) {
         return ['សាច់អាំង និងស៊ុបឆ្នាំងភ្លើង', 'ប៊ូហ្វេ និងគ្រឿងសមុទ្រ'];
       }
       if (/(\b(?:bakery|bread|cake|pastry|dessert)\b|នំប៉័ង|នំខេក|បង្អែម|ការ៉េម|甜品|面包|蛋糕)/i.test(meta)) {
@@ -5581,7 +6155,7 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
       if (/(seafood|គ្រឿងសមុទ្រ|ក្តាម|បង្គា|មឹក|海鲜)/i.test(meta)) {
         return ['Fresh Coastal & River Seafood', 'Grilled Crab, Prawns & Squid'];
       }
-      if (/(\b(?:bbq|grill|hotpot|buffet|shabu|sukiyaki|mookata)\b|សាច់អាំង|ប៊ូហ្វេ|ស៊ុប|ឆ្នាំងភ្លើង|ឆ្នាំងដី|烧烤|火锅)/i.test(meta)) {
+      if (/(\b(?:bbq|grill|hotpot|buffet|shabu|sukiyaki)\b|សាច់អាំង|ប៊ូហ្វេ|ស៊ុប|ឆ្នាំងភ្លើង|ឆ្នាំងដី|烧烤|火锅)/i.test(meta)) {
         return ['Charcoal BBQ & Hotpot Soup', 'Buffet & Fresh Seafood'];
       }
       if (/(\b(?:bakery|bread|cake|pastry|dessert)\b|នំប៉័ង|នំខេក|បង្អែម|ការ៉េម|甜品|面包|蛋糕)/i.test(meta)) {
@@ -5596,6 +6170,16 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
     isVerified: true,
     createdAt: place.cachedAt || new Date().toISOString(),
   };
+  if (isPubPlace) {
+    return {
+      ...baseRestaurant,
+      categoryKh: 'កម្សាន្ត និងជួបជុំ',
+      categoryEn: 'Pub & Nightlife',
+      signatureDishesKh: ['ស្រាបៀរ ស្រាក្រឡុក និងភេសជ្ជៈ', 'សាច់អាំង អាហារសម្រន់ និងតន្ត្រី'],
+      signatureDishesEn: ['Craft Beer, Cocktails & Drinks', 'Grill Bites, Music & Gathering'],
+    };
+  }
+  return baseRestaurant;
 }
 
 /**
@@ -5724,6 +6308,9 @@ export function mergeGoogleMapsPlaceWithExistingRestaurant(
 const nearby500mMemoryCache = new Map<
   string,
   {
+    lat?: number;
+    lng?: number;
+    radius?: number;
     restaurants: GooglePlaceCachedItem[];
     attractions: GooglePlaceCachedItem[];
     providerUsed: 'google_maps_api' | 'smart_cache' | 'online_cambodia_map';
@@ -5732,9 +6319,99 @@ const nearby500mMemoryCache = new Map<
   }
 >();
 
+const inFlightNearby500mMap = new Map<
+  string,
+  Promise<{
+    restaurants: GooglePlaceCachedItem[];
+    attractions: GooglePlaceCachedItem[];
+    providerUsed: 'google_maps_api' | 'smart_cache' | 'online_cambodia_map';
+    fromCache: boolean;
+  }>
+>();
+
+function findFreshNearbyMemoryHit(
+  lat: number,
+  lng: number,
+  effectiveRadius: number
+) {
+  const now = Date.now();
+  const exactKey = `v6_${lat.toFixed(4)}_${lng.toFixed(4)}_${effectiveRadius}`;
+  const exact = nearby500mMemoryCache.get(exactKey);
+  if (
+    exact &&
+    now - exact.fetchedAt < 15 * 60 * 1000 &&
+    exact.restaurants.length + exact.attractions.length > 0
+  ) {
+    return exact;
+  }
+  for (const entry of nearby500mMemoryCache.values()) {
+    if (now - entry.fetchedAt >= 15 * 60 * 1000) continue;
+    if (entry.radius !== effectiveRadius) continue;
+    if (
+      typeof entry.lat === 'number' &&
+      typeof entry.lng === 'number' &&
+      calculateHaversineMeters(lat, lng, entry.lat, entry.lng) <= 140 &&
+      entry.restaurants.length + entry.attractions.length > 0
+    ) {
+      return entry;
+    }
+  }
+  return null;
+}
+
+/**
+ * Synchronous, zero-latency nearby lookup from Memory Cache + Smart Cache + Seed Directory.
+ * Used to pre-populate nearby & vegetarian restaurant lists on the very first render without waiting for network I/O.
+ */
+export function getInstantCachedNearbyPlaces(
+  lat: number,
+  lng: number,
+  radiusMeters: number = 5000
+): {
+  restaurants: GooglePlaceCachedItem[];
+  attractions: GooglePlaceCachedItem[];
+  fromMemoryCache: boolean;
+} {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return { restaurants: [], attractions: [], fromMemoryCache: false };
+  }
+  const effectiveRadius = Math.min(50000, Math.max(radiusMeters, 500));
+  const memHit = findFreshNearbyMemoryHit(lat, lng, effectiveRadius);
+  if (memHit) {
+    return {
+      restaurants: memHit.restaurants,
+      attractions: memHit.attractions,
+      fromMemoryCache: true,
+    };
+  }
+  const deletedNearbyMap = loadDeletedRestaurantIdsMap();
+  const localPool = getLocalSmartCache().filter(
+    (p) =>
+      !isRoadOrInvalidNearbyPlaceName(p.nameKh) &&
+      calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius &&
+      !(
+        p.category !== 'tourism' &&
+        (deletedNearbyMap[p.placeId] ||
+          (p.googlePlaceId &&
+            (deletedNearbyMap[`gplace:${p.googlePlaceId}`] || deletedNearbyMap[p.googlePlaceId])))
+      )
+  );
+  localPool.sort(
+    (a, b) =>
+      calculateHaversineMeters(lat, lng, a.lat, a.lng) -
+      calculateHaversineMeters(lat, lng, b.lat, b.lng)
+  );
+  return {
+    restaurants: localPool.filter((p) => p.category !== 'tourism'),
+    attractions: localPool.filter((p) => p.category === 'tourism'),
+    fromMemoryCache: false,
+  };
+}
+
 function isRoadOrInvalidNearbyPlaceName(rawName: string): boolean {
   const clean = (rawName || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
   if (!clean || clean.length < 2) return true;
+  if (isThaiRelatedText(clean)) return true;
   if (clean.toLowerCase() === 'cambodia' || clean === 'កម្ពុជា') return true;
   if (/(charges double|scam|tourist trap|do not go)/i.test(clean)) return true;
   return /^(ផ្លូវ\s|ផ្លូវលេខ|ផ្លូវបេតុង|មហាវិថី|ផ្លូវជាតិ|ស្ពាន|ផ្លូវដែក|street\s|st\.\s|road\s|rd\.\s|national\s+road|boulevard\s|blvd\s|bridge\s)/i.test(
@@ -5857,22 +6534,29 @@ export async function searchNearbyPlacesWithin500m(
 
   const effectiveRadius = Math.min(50000, Math.max(radiusMeters, 500));
   const gridKey = `v6_${lat.toFixed(4)}_${lng.toFixed(4)}_${effectiveRadius}`;
-  const cachedMem = nearby500mMemoryCache.get(gridKey);
-  if (
-    !forceRefresh &&
-    cachedMem &&
-    Date.now() - cachedMem.fetchedAt < 15 * 60 * 1000 &&
-    cachedMem.restaurants.length + cachedMem.attractions.length > 0
-  ) {
-    incrementCacheStat('cacheHitsSavedQuota');
-    return {
-      restaurants: cachedMem.restaurants,
-      attractions: cachedMem.attractions,
-      providerUsed: cachedMem.providerUsed,
-      fromCache: true,
-    };
+  if (!forceRefresh) {
+    const cachedMem = findFreshNearbyMemoryHit(lat, lng, effectiveRadius);
+    if (cachedMem) {
+      incrementCacheStat('cacheHitsSavedQuota');
+      return {
+        restaurants: cachedMem.restaurants,
+        attractions: cachedMem.attractions,
+        providerUsed: cachedMem.providerUsed,
+        fromCache: true,
+      };
+    }
+    const existingInFlight = inFlightNearby500mMap.get(gridKey);
+    if (existingInFlight) {
+      return existingInFlight;
+    }
   }
 
+  const runFetch = async (): Promise<{
+    restaurants: GooglePlaceCachedItem[];
+    attractions: GooglePlaceCachedItem[];
+    providerUsed: 'google_maps_api' | 'smart_cache' | 'online_cambodia_map';
+    fromCache: boolean;
+  }> => {
   // 1. Gather existing cached, prior-radius memory, & verified seed directory places strictly within effectiveRadius
   const priorMemoryItems: GooglePlaceCachedItem[] = [];
   for (const entry of nearby500mMemoryCache.values()) {
@@ -5900,7 +6584,7 @@ export async function searchNearbyPlacesWithin500m(
     ): Promise<GooglePlaceCachedItem[]> => {
       try {
         const controller = new AbortController();
-        const tId = setTimeout(() => controller.abort(), 5500);
+        const tId = setTimeout(() => controller.abort(), 3200);
         const res = await placesFetch('https://places.googleapis.com/v1/places:searchNearby', {
           method: 'POST',
           headers: {
@@ -6083,7 +6767,7 @@ export async function searchNearbyPlacesWithin500m(
           spec.q
         )}`;
         const controller = new AbortController();
-        const tId = setTimeout(() => controller.abort(), 5500);
+        const tId = setTimeout(() => controller.abort(), 2800);
         const res = await fetch(url, {
           headers: { Accept: 'application/json' },
           signal: controller.signal,
@@ -6222,7 +6906,7 @@ export async function searchNearbyPlacesWithin500m(
         });
         const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?${params.toString()}`;
         const controller = new AbortController();
-        const tId = setTimeout(() => controller.abort(), 4500);
+        const tId = setTimeout(() => controller.abort(), 2600);
         const res = await fetch(url, {
           headers: { Accept: 'application/json' },
           signal: controller.signal,
@@ -6311,6 +6995,7 @@ export async function searchNearbyPlacesWithin500m(
         (
           [
             { q: 'ភោជនីយដ្ឋាន អាហារដ្ឋាន ម្ហូបខ្មែរ', cat: 'restaurant' as const },
+            { q: 'អាហារបួស ម្ហូបបួស Vegetarian Vegan Restaurant', cat: 'restaurant' as const },
             { q: 'គុយទាវ មី នំបញ្ចុក អាហារព្រឹក', cat: 'street_food' as const },
             { q: 'ហាងកាហ្វេ Cafe Coffee Tea', cat: 'cafe' as const },
             { q: 'សាច់អាំង ស៊ុប គ្រឿងសមុទ្រ BBQ Hotpot', cat: 'seafood' as const },
@@ -6377,6 +7062,9 @@ export async function searchNearbyPlacesWithin500m(
     : 'smart_cache';
 
   nearby500mMemoryCache.set(gridKey, {
+    lat,
+    lng,
+    radius: effectiveRadius,
     restaurants,
     attractions,
     providerUsed,
@@ -6390,6 +7078,215 @@ export async function searchNearbyPlacesWithin500m(
     providerUsed,
     fromCache: !usedGoogleApi && liveMapItems.length === 0,
   };
+  };
+
+  const task = runFetch().finally(() => {
+    inFlightNearby500mMap.delete(gridKey);
+  });
+  inFlightNearby500mMap.set(gridKey, task);
+  return task;
+}
+
+// ============================================================================
+// កម្សាន្ត និងជួបជុំ / Pub & Nightlife deep GPS search
+// ============================================================================
+
+const pubNightlifeMemoryCache = new Map<string, { items: GooglePlaceCachedItem[]; fetchedAt: number }>();
+
+/** Query terms (Khmer / English / Chinese) used to dig out bars, pubs, beer gardens, skybars and night venues. */
+const PUB_NIGHTLIFE_QUERIES = [
+  'bar',
+  'pub',
+  'beer garden',
+  'beer restaurant',
+  'night club',
+  'karaoke KTV',
+  'lounge cocktail',
+  'sports bar',
+  'live music bar',
+  'rooftop sky bar',
+  'ហាងផឹកស៊ី',
+  'ស្រាបៀរ',
+  'ខារ៉ាអូខេ',
+  '酒吧 夜店',
+];
+
+function isPubNightlifeCachedItem(it: GooglePlaceCachedItem): boolean {
+  return isPubNightlifeText(
+    [it.nameKh, it.nameEn, it.primaryTypeDisplayName, ...(it.types || [])].filter(Boolean).join(' ')
+  );
+}
+
+/**
+ * Deep nearby search for pubs, bars, beer gardens, skybars, night clubs and karaoke venues around the user's GPS position.
+ * Combines (1) free Google Maps viewport search with paging for many queries, (2) Google Places API nearby + text
+ * search (quota-guarded), and (3) the local smart cache. Only venues whose own name/type is genuinely pub/bar/nightlife
+ * are kept (never bakeries, morning noodle shops, coffee shops, or ordinary restaurants).
+ * Results are sorted nearest-first by exact Haversine distance.
+ */
+export async function searchNearbyPubNightlife(
+  lat: number,
+  lng: number,
+  radiusMeters: number = 10000,
+  forceRefresh: boolean = false
+): Promise<GooglePlaceCachedItem[]> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [];
+  const effectiveRadius = Math.min(50000, Math.max(radiusMeters, 1000));
+  const cacheKey = `pub_v2_${lat.toFixed(3)}_${lng.toFixed(3)}_${effectiveRadius}`;
+  const hit = pubNightlifeMemoryCache.get(cacheKey);
+  if (!forceRefresh && hit && Date.now() - hit.fetchedAt < 15 * 60 * 1000 && hit.items.length > 0) {
+    return hit.items;
+  }
+
+  const collected: GooglePlaceCachedItem[] = [];
+
+  // 1. Free Google Maps viewport search: every query, 3 pages (offset 0/20/40), all queries in parallel
+  const nearbyProv = inferCambodiaProvinceFromAddressOrGps('', lat, lng);
+  const nearbyProvGeo = resolveProvinceGeoConfig(nearbyProv);
+  const tbmChains = PUB_NIGHTLIFE_QUERIES.map(async (q) => {
+    const out: GooglePlaceCachedItem[] = [];
+    for (const offset of [0, 20, 40]) {
+      const page = await fetchFreeGoogleMapsTbmPlaces(q, nearbyProvGeo, 'restaurant', [], {
+        lat,
+        lng,
+        radiusMeters: effectiveRadius,
+        offset,
+      }).catch(() => [] as GooglePlaceCachedItem[]);
+      out.push(...page);
+      if (page.length < 10) break;
+    }
+    return out;
+  });
+
+  // 2. Google Places API (New): dedicated bar/night-club types + paged text search, guarded by the daily quota
+  const googleTask = (async (): Promise<GooglePlaceCachedItem[]> => {
+    const out: GooglePlaceCachedItem[] = [];
+    if (!isGoogleMapsConfigured() || isGooglePlacesV1CurrentlyBlocked()) return out;
+    const cfg = getCloudApiConfig();
+    const stats = getSmartCacheStats();
+    let callsLeft = Math.max(0, stats.dailyApiLimit - stats.dailyApiCallsCount - 5);
+    if (callsLeft <= 0) return out;
+
+    const fieldMask =
+      'places.id,places.displayName,places.formattedAddress,places.shortFormattedAddress,places.location,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,places.regularOpeningHours,places.currentOpeningHours,places.priceLevel,places.photos,places.types,places.primaryType,places.primaryTypeDisplayName,places.editorialSummary,places.businessStatus,places.googleMapsUri';
+
+    const post = async (url: string, body: Record<string, unknown>, mask: string): Promise<any[]> => {
+      if (callsLeft <= 0) return [];
+      callsLeft -= 1;
+      try {
+        const controller = new AbortController();
+        const tId = setTimeout(() => controller.abort(), 7000);
+        const res = await placesFetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': cfg.googleMapsApiKey,
+            'X-Goog-FieldMask': mask,
+          },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+        clearTimeout(tId);
+        if (!res.ok) return [];
+        incrementCacheStat('googleApiCallsCount');
+        const data = await res.json();
+        const places = Array.isArray(data?.places) ? data.places : [];
+        (places as any[]).forEach((p) => {
+          (p as any).__nextPageToken = data?.nextPageToken;
+        });
+        return places;
+      } catch {
+        return [];
+      }
+    };
+
+    const circle = {
+      circle: { center: { latitude: lat, longitude: lng }, radius: Math.min(50000, effectiveRadius) },
+    };
+
+    const typeGroups: string[][] = [
+      ['bar', 'night_club', 'pub', 'bar_and_grill'],
+      ['karaoke', 'wine_bar', 'irish_pub'],
+      ['brewery', 'brewpub'],
+    ];
+    const nearbyBatches = await Promise.all(
+      typeGroups.flatMap((types) =>
+        (['DISTANCE', 'POPULARITY'] as const).map((rankPreference) =>
+          post(
+            'https://places.googleapis.com/v1/places:searchNearby',
+            { includedTypes: types, maxResultCount: 20, rankPreference, locationRestriction: circle },
+            fieldMask
+          )
+        )
+      )
+    );
+    for (const batch of nearbyBatches) {
+      for (const p of batch) {
+        const it = mapRawGooglePlaceV1ToCachedItem(p, cfg.googleMapsApiKey, 'restaurant', 'restaurant');
+        if (it) out.push(it);
+      }
+    }
+
+    const textQueries = ['bar', 'pub', 'beer garden', 'night club', 'karaoke', 'ហាងផឹកស៊ី'];
+    const textBatches = await Promise.all(
+      textQueries.map(async (q) => {
+        const acc: any[] = [];
+        let token: string | undefined;
+        for (let page = 0; page < 3; page++) {
+          const places = await post(
+            'https://places.googleapis.com/v1/places:searchText',
+            {
+              textQuery: q,
+              regionCode: 'KH',
+              languageCode: /[\u1780-\u17FF]/.test(q) ? 'km' : 'en',
+              maxResultCount: 20,
+              locationBias: circle,
+              ...(token ? { pageToken: token } : {}),
+            },
+            fieldMask + ',nextPageToken'
+          );
+          acc.push(...places);
+          token = places[0]?.__nextPageToken;
+          if (!token || places.length < 10) break;
+        }
+        return acc;
+      })
+    );
+    for (const batch of textBatches) {
+      for (const p of batch) {
+        const it = mapRawGooglePlaceV1ToCachedItem(p, cfg.googleMapsApiKey, 'restaurant', 'restaurant');
+        if (it) out.push(it);
+      }
+    }
+    return out;
+  })();
+
+  const [tbmResults, googleResults] = await Promise.all([Promise.all(tbmChains), googleTask]);
+  for (const b of tbmResults) collected.push(...b);
+  collected.push(...googleResults);
+
+  // 3. Previously cached & curated venues near the user
+  const localPool = getLocalSmartCache().filter((p) => calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius);
+  collected.push(...localPool);
+
+  const deletedMap = loadDeletedRestaurantIdsMap();
+  const final = deduplicateGooglePlacesList(collected)
+    .map(repairCachedGooglePlaceItem)
+    .map((it) => (it.category === 'tourism' ? { ...it, category: 'restaurant' as const, subCategorySlug: undefined } : it))
+    .filter(
+      (p) =>
+        isPubNightlifeCachedItem(p) &&
+        !isRoadOrInvalidNearbyPlaceName(p.nameKh) &&
+        calculateHaversineMeters(lat, lng, p.lat, p.lng) <= effectiveRadius &&
+        !(deletedMap[p.placeId] || (p.googlePlaceId && (deletedMap[`gplace:${p.googlePlaceId}`] || deletedMap[p.googlePlaceId])))
+    )
+    .sort((a, b) => calculateHaversineMeters(lat, lng, a.lat, a.lng) - calculateHaversineMeters(lat, lng, b.lat, b.lng));
+
+  if (final.length > 0) {
+    await saveToSmartCache(final).catch(() => undefined);
+    pubNightlifeMemoryCache.set(cacheKey, { items: final, fetchedAt: Date.now() });
+  }
+  return final;
 }
 
 export interface UnifiedCambodiaSearchParams {
@@ -6440,7 +7337,7 @@ export function performUnifiedCambodiaSearch(
   } = params;
 
   const q = normalizeKhmerSearchText(query);
-  if (!q) {
+  if (!q || isThaiRelatedText(query)) {
     return { foods: [], restaurants: [], destinations: [], externalPlaces: [], totalCount: 0 };
   }
 
@@ -6775,8 +7672,9 @@ function readStoredUserGps(): { lat: number; lng: number } | null {
   return null;
 }
 
-// In-memory cache for recent device GPS (prevents repetitive mobile GPS chip wakeups & thermal throttling)
+// In-memory cache & in-flight promise coalescer for device GPS (prevents repetitive mobile GPS chip wakeups & thermal throttling)
 let cachedDeviceGps: { lat: number; lng: number; timestamp: number } | null = null;
+let inFlightDeviceGpsPromise: Promise<{ lat: number; lng: number } | null> | null = null;
 
 export async function getCurrentDeviceLocation(forceFresh = false): Promise<{ lat: number; lng: number } | null> {
   const now = Date.now();
@@ -6785,10 +7683,20 @@ export async function getCurrentDeviceLocation(forceFresh = false): Promise<{ la
   }
   const storedFallback = () =>
     cachedDeviceGps ? { lat: cachedDeviceGps.lat, lng: cachedDeviceGps.lng } : readStoredUserGps();
+  if (!forceFresh) {
+    const existingSaved = readStoredUserGps();
+    if (existingSaved) {
+      cachedDeviceGps = { lat: existingSaved.lat, lng: existingSaved.lng, timestamp: now };
+      return existingSaved;
+    }
+  }
   if (typeof navigator === 'undefined' || !navigator.geolocation) {
     return storedFallback();
   }
-  return new Promise((resolve) => {
+  if (!forceFresh && inFlightDeviceGpsPromise) {
+    return inFlightDeviceGpsPromise;
+  }
+  const runPromise = new Promise<{ lat: number; lng: number } | null>((resolve) => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const rawLat = pos.coords.latitude;
@@ -6824,5 +7732,9 @@ export async function getCurrentDeviceLocation(forceFresh = false): Promise<{ la
         maximumAge: 120000,
       }
     );
+  }).finally(() => {
+    inFlightDeviceGpsPromise = null;
   });
+  inFlightDeviceGpsPromise = runPromise;
+  return runPromise;
 }

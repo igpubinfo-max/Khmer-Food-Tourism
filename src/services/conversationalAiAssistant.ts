@@ -1,4 +1,12 @@
-import { isPlaceLocationVerified, type FoodItem, type Language, type Restaurant, type TouristDestination } from '../types';
+import {
+  isPlaceLocationVerified,
+  isThaiRelatedRecord,
+  isThaiRelatedText,
+  type FoodItem,
+  type Language,
+  type Restaurant,
+  type TouristDestination,
+} from '../types';
 import { tr } from '../utils/i18n';
 import { normalizeKhmerFoodText, parseKhmerFoodSearchQuery, searchKhmerFoods } from '../utils/khmerFoodSearch';
 import { generateAuthenticRecipeByDishName } from '../utils/khmerRecipeGenerator';
@@ -363,7 +371,7 @@ function findBestDishInQuery(query: string, foods: FoodItem[], fallbackDishes: F
 
 export function detectOutOfCatalogDishName(rawQuery: string, foods: FoodItem[]): string | null {
   const trimmedRaw = (rawQuery || '').trim();
-  if (!trimmedRaw) return null;
+  if (!trimmedRaw || isThaiRelatedText(trimmedRaw)) return null;
   if (
     /^(?:hello|hi|hey|yo|good\s*(?:morning|afternoon|evening|night)|how\s*are\s*you|what'?s\s*up|thanks?|thank\s*you|ok(?:ay)?|yes|no|help|test|who\s*are\s*you|សួស្តី|ជំរាបសួរ|ជម្រាបសួរ|អរគុណ|បាទ|ចាស|សុខសប្បាយ|你好|您好|谢谢|早上好|晚上好)(?:\s|[!?.។؟])*$/i.test(
       trimmedRaw
@@ -465,7 +473,7 @@ export function createOutOfCatalogDishItem(cleanDishName: string, foods: FoodIte
       : `ម្ហូបខ្មែរពិសេស / ${cleanDishName}`;
     catEn = `Cambodian Specialty / ${translated.enName}`;
   } else if (
-    /សម្ល|ស្ងោរ|ស៊ុប|កកូរ|ម្ជូរ|ការី|ប្រហើរ|តុំយ៉ាំ|ម៉ាឡាតាំង|ហតផត|\bsoup\b|\bstew\b|\bcurry\b|\bbroth\b|hot\s*pot|malatang|jjigae|tom\s*yum/i.test(
+    /សម្ល|ស្ងោរ|ស៊ុប|កកូរ|ម្ជូរ|ការី|ប្រហើរ|ម៉ាឡាតាំង|ហតផត|\bsoup\b|\bstew\b|\bcurry\b|\bbroth\b|hot\s*pot|malatang|jjigae/i.test(
       combinedLabel
     ) &&
     !/បាយការី/.test(normDish)
@@ -498,7 +506,7 @@ export function createOutOfCatalogDishItem(cleanDishName: string, foods: FoodIte
     catKh = `ញាំ & ម្ហូបពិសេស / ${cleanDishName}`;
     catEn = `Salad & Specialty / ${translated.enName}`;
   } else if (
-    /មី(?!\u17D2)|គុយទាវ|នំបញ្ចុក|លត(?!\u17D2)|បាញ់កាញ់|បាញ់ស៊ុង|ផាត់ថៃ|ស្ប៉ាហ្គេត?ទី|ផាស្តា|កាបូណារ៉ា|ឡាសាញ៉ា|រ៉ាមេន|ហ្វឺ|អ៊ូដុង|noodle|spaghetti|pasta|lasagna|ramen|\bpho\b|udon/i.test(
+    /មី(?!\u17D2)|គុយទាវ|នំបញ្ចុក|លត(?!\u17D2)|បាញ់កាញ់|បាញ់ស៊ុង|ស្ប៉ាហ្គេត?ទី|ផាស្តា|កាបូណារ៉ា|ឡាសាញ៉ា|រ៉ាមេន|ហ្វឺ|អ៊ូដុង|noodle|spaghetti|pasta|lasagna|ramen|\bpho\b|udon/i.test(
       combinedLabel
     )
   ) {
@@ -1141,7 +1149,7 @@ export function generateConversationalAiResponse(params: {
     chosenDishes = advisor.dishes.slice(0, 4);
   }
 
-  // Auto-detect if the user asked for a specific dish outside the 200-item catalog (e.g. "ងាវអាំង", "លៀសហាល", "ផាត់ថៃ", "Pizza")
+  // Auto-detect if the user asked for a specific dish outside the 200-item catalog (e.g. "ងាវអាំង", "លៀសហាល", "ហ្វឺ", "Pizza")
   // even without typing "របៀបធ្វើ" or "រូបមន្ត", and automatically create its card + trigger Open API photo fetch!
   const outOfCatalogDishName =
     !isMoreFollowUp && !isCompareQuery && !isVegQuery

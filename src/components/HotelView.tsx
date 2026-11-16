@@ -609,8 +609,10 @@ export const HotelView: React.FC = () => {
   const [nowTickMs, setNowTickMs] = useState<number>(() => Date.now());
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setNowTickMs(Date.now());
-    }, 60_000);
+      if (typeof document === 'undefined' || !document.hidden) {
+        setNowTickMs(Date.now());
+      }
+    }, 30 * 60 * 1000);
     return () => window.clearInterval(timer);
   }, []);
 

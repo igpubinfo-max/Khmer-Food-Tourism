@@ -1,4 +1,4 @@
-import { FoodItem } from '../types';
+import { FoodItem, isThaiRelatedRecord, isThaiRelatedText } from '../types';
 import { getLocalizedFood } from './zhDynamicTranslator';
 import { analyzeSearchQuery, scoreSearchRecord, getCulinarySynonyms, applyKhmerSpellingVariants, SearchableFields } from './searchEngine';
 import { detectDishProvince, getProvinceOptionById } from './foodFilters';
@@ -148,13 +148,13 @@ const BEVERAGE_OR_SWEET_NAME_RE =
   /^(?:បង្អែម|ទឹកសណ្តែក|ទឹកអំពៅ|ទឹកដូង|ទឹកត្នោត|កាហ្វេ|តែក្រូចឆ្មា|តែបៃតង|ទឹកក្រឡុក|ទឹកត្រឡាច|ទឹកផ្លែឈើ|ការ៉េម)/i;
 
 const EXPLICIT_SPICY_TITLE_RE =
-  /បុកល្ហុង|បុកស្វាយ|បុកកាពិ|បុកត្រប់|បុកសណ្តែក|បុកមី|បុកកន្ទុយហេស|ភ្លា|ឆាក្តៅ|ឆាម្រះព្រៅ|ម្រះព្រៅ|សម្លប្រហុកក្តៅ|សម្លម្ជូរព្រៃ|ទឹកត្រីកោះកុង|អំបិលម្ទេស|លៀសហាល|ក្តាមប្រៃ|ងាវឆាអំពិលទុំ|ហឹរ|ម្ទេស|តុំយ៉ាំ|\bspicy\b|\bchili\b|\bhot\s+basil\b|\bbok\s+lhong\b|\bpapaya\s+salad\b|\bceviche\b|\btom\s+yum\b/i;
+  /បុកល្ហុង|បុកស្វាយ|បុកកាពិ|បុកត្រប់|បុកសណ្តែក|បុកមី|បុកកន្ទុយហេស|ភ្លា|ឆាក្តៅ|ឆាម្រះព្រៅ|ម្រះព្រៅ|សម្លប្រហុកក្តៅ|សម្លម្ជូរព្រៃ|ទឹកត្រីកោះកុង|អំបិលម្ទេស|លៀសហាល|ក្តាមប្រៃ|ងាវឆាអំពិលទុំ|ហឹរ|ម្ទេស|\bspicy\b|\bchili\b|\bhot\s+basil\b|\bbok\s+lhong\b|\bpapaya\s+salad\b|\bceviche\b/i;
 
 const ZESTY_SALAD_OR_CHILI_TITLE_RE =
   /ញាំ|បុក|ភ្លា|ទឹកគ្រឿង|កាពិ|ម្រេចកំពត|\bsalad\b|\bkampot\s+pepper\b/i;
 
 const SPICY_BODY_RE =
-  /ហឹរ|ម្ទេស(?!ប្លោក)|ម្រះព្រៅ|\bspicy\b|\bhot\s+chili\b|\bbird'?s[\s-]*eye\s+chili\b|\bthai\s+chili\b|\bfresh\s+chili\b/i;
+  /ហឹរ|ម្ទេស(?!ប្លោក)|ម្រះព្រៅ|\bspicy\b|\bhot\s+chili\b|\bbird'?s[\s-]*eye\s+chili\b|\bfresh\s+chili\b/i;
 
 /**
  * Normalizes Khmer, English, and Chinese food search text:
@@ -1107,7 +1107,7 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
 
     if (parsed.flavorIntents.includes('sour_spicy')) {
       const hasSourSignal =
-        /ម្ជូរ|ជូរ|ញាំ|ភ្លា|បុក|តុំយ៉ាំ|ក្រូចឆ្មា|អំពិល|សណ្ដាន់|សណ្តាន់|ក្រសាំង|\bsour\b|\blime\b|\btamarind\b|\bsalad\b|\bceviche\b/i.test(
+        /ម្ជូរ|ជូរ|ញាំ|ភ្លា|បុក|ក្រូចឆ្មា|អំពិល|សណ្ដាន់|សណ្តាន់|ក្រសាំង|\bsour\b|\blime\b|\btamarind\b|\bsalad\b|\bceviche\b/i.test(
           `${titleNorm} ${ingNorm} ${descSafeNorm}`
         );
       if (!hasSourSignal && parsed.isFlavorOnlyQuery) return -500;
@@ -1180,7 +1180,7 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
           score += 220;
         }
       } else if (occ === 'rainy') {
-        if (/សម្លម្ជូរ|សម្លកកូរ|ស៊ុប|បបរ|ស្ងោរជ្រក់|គុយទាវ|តុំយ៉ាំ|សម្លប្រហុក|សម្លការី/i.test(titleNorm)) {
+        if (/សម្លម្ជូរ|សម្លកកូរ|ស៊ុប|បបរ|ស្ងោរជ្រក់|គុយទាវ|សម្លប្រហុក|សម្លការី/i.test(titleNorm)) {
           score += 305;
         } else if (food.categorySlug === 'soup') {
           score += 245;
@@ -1221,7 +1221,7 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
     score += getSpicyDishScore(food);
   }
   if (parsed.flavorIntents.includes('sour')) {
-    if (/ម្ជូរ|ស្ងោរជ្រក់|ញាំ|ភ្លា|បុកស្វាយ|បុកល្ហុង|តុំយ៉ាំ|អំពិល|\bsour\b|\btamarind\b|\blime\b/i.test(titleNorm)) {
+    if (/ម្ជូរ|ស្ងោរជ្រក់|ញាំ|ភ្លា|បុកស្វាយ|បុកល្ហុង|អំពិល|\bsour\b|\btamarind\b|\blime\b/i.test(titleNorm)) {
       score += 275;
     } else if (/ជូរ|អំពិល|ក្រូចឆ្មា|សណ្តាន់|ក្រសាំង|ទំពាំងជ្រក់|ស្ពៃជ្រក់|\bsour\b|\btangy\b/i.test(`${descSafeNorm} ${ingNorm}`)) {
       score += 170;
@@ -1428,6 +1428,7 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
  * Deduplicates by food ID and normalized Khmer name so zero duplicate items are ever returned.
  */
 export function searchKhmerFoods(foods: FoodItem[], rawQuery: string): FoodItem[] {
+  if (isThaiRelatedText(rawQuery)) return [];
   const parsed = parseKhmerFoodSearchQuery(rawQuery);
   if (!parsed.normalizedQuery) return [];
 
@@ -1455,7 +1456,7 @@ export function searchKhmerFoods(foods: FoodItem[], rawQuery: string): FoodItem[
 
   const dedupedFoods: FoodItem[] = [];
   for (const food of foods) {
-    if (!food || !food.id || !food.nameKh) continue;
+    if (!food || !food.id || !food.nameKh || isThaiRelatedRecord(food)) continue;
     const idKey = String(food.id);
     const idx = getPrecomputedFoodSearchIndex(food);
     const nameKey = idx.nameKhNorm;

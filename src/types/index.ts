@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1615;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1616;
 export const APP_RELEASE_DATE = '2026-11-16';
 
 /**
@@ -2424,10 +2424,51 @@ export const isPlaceLocationVerified = (
   return false;
 };
 
+const THAI_CONTENT_GUARD_REGEX =
+  /[\u0E00-\u0E7F]|(?<!តា|យ៉ា)ថៃ(?!្ង)|តុងយ៉ាំ|តុំយ៉ាំ|ផាត់ថៃ|បាងកក|ឈៀងម៉ៃ|ភូកេត|ផាតាយ៉ា|\b(?:thai|thailand|bangkok|chiang\s*mai|phuket|pattaya|tom\s*yum|tomyum|pad\s*thai|mookata|moo\s*kata|som\s*tam|som\s*tum|khao\s*soi|massaman|thai_restaurant)\b|泰国|泰式|泰餐|泰菜|泰茶|冬阴功|帕泰|曼谷/i;
+
+/**
+ * Returns true if a text string contains any Thai-related dish, restaurant, cuisine, or country reference
+ * across Khmer, English, Chinese, or Thai Unicode script.
+ */
+export const isThaiRelatedText = (text?: string | null): boolean => {
+  if (!text || typeof text !== 'string') return false;
+  return THAI_CONTENT_GUARD_REGEX.test(text);
+};
+
+/**
+ * Returns true if a food, restaurant, place, or destination record contains any Thai-related content.
+ */
+export const isThaiRelatedRecord = (rec?: Record<string, any> | null): boolean => {
+  if (!rec || typeof rec !== 'object') return false;
+  if (rec.id === 'rest-507' || rec.googlePlaceId === 'ChIJ81o1c8BRCTERPCFusbjyYb8') return true;
+  const hay = [
+    rec.name,
+    rec.nameKh,
+    rec.nameEn,
+    rec.nameZh,
+    rec.category,
+    rec.categoryKh,
+    rec.categoryEn,
+    rec.cuisineType,
+    rec.businessCategory,
+    rec.primaryTypeDisplayName,
+    rec.editorialSummary,
+    rec.descriptionKh,
+    rec.descriptionEn,
+    ...(Array.isArray(rec.types) ? rec.types : []),
+    ...(Array.isArray(rec.signatureDishesKh) ? rec.signatureDishesKh : []),
+    ...(Array.isArray(rec.signatureDishesEn) ? rec.signatureDishesEn : []),
+  ]
+    .filter(Boolean)
+    .join(' ');
+  return THAI_CONTENT_GUARD_REGEX.test(hay);
+};
+
 /**
  * Strict runtime guardrail for Cambodia restaurants & food shops:
  * Rejects unverified, incomplete, fake, (0, 0), locationNeedsReview: true,
- * out-of-Cambodia coordinates, fake Place IDs, or missing/broken mapUrl entries so they
+ * out-of-Cambodia coordinates, fake Place IDs, Thai-related restaurants, or missing/broken mapUrl entries so they
  * can NEVER be displayed in RestaurantView, HomeView, NearMeModal, or search results.
  */
 export const isStrictVerifiedCambodiaRestaurant = (
@@ -2436,6 +2477,7 @@ export const isStrictVerifiedCambodiaRestaurant = (
   if (!restaurant || typeof restaurant !== 'object') return false;
   if (!restaurant.id || typeof restaurant.id !== 'string') return false;
   if (restaurant.id.startsWith('food-') || restaurant.id.startsWith('dest-')) return false;
+  if (isThaiRelatedRecord(restaurant)) return false;
   const nameKh = (restaurant.nameKh || '').trim();
   const nameEn = (restaurant.nameEn || '').trim();
   if (!nameKh && !nameEn) return false;

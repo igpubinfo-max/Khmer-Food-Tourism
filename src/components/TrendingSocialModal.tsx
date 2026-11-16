@@ -653,7 +653,8 @@ export const TrendingSocialModal: React.FC = () => {
     return () => observer.disconnect();
   }, [visibleVideoCount, filteredItems.length]);
 
-  // Keep mounted once visited so video feed & scroll position persist
+  // Keep mounted once visited so video feed state persists, but unmount DOM when closed
+  if (!isTrendingSocialModalOpen) return null;
 
   // 4 Main Categories + All Trending
   const categories: { id: TrendingFoodCategorySlug; labelKh: string; labelEn: string; labelZh: string; icon: string }[] = [

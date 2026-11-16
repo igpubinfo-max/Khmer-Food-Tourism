@@ -431,6 +431,22 @@ export function requestCambodiaGpsLocation(options: {
     onImmediateSaved(savedGps, detectClosestProvinceFromCoords(savedGps));
   }
 
+  // Thermal & battery guard: if saved GPS was updated within the last 2 minutes and forceRefresh is false,
+  // skip waking up the hardware GNSS/GPS radio again.
+  if (savedGps && !forceRefresh) {
+    try {
+      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(LAST_KNOWN_GPS_STORAGE_KEY) : null;
+      const parsed = raw ? JSON.parse(raw) : null;
+      const updatedAt = Number(parsed?.updatedAt || 0);
+      if (updatedAt > 0 && Date.now() - updatedAt < 120_000) {
+        onGranted(savedGps, detectClosestProvinceFromCoords(savedGps));
+        return;
+      }
+    } catch {
+      // ignore storage read errors
+    }
+  }
+
   if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
     const handleSuccess = (position: GeolocationPosition) => {
       if (!isCurrentReq()) return;
@@ -464,7 +480,7 @@ export function requestCambodiaGpsLocation(options: {
           { enableHighAccuracy: false, timeout: 4000, maximumAge: 180000 }
         );
       },
-      { enableHighAccuracy: true, timeout: 4500, maximumAge: forceRefresh ? 0 : 60000 }
+      { enableHighAccuracy: Boolean(forceRefresh), timeout: 4500, maximumAge: forceRefresh ? 0 : 120000 }
     );
   } else {
     const fallback = savedGps || defaultCenter;
@@ -480,7 +496,7 @@ const HOTEL_KEYWORD_REGEX =
   /សណ្ឋាគារ|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|បឹងកាឡូ|រីសត|អេកូរីសត|អេកូឡច|វីឡា|ប៊ូទិក|រេស៊ីដង់|រ៉េស៊ីដិន|អាផាតមិន|ស្វីត|ភូមិគ្រឹះ|ហូមស្ទេ|ហូស្តេល|ឡច|\b(hotel|hotels|guesthouse|guest\s*house|hostel|motel|homestay|home\s*stay|bungalow|bungalows|lodge|lodging|inn|suites?|resort|resorts|eco-resort|eco-lodge|villa|villas|boutique|residence|residences|apartment|apartments|retreat|glamping)\b/i;
 
 const FOOD_SHOP_KEYWORD_REGEX =
-  /ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងអាហារ|ហាងកាហ្វេ|កាហ្វេ|ហាងបាយ|បាយ|ម្ហូប|សម្ល|អាម៉ុក|ឡុកឡាក់|គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់|គ្រឿង|ប៉ាតេ|ប្រហិត|ពង|លាក់ខ្លួន|ជាតិ)|នំបញ្ចុក|លតឆា|បបរ|សាច់អាំង|ស៊ុប|គ្រឿងសមុទ្រ|ប៊ូហ្វេ|ឆ្នាំងភ្លើង|តែគុជ|ហាងតែ|ភេសជ្ជៈ|នំប៉័ង|នំខេក|ការ៉េម|បង្អែម|ភីហ្សា|ម្ហូបបួស|អាហារបួស|អាហារព្រឹក|\b(restaurant|cafe|café|coffee|cofe|coffe|kopi|roastery|espresso|latte|matcha|bakery|bistro|eatery|diner|noodle|noodles|kuy\s*teav|pho|ramen|udon|bbq|hotpot|grill|seafood|buffet|steak|steakhouse|sushi|dim\s*sum|pizza|burger|burrito|tacos|boba|milk\s*tea|tea\s*house|smoothie|juice|ice\s*cream|dessert|vegetarian|vegan|breakfast)\b/i;
+  /ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងអាហារ|ហាងកាហ្វេ|កាហ្វេ|ហាងបាយ|បាយ|ម្ហូប|សម្ល|អាម៉ុក|ឡុកឡាក់|គុយទាវ|(?<!\u17D2)មី(?:ស៊ុប|គោក|ឆា|ហឹរ|ហិរ|ទាញ|កូឡា|សួរ|សួ|គាវ|ទា|សាច់|គ្រឿង|ប៉ាតេ|ប្រហិត|ពង|លាក់ខ្លួន|ជាតិ)|នំបញ្ចុក|លតឆា|បបរ|សាច់អាំង|ស៊ុប|គ្រឿងសមុទ្រ|ប៊ូហ្វេ|ឆ្នាំងភ្លើង|តែគុជ|ហាងតែ|ភេសជ្ជៈ|នំប៉័ង|នំខេក|ការ៉េម|បង្អែម|ភីហ្សា|ម្ហូបបួស|អាហារបួស|អាហារព្រឹក|ហាងផឹកស៊ី|ស្រាបៀរ|ខារ៉ាអូខេ|\b(restaurant|cafe|café|coffee|cofe|coffe|kopi|roastery|espresso|latte|matcha|bakery|bistro|eatery|diner|noodle|noodles|kuy\s*teav|pho|ramen|udon|bbq|hotpot|grill|seafood|buffet|steak|steakhouse|sushi|dim\s*sum|pizza|burger|burrito|tacos|boba|milk\s*tea|tea\s*house|smoothie|juice|ice\s*cream|dessert|vegetarian|vegan|breakfast|pub|bar|beer|brewery|karaoke|ktv|nightclub|night\s*club|lounge)\b|酒吧|夜店|啤酒/i;
 
 const TOURISM_ONLY_KEYWORD_REGEX =
   /ប្រាសាទ|វត្ត|ទឹកធ្លាក់|សារមន្ទីរ|ភ្នំ(?!ពេញ)|ឆ្នេរ|កោះ|ឧទ្យានជាតិ|រមណីយដ្ឋាន|ពហុកីឡដ្ឋាន|កីឡដ្ឋាន|សួនសត្វ|សួនទឹក|សួនកម្សាន្ត|វិមានឯករាជ្យ|ព្រះបរមរាជវាំង|ស្តូប|រូបសំណាក|ផ្សារធំថ្មី|ផ្សារទួលទំពូង|ផ្សាររាត្រី|ផ្លូវថ្មើរជើង|មជ្ឈមណ្ឌលប្រល័យពូជសាសន៍|ទួលស្លែង|ជើងឯក|\b(temple|pagoda|wat\b|museum|waterfall|national\s*park|monument|palace|sanctuary|beach|island|mountain|stadium|zoo|safari\s*world|genocide|memorial\s*statue|walk\s*street|promenade|tourist\s*attraction|amusement\s*park|water\s*park|botanical\s*garden|heritage)\b/i;
@@ -699,7 +715,20 @@ export function mergeNearbyFoodShops(params: {
 }): Array<Restaurant & { distanceMeters: number; distanceKm: number }> {
   const { restaurants, liveNearbyRestaurants, refCoords, radiusMeters, targetProvinceKh } = params;
   const mergedMap = new Map<string, Restaurant>();
+  const mergedList: Restaurant[] = [];
+  const mergedIdxById = new Map<string, number>();
   const seenNameKeys = new Set<string>();
+
+  const setMergedRestaurant = (id: string, r: Restaurant) => {
+    mergedMap.set(id, r);
+    const prevIdx = mergedIdxById.get(id);
+    if (prevIdx !== undefined) {
+      mergedList[prevIdx] = r;
+    } else {
+      mergedIdxById.set(id, mergedList.length);
+      mergedList.push(r);
+    }
+  };
 
   const registerNameKey = (r: Restaurant) => {
     const key = `${normalizeKhmerSearchText(r.nameKh || r.nameEn || '')}::${(r.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
@@ -712,7 +741,7 @@ export function mergeNearbyFoodShops(params: {
     const dist = calculateDistanceMeters(refCoords.lat, refCoords.lng, r.latitude, r.longitude);
     if (dist > radiusMeters) continue;
     if (!doesPlaceBelongToProvince(r.latitude, r.longitude, r.provinceKh, targetProvinceKh)) continue;
-    mergedMap.set(r.id, r);
+    setMergedRestaurant(r.id, r);
     registerNameKey(r);
   }
 
@@ -722,24 +751,24 @@ export function mergeNearbyFoodShops(params: {
     if (dist > radiusMeters) continue;
     if (!doesPlaceBelongToProvince(gp.lat, gp.lng, gp.provinceKh || gp.province, targetProvinceKh)) continue;
 
-    const existingMatch = findDuplicateRestaurantForGooglePlace(gp, Array.from(mergedMap.values()));
+    const existingMatch = findDuplicateRestaurantForGooglePlace(gp, mergedList);
     if (existingMatch) {
       const merged = mergeGoogleMapsPlaceWithExistingRestaurant(existingMatch, gp);
       if (!isHotelBusinessRecord(merged) && verifyShopDataForDisplay(merged)) {
-        mergedMap.set(existingMatch.id, merged);
+        setMergedRestaurant(existingMatch.id, merged);
       }
     } else {
       const converted = convertGooglePlaceToRestaurant(gp);
       if (!isHotelBusinessRecord(converted) && verifyShopDataForDisplay(converted)) {
         const normKey = `${normalizeKhmerSearchText(converted.nameKh || converted.nameEn || '')}::${(converted.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
         if (normKey.length > 3 && seenNameKeys.has(normKey)) continue;
-        mergedMap.set(converted.id, converted);
+        setMergedRestaurant(converted.id, converted);
         if (normKey.length > 3) seenNameKeys.add(normKey);
       }
     }
   }
 
-  return Array.from(mergedMap.values())
+  return mergedList
     .map((r) => {
       const distanceMeters = calculateDistanceMeters(refCoords.lat, refCoords.lng, r.latitude, r.longitude);
       const distanceKm = Number((distanceMeters / 1000).toFixed(1));
@@ -770,6 +799,7 @@ export function mergeNearbyHotels(params: {
     targetProvinceKh,
   } = params;
   const mergedMap = new Map<string, TouristDestination>();
+  const mergedList: TouristDestination[] = [];
   const seenNameKeys = new Set<string>();
 
   for (const h of allHotels) {
@@ -779,6 +809,7 @@ export function mergeNearbyHotels(params: {
     if (!doesPlaceBelongToProvince(h.latitude, h.longitude, h.provinceKh, targetProvinceKh)) continue;
     const normKey = `${normalizeKhmerSearchText(h.nameKh || h.nameEn || '')}::${(h.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
     if (normKey.length > 3 && seenNameKeys.has(normKey)) continue;
+    if (!mergedMap.has(h.id)) mergedList.push(h);
     mergedMap.set(h.id, h);
     if (normKey.length > 3) seenNameKeys.add(normKey);
   }
@@ -789,7 +820,7 @@ export function mergeNearbyHotels(params: {
     if (dist > radiusMeters) continue;
     if (!doesPlaceBelongToProvince(gp.lat, gp.lng, gp.provinceKh || gp.province, targetProvinceKh)) continue;
 
-    const existingMatch = findDuplicateDestinationForGooglePlace(gp, Array.from(mergedMap.values()));
+    const existingMatch = findDuplicateDestinationForGooglePlace(gp, mergedList);
     if (!existingMatch) {
       const inferredLabels = inferHotelCategoryLabels(`${gp.nameKh || ''} ${gp.nameEn || ''} ${gp.primaryTypeDisplayName || ''}`);
       const converted: TouristDestination = {
@@ -801,12 +832,13 @@ export function mergeNearbyHotels(params: {
       if (!isStrictHotelDestination(converted)) continue;
       const normKey = `${normalizeKhmerSearchText(converted.nameKh || converted.nameEn || '')}::${(converted.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
       if (normKey.length > 3 && seenNameKeys.has(normKey)) continue;
+      if (!mergedMap.has(converted.id)) mergedList.push(converted);
       mergedMap.set(converted.id, converted);
       if (normKey.length > 3) seenNameKeys.add(normKey);
     }
   }
 
-  return Array.from(mergedMap.values())
+  return mergedList
     .map((h) => {
       const distanceMeters = calculateDistanceMeters(refCoords.lat, refCoords.lng, h.latitude, h.longitude);
       const distanceKm = Number((distanceMeters / 1000).toFixed(1));
@@ -829,6 +861,7 @@ export function mergeNearbyTourismDestinations(params: {
 }): Array<TouristDestination & { distanceMeters: number; distanceKm: number }> {
   const { destinations, liveNearbyAttractions, refCoords, radiusMeters, targetProvinceKh } = params;
   const mergedMap = new Map<string, TouristDestination>();
+  const mergedList: TouristDestination[] = [];
   const seenNameKeys = new Set<string>();
 
   for (const d of destinations) {
@@ -839,6 +872,7 @@ export function mergeNearbyTourismDestinations(params: {
     if (!doesPlaceBelongToProvince(d.latitude, d.longitude, d.provinceKh, targetProvinceKh)) continue;
     const normKey = `${normalizeKhmerSearchText(d.nameKh || d.nameEn || '')}::${(d.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
     if (normKey.length > 3 && seenNameKeys.has(normKey)) continue;
+    if (!mergedMap.has(d.id)) mergedList.push(d);
     mergedMap.set(d.id, d);
     if (normKey.length > 3) seenNameKeys.add(normKey);
   }
@@ -849,18 +883,19 @@ export function mergeNearbyTourismDestinations(params: {
     if (dist > radiusMeters) continue;
     if (!doesPlaceBelongToProvince(gp.lat, gp.lng, gp.provinceKh || gp.province, targetProvinceKh)) continue;
 
-    const existingMatch = findDuplicateDestinationForGooglePlace(gp, Array.from(mergedMap.values()));
+    const existingMatch = findDuplicateDestinationForGooglePlace(gp, mergedList);
     if (!existingMatch) {
       const converted = convertGooglePlaceToDestination(gp);
       if (converted.categorySlug === 'hotel') continue;
       const normKey = `${normalizeKhmerSearchText(converted.nameKh || converted.nameEn || '')}::${(converted.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
       if (normKey.length > 3 && seenNameKeys.has(normKey)) continue;
+      if (!mergedMap.has(converted.id)) mergedList.push(converted);
       mergedMap.set(converted.id, converted);
       if (normKey.length > 3) seenNameKeys.add(normKey);
     }
   }
 
-  return Array.from(mergedMap.values())
+  return mergedList
     .map((d) => {
       const distanceMeters = calculateDistanceMeters(refCoords.lat, refCoords.lng, d.latitude, d.longitude);
       const distanceKm = Number((distanceMeters / 1000).toFixed(1));
@@ -884,7 +919,7 @@ const COFFEE_DRINK_CATEGORY_REGEX =
   /កាហ្វេ|តែគុជ|តែបៃតង|តែក្រូចឆ្មា|តែទឹកដោះគោ|តែផ្លែឈើ|តែត្រជាក់|តែក្ដៅ|ហាងតែ|ភេសជ្ជៈ|ទឹកផ្លែឈើ|ទឹកក្រឡុក|ទឹកអំពៅ|ការ៉េម|នំប៉័ង|នំខេក|នំដុត|\b(?:coffee|cafe|café|cofe|coffe|kopi|espresso|latte|cappuccino|americano|mocha|macchiato|matcha|roastery|tea|boba|bubble\s*tea|milk\s*tea|smoothie|juice|bakery|pastry|croissant|cake|ice\s*cream|gelato|chagee|koi\s*th[eé]|gong\s*cha|the\s*alley|mixue|starbucks)\b|咖啡|奶茶|茶饮|果茶|冰沙|果汁|烘焙|面包|蛋糕|冰淇淋|甜品/i;
 
 const BBQ_SEAFOOD_CATEGORY_REGEX =
-  /សាច់អាំង|សាច់គោអាំង|គ្រឿងសមុទ្រ|ស៊ុបឆ្នាំងដី|ស៊ុបឆ្នាំងភ្លើង|ស៊ុបគោ|ស៊ុបម្រះ|ស៊ុបពិសេស|ស៊ុបសាច់គោ|ស៊ុបពពែ|ស៊ុបខួរ|ស៊ុបហឹរ|ឆ្នាំងភ្លើង|ឆ្នាំងដី|ហតផត|ប៊ូហ្វេ|ក្តាម|បង្គា|មឹក|អយស្ទ័រ|ងៀត|ត្រីដុត|បង្កង|\b(?:bbq|barbecue|seafood|grill|grilled|hotpot|hot\s*pot|shabu|sukiyaki|mookata|buffet|crab|prawns?|shrimp|squid|oyster|lobster|yakiniku)\b|烧烤|烤肉|海鲜|火锅|自助餐|螃蟹|大虾|鱿鱼/i;
+  /សាច់អាំង|សាច់គោអាំង|គ្រឿងសមុទ្រ|ស៊ុបឆ្នាំងដី|ស៊ុបឆ្នាំងភ្លើង|ស៊ុបគោ|ស៊ុបម្រះ|ស៊ុបពិសេស|ស៊ុបសាច់គោ|ស៊ុបពពែ|ស៊ុបខួរ|ស៊ុបហឹរ|ឆ្នាំងភ្លើង|ឆ្នាំងដី|ហតផត|ប៊ូហ្វេ|ក្តាម|បង្គា|មឹក|អយស្ទ័រ|ងៀត|ត្រីដុត|បង្កង|\b(?:bbq|barbecue|seafood|grill|grilled|hotpot|hot\s*pot|shabu|sukiyaki|buffet|crab|prawns?|shrimp|squid|oyster|lobster|yakiniku)\b|烧烤|烤肉|海鲜|火锅|自助餐|螃蟹|大虾|鱿鱼/i;
 
 /** Eligibility only (a shop may be eligible for several of these) — see matchesNearMeQuickCategory for the exclusive result. */
 function isEligibleForNearMeCategory(r: Restaurant, quickFilterId: string): boolean {
@@ -1001,6 +1036,11 @@ function isEligibleForNearMeCategory(r: Restaurant, quickFilterId: string): bool
 
 export type NearMePrimaryCategory = 'vegetarian' | 'coffee' | 'noodles' | 'bbq_seafood' | 'rice_khmer';
 
+const nearMePrimaryCatCache = new WeakMap<
+  Restaurant,
+  { sig: string; val: NearMePrimaryCategory | null }
+>();
+
 /**
  * Assigns every food shop to AT MOST ONE of the 5 specific Near Me categories so the buttons never overlap
  * (only 'all' shows every shop). Priority: vegetarian → café & drinks → name hint (noodles / BBQ) →
@@ -1008,30 +1048,44 @@ export type NearMePrimaryCategory = 'vegetarian' | 'coffee' | 'noodles' | 'bbq_s
  */
 export function classifyNearMePrimaryCategory(r: Restaurant): NearMePrimaryCategory | null {
   if (!r) return null;
-  if (isVegetarianShop(r)) return 'vegetarian';
-  if (isEligibleForNearMeCategory(r, 'coffee')) return 'coffee';
+  const dishesKh = r.signatureDishesKh || [];
+  const dishesEn = r.signatureDishesEn || [];
+  const sig = `${r.nameKh || ''}|${r.nameEn || ''}|${r.categoryKh || ''}|${r.categoryEn || ''}|${r.businessCategory || ''}|${(r.descriptionKh || '').length}|${dishesKh[0] || ''}|${dishesKh.length}|${dishesEn[0] || ''}|${dishesEn.length}|${(r.menuItems || []).length}`;
+  const cached = nearMePrimaryCatCache.get(r);
+  if (cached && cached.sig === sig) {
+    return cached.val;
+  }
 
-  const eligNoodles = isEligibleForNearMeCategory(r, 'noodles');
-  const eligBbq = isEligibleForNearMeCategory(r, 'bbq_seafood');
-  const eligRice = isEligibleForNearMeCategory(r, 'rice_khmer');
-  if (!eligNoodles && !eligBbq && !eligRice) return null;
-  if (eligNoodles && !eligBbq && !eligRice) return 'noodles';
-  if (eligBbq && !eligNoodles && !eligRice) return 'bbq_seafood';
-  if (eligRice && !eligNoodles && !eligBbq) return 'rice_khmer';
+  const compute = (): NearMePrimaryCategory | null => {
+    if (isVegetarianShop(r)) return 'vegetarian';
+    if (isEligibleForNearMeCategory(r, 'coffee')) return 'coffee';
 
-  const nameAndCat = normalizeKhmerFoodText(
-    [r.nameKh, r.nameEn, r.categoryKh, r.categoryEn, r.businessCategory].filter(Boolean).join(' ')
-  );
-  if (eligNoodles && NOODLE_CATEGORY_REGEX.test(nameAndCat)) return 'noodles';
-  if (eligBbq && BBQ_SEAFOOD_CATEGORY_REGEX.test(nameAndCat)) return 'bbq_seafood';
+    const eligNoodles = isEligibleForNearMeCategory(r, 'noodles');
+    const eligBbq = isEligibleForNearMeCategory(r, 'bbq_seafood');
+    const eligRice = isEligibleForNearMeCategory(r, 'rice_khmer');
+    if (!eligNoodles && !eligBbq && !eligRice) return null;
+    if (eligNoodles && !eligBbq && !eligRice) return 'noodles';
+    if (eligBbq && !eligNoodles && !eligRice) return 'bbq_seafood';
+    if (eligRice && !eligNoodles && !eligBbq) return 'rice_khmer';
 
-  const firstDish = normalizeKhmerFoodText(
-    `${(r.signatureDishesKh || [])[0] || ''} ${(r.signatureDishesEn || [])[0] || ''}`
-  );
-  if (eligNoodles && NOODLE_CATEGORY_REGEX.test(firstDish)) return 'noodles';
-  if (eligBbq && BBQ_SEAFOOD_CATEGORY_REGEX.test(firstDish)) return 'bbq_seafood';
-  if (eligRice) return 'rice_khmer';
-  return eligNoodles ? 'noodles' : 'bbq_seafood';
+    const nameAndCat = normalizeKhmerFoodText(
+      [r.nameKh, r.nameEn, r.categoryKh, r.categoryEn, r.businessCategory].filter(Boolean).join(' ')
+    );
+    if (eligNoodles && NOODLE_CATEGORY_REGEX.test(nameAndCat)) return 'noodles';
+    if (eligBbq && BBQ_SEAFOOD_CATEGORY_REGEX.test(nameAndCat)) return 'bbq_seafood';
+
+    const firstDish = normalizeKhmerFoodText(
+      `${(r.signatureDishesKh || [])[0] || ''} ${(r.signatureDishesEn || [])[0] || ''}`
+    );
+    if (eligNoodles && NOODLE_CATEGORY_REGEX.test(firstDish)) return 'noodles';
+    if (eligBbq && BBQ_SEAFOOD_CATEGORY_REGEX.test(firstDish)) return 'bbq_seafood';
+    if (eligRice) return 'rice_khmer';
+    return eligNoodles ? 'noodles' : 'bbq_seafood';
+  };
+
+  const val = compute();
+  nearMePrimaryCatCache.set(r, { sig, val });
+  return val;
 }
 
 /**

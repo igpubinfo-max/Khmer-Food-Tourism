@@ -589,7 +589,7 @@ module.exports = [
     "categoryKh": "ប្រាសាទបុរាណ / បេតិកភណ្ឌ",
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តសមាធិ ស្ថិតនៅលើជម្រាលភ្នំកែប ហ៊ុមព័ទ្ធដោយព្រៃឈើធម្មជាតិដ៏ស្ងប់ស្ងាត់ មានព្រះវិហារពណ៌មាស និងទីធ្លាគយគន់ទេសភាពឆ្នេរសមុទ្រកែប និងកោះនានាយ៉ាងស្រស់ត្រកាល។",
-    "descriptionEn": "A tranquil hillside Buddhist meditation temple nestled in the slopes of Kep Mountain, offering golden pagodas, spiritual peace, and scenic vistas over the Gulf of Thailand.",
+    "descriptionEn": "A tranquil hillside Buddhist meditation temple nestled in the slopes of Kep Mountain, offering golden pagodas, spiritual peace, and scenic vistas over the Kep coastline and southern sea.",
     "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Kep_National_Park_trail_Cambodia.jpg/960px-Kep_National_Park_trail_Cambodia.jpg",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
@@ -826,8 +826,8 @@ module.exports = [
     "categorySlug": "resort",
     "categoryKh": "រមណីយដ្ឋាន & វប្បធម៌",
     "categoryEn": "Resorts & Cultural Heritage",
-    "descriptionKh": "ច្រកទ្វារអន្តរជាតិចាំយាមជាច្រកព្រំដែនកម្ពុជា-ថៃ ជាប់មាត់សមុទ្រ មានសួនច្បារមាត់ទឹក ផ្សារទំនិញរួចពន្ធ និងទេសភាពភ្នំជាប់មាត់សមុទ្រដ៏ស្រស់បំព្រង។",
-    "descriptionEn": "The southwestern coastal international border gateway between Cambodia and Thailand, offering duty-free shopping, scenic seaside cliffs, and sea-view promenades.",
+    "descriptionKh": "ច្រកទ្វារអន្តរជាតិចាំយាមជាច្រកព្រំដែនអន្តរជាតិ ជាប់មាត់សមុទ្រ មានសួនច្បារមាត់ទឹក ផ្សារទំនិញរួចពន្ធ និងទេសភាពភ្នំជាប់មាត់សមុទ្រដ៏ស្រស់បំព្រង។",
+    "descriptionEn": "The southwestern coastal international border gateway in Koh Kong, offering duty-free shopping, scenic seaside cliffs, and sea-view promenades.",
     "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Koh_Sdach_Archipelago_Koh_Kong.jpg/960px-Koh_Sdach_Archipelago_Koh_Kong.jpg",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
@@ -845,7 +845,7 @@ module.exports = [
     "highlightsKh": [
       "ទិដ្ឋភាពភ្នំប៉ះមាត់សមុទ្រព្រំដែនអន្តរជាតិ",
       "ទិញទំនិញរួចពន្ធ និងវត្ថុអនុស្សាវរីយ៍",
-      "ចំណុចឆ្លងដែនទេសចរណ៍ទៅកាន់ប្រទេសថៃ",
+      "ចំណុចឆ្លងដែនទេសចរណ៍អន្តរជាតិមាត់សមុទ្រ",
       "ខ្យល់អាកាសបរិសុទ្ធមាត់សមុទ្រ"
     ],
     "isFeatured": false,
@@ -879,7 +879,7 @@ module.exports = [
     "highlightsKh": [
       "ចេតិយបុរាណលើផ្ទាំងថ្មមាត់សមុទ្រ",
       "ស្ពានបេតុងដើរកាត់ទឹកសមុទ្រទៅកាន់ចេតិយ",
-      "រឿងព្រេងស្នេហាបុរាណខ្មែរ-ថៃ",
+      "រឿងព្រេងស្នេហាបុរាណប្រចាំតំបន់ឆ្នេរ",
       "ទេសភាពក្រុងកោះកុងមើលពីមាត់ទឹក"
     ],
     "isFeatured": false,

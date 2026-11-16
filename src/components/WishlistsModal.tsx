@@ -160,7 +160,8 @@ export const WishlistsModal: React.FC = () => {
     });
   }, [isSavedBookmarksTab, bookmarkedItems, activeWishlist, foods, destinations]);
 
-  // Keep mounted once visited so active list & scroll position persist
+  // Keep mounted once visited so active list persists, but unmount DOM when closed
+  if (!isWishlistsModalOpen) return null;
 
   const getWishlistDisplayName = (w: { nameKh: string; nameEn: string }) => {
     if (language === 'km') return sanitizeStrictLanguageText(w.nameKh, 'km');

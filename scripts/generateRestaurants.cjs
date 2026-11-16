@@ -71,7 +71,7 @@ const verifiedVenues = [
     nameKh: 'ភោជនីយដ្ឋាន ខ្មែរសុរិន្ទ (Khmer Surin Restaurant)',
     nameEn: 'Khmer Surin Restaurant BKK1',
     descKh: 'ភោជនីយដ្ឋានដ៏ល្បីល្បាញយូរឆ្នាំនៅភ្នំពេញ តាំងពីឆ្នាំ ១៩៩៦ មានបរិយាកាសផ្ទះឈើបុរាណ លម្អដោយរុក្ខជាតិបៃតង និងវត្ថុសិល្បៈខ្មែរ។',
-    descEn: 'A long-standing Phnom Penh staple since 1996 serving fragrant Khmer and Surin-border regional fare in a lush garden terrace.',
+    descEn: 'A long-standing Phnom Penh staple since 1996 serving fragrant Khmer traditional regional fare in a lush garden terrace.',
     photo: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80',
     addrKh: 'ផ្ទះលេខ ៩ ផ្លូវ ៥៧ សង្កាត់បឹងកេងកង ១',
     addrEn: 'No. 9 Street 57, BKK1, Phnom Penh',

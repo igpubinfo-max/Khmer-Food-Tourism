@@ -91,12 +91,8 @@ export const ProvinceDirectoryHub: React.FC<Props> = ({
     }
     return order;
   }, [provinces]);
+  // Static random pick per open (0% background timer CPU/battery drain); user can tap the shuffle pill to cycle manually
   const [featuredPos, setFeaturedPos] = useState(0);
-  useEffect(() => {
-    if (shuffledOrder.length < 2) return;
-    const timer = window.setInterval(() => setFeaturedPos((n) => (n + 1) % shuffledOrder.length), 5000);
-    return () => window.clearInterval(timer);
-  }, [shuffledOrder]);
 
   const featured = useMemo(() => {
     if (provinces.length !== DISH_PROVINCES.length) return null;
@@ -146,7 +142,20 @@ export const ProvinceDirectoryHub: React.FC<Props> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/10" />
           <div className="relative p-4 pt-24 space-y-2">
             <span
-              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold text-white shadow-md"
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                setFeaturedPos((n) => (n + 1) % Math.max(1, shuffledOrder.length));
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setFeaturedPos((n) => (n + 1) % Math.max(1, shuffledOrder.length));
+                }
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold text-white shadow-md active:scale-95 transition"
               style={{ background: `linear-gradient(180deg, ${featuredMeta.from} 0%, ${featuredMeta.to} 100%)` }}
             >
               <Shuffle className="w-3 h-3" strokeWidth={1.75} />

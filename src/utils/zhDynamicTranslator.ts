@@ -1188,7 +1188,7 @@ const CULINARY_AND_TOURISM_PHRASES_EN_TO_ZH: Array<[string, string]> = [
   ['sliced tender beef', '鲜嫩牛肉片'],
   ['morning glory (water spinach) and eggplant', '空心菜（通心菜）与紫茄'],
   ['round eggplants and water spinach', '圆茄子与空心菜'],
-  ['thai round eggplant, water spinach', '脆圆茄与空心菜'],
+  ['crisp green round eggplant, water spinach', '脆圆茄与空心菜'],
   ['water spinach and bean sprouts', '空心菜与绿豆芽'],
   ['water spinach or water hyacinth stems', '空心菜或水葫芦嫩茎'],
   ['fresh morning glory cut', '鲜切空心菜段'],
@@ -2072,7 +2072,7 @@ export function sanitizeStrictLanguageText(input: string | undefined, lang: Lang
 
 function computeSanitizeStrictLanguageText(input: string, lang: Language): string {
   if (!input) return '';
-  // Always strip any Thai (\u0E00-\u0E7F), Lao (\u0E80-\u0EFF), Myanmar (\u1000-\u109F), or Devanagari (\u0900-\u097F) script
+  // Always strip any non-Khmer regional (\u0E00-\u0E7F, \u0E80-\u0EFF, \u1000-\u109F) or Devanagari (\u0900-\u097F) script
   let out = input.replace(/[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]+/g, '').trim();
   if (!out) return '';
 

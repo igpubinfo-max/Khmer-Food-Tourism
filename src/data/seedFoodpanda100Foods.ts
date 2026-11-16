@@ -1427,7 +1427,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "nameKh": "ត្រប់ស្រួយ និងត្រប់ពុតលំញង",
-        "nameEn": "Crisp Thai round eggplants & pea eggplants",
+        "nameEn": "Crisp green round eggplants & pea eggplants",
         "nameZh": "脆圆茄片与水茄",
         "amount": "១៥០ ក្រាម"
       },
@@ -1767,7 +1767,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryEn": "Salads & Dips",
     "categoryZh": "凉拌与蘸酱",
     "descriptionKh": "ម៉ាំត្រីលាយគ្រឿងក្រូចឆ្មារ ខ្ទឹមស ម្ទេស និងត្រប់ស្រួយ ញ៉ាំផ្ទាប់ជាមួយពោះតាន់ជ្រូកស្ងោរស្រួយៗ។",
-    "descriptionEn": "Pungent Cambodian fermented fish mam tossed with lime, garlic, chilies, and crunchy Thai eggplant, served alongside boiled pork chitterlings.",
+    "descriptionEn": "Pungent Cambodian fermented fish mam tossed with lime, garlic, chilies, and crunchy green round eggplant, served alongside boiled pork chitterlings.",
     "descriptionZh": "柬式风味生腌鱼拌入青柠汁、蒜片、辣椒与脆茄子，搭配爽脆白灼猪粉肠享用。",
     "photoUrl": "/foods/food-255.jpg",
     "prepTime": "១៥ នាទី",
@@ -1792,7 +1792,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "nameKh": "ត្រប់ស្រួយហាន់ស្តើងៗ ៥ ផ្លែ",
-        "nameEn": "Crunchy green Thai eggplants sliced 5 pcs",
+        "nameEn": "Crunchy green round eggplants sliced 5 pcs",
         "nameZh": "脆绿圆茄切片 5个",
         "amount": "តាមចំណូលចិត្ត"
       },
@@ -1819,7 +1819,7 @@ export const foodpanda100Foods: FoodItem[] = [
       {
         "stepNumber": 3,
         "instructionKh": "ដាក់ត្រប់ស្រួយចូលច្របល់ជាមួយម៉ាំ រួចរៀបដាក់ក្បែរពោះតាន់ស្ងោរ និងបន្លែអន្លក់ស្រស់។",
-        "instructionEn": "Fold sliced Thai eggplants into the mam relish and serve beside the boiled chitterlings and fresh herbs.",
+        "instructionEn": "Fold sliced green round eggplants into the mam relish and serve beside the boiled chitterlings and fresh herbs.",
         "instructionZh": "拌入脆茄片，与白灼粉肠及新鲜香草同食。"
       }
     ],
@@ -2948,7 +2948,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryZh": "凉拌与蘸酱",
     "descriptionKh": "មីស្រុសស្វិតល្មម បុកលាយជាមួយជើងមាន់អត់ឆ្អឹងស្រួយៗ ប្រហិត ប៉េងប៉ោះ និងទឹកត្រីក្រូចឆ្មារជូរហឹរ។",
     "descriptionEn": "Springy blanched instant noodles tossed with crunchy boneless chicken feet, meatballs, yardlong beans, and fiery lime-chili dressing.",
-    "descriptionZh": "劲道烫面配爽脆无骨凤爪、肉丸、长豆角与泰式青柠辣椒汁拌制而成。",
+    "descriptionZh": "劲道烫面配爽脆无骨凤爪、肉丸、长豆角与柬式青柠辣椒汁拌制而成。",
     "photoUrl": "/foods/food-271.jpg",
     "prepTime": "១៥ នាទី",
     "cookTime": "៣៥ នាទី",
@@ -4219,7 +4219,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "nameKh": "ជីរណា ជីរនាងវង និងខ្ទឹមបំពង ១ ចានតូច",
-        "nameEn": "Sawtooth coriander, Thai basil & fried garlic 1 small bowl",
+        "nameEn": "Sawtooth coriander, sweet basil & fried garlic 1 small bowl",
         "nameZh": "刺芫荽、罗勒与炸蒜酥 1小碗",
         "amount": "តាមចំណូលចិត្ត"
       }
@@ -5429,7 +5429,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryEn": "Salads & Dips",
     "categoryZh": "凉拌与蘸酱",
     "descriptionKh": "ប្រហុកសាច់ល្អចិញ្ច្រាំជាមួយគល់ស្លឹកគ្រៃ រំដេង ខ្ទឹមស ម្ទេស ត្រប់ស្រួយ និងទឹកក្រូចឆ្មារ ញ៉ាំជាមួយសាច់គោអាំងឬបន្លែស្រស់។",
-    "descriptionEn": "Bold, aromatic Cambodian relish of finely minced fermented fish paste with lemongrass, galangal, garlic, crisp Thai eggplant, and fresh lime.",
+    "descriptionEn": "Bold, aromatic Cambodian relish of finely minced fermented fish paste with lemongrass, galangal, garlic, crisp green round eggplant, and fresh lime.",
     "descriptionZh": "精选柬埔寨臭鱼肉与香茅、南姜、蒜瓣、指天椒及脆茄子一同剁碎，拌入鲜青柠汁。",
     "photoUrl": "/foods/food-305.jpg",
     "prepTime": "១៥ នាទី",
@@ -5454,7 +5454,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "nameKh": "ត្រប់ស្រួយហាន់ ខ្ទឹមស និងម្ទេសអាចម៍សត្វ ១ ចានតូច",
-        "nameEn": "Crunchy Thai eggplants, garlic & bird-eye chilies 1 small bowl",
+        "nameEn": "Crunchy green round eggplants, garlic & bird-eye chilies 1 small bowl",
         "nameZh": "脆绿茄、蒜瓣与指天椒 1小碗",
         "amount": "តាមចំណូលចិត្ត"
       },
@@ -5481,7 +5481,7 @@ export const foodpanda100Foods: FoodItem[] = [
       {
         "stepNumber": 3,
         "instructionKh": "បន្ថែមត្រប់ស្រួយហាន់ស្តើងៗនិងម្ទេស ញ៉ាំផ្ទាប់ជាមួយបន្លែអន្លក់និងបាយក្ដៅៗ។",
-        "instructionEn": "Fold in thinly sliced Thai eggplants and chilies, serving with crisp raw vegetables and hot rice.",
+        "instructionEn": "Fold in thinly sliced green round eggplants and chilies, serving with crisp raw vegetables and hot rice.",
         "instructionZh": "拌入薄切脆茄子与辣椒，配新鲜生菜和热饭食用。"
       }
     ],

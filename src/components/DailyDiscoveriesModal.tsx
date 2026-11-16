@@ -320,7 +320,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
     return () => observer.disconnect();
   }, [isDailyDiscoveriesModalOpen, visibleDishCount, filteredDishes.length]);
 
-  // Keep mounted once visited so province selection & scroll position persist
+  // Keep mounted once visited so province selection persists, but unmount DOM when closed
+  if (!isDailyDiscoveriesModalOpen) return null;
 
   const getProvinceDisplayName = (p: ProvinceFilterOption) => {
     if (isKm) return p.fullKh;

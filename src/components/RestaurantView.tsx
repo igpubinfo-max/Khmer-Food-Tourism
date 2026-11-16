@@ -37,7 +37,9 @@ import { isVipOwnerListing } from './listing/ListingUI';
 import {
   normalizeKhmerSearchText,
   searchNearbyPlacesWithin500m,
+  getInstantCachedNearbyPlaces,
   GooglePlaceCachedItem,
+  searchNearbyPubNightlife,
 } from '../services/googlePlacesService';
 import { NearMeControlBar } from './common/NearMeControlBar';
 import {
@@ -137,7 +139,12 @@ export const RestaurantView: React.FC = () => {
     return saved ? detectClosestProvinceFromCoords(saved) : 'រាជធានីភ្នំពេញ';
   });
   const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
-  const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>([]);
+  const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>(() => {
+    const initCoords = readSavedUserGps() || PROVINCE_CENTERS['រាជធានីភ្នំពេញ'];
+    return getInstantCachedNearbyPlaces(initCoords.lat, initCoords.lng, MAX_NEARBY_RADIUS_METERS).restaurants;
+  });
+  const [livePubNightlife, setLivePubNightlife] = useState<GooglePlaceCachedItem[]>([]);
+  const [isLoadingPub, setIsLoadingPub] = useState<boolean>(false);
   const locationReqSeqRef = useRef<number>(0);
   const [showAllFeatured, setShowAllFeatured] = useState<boolean>(false);
   const [shopSearchQuery, setShopSearchQuery] = useState<string>('');
@@ -231,6 +238,14 @@ export const RestaurantView: React.FC = () => {
         setNearMeActive(true);
         setSortMode('nearest');
         requestLocation(false);
+      } else if (explicitCat === 'pub_nightlife' || explicitCat === 'vegetarian_shop') {
+        setCategoryFilter(explicitCat);
+        setNearMeActive(true);
+        setSortMode('nearest');
+        if (explicitCat === 'pub_nightlife') {
+          setSelectedRadiusMeters((prev) => Math.max(prev, 10000));
+        }
+        requestLocation(false);
       } else if (explicitCat) {
         setNearMeActive(false);
         setCategoryFilter(explicitCat);
@@ -280,6 +295,16 @@ export const RestaurantView: React.FC = () => {
   ) => {
     if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) return;
     const reqSeq = locationReqSeqRef.current;
+    if (!forceRefresh) {
+      const instant = getInstantCachedNearbyPlaces(coords.lat, coords.lng, radiusOverride);
+      if (instant.restaurants.length > 0) {
+        setLiveNearbyRestaurants(instant.restaurants);
+      }
+      if (instant.fromMemoryCache) {
+        setIsLoadingNearby(false);
+        return;
+      }
+    }
     setIsLoadingNearby(true);
     try {
       const res = await searchNearbyPlacesWithin500m(
@@ -301,7 +326,9 @@ export const RestaurantView: React.FC = () => {
 
   const requestLocation = (forceRefresh = false) => {
     const reqSeq = ++locationReqSeqRef.current;
-    setGeoStatus('requesting');
+    if (forceRefresh || (!userCoords && !readSavedUserGps())) {
+      setGeoStatus('requesting');
+    }
     let fetchedCoords: { lat: number; lng: number } | null = null;
 
     requestCambodiaGpsLocation({
@@ -341,8 +368,14 @@ export const RestaurantView: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!readSavedUserGps()) {
+    const savedGps = readSavedUserGps();
+    if (!savedGps) {
       requestLocation(false);
+    } else {
+      const instant = getInstantCachedNearbyPlaces(savedGps.lat, savedGps.lng, selectedRadiusMeters);
+      if (instant.restaurants.length > 0) {
+        setLiveNearbyRestaurants(instant.restaurants);
+      }
     }
     const onGpsUpdated = (e: Event) => {
       const detail = (e as CustomEvent<{ lat: number; lng: number }>).detail;
@@ -422,6 +455,35 @@ export const RestaurantView: React.FC = () => {
     );
   };
 
+  /** "ហាងផឹកស៊ី": deep GPS search for pubs, bars, beer gardens & night venues, nearest first. */
+  const handleTogglePubNightlife = () => {
+    if (shopSearchQuery || debouncedShopSearchQuery) {
+      setShopSearchQuery('');
+      setDebouncedShopSearchQuery('');
+    }
+    if (nearMeActive && categoryFilter === 'pub_nightlife') {
+      setNearMeActive(false);
+      setCategoryFilter('all');
+      setSortMode('nearest');
+      return;
+    }
+    setCategoryFilter('pub_nightlife');
+    setNearMeActive(true);
+    setSortMode('nearest');
+    // Wider default radius so the deep search returns many venues (user can still pick 5 / 10 / 20 km)
+    setSelectedRadiusMeters((prev) => Math.max(prev, 10000));
+    requestLocation(false);
+    showToast(
+      tr(
+        language,
+        'កំពុងស្វែងរកកន្លែងកម្សាន្ត និងជួបជុំ (បារ ផាប់ បៀរហ្គាឌិន) ជិតអ្នក — រៀបពីជិតទៅឆ្ងាយ',
+        'Deep-searching pubs, bars & nightlife near you — nearest first',
+        '正在深度搜索您附近的酒吧与夜生活场所——由近到远排序'
+      ),
+      'success'
+    );
+  };
+
   const classifyRestaurantCategory = (r: Restaurant): string => {
     return classifyRestaurantSubCategory(r);
   };
@@ -452,21 +514,21 @@ export const RestaurantView: React.FC = () => {
     },
     {
       id: 'cafe_bistro',
-      nameKh: 'កាហ្វេ',
-      nameEn: 'Café',
-      nameZh: '咖啡馆',
+      nameKh: 'កាហ្វេ/ភេសជ្ជៈ',
+      nameEn: 'Café & Drinks',
+      nameZh: '咖啡与饮品',
       icon: Coffee,
       imageSrc: '/categories/shop_cat_cafe.png',
       accentColor: '#F43F5E',
     },
     {
-      id: 'drinks_boba',
-      nameKh: 'ភេសជ្ជៈ',
-      nameEn: 'Drinks',
-      nameZh: '饮品',
+      id: 'pub_nightlife',
+      nameKh: 'កម្សាន្ត និងជួបជុំ',
+      nameEn: 'Pub & Nightlife',
+      nameZh: '娱乐与聚会',
       icon: CupSoda,
-      imageSrc: '/categories/shop_cat_drinks.png',
-      accentColor: '#3B82F6',
+      imageSrc: '/categories/shop_cat_pub_nightlife.png',
+      accentColor: '#9333EA',
     },
     {
       id: 'fast_street',
@@ -549,11 +611,35 @@ export const RestaurantView: React.FC = () => {
     [validDirectoryRestaurants, users, appSettings, nowTickMs]
   );
 
+  const pubModeActive = nearMeActive && categoryFilter === 'pub_nightlife';
+  const liveSourceForNearMe = useMemo(
+    () => (pubModeActive ? [...liveNearbyRestaurants, ...livePubNightlife] : liveNearbyRestaurants),
+    [pubModeActive, liveNearbyRestaurants, livePubNightlife]
+  );
+
+  // Deep pub / nightlife search whenever the pub button is active (re-runs on GPS or radius change)
+  useEffect(() => {
+    if (!pubModeActive) return;
+    let cancelled = false;
+    setIsLoadingPub(true);
+    searchNearbyPubNightlife(activeNearMeCoords.lat, activeNearMeCoords.lng, selectedRadiusMeters)
+      .then((items) => {
+        if (!cancelled) setLivePubNightlife(items);
+      })
+      .catch((err) => console.warn('Pub & nightlife deep search warning:', err))
+      .finally(() => {
+        if (!cancelled) setIsLoadingPub(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pubModeActive, activeNearMeCoords.lat, activeNearMeCoords.lng, selectedRadiusMeters]);
+
   const nearbyMergedShops = useMemo(() => {
     if (!nearMeActive) return [];
     return mergeNearbyFoodShops({
       restaurants: validDirectoryRestaurants,
-      liveNearbyRestaurants,
+      liveNearbyRestaurants: liveSourceForNearMe,
       refCoords: activeNearMeCoords,
       radiusMeters: selectedRadiusMeters,
       targetProvinceKh: manualProvince,
@@ -561,7 +647,7 @@ export const RestaurantView: React.FC = () => {
   }, [
     nearMeActive,
     validDirectoryRestaurants,
-    liveNearbyRestaurants,
+    liveSourceForNearMe,
     activeNearMeCoords,
     selectedRadiusMeters,
     manualProvince,
@@ -614,11 +700,11 @@ export const RestaurantView: React.FC = () => {
       (!queryProvince || queryProvince === cleanManualProv);
 
     const candidatePool: Restaurant[] = useNearMePool
-      ? nearbyMergedShops.length > 0
+      ? nearMeActive
         ? nearbyMergedShops
         : mergeNearbyFoodShops({
             restaurants: validDirectoryRestaurants,
-            liveNearbyRestaurants,
+            liveNearbyRestaurants: liveSourceForNearMe,
             refCoords: activeNearMeCoords,
             radiusMeters: selectedRadiusMeters,
             targetProvinceKh: manualProvince,
@@ -824,7 +910,7 @@ export const RestaurantView: React.FC = () => {
     nearMeActive,
     nearbyMergedShops,
     validDirectoryRestaurants,
-    liveNearbyRestaurants,
+    liveSourceForNearMe,
     activeNearMeCoords,
     selectedRadiusMeters,
     manualProvince,
@@ -1146,8 +1232,8 @@ export const RestaurantView: React.FC = () => {
           <div className="kft-cat-grid grid grid-cols-3 gap-x-1.5 min-[360px]:gap-x-2 sm:gap-x-3 gap-y-2 min-[360px]:gap-y-2.5 sm:gap-y-3 items-stretch">
             {primaryCategoryPills.map((cat) => {
               const active =
-                cat.id === 'vegetarian_shop'
-                  ? nearMeActive && categoryFilter === 'vegetarian_shop'
+                cat.id === 'vegetarian_shop' || cat.id === 'pub_nightlife'
+                  ? nearMeActive && categoryFilter === cat.id
                   : !nearMeActive && categoryFilter === cat.id;
               const titleText = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
               return (
@@ -1164,6 +1250,8 @@ export const RestaurantView: React.FC = () => {
                     }
                     if (cat.id === 'vegetarian_shop') {
                       handleToggleVegetarianNearby();
+                    } else if (cat.id === 'pub_nightlife') {
+                      handleTogglePubNightlife();
                     } else {
                       setNearMeActive(false);
                       setCategoryFilter(cat.id);
@@ -1302,7 +1390,7 @@ export const RestaurantView: React.FC = () => {
                 requestLocation(true);
                 scrollToShopList();
               }}
-              isLoadingNearby={isLoadingNearby}
+              isLoadingNearby={isLoadingNearby || isLoadingPub}
               selectedRadiusMeters={selectedRadiusMeters}
               onSelectRadius={handleSelectRadius}
               countLabel={tr(

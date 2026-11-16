@@ -716,7 +716,9 @@ test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclus
     detectExplicitShopCategoryFromQuery,
     verifyShopDataForDisplay,
     isVegetarianShop,
+    isPubNightlifeShop,
   } = require(path.join(ROOT, 'src/utils/foodFilters.ts'));
+  const { isPubNightlifeText } = require(path.join(ROOT, 'src/utils/pubNightlife.ts'));
   const { initialRestaurants } = require(path.join(ROOT, 'src/data/seedData.ts'));
   const { isHotelBusinessRecord, isStrictVerifiedCambodiaRestaurant } = require(path.join(ROOT, 'src/types/index.ts'));
   const { parseSmartSearchIntent } = require(path.join(ROOT, 'src/utils/aiSearchBridge.ts'));
@@ -829,6 +831,98 @@ test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclus
     vegShops.every((r) => isVegetarianShop(r)),
     'vegetarian_shop tab must only contain vegetarian shops'
   );
+
+  // 7. Pub & Nightlife (ហាងផឹកស៊ី) replaces the Drinks button: deep GPS search, only bars/pubs/night venues
+  assert.ok(rvSrc.includes("id: 'pub_nightlife'"), 'RestaurantView must expose the pub_nightlife (ហាងផឹកស៊ី) button');
+  assert.ok(!rvSrc.includes("id: 'drinks_boba',\n      nameKh"), 'Drinks button must be replaced by pub_nightlife');
+  assert.ok(rvSrc.includes('searchNearbyPubNightlife'), 'pub button must run the deep nearby pub search');
+  assert.ok(
+    /handleTogglePubNightlife[\s\S]{0,1200}requestLocation\(false\)/.test(rvSrc),
+    'pub button must request GPS'
+  );
+  for (const yes of [
+    'Angkor Beer Garden',
+    'Sky Bar Phnom Penh',
+    'The Irish Pub',
+    'Dragon Night Club',
+    'Karaoke KTV Palace',
+    'ហាងផឹកស៊ី អូឡាំពិក',
+    'ស្រាបៀរ អង្គរ',
+    '金边酒吧',
+    'Craft Brewery Taproom',
+    'bar_and_grill',
+    'Rooftop Lounge Cocktail',
+  ]) {
+    assert.equal(isPubNightlifeText(yes), true, 'must be pub/nightlife: ' + yes);
+  }
+  for (const no of [
+    'Brown Coffee Roastery',
+    'Fresh Juice Bar',
+    'Salad Bar Healthy',
+    'Sushi Bar',
+    'Korean Bar-B-Q Restaurant',
+    'Barista Academy',
+    'Phnom Penh Noodle Soup',
+    'Khmer Kitchen Restaurant',
+    'Pteah Bay Steakhouse',
+    'ភោជនីយដ្ឋានបារាំង',
+    'Coffee Lounge Cafe',
+    'ហាងនំប៉័ង ប៉ាតេ ភ្នំពេញ',
+    'Tous Les Jours Bakery',
+    'ហាងគុយទាវ និងអាហារព្រឹក',
+    'គុយទាវពេលព្រឹក ភ្នំពេញ',
+    'Specialty Cambodian espresso bar and training café',
+    'BROWN Coffee and Bakery Roastery',
+  ]) {
+    assert.equal(isPubNightlifeText(no), false, 'must NOT be pub/nightlife: ' + no);
+  }
+  assert.ok(rvSrc.includes("nameKh: 'កម្សាន្ត និងជួបជុំ'"), 'Button 4 must be named កម្សាន្ត និងជួបជុំ');
+  assert.ok(rvSrc.includes("imageSrc: '/categories/shop_cat_pub_nightlife.png'"), 'Button 4 must use shop_cat_pub_nightlife.png');
+  assert.ok(rvSrc.includes("nameKh: 'កាហ្វេ/ភេសជ្ជៈ'"), 'Button 3 must be named កាហ្វេ/ភេសជ្ជៈ');
+  const { getLocalSmartCache, convertGooglePlaceToRestaurant } = require(path.join(ROOT, 'src/services/googlePlacesService.ts'));
+  const cachedConverted = getLocalSmartCache().map(convertGooglePlaceToRestaurant);
+  const cachedPubs = cachedConverted.filter((r) => matchesShopCategoryTab(r, 'pub_nightlife'));
+  assert.ok(cachedPubs.length >= 12, 'Expected >= 12 verified pub/nightlife venues in cache, got ' + cachedPubs.length);
+  assert.ok(
+    !cachedPubs.some((r) => /នំប៉័ង|គុយទាវ|អាហារព្រឹក|ហាងកាហ្វេ|bakery|noodle|coffee|kinyei/i.test(r.nameKh + ' ' + r.nameEn)),
+    'pub_nightlife must never contain bakeries, morning noodle shops, or coffee shops'
+  );
+  const pubShop = vegMk({ nameEn: 'Angkor Beer Garden' });
+  const coffeeShop = vegMk({ nameEn: 'Brown Coffee Roastery' });
+  assert.equal(getShopCategoryTabTier(pubShop, 'pub_nightlife'), 2);
+  assert.equal(getShopCategoryTabTier(coffeeShop, 'pub_nightlife'), 0);
+  for (const tab of ['restaurant_dining', 'cafe_bistro', 'fast_street', 'drinks_boba']) {
+    assert.equal(getShopCategoryTabTier(pubShop, tab), 0, 'pub must not appear under ' + tab);
+  }
+  const pubTab = validShops.filter((r) => matchesShopCategoryTab(r, 'pub_nightlife'));
+  assert.ok(pubTab.every((r) => isPubNightlifeShop(r)), 'pub_nightlife tab must only contain pubs/bars');
+  // Every shop is shown under at most one of the 6 buttons (all excluded)
+  const exclusiveTabs = ['restaurant_dining', 'cafe_bistro', 'fast_street', 'pub_nightlife', 'vegetarian_shop'];
+  for (const shop of validShops) {
+    const hits = exclusiveTabs.filter((t) => matchesShopCategoryTab(shop, t));
+    assert.ok(hits.length <= 1, 'shop ' + shop.id + ' appears under several buttons: ' + hits.join(', '));
+  }
+
+  // 8. Zero Thai Content Guard across seed data, search results, and runtime validators
+  const { isThaiRelatedText, isThaiRelatedRecord } = require(path.join(ROOT, 'src/types/index.ts'));
+  assert.ok(
+    validShops.every((r) => !isThaiRelatedRecord(r)),
+    'Zero Thai restaurants or shops may exist in validShops'
+  );
+  assert.equal(
+    isStrictVerifiedCambodiaRestaurant({
+      id: 'custom-thai-1',
+      nameKh: 'ភោជនីយដ្ឋានម្ហូបថៃ',
+      nameEn: 'Bangkok Thai Kitchen',
+      addressKh: 'ភ្នំពេញ',
+      provinceKh: 'រាជធានីភ្នំពេញ',
+      latitude: 11.5564,
+      longitude: 104.9282,
+    }),
+    false,
+    'isStrictVerifiedCambodiaRestaurant must reject Thai restaurants'
+  );
+  assert.equal(isThaiRelatedText('ទឹកធ្លាក់តាតៃ Koh Kong Tatai Waterfall'), false, 'Tatai Waterfall must be preserved');
 });
 
 console.log('\nAll ' + passed + ' unit test suites passed successfully!');

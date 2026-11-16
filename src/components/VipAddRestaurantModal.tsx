@@ -862,7 +862,8 @@ export const VipAddRestaurantModal: React.FC = () => {
     });
   }, [isVipAddRestaurantModalOpen, isPreviewStep, upgradingExistingStoreId, claimingDestinationId, activeTab, registerModalBackHandler]);
 
-  // Keep mounted once visited so entered shop/hotel form data & scroll persist
+  // Keep mounted once visited so entered shop/hotel form data persists, but unmount DOM when closed
+  if (!isVipAddRestaurantModalOpen) return null;
 
   // Pick Shop Photo from Gallery with Image Moderation & Validation
   const handleTakePhotoWithCamera = async () => {

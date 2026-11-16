@@ -747,7 +747,7 @@ const RAW_100_NEW_DISHES: Array<{
     subIngKh: 'ទឹកក្រូចឆ្មារ ខ្ទឹមស ម្ទេស និងសណ្តែកដីបុក',
     subIngEn: 'Fresh lime juice, garlic, chilies, and crushed roasted peanuts',
     herbKh: 'ត្រសក់ ត្រប់ស្រួយ ស្ពៃក្តោប ព្រលិត និងកញ្ឆែតស្រស់',
-    herbEn: 'Cucumber, Thai eggplant, cabbage, water lily stems, and water mimosa',
+    herbEn: 'Cucumber, crisp green round eggplant, cabbage, water lily stems, and water mimosa',
   },
   {
     nameKh: 'ប្រហុកខ្ទិះ',
@@ -1493,7 +1493,7 @@ function buildSeasoningIngredient(
 
 function lowerInlineEn(s: string): string {
   if (!s) return s;
-  if (/^(Cambodian|Khmer|Kampot|Kep|Battambang|Siem Reap|Phnom Penh|Khor Ko|Prahok|Kroeung|Thai|Chinese|Vietnamese|Mekong|Tonle Sap|Preah|Stung Treng|Kandal|Takeo|Kampong|Yangzhou)\b/.test(s)) {
+  if (/^(Cambodian|Khmer|Kampot|Kep|Battambang|Siem Reap|Phnom Penh|Khor Ko|Prahok|Kroeung|Chinese|Vietnamese|Mekong|Tonle Sap|Preah|Stung Treng|Kandal|Takeo|Kampong|Yangzhou)\b/.test(s)) {
     return s;
   }
   return s.charAt(0).toLowerCase() + s.slice(1);

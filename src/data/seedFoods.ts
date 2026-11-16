@@ -130,7 +130,7 @@ export const seedFoods: FoodItem[] = [
     categorySlug: 'soup',
     categoryKh: 'ម្ហូបសម្ល / ការី',
     categoryEn: 'Curry / Traditional',
-    descriptionKh: 'ការីខ្មែរ មានរសជាតិស្រាលស្រទន់ មិនហឹរខ្លាំងដូចការីថៃឡើយ។ ចម្អិនពីសាច់មាន់ស្រែ ដំឡូងជ្វា ការ៉ុត ខ្ទឹមបារាំង ក្នុងទឹកខ្ទិះដូងឈ្ងុយឆ្ងាញ់ ទទួលទានជាមួយនំប៉័ងស្រួយ ឬនំបញ្ចុក។',
+    descriptionKh: 'ការីខ្មែរ មានរសជាតិស្រាលស្រទន់ និងឈ្ងុយគ្រឿងទេសបុរាណខ្មែរ។ ចម្អិនពីសាច់មាន់ស្រែ ដំឡូងជ្វា ការ៉ុត ខ្ទឹមបារាំង ក្នុងទឹកខ្ទិះដូងឈ្ងុយឆ្ងាញ់ ទទួលទានជាមួយនំប៉័ងស្រួយ ឬនំបញ្ចុក។',
     descriptionEn: 'Mild, silky Cambodian red coconut curry featuring farm chicken, sweet potatoes, and carrots. Traditionally dipped with crusty French baguettes or rice vermicelli.',
     photoUrl: '/foods/food-4.jpg',
     imageAuditStatus: 'verified',
@@ -252,7 +252,7 @@ export const seedFoods: FoodItem[] = [
     ingredients: [
       { nameKh: 'ត្រីឆ្អើរ ឬត្រីអាំងបេះយកសាច់', nameEn: 'Smoked catfish flaked', amount: '២៥០ ក្រាម' },
       { nameKh: 'អម្ពិលខ្ចី ឬស្លឹកទ្រមូង', nameEn: 'Young green tamarind or wild sour leaves', amount: '១ ក្តាប់' },
-      { nameKh: 'ត្រប់ស្រួយ និងត្រកួនស្រែ', nameEn: 'Thai round eggplant, water spinach', amount: '២០០ ក្រាម' },
+      { nameKh: 'ត្រប់ស្រួយ និងត្រកួនស្រែ', nameEn: 'Crisp green round eggplant, water spinach', amount: '២០០ ក្រាម' },
       { nameKh: 'ប្រហុកដុត ឬប្រហុកសាច់', nameEn: 'Toasted prahok paste', amount: '១ ស្លាបព្រាបាយ' },
     ],
     steps: [
@@ -624,7 +624,7 @@ export const seedFoods: FoodItem[] = [
     categoryKh: 'ម្ហូបឆា / គ្រឿងសមុទ្រ និង ទន្លេ',
     categoryEn: 'Stir-fry / Tamarind Clams',
     descriptionKh: 'លៀសឆាអំពិលទុំ ជាមុខម្ហូប និងអាហារសម្រន់ដ៏ពេញនិយម ប្រើលៀសទឹកសាបស្រស់ៗឆាលើភ្លើងខ្លាំងជាមួយទឹកអំពិលទុំ ស្ករត្នោត ខ្ទឹមសបំពង ម្ទេស និងស្លឹកជីរនាងវង មានរសជាតិជូរផ្អែមហឹរតិចៗឈ្ងុយឆ្ងាញ់។',
-    descriptionEn: 'Popular Cambodian wok-tossed freshwater clams glazed in a tangy-sweet ripe tamarind sauce with crispy garlic, fresh bird-eye chilies, and aromatic Thai basil.',
+    descriptionEn: 'Popular Cambodian wok-tossed freshwater clams glazed in a tangy-sweet ripe tamarind sauce with crispy garlic, fresh bird-eye chilies, and aromatic sweet basil.',
     photoUrl: '/foods/food-18.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',

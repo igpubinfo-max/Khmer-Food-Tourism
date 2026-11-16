@@ -179,7 +179,7 @@ export const restPart1: Restaurant[] = [
     "nameKh": "ភោជនីយដ្ឋាន ខ្មែរសុរិន្ទ",
     "nameEn": "Khmer Surin Restaurant BKK1",
     "descriptionKh": "ភោជនីយដ្ឋានដ៏ល្បីល្បាញយូរឆ្នាំនៅភ្នំពេញ តាំងពីឆ្នាំ ១៩៩៦ មានបរិយាកាសផ្ទះឈើបុរាណ លម្អដោយរុក្ខជាតិបៃតង និងវត្ថុសិល្បៈខ្មែរ។",
-    "descriptionEn": "A long-standing Phnom Penh staple since 1996 serving fragrant Khmer and Surin-border regional fare in a lush garden terrace.",
+    "descriptionEn": "A long-standing Phnom Penh staple since 1996 serving fragrant traditional Khmer regional fare in a lush garden terrace.",
     "photoUrl": "/Shop/rest-5.jpg",
     "galleryPhotos": [
       "/Shop/rest-5.jpg"

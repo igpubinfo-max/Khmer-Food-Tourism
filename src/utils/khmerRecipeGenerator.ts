@@ -551,7 +551,7 @@ export function generateAuthenticRecipeByDishName(
       },
       {
         nameKh: 'ម្ទេសស្រស់ និងបន្លែអន្លក់ស្រស់គ្រប់មុខ (ត្រសក់ ត្រប់ស្រួយ ស្ពៃក្តោប សណ្តែកគួរ ពពាយ)',
-        nameEn: 'Fresh bird-eye chilies and crisp Cambodian crudités (cucumber, Thai eggplant, cabbage, long beans)',
+        nameEn: 'Fresh bird-eye chilies and crisp Cambodian crudités (cucumber, green round eggplant, cabbage, long beans)',
         amount: '១ ថាសធំ',
       },
     ];

@@ -611,7 +611,8 @@ export const AdminDashboard: React.FC = () => {
     });
   }, [isAdminOpen, destinations, destLocationFilter, destSearchQuery, destProvinceFilter]);
 
-  // Keep mounted once visited so admin search/filter state & scroll position persist
+  // Keep mounted once visited so admin search/filter state persists, but unmount DOM when closed
+  if (!isAdminOpen) return null;
 
   const smartCacheStats = getSmartCacheStats();
 

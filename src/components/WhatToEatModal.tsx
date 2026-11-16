@@ -793,7 +793,7 @@ export const WhatToEatModal: React.FC = () => {
               !isSweetOrBeverageFood(f) &&
               !/^បាយសាច់ជ្រូក/i.test(kh) &&
               (getSpicyDishScore(f) > 0 ||
-                /ម្ជូរ|ញាំ|ភ្លា|បុក|តុំយ៉ាំ|សម្លម្ជូរព្រៃ|ប្រហុក|ទឹកគ្រឿង|ម្រះព្រៅ|ឆាក្តៅ|\bsour\b|\bsalad\b|\bceviche\b|\btom\s*yum\b/i.test(
+                /ម្ជូរ|ញាំ|ភ្លា|បុក|សម្លម្ជូរព្រៃ|ប្រហុក|ទឹកគ្រឿង|ម្រះព្រៅ|ឆាក្តៅ|\bsour\b|\bsalad\b|\bceviche\b/i.test(
                   title
                 ))
             );
@@ -1096,7 +1096,8 @@ export const WhatToEatModal: React.FC = () => {
     return getMatchingRestaurantsForDish(currentDish, restaurants, 2);
   }, [restaurants, currentDish]);
 
-  // Keep mounted once visited so scroll position & chat/wheel state persist
+  // Keep mounted once visited so chat/wheel state persists, but unmount DOM when closed
+  if (!isWhatToEatModalOpen) return null;
 
   /** Everything that must happen after an assistant reply is shown (cards, photos, drink mode, memory). */
   const applyReplyEffects = (reply: AiAssistantMessage, nextMemory: AiConversationMemory | null, cleanText: string) => {

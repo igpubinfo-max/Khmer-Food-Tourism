@@ -1037,7 +1037,7 @@ export const EXACT_INGREDIENT_ZH_MAP: Record<string, string> = {
   "marbled beef sirloin slices (450g)": "雪花西冷牛肉片（450克）",
   "marbled beef sirloin slices": "雪花西冷牛肉片",
   "creamy prahok coconut dip with minced lemongrass": "香茅椰浆波罗福鱼酱蘸水",
-  "crisp cucumber, thai eggplant, and fresh herbs": "爽脆黄瓜、脆圆茄与生鲜香草",
+  "crisp cucumber, green round eggplant, and fresh herbs": "爽脆黄瓜、脆圆茄与生鲜香草",
   "fresh whole ocean squid (500g)": "整只新鲜海捕大鱿鱼（500克）",
   "fresh whole ocean squid": "整只新鲜海捕大鱿鱼",
   "koh kong garlic-chili-lime fish sauce dip": "国公蒜蓉辣椒青柠鱼露蘸汁",
@@ -1171,7 +1171,7 @@ export const EXACT_INGREDIENT_ZH_MAP: Record<string, string> = {
   "pounded poached snakehead fish and simmered prahok broth (350g)": "石臼捣碎白灼黑鱼肉与熟波罗福鱼酱高汤（350克）",
   "pounded poached snakehead fish and simmered prahok broth": "石臼捣碎白灼黑鱼肉与熟波罗福鱼酱高汤",
   "fresh lime juice, garlic, chilies, and crushed roasted peanuts": "鲜青柠汁、蒜蓉、辣椒与烤香花生碎",
-  "cucumber, thai eggplant, cabbage, water lily stems, and water mimosa": "黄瓜、脆圆茄、包菜、睡莲嫩茎与水含羞草",
+  "cucumber, crisp green round eggplant, cabbage, water lily stems, and water mimosa": "黄瓜、脆圆茄、包菜、睡莲嫩茎与水含羞草",
   "minced pork belly and fine prahok paste (300g)": "五花肉末与细腻波罗福发酵鱼酱（300克）",
   "minced pork belly and fine prahok paste": "五花肉末与细腻波罗福发酵鱼酱",
   "thick coconut cream, yellow kroeung, and pea eggplants": "头道浓椰浆、黄香茅泥与脆水茄（豌豆茄）",
@@ -2033,7 +2033,7 @@ export const EXTRA_KHMER_CULINARY_MAP: Array<[string, string, string]> = [
   [
     "ត្រីសមុទ្រចំហុយក្រូចឆ្មារ",
     "Steamed Ocean Fish with Spicy Lime & Garlic",
-    "泰式青柠蒜蓉清蒸海鱼"
+    "柬式青柠蒜蓉清蒸海鱼"
   ],
   [
     "សម្លប្រុងបំពង់ឫស្សី",
@@ -2969,7 +2969,7 @@ export const DEST_DESC_ZH_BY_ID: Record<string, string> = {
   "dest-172": "深藏于南豆蔻山脉腹地的原始秘境河谷，是极度濒危野生暹罗鳄与亚洲龙鱼的天然家园，提供原住民社区民宿、雨林徒步与河谷皮划艇探险。",
   "dest-173": "横跨沿海半岛、占地1,800平方公里的柬埔寨最大海岸国家公园，涵盖常绿热带雨林、广袤红树林、原始白沙滩以及珍稀野生亚洲象栖息地。",
   "dest-174": "位于48号国道旁、被茂密山林绿植环抱的隐秘溪流瀑布，宽阔平坦的岩石水潭清澈凉爽，是旅途中消暑戏水的绝佳驿站。",
-  "dest-175": "连接柬埔寨国公省与泰国桐艾府的西南沿海国际边境口岸，拥有壮丽的海滨悬崖公路风光、跨海大桥视野与热闹的边境商贸氛围。",
+  "dest-175": "坐落于柬埔寨国公省西南沿海的国际边境口岸，拥有壮丽的海滨悬崖公路风光、跨海大桥视野与热闹的边境商贸氛围。",
   "dest-176": "矗立于国公省海湾礁石小岛上的历史石塔古迹，承载着流传数百年的坤昌与坤平（Khun Chhang Khun Phaen）民间传奇故事，四面环海风景独特。",
   "dest-177": "位于豆蔻山麓的宁静三层森林瀑布，清澈的山泉汇入翠绿的天然岩石水潭，四周鸟语花香，非常适合徒步探幽与森林野泳。",
   "dest-178": "坐落于塔泰河中央、被豆蔻山原始雨林环抱的生态绿洲岛，以静谧的水上生态度假木屋、清澈河水畅游与红树林皮划艇而闻名。",
@@ -3119,7 +3119,7 @@ export const EXACT_RESTAURANT_NAME_ZH_MAP: Record<string, string> = {
   "One More Restaurant Toul Kork": "金边堆谷区再来一家高棉名菜馆（One More）",
   "Mok Mony Restaurant Phnom Penh": "金边莫莫尼传统家常菜馆（Mok Mony）",
   "Friends the Restaurant Phnom Penh": "金边朋友公益创意餐厅（Friends the Restaurant）",
-  "Bopha Phnom Penh Titanic Riverside": "金边波帕泰坦尼克号河畔景观餐厅（Bopha）",
+  "Bopha Phnom Penh Titanic Riverside": "金边波帕河畔景观餐厅（Bopha）",
   "The Sugar Palm Siem Reap": "暹粒糖棕传统高棉餐厅（The Sugar Palm）",
   "Chanrey Tree Riverside Siem Reap": "暹粒占雷树河畔精致高棉餐厅（Chanrey Tree）",
   "Cuisine Wat Damnak Siem Reap": "暹粒瓦达纳克当代高棉名厨餐厅（Cuisine Wat Damnak）",
@@ -3239,7 +3239,7 @@ export const REST_DESC_PATTERN_ZH_MAP: Record<string, string> = {
   "Vibrant training restaurant by Friends-International serving regional Cambodian delicacies and creative specialties.": "由国际公益组织 Friends-International 创办的法式殖民别墅培训餐厅，供应正宗柬埔寨地方风味名菜与独具匠心的创意料理。",
   "Eco-conscious Cambodian eatery serving wholesome local home cooking made with chemical-free produce.": "崇尚环保健康理念的高棉绿色餐厅，严选无农药有机蔬果与鲜美食材，烹制纯正无味精的地道柬埔寨家常菜，全面告别一次性塑料。",
   "Authentic royal and traditional home recipes prepared with exquisite presentation and antique atmosphere.": "在充满古典高棉艺术氛围的雅致空间内，以考究的摆盘呈现正宗高棉皇室名菜与传统家传食谱。",
-  "A long-standing Phnom Penh staple since 1996 serving fragrant Khmer and Surin-border regional fare in a lush garden terrace.": "始创于1996年的金边老字号花园露台餐厅，在绿树繁花掩映的传统木屋中供应香气浓郁的高棉与泰柬边境素林风味佳肴。",
+  "A long-standing Phnom Penh staple since 1996 serving fragrant traditional Khmer regional fare in a lush garden terrace.": "始创于1996年的金边老字号花园露台餐厅，在绿树繁花掩映的传统木屋中供应香气浓郁的高棉传统地方风味佳肴。",
   "Legendary lively local barbecue spot serving charcoal-grilled beef, ribs, and fresh seafood with pungent dipping sauces.": "金边极具人气的传奇炭火烧烤名店，主打炭烤腌制牛肉、烤排骨与生猛海鲜，搭配风味浓郁的高棉秘制蘸酱。",
   "Sophisticated Khmer dining destination in Toul Kork featuring royal soups and traditional dishes.": "坐落于金边堆谷区的高雅高棉餐厅，宽敞气派，主打世代相传的高棉皇家炖汤、古法鱼鲜与地道传统名菜。",
   "Cozy and intimate family-run kitchen serving beloved traditional recipes and unique stuffed specialties.": "温馨雅致的家族经营高棉私房菜馆，用心烹制广受喜爱的传统高棉菜肴与独具特色的香茅酿馅料理。",
@@ -4068,9 +4068,9 @@ const CONCEPT_LIST: Array<[string, string, string]> = [
     "历史见证纪实摄影展览"
   ],
   [
-    "ចំណុចឆ្លងដែនទេសចរណ៍ទៅកាន់ប្រទេសថៃ",
-    "International Coastal Tourism Border Crossing to Thailand",
-    "通往泰国的沿海国际旅游边境口岸"
+    "ចំណុចឆ្លងដែនទេសចរណ៍អន្តរជាតិមាត់សមុទ្រ",
+    "International Coastal Tourism Border Crossing",
+    "沿海国际旅游边境口岸"
   ],
   [
     "ស្តូបរំលឹកវិញ្ញាណក្ខន្ធជនរងគ្រោះ",
@@ -4338,9 +4338,9 @@ const CONCEPT_LIST: Array<[string, string, string]> = [
     "面带神秘高棉微笑的四面佛石塔"
   ],
   [
-    "រឿងព្រេងស្នេហាបុរាណខ្មែរ-ថៃ",
-    "Historic Site Steeped in Ancient Khmer-Thai Folklore",
-    "承载古老高棉与暹罗民间爱情传说的历史遗迹"
+    "រឿងព្រេងស្នេហាបុរាណប្រចាំតំបន់ឆ្នេរ",
+    "Historic Site Steeped in Ancient Coastal Folklore",
+    "承载古老高棉海滨民间爱情传说的历史遗迹"
   ],
   [
     "ក្បាច់ចម្លាក់ឈើ និងសំរិទ្ធ",

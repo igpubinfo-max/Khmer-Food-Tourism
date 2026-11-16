@@ -97,7 +97,8 @@ export const NotificationsModal: React.FC = () => {
     return list;
   }, [notifications, prefs]);
 
-  // Keep mounted once visited so notification filter & scroll position persist
+  // Keep mounted once visited so notification filter persists, but unmount DOM when closed
+  if (!isNotificationsModalOpen) return null;
 
   const unreadCount = activeNotifications.filter((n) => !n.isRead).length;
 

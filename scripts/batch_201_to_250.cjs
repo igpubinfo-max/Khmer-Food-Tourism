@@ -1273,7 +1273,7 @@ module.exports = [
     "categorySlug": "mountain",
     "categoryKh": "ភ្នំ & រូងភ្នំ",
     "categoryEn": "Mountains & Caves",
-    "descriptionKh": "ល្អាងអន្លង់ព្រះជារូងភ្នំធម្មជាតិដ៏ជ្រៅកណ្តាលជួរភ្នំក្រវាញខាងកើត មានថ្មដុះថ្មយ้อยចាំងពន្លឺផ្លេកៗ និងប្រភពទឹកក្រោមដីថ្លាត្រជាក់ ជាទីទាក់ទាញទេសចរណ៍ផ្សងព្រេង។",
+    "descriptionKh": "ល្អាងអន្លង់ព្រះជារូងភ្នំធម្មជាតិដ៏ជ្រៅកណ្តាលជួរភ្នំក្រវាញខាងកើត មានថ្មដុះថ្មសំយុងចាំងពន្លឺផ្លេកៗ និងប្រភពទឹកក្រោមដីថ្លាត្រជាក់ ជាទីទាក់ទាញទេសចរណ៍ផ្សងព្រេង។",
     "descriptionEn": "A natural cavern system featuring crystalline stalactites, stalagmites, and cool subterranean spring water pools in western Kampong Chhnang.",
     "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Phnom_Neang_Kangrei_mountain_Kampong_Chhnang.jpg/960px-Phnom_Neang_Kangrei_mountain_Kampong_Chhnang.jpg",
     "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
@@ -1290,7 +1290,7 @@ module.exports = [
     "rating": 4.6,
     "reviewCount": 820,
     "highlightsKh": [
-      "រូងភ្នំថ្មដុះថ្មយ้อยធម្មជាតិចម្លែកភ្នែក",
+      "រូងភ្នំថ្មដុះថ្មសំយុងធម្មជាតិចម្លែកភ្នែក",
       "ទឹកជ្រោះក្រោមដីហូរត្រជាក់ស្រេង",
       "បទពិសោធន៍ដើររូងភ្នំបែបផ្សងព្រេង",
       "ព្រៃភ្នំធម្មជាតិអភិរក្ស"

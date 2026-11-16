@@ -2415,45 +2415,6 @@ export const restPart2: Restaurant[] = [
     "googlePlaceId": "ChIJ81o1c8BRCTERPCFusbjyYb8"
   },
   {
-    "id": "rest-507",
-    "created_at": "2026-03-01T00:00:00.000Z",
-    "nameKh": "ភោជនីយដ្ឋាន ខ្មែរ.ថៃ",
-    "nameEn": "Khmer-Thai Restaurant",
-    "descriptionKh": "ភោជនីយដ្ឋាន ខ្មែរ.ថៃ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
-    "descriptionEn": "Khmer-Thai Restaurant is a verified Cambodian and international restaurant at Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "",
-    "galleryPhotos": [],
-    "addressKh": "Khan Chamkarmon, រាជធានីភ្នំពេញ",
-    "addressEn": "Khan Chamkarmon, Phnom Penh",
-    "provinceKh": "រាជធានីភ្នំពេញ",
-    "provinceEn": "Phnom Penh",
-    "phone": "011 910 912",
-    "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
-    "openingHoursEn": "07:00 AM - 09:00 PM",
-    "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.544401,104.914123",
-    "latitude": 11.544401,
-    "longitude": 104.914123,
-    "rating": 4.6,
-    "reviewCount": 200,
-    "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
-    ],
-    "status": "approved",
-    "isVerified": true,
-    "isFeatured": false,
-    "paymentStatus": "verified",
-    "promotionalPrice": 2.99,
-    "isPromoted": false,
-    "paymentDate": "2026-03-01",
-    "profileImage": "",
-    "locationVerificationStatus": "verified",
-    "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
-  },
-  {
     "id": "rest-508",
     "created_at": "2026-03-01T00:00:00.000Z",
     "nameKh": "ភោជនីយដ្ឋាន Max's Bar & Kitchen",
@@ -3825,7 +3786,7 @@ export const restPart2: Restaurant[] = [
     "signatureDishesKh": [
       "បង្គាអាំងទឹកត្រីកោះកុងរសជាតិដើម",
       "ក្តាមថ្មឆាម្រេចខ្ចី",
-      "តុងយ៉ាំគ្រឿងសមុទ្រកោះកុង"
+      "សម្លម្ជូរគ្រឿងសមុទ្រកោះកុង"
     ],
     "status": "approved",
     "isVerified": true,

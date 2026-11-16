@@ -295,7 +295,7 @@ const CATEGORY_SYNONYM_GROUPS: string[][] = [
   // 15: seafood
   ['seafood', 'seafoods', 'crab', 'shrimp', 'prawn', 'prawns', 'lobster', 'oyster', 'squid', 'octopus', 'shellfish', 'គ្រឿងសមុទ្រ', 'ហាងគ្រឿងសមុទ្រ', 'ក្តាម', 'បង្គា', 'មឹក', 'ងៀត', 'អយស្ទ័រ', 'បង្កង', '海鲜', '螃蟹', '虾'],
   // 16: bbq / grill / hotpot / buffet
-  ['bbq', 'barbecue', 'grill', 'grilled', 'buffet', 'hotpot', 'shabu', 'sukiyaki', 'mookata', 'yakiniku', 'សាច់អាំង', 'ហាងសាច់អាំង', 'ប៊ូហ្វេ', 'ស៊ុប', 'ហាងស៊ុប', 'ស៊ុបគោ', 'ស៊ុបម្រះ', 'ស៊ុបក្តាម', 'ស៊ុបត្រី', 'ស៊ុបពពែ', 'ស៊ុបមាន់', 'ភ្នំភ្លើង', '烧烤', '烤肉', '火锅', '自助餐'],
+  ['bbq', 'barbecue', 'grill', 'grilled', 'buffet', 'hotpot', 'shabu', 'sukiyaki', 'yakiniku', 'សាច់អាំង', 'ហាងសាច់អាំង', 'ប៊ូហ្វេ', 'ស៊ុប', 'ហាងស៊ុប', 'ស៊ុបគោ', 'ស៊ុបម្រះ', 'ស៊ុបក្តាម', 'ស៊ុបត្រី', 'ស៊ុបពពែ', 'ស៊ុបមាន់', 'ភ្នំភ្លើង', '烧烤', '烤肉', '火锅', '自助餐'],
   // 17: boba / tea / juice / drinks
   ['boba', 'bubble', 'matcha', 'milktea', 'tea', 'teashop', 'juice', 'smoothie', 'drink', 'drinks', 'beverage', 'តែគុជ', 'ម៉ាត់ឆា', 'មិចឆា', 'តែទឹកដោះគោ', 'តែក្រូចឆ្មារ', 'ទឹកផ្លែឈើ', 'ទឹកអំពៅ', 'ភេសជ្ជៈ', '奶茶', '珍珠奶茶', '抹茶', '茶饮', '果汁'],
   // 18: shop / store

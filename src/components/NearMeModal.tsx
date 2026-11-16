@@ -26,6 +26,7 @@ import {
 import {
   sanitizeDialablePhone,
   searchNearbyPlacesWithin500m,
+  getInstantCachedNearbyPlaces,
   convertGooglePlaceToRestaurant,
   convertGooglePlaceToDestination,
   findDuplicateRestaurantForGooglePlace,
@@ -212,8 +213,14 @@ export const NearMeModal: React.FC = () => {
   const [manualProvince, setManualProvince] = useState<string>('រាជធានីភ្នំពេញ');
   const [selectedRadiusMeters, setSelectedRadiusMeters] = useState<number>(MAX_NEARBY_RADIUS_METERS);
   const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
-  const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>([]);
-  const [liveNearbyAttractions, setLiveNearbyAttractions] = useState<GooglePlaceCachedItem[]>([]);
+  const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>(() => {
+    const initCoords = readSavedUserGps() || { lat: 11.5564, lng: 104.9282 };
+    return getInstantCachedNearbyPlaces(initCoords.lat, initCoords.lng, MAX_NEARBY_RADIUS_METERS).restaurants;
+  });
+  const [liveNearbyAttractions, setLiveNearbyAttractions] = useState<GooglePlaceCachedItem[]>(() => {
+    const initCoords = readSavedUserGps() || { lat: 11.5564, lng: 104.9282 };
+    return getInstantCachedNearbyPlaces(initCoords.lat, initCoords.lng, MAX_NEARBY_RADIUS_METERS).attractions;
+  });
   const [visibleNearbyCount, setVisibleNearbyCount] = useState<number>(NEARBY_BATCH_SIZE);
 
   useEffect(() => {
@@ -311,6 +318,19 @@ export const NearMeModal: React.FC = () => {
   ) => {
     if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) return;
     const reqSeq = locationReqSeqRef.current;
+    if (!forceRefresh) {
+      const instant = getInstantCachedNearbyPlaces(coords.lat, coords.lng, radiusOverride);
+      if (instant.restaurants.length > 0) {
+        setLiveNearbyRestaurants(instant.restaurants);
+      }
+      if (instant.attractions.length > 0) {
+        setLiveNearbyAttractions(instant.attractions);
+      }
+      if (instant.fromMemoryCache) {
+        setIsLoadingNearby(false);
+        return;
+      }
+    }
     setIsLoadingNearby(true);
     try {
       const res = await searchNearbyPlacesWithin500m(
@@ -393,7 +413,20 @@ export const NearMeModal: React.FC = () => {
   // Merge & deduplicate verified Supabase restaurants + Google Maps/Live nearby places within user's location
   const allVerifiedCityRestaurants = useMemo(() => {
     const mergedMap = new Map<string, Restaurant>();
+    const mergedList: Restaurant[] = [];
+    const mergedIdxById = new Map<string, number>();
     const maxCitySearchRadius = Math.max(selectedRadiusMeters, 20000);
+
+    const setMergedRest = (id: string, r: Restaurant) => {
+      mergedMap.set(id, r);
+      const prevIdx = mergedIdxById.get(id);
+      if (prevIdx !== undefined) {
+        mergedList[prevIdx] = r;
+      } else {
+        mergedIdxById.set(id, mergedList.length);
+        mergedList.push(r);
+      }
+    };
 
     for (const r of restaurants) {
       if (!r || isHotelBusinessRecord(r)) continue;
@@ -401,7 +434,7 @@ export const NearMeModal: React.FC = () => {
       const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, r.latitude, r.longitude);
       if (dist > maxCitySearchRadius) continue;
       if (!doesPlaceBelongToProvince(r.latitude, r.longitude, r.provinceKh, manualProvince)) continue;
-      mergedMap.set(r.id, r);
+      setMergedRest(r.id, r);
     }
 
     for (const gp of [...liveNearbyRestaurants, ...liveNearbyAttractions]) {
@@ -410,21 +443,21 @@ export const NearMeModal: React.FC = () => {
       if (dist > maxCitySearchRadius) continue;
       if (!doesPlaceBelongToProvince(gp.lat, gp.lng, gp.provinceKh || gp.province, manualProvince)) continue;
 
-      const existingMatch = findDuplicateRestaurantForGooglePlace(gp, Array.from(mergedMap.values()));
+      const existingMatch = findDuplicateRestaurantForGooglePlace(gp, mergedList);
       if (existingMatch) {
         const merged = mergeGoogleMapsPlaceWithExistingRestaurant(existingMatch, gp);
         if (!isHotelBusinessRecord(merged) && verifyShopDataForDisplay(merged)) {
-          mergedMap.set(existingMatch.id, merged);
+          setMergedRest(existingMatch.id, merged);
         }
       } else {
         const converted = convertGooglePlaceToRestaurant(gp);
         if (!isHotelBusinessRecord(converted) && verifyShopDataForDisplay(converted)) {
-          mergedMap.set(converted.id, converted);
+          setMergedRest(converted.id, converted);
         }
       }
     }
 
-    return Array.from(mergedMap.values())
+    return mergedList
       .map((r) => {
         const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, r.latitude, r.longitude);
         return { ...r, distanceMeters: dist };
@@ -441,6 +474,7 @@ export const NearMeModal: React.FC = () => {
 
   const nearbyDestinations = useMemo(() => {
     const mergedMap = new Map<string, TouristDestination>();
+    const mergedList: TouristDestination[] = [];
 
     for (const d of destinations) {
       if (!d || d.categorySlug === 'hotel') continue;
@@ -448,6 +482,7 @@ export const NearMeModal: React.FC = () => {
       const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, d.latitude, d.longitude);
       if (dist > selectedRadiusMeters) continue;
       if (!doesPlaceBelongToProvince(d.latitude, d.longitude, d.provinceKh, manualProvince)) continue;
+      if (!mergedMap.has(d.id)) mergedList.push(d);
       mergedMap.set(d.id, d);
     }
 
@@ -457,16 +492,17 @@ export const NearMeModal: React.FC = () => {
       if (dist > selectedRadiusMeters) continue;
       if (!doesPlaceBelongToProvince(gp.lat, gp.lng, gp.provinceKh || gp.province, manualProvince)) continue;
 
-      const existingMatch = findDuplicateDestinationForGooglePlace(gp, Array.from(mergedMap.values()));
+      const existingMatch = findDuplicateDestinationForGooglePlace(gp, mergedList);
       if (!existingMatch) {
         const converted = convertGooglePlaceToDestination(gp);
         if (converted.categorySlug !== 'hotel') {
+          if (!mergedMap.has(converted.id)) mergedList.push(converted);
           mergedMap.set(converted.id, converted);
         }
       }
     }
 
-    return Array.from(mergedMap.values())
+    return mergedList
       .map((d) => {
         const dist = calculateDistanceMeters(activeNearMeCoords.lat, activeNearMeCoords.lng, d.latitude, d.longitude);
         return { ...d, distanceMeters: dist };
@@ -597,7 +633,8 @@ export const NearMeModal: React.FC = () => {
     }).sort((a, b) => compareByGpsDistanceAscending(a, b, activeNearMeCoords));
   }, [nearbyDestinations, nearbyQuery, quickFilterId, language, activeNearMeCoords]);
 
-  // Keep mounted once visited so GPS results & scroll position persist
+  // Keep mounted once visited so GPS results persist, but unmount DOM when closed
+  if (!isNearMeModalOpen) return null;
 
   const localizedManualProvince = translateProvince(manualProvince, language);
   const localizedDetectedGpsProvince = translateProvince(detectedGpsProvince, language);

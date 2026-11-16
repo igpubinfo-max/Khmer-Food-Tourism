@@ -10,17 +10,18 @@ import {
 } from './zhDynamicTranslator';
 import { ZH_UI_EXTRA } from '../data/zhUiExtra';
 
-// Pre-compiled (non-global, so `.test()` is stateless) detector for unintended Thai / Lao / Myanmar / Devanagari scripts.
+// Pre-compiled (non-global, so `.test()` is stateless) detector for unintended non-Khmer scripts.
 const FOREIGN_SCRIPT_TEST_RX = /[\u0E00-\u0E7F\u0E80-\u0EFF\u1000-\u109F\u0900-\u097F]/;
 
 /**
- * Strip any unintended foreign scripts (Thai, Lao, Myanmar, Devanagari) and repair known legacy cached typos.
+ * Strip any unintended foreign scripts and repair known legacy cached typos.
  * Fast path: returns the very same string instance after a single cheap regex test when nothing needs cleaning.
  */
 export function stripForeignScripts(text: string): string {
   if (!text || typeof text !== 'string') return text;
   if (!FOREIGN_SCRIPT_TEST_RX.test(text)) return text;
   return text
+    .replace(/ស្\u0E01\u0E32\u0E22បារ/g, 'ស្កាយបារ')
     .replace(/កាហ្វេឆ\u0E07ដៃ/g, 'កាហ្វេឆុងដៃ')
     .replace(/សម្លៀកបំពាក់\u0E2A\u0E38ភាព/g, 'សម្លៀកបំពាក់សុភាពរាបសារ')
     .replace(/ស\u0E23\u0E07ទឹកព្រះ/g, 'ស្រង់ទឹកព្រះ')

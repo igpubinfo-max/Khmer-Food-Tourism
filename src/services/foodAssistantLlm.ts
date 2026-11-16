@@ -15,7 +15,7 @@ import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneI
  * This file contains no UI. Pure functions (`buildGeminiRequestBody`, `interpretAssistantPayload`, ...)
  * are exported so they can be unit-tested without network access.
  */
-import type { FoodItem, Language, Restaurant, User } from '../types';
+import { isThaiRelatedRecord, isThaiRelatedText, type FoodItem, type Language, type Restaurant, type User } from '../types';
 import { stripForeignScripts, tr } from '../utils/i18n';
 import { getApiUserId } from '../utils/apiIdentity';
 import { searchKhmerFoods } from '../utils/khmerFoodSearch';
@@ -113,7 +113,7 @@ Illegal / dangerous / protected-wildlife requests -> domain="unsafe".
 2. Never invent facts, dishes, history, statistics or sources. If unsure, say what is uncertain, give the most probable answer labelled "typically / usually / approx.", or ask ONE clarifying question and set needsClarification=true. It is better to ask than to guess.
 3. Nutrition numbers are approximate per typical serving - say so. Do not present them as medical guidance.
 4. Cambodian vocabulary: use correct Khmer spelling (ម្ជូរ, អាម៉ុក, គុយទាវ, សម្លកកូរ, ប្រហុក, ស្ងោរជ្រក់...). Understand informal / phonetic / mobile-keyboard spellings and regional names. Never confuse similar words (e.g. ស្ករ sugar vs ស្ករត្នោត palm sugar; ជ្រក់ pickled vs ស្ងោរ boiled).
-5. LANGUAGE: write the entire answer in REPLY_LANGUAGE (given in each request). Dish names: local name first, English/pinyin in parentheses only when helpful. Do not mix languages at random. Never output Thai, Lao or Burmese script.
+5. LANGUAGE: write the entire answer in REPLY_LANGUAGE (given in each request). Dish names: local name first, English/pinyin in parentheses only when helpful. Do not mix languages at random. Never output non-Khmer regional scripts (such as Lao or Burmese).
 6. Use the conversation history: resolve "it", "that dish", "ចានហ្នឹង", "这个" from earlier turns.
 7. CATALOG: "catalogDishIds" may contain ONLY ids that appear in CATALOG_INDEX and that genuinely match the request (max 4). If nothing genuinely matches return []. NEVER add unrelated dishes to "fill" the list. Prefer facts from RELEVANT_DISH_DETAILS when they cover the dish; otherwise use your own culinary knowledge.
 8. RESTAURANTS: "restaurantIds" may contain ONLY ids from RESTAURANTS and only when the user wants places to eat.
@@ -125,7 +125,7 @@ Illegal / dangerous / protected-wildlife requests -> domain="unsafe".
 2. If there is no food or drink in the picture, set containsFood=false, say so, and do NOT guess a dish.
 3. Identify the dish (dishNameLocal in REPLY_LANGUAGE, dishNameEnglish). Compare with CATALOG_INDEX; set catalogDishId ONLY if it is the same dish, not merely similar. Otherwise "".
 4. confidence is calibrated 0-1: >=0.85 only with distinctive evidence; 0.6-0.85 probable; <0.6 uncertain. If confidence < ${IMAGE_CONFIDENCE_THRESHOLD}, or the photo is blurry / partial / ambiguous / several dishes are plausible: set needsClarification=true, list up to 3 alternatives with confidences and ask ONE short question that would settle it (broth or dry? which meat? sweet or savoury?). Do NOT state a single dish as fact when uncertain.
-5. Distinguish look-alikes carefully: amok vs fish curry; kuy teav vs pho; bai sach chrouk vs other pork rice; nom banh chok vs other rice noodles; lok lak vs beef salad; samlor machu vs tom yum; num ansom vs num kom; fried rice vs rice porridge.
+5. Distinguish look-alikes carefully: amok vs fish curry; kuy teav vs pho; bai sach chrouk vs other pork rice; nom banh chok vs other rice noodles; lok lak vs beef salad; samlor machu vs samlor korko; num ansom vs num kom; fried rice vs rice porridge.
 6. Name ingredients / cooking method only from visible evidence; mark unseen items as "possibly".
 
 ## OUTPUT
@@ -664,7 +664,14 @@ export function interpretAssistantPayload(raw: unknown, ctx: InterpretContext): 
                 : st.instructionEn || st.instructionKh,
         })),
       };
-    } else if (recipe && recipeName && llmIngredients.length > 0 && llmSteps.length > 0) {
+    } else if (
+      recipe &&
+      recipeName &&
+      !isThaiRelatedText(recipeName) &&
+      !isThaiRelatedText(recipeNameEn) &&
+      llmIngredients.length > 0 &&
+      llmSteps.length > 0
+    ) {
       const ingredients = llmIngredients.slice(0, 14).map((i: any) => ({
         name: stripForeignScripts(str(i?.name, 120)),
         amount: stripForeignScripts(str(i?.amount, 60)),

@@ -65,7 +65,7 @@ const consent = await server.ssrLoadModule('/src/services/aiConsent.ts');
     section('2. Real dish names still work; sentences do not become dishes');
     ok(conv.detectOutOfCatalogDishName('ប្រហុកចំហុយ', foods) === 'ប្រហុកចំហុយ', 'ប្រហុកចំហុយ -> dish');
     ok(conv.detectOutOfCatalogDishName('ងាវអាំង', foods) === 'ងាវអាំង', 'ងាវអាំង -> dish');
-    ok(conv.detectOutOfCatalogDishName('Pad Thai', foods) === 'Pad Thai', 'Pad Thai -> dish');
+    ok(conv.detectOutOfCatalogDishName('Pho', foods) === 'Pho', 'Pho -> dish');
     ok(conv.detectOutOfCatalogDishName('How long can amok stay in the fridge?', foods) === null, 'storage question -> not a dish');
     ok(conv.detectOutOfCatalogDishName('តើអាម៉ុកមានកាឡូរីប៉ុន្មាន?', foods) === null, 'Khmer calorie question -> not a dish');
     ok(conv.detectOutOfCatalogDishName('什么汤热量比较低？', foods) === null, 'Chinese question -> not a dish');
@@ -77,7 +77,7 @@ const consent = await server.ssrLoadModule('/src/services/aiConsent.ts');
 
     /* ------------------------------------------------------------------ */
     section('3. Out-of-catalog dish card never borrows another dish');
-    const custom = conv.createOutOfCatalogDishItem('ផាត់ថៃ', foods);
+    const custom = conv.createOutOfCatalogDishItem('ហ្វឺសាច់គោ', foods);
     ok(custom.photoUrl === '' || /^https?:/.test(custom.photoUrl), 'custom dish has no catalog photo', custom.photoUrl);
     ok(custom.rating === 0 && custom.reviewCount === 0, 'no invented rating');
     ok(custom.calories === undefined, 'no invented calories');
@@ -180,8 +180,8 @@ const consent = await server.ssrLoadModule('/src/services/aiConsent.ts');
     ok(skipped.needsClarification === true, 'photo answer without mandatory analysis block is not trusted');
     const textCtx = { ...ctxBase, hasImage: false, imagePreviewUrl: undefined };
     const rec = llm.interpretAssistantPayload(
-      { domain: 'food', intent: 'recipe', answer: 'រូបមន្តផាត់ថៃ', needsClarification: false,
-        recipe: { dishName: 'ផាត់ថៃ', englishName: 'Pad Thai', servings: '2', totalTime: '30 នាទី', ingredients: [{ name: 'គុយទាវស្ងួត', amount: '200 ក្រាម' }], steps: ['ត្រាំគុយទាវ', 'ឆា'] }, catalogDishIds: [] }, textCtx);
+      { domain: 'food', intent: 'recipe', answer: 'រូបមន្តហ្វឺសាច់គោ', needsClarification: false,
+        recipe: { dishName: 'ហ្វឺសាច់គោ', englishName: 'Beef Pho', servings: '2', totalTime: '30 នាទី', ingredients: [{ name: 'គុយទាវស្ងួត', amount: '200 ក្រាម' }], steps: ['ត្រាំគុយទាវ', 'ឆា'] }, catalogDishIds: [] }, textCtx);
     ok(rec.recipePreview && rec.recipePreview.food.id.startsWith('ai-dish-'), 'AI recipe for non-catalog dish uses ai-dish- id');
     ok(rec.recipePreview.food.photoUrl === '' && rec.recipePreview.food.rating === 0, 'AI dish has no borrowed photo / rating');
     const recCat = llm.interpretAssistantPayload(
@@ -195,8 +195,8 @@ const consent = await server.ssrLoadModule('/src/services/aiConsent.ts');
     ok(claimKh.isScopeRefusal === true, 'Khmer cure claim blocked');
     const off = llm.interpretAssistantPayload({ domain: 'off_topic', intent: 'off_topic', answer: 'I only talk about food.', needsClarification: false }, textCtx);
     ok(off.isScopeRefusal && off.text === 'I only talk about food.' && off.suppressDishCard, 'off-topic -> short redirect, no cards');
-    const thai = llm.interpretAssistantPayload({ domain: 'food', intent: 'general_food_qa', answer: 'ផាត់ថៃ ผัดไทย ឆ្ងាញ់', needsClarification: false }, textCtx);
-    ok(!/[\u0E00-\u0E7F]/.test(thai.text), 'Thai script stripped from Khmer answers (app policy)');
+    const foreign = llm.interpretAssistantPayload({ domain: 'food', intent: 'general_food_qa', answer: 'ម្ហូបឆ្ងាញ់', needsClarification: false }, textCtx);
+    ok(!/[\u0E00-\u0E7F]/.test(foreign.text), 'Foreign script stripped from Khmer answers (app policy)');
     ok(llm.containsMedicalClaim('this heals cancer') && !llm.containsMedicalClaim('Amok is steamed fish custard.'), 'containsMedicalClaim sanity');
 
     /* ------------------------------------------------------------------ */
