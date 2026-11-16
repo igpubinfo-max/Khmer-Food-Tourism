@@ -85,7 +85,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           <h1
             className="font-khmer font-extrabold text-white tracking-wide leading-[1.32] whitespace-nowrap"
             style={{
-              fontSize: 'clamp(11px, 3.55cqw, 17.5px)',
+              fontSize: language === 'en' ? 'clamp(10px, 3.12cqw, 15.2px)' : 'clamp(11px, 3.55cqw, 17.5px)',
               textShadow: '0 2px 10px rgba(0, 15, 40, 0.95), 0 0 16px rgba(56, 189, 248, 0.45)',
             }}
           >
@@ -111,7 +111,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
             width: '17.71%',
             height: '12.11%',
           }}
-          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
+          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-0.5 pb-0.5 px-1 rounded-[16px]"
         >
           <svg
             className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
@@ -141,7 +141,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
             width: '17.58%',
             height: '12.11%',
           }}
-          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
+          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-0.5 pb-0.5 px-1 rounded-[16px]"
         >
           <img
             src={WELCOME_IMAGES.tourismIcon}
@@ -167,7 +167,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
             width: '17.58%',
             height: '12.11%',
           }}
-          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
+          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-0.5 pb-0.5 px-1 rounded-[16px]"
         >
           <svg
             className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
@@ -199,7 +199,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
             width: '17.58%',
             height: '12.11%',
           }}
-          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-1 px-1 rounded-[16px]"
+          className="pointer-events-none absolute z-20 flex flex-col items-center justify-center gap-0.5 pb-0.5 px-1 rounded-[16px]"
         >
           <svg
             className="w-[38%] h-[38%] text-[#FACC15] drop-shadow-[0_2px_6px_rgba(250,204,21,0.45)]"
@@ -260,7 +260,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
             right: '4.8%',
             height: '7.4%',
           }}
-          className="pointer-events-none absolute z-20 grid grid-cols-[1fr_1.08fr_1.18fr] items-center divide-x divide-cyan-300/45"
+          className={`pointer-events-none absolute z-20 grid ${language === 'km' ? 'grid-cols-[1fr_1.08fr_1.18fr]' : 'grid-cols-3'} items-center divide-x divide-cyan-300/45`}
         >
           {/* Column 1: សុខភាព និងអាហារូបត្ថម្ភ */}
           <div className="h-full flex flex-col items-center justify-center gap-0.5 px-1">

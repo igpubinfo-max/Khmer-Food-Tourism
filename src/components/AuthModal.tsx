@@ -48,6 +48,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     loginWithGoogle,
     exitAppNow,
     language,
+    setLanguage,
     currentUser,
     isAdminLoginModalOpen,
     showToast,
@@ -528,7 +529,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
         >
           {/* Clean Artwork Template Background (935x1024) — No Logo or Program Title overlay */}
           <img
-            src="/welcome/auth-login-bg.jpg?v=2.7.2"
+            src="/welcome/auth-login-bg.jpg?v=hq1623"
             alt="Cambodia Flavors & Tourism Sign In"
             width={935}
             height={1024}
@@ -536,6 +537,35 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
             decoding="async"
             className="pointer-events-none absolute inset-0 w-full h-full object-contain select-none"
           />
+
+          {/* Top-Left Compact Language Switcher (ខ្មែរ | EN | 中文) */}
+          <div
+            style={{ top: '3.6%', left: '3.8%' }}
+            className="absolute z-30 inline-flex items-center bg-[#0F1E38]/88 rounded-full p-0.5 border border-cyan-300/35 shadow-[0_4px_14px_rgba(0,0,0,0.5)]"
+          >
+            {(['km', 'en', 'zh'] as const).map((langCode) => {
+              const active = language === langCode;
+              return (
+                <button
+                  key={langCode}
+                  type="button"
+                  onClick={() => setLanguage(langCode)}
+                  style={{
+                    fontSize: 'clamp(9.5px, 2.5cqw, 11.5px)',
+                    minWidth: 'clamp(34px, 9.2cqw, 44px)',
+                    minHeight: 'clamp(22px, 5.8cqw, 28px)',
+                  }}
+                  className={`px-2 rounded-full font-extrabold leading-none flex items-center justify-center transition cursor-pointer ${
+                    active
+                      ? 'bg-gradient-to-b from-[#FDE047] via-[#FACC15] to-[#EAB308] text-slate-950 shadow-sm font-black'
+                      : 'text-white/90 hover:text-white'
+                  }`}
+                >
+                  {langCode === 'km' ? 'ខ្មែរ' : langCode === 'en' ? 'EN' : '中文'}
+                </button>
+              );
+            })}
+          </div>
 
           {/* Top-Right Close (X) Button Overlay aligned with the glowing cyan X circle in the artwork */}
           {!isMandatoryGate && (
@@ -584,10 +614,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
             }}
             data-testid="auth-primary-phone"
             style={{
-              top: '46.88%',
+              top: '46.68%',
               left: '5.78%',
               width: '88.45%',
-              height: '9.18%',
+              height: '8.98%',
             }}
             className="absolute z-20 rounded-full px-4 sm:px-5 flex items-center justify-between gap-3 bg-transparent hover:bg-cyan-400/10 active:scale-[0.99] transition cursor-pointer group"
           >
@@ -622,10 +652,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
               disabled={isGoogleLoading}
               data-testid="auth-primary-google"
               style={{
-                top: '58.59%',
+                top: '58.20%',
                 left: '5.78%',
                 width: '88.45%',
-                height: '9.18%',
+                height: '8.99%',
               }}
               className="absolute z-20 rounded-full px-4 flex items-center justify-center gap-2.5 sm:gap-3 bg-transparent hover:bg-cyan-400/10 active:scale-[0.99] transition cursor-pointer disabled:opacity-60"
             >

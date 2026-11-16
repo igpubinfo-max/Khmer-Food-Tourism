@@ -1283,7 +1283,7 @@ export const RestaurantView: React.FC = () => {
                   >
                     <img
                       decoding="async"
-                      src={`${cat.imageSrc}?v=hq1622`}
+                      src={`${cat.imageSrc}?v=hq1623`}
                       alt={titleText}
                       className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain select-none pointer-events-none"
                       loading="eager"

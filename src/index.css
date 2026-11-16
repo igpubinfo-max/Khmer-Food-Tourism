@@ -821,7 +821,7 @@ img[src^="data:image"],
   position: relative;
   isolation: isolate;
   background-color: #045b29 !important;
-  background-image: url('/banners/Untitled-3.png?v=hq1622') !important;
+  background-image: url('/banners/Untitled-3.png?v=hq1623') !important;
   background-size: 100% 100% !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
@@ -841,7 +841,7 @@ img[src^="data:image"],
   position: relative;
   isolation: isolate;
   background-color: #035c1f !important;
-  background-image: linear-gradient(180deg, rgba(0, 30, 10, 0.22) 0%, rgba(0, 30, 10, 0.10) 100%), url('/banners/auth_login_header_banner.jpg?v=hq1622') !important;
+  background-image: linear-gradient(180deg, rgba(0, 30, 10, 0.22) 0%, rgba(0, 30, 10, 0.10) 100%), url('/banners/auth_login_header_banner.jpg?v=hq1623') !important;
   background-size: 100% 100% !important;
   background-position: center bottom !important;
   background-repeat: no-repeat !important;
@@ -1017,3 +1017,13 @@ img[src^="data:image"],
   background: linear-gradient(90deg, #D97706, #F59E0B, #D97706);
 }
 
+
+/* 16. Zero-Latency Touch & Crisp Button Rendering */
+button, [role="button"], a, input, select, textarea {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}

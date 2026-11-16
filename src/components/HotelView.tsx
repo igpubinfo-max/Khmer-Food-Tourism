@@ -1806,7 +1806,7 @@ export const HotelView: React.FC = () => {
                     }}
                   >
                     <img
-                      src={`${cat.imageSrc}?v=hq1622`}
+                      src={`${cat.imageSrc}?v=hq1623`}
                       alt={titleText}
                       loading="eager"
                       decoding="async"

@@ -611,7 +611,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                       }}
                     >
                       <img
-                        src={`${card.imageSrc}?v=hq1622`}
+                        src={`${card.imageSrc}?v=hq1623`}
                         alt={card.label}
                         loading="eager"
                         decoding="async"

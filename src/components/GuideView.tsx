@@ -671,7 +671,7 @@ export const GuideView: React.FC = () => {
                     }}
                   >
                     <img
-                      src={`${t.imageSrc}?v=hq1622`}
+                      src={`${t.imageSrc}?v=hq1623`}
                       alt={t.label}
                       loading="eager"
                       decoding="async"

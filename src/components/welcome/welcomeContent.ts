@@ -12,13 +12,13 @@ export interface WelcomeSlide {
 }
 
 export const WELCOME_IMAGES = {
-  hero: { src: '/welcome/welcome-robot-bg.jpg?v=hq1622', width: 768, height: 1024 },
-  authBg: { src: '/welcome/auth-login-bg.jpg?v=hq1622', width: 935, height: 1024 },
+  hero: { src: '/welcome/welcome-robot-bg.jpg?v=hq1623', width: 768, height: 1024 },
+  authBg: { src: '/welcome/auth-login-bg.jpg?v=hq1623', width: 935, height: 1024 },
   places: { src: '/welcome/places.webp', width: 1280, height: 714 },
-  logo: '/welcome/welcome-hero-icon.png?v=hq1622',
+  logo: '/welcome/welcome-hero-icon.png?v=hq1623',
   logoFallback: '/icon-192.png?v=2.7.0',
-  tourismIcon: '/welcome/welcome-tourism-icon.png?v=hq1622',
-  robotHead: '/welcome/welcome-robot-head.png?v=hq1622',
+  tourismIcon: '/welcome/welcome-tourism-icon.png?v=hq1623',
+  robotHead: '/welcome/welcome-robot-head.png?v=hq1623',
 } as const;
 
 export const WELCOME_SLIDES: WelcomeSlide[] = [
