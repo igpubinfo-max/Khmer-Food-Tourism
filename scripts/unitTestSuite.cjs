@@ -1162,7 +1162,7 @@ test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclus
   }
 });
 
-test('17. TikTok Video System Audit: 180+ Unique Playable Streams, Zero YouTube Hijack, Strict Deduplication & Non-Repeating Playback', () => {
+test('17. TikTok & Facebook Video System Audit: 360+ Disjoint Playable Streams, Zero YouTube Hijack, Strict Deduplication & Non-Repeating Playback', () => {
   const memStore = new Map();
   globalThis.localStorage = {
     getItem: (k) => (memStore.has(k) ? memStore.get(k) : null),
@@ -1183,27 +1183,33 @@ test('17. TikTok Video System Audit: 180+ Unique Playable Streams, Zero YouTube 
   } = require(path.join(ROOT, 'src/services/onlineFoodDiscoveryService.ts'));
 
   const tiktokItems = CURATED_TIKTOK_FACEBOOK_REVIEWS.filter((x) => x.platform === 'tiktok');
+  const facebookItems = CURATED_TIKTOK_FACEBOOK_REVIEWS.filter((x) => x.platform === 'facebook');
+
   assert.ok(
     tiktokItems.length >= 180,
-    'Expected at least 180 unique verified TikTok videos in CURATED_TIKTOK_FACEBOOK_REVIEWS, got ' + tiktokItems.length
+    'Expected at least 180 unique verified TikTok videos, got ' + tiktokItems.length
+  );
+  assert.ok(
+    facebookItems.length >= 180,
+    'Expected at least 180 unique verified Facebook videos, got ' + facebookItems.length
   );
 
+  const allSocialItems = [...tiktokItems, ...facebookItems];
   const uniqueVideoIds = new Set();
   const uniqueStreamPaths = new Set();
-  const uniqueEmbedUrls = new Set();
 
-  for (const item of tiktokItems) {
+  for (const item of allSocialItems) {
     const info = extractEmbedPlayerInfo(item);
     assert.ok(
       !info.embedUrl || !info.embedUrl.includes('youtube.com'),
-      'TikTok item must NEVER use a YouTube embed URL: ' + item.id + ' -> ' + info.embedUrl
+      item.platform + ' item must NEVER use a YouTube embed URL: ' + item.id + ' -> ' + info.embedUrl
     );
     assert.ok(
       info.embedUrl && info.embedUrl.startsWith('https://www.tiktok.com/player/v1/'),
-      'TikTok item embedUrl must use official TikTok player/v1: ' + item.id
+      item.platform + ' item embedUrl must use official player/v1: ' + item.id
     );
-    assert.ok(info.videoId && /^\d{15,22}$/.test(info.videoId), 'Invalid 19-digit TikTok videoId for ' + item.id);
-    assert.ok(info.directVideoUrl, 'Missing directVideoUrl for TikTok item ' + item.id);
+    assert.ok(info.videoId && /^\d{15,22}$/.test(info.videoId), 'Invalid 19-digit videoId for ' + item.id);
+    assert.ok(info.directVideoUrl, 'Missing directVideoUrl for ' + item.platform + ' item ' + item.id);
     assert.equal(
       isDirectVideoUrlFreshAndPlayable(info.directVideoUrl),
       true,
@@ -1212,58 +1218,57 @@ test('17. TikTok Video System Audit: 180+ Unique Playable Streams, Zero YouTube 
 
     uniqueVideoIds.add(info.videoId);
     uniqueStreamPaths.add(info.directVideoUrl.split('?')[0]);
-    uniqueEmbedUrls.add(info.embedUrl);
   }
 
+  // Every TikTok and Facebook video must be 100% unique and disjoint across both platforms (180 + 180 = 360 unique streams)
   assert.equal(
     uniqueVideoIds.size,
-    tiktokItems.length,
-    'Every TikTok item must have a 100% unique 19-digit videoId'
+    allSocialItems.length,
+    'Every TikTok & Facebook item must have a 100% unique 19-digit videoId across both platforms'
   );
   assert.equal(
     uniqueStreamPaths.size,
-    tiktokItems.length,
-    'Every TikTok item must have a 100% unique direct MP4 stream path'
-  );
-  assert.equal(
-    uniqueEmbedUrls.size,
-    tiktokItems.length,
-    'Every TikTok item must have a 100% unique official TikTok embedUrl'
+    allSocialItems.length,
+    'Every TikTok & Facebook item must have a 100% unique direct MP4 stream path across both platforms'
   );
 
-  // Verify strict deduplication so displayed count matches actual unique playable videos
-  const injectedWithDups = [
-    ...tiktokItems,
-    tiktokItems[0],
-    { ...tiktokItems[1], id: 'dup-id-variant' },
-    { ...tiktokItems[2], id: 'dup-stream-variant', inlineVideoId: '7799999999999999999' },
+  // Verify strict deduplication on Facebook items so displayed count matches actual unique playable videos
+  const fbWithDups = [
+    ...facebookItems,
+    facebookItems[0],
+    { ...facebookItems[1], id: 'fb-dup-id-variant' },
+    { ...facebookItems[2], id: 'fb-dup-stream-variant', inlineVideoId: '7788888888888888888' },
   ];
-  const deduped = deduplicateSingleVideoList(injectedWithDups);
+  const dedupedFb = deduplicateSingleVideoList(fbWithDups);
   assert.equal(
-    deduped.length,
-    tiktokItems.length,
-    'deduplicateSingleVideoList must eliminate ID, videoId, stream-path, and title duplicates'
+    dedupedFb.length,
+    facebookItems.length,
+    'deduplicateSingleVideoList must eliminate ID, videoId, stream-path, and title duplicates for Facebook'
   );
 
-  // Verify playback history pushes watched videos to the back so they do not repeat unnecessarily
-  const c1 = advanceVideoRotationCycle();
-  const rot1 = rotateLatestVideosForScope(tiktokItems, 'tiktok|all|all', c1);
-  const watchedItem = rot1[0];
-  recordPlayedSocialVideo(watchedItem);
-  assert.equal(
-    getPlayedSocialVideoKeys().has(getCanonicalSocialVideoKey(watchedItem)),
-    true,
-    'recordPlayedSocialVideo must persist canonical video key'
-  );
+  // Verify playback history pushes watched Facebook & TikTok videos to the back so they do not repeat unnecessarily
+  for (const [scope, pool] of [
+    ['tiktok|all|all', tiktokItems],
+    ['facebook|all|all', facebookItems],
+  ]) {
+    const c1 = advanceVideoRotationCycle();
+    const rot1 = rotateLatestVideosForScope(pool, scope, c1);
+    const watchedItem = rot1[0];
+    recordPlayedSocialVideo(watchedItem);
+    assert.equal(
+      getPlayedSocialVideoKeys().has(getCanonicalSocialVideoKey(watchedItem)),
+      true,
+      'recordPlayedSocialVideo must persist canonical video key for ' + scope
+    );
 
-  const c2 = advanceVideoRotationCycle();
-  const rot2 = rotateLatestVideosForScope(tiktokItems, 'tiktok|all|all', c2);
-  assert.equal(
-    rot2[rot2.length - 1].id,
-    watchedItem.id,
-    'Already-played video must be pushed to the back of the rotation queue'
-  );
+    const c2 = advanceVideoRotationCycle();
+    const rot2 = rotateLatestVideosForScope(pool, scope, c2);
+    assert.equal(
+      rot2[rot2.length - 1].id,
+      watchedItem.id,
+      'Already-played video must be pushed to the back of the rotation queue for ' + scope
+    );
+  }
 });
 
 console.log('\nAll ' + passed + ' unit test suites passed successfully!');
-

@@ -432,11 +432,11 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         throw "Downloaded package size does not match the cloud build. Please run the builder again (it will resume)."
     }
 
-    # Also keep root, Desktop, and Downloads updated with latest APK / AAB
+    # Ensure project root has no .apk/.aab files; keep releases organized in Release_APK_AAB, Desktop, and Downloads
     try {
+        Get-ChildItem -LiteralPath $RepoRoot -File -Filter "*.apk" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -LiteralPath $RepoRoot -File -Filter "*.aab" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
         if ($apkFile) {
-            $rootApkPath = Join-Path $RepoRoot "CambodiaFlavorsTourism-v$versionName.apk"
-            Copy-Item -LiteralPath $apkOutPath -Destination $rootApkPath -Force
             if (Test-Path "$env:USERPROFILE\Desktop") {
                 Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path "$env:USERPROFILE\Desktop" "CambodiaFlavorsTourism-v$versionName.apk") -Force
             }

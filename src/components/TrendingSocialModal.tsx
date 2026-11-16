@@ -228,7 +228,7 @@ export const TrendingSocialModal: React.FC = () => {
   /** Automatically replace an unavailable video with a verified playable Cambodian video stream inline */
   const handleReplaceUnavailableVideo = useCallback(
     (unavailableItem: OnlineFoodDiscoveryItem, notifyUser = false) => {
-      if (unavailableItem.platform === 'tiktok') {
+      if (unavailableItem.platform === 'tiktok' || unavailableItem.platform === 'facebook') {
         setVerifyingPlayItemId(unavailableItem.id);
         resolvePlayableTikTokStreamUrl(unavailableItem, { priority: true, forceFresh: true })
           .then((res) => {
@@ -254,22 +254,7 @@ export const TrendingSocialModal: React.FC = () => {
         return;
       }
 
-      if (unavailableItem.platform === 'facebook') {
-        const nextInlineVid = getNextPlayableSocialVideoId(unavailableItem.inlineVideoId);
-        setDiscoveryItems((prev) =>
-          prev.map((x) =>
-            x.id === unavailableItem.id
-              ? { ...x, inlineVideoId: nextInlineVid, canInlineEmbed: true }
-              : x
-          )
-        );
-        setEmbedFallbackItemIds((prev) => ({
-          ...prev,
-          [unavailableItem.id]: false,
-        }));
-        setPlayerReloadKey((prev) => prev + 1);
-        return;
-      }
+
 
       markYouTubeVideoUnavailable(unavailableItem.sourceUrl);
       let replacedId: string | null = null;
@@ -658,7 +643,7 @@ export const TrendingSocialModal: React.FC = () => {
       if (!vidEl) return;
       if (vidEl.currentTime === 0 && vidEl.readyState < 2) {
         const activeItem = discoveryItems.find((x) => x.id === activePlayerItemId);
-        if (activeItem?.platform === 'tiktok' && !currentEntry?.triedForceFresh) {
+        if ((activeItem?.platform === 'tiktok' || activeItem?.platform === 'facebook') && !currentEntry?.triedForceFresh) {
           setResolvedDirectVideoUrls((prev) => ({
             ...prev,
             [activePlayerItemId]: {
@@ -740,7 +725,7 @@ export const TrendingSocialModal: React.FC = () => {
             const nextCount = Math.min(filteredItems.length, prev + VIDEO_BATCH_SIZE);
             if (
               nextCount + VIDEO_BATCH_SIZE >= filteredItems.length &&
-              (platformFilter === 'tiktok' || platformFilter === 'all')
+              (platformFilter === 'tiktok' || platformFilter === 'facebook' || platformFilter === 'all')
             ) {
               loadNextTikTokPage();
             }
@@ -936,7 +921,7 @@ export const TrendingSocialModal: React.FC = () => {
     setIsVideoBuffering(true);
     recordPlayedSocialVideo(item);
 
-    if (item.platform === 'tiktok') {
+    if (item.platform === 'tiktok' || item.platform === 'facebook') {
       const syncStream = getCachedTikTokStreamUrl(item);
       if (syncStream?.primaryUrl) {
         setResolvedDirectVideoUrls((prev) => ({
@@ -993,8 +978,8 @@ export const TrendingSocialModal: React.FC = () => {
     setIsRetryingConnection(true);
     const [reachable, streamRes] = await Promise.all([
       checkYouTubeConnectivity(),
-      item.platform === 'tiktok'
-        ? resolvePlayableTikTokStreamUrl(item).catch(() => ({ primaryUrl: null, backupUrl: null }))
+      (item.platform === 'tiktok' || item.platform === 'facebook')
+        ? resolvePlayableTikTokStreamUrl(item, { priority: true }).catch(() => ({ primaryUrl: null, backupUrl: null }))
         : Promise.resolve({ primaryUrl: null, backupUrl: null }),
     ]);
     setIsRetryingConnection(false);
@@ -1822,7 +1807,7 @@ export const TrendingSocialModal: React.FC = () => {
                                   }));
                                   return;
                                 }
-                                if (item.platform === 'tiktok' && !currEntry?.triedForceFresh) {
+                                if ((item.platform === 'tiktok' || item.platform === 'facebook') && !currEntry?.triedForceFresh) {
                                   setResolvedDirectVideoUrls((prev) => ({
                                     ...prev,
                                     [item.id]: {
@@ -1878,7 +1863,7 @@ export const TrendingSocialModal: React.FC = () => {
                                 }));
                               }}
                             />
-                          ) : isVerifyingThis && item.platform === 'tiktok' ? (
+                          ) : isVerifyingThis && (item.platform === 'tiktok' || item.platform === 'facebook') ? (
                             <div className="relative w-full h-full bg-slate-950 flex items-center justify-center">
                               <img
                                 loading="lazy"
