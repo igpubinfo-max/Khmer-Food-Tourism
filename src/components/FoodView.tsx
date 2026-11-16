@@ -635,7 +635,7 @@ export const FoodView: React.FC = () => {
           </button>
         </div>
 
-        {/* 3. Five Premium PNG Category Buttons with Category Names Inside Each Button */}
+        {/* 3. Six Premium PNG Category Buttons (3 + 3) with Category Names Inside Each Button */}
         <div
           ref={dishCategoryCardRef}
           style={{
@@ -644,7 +644,7 @@ export const FoodView: React.FC = () => {
           }}
           className="w-full max-w-full min-w-0 rounded-[24px] p-1 min-[360px]:p-2 sm:p-2.5 md:p-3 border border-white"
         >
-          <div className="grid grid-cols-5 gap-1 min-[360px]:gap-1.5 sm:gap-2 md:gap-2.5 items-stretch w-full max-w-full min-w-0">
+          <div className="grid grid-cols-3 gap-2 min-[360px]:gap-2.5 sm:gap-3 items-stretch w-full max-w-full min-w-0">
             {[
               {
                 id: 'all',
@@ -659,6 +659,13 @@ export const FoodView: React.FC = () => {
                 nameKh: 'សម្ល',
                 nameEn: 'Soups',
                 nameZh: '高棉汤羹',
+              },
+              {
+                id: 'noodles',
+                imageSrc: '/categories/food_cat_noodles.png',
+                nameKh: 'គុយទាវ/មី',
+                nameEn: 'Noodles',
+                nameZh: '粉面',
               },
               {
                 id: 'cha',
@@ -727,7 +734,7 @@ export const FoodView: React.FC = () => {
                       src={cat.imageSrc}
                       alt={label}
                       style={{ transform: 'none' }}
-                      className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none transition-all duration-150 ${
+                      className={`block w-full h-full max-w-full min-w-0 min-h-0 object-fill bg-transparent select-none pointer-events-none transition-all duration-150 ${
                         ''
                       }`}
                       loading="eager"
@@ -737,16 +744,14 @@ export const FoodView: React.FC = () => {
                     <div className="pointer-events-none absolute inset-x-[2%] top-[68.5%] bottom-[6.5%] flex items-center justify-center px-[1px] overflow-visible">
                       <span
                         className={`kft-food-cat-label ${
-                          cat.id === 'bong_aem' || cat.id === 'all' || cat.id === 'vegetarian'
-                            ? 'kft-food-cat-label-compact'
-                            : ''
+                          ''
                         } ${active ? 'kft-food-cat-label-active' : ''}`}
                       >
                         {label}
                       </span>
                     </div>
                   </div>
-                  {/* Uniform selection indicator: same slot for all 5 buttons */}
+                  {/* Uniform selection indicator: same slot for all 6 buttons */}
                   <span
                     aria-hidden="true"
                     className={`kft-food-indicator ${active ? 'kft-food-indicator-active' : ''}`}

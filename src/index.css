@@ -859,9 +859,9 @@ img[src^="data:image"],
 /* 16. Global Standardized Khmer Typography System for Category Buttons, Icon Tiles, and Navigation Labels */
 :root {
   --kft-font-khmer: 'Kantumruy Pro', 'Noto Sans Khmer', 'Plus Jakarta Sans', sans-serif;
-  --kft-cat-label-size: clamp(9.2px, 2.85vw, 13.2px);
-  --kft-cat-label-lh: 1.48;
-  --kft-cat-label-min-h: 22px;
+  --kft-cat-label-size: clamp(11.5px, 3.35vw, 15.2px);
+  --kft-cat-label-lh: 1.54;
+  --kft-cat-label-min-h: 26px;
   --kft-food-cat-label-size: clamp(6.6px, 2.0vw, 12.6px);
   --kft-tile-label-size: clamp(9.5px, 2.85vw, 13.2px);
   --kft-nav-label-size: clamp(8.5px, 2.65vw, 12.4px);
@@ -869,7 +869,7 @@ img[src^="data:image"],
 
 @media (max-width: 359px) {
   :root {
-    --kft-cat-label-size: clamp(8.5px, 2.75vw, 10.8px);
+    --kft-cat-label-size: clamp(10.2px, 3.2vw, 12.6px);
     --kft-food-cat-label-size: clamp(6.0px, 1.9vw, 9.2px);
     --kft-tile-label-size: clamp(8.8px, 2.75vw, 11px);
     --kft-nav-label-size: clamp(8.0px, 2.5vw, 9.8px);
@@ -889,10 +889,10 @@ img[src^="data:image"],
   padding: 0.0625rem 0.125rem;
   font-family: var(--kft-font-khmer);
   font-size: var(--kft-cat-label-size) !important;
-  font-size: clamp(8.4px, 10.2cqw, 13.2px) !important;
+  font-size: clamp(10.6px, 12.6cqw, 15.2px) !important;
   font-weight: 800 !important;
   line-height: var(--kft-cat-label-lh) !important;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.012em;
   text-align: center;
   color: #FFFFFF;
   text-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75);
@@ -900,6 +900,12 @@ img[src^="data:image"],
   overflow-wrap: break-word;
   white-space: normal;
   transition: color 0.15s ease, text-shadow 0.15s ease;
+}
+
+/* 4-column category grids (GuideView: សម្រាប់អ្នក / ខេត្ត / ប្រតិទិន / គន្លឹះ & DailyDiscoveriesModal) have narrower columns so scale their cqw ratio higher */
+.grid-cols-4 > .kft-cat-btn > .kft-cat-label {
+  font-size: clamp(11.5px, 3.5vw, 15.6px) !important;
+  font-size: clamp(11.2px, 14.8cqw, 15.6px) !important;
 }
 
 .kft-cat-btn:hover .kft-cat-label,

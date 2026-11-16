@@ -153,6 +153,7 @@ export function resolveFoodScreenCategoryTab(food: FoodItem): Exclude<FoodCatego
  * - 'cha' (អាំង/ចៀន): Grilled and fried food only
  * - 'vegetarian' (ម្ហូបបួស): Vegetarian & plant-based dishes
  * - 'bong_aem' (បង្អែម/ភេសជ្ជៈ): Desserts and beverages only
+ * - 'noodles' (គុយទាវ/មី): Noodle dishes only (kuy teav, num banh chok, mee ...)
  */
 export function matchesFoodScreenCategoryTab(food: FoodItem, catId: string): boolean {
   if (!food || !food.id || !food.nameKh) return false;
@@ -162,6 +163,9 @@ export function matchesFoodScreenCategoryTab(food: FoodItem, catId: string): boo
   }
   if (catId === 'cha') {
     return isGrilledOrFriedDish(food) && !isVegetarianDish(food);
+  }
+  if (catId === 'noodles') {
+    return isNoodleDishStrict(food) && !isVegetarianDish(food) && !isBeverageDish(food) && !isSweetDessertOrCakeDish(food);
   }
   if (catId === 'vegetarian') {
     return isVegetarianDish(food);

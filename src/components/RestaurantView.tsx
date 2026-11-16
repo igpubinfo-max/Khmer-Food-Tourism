@@ -395,6 +395,33 @@ export const RestaurantView: React.FC = () => {
     );
   };
 
+  /** "អាហារបួស": GPS-based vegetarian / vegan shops, nearest first (closest → farthest). */
+  const handleToggleVegetarianNearby = () => {
+    if (shopSearchQuery || debouncedShopSearchQuery) {
+      setShopSearchQuery('');
+      setDebouncedShopSearchQuery('');
+    }
+    if (nearMeActive && categoryFilter === 'vegetarian_shop') {
+      setNearMeActive(false);
+      setCategoryFilter('all');
+      setSortMode('nearest');
+      return;
+    }
+    setCategoryFilter('vegetarian_shop');
+    setNearMeActive(true);
+    setSortMode('nearest');
+    requestLocation(false);
+    showToast(
+      tr(
+        language,
+        'កំពុងស្វែងរកហាងអាហារបួសជិតអ្នក — រៀបពីជិតទៅឆ្ងាយ',
+        'Finding vegetarian shops near you — nearest first',
+        '正在查找您附近的素食店铺——由近到远排序'
+      ),
+      'success'
+    );
+  };
+
   const classifyRestaurantCategory = (r: Restaurant): string => {
     return classifyRestaurantSubCategory(r);
   };
@@ -451,13 +478,13 @@ export const RestaurantView: React.FC = () => {
       accentColor: '#EAB308',
     },
     {
-      id: 'near_me_toggle',
-      nameKh: 'នៅជិតខ្ញុំ',
-      nameEn: 'Near Me',
-      nameZh: '附近店铺',
-      icon: MapPin,
-      imageSrc: '/categories/shop_cat_nearme.png',
-      accentColor: '#14B8A6',
+      id: 'vegetarian_shop',
+      nameKh: 'អាហារបួស',
+      nameEn: 'Vegetarian',
+      nameZh: '素食',
+      icon: Utensils,
+      imageSrc: '/categories/shop_cat_vegetarian.png',
+      accentColor: '#22C55E',
     },
   ];
 
@@ -1119,8 +1146,8 @@ export const RestaurantView: React.FC = () => {
           <div className="kft-cat-grid grid grid-cols-3 gap-x-1.5 min-[360px]:gap-x-2 sm:gap-x-3 gap-y-2 min-[360px]:gap-y-2.5 sm:gap-y-3 items-stretch">
             {primaryCategoryPills.map((cat) => {
               const active =
-                cat.id === 'near_me_toggle'
-                  ? nearMeActive
+                cat.id === 'vegetarian_shop'
+                  ? nearMeActive && categoryFilter === 'vegetarian_shop'
                   : !nearMeActive && categoryFilter === cat.id;
               const titleText = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
               return (
@@ -1135,8 +1162,8 @@ export const RestaurantView: React.FC = () => {
                       setShopSearchQuery('');
                       setDebouncedShopSearchQuery('');
                     }
-                    if (cat.id === 'near_me_toggle') {
-                      handleToggleNearMe();
+                    if (cat.id === 'vegetarian_shop') {
+                      handleToggleVegetarianNearby();
                     } else {
                       setNearMeActive(false);
                       setCategoryFilter(cat.id);
@@ -1197,7 +1224,7 @@ export const RestaurantView: React.FC = () => {
             </span>
             <div className="min-w-0 flex-1">
               <h3 className="font-extrabold text-xs sm:text-sm text-slate-900 leading-[1.65] break-words">
-                {tr(language, 'ចុះបញ្ជីហាងរបស់អ្នកដោយឥតគិតថ្លៃ', 'Register Your Shop on the App', '入驻您的餐厅店铺')}
+                {tr(language, 'ចុះបញ្ជីហាងរបស់អ្នក', 'Register Your Shop on the App', '入驻您的餐厅店铺')}
               </h3>
               <p className="text-[11px] text-slate-500 leading-[1.6] break-words">
                 {tr(

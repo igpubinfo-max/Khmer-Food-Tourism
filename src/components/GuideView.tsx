@@ -604,25 +604,29 @@ export const GuideView: React.FC = () => {
           }}
           className="w-full max-w-full min-w-0 rounded-[24px] p-2 min-[360px]:p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
         >
-          <div className="flex items-center justify-between gap-2 flex-wrap px-1">
-            <span className="text-xs font-extrabold text-white">
-              {greeting}
-              {firstName ? `, ${firstName}` : ''}
-            </span>
+          <div className="px-1 pt-0.5 space-y-2">
+            <div className="flex items-center gap-2">
+              <span aria-hidden="true" className="w-1 h-4 rounded-full bg-amber-400/80" />
+              <span className="text-[13px] font-extrabold text-white leading-[1.6] truncate">
+                {greeting}
+                {firstName ? `, ${firstName}` : ''}
+              </span>
+            </div>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold">
+              <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/15 text-slate-200 text-[10px] font-bold">
                 {season.emoji} {pickTri(season.name, lang)} • {pickTri(season.range, lang)}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-400/15 border border-amber-300/40 text-amber-200 text-[10px] font-bold">
                 {activeSlot.emoji} {pickTri(MEAL_SLOTS.find((s) => s.id === currentSlotId)!.label, lang)}
               </span>
             </div>
+            <div className="h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" aria-hidden="true" />
           </div>
 
           <div
             role="tablist"
             aria-label={tr(language, 'ផ្នែកណែនាំ', 'Guide sections', '指南分区')}
-            className="grid grid-cols-4 gap-1.5 min-[360px]:gap-2 sm:gap-3 items-stretch"
+            className="grid grid-cols-2 w-full max-w-[340px] mx-auto gap-2.5 sm:gap-3 items-stretch"
           >
             {[
               {
@@ -657,11 +661,11 @@ export const GuideView: React.FC = () => {
                     setTab(t.id);
                     scrollToGuideSection(guideContentStartRef.current);
                   }}
-                  className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 overflow-visible p-0 bg-transparent border-0 transition-colors duration-150 cursor-pointer focus:outline-none select-none"
+                  className={`kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 overflow-visible px-2 pt-2 pb-1.5 rounded-[18px] border transition-all duration-150 cursor-pointer focus:outline-none select-none active:scale-[0.98] ${active ? 'bg-amber-400/10 border-amber-300/60 shadow-[0_4px_14px_rgba(0,0,0,0.3)]' : 'bg-white/[0.04] border-white/10 hover:bg-white/[0.07]'}`}
                 >
                   {/* 3D Gold-Bordered Button Graphic */}
                   <div
-                    className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] ${active ? 'kft-cat-img-active-glow' : ''}`}
+                    className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] ${active ? '' : 'opacity-90'}`}
                     style={{
                       transform: 'none',
                     }}

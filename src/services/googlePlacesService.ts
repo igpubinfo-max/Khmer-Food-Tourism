@@ -5856,7 +5856,7 @@ export async function searchNearbyPlacesWithin500m(
   }
 
   const effectiveRadius = Math.min(50000, Math.max(radiusMeters, 500));
-  const gridKey = `v5_${lat.toFixed(4)}_${lng.toFixed(4)}_${effectiveRadius}`;
+  const gridKey = `v6_${lat.toFixed(4)}_${lng.toFixed(4)}_${effectiveRadius}`;
   const cachedMem = nearby500mMemoryCache.get(gridKey);
   if (
     !forceRefresh &&
@@ -6019,6 +6019,8 @@ export async function searchNearbyPlacesWithin500m(
 
     const googleRequests: Promise<GooglePlaceCachedItem[]>[] = [
       fetchGoogleNearbyGroup(['restaurant', 'cafe', 'meal_takeaway', 'bakery'], 'food', 'DISTANCE'),
+      // Dedicated vegetarian / vegan search so the "អាហារបួស" button always finds nearby veg shops (nearest first)
+      fetchGoogleNearbyGroup(['vegetarian_restaurant', 'vegan_restaurant'], 'food', 'DISTANCE'),
       fetchGoogleNearbyGroup(
         ['tourist_attraction', 'museum', 'park', 'place_of_worship', 'historical_landmark', 'lodging', 'hotel', 'guest_house', 'hostel', 'resort_hotel'],
         'tourism',

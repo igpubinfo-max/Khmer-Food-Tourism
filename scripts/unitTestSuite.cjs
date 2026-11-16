@@ -707,6 +707,7 @@ test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclus
     matchesShopCategoryTab,
     detectExplicitShopCategoryFromQuery,
     verifyShopDataForDisplay,
+    isVegetarianShop,
   } = require(path.join(ROOT, 'src/utils/foodFilters.ts'));
   const { initialRestaurants } = require(path.join(ROOT, 'src/data/seedData.ts'));
   const { isHotelBusinessRecord, isStrictVerifiedCambodiaRestaurant } = require(path.join(ROOT, 'src/types/index.ts'));
@@ -798,6 +799,28 @@ test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclus
   const smartSr = parseSmartSearchIntent('កាហ្វេ សៀមរាប');
   assert.equal(smartSr.detectedProvinceKh, 'សៀមរាប');
   assert.equal(smartSr.coreQuery, 'កាហ្វេ');
+
+  // 6. Vegetarian (អាហារបួស) GPS button replaces "Near Me": strictly vegetarian shops, nearest first
+  assert.ok(rvSrc.includes("id: 'vegetarian_shop'"), 'RestaurantView must expose the vegetarian_shop (អាហារបួស) button');
+  assert.ok(!rvSrc.includes("id: 'near_me_toggle'"), 'Near Me button must be replaced by vegetarian_shop');
+  assert.ok(rvSrc.includes('handleToggleVegetarianNearby'), 'vegetarian button must run the GPS handler');
+  assert.ok(
+    /handleToggleVegetarianNearby[\s\S]{0,900}requestLocation\(false\)[\s\S]{0,200}/.test(rvSrc) &&
+      rvSrc.includes("setSortMode('nearest')"),
+    'vegetarian button must request GPS and sort nearest-first'
+  );
+  const vegMk = (o) => ({ id: 'v', nameKh: '', nameEn: '', signatureDishesKh: [], signatureDishesEn: [], ...o });
+  assert.equal(isVegetarianShop(vegMk({ nameKh: 'ភោជនីយដ្ឋានម្ហូបបួស' })), true);
+  assert.equal(isVegetarianShop(vegMk({ nameEn: 'Veggie Garden Vegan Cafe' })), true);
+  assert.equal(isVegetarianShop(vegMk({ nameKh: '素食馆' })), true);
+  assert.equal(isVegetarianShop(vegMk({ nameKh: 'ហាងគុយទាវភ្នំពេញ', nameEn: 'Phnom Penh Noodles' })), false);
+  assert.equal(getShopCategoryTabTier(vegMk({ nameEn: 'Vegetarian Kitchen' }), 'vegetarian_shop'), 2);
+  assert.equal(getShopCategoryTabTier(vegMk({ nameEn: 'Steak House' }), 'vegetarian_shop'), 0);
+  const vegShops = validShops.filter((r) => matchesShopCategoryTab(r, 'vegetarian_shop'));
+  assert.ok(
+    vegShops.every((r) => isVegetarianShop(r)),
+    'vegetarian_shop tab must only contain vegetarian shops'
+  );
 });
 
 console.log('\nAll ' + passed + ' unit test suites passed successfully!');

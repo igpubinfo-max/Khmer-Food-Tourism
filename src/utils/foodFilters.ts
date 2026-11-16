@@ -2114,9 +2114,36 @@ export function classifyRestaurantSubCategory(r: Restaurant): ShopDirectorySubCa
  * Returns the match tier (2 = primary dedicated match, 1 = secondary beverage-serving cafe match, 0 = no match)
  * for the 6 category buttons in RestaurantView.tsx.
  */
+const SHOP_VEGETARIAN_REGEX =
+  /អាហារបួស|ម្ហូបបួស|ម្ហូបបន្លែ|ភោជនីយដ្ឋានបួស|ហាងបួស|អ្នកតមសាច់|តមសាច់|\b(?:vegetarian|vegeterian|vegan|veggie|veggies|plant[-\s]*based|meatless|buddhist\s*(?:food|restaurant|vegetarian)|vegetarian_restaurant|vegan_restaurant)\b|素食|蔬食|斋饭|素菜|纯素/i;
+
+/**
+ * True when a shop is a vegetarian / vegan food shop, judged ONLY from its own name, category,
+ * description and signature dishes (never from distance or province) so GPS results stay accurate.
+ */
+export function isVegetarianShop(r: Restaurant): boolean {
+  if (!r) return false;
+  const text = [
+    r.nameKh,
+    r.nameEn,
+    r.categoryKh,
+    r.categoryEn,
+    r.cuisineType,
+    r.businessCategory,
+    r.descriptionKh,
+    r.descriptionEn,
+    ...(r.signatureDishesKh || []),
+    ...(r.signatureDishesEn || []),
+  ]
+    .filter(Boolean)
+    .join(' ');
+  return SHOP_VEGETARIAN_REGEX.test(text);
+}
+
 export function getShopCategoryTabTier(r: Restaurant, tabId: string): number {
   if (!r) return 0;
   if (!tabId || tabId === 'all' || tabId === 'near_me_toggle') return 2;
+  if (tabId === 'vegetarian_shop') return isVegetarianShop(r) ? 2 : 0;
 
   const primary = classifyShopDirectoryCategory(r);
 
