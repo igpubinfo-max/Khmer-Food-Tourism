@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext';
 import { isAdminAccount } from '../types';
 import { tr } from '../utils/i18n';
 import {
+  acknowledgeWebUpdateBuild,
   CHECK_APP_UPDATE_EVENT,
   checkLiveAppUpdate,
   evaluateSyncUpdateStatus,
@@ -98,9 +99,9 @@ export const AppUpdateBanner: React.FC = () => {
       if (status.hasUpdate) {
         if (
           isManual ||
-          status.forceUpdate ||
+          (!isWebRuntime && status.forceUpdate) ||
           status.updateDownloaded ||
-          !isUpdateSnoozed(status.latestBuildCode, status.latestVersion, status.forceUpdate)
+          !isUpdateSnoozed(status.latestBuildCode, status.latestVersion, !isWebRuntime && status.forceUpdate)
         ) {
           setVisible(true);
         } else {
@@ -246,10 +247,11 @@ export const AppUpdateBanner: React.FC = () => {
   }, []);
 
   const isBlockingForceUpdate = Boolean(
-    updateStatus &&
+    !isWebRuntime &&
+      updateStatus &&
       updateStatus.hasUpdate &&
       updateStatus.forceUpdate &&
-      (!isWebRuntime || !webBypassUnlocked)
+      !webBypassUnlocked
   );
 
   // Strict Anti-Bypass Lock: block Escape key, Android hardware Back button, and background scroll when Force Update is active
@@ -292,14 +294,35 @@ export const AppUpdateBanner: React.FC = () => {
     };
   }, [isBlockingForceUpdate]);
 
-  if (!updateStatus || !updateStatus.hasUpdate || (!visible && !isBlockingForceUpdate)) {
+  if ((isWebRuntime && webBypassUnlocked) || !updateStatus || !updateStatus.hasUpdate || (!visible && !isBlockingForceUpdate)) {
     return null;
   }
+
+  const handleContinueOnPc = () => {
+    acknowledgeWebUpdateBuild(updateStatus.latestBuildCode, updateStatus.latestVersion);
+    snoozeUpdateAlert(updateStatus.latestBuildCode, updateStatus.latestVersion);
+    setWebBypassUnlocked(true);
+    setVisible(false);
+    setAsyncStatus((prev) =>
+      prev
+        ? {
+            ...prev,
+            hasUpdate: false,
+            forceUpdate: false,
+            currentBuildCode: Math.max(prev.currentBuildCode, prev.latestBuildCode),
+          }
+        : null
+    );
+  };
 
   const handleUpdateNow = async () => {
     if (isUpdating) return;
     setIsUpdating(true);
     if (!updateStatus.forceUpdate || isWebRuntime) {
+      if (isWebRuntime) {
+        acknowledgeWebUpdateBuild(updateStatus.latestBuildCode, updateStatus.latestVersion);
+        setWebBypassUnlocked(true);
+      }
       snoozeUpdateAlert(updateStatus.latestBuildCode, updateStatus.latestVersion);
       setVisible(false);
     }
@@ -465,7 +488,7 @@ export const AppUpdateBanner: React.FC = () => {
             {isWebRuntime && (
               <button
                 type="button"
-                onClick={() => setWebBypassUnlocked(true)}
+                onClick={handleContinueOnPc}
                 className="w-full min-h-[42px] px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition cursor-pointer"
               >
                 <Laptop className="w-4 h-4" />
@@ -562,10 +585,10 @@ export const AppUpdateBanner: React.FC = () => {
             )}
           </div>
 
-          {!updateStatus.forceUpdate && (
+          {(!updateStatus.forceUpdate || isWebRuntime) && (
             <button
               type="button"
-              onClick={handleSnooze}
+              onClick={isWebRuntime ? handleContinueOnPc : handleSnooze}
               aria-label={tr(language, 'បិទ', 'Close', '关闭')}
               className="w-8 h-8 -mt-1 -mr-1 rounded-full flex items-center justify-center text-emerald-200/80 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
             >
@@ -600,10 +623,10 @@ export const AppUpdateBanner: React.FC = () => {
             )}
           </button>
 
-          {!updateStatus.forceUpdate && (
+          {(!updateStatus.forceUpdate || isWebRuntime) && (
             <button
               type="button"
-              onClick={handleSnooze}
+              onClick={isWebRuntime ? handleContinueOnPc : handleSnooze}
               className="min-h-[42px] px-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-emerald-50 text-xs font-semibold active:scale-[0.98] transition cursor-pointer"
             >
               {tr(language, 'ពេលក្រោយ', 'Later', '稍后')}

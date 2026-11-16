@@ -80,6 +80,19 @@ function kftVersionManifestPlugin(): Plugin {
 
   return {
     name: 'kft-version-manifest',
+    transform(code, id) {
+      if (id.replace(/\\/g, '/').endsWith('/src/types/index.ts')) {
+        const liveBuild = readAndroidVersionCode();
+        const liveVer = readPackageVersionName();
+        return {
+          code: code
+            .replace(/__KFT_BUILD_CODE__/g, JSON.stringify(liveBuild))
+            .replace(/__KFT_VERSION_NAME__/g, JSON.stringify(liveVer)),
+          map: null,
+        };
+      }
+      return null;
+    },
     configureServer(server) {
       server.middlewares.use(handleFreeGmapsProxy);
       server.middlewares.use((req, res, next) => {
@@ -112,7 +125,7 @@ function kftVersionManifestPlugin(): Plugin {
 }
 
 // https://vite.dev/config/
-// Auto-reloaded buildCode: 1619
+// Auto-reloaded buildCode: 1622
 export default defineConfig({
   base: './',
   define: {

@@ -127,6 +127,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(() => searchQuery);
 
   useEffect(() => {
+    syncUsersNow?.().catch(() => {});
     const initial = typeof window !== 'undefined' ? String((window as any).__kft_admin_user_initial_search || '').trim() : '';
     if (initial) {
       delete (window as any).__kft_admin_user_initial_search;

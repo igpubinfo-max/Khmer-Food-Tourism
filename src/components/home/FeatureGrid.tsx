@@ -32,37 +32,37 @@ const FeatureGridImpl: React.FC<Props> = ({
   const items: FeatureItem[] = [
     {
       id: 'nearby-food',
-      imageSrc: `/categories/home_cat_nearby_food.png?v=${APP_BUILD_CODE}`,
+      imageSrc: `/categories/home_cat_nearby_food.png?v=hq1622_${APP_BUILD_CODE}`,
       label: tr(language, 'ម្ហូបជិតខ្ញុំ', 'Nearby Food', '附近美食'),
       onClick: onNearbyFoodSearch,
     },
     {
       id: 'compare-dishes',
-      imageSrc: `/categories/home_cat_drinks.png?v=${APP_BUILD_CODE}`,
+      imageSrc: `/categories/home_cat_drinks.png?v=hq1622_${APP_BUILD_CODE}`,
       label: tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佳肴与饮品'),
       onClick: onNearbyPlaces,
     },
     {
       id: 'food-recommend',
-      imageSrc: `/categories/home_cat_recommend.png?v=${APP_BUILD_CODE}`,
+      imageSrc: `/categories/home_cat_recommend.png?v=hq1622_${APP_BUILD_CODE}`,
       label: tr(language, 'ណែនាំម្ហូប', 'Food Picks', '美食推荐'),
       onClick: onFoodRecommendations,
     },
     {
       id: 'daily-food',
-      imageSrc: `/categories/home_cat_province_food.png?v=${APP_BUILD_CODE}`,
+      imageSrc: `/categories/home_cat_province_food.png?v=hq1622_${APP_BUILD_CODE}`,
       label: tr(language, 'ម្ហូបតាមខេត្ត', 'Food by Province', '各省美食'),
       onClick: onDailyFoodDiscovery,
     },
     {
       id: 'map-nav',
-      imageSrc: `/categories/home_cat_map_route.png?v=${APP_BUILD_CODE}`,
+      imageSrc: `/categories/home_cat_map_route.png?v=hq1622_${APP_BUILD_CODE}`,
       label: tr(language, 'ផែនទីធ្វើដំណើរ', 'Map Route', '地图导航'),
       onClick: onMapNavigation,
     },
     {
       id: 'smart-ai',
-      imageSrc: `/categories/home_cat_smart_ai.png?v=${APP_BUILD_CODE}`,
+      imageSrc: `/categories/home_cat_smart_ai.png?v=hq1622_${APP_BUILD_CODE}`,
       label: tr(language, 'ជំនួយការឆ្លាតវៃ Ai', 'Smart AI', 'AI 智能助手'),
       onClick: onSmartAiAssistant,
     },

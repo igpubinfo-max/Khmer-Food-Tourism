@@ -182,6 +182,7 @@ import {
   syncAllAppDataWithSupabase,
   pushCloudDocument,
   pullCloudDocument,
+  pullCloudDocumentsByKeys,
   deleteCloudDocument,
   fetchAuthoritativeAppSettingsFromServer,
   saveAuthoritativeAppSettingsToServer,
@@ -8185,10 +8186,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         restoredAt: nowIso,
       };
     } else {
-      const errMsg =
-        tr(language, 'រកមិនឃើញគណនីដែលត្រូវស្តារឡើងវិញទេ!', 'User account not found to restore!', '未找到要恢复的用户账号！');
-      showToast(errMsg, 'warning');
-      return { success: false, error: errMsg };
+      // Check Supabase Cloud directly for any atomic kft_user_* record matching this email/ID
+      let cloudFoundUser: User | null = null;
+      if (isSupabaseConfigured()) {
+        try {
+          const emailSlug = cleanEmail.replace(/[^a-z0-9]/g, '_');
+          const candKeys = Array.from(
+            new Set([
+              `${USER_RECORD_PREFIX}${cleanTarget}`,
+              `${USER_RECORD_PREFIX}user-${emailSlug}`,
+              `${USER_RECORD_PREFIX}google-${emailSlug}`,
+              `${USER_RECORD_PREFIX}owner-${emailSlug}`,
+            ])
+          );
+          const docs = await pullCloudDocumentsByKeys<User>(candKeys, 6000);
+          if (docs.length > 0 && docs[0].payload) {
+            cloudFoundUser = docs[0].payload;
+          }
+        } catch {}
+      }
+      if (cloudFoundUser) {
+        restoredUser = {
+          ...cloudFoundUser,
+          isDisabled: false,
+          disabledAt: undefined,
+          isVerified: true,
+          restoredAt: nowIso,
+        };
+      } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        const emailSlug = cleanEmail.replace(/[^a-z0-9]/g, '_');
+        restoredUser = {
+          id: `user-${emailSlug}`,
+          name: cleanEmail.split('@')[0],
+          email: cleanEmail,
+          role: 'user',
+          authProvider: cleanEmail.endsWith('@gmail.com') ? 'google' : 'email',
+          linkedProviders: [cleanEmail.endsWith('@gmail.com') ? 'google' : 'email'],
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          isVerified: true,
+          verifiedAt: nowIso,
+          createdAt: nowIso.split('T')[0],
+          registeredAtIso: nowIso,
+          lastLoginAt: nowIso,
+          membershipTier: 'free',
+          subscriptionStatus: 'none',
+          isDisabled: false,
+          restoredAt: nowIso,
+        };
+      } else {
+        const errMsg =
+          tr(language, 'រកមិនឃើញគណនីដែលត្រូវស្តារឡើងវិញទេ!', 'User account not found to restore!', '未找到要恢复的用户账号！');
+        showToast(errMsg, 'warning');
+        return { success: false, error: errMsg };
+      }
     }
 
     // 1. Remove from deletedUsers registry if present

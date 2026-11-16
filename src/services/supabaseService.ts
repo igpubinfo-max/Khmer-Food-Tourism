@@ -4134,7 +4134,7 @@ export async function fetchServerPaginatedUsersFromSupabase(
     const queryParts: string[] = [
       'select=key,payload,updated_at',
       `key=like.${encodeURIComponent(USER_RECORD_PREFIX)}*`,
-      'payload->>role=neq.admin',
+      'or=(payload->>role.is.null,payload->>role.neq.admin)',
     ];
 
     // 1. Server-side Role / Account Type filter
@@ -4196,8 +4196,7 @@ export async function fetchServerPaginatedUsersFromSupabase(
     const res = await fetch(url, {
       method: 'GET',
       headers: {
-        apikey: cfg.supabaseAnonKey,
-        Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+        ...getSupabaseHeaders(false),
         Accept: 'application/json',
         Prefer: 'count=exact',
         'Range-Unit': 'items',
@@ -4325,21 +4324,24 @@ export async function syncAllAppDataWithSupabase(localState: {
     // Deliver any critical writes that previously failed (402 / offline) before doing anything else.
     void flushCloudOutbox().catch(() => {});
     const isAdminDevice = Boolean(
-      localState.currentUser &&
-        (localState.currentUser.role === 'admin' ||
-          localState.currentUser.id === 'admin-authorized-single' ||
-          localState.currentUser.username === 'admin' ||
-          localState.currentUser.username === 'cheasavuth')
+      localState.includeHeavyAdminVaults ||
+        isAdminServerAuthActive() ||
+        (localState.currentUser &&
+          (localState.currentUser.role === 'admin' ||
+            localState.currentUser.id === 'admin-authorized-single' ||
+            localState.currentUser.username === 'admin' ||
+            localState.currentUser.username === 'cheasavuth'))
     );
     const shouldFetchHeavyAdminVaults = Boolean(isAdminDevice && localState.includeHeavyAdminVaults);
     const shouldSyncPaymentProofs = shouldFetchHeavyAdminVaults;
-    // Admin devices download only CHANGED user rows once they hold a trustworthy local copy (egress + 10k scale).
+    // Admin devices download only CHANGED user rows on background polls, but ALWAYS do a full pull when
+    // shouldFetchHeavyAdminVaults is true (Admin opens User Directory or clicks Sync Users Now).
     const userCursorPlan = planUserCursorSync({
       cursorIso: readUserSyncCursor(),
       localCount: Array.isArray(localState.users) ? localState.users.length : 0,
       baselineCount: readUserHighWater().count,
     });
-    const userDeltaMode = isAdminDevice && userCursorPlan.mode === 'delta';
+    const userDeltaMode = isAdminDevice && !shouldFetchHeavyAdminVaults && userCursorPlan.mode === 'delta';
 
     // Always fetch atomic `kft_user_*` prefix documents on Admin devices or when using Secondary Cloud Failover
     // (where prefix reads come from the shared single-poll memory map at 0 extra network cost).

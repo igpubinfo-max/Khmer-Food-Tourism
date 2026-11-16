@@ -790,7 +790,7 @@ export const TourismView: React.FC = () => {
                     }}
                   >
                     <img
-                      src={cat.imageSrc}
+                      src={`${cat.imageSrc}?v=hq1622`}
                       alt={label}
                       loading="eager"
                       decoding="async"

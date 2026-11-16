@@ -1015,7 +1015,7 @@ export const NearMeModal: React.FC = () => {
                       }}
                     >
                       <img
-                        src={card.imageSrc}
+                        src={`${card.imageSrc}?v=hq1622`}
                         alt={card.label}
                         loading="eager"
                         decoding="async"

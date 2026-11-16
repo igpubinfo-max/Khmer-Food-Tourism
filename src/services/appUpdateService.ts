@@ -54,6 +54,7 @@ const FALLBACK_REMOTE_MANIFEST_URL =
   'https://kimseng-prog.github.io/Khmer-Food-Tourism/version.json';
 const SNOOZE_STORAGE_KEY = 'kft_snoozed_app_update_v1';
 const ENFORCED_POLICY_CACHE_KEY = 'kft_enforced_update_policy_v1';
+const WEB_ACK_BUILD_KEY = 'kft_web_ack_build_v1';
 const SNOOZE_DURATION_MS = 24 * 60 * 60 * 1000;
 
 export const CHECK_APP_UPDATE_EVENT = 'kft:check-app-update';
@@ -132,6 +133,64 @@ function pickHigherSemver(a?: string, b?: string): string | undefined {
   if (!ca) return cb;
   if (!cb) return ca;
   return compareSemver(ca, cb) >= 0 ? ca : cb;
+}
+
+
+export function acknowledgeWebUpdateBuild(buildCode: number, latestVersion?: string): void {
+  if (typeof window === 'undefined') return;
+  const payload = JSON.stringify({
+    buildCode: Number(buildCode || 0),
+    latestVersion: String(latestVersion || '').trim().replace(/^v/i, ''),
+    updatedAtMs: Date.now(),
+  });
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(WEB_ACK_BUILD_KEY, payload);
+    }
+  } catch {}
+  try {
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(WEB_ACK_BUILD_KEY, payload);
+    }
+  } catch {}
+}
+
+export function getEffectiveWebRuntimeState(): { buildCode: number; versionName: string } {
+  let buildCode = APP_BUILD_CODE;
+  let versionName = APP_VERSION_NAME;
+  if (typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform()) {
+    return { buildCode, versionName };
+  }
+  try {
+    if (typeof window !== 'undefined' && window.location?.search) {
+      const params = new URLSearchParams(window.location.search);
+      const vParam = Number(params.get('v') || 0);
+      if (Number.isFinite(vParam) && vParam > buildCode && vParam < 100000000) {
+        buildCode = vParam;
+      }
+    }
+  } catch {}
+  const readFromStorage = (store?: Storage) => {
+    if (!store) return;
+    const raw = store.getItem(WEB_ACK_BUILD_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as { buildCode?: number; latestVersion?: string };
+    const ackBuild = Number(parsed?.buildCode || 0);
+    if (Number.isFinite(ackBuild) && ackBuild > buildCode) {
+      buildCode = ackBuild;
+    }
+    if (parsed?.latestVersion) {
+      const higher = pickHigherSemver(versionName, parsed.latestVersion);
+      if (higher) versionName = higher;
+    }
+  };
+  try {
+    if (typeof sessionStorage !== 'undefined') readFromStorage(sessionStorage);
+  } catch {}
+  try {
+    if (typeof localStorage !== 'undefined') readFromStorage(localStorage);
+  } catch {}
+  return { buildCode, versionName };
 }
 
 function readCachedEnforcedPolicy(): CachedEnforcedUpdatePolicy | null {
@@ -247,8 +306,10 @@ async function checkNativePlayStoreUpdate(timeoutMs = 3500): Promise<NativePlayU
  * Used on initial render (0ms) and when offline so Force Update cannot be bypassed by disabling internet.
  */
 export function evaluateSyncUpdateStatus(appSettings?: Partial<AppSettings> | null): AppUpdateStatus {
-  const currentBuildCode = APP_BUILD_CODE;
-  const currentVersion = APP_VERSION;
+  const webState = getEffectiveWebRuntimeState();
+  const currentBuildCode = webState.buildCode;
+  const currentVersionName = webState.versionName;
+  const currentVersion = formatVersionTag(currentVersionName);
   const cached = readCachedEnforcedPolicy();
 
   const cloudBuild = Math.max(
@@ -270,19 +331,20 @@ export function evaluateSyncUpdateStatus(appSettings?: Partial<AppSettings> | nu
   );
 
   const isBelowMinBuild = minRequiredBuild > 0 && currentBuildCode < minRequiredBuild;
-  const isBelowMinVersion = Boolean(minRequiredVer && compareSemver(minRequiredVer, APP_VERSION_NAME) > 0);
+  const isBelowMinVersion = Boolean(minRequiredVer && compareSemver(minRequiredVer, currentVersionName) > 0);
   const isBelowMinRequired = isBelowMinBuild || isBelowMinVersion;
 
   const isBuildNewer = cloudBuild > currentBuildCode;
-  const isVersionNewer = Boolean(cloudVer && compareSemver(cloudVer, APP_VERSION_NAME) > 0);
+  const isVersionNewer = Boolean(cloudVer && compareSemver(cloudVer, currentVersionName) > 0);
   const hasUpdate = isBelowMinRequired || isBuildNewer || isVersionNewer;
 
   const latestBuildCode = Math.max(currentBuildCode, cloudBuild, minRequiredBuild);
-  const resolvedVerRaw = pickHigherSemver(APP_VERSION_NAME, pickHigherSemver(cloudVer, minRequiredVer));
+  const resolvedVerRaw = pickHigherSemver(currentVersionName, pickHigherSemver(cloudVer, minRequiredVer));
   const latestVersion = formatVersionTag(resolvedVerRaw);
 
+  const isNative = typeof Capacitor !== 'undefined' && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform();
   const forceFlag = Boolean(appSettings?.forceAppUpdate || cached?.forceUpdate);
-  const forceUpdate = hasUpdate && (isBelowMinRequired || forceFlag);
+  const forceUpdate = isNative && hasUpdate && (isBelowMinRequired || forceFlag);
 
   if (forceUpdate) {
     clearUpdateSnooze();
@@ -334,15 +396,18 @@ export async function checkLiveAppUpdate(appSettings?: Partial<AppSettings> | nu
   const cached = readCachedEnforcedPolicy();
 
   // If Android PackageManager reports a lower installed native APK versionCode, enforce against the actual installed APK build
+  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform();
+  const webState = getEffectiveWebRuntimeState();
   const nativeInstalledBuild =
     playInfo && Number(playInfo.currentVersionCode || 0) > 0
       ? Number(playInfo.currentVersionCode)
       : APP_BUILD_CODE;
-  const currentBuildCode = Math.min(APP_BUILD_CODE, nativeInstalledBuild);
-  const currentVersionName =
-    playInfo?.currentVersionName && compareSemver(APP_VERSION_NAME, playInfo.currentVersionName) > 0
+  const currentBuildCode = isNative ? Math.min(APP_BUILD_CODE, nativeInstalledBuild) : webState.buildCode;
+  const currentVersionName = isNative
+    ? playInfo?.currentVersionName && compareSemver(APP_VERSION_NAME, playInfo.currentVersionName) > 0
       ? playInfo.currentVersionName
-      : APP_VERSION_NAME;
+      : APP_VERSION_NAME
+    : webState.versionName;
   const currentVersion = formatVersionTag(currentVersionName);
 
   let latestBuildCode = currentBuildCode;
@@ -449,7 +514,7 @@ export async function checkLiveAppUpdate(appSettings?: Partial<AppSettings> | nu
     pickHigherSemver(manifest?.minRequiredVersion, forceFlag ? latestVersionName : undefined)
   );
 
-  const forceUpdate = hasUpdate && (isBelowAnyMinRequired || forceFlag);
+  const forceUpdate = isNative && hasUpdate && (isBelowAnyMinRequired || forceFlag);
 
   // Persist authoritative requirement locally so offline mode / airplane mode can never bypass Force Update
   if (latestBuildCode > currentBuildCode || compareSemver(latestVersionName, currentVersionName) > 0 || forceFlag) {
@@ -568,7 +633,9 @@ export async function triggerAutoAppUpdate(
     return;
   }
 
-  // Web / PWA: Clear stale Service Worker & HTTP Cache Storage (strictly preserving localStorage user & VIP state!) and reload
+  // Web / PWA: Acknowledge target build on Web, clear stale Service Worker & HTTP Cache Storage, and reload
+  acknowledgeWebUpdateBuild(latestBuildCode || APP_BUILD_CODE, latestVersion);
+  snoozeUpdateAlert(latestBuildCode || APP_BUILD_CODE, latestVersion);
   try {
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
@@ -586,6 +653,11 @@ export async function triggerAutoAppUpdate(
   try {
     const nextUrl = new URL(window.location.href);
     nextUrl.searchParams.set('v', String(latestBuildCode || Date.now()));
+    await fetch(nextUrl.toString(), {
+      method: 'GET',
+      cache: 'reload',
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', Pragma: 'no-cache' },
+    }).catch(() => null);
     window.location.replace(nextUrl.toString());
   } catch {
     window.location.reload();

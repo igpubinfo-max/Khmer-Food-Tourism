@@ -679,7 +679,7 @@ if (Test-Path $typesFile) {
     $typesText = [regex]::Replace(
         $typesText,
         'export const APP_BUILD_CODE:\s*number\s*=[^;]+;',
-        "export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : $nextVC;"
+        "export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? Math.max(__KFT_BUILD_CODE__, $nextVC) : $nextVC;"
     )
     $typesText = [regex]::Replace(
         $typesText,
@@ -687,6 +687,21 @@ if (Test-Path $typesFile) {
         "export const APP_RELEASE_DATE = '$todayIso';"
     )
     [System.IO.File]::WriteAllText($typesFile, $typesText, (New-Object System.Text.UTF8Encoding($false)))
+}
+
+$viteConfigFile = Join-Path $RepoRoot "vite.config.ts"
+if (Test-Path $viteConfigFile) {
+    $viteText = [System.IO.File]::ReadAllText($viteConfigFile, [System.Text.Encoding]::UTF8)
+    $viteText = [regex]::Replace($viteText, "// Auto-reloaded buildCode:\s*\d+", "// Auto-reloaded buildCode: $nextVC")
+    [System.IO.File]::WriteAllText($viteConfigFile, $viteText, (New-Object System.Text.UTF8Encoding($false)))
+}
+
+$pubVerFile = Join-Path $RepoRoot "public\version.json"
+if (Test-Path $pubVerFile) {
+    $pubVerText = [System.IO.File]::ReadAllText($pubVerFile, [System.Text.Encoding]::UTF8)
+    $pubVerText = [regex]::Replace($pubVerText, '"buildCode":\s*\d+', "`"buildCode`": $nextVC")
+    $pubVerText = [regex]::Replace($pubVerText, '"minRequiredBuildCode":\s*\d+', "`"minRequiredBuildCode`": $nextVC")
+    [System.IO.File]::WriteAllText($pubVerFile, $pubVerText, (New-Object System.Text.UTF8Encoding($false)))
 }
 
 Write-Host "  Updated versionCode & APP_BUILD_CODE -> $nextVC" -ForegroundColor Green
