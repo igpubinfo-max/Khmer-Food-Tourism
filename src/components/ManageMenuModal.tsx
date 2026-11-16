@@ -496,7 +496,7 @@ export const ManageMenuModal: React.FC = () => {
       trimmedMapUrl && isValidGoogleMapsUrl(trimmedMapUrl)
         ? trimmedMapUrl
         : hasVerifiedCoords
-          ? buildCanonicalGoogleMapsPinUrl(finalLat, finalLng, managingRestaurant.googlePlaceId)
+          ? buildCanonicalGoogleMapsPinUrl(finalLat, finalLng, managingRestaurant.googlePlaceId, `${storeNameEn.trim() || storeNameKh.trim()}, ${storeAddressKh.trim() || storeProvinceKh}, Cambodia`)
           : '';
     const mapUrlChanged = trimmedMapUrl !== (managingRestaurant.mapUrl || '').trim();
     const isAdminEditing = Boolean(isAdmin);

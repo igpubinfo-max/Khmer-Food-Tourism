@@ -1654,7 +1654,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             : hasValidUserMapUrl && (r.isAdminEdited || r.dataSource === 'vip_owner' || Boolean(r.ownerId) || !hasValidCoords)
               ? trimmedRawMapUrl
               : hasValidCoords
-                ? buildCanonicalGoogleMapsPinUrl(lat, lng, cleanGpid)
+                ? buildCanonicalGoogleMapsPinUrl(lat, lng, cleanGpid, buildSpecificPlaceSearchQuery({ nameEn: r.nameEn, nameKh: r.nameKh, addressEn: r.addressEn, addressKh: r.addressKh, provinceEn: r.provinceEn, provinceKh: r.provinceKh }))
                 : trimmedRawMapUrl;
         return {
           mapUrl: preservedMapUrl,

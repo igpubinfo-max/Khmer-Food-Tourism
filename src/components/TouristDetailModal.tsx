@@ -149,7 +149,7 @@ export const TouristDetailModal: React.FC = () => {
     const nextMapUrl = hasVerifiedCoords
       ? trimmedMapUrl.includes('maps.app.goo.gl')
         ? trimmedMapUrl
-        : buildCanonicalGoogleMapsPinUrl(nextLat, nextLng, selectedDestination.googlePlaceId)
+        : buildCanonicalGoogleMapsPinUrl(nextLat, nextLng, selectedDestination.googlePlaceId, `${editNameEn.trim() || editNameKh.trim() || selectedDestination.nameEn || selectedDestination.nameKh}, ${editProvinceEn.trim() || selectedDestination.provinceEn || selectedDestination.provinceKh}, Cambodia`)
       : trimmedMapUrl || selectedDestination.mapUrl;
 
     const customPhotoFlag = editPhotoUrl.trim() !== '' ? true : selectedDestination.isCustomPhoto;

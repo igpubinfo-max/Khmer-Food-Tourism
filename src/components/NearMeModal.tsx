@@ -44,6 +44,7 @@ import {
   isHotelBusinessRecord,
   openRestaurantGoogleExternal,
   openDestinationGoogleExternal,
+  stripPlusCodesAndRawCoords,
 } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
 import { isShopExcludedFromSearch, EXCLUDED_SHOPS_UPDATED_EVENT } from '../utils/excludedShopsRegistry';
@@ -672,7 +673,7 @@ export const NearMeModal: React.FC = () => {
   };
 
   const cleanCardAddress = (rawAddr: string | undefined, provLabel: string) => {
-    const cleaned = (rawAddr || '')
+    const cleaned = stripPlusCodesAndRawCoords(rawAddr || '')
       .replace(/(?:\s*,\s*){2,}/g, ', ')
       .replace(/^[\s,.;:–—-]+|[\s,.;:–—-]+$/g, '')
       .trim();

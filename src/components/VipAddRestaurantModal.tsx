@@ -44,6 +44,8 @@ import {
   isAdminAccount,
   isValidCambodiaCoordinates,
   buildCanonicalGoogleMapsPinUrl,
+  stripPlusCodesAndRawCoords,
+  buildSpecificPlaceSearchQuery,
   isValidGoogleMapsUrl,
   extractCoordsFromGoogleMapsUrl,
   inferBusinessTypeAndCategory,
@@ -231,7 +233,7 @@ const reverseGeocodeFreeAddress = async (lat: number, lng: number): Promise<stri
       const a = data?.address;
       if (a) {
         const parts = [a.Address, a.Neighborhood || a.District, a.City || a.Subregion, a.Region]
-          .map((p: unknown) => String(p || '').trim())
+          .map((p: unknown) => stripPlusCodesAndRawCoords(String(p || '')))
           .filter(Boolean);
         const unique = Array.from(new Set(parts));
         if (unique.length > 0) return unique.join(', ');
@@ -253,7 +255,7 @@ const reverseGeocodeFreeAddress = async (lat: number, lng: number): Promise<stri
         a.city_district || a.county || a.town,
         a.city || a.state,
       ]
-        .map((p: unknown) => String(p || '').trim())
+        .map((p: unknown) => stripPlusCodesAndRawCoords(String(p || '')))
         .filter(Boolean);
       const unique = Array.from(new Set(parts));
       if (unique.length > 0) return unique.join(', ');
@@ -1285,7 +1287,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     const resolvedMapUrl = hasValidMapLink
       ? trimmedMapUrl
       : hasVerifiedCoords
-        ? buildCanonicalGoogleMapsPinUrl(resolvedLat!, resolvedLng!, importedGooglePlaceId)
+        ? buildCanonicalGoogleMapsPinUrl(resolvedLat!, resolvedLng!, importedGooglePlaceId, buildSpecificPlaceSearchQuery({ nameEn: finalNameEn, nameKh: finalNameKh, addressKh: addressKh.trim(), provinceEn, provinceKh }))
         : '';
 
     setIsSaving(true);

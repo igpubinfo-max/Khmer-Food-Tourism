@@ -21,7 +21,7 @@ import {
 } from '../services/googlePlacesService';
 import { rankBySearchRelevance, normalizeSearchText } from '../utils/searchEngine';
 import { getCurrentDeviceLocation } from '../services/restaurantCheckInService';
-import { extractCoordsFromGoogleMapsUrl, isValidGoogleMapsUrl, openExternalUrlNativeSafe } from '../types';
+import { extractCoordsFromGoogleMapsUrl, isValidGoogleMapsUrl, openExternalUrlNativeSafe, stripPlusCodesAndRawCoords, buildCanonicalGoogleMapsPinUrl } from '../types';
 import { tr } from '../utils/i18n';
 
 export interface ShopCheckInLocationResult {
@@ -105,7 +105,8 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
       setProvinceKh(normalizedProvKh);
 
       try {
-        const arcUrl = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=json&location=${targetLng},${targetLat}&langCode=km`;
+        const arcLang = language === "zh" ? "zh" : language === "en" ? "en" : "km";
+        const arcUrl = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=json&location=${targetLng},${targetLat}&langCode=${arcLang}`;
         const controller = new AbortController();
         const tId = setTimeout(() => controller.abort(), 3800);
         const res = await fetch(arcUrl, { signal: controller.signal });
@@ -120,7 +121,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
               addr.Neighborhood || addr.District,
               addr.City || addr.Subregion,
             ]
-              .map((p) => String(p || '').trim())
+              .map((p) => stripPlusCodesAndRawCoords(String(p || '')))
               .filter(Boolean);
             const uniqueParts = Array.from(new Set(parts));
             if (uniqueParts.length > 0) {
@@ -142,7 +143,8 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
       }
 
       try {
-        const nomUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${targetLat}&lon=${targetLng}&accept-language=km,en`;
+        const nomLang = language === "zh" ? "zh,en,km" : language === "en" ? "en,km" : "km,en";
+        const nomUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${targetLat}&lon=${targetLng}&accept-language=${nomLang}`;
         const controller = new AbortController();
         const tId = setTimeout(() => controller.abort(), 4000);
         const res = await fetch(nomUrl, {
@@ -160,7 +162,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
             a.city_district || a.county || a.town,
             a.city || a.state,
           ]
-            .map((p) => String(p || '').trim())
+            .map((p) => stripPlusCodesAndRawCoords(String(p || '')))
             .filter(Boolean);
           const uniqueParts = Array.from(new Set(parts));
           if (uniqueParts.length > 0) {
@@ -180,11 +182,11 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
         // Fallback to coordinate description
       }
 
-      setFormattedAddress((prev) =>
-        prev.trim()
-          ? prev
-          : `${normalizedProvKh} (GPS: ${targetLat.toFixed(5)}, ${targetLng.toFixed(5)})`
-      );
+      setFormattedAddress((prev) => {
+        const cleanPrev = stripPlusCodesAndRawCoords(prev);
+        if (cleanPrev) return cleanPrev;
+        return shopName.trim() ? `${shopName.trim()}, ${normalizedProvKh}` : normalizedProvKh;
+      });
       setIsReverseGeocoding(false);
     },
     []
@@ -484,7 +486,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
     if (c.mapUrl) {
       setCustomMapUrl(c.mapUrl);
     } else {
-      setCustomMapUrl(`https://www.google.com/maps/search/?api=1&query=${c.lat.toFixed(6)},${c.lng.toFixed(6)}`);
+      setCustomMapUrl(buildCanonicalGoogleMapsPinUrl(c.lat, c.lng, undefined, [c.name, c.address, c.provinceKh, "Cambodia"].filter(Boolean).join(", ")));
     }
     setPasteNotice(
       tr(language, `✅ បានជ្រើសរើសទីតាំង «${c.name}» (GPS: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)})`, `✅ Selected location "${c.name}" (GPS: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)})`, `✅ 已选择位置 "${c.name}" (GPS: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)})`)
@@ -499,7 +501,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
     setLat(nextLat);
     setLng(nextLng);
     setManualCoordInput(`${nextLat.toFixed(6)}, ${nextLng.toFixed(6)}`);
-    setCustomMapUrl(`https://www.google.com/maps/search/?api=1&query=${nextLat.toFixed(6)},${nextLng.toFixed(6)}`);
+    setCustomMapUrl(buildCanonicalGoogleMapsPinUrl(nextLat, nextLng, undefined, [shopName.trim(), formattedAddress.trim(), provinceKh, "Cambodia"].filter(Boolean).join(", ")));
     reverseGeocodeCoordinates(nextLat, nextLng);
   };
 
@@ -521,13 +523,13 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
   const resolvedGoogleMapsLink =
     customMapUrl.trim() && isValidGoogleMapsUrl(customMapUrl.trim())
       ? customMapUrl.trim()
-      : `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(6)},${lng.toFixed(6)}`;
+      : buildCanonicalGoogleMapsPinUrl(lat, lng, undefined, [shopName.trim(), stripPlusCodesAndRawCoords(formattedAddress), provinceKh, "Cambodia"].filter(Boolean).join(", "));
 
   const handleConfirm = () => {
     const provGeo = resolveProvinceGeoConfig(provinceKh) || CAMBODIA_PROVINCE_GEO_LIST[0];
     const cleanAddr =
-      formattedAddress.trim() ||
-      `${provGeo.kh} (GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+      stripPlusCodesAndRawCoords(formattedAddress) ||
+      (shopName.trim() ? `${shopName.trim()}, ${provGeo.kh}` : provGeo.kh);
 
     onConfirmLocation({
       latitude: Number(lat.toFixed(6)),
@@ -542,7 +544,10 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
     onClose();
   };
 
-  const googleMapEmbedUrl = `https://maps.google.com/maps?q=${lat},${lng}&z=17&output=embed`;
+  const embedLabel = stripPlusCodesAndRawCoords(shopName.trim() || formattedAddress.trim() || provinceKh);
+  const googleMapEmbedUrl = embedLabel
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(`${lat},${lng} (${embedLabel})`)}&z=17&output=embed`
+    : `https://maps.google.com/maps?q=${lat},${lng}&z=17&output=embed`;
 
   return (
     <div

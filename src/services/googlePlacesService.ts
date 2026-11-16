@@ -33,6 +33,9 @@ import {
   getCachedVerifiedPlaceForCoords,
   saveCachedVerifiedPlaceForCoords,
   buildCanonicalGoogleMapsPinUrl,
+  stripPlusCodesAndRawCoords,
+  isCoordinateOrPlusCodeOnly,
+  buildSpecificPlaceSearchQuery,
   buildCanonicalGoogleMapsDirectionsUrl,
   openExternalUrlNativeSafe,
   notifyUnverifiedLocationBlocked,
@@ -463,7 +466,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ភោជនីយដ្ឋាន ជំនោរក្បាលកោះ', 'ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.541938,104.946187&query_place_id=0x31095729de2b8f21%3A0x7c6cd6284a4f844c',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Chumnor%20Kbal%20Koh%20Restaurant%20(Jomnor%20Kbal%20Koh)%20-%20%E1%9E%87%E1%9F%86%E1%9E%93%E1%9F%84%E1%9E%9A%E1%9E%80%E1%9F%92%E1%9E%94%E1%9E%B6%E1%9E%9B%E1%9E%80%E1%9F%84%E1%9F%87%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=0x31095729de2b8f21%3A0x7c6cd6284a4f844c',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
@@ -490,7 +493,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['/destinations/gmap-kandal-kbal-koh-ecotourism.jpg'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5125,105.0185',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Kbal%20Koh%20Riverside%20Resort%20(Chbar%20Ampov%20%2F%20Kien%20Svay)%2C%20%E1%9E%80%E1%9E%8E%E1%9F%92%E1%9E%8F%E1%9E%B6%E1%9E%9B%2C%20Cambodia',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
@@ -516,7 +519,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['/Shop/rest-1.jpg'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.553152,104.928957',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Malis%20Restaurant%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-31T00:00:00.000Z',
   },
@@ -542,7 +545,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['/Shop/rest-2.jpg'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.559,104.92387',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Romdeng%20Restaurant%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-31T00:00:00.000Z',
   },
@@ -568,7 +571,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ភោជនីយដ្ឋាន ក្រវាញ', 'ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.557382,104.933324',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Kravanh%20Restaurant%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
@@ -594,7 +597,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['/Shop/rest-7.jpg'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.583051,104.898124',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=One%20More%20Restaurant%20Toul%20Kork%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-31T00:00:00.000Z',
   },
@@ -620,7 +623,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('សុវណ្ណា សាច់អាំង និងគ្រឿងសមុទ្រ', 'ខណ្ឌចំការមន រាជធានីភ្នំពេញ', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.55064,104.930277',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Sovanna%20BBQ%20Restaurant%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-31T00:00:00.000Z',
   },
@@ -646,7 +649,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg("ភោជនីយដ្ឋាន ភីហ្សា 4P's (Pizza 4P's)", 'រាជធានីភ្នំពេញ', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5535,104.9268',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Pizza%204P%27s%20Phnom%20Penh%20(BKK1)%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
@@ -672,7 +675,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ដឹ ភីហ្សា ខមផានី (The Pizza Company)', 'រាជធានីភ្នំពេញ', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.56956,104.92964',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=The%20Pizza%20Company%20Riverside%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
@@ -698,7 +701,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ប្រ៊ុកលីន ភីហ្សា សៀមរាប (Brooklyn Pizza)', 'ខេត្តសៀមរាប', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.3562,103.8548',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Brooklyn%20Pizza%20%26%20Bistro%20Siem%20Reap%2C%20%E1%9E%81%E1%9F%81%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%9F%E1%9F%80%E1%9E%98%E1%9E%9A%E1%9E%B6%E1%9E%94%2C%20Cambodia',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
@@ -727,7 +730,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('Manna Kitchen (ម៉ាន់ណា ឃីតឆិន)', 'ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.0984,103.2062',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Manna%20Kitchen%2C%20%E1%9E%81%E1%9F%81%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%94%E1%9E%B6%E1%9E%8F%E1%9F%8B%E1%9E%8A%E1%9F%86%E1%9E%94%E1%9E%84%2C%20Cambodia',
     types: ['vegetarian_restaurant', 'vegan_restaurant', 'korean_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-27T00:00:00.000Z',
@@ -757,7 +760,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ភោជនីយដ្ឋាន ចានបាយ (Jaan Bai)', 'ខេត្តបាត់ដំបង', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.101518,103.198719',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Jaan%20Bai%20Restaurant%20Battambang%2C%20%E1%9E%81%E1%9F%81%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%94%E1%9E%B6%E1%9E%8F%E1%9F%8B%E1%9E%8A%E1%9F%86%E1%9E%94%E1%9E%84%2C%20Cambodia',
     types: ['restaurant', 'cambodian_restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-27T00:00:00.000Z',
@@ -786,7 +789,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ហាងកាហ្វេ គិនយី (Kinyei Café)', 'ខេត្តបាត់ដំបង', 'cafe')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.1027,103.1977',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Kinyei%20Caf%C3%A9%20Battambang%2C%20%E1%9E%81%E1%9F%81%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%94%E1%9E%B6%E1%9E%8F%E1%9F%8B%E1%9E%8A%E1%9F%86%E1%9E%94%E1%9E%84%2C%20Cambodia',
     types: ['cafe', 'coffee_shop'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-27T00:00:00.000Z',
@@ -815,7 +818,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ផ្ទះបាយ ណារី (Nary Kitchen)', 'ខេត្តបាត់ដំបង', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.103325,103.196403',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Nary%20Kitchen%20Battambang%2C%20%E1%9E%81%E1%9F%81%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%94%E1%9E%B6%E1%9E%8F%E1%9F%8B%E1%9E%8A%E1%9F%86%E1%9E%94%E1%9E%84%2C%20Cambodia',
     types: ['restaurant', 'cambodian_restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-27T00:00:00.000Z',
@@ -845,7 +848,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ហាងកាហ្វេ ប្រោន (BROWN Coffee Roastery)', 'រាជធានីភ្នំពេញ', 'cafe')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5533,104.9248',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=BROWN%20Coffee%20and%20Bakery%20Roastery%20BKK1%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['cafe', 'coffee_shop', 'bakery'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-27T00:00:00.000Z',
@@ -876,7 +879,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('The Square Kampot Hotel', 'ខេត្តកំពត', 'tourism')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=10.6211497,104.1822991&query_place_id=ChIJX8rUagw3CDERlRCQ4NhJwd0',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=The%20Square%20Kampot%20Hotel%2C%20%E1%9E%81%E1%9F%81%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%80%E1%9F%86%E1%9E%96%E1%9E%8F%2C%20Cambodia&query_place_id=ChIJX8rUagw3CDERlRCQ4NhJwd0',
     types: ['hotel', 'lodging'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-05T00:00:00.000Z',
@@ -907,7 +910,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('Hotel Old Cinema Kampot', 'ខេត្តកំពត', 'tourism')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=10.6101508,104.1802723&query_place_id=ChIJE178oGI2CDERzT5CVI9LSJM',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Hotel%20Old%20Cinema%20Kampot%2C%20%E1%9E%81%E1%9F%81%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%80%E1%9F%86%E1%9E%96%E1%9E%8F%2C%20Cambodia&query_place_id=ChIJE178oGI2CDERzT5CVI9LSJM',
     types: ['hotel', 'lodging', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-05T00:00:00.000Z',
@@ -936,7 +939,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLdpL8tTk7v3dfa7KXGVAWqr3BWZRnosX9i4YH8WzdFpH58Ls5fS_Bng8D8GBimvJbk5s3A7z1qF9j8iMJzTxBUGX2T_LAITEKp4dFxS61jLi1PjBAVk9LxoH3ETh6qWiSa36DrT=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5528795,104.9139623&query_place_id=ChIJ75aVST1RCTERtFcQOgNIbmI',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Vitking%20House%20-%20Wat%20Mahamontrey%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJ75aVST1RCTERtFcQOgNIbmI',
     types: ['vegetarian_restaurant', 'vegan_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -965,7 +968,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLdOTrznQBwvSelAGAp2ce7D4P8T9Ve2G-H9DD_leJyKGPEtJfUuqz5MB8QqiIxHVvAtFbgQfDVoNBQ1Px-q5fUJMMByqnjUFJnINvDhGfwae4V_FeyA3t16BbmNZRP1O0dDv8Om=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5405876,104.9100765&query_place_id=ChIJ-_tXZOFQCTER4uvpLv2cQVM',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Vitking%20House%20-%20Toul%20Tompong%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJ-_tXZOFQCTER4uvpLv2cQVM',
     types: ['vegetarian_restaurant', 'vegan_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -993,7 +996,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLeXJ0B_ghUXrld5W82NvBYtqDJmFZvnzi3LcqgAOP7jW2CvVaD30mOy1rEaWgf5_Up-HyDfqZGHGxzBWipTDmOtZVA4UN-vuTBfBoCt4RUcZiSjBklxlTOOj9MRRigbltkr5nxr=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5591995,104.9251061&query_place_id=ChIJScMkKgBRCTER7BNkdun3xNw',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Magnolia%20Veggie%20Restaurant%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJScMkKgBRCTER7BNkdun3xNw',
     types: ['vegetarian_restaurant', 'vegan_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1021,7 +1024,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLdpbt_GCM4IHeVvjK9DLGNnKwXHk9_WdJWo9cTIKkD8guC06w3Coh2ZaXQNkBcdZJnV2mQ0Qjlfs402nB12A9O_VQFEoEFU4jAiaGs60108SabHKuy6kcp-tggaGxGvdR5hbiw=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5638905,104.9269683&query_place_id=ChIJkWqGijdRCTERIMQci0-vEq0',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Surn%20Yi%20Vegetarian%20Restaurant%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJkWqGijdRCTERIMQci0-vEq0',
     types: ['vegetarian_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1049,7 +1052,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('អាហារបួសសុខភាព ទួនហ្វា (Mi Chay)', 'រាជធានីភ្នំពេញ', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5572243,104.9157049&query_place_id=ChIJTckSgj1RCTERpWFxekL2aRo',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Mi%20Chay%20Vegetarian%20Food%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJTckSgj1RCTERpWFxekL2aRo',
     types: ['vegetarian_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1077,7 +1080,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ម្ហូបបួស មេត្រី (Maitreya Vegetarian)', 'រាជធានីភ្នំពេញ', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5458833,104.9178614&query_place_id=ChIJVTTEySZRCTERLAJtxfMmvZY',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Maitreya%20Vegetarian%20Chay%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJVTTEySZRCTERLAJtxfMmvZY',
     types: ['vegetarian_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1105,7 +1108,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLcuQJbEnBEBTNwiFK7ZizPrtKRwNM4E6rvdN8wSUCwL89NgCaAXUBT9skUORx9efofD7Zt_bUKWDVq-12hMfLCbxWs-VsJR0izaC9PN1ddgu57Lx07bxF6j4iSeBJA3aw-w1h-r=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5788877,104.9050511&query_place_id=ChIJnWaFSKlRCTERrwHWOp0BcyA',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Vegetarian%20Boeung%20Kak%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJnWaFSKlRCTERrwHWOp0BcyA',
     types: ['vegetarian_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1133,7 +1136,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLdBiB0Ib9IKlUvKLs1tuP98c7mAYhM1BmvVMzvwQoRuO-WN8FEzsA5-dJ-O-XehG1fpwD0TYvH4liA3lepA8YEaMXs_RBkswBjYl6pWBEwqU2a0w_x1PM0cbRBrgWAE6SyALeorgg=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5507202,104.9306182&query_place_id=ChIJAYT6klRRCTERyvqx6ME85jk',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Bong%20Bonlai%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJAYT6klRRCTERyvqx6ME85jk',
     types: ['vegan_restaurant', 'vegetarian_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1162,7 +1165,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLee7JLIlw8c8VdlwYuu0Fiv_CTDtYeh_vlmq9cOIXlMeQSpnFvKA7itZE-sbWYlRo9Q-_0cWEpXQwG2z75uwNQrSvdlhV8JMkMoHck9mKHZjE2IIFZ2cINxHbwrWpIjYu6sqrY=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5554915,104.9117076&query_place_id=ChIJw2kDZhdRCTERvF4dIhDY_rI',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Kun%20Kimsea%20Olympic%20Kuy%20Teav%20Noodle%20Restaurant%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJw2kDZhdRCTERvF4dIhDY_rI',
     types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1191,7 +1194,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLeMiT2l7zXr2a2330tIvEk010JyS7Q7UhBAX46oeabkwFndRMPnIU2DrRXr7vnL2d7gZf40McILzBFSK1ZOkAV-M396iAz5Krq1b33A2Y4ikstuhYhEFafm8dgtldE5hhauuUg0Wg=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5576287,104.9236688&query_place_id=ChIJfRQkrztRCTERxr6wxv5pW_c',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Kaun%20Heng%20Noodle%20Restaurant%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJfRQkrztRCTERxr6wxv5pW_c',
     types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1220,7 +1223,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLds4qszGNJz7Wv6jRGIKqy3BEPIc6oi-m2I8RP3n1DyunVMcYOvq4MQnZPgD80SHrCEj2Bhv6DiJ9mstTEE1uYVvuk6a-udX42MhQaGqfNujK_ibE6QqvuuI77hTbKn0mQvFy1hWw=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5561063,104.9089341&query_place_id=ChIJqacEuhBRCTERb8R-Mo7-uYI',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Pov%20Olympic%20Restaurant%20(Kuy%20Teav%20%26%20Breakfast)%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJqacEuhBRCTERb8R-Mo7-uYI',
     types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1249,7 +1252,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLfYmDzeZiSjGCEt28xYRIzF4VRWAZcrSKkQzMppxx2GRvf316NAivQYefQoWXUsU9d0dyYZLmaIUD0haOuzN3zsQCAERcoEdUCHEMheR-X2PlfdqHotUsZDFRwe4OMOgZKxH8Ndaw=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5424561,104.910579&query_place_id=ChIJK3fbkuFQCTER8tXbm27p9ZU',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=3%20Generations%20Kuy%20Teav%20Noodle%20Shop%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJK3fbkuFQCTER8tXbm27p9ZU',
     types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1278,7 +1281,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-proxy/AIM7gW1aCZjXYwGkxs9Pcpcp760-AHlIUaYE8AQ6CfSxiQvHUVB8XbaWE8r_Il2HGiTr5IeXqPrzO2dHRxgjh1vOiolGm5YxR-7QBEL5NjDSL-yVFAPKjpaAE-ReWSo6_rFfmgDcT0MH2mQOmFOJ8249aZj8ceJ9gWs-5exl_wtLRr0xxXcR74aUonxq3g=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5686649,104.9232088&query_place_id=ChIJKzjn025PCTER_B69KB0qxro',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Re%20Kuyteav%20Noodle%20Restaurant%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJKzjn025PCTER_B69KB0qxro',
     types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1307,7 +1310,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLfR1I1PYV1GQCYak9_c1H-9hER_Lx-gD9fcw2mmaysMYM1-Ah62aUSTg5Rx-r-f-hEVSHxHqc-fbA4Jrf8HGDPTSHzQKz3-83vySGCyVsYcmjqRky05HkdMiiyL7LHPX49fcuGekA=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5552449,104.9191337&query_place_id=ChIJTwJ34GVRCTERw2uLuf_JE48',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Yukanthor%20Kuy%20Teav%20Noodle%20Shop%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJTwJ34GVRCTERw2uLuf_JE48',
     types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1336,7 +1339,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLdIH1ZbN4qVb8Nty6aEDidfUZWrvdEobU3JH74w0FIJPXpzTC-NkauczdwdT7BHUyXCnBuFtHdUyimCQ8Uhz1sPiEftTnzlyLEo0H0678gy0K7ZqbcuFPbIchsxIwoJD-xHnGwl=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5631108,104.9050693&query_place_id=ChIJLa64WmJRCTERI6BHiQbD1Nc',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Boeung%20Ket%20Kuy%20Teav%20Noodle%20Shop%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJLa64WmJRCTERI6BHiQbD1Nc',
     types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1365,7 +1368,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://lh3.googleusercontent.com/grass-cs/AABkmLcW5IpB8kcOXIyskL5hIp8UIbwCs7meMksOHdXb9VrGEZ0AVEPrKb38Mdz2M11f5fvfE16WAcyGRcsXNyyQuyUv8OQ6w8qunt1cYCCMiamDP7GSm4svz1latidNMmfc7yrjaDGKI1JD-voJ=w800-h600-k-no'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5544066,104.9066942&query_place_id=ChIJQdeN_QxRCTERrBB70evZGMc',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Ung%20Kim%20Srun%20Kuy%20Teav%20Noodle%20Shop%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia&query_place_id=ChIJQdeN_QxRCTERrBB70evZGMc',
     types: ['noodle_shop', 'breakfast_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-15T00:00:00.000Z',
@@ -1394,7 +1397,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5518,104.9292',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Bassac%20Lane%20Pubs%20%26%20Cocktail%20Bars%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['bar', 'pub', 'night_club'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1423,7 +1426,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5539,104.9281',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Botanico%20Craft%20Beer%20Garden%20%26%20Wine%20Bar%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['bar', 'pub', 'brewery'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1452,7 +1455,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5594,104.9242',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Hops%20Craft%20Beer%20Garden%20%26%20Pub%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['bar', 'pub', 'brewery'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1481,7 +1484,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5729,104.9197',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Sora%20Skybar%20Rooftop%20Lounge%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['bar', 'night_club'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1510,7 +1513,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5612,104.9202',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Eclipse%20Sky%20Bar%20Rooftop%20Pub%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['bar', 'pub', 'night_club'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1539,7 +1542,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5701,104.9301',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Le%20Moon%20Rooftop%20Bar%20%26%20Lounge%20Riverside%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['bar', 'night_club'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1568,7 +1571,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5551,104.9268',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Score%20Sports%20Bar%20%26%20Grill%20BKK1%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['bar', 'pub', 'bar_and_grill'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1597,7 +1600,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5646,104.9255',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Bouchon%20Wine%20Bar%20%26%20Cocktail%20Lounge%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['wine_bar', 'bar'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1626,7 +1629,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1536935338788-846bb9981813?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5404,104.9146',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Sundown%20Social%20Club%20Rooftop%20Bar%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['bar', 'pub'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1655,7 +1658,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5582,104.9334',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Himawari%20Microbrewery%20%26%20Riverside%20Pub%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['brewery', 'pub', 'bar'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1684,7 +1687,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5668,104.9241',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Heart%20of%20Darkness%20Nightclub%20%26%20Cocktail%20Bar%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['night_club', 'bar'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1713,7 +1716,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1545128485-c400e7702796?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5715,104.9262',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Pontoon%20Nightclub%20%26%20Pulse%20Lounge%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['night_club', 'bar'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1742,7 +1745,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1575037614876-c38a4d44f5b8?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5495,104.9422',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Koh%20Pich%20Riverside%20Beer%20Garden%20%26%20Lounge%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['bar', 'pub'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1771,7 +1774,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5785,104.8962',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Town%20Beer%20Garden%20%26%20Night%20Lounge%20Tuol%20Kork%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['bar', 'pub', 'karaoke'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1800,7 +1803,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5368,104.9162',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Riel%20Brewing%20%26%20Craft%20Beer%20Taproom%20Phnom%20Penh%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['brewery', 'bar', 'pub'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1829,7 +1832,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5688,104.9298',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Paddy%20Rice%20Irish%20Pub%20%26%20Sports%20Bar%2C%20%E1%9E%9A%E1%9E%B6%E1%9E%87%E1%9E%92%E1%9E%B6%E1%9E%93%E1%9E%B8%E1%9E%97%E1%9F%92%E1%9E%93%E1%9F%86%E1%9E%96%E1%9F%81%E1%9E%89%2C%20Cambodia',
     types: ['irish_pub', 'pub', 'bar'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1858,7 +1861,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.3548,103.8549',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Angkor%20What%3F%20Bar%20%26%20Pub%20Street%20Nightlife%20Siem%20Reap%2C%20%E1%9E%81%E1%9F%81%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%9F%E1%9F%80%E1%9E%98%E1%9E%9A%E1%9E%B6%E1%9E%94%2C%20Cambodia',
     types: ['pub', 'bar', 'night_club'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -1887,7 +1890,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.3568,103.8562',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Miss%20Wong%20Cocktail%20Bar%20Siem%20Reap%2C%20%E1%9E%81%E1%9F%81%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%9F%E1%9F%80%E1%9E%98%E1%9E%9A%E1%9E%B6%E1%9E%94%2C%20Cambodia',
     types: ['bar', 'wine_bar'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-11-16T00:00:00.000Z',
@@ -3853,7 +3856,7 @@ export function mapRawGooglePlaceV1ToCachedItem(
   const lng = Number(p.location?.longitude);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
 
-  const address = p.formattedAddress || p.shortFormattedAddress || 'ភ្នំពេញ, កម្ពុជា';
+  const address = stripPlusCodesAndRawCoords(p.formattedAddress || p.shortFormattedAddress) || 'ភ្នំពេញ, កម្ពុជា';
   const province = inferCambodiaProvinceFromAddressOrGps(address, lat, lng);
   const displayName = (p.displayName?.text || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
   if (!displayName || isRoadOrInvalidNearbyPlaceName(displayName)) return null;
@@ -3981,9 +3984,7 @@ export function mapRawGooglePlaceV1ToCachedItem(
     hasRealGooglePhoto: hasOfficialGooglePhoto,
     googleMapsUrl:
       p.googleMapsUri ||
-      `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${encodeURIComponent(
-        rawGoogleId
-      )}`,
+      buildCanonicalGoogleMapsPinUrl(lat, lng, rawGoogleId, `${displayName}, ${province}, Cambodia`),
     types,
     source: 'google_maps_api',
     cachedAt: new Date().toISOString(),
@@ -4321,12 +4322,21 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
   // Never resolve or cache coordinate-based Place IDs for default province-center placeholder coordinates
   if (isDefaultProvinceCenterCoordinates(lat, lng, item.id)) return null;
 
+  const itemNameForMaps = buildSpecificPlaceSearchQuery({
+    nameEn: item.nameEn,
+    nameKh: item.nameKh,
+    provinceEn: item.provinceEn,
+    provinceKh: item.provinceKh,
+  });
+
   if (isValidOfficialGooglePlaceId(item.googlePlaceId)) {
+    const cleanId = item.googlePlaceId!.trim();
     const existingEntry: VerifiedGooglePlaceCoordEntry = {
-      placeId: item.googlePlaceId!.trim(),
+      placeId: cleanId,
       officialName: (item.nameEn || item.nameKh || '').trim(),
       lat: lat!,
       lng: lng!,
+      googleMapsUri: buildCanonicalGoogleMapsPinUrl(lat!, lng!, cleanId, itemNameForMaps),
       updatedAt: new Date().toISOString(),
     };
     saveCachedVerifiedPlaceForCoords(item.id, lat!, lng!, existingEntry);
@@ -4346,12 +4356,12 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
     try {
       const localCache = getLocalSmartCache();
       let bestCandidate: GooglePlaceCachedItem | null = null;
-      let bestDist = 120; // Strict 120m radius so neighboring or distant shops never hijack the pin
+      let bestDist = 220;
 
       for (const c of localCache) {
         if (!isValidOfficialGooglePlaceId(c.googlePlaceId)) continue;
         const d = calculateHaversineMeters(lat!, lng!, c.lat, c.lng);
-        if (d > 120) continue;
+        if (d > 220) continue;
         const nameMatch = doesVerifiedPlaceNameMatchTarget(
           (c.nameKh || '') + ' ' + (c.nameEn || ''),
           item.nameKh,
@@ -4363,14 +4373,55 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
         }
       }
 
+      if (!bestCandidate) {
+        const provGeo = resolveProvinceGeoConfig(item.provinceKh || item.provinceEn);
+        const queries = Array.from(
+          new Set(
+            [
+              item.nameEn ? (item.nameEn + ' ' + (item.provinceEn || item.provinceKh || '')).trim() : '',
+              item.nameKh ? (item.nameKh + ' ' + (item.provinceKh || item.provinceEn || '')).trim() : '',
+            ].filter((q) => q.length >= 3)
+          )
+        );
+        for (const q of queries) {
+          const tbmItems = await fetchFreeGoogleMapsTbmPlaces(q, provGeo, 'all', []);
+          for (const c of tbmItems) {
+            if (!isValidOfficialGooglePlaceId(c.googlePlaceId)) continue;
+            const d = calculateHaversineMeters(lat!, lng!, c.lat, c.lng);
+            if (d > 220) continue;
+            const nameMatch = doesVerifiedPlaceNameMatchTarget(
+              (c.nameKh || '') + ' ' + (c.nameEn || ''),
+              item.nameKh,
+              item.nameEn
+            );
+            if (nameMatch && d < bestDist) {
+              bestDist = d;
+              bestCandidate = c;
+            }
+          }
+          if (bestCandidate && bestDist <= 150) break;
+        }
+      }
+
       if (bestCandidate && isValidOfficialGooglePlaceId(bestCandidate.googlePlaceId)) {
+        const cleanPid = bestCandidate.googlePlaceId!.trim();
+        const trueCandName = (bestCandidate.nameEn || bestCandidate.nameKh || '').trim();
         const resolvedEntry: VerifiedGooglePlaceCoordEntry = {
-          placeId: bestCandidate.googlePlaceId!.trim(),
-          // Always store the candidate's true official name so name verification cannot be bypassed
-          officialName: (bestCandidate.nameEn || bestCandidate.nameKh || '').trim(),
+          placeId: cleanPid,
+          officialName: trueCandName,
           lat: bestCandidate.lat,
           lng: bestCandidate.lng,
-          googleMapsUri: bestCandidate.googleMapsUrl,
+          googleMapsUri: buildCanonicalGoogleMapsPinUrl(
+            bestCandidate.lat,
+            bestCandidate.lng,
+            cleanPid,
+            buildSpecificPlaceSearchQuery({
+              nameEn: bestCandidate.nameEn || item.nameEn,
+              nameKh: bestCandidate.nameKh || item.nameKh,
+              addressEn: bestCandidate.address,
+              provinceKh: bestCandidate.provinceKh || item.provinceKh,
+            })
+          ),
           updatedAt: new Date().toISOString(),
         };
         saveCachedVerifiedPlaceForCoords(item.id, lat!, lng!, resolvedEntry);
@@ -4659,7 +4710,7 @@ async function searchLiveCambodiaMultiSource(
             photoUrls: [svgPhoto],
             hasOfficialGooglePhoto: false,
             hasRealGooglePhoto: false,
-            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng),
+            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng, undefined, `${displayName || fullAddr}, ${prov}, Cambodia`),
             types: [osmKey, osmVal].filter(Boolean),
             source: 'smart_cache_cloud',
             cachedAt: new Date().toISOString(),
@@ -4816,7 +4867,7 @@ async function searchLiveCambodiaMultiSource(
             photoUrls: [svgPhoto],
             hasOfficialGooglePhoto: false,
             hasRealGooglePhoto: false,
-            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng),
+            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng, undefined, `${displayName || fullAddr}, ${prov}, Cambodia`),
             types: [placeType].filter(Boolean),
             source: 'smart_cache_cloud',
             cachedAt: new Date().toISOString(),
@@ -4949,7 +5000,7 @@ async function searchLiveCambodiaMultiSource(
             photoUrls: [svgPhoto],
             hasOfficialGooglePhoto: false,
             hasRealGooglePhoto: false,
-            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng),
+            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng, undefined, `${nameEn || rawName || fullAddr}, ${prov}, Cambodia`),
             types: [itemClass, itemType].filter(Boolean),
             source: 'smart_cache_cloud',
             cachedAt: new Date().toISOString(),
@@ -6404,6 +6455,7 @@ export function getInstantCachedNearbyPlaces(
 function isRoadOrInvalidNearbyPlaceName(rawName: string): boolean {
   const clean = (rawName || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
   if (!clean || clean.length < 2) return true;
+  if (isCoordinateOrPlusCodeOnly(clean)) return true;
   if (isThaiRelatedText(clean)) return true;
   if (clean.toLowerCase() === 'cambodia' || clean === 'កម្ពុជា') return true;
   if (/(charges double|scam|tourist trap|do not go)/i.test(clean)) return true;
@@ -6455,7 +6507,7 @@ function buildSeedDirectoryNearbyCandidates(
       photoUrls: r.galleryPhotos && r.galleryPhotos.length > 0 ? r.galleryPhotos : [r.photoUrl],
       hasOfficialGooglePhoto: true,
       hasRealGooglePhoto: true,
-      googleMapsUrl: buildCanonicalGoogleMapsPinUrl(r.latitude, r.longitude, cleanGpid || undefined),
+      googleMapsUrl: buildCanonicalGoogleMapsPinUrl(r.latitude, r.longitude, cleanGpid || undefined, buildSpecificPlaceSearchQuery(r)),
       source: 'cambodia_extended_directory',
       cachedAt: new Date().toISOString(),
     });
@@ -6495,7 +6547,7 @@ function buildSeedDirectoryNearbyCandidates(
       photoUrls: d.galleryPhotos && d.galleryPhotos.length > 0 ? d.galleryPhotos : [d.photoUrl],
       hasOfficialGooglePhoto: Boolean(d.photoUrl),
       hasRealGooglePhoto: Boolean(d.photoUrl),
-      googleMapsUrl: buildCanonicalGoogleMapsPinUrl(d.latitude, d.longitude, cleanGpid || undefined),
+      googleMapsUrl: buildCanonicalGoogleMapsPinUrl(d.latitude, d.longitude, cleanGpid || undefined, buildSpecificPlaceSearchQuery(d)),
       source: 'cambodia_extended_directory',
       cachedAt: new Date().toISOString(),
     });
@@ -6621,7 +6673,7 @@ export async function searchNearbyPlacesWithin500m(
             const rawGoogleId = String(p.id || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
             const displayName = (p.displayName?.text || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
             if (isRoadOrInvalidNearbyPlaceName(displayName)) return null;
-            const address = p.formattedAddress || 'ភ្នំពេញ, កម្ពុជា';
+            const address = stripPlusCodesAndRawCoords(p.formattedAddress) || 'ភ្នំពេញ, កម្ពុជា';
             const province = inferCambodiaProvinceFromAddressOrGps(address, pLat, pLng);
             const types: string[] = Array.isArray(p.types) ? p.types : [];
 
@@ -6680,9 +6732,7 @@ export async function searchNearbyPlacesWithin500m(
               hasRealGooglePhoto: hasOfficialGooglePhoto,
               googleMapsUrl:
                 p.googleMapsUri ||
-                `https://www.google.com/maps/search/?api=1&query=${pLat},${pLng}&query_place_id=${encodeURIComponent(
-                  rawGoogleId
-                )}`,
+                buildCanonicalGoogleMapsPinUrl(pLat, pLng, rawGoogleId, `${displayName}, ${province}, Cambodia`),
               types,
               source: 'google_maps_api',
               cachedAt: new Date().toISOString(),
@@ -6871,7 +6921,7 @@ export async function searchNearbyPlacesWithin500m(
             photoUrls: [svgPhoto],
             hasOfficialGooglePhoto: false,
             hasRealGooglePhoto: false,
-            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(pLat, pLng),
+            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(pLat, pLng, undefined, `${rawNameEn || rawNameKh}, ${province}, Cambodia`),
             types: [cls, itemType].filter(Boolean),
             source: 'smart_cache_cloud',
             cachedAt: new Date().toISOString(),
@@ -6969,7 +7019,7 @@ export async function searchNearbyPlacesWithin500m(
             photoUrls: [svgPhoto],
             hasOfficialGooglePhoto: false,
             hasRealGooglePhoto: false,
-            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(pLat, pLng),
+            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(pLat, pLng, undefined, `${displayName}, ${province}, Cambodia`),
             types: [placeType].filter(Boolean),
             source: 'smart_cache_cloud',
             cachedAt: new Date().toISOString(),

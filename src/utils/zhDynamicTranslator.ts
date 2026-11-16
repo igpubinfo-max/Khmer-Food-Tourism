@@ -2429,6 +2429,19 @@ export function getLocalizedDestination(dest: TouristDestination, lang: Language
   return computed;
 }
 
+function cleanAddressDisplay(rawAddr: string | undefined, fallbackProv: string): string {
+  if (!rawAddr) return fallbackProv;
+  const cleaned = rawAddr
+    .replace(/\(\s*GPS\s*:\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*\)/gi, '')
+    .replace(/\b[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,5}\b\s*,?/gi, '')
+    .replace(/\d+\s*°\s*\d+\s*'\s*[\d.]+\s*"?\s*[NS]\s*,?\s*\d+\s*°\s*\d+\s*'\s*[\d.]+\s*"?\s*[EW]/gi, '')
+    .replace(/\b(?:GPS\s*:\s*)?-?\d{1,2}\.\d{3,}\s*,\s*-?\d{2,3}\.\d{3,}\b\s*,?/gi, '')
+    .replace(/(?:\s*,\s*){2,}/g, ', ')
+    .replace(/^[\s,.;:–—-]+|[\s,.;:–—-]+$/g, '')
+    .trim();
+  return cleaned.length >= 2 ? cleaned : fallbackProv;
+}
+
 function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
   const highlightsEnList = (dest as { highlightsEn?: string[] }).highlightsEn;
 
@@ -2439,7 +2452,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
       subtitle: '',
       category: sanitizeStrictLanguageText(dest.categoryKh, 'km'),
       province: sanitizeStrictLanguageText(dest.provinceKh, 'km'),
-      address: sanitizeStrictLanguageText(dest.addressKh, 'km'),
+      address: cleanAddressDisplay(sanitizeStrictLanguageText(dest.addressKh, 'km'), sanitizeStrictLanguageText(dest.provinceKh, 'km')),
       description: sanitizeStrictLanguageText(toConciseSummary(dest.descriptionKh, 'km'), 'km'),
       entranceFee: '',
       bestTime: sanitizeStrictLanguageText(dest.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ', 'km'),
@@ -2455,7 +2468,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
       subtitle: '',
       category: sanitizeStrictLanguageText(dest.categoryEn, 'en'),
       province: sanitizeStrictLanguageText(dest.provinceEn, 'en'),
-      address: sanitizeStrictLanguageText(dest.addressEn, 'en'),
+      address: cleanAddressDisplay(sanitizeStrictLanguageText(dest.addressEn, 'en'), sanitizeStrictLanguageText(dest.provinceEn, 'en')),
       description: sanitizeStrictLanguageText(toConciseSummary(dest.descriptionEn, 'en'), 'en'),
       entranceFee: '',
       bestTime: sanitizeStrictLanguageText(dest.bestTimeToVisitEn || 'All year round', 'en'),
@@ -2481,7 +2494,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
   const zhFee = '';
   const rawTime = dest.bestTimeToVisitEn || 'All year round';
   const zhTime = sanitizeStrictLanguageText(translateBestTimeToZh(rawTime), 'zh');
-  const zhAddress = sanitizeStrictLanguageText(translateAddressToZh(dest.addressEn || '', zhProv), 'zh');
+  const zhAddress = cleanAddressDisplay(sanitizeStrictLanguageText(translateAddressToZh(dest.addressEn || '', zhProv), 'zh'), zhProv);
 
   const zhHighlights = (dest.highlightsKh && dest.highlightsKh.length > 0
     ? dest.highlightsKh.map((h: string) => sanitizeStrictLanguageText(translateDestinationHighlight(h, 'zh'), 'zh'))
@@ -2532,7 +2545,7 @@ function computeLocalizedRestaurant(rest: Restaurant, lang: Language) {
       secondaryName: '',
       subtitle: '',
       province: sanitizeStrictLanguageText(rest.provinceKh || 'កម្ពុជា', 'km'),
-      address: sanitizeStrictLanguageText(rest.addressKh, 'km'),
+      address: cleanAddressDisplay(sanitizeStrictLanguageText(rest.addressKh, 'km'), sanitizeStrictLanguageText(rest.provinceKh || 'កម្ពុជា', 'km')),
       description: sanitizeStrictLanguageText(toConciseSummary(rest.descriptionKh, 'km'), 'km'),
       openingHours: translateOpeningHours(rest.openingHoursKh || rest.openingHoursEn, 'km'),
       signatureDishes: (rest.signatureDishesKh || []).map((d) => sanitizeStrictLanguageText(d, 'km')),
@@ -2545,7 +2558,7 @@ function computeLocalizedRestaurant(rest: Restaurant, lang: Language) {
       secondaryName: '',
       subtitle: '',
       province: sanitizeStrictLanguageText(rest.provinceEn || 'Cambodia', 'en'),
-      address: sanitizeStrictLanguageText(rest.addressEn || rest.addressKh, 'en'),
+      address: cleanAddressDisplay(sanitizeStrictLanguageText(rest.addressEn || rest.addressKh, 'en'), sanitizeStrictLanguageText(rest.provinceEn || 'Cambodia', 'en')),
       description: sanitizeStrictLanguageText(toConciseSummary(rest.descriptionEn || rest.descriptionKh, 'en'), 'en'),
       openingHours: translateOpeningHours(rest.openingHoursEn || rest.openingHoursKh, 'en'),
       signatureDishes: (rest.signatureDishesKh || []).map((d) => sanitizeStrictLanguageText(translateSignatureDish(d, 'en'), 'en')),
@@ -2559,7 +2572,7 @@ function computeLocalizedRestaurant(rest: Restaurant, lang: Language) {
     '柬埔寨';
   const rawZhName = translateRestaurantNameToZh(rest.nameEn || '', rest.nameKh || '', zhProv);
   const zhName = sanitizeStrictLanguageText(rawZhName, 'zh');
-  const zhAddress = sanitizeStrictLanguageText(translateAddressToZh(rest.addressEn || '', zhProv), 'zh');
+  const zhAddress = cleanAddressDisplay(sanitizeStrictLanguageText(translateAddressToZh(rest.addressEn || '', zhProv), 'zh'), zhProv);
   const zhDesc = sanitizeStrictLanguageText(toConciseSummary(translateRestaurantDescToZh(rest.descriptionEn || '', zhProv), 'zh'), 'zh');
   const zhHours = translateOpeningHours(rest.openingHoursKh || rest.openingHoursEn, 'zh');
 

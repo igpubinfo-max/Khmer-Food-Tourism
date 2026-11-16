@@ -1103,6 +1103,62 @@ test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclus
     const dUrl = getDestinationGoogleExternalUrl(d, 'directions');
     assert.ok(mUrl.startsWith('https://'), 'Empty or invalid maps URL for destination ' + d.id);
     assert.ok(dUrl.startsWith('https://www.google.com/maps/dir/'), 'Invalid directions URL for destination ' + d.id);
+    assert.ok(
+      !/[?&]query=-?\d+(\.\d+)?,-?\d+(\.\d+)?(&|$)/.test(mUrl),
+      'Destination maps URL must display place name instead of raw coordinates for ' + d.id + ': ' + mUrl
+    );
+    assert.ok(
+      !/[?&]destination=-?\d+(\.\d+)?,-?\d+(\.\d+)?(&|$)/.test(dUrl),
+      'Destination directions URL must display place name instead of raw coordinates for ' + d.id + ': ' + dUrl
+    );
+  }
+  for (const r of validShops) {
+    const mUrl = getRestaurantGoogleExternalUrl(r, 'maps');
+    const dUrl = getRestaurantGoogleExternalUrl(r, 'directions');
+    assert.ok(
+      !/[?&]query=-?\d+(\.\d+)?,-?\d+(\.\d+)?(&|$)/.test(mUrl),
+      'Restaurant maps URL must display shop name instead of raw coordinates for ' + r.id + ': ' + mUrl
+    );
+    assert.ok(
+      !/[?&]destination=-?\d+(\.\d+)?,-?\d+(\.\d+)?(&|$)/.test(dUrl),
+      'Restaurant directions URL must display shop name instead of raw coordinates for ' + r.id + ': ' + dUrl
+    );
+  }
+  const { stripPlusCodesAndRawCoords } = require(path.join(ROOT, 'src/types/index.ts'));
+  const { getLocalizedDestination, getLocalizedRestaurant } = require(path.join(ROOT, 'src/utils/zhDynamicTranslator.ts'));
+  const watPhnom = initial100Destinations.find((d) => d.id === 'dest-3');
+  assert.ok(watPhnom, 'dest-3 Wat Phnom must exist');
+  assert.ok(
+    getDestinationGoogleExternalUrl(watPhnom, 'maps').includes('Wat%20Phnom') &&
+      !getDestinationGoogleExternalUrl(watPhnom, 'maps').includes('11.5761'),
+    'Wat Phnom maps URL must show Wat Phnom name instead of 11.5761,104.9231'
+  );
+  assert.equal(
+    doesVerifiedPlaceNameMatchTarget('Wat Phnom (វត្តភ្នំ)', watPhnom.nameKh, watPhnom.nameEn),
+    true,
+    'Wat Phnom must match its official Google Maps landmark name'
+  );
+  assert.equal(
+    doesVerifiedPlaceNameMatchTarget('Wat Ounalom', watPhnom.nameKh, watPhnom.nameEn),
+    false,
+    'Wat Phnom must not match Wat Ounalom'
+  );
+  assert.equal(
+    stripPlusCodesAndRawCoords('HWGF+C6Q, Wat Phnom Circle, Daun Penh, Phnom Penh (GPS: 11.57610, 104.92310)'),
+    'Wat Phnom Circle, Daun Penh, Phnom Penh',
+    'Plus Codes and raw GPS tags must be stripped from addresses'
+  );
+  const samplePlusCodeRest = {
+    ...validShops[0],
+    addressKh: 'HWGF+C6Q, ផ្លូវព្រះនរោត្តម, រាជធានីភ្នំពេញ (GPS: 11.57610, 104.92310)',
+    addressEn: 'HWGF+C6Q, Norodom Blvd, Phnom Penh (GPS: 11.57610, 104.92310)',
+  };
+  for (const lang of ['km', 'en', 'zh']) {
+    const locRest = getLocalizedRestaurant(samplePlusCodeRest, lang);
+    assert.ok(
+      !locRest.address.includes('HWGF+C6Q') && !locRest.address.includes('11.57610'),
+      'Plus code / raw GPS leaked into localized restaurant address for lang=' + lang + ': ' + locRest.address
+    );
   }
 });
 

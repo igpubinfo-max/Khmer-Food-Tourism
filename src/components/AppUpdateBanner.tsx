@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Download, RefreshCw, ShieldCheck, X, ShieldAlert, Lock } from 'lucide-react';
+import { Download, RefreshCw, ShieldCheck, X, ShieldAlert, Lock, Laptop } from 'lucide-react';
 import { App as CapApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { useApp } from '../context/AppContext';
+import { isAdminAccount } from '../types';
 import { tr } from '../utils/i18n';
 import {
   CHECK_APP_UPDATE_EVENT,
@@ -15,7 +17,15 @@ import {
 } from '../services/appUpdateService';
 
 export const AppUpdateBanner: React.FC = () => {
-  const { language, appSettings, showToast } = useApp();
+  const { language, appSettings, currentUser, showToast } = useApp();
+  const [webBypassUnlocked, setWebBypassUnlocked] = useState(false);
+
+  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform();
+  const platform = typeof Capacitor !== 'undefined' ? Capacitor.getPlatform() : 'web';
+  const isAndroidNative = isNative && platform === 'android';
+  const isIosNative = isNative && platform === 'ios';
+  const isWebRuntime = !isNative;
+  const isAdmin = isAdminAccount(currentUser);
 
   const syncStatus = useMemo(() => evaluateSyncUpdateStatus(appSettings), [
     appSettings?.forceAppUpdate,
@@ -236,7 +246,10 @@ export const AppUpdateBanner: React.FC = () => {
   }, []);
 
   const isBlockingForceUpdate = Boolean(
-    updateStatus && updateStatus.hasUpdate && updateStatus.forceUpdate
+    updateStatus &&
+      updateStatus.hasUpdate &&
+      updateStatus.forceUpdate &&
+      (!isWebRuntime || !webBypassUnlocked)
   );
 
   // Strict Anti-Bypass Lock: block Escape key, Android hardware Back button, and background scroll when Force Update is active
@@ -286,7 +299,7 @@ export const AppUpdateBanner: React.FC = () => {
   const handleUpdateNow = async () => {
     if (isUpdating) return;
     setIsUpdating(true);
-    if (!updateStatus.forceUpdate) {
+    if (!updateStatus.forceUpdate || isWebRuntime) {
       snoozeUpdateAlert(updateStatus.latestBuildCode, updateStatus.latestVersion);
       setVisible(false);
     }
@@ -371,12 +384,19 @@ export const AppUpdateBanner: React.FC = () => {
 
           <div className="p-3.5 rounded-2xl bg-black/30 border border-emerald-400/25 text-xs text-emerald-50/95 leading-relaxed text-center">
             {customNote ||
-              tr(
-                language,
-                'កំណែចាស់នេះលែងអាចប្រើប្រាស់បានទៀតហើយ ដោយសារកម្មវិធីបានដំឡើងប្រព័ន្ធសុវត្ថិភាព និងមុខងារថ្មី។ សូមចុច «អាប់ដេតឥឡូវនេះ» ដើម្បីទាញយកកំណែថ្មី (គណនី និងទិន្នន័យ VIP របស់អ្នកត្រូវបានរក្សាទុកដោយសុវត្ថិភាព ១០០%)។',
-                'This older version is no longer supported due to important system and feature updates. Tap "Update Now" below to install the latest version (your account & VIP data remain 100% safe).',
-                '由于系统与功能的重要升级，此旧版本已停止支持。请点击下方“立即更新”安装最新版本（您的账户与 VIP 数据 100% 安全保留）。'
-              )}
+              (isWebRuntime
+                ? tr(
+                    language,
+                    `កំណែអាប់ដេតថ្មី (Build ${updateStatus.latestBuildCode}) ត្រូវបានចេញផ្សាយផ្លូវការលើ Google Play Store សម្រាប់ទូរសព្ទ Android។ នៅលើកុំព្យូទ័រ (Web) លោកអ្នកអាចចុច «ផ្ទុកឡើងវិញ & អាប់ដេត Web» ឬចុច «បន្តប្រើប្រាស់លើកុំព្យូទ័រ»។`,
+                    `A mandatory mobile update (Build ${updateStatus.latestBuildCode}) is released on Google Play Store for Android phones. On PC / Web, you may click "Reload & Update Web" or "Continue on PC".`,
+                    `新版本 (Build ${updateStatus.latestBuildCode}) 已在 Google Play 商店正式发布（适用于 Android 手机）。在电脑/网页端，您可以点击“刷新并更新网页版”或“在电脑上继续使用”。`
+                  )
+                : tr(
+                    language,
+                    'កំណែចាស់នេះលែងអាចប្រើប្រាស់បានទៀតហើយ ដោយសារកម្មវិធីបានដំឡើងប្រព័ន្ធសុវត្ថិភាព និងមុខងារថ្មី។ សូមចុច «អាប់ដេតឥឡូវនេះ» ដើម្បីទាញយកកំណែថ្មី (គណនី និងទិន្នន័យ VIP របស់អ្នកត្រូវបានរក្សាទុកដោយសុវត្ថិភាព ១០០%)។',
+                    'This older version is no longer supported due to important system and feature updates. Tap "Update Now" below to install the latest version (your account & VIP data remain 100% safe).',
+                    '由于系统与功能的重要升级，此旧版本已停止支持。请点击下方“立即更新”安装最新版本（您的账户与 VIP 数据 100% 安全保留）。'
+                  ))}
           </div>
 
           {downloadProgressPct !== null && (
@@ -406,19 +426,66 @@ export const AppUpdateBanner: React.FC = () => {
               {isUpdating ? (
                 <>
                   <RefreshCw className="w-5 h-5 animate-spin" />
-                  <span>{tr(language, 'កំពុងបើកការអាប់ដេត...', 'Launching Update...', '正在启动更新...')}</span>
+                  <span>
+                    {isWebRuntime
+                      ? tr(language, 'កំពុងផ្ទុកទំព័រឡើងវិញ...', 'Reloading Web App...', '正在刷新网页版...')
+                      : tr(language, 'កំពុងបើកការអាប់ដេត...', 'Launching Update...', '正在启动更新...')}
+                  </span>
                 </>
               ) : (
                 <>
-                  <Download className="w-5 h-5" />
+                  {isWebRuntime ? (
+                    <RefreshCw className="w-5 h-5" />
+                  ) : (
+                    <Download className="w-5 h-5" />
+                  )}
                   <span>
-                    {updateStatus.updateDownloaded
-                      ? tr(language, 'ដំឡើង & បើកឡើងវិញឥឡូវនេះ', 'Install & Restart Now', '立即安装并重启')
-                      : tr(language, 'អាប់ដេតឥឡូវនេះ (Google Play / ផ្លូវការ)', 'Update Now (Official Store)', '立即更新（官方商店）')}
+                    {isWebRuntime
+                      ? tr(
+                          language,
+                          '🔄 ផ្ទុកឡើងវិញ & អាប់ដេត Web (Reload & Update)',
+                          'Reload & Update Web App',
+                          '刷新并更新网页版'
+                        )
+                      : updateStatus.updateDownloaded
+                        ? tr(language, 'ដំឡើង & បើកឡើងវិញឥឡូវនេះ', 'Install & Restart Now', '立即安装并重启')
+                        : isIosNative
+                          ? tr(language, 'អាប់ដេតឥឡូវនេះ (App Store)', 'Update Now (App Store)', '立即更新（App Store）')
+                          : tr(
+                              language,
+                              'អាប់ដេតឥឡូវនេះ (Google Play / ផ្លូវការ)',
+                              'Update Now (Official Store)',
+                              '立即更新（官方商店）'
+                            )}
                   </span>
                 </>
               )}
             </button>
+
+            {isWebRuntime && (
+              <button
+                type="button"
+                onClick={() => setWebBypassUnlocked(true)}
+                className="w-full min-h-[42px] px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition cursor-pointer"
+              >
+                <Laptop className="w-4 h-4" />
+                <span>
+                  {isAdmin
+                    ? tr(
+                        language,
+                        '🛡️ ចូលផ្ទាំង Admin លើកុំព្យូទ័រ (Admin PC Access)',
+                        'Access Admin Dashboard on PC',
+                        '在电脑上进入管理员后台'
+                      )
+                    : tr(
+                        language,
+                        '💻 បន្តប្រើប្រាស់នៅលើកុំព្យូទ័រ (Continue on PC / Web)',
+                        'Continue on PC / Web Browser',
+                        '在电脑/网页端继续使用'
+                      )}
+                </span>
+              </button>
+            )}
 
             <button
               type="button"
@@ -523,9 +590,11 @@ export const AppUpdateBanner: React.FC = () => {
               <>
                 <Download className="w-4 h-4" />
                 <span>
-                  {updateStatus.updateDownloaded
-                    ? tr(language, 'ដំឡើង & បើកឡើងវិញឥឡូវនេះ', 'Install & Restart Now', '立即安装并重启')
-                    : tr(language, 'អាប់ដេតឥឡូវនេះ', 'Update Now', '立即更新')}
+                  {isWebRuntime
+                    ? tr(language, '🔄 ផ្ទុកឡើងវិញ & អាប់ដេត Web', 'Reload & Update Web', '刷新并更新网页版')
+                    : updateStatus.updateDownloaded
+                      ? tr(language, 'ដំឡើង & បើកឡើងវិញឥឡូវនេះ', 'Install & Restart Now', '立即安装并重启')
+                      : tr(language, 'អាប់ដេតឥឡូវនេះ', 'Update Now', '立即更新')}
                 </span>
               </>
             )}

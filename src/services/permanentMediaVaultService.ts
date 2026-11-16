@@ -41,6 +41,7 @@ import {
   isValidOfficialGooglePlaceId,
   isStrictVerifiedCambodiaRestaurant,
   buildCanonicalGoogleMapsPinUrl,
+  buildSpecificPlaceSearchQuery,
   sanitizeVerifiedShopPhotoUrl,
   sanitizeRestaurantShopPhoto,
   sanitizeRestaurantGalleryPhotos,
@@ -2992,7 +2993,7 @@ export function applyRestaurantOverrides(
             mapUrl:
               isValidGoogleMapsUrl(ov.mapUrl) && (ov.isAdminEdited || ov.dataSource === 'vip_owner' || Boolean(ov.ownerId))
                 ? ov.mapUrl!.trim()
-                : buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, nextCleanGpid),
+                : buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, nextCleanGpid, buildSpecificPlaceSearchQuery({ nameEn: ov.nameEn || r.nameEn, nameKh: ov.nameKh || r.nameKh, addressKh: ov.addressKh || r.addressKh, provinceKh: ov.provinceKh || r.provinceKh })),
             latitude: ov.latitude!,
             longitude: ov.longitude!,
             locationVerificationStatus: 'verified' as const,
@@ -3091,7 +3092,7 @@ export function applyRestaurantOverrides(
         isValidGoogleMapsUrl(ov.mapUrl) && (ov.isAdminEdited || ov.dataSource === 'vip_owner' || Boolean(ov.ownerId) || !hasValidCoords)
           ? ov.mapUrl!.trim()
           : hasValidCoords
-            ? buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid)
+            ? buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid, buildSpecificPlaceSearchQuery({ nameEn: ov.nameEn, nameKh: ov.nameKh, addressKh: ov.addressKh, provinceKh: ov.provinceKh }))
             : (ov.mapUrl || ''),
       latitude: hasValidCoords ? ov.latitude! : (typeof ov.latitude === 'number' ? ov.latitude : 0),
       longitude: hasValidCoords ? ov.longitude! : (typeof ov.longitude === 'number' ? ov.longitude : 0),
@@ -3297,7 +3298,7 @@ export function applyDestinationOverrides(
         entranceFeeEn: '',
         bestTimeToVisitKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៦:០០ ល្ងាច',
         bestTimeToVisitEn: '07:00 AM - 06:00 PM',
-        mapUrl: hasValidOvCoords ? buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid) : '',
+        mapUrl: hasValidOvCoords ? buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid, buildSpecificPlaceSearchQuery({ nameEn: ov.nameEn, nameKh: ov.nameKh, addressKh: ov.addressKh, provinceKh: ov.provinceKh })) : '',
         latitude: hasValidOvCoords ? ov.latitude! : 0,
         longitude: hasValidOvCoords ? ov.longitude! : 0,
         locationVerificationStatus: hasValidOvCoords ? 'verified' : 'needs_admin_review',

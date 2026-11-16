@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1619;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1620;
 export const APP_RELEASE_DATE = '2026-11-16';
 
 /**
@@ -2568,42 +2568,51 @@ export const isDefaultProvinceCenterCoordinates = (
   );
 };
 
+const MULTI_WORD_ADMIN_PHRASES_REGEX =
+  /\b(?:phnom\s+penh|siem\s+reap|preah\s+sihanouk|sihanoukville|kampong\s+cham|kampong\s+thom|kampong\s+chhnang|kampong\s+speu|prey\s+veng|svay\s+rieng|stung\s+treng|steung\s+treng|koh\s+kong|banteay\s+meanchey|oddar\s+meanchey|preah\s+vihear|tboung\s+khmum|tbong\s+khmum|sen\s+monorom|tuol\s+kork|toul\s+kork|tuol\s+tom\s*poung|toul\s+tom\s*poung|chbar\s+ampov|russey\s+keo|daun\s+penh|chamkar\s+mon|chroy\s+changvar|boeng\s+keng\s+kang|boeung\s+keng\s+kang)\b|រាជធានីភ្នំពេញ|ក្រុងភ្នំពេញ|ខេត្តសៀមរាប|ខេត្តព្រះសីហនុ|ខេត្តកំពត|ខេត្តកែប|ខេត្តបាត់ដំបង|ខេត្តកំពង់ចាម|ខេត្តកំពង់ធំ|ខេត្តកំពង់ឆ្នាំង|ខេត្តកំពង់ស្ពឺ|ខេត្តកណ្តាល|ខេត្តកណ្ដាល|ខេត្តតាកែវ|ខេត្តព្រៃវែង|ខេត្តស្វាយរៀង|ខេត្តក្រចេះ|ខេត្តស្ទឹងត្រែង|ខេត្តរតនគិរី|ខេត្តមណ្ឌលគិរី|ខេត្តកោះកុង|ខេត្តពោធិ៍សាត់|ខេត្តបន្ទាយមានជ័យ|ខេត្តប៉ៃលិន|ខេត្តឧត្តរមានជ័យ|ខេត្តព្រះវិហារ|ខេត្តត្បូងឃ្មុំ|រមណីយដ្ឋានប្រវត្តិសាស្ត្រ|រមណីយដ្ឋានធម្មជាតិ|រមណីយដ្ឋានវប្បធម៌|រមណីយដ្ឋានអេកូទេសចរណ៍|រមណីយដ្ឋាន|តំបន់ទេសចរណ៍|ភោជនីយដ្ឋានម្ហូបបួស|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងកាហ្វេ|សណ្ឋាគារ|ផ្ទះសំណាក់/gi;
+
 const GENERIC_PLACE_STOP_WORDS = new Set([
   'restaurant', 'restaurants', 'cafe', 'coffee', 'café', 'bakery', 'bistro', 'bar', 'grill', 'kitchen',
   'eatery', 'food', 'shop', 'store', 'house', 'place', 'lounge', 'garden', 'club', 'pub', 'dining',
   'hotel', 'resort', 'guesthouse', 'villa', 'boutique', 'hostel', 'stay', 'lodge', 'inn', 'spa',
-  'authentic', 'khmer', 'cambodian', 'cambodia', 'traditional', 'local', 'family', 'street', 'market',
-  'old', 'new', 'river', 'riverside', 'riverfront', 'beach', 'sea', 'seafood', 'view', 'sunset', 'night',
-  'phnom', 'penh', 'siem', 'reap', 'sihanoukville', 'preah', 'sihanouk', 'kampot', 'kep', 'kaeb',
-  'battambang', 'kampong', 'cham', 'thom', 'chhnang', 'speu', 'kandal', 'takeo', 'prey', 'veng',
-  'svay', 'rieng', 'kratie', 'stung', 'steung', 'treng', 'ratanakiri', 'banlung', 'mondulkiri', 'sen', 'monorom',
-  'koh', 'kong', 'pursat', 'banteay', 'meanchey', 'poipet', 'sisophon', 'pailin', 'oddar',
-  'vihear', 'tboung', 'tbong', 'khmum', 'suong', 'bkk1', 'bkk', 'bkk2', 'bkk3', 'tuol', 'toul', 'kork', 'tom', 'poung', 'tompoung',
-  'pich', 'elysee', 'elysée', 'flagship', 'branch', 'roastery', 'reserve', 'specialty', 'tea', 'ice', 'cream',
-  'wat', 'boeung', 'boeng', 'krong', 'phum', 'sangkat', 'khan', 'chbar', 'ampov', 'russey', 'keo', 'sok', 'daun', 'chamkar', 'mon', 'chroy', 'changvar',
-  'one', 'two', 'three', 'first', 'second', 'third', 'grand', 'palace', 'royal', 'golden', 'diamond', 'star', 'city', 'town', 'center', 'centre',
+  'authentic', 'khmer', 'cambodian', 'cambodia', 'traditional', 'local', 'family', 'street',
+  'kampot', 'kep', 'kaeb', 'battambang', 'kandal', 'takeo', 'kratie', 'ratanakiri', 'banlung',
+  'mondulkiri', 'pursat', 'poipet', 'sisophon', 'pailin', 'suong', 'bkk1', 'bkk', 'bkk2', 'bkk3',
+  'elysee', 'elysée', 'flagship', 'branch', 'roastery', 'reserve', 'specialty', 'tea', 'ice', 'cream',
+  'krong', 'phum', 'sangkat', 'khan', 'one', 'two', 'three', 'first', 'second', 'third', 'city', 'town',
   'noodle', 'noodles', 'soup', 'rice', 'bbq', 'hotpot', 'vegetarian', 'vegan', 'halal', 'organic', 'fresh', 'snacks', 'drinks', 'beverage',
   'ភោជនីយដ្ឋាន', 'អាហារដ្ឋាន', 'ហាង', 'កាហ្វេ', 'ហាងកាហ្វេ', 'បាយ', 'គុយទាវ', 'ម្ហូប', 'ខ្មែរ', 'គ្រឿងសមុទ្រ',
-  'សាច់អាំង', 'ស៊ុប', 'បង្អែម', 'នំប៉័ង', 'តែគុជ', 'ភេសជ្ជៈ', 'មាត់ទន្លេ', 'ឆ្នេរ', 'ផ្សារ', 'ចាស់', 'ថ្មី', 'សាខា',
+  'សាច់អាំង', 'ស៊ុប', 'បង្អែម', 'នំប៉័ង', 'តែគុជ', 'ភេសជ្ជៈ', 'សាខា',
   'សណ្ឋាគារ', 'រីសត', 'ផ្ទះសំណាក់', 'បឹងហ្គាឡូ', 'វីឡា', 'រមណីយដ្ឋាន', 'តំបន់ទេសចរណ៍', 'ម្ហូបបួស', 'អាហារបួស', 'អាហារសុខភាព',
   'ភ្នំពេញ', 'សៀមរាប', 'ព្រះសីហនុ', 'កំពត', 'កែប', 'បាត់ដំបង', 'កំពង់ចាម', 'កំពង់ធំ', 'កំពង់ឆ្នាំង',
   'កំពង់ស្ពឺ', 'កណ្តាល', 'តាកែវ', 'ព្រៃវែង', 'ស្វាយរៀង', 'ក្រចេះ', 'ស្ទឹងត្រែង', 'រតនគិរី', 'មណ្ឌលគិរី',
   'កោះកុង', 'ពោធិ៍សាត់', 'បន្ទាយមានជ័យ', 'ប៉ៃលិន', 'ឧត្តរមានជ័យ', 'ព្រះវិហារ', 'ត្បូងឃ្មុំ', 'បឹងកេងកង',
-  'ទួលគោក', 'ទួលទំពូង', 'កោះពេជ្រ', 'ចតុមុខ', 'វត្ត', 'បឹង', 'ស្ទឹង', 'ភ្នំ', 'ព្រះ', 'ភូមិ', 'សង្កាត់', 'ខណ្ឌ', 'ក្រុង', 'ស្រុក', 'ផ្លូវ',
+  'ទួលគោក', 'ទួលទំពូង', 'កោះពេជ្រ', 'ចតុមុខ', 'ភូមិ', 'សង្កាត់', 'ខណ្ឌ', 'ក្រុង', 'ស្រុក', 'ផ្លូវ',
   'the', 'and', 'of', 'in', 'at', 'by', 'no', 'st', 'rd', 'ave', 'blvd', 'cuisine', 'cooking', 'school'
+]);
+
+const MINIMAL_FILLER_STOP_WORDS = new Set([
+  'the', 'and', 'of', 'in', 'at', 'by', 'no', 'st', 'rd', 'ave', 'blvd', 'cambodia', 'កម្ពុជា',
+  'restaurant', 'restaurants', 'cafe', 'coffee', 'café', 'hotel', 'resort', 'guesthouse',
+  'ភោជនីយដ្ឋាន', 'អាហារដ្ឋាន', 'ហាង', 'ហាងកាហ្វេ', 'សណ្ឋាគារ', 'ផ្ទះសំណាក់', 'រមណីយដ្ឋាន', 'តំបន់ទេសចរណ៍'
 ]);
 
 const extractDistinctiveBrandTokens = (text?: string | null): string[] => {
   if (!text) return [];
   const cleaned = String(text)
     .toLowerCase()
+    .replace(MULTI_WORD_ADMIN_PHRASES_REGEX, ' ')
     .replace(/[()[\]{}|/\\,.;:'"`~!@#$%^&*+=<>?-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-  return cleaned
+  const baseTokens = cleaned
     .split(' ')
     .map((t) => t.trim())
-    .filter((t) => t.length >= 2 && !GENERIC_PLACE_STOP_WORDS.has(t) && !/^\d+$/.test(t));
+    .filter((t) => t.length >= 2 && !/^\d+$/.test(t));
+  const strictTokens = baseTokens.filter((t) => !GENERIC_PLACE_STOP_WORDS.has(t));
+  if (strictTokens.length > 0) return strictTokens;
+  // Fallback for landmark names made of geographic words (e.g. "Wat Phnom", "Royal Palace", "Koh Pich")
+  return baseTokens.filter((t) => !MINIMAL_FILLER_STOP_WORDS.has(t));
 };
 
 /**
@@ -2631,32 +2640,37 @@ export const doesVerifiedPlaceNameMatchTarget = (
   const targetLatinTokens = allTargetTokens.filter((t) => /[a-z]/i.test(t));
   const candLatinTokens = candTokens.filter((t) => /[a-z]/i.test(t));
   const candLatinSet = new Set(candLatinTokens);
+  const targetLatinSet = new Set(targetLatinTokens);
 
   if (targetLatinTokens.length > 0 && candLatinTokens.length > 0) {
     const matchedLatin = targetLatinTokens.filter((t) => candLatinSet.has(t));
     if (matchedLatin.length === 0) {
       return false;
     }
-    // If target has 1 or 2 distinctive Latin tokens, ALL of them must match as whole words,
-    // or all candidate distinctive Latin tokens must be a subset of targetLatinTokens
-    if (targetLatinTokens.length <= 2) {
-      if (matchedLatin.length === targetLatinTokens.length) return true;
-      const targetLatinSet = new Set(targetLatinTokens);
-      if (candLatinTokens.length >= 1 && candLatinTokens.every((t) => targetLatinSet.has(t))) {
-        return true;
-      }
-      return false;
+    // If all distinctive Latin tokens of the candidate (>= 2 tokens, e.g. "Wat Phnom") are in the target ("Wat Phnom Historical Sanctuary"),
+    // or all distinctive Latin tokens of the target are in the candidate, it is a genuine match
+    if (matchedLatin.length === targetLatinTokens.length) return true;
+    if (candLatinTokens.length >= 2 && candLatinTokens.every((t) => targetLatinSet.has(t))) return true;
+    if (targetLatinTokens.length <= 2 && candLatinTokens.length === 1 && candLatinSet.has(targetLatinTokens[0])) {
+      return true;
     }
     // For longer brand names (3+ distinctive tokens), require at least 2 exact whole-word matches and >= 60% overlap
-    return matchedLatin.length >= 2 && matchedLatin.length / targetLatinTokens.length >= 0.6;
+    return matchedLatin.length >= 2 && matchedLatin.length / Math.min(targetLatinTokens.length, candLatinTokens.length) >= 0.6;
   }
 
-  // Khmer-only comparison: require exact whole-token match in candTokenSet
+  // Khmer-only comparison
   const targetKhOnly = allTargetTokens.filter((t) => /[\u1780-\u17FF]/.test(t));
-  if (targetKhOnly.length > 0) {
+  const candKhOnly = candTokens.filter((t) => /[\u1780-\u17FF]/.test(t));
+  if (targetKhOnly.length > 0 && candKhOnly.length > 0) {
     const matchedKh = targetKhOnly.filter((t) => candTokenSet.has(t));
     if (matchedKh.length > 0 && matchedKh.length >= Math.min(2, targetKhOnly.length)) {
       return true;
+    }
+    // Khmer compounds without spaces (e.g. "វត្តភ្នំ" inside "វត្តភ្នំដូនពេញ")
+    for (const cKh of candKhOnly) {
+      if (cKh.length >= 4 && targetKhOnly.some((tKh) => tKh.includes(cKh) || cKh.includes(tKh))) {
+        return true;
+      }
     }
   }
 
@@ -2798,6 +2812,29 @@ export const isCoordinateMatchingCambodiaProvince = (
   return true;
 };
 
+/**
+ * Strips Google Plus Codes (e.g. `HWGF+C6Q`, `8564+3M`), DMS coordinate strings (`11°34'34.0"N 104°55'23.2"E`),
+ * and raw decimal coordinate prefixes (`11.576100, 104.923100` or `(GPS: 11.57610, 104.92310)`) from display/query text.
+ */
+export const stripPlusCodesAndRawCoords = (text?: string | null): string => {
+  if (!text || typeof text !== 'string') return '';
+  return text
+    .replace(/\(\s*GPS\s*:\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*\)/gi, '')
+    .replace(/\b[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,5}\b\s*,?/gi, '')
+    .replace(/\d+\s*°\s*\d+\s*'\s*[\d.]+\s*"?\s*[NS]\s*,?\s*\d+\s*°\s*\d+\s*'\s*[\d.]+\s*"?\s*[EW]/gi, '')
+    .replace(/\b(?:GPS\s*:\s*)?-?\d{1,2}\.\d{3,}\s*,\s*-?\d{2,3}\.\d{3,}\b\s*,?/gi, '')
+    .replace(/(?:\s*,\s*){2,}/g, ', ')
+    .replace(/^[\s,.;:–—-]+|[\s,.;:–—-]+$/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+};
+
+export const isCoordinateOrPlusCodeOnly = (text?: string | null): boolean => {
+  if (!text || typeof text !== 'string') return true;
+  const stripped = stripPlusCodesAndRawCoords(text);
+  return stripped.length < 2;
+};
+
 export const buildCanonicalGoogleMapsPinUrl = (
   lat: number,
   lng: number,
@@ -2806,13 +2843,17 @@ export const buildCanonicalGoogleMapsPinUrl = (
 ): string => {
   const latFixed = Number(lat.toFixed(6));
   const lngFixed = Number(lng.toFixed(6));
+  const cleanNameQuery = stripPlusCodesAndRawCoords(placeNameQuery);
   if (isValidOfficialGooglePlaceId(googlePlaceId)) {
     const cleanId = googlePlaceId!.trim();
-    const q = placeNameQuery?.trim() ? encodeURIComponent(placeNameQuery.trim()) : `${latFixed},${lngFixed}`;
+    const q = cleanNameQuery ? encodeURIComponent(cleanNameQuery) : `${latFixed},${lngFixed}`;
     if (cleanId.startsWith('0x')) {
       return `https://www.google.com/maps?q=${q}&ftid=${encodeURIComponent(cleanId)}`;
     }
     return `https://www.google.com/maps/search/?api=1&query=${q}&query_place_id=${encodeURIComponent(cleanId)}`;
+  }
+  if (cleanNameQuery) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanNameQuery)}`;
   }
   return `https://www.google.com/maps/search/?api=1&query=${latFixed},${lngFixed}`;
 };
@@ -2826,10 +2867,11 @@ export const buildCanonicalGoogleMapsDirectionsUrl = (
 ): string => {
   const latFixed = Number(lat.toFixed(6));
   const lngFixed = Number(lng.toFixed(6));
+  const cleanNameQuery = stripPlusCodesAndRawCoords(placeNameQuery);
   const hasOfficialPlaceId = isValidOfficialGooglePlaceId(googlePlaceId) && googlePlaceId!.trim().startsWith('ChIJ');
   const destParam =
-    hasOfficialPlaceId && placeNameQuery && placeNameQuery.trim().length > 2
-      ? encodeURIComponent(placeNameQuery.trim())
+    cleanNameQuery && cleanNameQuery.length >= 2
+      ? encodeURIComponent(cleanNameQuery)
       : `${latFixed},${lngFixed}`;
   let url = `https://www.google.com/maps/dir/?api=1&destination=${destParam}`;
   if (origin && isValidCambodiaCoordinates(origin.lat, origin.lng)) {
@@ -2881,29 +2923,35 @@ export const extractOfficialPlaceIdFromMapUrl = (mapUrl?: string | null): string
 
 /**
  * Builds an unambiguous, shop/place-specific Google Maps search query combining English name, Khmer name,
- * street address, and province so records without exact building coordinates never fall back to a default
- * province center or a bare ambiguous word.
+ * street address (stripped of Plus Codes/raw coordinates), and province so Google Maps always opens the
+ * named place card instead of raw GPS coordinates or Plus Codes.
  */
 export const buildSpecificPlaceSearchQuery = (place: {
   nameEn?: string | null;
   nameKh?: string | null;
+  nameZh?: string | null;
   addressEn?: string | null;
   addressKh?: string | null;
   provinceEn?: string | null;
   provinceKh?: string | null;
 }): string => {
-  const nameEn = (place.nameEn || '').trim();
-  const nameKh = (place.nameKh || '').trim();
+  const nameEn = stripPlusCodesAndRawCoords(place.nameEn);
+  const nameKh = stripPlusCodesAndRawCoords(place.nameKh);
+  const nameZh = stripPlusCodesAndRawCoords(place.nameZh);
   const combinedName =
     nameEn && nameKh && nameEn.toLowerCase() !== nameKh.toLowerCase() && !nameKh.includes(nameEn) && !nameEn.includes(nameKh)
       ? `${nameEn} (${nameKh})`
-      : nameEn || nameKh;
-  const addr = (place.addressEn || place.addressKh || '').trim();
-  const prov = (place.provinceEn || place.provinceKh || '').trim();
+      : nameEn || nameKh || nameZh;
+  const addr = stripPlusCodesAndRawCoords(place.addressEn || place.addressKh);
+  const prov = stripPlusCodesAndRawCoords(place.provinceEn || place.provinceKh);
   const parts: string[] = [];
   if (combinedName) parts.push(combinedName);
-  if (addr && addr.toLowerCase() !== prov.toLowerCase()) parts.push(addr);
-  if (prov && (!addr || !addr.toLowerCase().includes(prov.toLowerCase()))) parts.push(prov);
+  if (addr && addr.toLowerCase() !== prov.toLowerCase() && (!combinedName || addr.toLowerCase() !== combinedName.toLowerCase())) {
+    parts.push(addr);
+  }
+  if (prov && (!addr || !addr.toLowerCase().includes(prov.toLowerCase()))) {
+    parts.push(prov);
+  }
   parts.push('Cambodia');
   return parts.filter(Boolean).join(', ');
 };
@@ -2913,8 +2961,8 @@ export const getRestaurantGoogleExternalUrl = (
   mode: 'search' | 'maps' | 'directions' = 'maps',
   origin?: { lat: number; lng: number } | null
 ): string => {
-  const name = (restaurant.nameKh || restaurant.nameEn || '').trim();
-  const province = (restaurant.provinceKh || restaurant.provinceEn || '').trim();
+  const name = stripPlusCodesAndRawCoords(restaurant.nameKh || restaurant.nameEn);
+  const province = stripPlusCodesAndRawCoords(restaurant.provinceKh || restaurant.provinceEn);
   const query = [name, province, 'Cambodia'].filter(Boolean).join(' ');
 
   if (mode === 'search') {
@@ -2940,17 +2988,10 @@ export const getRestaurantGoogleExternalUrl = (
   const embeddedUrlPlaceId = extractOfficialPlaceIdFromMapUrl(trimmedMapUrl);
   const rawPlaceId = restaurant.googlePlaceId || restaurant.googleMapsMeta?.placeId || embeddedUrlPlaceId;
   const placeId = isValidOfficialGooglePlaceId(rawPlaceId) ? rawPlaceId!.trim() : cachedVerified?.placeId;
-  const placeNameForMaps = [
-    restaurant.nameEn || restaurant.nameKh,
-    restaurant.provinceEn || restaurant.provinceKh,
-    'Cambodia',
-  ]
-    .map((s) => (s || '').trim())
-    .filter(Boolean)
-    .join(', ');
+  const placeNameForMaps = buildSpecificPlaceSearchQuery(restaurant);
 
   const isRawCoordOnlyUrl = Boolean(
-    trimmedMapUrl && /[?&](?:query|q)=-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/i.test(trimmedMapUrl)
+    trimmedMapUrl && /[?&](?:query|q)=-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?(&|$)/i.test(trimmedMapUrl)
   );
   const isBareKhmerOnlyQueryUrl = Boolean(
     trimmedMapUrl &&
@@ -2964,10 +3005,7 @@ export const getRestaurantGoogleExternalUrl = (
     if (hasValidCoords) {
       return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, placeId, placeNameForMaps);
     }
-    // When exact building coordinates are missing or set to a default province center,
-    // route using the shop's own Place ID or full specific name + street address + province (never default center!)
-    const specificDestQuery = buildSpecificPlaceSearchQuery(restaurant);
-    let dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(specificDestQuery)}`;
+    let dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(placeNameForMaps)}`;
     if (origin && isValidCambodiaCoordinates(origin.lat, origin.lng)) {
       dirUrl += `&origin=${Number(origin.lat.toFixed(6))},${Number(origin.lng.toFixed(6))}`;
     }
@@ -2989,7 +3027,10 @@ export const getRestaurantGoogleExternalUrl = (
   }
 
   const metaUri = restaurant.googleMapsMeta?.googleMapsUri || cachedVerified?.googleMapsUri;
-  if (metaUri && metaUri.startsWith('http') && isValidOfficialGooglePlaceId(placeId)) {
+  const isMetaUriRawCoord = Boolean(
+    metaUri && /[?&](?:query|q)=-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?(&|$)/i.test(metaUri)
+  );
+  if (metaUri && metaUri.startsWith('http') && !isMetaUriRawCoord && isValidOfficialGooglePlaceId(placeId)) {
     return metaUri;
   }
 
@@ -2997,9 +3038,7 @@ export const getRestaurantGoogleExternalUrl = (
     return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId, placeNameForMaps);
   }
 
-  // Default province-center coordinates or missing coordinates: search by full shop name + address + province
-  const specificSearchQuery = buildSpecificPlaceSearchQuery(restaurant);
-  let searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(specificSearchQuery)}`;
+  let searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeNameForMaps)}`;
   if (isValidOfficialGooglePlaceId(placeId) && placeId!.startsWith('ChIJ')) {
     searchUrl += `&query_place_id=${encodeURIComponent(placeId!)}`;
   }
@@ -3074,21 +3113,13 @@ export const getDestinationGoogleExternalUrl = (
   const embeddedUrlPlaceId = extractOfficialPlaceIdFromMapUrl(trimmedMapUrl);
   const rawPlaceId = destination.googlePlaceId || destination.googleMapsMeta?.placeId || embeddedUrlPlaceId;
   const placeId = isValidOfficialGooglePlaceId(rawPlaceId) ? rawPlaceId!.trim() : cachedVerified?.placeId;
-  const placeNameForMaps = [
-    destination.nameEn || destination.nameKh,
-    destination.provinceEn || destination.provinceKh,
-    'Cambodia',
-  ]
-    .map((s) => (s || '').trim())
-    .filter(Boolean)
-    .join(', ');
+  const placeNameForMaps = buildSpecificPlaceSearchQuery(destination);
 
   if (mode === 'directions') {
     if (hasValidCoords) {
       return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, placeId, placeNameForMaps);
     }
-    const specificDestQuery = buildSpecificPlaceSearchQuery(destination);
-    let dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(specificDestQuery)}`;
+    let dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(placeNameForMaps)}`;
     if (origin && isValidCambodiaCoordinates(origin.lat, origin.lng)) {
       dirUrl += `&origin=${Number(origin.lat.toFixed(6))},${Number(origin.lng.toFixed(6))}`;
     }
@@ -3109,12 +3140,10 @@ export const getDestinationGoogleExternalUrl = (
   }
 
   if (hasValidCoords) {
-    const isRuralRacSite = String(destination.id || '').startsWith('rac-');
-    return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId, isRuralRacSite ? undefined : placeNameForMaps);
+    return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId, placeNameForMaps);
   }
 
-  const specificSearchQuery = buildSpecificPlaceSearchQuery(destination);
-  let searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(specificSearchQuery)}`;
+  let searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeNameForMaps)}`;
   if (isValidOfficialGooglePlaceId(placeId) && placeId!.startsWith('ChIJ')) {
     searchUrl += `&query_place_id=${encodeURIComponent(placeId!)}`;
   }
@@ -3153,14 +3182,11 @@ export const getTrendingFoodGoogleExternalUrl = (
     rawCached && doesVerifiedPlaceNameMatchTarget(rawCached.officialName, item.restaurantNameKh, item.restaurantNameEn)
       ? rawCached
       : null;
-  const placeNameForMaps = [
-    item.restaurantNameEn || item.restaurantNameKh,
-    item.locationKh,
-    'Cambodia',
-  ]
-    .map((s) => (s || '').trim())
-    .filter(Boolean)
-    .join(', ');
+  const placeNameForMaps = buildSpecificPlaceSearchQuery({
+    nameEn: item.restaurantNameEn,
+    nameKh: item.restaurantNameKh,
+    addressKh: item.locationKh,
+  });
   if (mode === 'directions') {
     return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, cachedVerified?.placeId, placeNameForMaps);
   }
