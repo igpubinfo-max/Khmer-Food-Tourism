@@ -31,6 +31,7 @@ import {
   Compass,
   Utensils,
   ChevronRight,
+  ChevronDown,
   Copy,
   CheckCircle2,
   Route,
@@ -193,13 +194,28 @@ const MiniCard: React.FC<MiniCardProps> = React.memo(
   )
 );
 
-const SectionTitle: React.FC<{ icon: React.ReactNode; title: string; subtitle?: string; action?: React.ReactNode }> = ({
-  icon,
-  title,
-  subtitle,
-  action,
-}) => (
-  <div className="flex items-end justify-between gap-2">
+const SectionTitle: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  action?: React.ReactNode;
+  open?: boolean;
+  onToggle?: () => void;
+}> = ({ icon, title, subtitle, action, open, onToggle }) => (
+  <div
+    className={`flex items-end justify-between gap-2 ${onToggle ? 'cursor-pointer select-none' : ''}`}
+    {...(onToggle
+      ? {
+          role: 'button',
+          tabIndex: 0,
+          'aria-expanded': !!open,
+          onClick: onToggle,
+          onKeyDown: (e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') onToggle();
+          },
+        }
+      : {})}
+  >
     <div className="min-w-0">
       <h3 className="font-moul text-xs sm:text-sm text-white flex items-center gap-1.5 leading-[1.7] py-0.5">
         <span className="text-amber-400 shrink-0">{icon}</span>
@@ -208,6 +224,9 @@ const SectionTitle: React.FC<{ icon: React.ReactNode; title: string; subtitle?: 
       {subtitle && <p className="text-[11px] text-slate-300 mt-0.5 font-khmer leading-[1.6]">{subtitle}</p>}
     </div>
     {action}
+    {onToggle && (
+      <ChevronDown className={`w-5 h-5 shrink-0 self-center text-slate-300 transition-transform ${open ? 'rotate-180' : ''}`} />
+    )}
   </div>
 );
 
@@ -311,6 +330,8 @@ export const GuideView: React.FC = () => {
   const [portCategoryFilter, setPortCategoryFilter] = useState<'all' | 'airport' | 'thailand' | 'vietnam' | 'laos_seaport'>('all');
   const [showAll25History, setShowAll25History] = useState<boolean>(false);
   const [showAll25Hospitals, setShowAll25Hospitals] = useState<boolean>(false);
+  const [openSecs, setOpenSecs] = useState<Record<string, boolean>>({ tips: true });
+  const toggleSec = useCallback((k: string) => setOpenSecs((p) => ({ ...p, [k]: !p[k] })), []);
   const portsSectionRef = useRef<HTMLElement | null>(null);
   const hospitalsSectionRef = useRef<HTMLElement | null>(null);
   const provAdminSectionRef = useRef<HTMLDivElement | null>(null);
@@ -753,6 +774,7 @@ export const GuideView: React.FC = () => {
             onClick={() => {
               setTab('tips');
               setTipFilter('all');
+              setOpenSecs((p) => ({ ...p, ports: true }));
               setTimeout(() => scrollToGuideSection(portsSectionRef.current || guideContentStartRef.current), 40);
             }}
             className="p-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-900 border border-emerald-400/40 text-left flex items-center gap-2.5 shadow-sm active:scale-[0.98] transition cursor-pointer"
@@ -776,6 +798,7 @@ export const GuideView: React.FC = () => {
             onClick={() => {
               setTab('tips');
               setTipFilter('all');
+              setOpenSecs((p) => ({ ...p, hosp: true }));
               setTimeout(() => scrollToGuideSection(hospitalsSectionRef.current || guideContentStartRef.current), 40);
             }}
             className="p-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-900 border border-rose-400/40 text-left flex items-center gap-2.5 shadow-sm active:scale-[0.98] transition cursor-pointer"
@@ -1411,7 +1434,7 @@ export const GuideView: React.FC = () => {
           {/* Dedicated Police & Emergency Contacts Section */}
           {(tipFilter === 'all' || tipFilter === 'safety') && (
             <section className="p-4 rounded-3xl bg-gradient-to-br from-rose-50 via-amber-50/70 to-white border-2 border-rose-300 space-y-3 shadow-xs">
-              <div className="flex items-center justify-between gap-2">
+              <div role="button" tabIndex={0} onClick={() => toggleSec('police')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleSec('police'); }} aria-expanded={!!openSecs.police} className="flex items-center justify-between gap-2 cursor-pointer">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <span className="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-xs shrink-0">
                     <ShieldAlert className="w-5 h-5" />
@@ -1425,8 +1448,10 @@ export const GuideView: React.FC = () => {
                     </p>
                   </div>
                 </div>
+<ChevronDown className={`w-5 h-5 shrink-0 transition-transform text-rose-700 ${openSecs.police ? 'rotate-180' : ''}`} />
               </div>
 
+{openSecs.police && (<>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {EMERGENCY_CONTACTS.map((ec) => (
                   <div
@@ -1456,6 +1481,7 @@ export const GuideView: React.FC = () => {
                   </div>
                 ))}
               </div>
+</>)}
             </section>
           )}
 
@@ -1467,7 +1493,7 @@ export const GuideView: React.FC = () => {
             className="p-4 rounded-3xl bg-white border-2 border-rose-200/90 space-y-3 shadow-xs scroll-mt-2"
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
-              <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
+              <div role="button" tabIndex={0} onClick={() => toggleSec('hosp')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleSec('hosp'); }} aria-expanded={!!openSecs.hosp} className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1 cursor-pointer">
                 <span className="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg shrink-0">
                   🏥
                 </span>
@@ -1489,19 +1515,23 @@ export const GuideView: React.FC = () => {
                     )}
                   </p>
                 </div>
+<ChevronDown className={`w-5 h-5 shrink-0 transition-transform text-rose-700 self-center ${openSecs.hosp ? 'rotate-180' : ''}`} />
               </div>
 
+            </div>
+
+{openSecs.hosp && (<>
+<div className="flex justify-end">
               <button
                 type="button"
                 onClick={() => setShowAll25Hospitals((v) => !v)}
-                className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 text-xs font-extrabold cursor-pointer transition shrink-0"
+                className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 text-xs font-extrabold cursor-pointer transition"
               >
                 {showAll25Hospitals
                   ? tr(language, 'បង្ហាញខេត្តសំខាន់ៗ', 'Show Major Hubs', '仅显示重点旅游省市')
                   : tr(language, `មើលទាំង ${PROVINCIAL_ADMIN_HISTORY_HOSPITALS.length} ខេត្ត-រាជធានី`, `View All ${PROVINCIAL_ADMIN_HISTORY_HOSPITALS.length} Provinces`, `查看全部 ${PROVINCIAL_ADMIN_HISTORY_HOSPITALS.length} 省市医院`)}
               </button>
-            </div>
-
+</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {(showAll25Hospitals ? PROVINCIAL_ADMIN_HISTORY_HOSPITALS : PROVINCIAL_ADMIN_HISTORY_HOSPITALS.slice(0, 8)).map((h) => (
                 <div
@@ -1543,6 +1573,7 @@ export const GuideView: React.FC = () => {
                 </div>
               ))}
             </div>
+</>)}
           </section>
 
           {/* International Border Checkpoints, Airports & Seaports Directory (Zero External Photos) */}
@@ -1552,7 +1583,7 @@ export const GuideView: React.FC = () => {
             data-testid="guide-international-ports-section"
             className="p-4 rounded-3xl bg-white border-2 border-emerald-200/90 space-y-3 shadow-xs scroll-mt-2"
           >
-            <div className="flex items-center gap-2.5">
+            <div role="button" tabIndex={0} onClick={() => toggleSec('ports')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleSec('ports'); }} aria-expanded={!!openSecs.ports} className="flex items-center gap-2.5 cursor-pointer">
               <span className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-lg shrink-0">
                 🛂
               </span>
@@ -1574,8 +1605,10 @@ export const GuideView: React.FC = () => {
                   )}
                 </p>
               </div>
+<ChevronDown className={`w-5 h-5 shrink-0 transition-transform text-emerald-800 ${openSecs.ports ? 'rotate-180' : ''}`} />
             </div>
 
+{openSecs.ports && (<>
             {/* Category Filter Pills */}
             <div className="kft-hscroll flex gap-1.5 overflow-x-auto no-scrollbar py-0.5">
               {[
@@ -1643,14 +1676,16 @@ export const GuideView: React.FC = () => {
                 </div>
               ))}
             </div>
+</>)}
           </section>
 
 
           <section className="space-y-2.5">
-            <SectionTitle
+            <SectionTitle open={!!openSecs.tips} onToggle={() => toggleSec('tips')}
               icon={<Lightbulb className="w-4 h-4" />}
               title={tr(language, `គន្លឹះដំណើរកម្សាន្ត & ញ៉ាំអាហារ (${GUIDE_TIPS.length} គន្លឹះ)`, `Travel & dining tips (${GUIDE_TIPS.length} tips)`, `旅行与用餐实用贴士（共 ${GUIDE_TIPS.length} 条）`)}
             />
+{openSecs.tips && (<>
             <div className="kft-hscroll flex gap-1.5 overflow-x-auto no-scrollbar -mx-3.5 px-3.5 sm:-mx-4 sm:px-4 py-0.5">
               {TIP_CATEGORIES.map((c) => {
                 const active = tipFilter === c.id;
@@ -1689,10 +1724,11 @@ export const GuideView: React.FC = () => {
                 </li>
               ))}
             </ul>
+</>)}
           </section>
 
           <section className="space-y-2.5">
-            <SectionTitle
+            <SectionTitle open={!!openSecs.phrases} onToggle={() => toggleSec('phrases')}
               icon={<span className="text-sm">🗣️</span>}
               title={tr(language, 'ឃ្លាខ្មែរចាំបាច់', 'Khmer phrasebook', '高棉语常用语')}
               subtitle={tr(
@@ -1702,6 +1738,7 @@ export const GuideView: React.FC = () => {
                 '可复制短语，或放大文字展示给店家'
               )}
             />
+{openSecs.phrases && (<>
             <ul className="space-y-2">
               {PHRASES.map((p) => (
                 <li
@@ -1734,11 +1771,12 @@ export const GuideView: React.FC = () => {
                 </li>
               ))}
             </ul>
+</>)}
           </section>
 
           {/* 1. UNESCO World Heritage & Intangible Heritage of Cambodia */}
           <section className="space-y-2.5">
-            <SectionTitle
+            <SectionTitle open={!!openSecs.unesco} onToggle={() => toggleSec('unesco')}
               icon={<span className="text-sm">🏛️</span>}
               title={tr(language, 'បេតិកភណ្ឌពិភពលោក UNESCO របស់កម្ពុជា', 'Cambodia UNESCO World Heritage', '柬埔寨联合国教科文组织世界遗产')}
               subtitle={tr(
@@ -1748,6 +1786,7 @@ export const GuideView: React.FC = () => {
                 '列入世界遗产名录的古迹遗址与人类非物质文化遗产代表作'
               )}
             />
+{openSecs.unesco && (<>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {CAMBODIA_UNESCO_HERITAGE_LIST.map((item) => (
                 <div
@@ -1773,11 +1812,12 @@ export const GuideView: React.FC = () => {
                 </div>
               ))}
             </div>
+</>)}
           </section>
 
           {/* 2. National Symbols, Flora & Rare Wildlife of Cambodia */}
           <section className="space-y-2.5">
-            <SectionTitle
+            <SectionTitle open={!!openSecs.symbols} onToggle={() => toggleSec('symbols')}
               icon={<span className="text-sm">🦌</span>}
               title={tr(language, 'និមិត្តរូបជាតិ រុក្ខជាតិ និងសត្វព្រៃកម្រនៅកម្ពុជា', 'National Symbols, Flora & Wildlife', '柬埔寨国家象征与珍稀动植物')}
               subtitle={tr(
@@ -1787,6 +1827,7 @@ export const GuideView: React.FC = () => {
                 '官方认定的国花、国树、国兽与湄公河珍稀生态物种'
               )}
             />
+{openSecs.symbols && (<>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {CAMBODIA_NATIONAL_SYMBOLS_AND_WILDLIFE.map((sym) => (
                 <div
@@ -1810,11 +1851,12 @@ export const GuideView: React.FC = () => {
                 </div>
               ))}
             </div>
+</>)}
           </section>
 
           {/* 3. Domestic Travel Routes: Expressway, Railways, Speed Ferries & Flights */}
           <section className="space-y-2.5">
-            <SectionTitle
+            <SectionTitle open={!!openSecs.transport} onToggle={() => toggleSec('transport')}
               icon={<span className="text-sm">🚂</span>}
               title={tr(language, 'មធ្យោបាយធ្វើដំណើរក្នុងស្រុក (ផ្លូវល្បឿនលឿន រថភ្លើង និងទូក)', 'Domestic Travel Routes (Expressway, Rail & Ferry)', '柬埔寨境内交通指南（高速、火车与快艇）')}
               subtitle={tr(
@@ -1824,6 +1866,7 @@ export const GuideView: React.FC = () => {
                 '连接各省市与海岛的高速公路、客运铁路、快艇及国内航线'
               )}
             />
+{openSecs.transport && (<>
             <ul className="space-y-2">
               {CAMBODIA_DOMESTIC_TRANSPORT_ROUTES.map((rt) => (
                 <li
@@ -1844,11 +1887,12 @@ export const GuideView: React.FC = () => {
                 </li>
               ))}
             </ul>
+</>)}
           </section>
 
           {/* 4. Cambodia Fast Facts ("Did You Know?") */}
           <section className="space-y-2.5">
-            <SectionTitle
+            <SectionTitle open={!!openSecs.facts} onToggle={() => toggleSec('facts')}
               icon={<span className="text-sm">💡</span>}
               title={tr(language, 'តើអ្នកដឹងទេ? កំណត់ត្រាពិភពលោក និងការពិតអំពីកម្ពុជា', 'Did You Know? Amazing Facts About Cambodia', '趣味百科：关于柬埔寨的世界纪录与冷知识')}
               subtitle={tr(
@@ -1858,6 +1902,7 @@ export const GuideView: React.FC = () => {
                 '令全球游客赞叹的高棉历史奇迹与自然奇观'
               )}
             />
+{openSecs.facts && (<>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {CAMBODIA_FAST_FACTS.map((f) => (
                 <div
@@ -1878,6 +1923,7 @@ export const GuideView: React.FC = () => {
                 </div>
               ))}
             </div>
+</>)}
           </section>
         </div>
       )}

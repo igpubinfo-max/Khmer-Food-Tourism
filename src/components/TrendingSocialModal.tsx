@@ -409,16 +409,11 @@ export const TrendingSocialModal: React.FC = () => {
   loadFeedRef.current = loadFeed;
   useEffect(() => {
     if (!isTrendingSocialModalOpen) return;
-    loadFeedRef.current(false, false);
-
-    const autoDiscoverTimer = setInterval(() => {
-      if (typeof document !== 'undefined' && document.hidden) return;
-      if (!activePlayerItemIdRef.current) {
-        loadFeedRef.current(true, true);
-      }
-    }, 180 * 1000);
-
-    return () => clearInterval(autoDiscoverTimer);
+    // Rotate existing in-memory videos instantaneously (0 network calls, 0 CPU heat)
+    setRotationCycle(advanceVideoRotationCycle());
+    if (!lastCheckedAt) {
+      setLastCheckedAt(new Date().toISOString());
+    }
   }, [isTrendingSocialModalOpen]);
 
   // Stop inline video when modal closes
@@ -592,33 +587,7 @@ export const TrendingSocialModal: React.FC = () => {
     [filteredItems, visibleVideoCount]
   );
 
-  // Pre-warm visible TikTok MP4 streams in the background so user taps play instantaneously with 0ms wait
-  useEffect(() => {
-    if (!isTrendingSocialModalOpen || displayedVideos.length === 0) return;
-    let cancelled = false;
-    prewarmTikTokStreams(displayedVideos, 3)
-      .then((resolvedMap) => {
-        if (cancelled || Object.keys(resolvedMap).length === 0) return;
-        setResolvedDirectVideoUrls((prev) => {
-          const next = { ...prev };
-          for (const [id, entry] of Object.entries(resolvedMap)) {
-            if (!next[id] || (!next[id].primaryUrl && entry.primaryUrl)) {
-              next[id] = {
-                primaryUrl: entry.primaryUrl,
-                backupUrl: entry.backupUrl,
-                usingBackup: false,
-                failedAllDirect: false,
-              };
-            }
-          }
-          return next;
-        });
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [isTrendingSocialModalOpen, displayedVideos]);
+  // On-demand stream resolution only (no background pre-warm radio/CPU drain when scrolling or switching tabs)
 
   const isPagingTikTokRef = useRef<boolean>(false);
   const loadNextTikTokPage = useCallback(async () => {

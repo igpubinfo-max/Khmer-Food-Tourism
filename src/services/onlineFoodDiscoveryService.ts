@@ -4647,8 +4647,8 @@ export async function fetchLiveYouTubeChannelUploads(
   foods: FoodItem[] = initialFoods
 ): Promise<OnlineFoodDiscoveryItem[]> {
   const cached = readLiveRssCache();
-  if (!force && cached && Date.now() - cached.fetchedAt < LIVE_RSS_TTL_MS) {
-    return cached.items;
+  if (!force) {
+    return cached?.items || [];
   }
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     return cached?.items || [];
@@ -16417,6 +16417,9 @@ export async function fetchLiveTikTokCreatorVideos(
   forceRefresh = false,
   foods: FoodItem[] = initialFoods
 ): Promise<OnlineFoodDiscoveryItem[]> {
+  if (!forceRefresh) {
+    return CURATED_TIKTOK_FACEBOOK_REVIEWS;
+  }
   // 1. Check fresh local cache first when not force-refreshing
   if (!forceRefresh) {
     try {
@@ -17009,6 +17012,22 @@ export async function fetchOnlineFoodDiscoveryFeed(params: {
     if (cached) {
       return { ...cached, fromCache: true, cooldownRemainingSec: 0 };
     }
+  }
+
+  if (!params.forceRefresh && !params.query) {
+    const ytCurated = CURATED_YOUTUBE_VIDEOS.map((seed) => seedToDiscoveryItem(seed, foods, true)).filter(
+      (x): x is OnlineFoodDiscoveryItem => Boolean(x)
+    );
+    const baseline = deduplicateAndRankDiscoveries([
+      ...CURATED_TIKTOK_FACEBOOK_REVIEWS,
+      ...ytCurated,
+    ]);
+    return {
+      items: baseline,
+      lastCheckedAt: new Date().toISOString(),
+      fromCache: true,
+      cooldownRemainingSec: 0,
+    };
   }
 
   const [ytRes, liveTikTokItems] = await Promise.all([

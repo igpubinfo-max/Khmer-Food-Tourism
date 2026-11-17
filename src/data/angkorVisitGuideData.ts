@@ -591,21 +591,6 @@ export const ANGKOR_CODE_OF_CONDUCT: AngkorCodeOfConductItem[] = [
       '未经阿普萨拉国家管理局（APSARA）书面批准，严禁在吴哥景区内使用无人机航拍。',
   },
   {
-    id: 'no-giving-candy-money',
-    category: 'prohibition',
-    type: 'dont',
-    emoji: '🍬',
-    titleKh: 'ហាមឱ្យប្រាក់ ឬស្ករគ្រាប់ដល់ក្មេងៗ',
-    titleEn: 'Do Not Give Money or Candy to Children',
-    titleZh: '请勿向儿童给钱或糖果',
-    detailKh:
-      'ហាមឱ្យប្រាក់ ឬស្ករគ្រាប់ដល់ក្មេងៗ ព្រោះវាលើកទឹកចិត្តឱ្យកុមារបោះបង់ការសិក្សាមកសុំទាន ឬលក់ដូរក្នុងម៉ោងរៀន។',
-    detailEn:
-      'Giving money or sweets encourages children to skip school to beg or hawk souvenirs around the temples.',
-    detailZh:
-      '向儿童给钱或糖果会促使孩子辍学行乞，请支持孩子们留在学校读书。',
-  },
-  {
     id: 'respect-monks-sacred',
     category: 'etiquette',
     type: 'do',
