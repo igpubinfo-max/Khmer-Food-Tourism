@@ -14,7 +14,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "បទពិសោធន៍ជិះខ្សែរ៉កលើចុងឈើខ្ពស់ៗក្នុងព្រៃធម្មជាតិនៃឧទ្យានអង្គរ ខេត្តសៀមរាប អមដោយស្ពានយោលលើអាកាស និងការណែនាំអំពីប្រព័ន្ធអេកូឡូស៊ីព្រៃឈើដោយគ្រូបង្ហាត់ជំនាញសុវត្ថិភាពអន្តរជាតិ។",
     "descriptionEn": "Soar across ancient rainforest canopies on suspended sky bridges and high-wire ziplines inside the Angkor nature reserve with certified safety rangers.",
     "descriptionZh": "在专业安全教练带领下，飞越暹粒原始森林树冠高空滑索与空中吊桥，体验刺激的生态探险之旅。",
-    "photoUrl": "/destinations/dest-15.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ផ្លូវទៅប្រាសាទតាកែវ ភូមិក្រវ៉ាន់ សង្កាត់នគរធំ ក្រុងសៀមរាប",
@@ -46,9 +46,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "野生长臂猿生态导览"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-15.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-2",
@@ -63,7 +61,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ផ្លូវជិះទូកកាយ៉ាក់ និងក្ដារឈរអុំ (SUP) ដ៏ល្បីល្បាញតាមដៃព្រែកកំពត ដែលមានដើមចាក និងព្រៃកោងកាងដុះប្រក់ពីលើដូចដំបូលធម្មជាតិពណ៌បៃតងត្រជាក់ភ្នែក គយគន់ទេសភាពជួរភ្នំបូកគោ។",
     "descriptionEn": "Paddle kayaks or stand-up paddleboards through the tranquil nipa-palm waterways of the Kampot River loop with panoramic views of Bokor Mountain.",
     "descriptionZh": "沿着贡布河水椰树环绕的翡翠水道划皮划艇或桨板，远眺波哥山脉迷人风光。",
-    "photoUrl": "/destinations/dest-22.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ភូមិម៉ាក់ប្រាង្គ ស្រុកទឹកឈូ ខេត្តកំពត",
@@ -95,9 +93,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "波哥山河畔美景"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-22.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-3",
@@ -112,7 +108,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "សកម្មភាពមុជទឹកសមុទ្រ (Scuba Diving & Snorkeling) ទស្សនាផ្កាថ្មធម្មជាតិ ហ្វូងត្រីសមុទ្រចម្រុះពណ៌ និងបាតសមុទ្រភ្លឺផ្លេកពេលយប់ (Bioluminescent Plankton) នៅជុំវិញកោះរ៉ុង និងកោះរ៉ុងសន្លឹម។",
     "descriptionEn": "Explore vibrant coral reefs, tropical marine life, and glowing night plankton around Koh Rong and Koh Rong Sanloem with certified PADI dive instructors.",
     "descriptionZh": "在专业潜水教练陪同下探索高龙岛与高龙撒冷岛色彩斑斓的珊瑚礁、热带鱼群及夜间蓝眼泪奇观。",
-    "photoUrl": "/destinations/dest-18.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "ឆ្នេរកោះតូច សង្កាត់កោះរ៉ុង ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -144,9 +140,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "海岛乘船出海游"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-18.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-4",
@@ -161,7 +155,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ដំណើរកម្សាន្តបើកម៉ូតូកង់បួន (ATV) ឆ្លងកាត់ផ្លូវដីក្រហម វាលស្រែបៃតង ភូមិអ្នកស្រុក និងប្រាសាទបុរាណស្ងប់ស្ងាត់នៅជាយក្រុងសៀមរាប រហូតដល់ពេលថ្ងៃលិចដ៏ស្រស់ត្រកាល។",
     "descriptionEn": "Ride all-terrain quad bikes along scenic red-earth trails, emerald rice paddies, traditional stilt villages, and hidden rural temples at sunset.",
     "descriptionZh": "驾驶四轮全地形越野车穿越暹粒郊外红土小径、翠绿稻田与古老村落，欣赏壮丽的田园日落。",
-    "photoUrl": "/destinations/dest-25.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ភូមិស្វាយដង្គំ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
@@ -193,9 +187,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "探访原生态高棉村落"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-25.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-5",
@@ -210,7 +202,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "គោលដៅដើរព្រៃឡើងភ្នំ និងបោះតង់ដ៏ល្បីបំផុតនៅកម្ពុជា ស្ថិតនៅចំណុចប្រសព្វខេត្តកំពង់ស្ពឺ កោះកុង និងពោធិ៍សាត់ ដែលមានវាលស្មៅបៃតងល្វឹងល្វើយ ព្រៃស្រល់ និងសមុទ្រពពកពេលព្រឹកព្រលឹម។",
     "descriptionEn": "Cambodia’s premier mountain trekking and cloud-camping peak in Thma Bang / Oral range, featuring sweeping alpine meadows, pine ridges, and sunrise cloud seas.",
     "descriptionZh": "柬埔寨最著名的徒步登山与云海露营圣地，拥有辽阔的高山草甸、松林山脊与日出云海奇观。",
-    "photoUrl": "/destinations/dest-28.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "សហគមន៍អេកូទេសចរណ៍តាសាល ស្រុកឱរ៉ាល់ ខេត្តកំពង់ស្ពឺ",
@@ -242,9 +234,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "360度豆蔻山脉全景"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-28.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-6",
@@ -259,7 +249,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ទស្សនាការប្រកួតប្រដាល់គុនខ្មែរផ្ទាល់នៅសង្វៀនទូរទស្សន៍រៀងរាល់ចុងសប្ដាហ៍ និងសាកល្បងហាត់ក្បាច់គុនខ្មែរបុរាណជាមួយគ្រូបង្វឹកជើងឯក សម្រាប់ភ្ញៀវទេសចរដែលស្រឡាញ់កីឡាប្រពៃណីជាតិ។",
     "descriptionEn": "Experience live weekend Kun Khmer championship bouts and introductory traditional martial arts training sessions with veteran Cambodian fighters.",
     "descriptionZh": "现场观看周末高棉古拳（Kun Khmer）擂台争霸赛，并可跟随冠军教练体验正宗高棉传统武术训练。",
-    "photoUrl": "/destinations/dest-3.jpg",
+    "photoUrl": "",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "មហាវិថីព្រះមុនីវង្ស សង្កាត់បឹងកេងកង ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
@@ -291,9 +281,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "传统高棉战鼓音乐文化"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-3.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-7",
@@ -308,7 +296,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ទីលានវាយកូនហ្គោលលំដាប់ពិភពលោក ៣៦ ឡូត៍ រចនាដោយ Sir Nick Faldo ដែលមានរូបសំណាកប្រាសាទបុរាណខ្មែរដូចជា អង្គរវត្ត បាយ័ន និងព្រះវិហារ អមដោយទីលានវាយកូនហ្គោលពេលយប់ (Night Golf)។",
     "descriptionEn": "Award-winning 36-hole championship golf course designed by Sir Nick Faldo, featuring scale replicas of Angkor Wat, Bayon, and Preah Vihear plus floodlit night golf.",
     "descriptionZh": "由名将尼克·佛度爵士设计的36洞国际锦标赛级高尔夫球场，融合微缩吴哥古迹景观并支持夜间灯光挥杆。",
-    "photoUrl": "/destinations/dest-6.jpg",
+    "photoUrl": "",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "មហាវិថីឈ្នះឈ្នះ សង្កាត់ព្រែកឯង ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ",
@@ -340,9 +328,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "高棉古迹微缩景观球道"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-6.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-8",
@@ -357,7 +343,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "សួនទឹកកម្សាន្តដ៏ធំទំនើបបំផុតនៅកម្ពុជា ដែលមានអាងទឹករលកសមុទ្រសិប្បនិម្មិត ស្លាយទឹកខ្ពស់ៗ កន្លែងជិះក្ដាររលក (FlowRider Surfing) និងអាងហែលទឹកសម្រាប់គ្រួសារ។",
     "descriptionEn": "Cambodia’s largest modern water park featuring giant water slides, a massive wave pool, FlowRider surf simulator, and lazy river rapids.",
     "descriptionZh": "柬埔寨规模最大的现代化水上主题乐园，拥有巨型造浪池、高空滑水道、人工冲浪池及漂流河。",
-    "photoUrl": "/destinations/dest-9.jpg",
+    "photoUrl": "",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "មហាវិថីឈ្នះឈ្នះ សង្កាត់ព្រែកតាសេក ខណ្ឌជ្រោយចង្វារ រាជធានីភ្នំពេញ",
@@ -389,9 +375,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "高空极速滑水道"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-9.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-9",
@@ -406,7 +390,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "កសិដ្ឋានបង្ហាត់ជិះសេះ និងនាំភ្ញៀវទេសចរជិះសេះដើរលេងកាត់វាលស្រែ ភូមិជនបទ និងប្រាសាទបុរាណស្ងប់ស្ងាត់ក្នុងខេត្តសៀមរាប ស័ក្តិសមសម្រាប់ទាំងអ្នកទើបចាប់ផ្ដើម និងអ្នកជំនាញ។",
     "descriptionEn": "Guided horseback riding trails through peaceful rice fields, lotus ponds, and rural villages outside Siem Reap for both beginners and experienced riders.",
     "descriptionZh": "提供专业马术指导与田园骑马之旅，骑马漫步于暹粒乡间稻田、莲花池与古朴村落之间。",
-    "photoUrl": "/destinations/dest-14.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ភូមិស្វាយដង្គំ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
@@ -438,9 +422,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "田园日落骑行摄影"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-14.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-10",
@@ -455,7 +437,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ផ្លូវជិះកង់មហាគ្រួសារ និងអ្នកស្រឡាញ់កីឡាជិះកង់ ឆ្លងកាត់ម្លប់ឈើត្រឈឹងត្រឈៃ ប្រឡាយទឹកបុរាណ និងកំពែងក្រុងអង្គរធំ ដែលជាផ្លូវជិះកង់ធម្មជាតិដ៏ស្អាតបំផុតនៅអាស៊ីអាគ្នេយ៍។",
     "descriptionEn": "Dedicated shaded cycling network winding through ancient Angkorian forest canopies, moat embankments, and hidden temple ruins away from motor traffic.",
     "descriptionZh": "专为骑行爱好者打造的吴哥森林自行车绿道，穿行于千年古树林荫、古护城河畔与静谧寺庙遗址之间。",
-    "photoUrl": "/destinations/dest-1.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ផ្លូវជិះកង់ឧទ្យានអង្គរ សង្កាត់គោកចក ក្រុងសៀមរាប",
@@ -487,9 +469,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "无机动车绿色生态步道"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-1.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-11",
@@ -504,7 +484,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ជិះទូកកាយ៉ាក់កាត់ព្រៃកោងកាងធម្មជាតិដ៏ធំល្វឹងល្វើយ និងដើរឆ្លងស្ពានយោលកាត់ដៃសមុទ្រនៅសហគមន៍អេកូទេសចរណ៍ពាមក្រសោប ខេត្តកោះកុង។",
     "descriptionEn": "Kayak through winding coastal mangrove tunnels and cross scenic elevated walkways and suspension bridges in Koh Kong’s protected sanctuary.",
     "descriptionZh": "划皮划艇穿梭于国公省原始海岸红树林水道，漫步高空栈道与跨海吊桥，感受纯净自然生态。",
-    "photoUrl": "/destinations/dest-31.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
     "addressKh": "ឃុំពាមក្រសោប ស្រុកមណ្ឌលសីមា ខេត្តកោះកុង",
@@ -536,9 +516,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "河口生态游船体验"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-31.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-12",
@@ -553,7 +531,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ហែលទឹកលេងក្នុងបឹងភ្នំភ្លើងបុរាណដែលមានទឹកថ្លាឈ្វេងដូចកញ្ចក់ និងដើរហាត់ប្រាណតាមផ្លូវព្រៃជុំវិញបឹងប្រវែង ៣ គីឡូម៉ែត្រ ក្នុងខេត្តរតនគិរី។",
     "descriptionEn": "Swim in crystal-clear emerald waters of a 700,000-year-old volcanic crater lake and hike the 3 km shaded rainforest perimeter trail in Ratanakiri.",
     "descriptionZh": "在清澈见底的七十万年古火山口湖中畅游，并沿3公里原始雨林环湖步道徒步吸氧。",
-    "photoUrl": "/destinations/dest-36.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
     "addressKh": "សង្កាត់យក្សឡោម ក្រុងបានលុង ខេត្តរតនគិរី",
@@ -585,9 +563,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "探访本土少数民族文化"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-36.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-13",
@@ -602,7 +578,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ដំណើរផ្សងព្រេងដើរឆ្លងកាត់ជ្រលងភ្នំវាលស្មៅ ព្រៃធម្មជាតិ និងទឹកធ្លាក់ប៊ូស្រា ៣ ដំណាក់ ព្រមទាំងការទស្សនាដែនជម្រកសត្វដំរីធម្មជាតិនៅខេត្តមណ្ឌលគិរី។",
     "descriptionEn": "Trek across windswept grassy hills, deep jungle valleys, ethical elephant sanctuaries, and the roaring tiers of Bousra Waterfall in Mondulkiri.",
     "descriptionZh": "徒步穿越蒙多基里连绵起伏的高山草甸、原始森林谷地、大象生态保护区与壮观的布斯拉三叠瀑布。",
-    "photoUrl": "/destinations/dest-34.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "ឃុំពេជ្រាដា ស្រុកពេជ្រាដា ខេត្តមណ្ឌលគិរី",
@@ -634,9 +610,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "高山草甸星空露营"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-34.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-14",
@@ -651,7 +625,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ជិះទូកកាយ៉ាក់ដោយស្ងប់ស្ងាត់តាមដងទន្លេមេគង្គដើម្បីទស្សនាផ្សោតទឹកសាបកម្រនៅអន្លង់កាំពី និងជិះកង់ជុំវិញកោះទ្រង់ ៩ គីឡូម៉ែត្រ ទស្សនាចម្ការក្រូចថ្លុងធម្មជាតិ។",
     "descriptionEn": "Paddle river kayaks across flooded Mekong forests to spot rare Irrawaddy dolphins at Kampi and cycle the 9 km car-free loop around Koh Trong pomelo island.",
     "descriptionZh": "在湄公河甘比水域划皮划艇静观珍稀伊洛瓦底江豚，并乘渡轮登上笼岛享受9公里环岛单车骑行与柚子园风光。",
-    "photoUrl": "/destinations/dest-38.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តក្រចេះ",
     "provinceEn": "Kratie",
     "addressKh": "ភូមិកាំពី ឃុំសំបុក ស្រុកចិត្របុរី ខេត្តក្រចេះ",
@@ -683,9 +657,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "品尝正宗桔井甜柚"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-38.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-adv-15",
@@ -700,7 +672,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ជិះឡូរីឫស្សីប្រពៃណីកាត់វាលស្រែបាត់ដំបង និងដើរឡើងភ្នំសំពៅគយគន់ទេសភាពវាលស្រែពីលើកំពូលភ្នំ ព្រមទាំងទស្សនាហ្វូងប្រចៀវរាប់លានក្បាលហើរចេញពីល្អាងភ្នំពេលថ្ងៃលិច។",
     "descriptionEn": "Ride Battambang’s iconic open-air Bamboo Train (Norry) across rural tracks and hike Phnom Sampov limestone mountain to watch millions of bats emerge at dusk.",
     "descriptionZh": "体验马德望著名的露天竹火车穿越田野，徒步登上森宝山俯瞰平原风光，傍晚观赏数百万只蝙蝠出洞奇观。",
-    "photoUrl": "/destinations/dest-20.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
     "addressKh": "ឃុំអូរដំបង១ ស្រុកសង្កែ និងឃុំភ្នំសំពៅ ស្រុកបាណន់ ខេត្តបាត់ដំបង",
@@ -732,9 +704,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "日落百万蝙蝠出洞奇观"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-20.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-1",
@@ -749,7 +719,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "មជ្ឈមណ្ឌលថែរក្សា និងផលិតសិប្បកម្មប្រណិតខ្មែរដ៏ល្បីល្បាញនៅសៀមរាប ដែលភ្ញៀវអាចទស្សនាការឆ្លាក់ថ្មភក់ ចម្លាក់ឈើ ម្រក្សណ៍ខ្មែរ គ្រឿងប្រាក់ និងតម្បាញសូត្រមាសដោយផ្ទាល់ ព្រមទាំងទិញជាវត្ថុអនុស្សាវរីយ៍ផ្លូវការ។",
     "descriptionEn": "Renowned Cambodian social enterprise showcasing live master workshops in sandstone sculpture, wood carving, lacquerware, silver plating, and hand-woven golden silk.",
     "descriptionZh": "柬埔寨最著名的高棉传统工艺复兴中心，游客可免费参观砂岩雕刻、木雕、漆器、银器及金丝绸手工织造工坊并选购正品伴手礼。",
-    "photoUrl": "/destinations/dest-12.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ផ្លូវស្ទឹងថ្មី សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប (ក្បែរផ្សារចាស់)",
@@ -781,9 +751,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "博物馆级精致高棉纪念品"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-12.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-2",
@@ -798,7 +766,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ចម្ការម្រេចកំពតសរីរាង្គដែលទទួលស្គាល់សម្គាល់ភូមិសាស្ត្រ (GI) ពិភពលោក ផ្ដល់ជូនការដើរទស្សនាចម្ការម្រេចដោយឥតគិតថ្លៃ ការភ្លក្សម្រេចក្រហម ម្រេចខ្មៅ ម្រេចស និងទិញគ្រឿងទេសខ្មែរវេចខ្ចប់យ៉ាងស្អាតជាកាដូ។",
     "descriptionEn": "World-famous organic Kampot Pepper estate offering complimentary guided plantation tours, guided spice tastings, and certified GI red, black, white, and salted Kampot pepper gifts.",
     "descriptionZh": "享誉世界的有机地理标志（GI）贡布胡椒庄园，提供免费果园导览、多品种胡椒品鉴及精美包装的正宗贡布胡椒伴手礼。",
-    "photoUrl": "/destinations/dest-23.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "addressKh": "ភូមិបុស្សញិញ ឃុំកូនសត្វ ស្រុកទឹកឈូ ខេត្តកំពត (ជិតបឹងទំនប់ប្រទក្សក្រឡា)",
@@ -830,9 +798,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "有机香料庄园观光漫步"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-23.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-3",
@@ -847,7 +813,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "កោះតម្បាញសូត្រប្រពៃណីខ្មែរនៅកណ្ដាលទន្លេមេគង្គ ដែលភ្ញៀវអាចមើលដំណើរការចិញ្ចឹមដង្កូវនាង រវៃសូត្រ និងត្បាញហូលផាមួង ក្រមាសូត្រដោយកីតម្បាញឈើពីសិប្បករផ្ទាល់ក្នុងតម្លៃសមរម្យ។",
     "descriptionEn": "Idyllic Mekong River island where families weave intricate Khmer Ikat silk (Hol, Phamoung, and Krama scarves) on traditional wooden handlooms beneath stilt houses.",
     "descriptionZh": "位于湄公河畔的传统丝绸手工艺岛，游客可亲眼见证桑蚕养殖、抽丝染色与木织机手工织造高棉真丝水布（Krama）及传统礼服绸缎。",
-    "photoUrl": "/destinations/dest-4.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
     "addressKh": "ឃុំកោះឧកញ៉ាតី ស្រុកខ្សាច់កណ្ដាល ខេត្តកណ្ដាល (ជិះទូកចម្លងពីជ្រោយចង្វារ)",
@@ -879,9 +845,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "惬意环岛骑行与湄公河渡轮体验"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-4.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-4",
@@ -896,7 +860,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "សិប្បកម្មផលិតគ្រឿងក្រអូប និងអំណោយធម្មជាតិខ្មែរដ៏ល្បីនៅសៀមរាប មានដូចជា សាប៊ូប្រេងដូងធម្មជាតិ ប្រេងក្រអូបស្លឹកគ្រៃ ទៀនក្រអូប តែផ្កាម្លិះ កាហ្វេ និងគ្រឿងទេសខ្មែរវេចខ្ចប់ក្នុងប្រអប់ស្លឹកត្នោត។",
     "descriptionEn": "Botanical workshop crafting natural coconut-oil soaps, lemongrass essential oils, scented candles, Khmer herbal teas, and spice gift boxes hand-woven from palm leaves.",
     "descriptionZh": "暹粒知名天然植物手信工坊，手工制作椰油香皂、柠檬草精油、香薰蜡烛、高棉花草茶及棕榈叶编织礼盒装传统香料。",
-    "photoUrl": "/destinations/dest-16.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ផ្លូវពោធិ៍កំបោរ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
@@ -928,9 +892,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "免费参观手工制作工坊"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-16.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-5",
@@ -945,7 +907,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ម៉ាកផលិតផលថែរក្សាស្បែក និងសុខភាពធម្មជាតិផលិតនៅកម្ពុជា (Made in Cambodia) ផ្សំពីរុក្ខជាតិឱសថខ្មែរដូចជា រមៀត ខ្ញី ម្រុំ ស្លឹកគ្រៃ និងអង្ករផ្ការំដួល ស័ក្តិសមបំផុតសម្រាប់ទិញជាកាដូជូនមនុស្សជាទីស្រឡាញ់។",
     "descriptionEn": "Premier Made-in-Cambodia natural wellness brand formulating herbal balms, turmeric-rice scrubs, moringa oils, and aromatic diffusers from local botanicals.",
     "descriptionZh": "柬埔寨高端本土草本护肤品牌，采用姜黄、柠檬草、辣木籽与茉莉香米等本土天然植物精制草本膏、精油与身体护理礼盒。",
-    "photoUrl": "/destinations/dest-2.jpg",
+    "photoUrl": "",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "ផ្លូវព្រះស៊ីសុវត្ថិ (មាត់ទន្លេ) សង្កាត់ផ្សារកណ្ដាល១ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -977,9 +939,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "100%柬埔寨本土研发制造伴手礼"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-2.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-6",
@@ -994,7 +954,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "សិប្បកម្មផលិតស្រាអង្ករខ្មែរត្រាំជាមួយផ្លែឈើ និងគ្រឿងទេសធម្មជាតិ (ដូចជា ស្វាយ-ម្ទេស, ដូង-ម្នាស់, កាហ្វេ-ក្រវាញ, ខ្ញី-ម្រេចក្រហម) ច្រកក្នុងដបគូរគំនូរដោយដៃដ៏ស្រស់ស្អាតសម្រាប់ធ្វើជាកាដូអនុស្សាវរីយ៍។",
     "descriptionEn": "Boutique Siem Reap distillery crafting aromatic fruit-and-spice infused Cambodian rice wines presented in hand-painted artisan bottles with free tasting sessions.",
     "descriptionZh": "暹粒特色手工酿造坊，将高棉米酒与芒果辣椒、椰子菠萝、贡布红胡椒等热带水果香料浸酿，装入纯手绘艺术酒瓶中，并提供免费品鉴。",
-    "photoUrl": "/destinations/dest-13.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ផ្លូវសាលាកន្សែង សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
@@ -1026,9 +986,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "便携式旅行伴手礼套装"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-13.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-7",
@@ -1043,7 +1001,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ភូមិសិប្បករឆ្លាក់ប្រាក់ និងស្ពាន់បុរាណតាំងពីសម័យរាជធានីឧត្តុង្គ ស្ថិតនៅតាមមាត់ទន្លេសាប ស្រុកពញាឮ ដែលល្បីល្បាញខាងផលិតប្រអប់ប្រាក់រូបផ្លែល្ពៅ ផ្តិលប្រាក់ និងគ្រឿងអលង្ការក្បាច់ខ្មែរ។",
     "descriptionEn": "Historic riverside artisan village near Oudong where multi-generational silversmiths hand-hammer intricate Khmer silver betel boxes, bowls, and jewelry.",
     "descriptionZh": "毗邻乌栋古都的百年银匠村，世代银匠手工锤揲雕琢精美的高棉传统银盒、银钵与复古首饰。",
-    "photoUrl": "/destinations/dest-27.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
     "addressKh": "ឃុំកំពង់ហ្លួង ស្រុកពញាឮ ខេត្តកណ្ដាល (ជិតភ្នំព្រះរាជទ្រព្យ/ឧត្តុង្គ)",
@@ -1075,9 +1033,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "工坊源头直购价格"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-27.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-8",
@@ -1092,7 +1048,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ភូមិផលិតក្អមឆ្នាំងដី និងវត្ថុអនុស្សាវរីយ៍ពីដីឥដ្ឋដ៏ល្បីល្បាញប្រចាំខេត្តកំពង់ឆ្នាំង ដែលភ្ញៀវទេសចរអាចសាកល្បងសូនរូបដីឥដ្ឋដោយខ្លួនឯង និងទិញគ្រឿងសេរ៉ាមិចខ្មែរស្អាតៗត្រឡប់ទៅផ្ទះ។",
     "descriptionEn": "Heartland of Kampong Chhnang (\"Port of Pottery\") where visitors can try shaping clay on pottery wheels and purchase authentic handmade terracotta vessels and decor.",
     "descriptionZh": "磅清扬（意为“陶器之港”）最著名的传统制陶村，游客可亲自体验手工拉坯制陶并选购精致的高棉红陶工艺品。",
-    "photoUrl": "/destinations/dest-30.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
     "provinceEn": "Kampong Chhnang",
     "addressKh": "ភូមិអណ្ដូងឫស្សី ឃុំស្រែថ្មី ស្រុករលាប្អៀរ ខេត្តកំពង់ឆ្នាំង",
@@ -1124,9 +1080,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "糖棕树与稻田环绕的田园风光"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-30.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-9",
@@ -1141,7 +1095,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "សហគមន៍ផលិតស្ករត្នោតកំពង់ស្ពឺដែលទទួលស្គាល់សម្គាល់ភូមិសាស្ត្រ (GI) នៅសហភាពអឺរ៉ុប និងអន្តរជាតិ មានលក់ស្ករត្នោតម្សៅសរីរាង្គ ស្ករត្នោតផែន ស្ករត្នោតរុំស្លឹកត្នោត និងទឹកត្នោតផ្អែមធម្មជាតិ។",
     "descriptionEn": "Protected Geographical Indication (GI) palm sugar community where artisans climb lofty sugar palms and simmer pure golden nectar into organic granulated and palm-leaf wrapped sugar.",
     "descriptionZh": "荣获国际地理标志（GI）认证的磅士卑棕糖社区，现场展示传统棕糖熬制技艺，提供有机棕糖粉、棕叶糖块及新鲜甜棕汁。",
-    "photoUrl": "/destinations/dest-29.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "ឃុំរលាំងចក ស្រុកសំរោងទង ខេត្តកំពង់ស្ពឺ (តាមបណ្ដោយផ្លូវជាតិលេខ ៤)",
@@ -1173,9 +1127,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "天然健康低升糖养生伴手礼"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-29.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-10",
@@ -1190,7 +1142,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ផ្សាររាត្រី និងសិប្បកម្មបែបច្នៃប្រឌិតដែលប្រមូលផ្ដុំផលិតផលធ្វើដោយដៃសិប្បករខ្មែរសុទ្ធសាធ រួមមាន កាបូបច្នៃ សម្លៀកបំពាក់សូត្រ និងកប្បាស គ្រឿងអលង្ការ គំនូរ និងគ្រឿងទេសខ្មែរ។",
     "descriptionEn": "Vibrant open-air artisan market in Siem Reap dedicated exclusively to locally crafted Cambodian fashion, jewelry, eco-accessories, fine art, and gourmet food gifts.",
     "descriptionZh": "暹粒极具人气的文创夜市，汇集100%柬埔寨本土设计师与工匠制作的丝棉服饰、手作首饰、环保包袋、艺术画作与特色美食伴手礼。",
-    "photoUrl": "/destinations/dest-11.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ផ្លូវអុំឃុន សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប (មាត់ស្ទឹងសៀមរាប)",
@@ -1222,9 +1174,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "晚间现场文化与音乐表演"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-11.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-11",
@@ -1239,7 +1189,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "មជ្ឈមណ្ឌលទិញវត្ថុអនុស្សាវរីយ៍ដ៏ធំបំផុតនៅរាជធានីភ្នំពេញ ដែលមានលក់ក្រមាខ្មែរ គ្រឿងប្រាក់ គ្រឿងត្បូង ចម្លាក់ឈើ សម្លៀកបំពាក់ប្រពៃណី ត្រីងៀត សាច់ក្រក និងនំចំណីខ្មែរគ្រប់ប្រភេទ។",
     "descriptionEn": "Iconic 1937 Art Deco dome market and bustling souvenir bazaars offering Khmer Krama scarves, silverwork, gems, wood carvings, dried seafood, and local delicacies.",
     "descriptionZh": "金边最具代表性的1937年装饰艺术圆顶市场与伴手礼集散地，荟萃高棉水布、银饰宝石、木雕工艺品、干货特产与传统糕点。",
-    "photoUrl": "/destinations/dest-5.jpg",
+    "photoUrl": "",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "សង្កាត់ផ្សារថ្មី១ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -1271,9 +1221,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "精选柬埔寨干货特产与传统点心"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-5.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-12",
@@ -1288,7 +1236,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ភូមិសិប្បករឆ្លាក់ថ្មភក់ដ៏ល្បីល្បាញនៅជើងភ្នំសន្ទុក ខេត្តកំពង់ធំ ដែលឆ្លាក់រូបបដិមា រូបអប្សរា តោថ្ម និងគ្រឿងតុបតែងគេហដ្ឋានតាមក្បាច់បុរាណសម័យអង្គរ និងសម័យសំបូរព្រៃគុក។",
     "descriptionEn": "Master sandstone-carving community at the foot of sacred Phnom Santuk in Kampong Thom, sculpting classical Sambor Prei Kuk and Angkorian statues and home decor.",
     "descriptionZh": "位于磅同省圣山三笃山脚下的传统砂岩雕刻村，匠人们世代传承三波坡雷古与吴哥风格石雕技艺，创作精美仙女浮雕与家居石艺品。",
-    "photoUrl": "/destinations/dest-32.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកំពង់ធំ",
     "provinceEn": "Kampong Thom",
     "addressKh": "ឃុំកកោះ ស្រុកសន្ទុក ខេត្តកំពង់ធំ (តាមផ្លូវជាតិលេខ ៦ ជើងភ្នំសន្ទុក)",
@@ -1320,9 +1268,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "6号公路沿线工坊现场观摩选购"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-32.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-13",
@@ -1337,7 +1283,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "កន្លែងភ្លក្ស និងទិញកាហ្វេភ្នំមណ្ឌលគិរីលីងថ្មីៗ ទឹកឃ្មុំព្រៃធម្មជាតិសុទ្ធ ១០០% ផ្លែបឺរមណ្ឌលគិរី គ្រាប់ម៉ាកាដាមៀ និងតែផ្កាឈើភ្នំ ដែលជាកាដូដ៏ពេញនិយមបំផុតពីតំបន់ភូមិភាគឦសាន។",
     "descriptionEn": "Highland agro-tourism plantation in Sen Monorom offering freshly roasted Mondulkiri coffee beans, pure wild forest honey, macadamia nuts, and mountain herbal teas.",
     "descriptionZh": "位于森莫诺隆的高原生态农庄，盛产现烘蒙多基里高山咖啡豆、100%纯天然野生森林蜂蜜、夏威夷果与高山花草茶伴手礼。",
-    "photoUrl": "/destinations/dest-35.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "សង្កាត់ស្ពានមានជ័យ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -1369,9 +1315,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "本土夏威夷果与百香果特产礼盒"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-35.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-14",
@@ -1386,7 +1330,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ចម្ការទំពាំងបាយជូរតែមួយគត់នៅខេត្តបាត់ដំបង ស្ថិតនៅតាមដងស្ទឹងសង្កែក្បែរប្រាសាទភ្នំបាណន់ ដែលផលិតស្រាទំពាំងបាយជូរ ទឹកទំពាំងបាយជូរស្រស់ ស្រាខ្ញី និងដំណាប់ផ្លែឈើសម្រាប់ទិញជាកាដូ។",
     "descriptionEn": "Cambodia’s pioneering riverside vineyard near Phnom Banan temple producing local grape wines, brandy, fresh grape juice, and organic ginger cordials.",
     "descriptionZh": "马德望桑岐河畔著名的巴南山葡萄园，酿造柬埔寨本土葡萄酒、鲜榨葡萄汁、生姜甜酒与果脯伴手礼。",
-    "photoUrl": "/destinations/dest-21.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
     "addressKh": "ឃុំកន្ទឺ២ ស្រុកបាណន់ ខេត្តបាត់ដំបង (ផ្លូវទៅប្រាសាទភ្នំបាណន់)",
@@ -1418,9 +1362,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "选购姜汁甜酒与马德望特产伴手礼"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-21.jpg"
-    ]
+    "galleryPhotos": []
   },
   {
     "id": "dest-souv-15",
@@ -1435,7 +1377,7 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
     "descriptionKh": "ផ្សារគ្រឿងសមុទ្រដ៏ល្បីល្បាញនៅមាត់សមុទ្រខេត្តកែប ដែលក្រៅពីក្ដាមសេះឆាម្រេចខ្ចី ភ្ញៀវទេសចរនិយមទិញបង្គាក្រៀម មឹកក្រៀម ត្រីងៀតសមុទ្រ ទឹកត្រីកំពត និងម្រេចកំពតវេចខ្ចប់យកទៅផ្ញើគ្រួសារ។",
     "descriptionEn": "Bustling seaside market where travelers savor fresh blue swimmer crabs and shop for premium sun-dried prawns, dried squid, Kampot fish sauce, and sea salt souvenirs.",
     "descriptionZh": "白马省最热闹的海滨市集，除品尝鲜活青胡椒炒蟹外，更是选购优质虾干、鱿鱼干、贡布传统鱼露与海盐伴手礼的最佳地点。",
-    "photoUrl": "/destinations/dest-24.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
     "addressKh": "ផ្លូវមាត់សមុទ្រ សង្កាត់កែប ក្រុងកែប ខេត្តកែប",
@@ -1467,8 +1409,6 @@ export const sportsAndSouvenirsDestinations: TouristDestination[] = [
       "现捕梭子蟹炒鲜青胡椒"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-24.jpg"
-    ]
+    "galleryPhotos": []
   }
 ];

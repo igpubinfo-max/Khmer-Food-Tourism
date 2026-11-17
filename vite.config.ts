@@ -204,7 +204,7 @@ function kftVersionManifestPlugin(): Plugin {
 }
 
 // https://vite.dev/config/
-// Auto-reloaded buildCode: 1630
+// Auto-reloaded buildCode: 1631
 export default defineConfig({
   base: './',
   define: {

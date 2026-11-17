@@ -22,7 +22,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5625,104.9317",
     "latitude": 11.5625,
     "longitude": 104.9317,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1450,
     "highlightsKh": [
       "ប្រាសាទទេវាវិនិច្ឆ័យ",
@@ -97,7 +97,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5761,104.9231",
     "latitude": 11.5761,
     "longitude": 104.9231,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 750,
     "highlightsKh": [
       "ចេតិយព្រះចៅពញាយ៉ាត",
@@ -136,7 +136,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5564,104.9282",
     "latitude": 11.5564,
     "longitude": 104.9282,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1120,
     "highlightsKh": [
       "ស្ថាបត្យកម្មផ្កាឈូក វណ្ណ ម៉ូលីវណ្ណ",
@@ -235,7 +235,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ទីតាំងប្រវត្តិសាស្ត្រវាលពិឃាតជើងឯក ស្ថិតនៅចម្ងាយប្រមាណ ១៥ គីឡូម៉ែត្រពីរាជធានីភ្នំពេញ ដែលមានស្តូបកញ្ចក់រក្សាទុកអដ្ឋិធាតុជនរងគ្រោះ ដើម្បីឧទ្ទិសកុសល និងជាមេរៀនប្រវត្តិសាស្ត្រសម្រាប់មនុស្សជាតិ។",
     "descriptionEn": "The historical site of the Killing Fields located 15km south of Phnom Penh, featuring a memorial Buddhist stupa filled with skulls to honor victims.",
-    "photoUrl": "/destinations/dest-7.jpg",
+    "photoUrl": "",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "addressKh": "ភូមិរលួស សង្កាត់ជើងឯក ខណ្ឌដង្កោ",
@@ -255,9 +255,7 @@ export const destPart1: TouristDestination[] = [
       "មគ្គុទ្ទេសក៍សំឡេងពហុភាសា"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-7.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -321,7 +319,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4125,103.867",
     "latitude": 13.4125,
     "longitude": 103.867,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 2450,
     "highlightsKh": [
       "ទស្សនាថ្ងៃរះដ៏អស្ចារ្យ",
@@ -369,7 +367,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4413,103.8587",
     "latitude": 13.4413,
     "longitude": 103.8587,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1890,
     "highlightsKh": [
       "ព្រះភក្ត្រថ្មញញឹមអាថ៌កំបាំង ២១៦",
@@ -406,7 +404,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4348,103.8893",
     "latitude": 13.4348,
     "longitude": 103.8893,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1650,
     "highlightsKh": [
       "ឫសឈើដើមស្ពង់យក្សលើប្រាសាទ",
@@ -443,7 +441,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5989,103.963",
     "latitude": 13.5989,
     "longitude": 103.963,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1350,
     "highlightsKh": [
       "ថ្មភក់ពណ៌ផ្កាឈូក",
@@ -480,7 +478,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6114,104.1089",
     "latitude": 13.6114,
     "longitude": 104.1089,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1100,
     "highlightsKh": [
       "ទឹកធ្លាក់គូលែនពីរដំណាក់",
@@ -527,7 +525,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.708361,104.025583",
     "latitude": 13.708361,
     "longitude": 104.025583,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 680,
     "highlightsKh": [
       "ចម្លាក់លិង្គបាតស្ទឹងរាប់ពាន់",
@@ -640,7 +638,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.2089,103.9744",
     "latitude": 13.2089,
     "longitude": 103.9744,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 920,
     "highlightsKh": [
       "ផ្ទះសសរខ្ពស់កប់ពពកលើទឹក",
@@ -677,7 +675,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4303,103.8992",
     "latitude": 13.4303,
     "longitude": 103.8992,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 610,
     "highlightsKh": [
       "ទស្សនាថ្ងៃរះមាត់ស្រះស្រង់",
@@ -702,7 +700,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទប្រែរូបជាប្រាសាទភ្នំឥដ្ឋក្រហម និងថ្មបាយក្រៀម កសាងនៅឆ្នាំ ៩៦១ ល្បីខាងទស្សនាថ្ងៃលិច។ រីឯប្រាសាទមេបុណ្យខាងកើត ស្ថិតនៅចំកណ្តាលបារាយណ៍បុរាណ មានរូបដំរីថ្មទោលធំៗនៅគ្រប់ជ្រុង។",
     "descriptionEn": "10th-century brick temple-mountain Pre Rup famed for sunsets, alongside East Mebon once situated on an island in the dry East Baray, guarded by monolithic stone elephants.",
-    "photoUrl": "/destinations/dest-19.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "បារាយណ៍ខាងកើត រមណីយដ្ឋានអង្គរ",
@@ -714,7 +712,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.435,103.9208",
     "latitude": 13.435,
     "longitude": 103.9208,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 580,
     "highlightsKh": [
       "ដំរីថ្មទោលធំៗនៅគ្រប់ជ្រុង",
@@ -722,9 +720,7 @@ export const destPart1: TouristDestination[] = [
       "ឥដ្ឋបុរាណពណ៌ក្រហមឆ្អៅ"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-19.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -751,7 +747,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3547,103.8547",
     "latitude": 13.3547,
     "longitude": 103.8547,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1450,
     "highlightsKh": [
       "ផ្សាររាត្រីទិញវត្ថុអនុស្សាវរីយ៍ខ្មែរ",
@@ -825,7 +821,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.7258,103.2325",
     "latitude": 10.7258,
     "longitude": 103.2325,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1550,
     "highlightsKh": [
       "ឆ្នេរខ្សាច់សសុខសាន្ត ៤ គ.ម",
@@ -872,7 +868,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5989,103.3089",
     "latitude": 10.5989,
     "longitude": 103.3089,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1180,
     "highlightsKh": [
       "ឆ្នេរសារ៉ាសិនបេទឹកថ្លាដូចកញ្ចក់",
@@ -1022,7 +1018,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Beaches & Tropical Islands",
     "descriptionKh": "កោះតូចគ្មានមនុស្សរស់នៅ ជាឋានសួគ៌សម្រាប់អ្នកចូលចិត្តមុជទឹកជ្រៅ (Scuba Diving) និងមុជទឹកមើលផ្កាថ្ម (Snorkeling) សម្បូរទៅដោយផ្កាថ្មចម្រុះពណ៌ និងហ្វូងត្រីសមុទ្រកម្រ។",
     "descriptionEn": "Uninhabited island paradise situated between the two big islands, widely regarded as the premier scuba diving and snorkeling reef in Cambodia.",
-    "photoUrl": "/destinations/dest-27.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "ចន្លោះកោះរ៉ុង និងកោះរ៉ុងសន្លឹម",
@@ -1042,9 +1038,7 @@ export const destPart1: TouristDestination[] = [
       "មុជទឹក Scuba Diving & Snorkeling"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-27.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -1110,7 +1104,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6314,104.0152",
     "latitude": 10.6314,
     "longitude": 104.0152,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1480,
     "highlightsKh": [
       "អាកាសធាតុត្រជាក់ និងអ័ព្ទលើកំពូលភ្នំ",
@@ -1313,7 +1307,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6114,104.1814",
     "latitude": 10.6114,
     "longitude": 104.1814,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 780,
     "highlightsKh": [
       "ជិះទូកកាយ៉ាក់កាត់ផ្លូវវង់បៃតង",
@@ -1389,7 +1383,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6314,104.2589",
     "latitude": 10.6314,
     "longitude": 104.2589,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 440,
     "highlightsKh": [
       "ប្រាសាទបុរាណសតវត្សរ៍ទី ៧ ក្នុងរូងភ្នំ",
@@ -1785,7 +1779,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0758,103.1975",
     "latitude": 13.0758,
     "longitude": 103.1975,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 480,
     "highlightsKh": [
       "ផ្ទះឈើបុរាណខ្មែរអាយុកាលជាង ១០០ ឆ្នាំ",
@@ -1824,7 +1818,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0114,102.9872",
     "latitude": 13.0114,
     "longitude": 102.9872,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 540,
     "highlightsKh": [
       "បឹងផ្កាឈូករីកពណ៌ផ្កាឈូកស្រស់ស្អាត",
@@ -2097,7 +2091,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.7514,103.2489",
     "latitude": 11.7514,
     "longitude": 103.2489,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 480,
     "highlightsKh": [
       "ព្រៃទឹកភ្លៀងព្រហ្មចារីដ៏ខៀវស្រងាត់",
@@ -2175,7 +2169,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5658,107.4189",
     "latitude": 12.5658,
     "longitude": 107.4189,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1650,
     "highlightsKh": [
       "ទឹកធ្លាក់ដ៏មហិមាកម្ពស់ ៣០ ម៉ែត្រ",
@@ -2224,7 +2218,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.3514,107.0114",
     "latitude": 12.3514,
     "longitude": 107.0114,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 920,
     "highlightsKh": [
       "ដើរកម្សាន្តជាមួយសត្វដំរីក្នុងព្រៃ",
@@ -2251,7 +2245,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "ទួលភ្នំពិសិដ្ឋដែលជាទីសក្ការបូជាធំបំផុតរបស់បងប្អូនជនជាតិដើមភាគតិចព្នង។ ពីលើកំពូលភ្នំអាចគយគន់ទេសភាពផ្ទះក្បឿងក្រុងសែនមនោរម្យ វាលស្មៅពណ៌មាស និងថ្ងៃលិចដ៏រ៉ូមែនទិក។",
     "descriptionEn": "Sacred indigenous mountain shrine offering sweeping 360-degree panoramic sunset views overlooking Sen Monorom town, pine groves, and golden grassy hills.",
-    "photoUrl": "/destinations/dest-58.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
     "addressKh": "ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -2271,9 +2265,7 @@ export const destPart1: TouristDestination[] = [
       "ខ្យល់ត្រជាក់បរិសុទ្ធលើកំពូលភ្នំ"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-58.jpg"
-    ],
+    "galleryPhotos": [],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
@@ -2419,7 +2411,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7314,107.0152",
     "latitude": 13.7314,
     "longitude": 107.0152,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1420,
     "highlightsKh": [
       "ទឹកបឹងភ្នំភ្លើងថ្លាដូចកញ្ចក់",
@@ -2575,7 +2567,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3414,106.9872",
     "latitude": 14.3414,
     "longitude": 106.9872,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 380,
     "highlightsKh": [
       "ឧទ្យានបេតិកភណ្ឌអាស៊ាន ASEAN Heritage",
@@ -2614,7 +2606,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3908,104.6803",
     "latitude": 14.3908,
     "longitude": 104.6803,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1850,
     "highlightsKh": [
       "បេតិកភណ្ឌពិភពលោកយូណេស្កូ UNESCO",
@@ -2663,7 +2655,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7844,104.5358",
     "latitude": 13.7844,
     "longitude": 104.5358,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1150,
     "highlightsKh": [
       "ប្រាសាទរាងពីរ៉ាមីត ៧ ជាន់កម្ពស់ ៣៦ ម៉ែត្រ",
@@ -2741,7 +2733,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.1114,104.9214",
     "latitude": 14.1114,
     "longitude": 104.9214,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 290,
     "highlightsKh": [
       "មើលសត្វត្រយងយក្សបក្សីនិមិត្តរូបជាតិ",
@@ -2817,7 +2809,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8689,105.0414",
     "latitude": 12.8689,
     "longitude": 105.0414,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1220,
     "highlightsKh": [
       "បេតិកភណ្ឌពិភពលោក UNESCO ២០១៧",
@@ -2879,7 +2871,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "អាងស្តុកទឹកធារាសាស្ត្រដ៏ធំល្វឹងល្វើយ ដែលបានក្លាយជារមណីយដ្ឋានកម្សាន្តមាត់ទឹកដ៏ពេញនិយម។ មានខ្យល់ត្រជាក់បរិសុទ្ធ ក្យូសអង្គុយញ៉ាំត្រីបឹងធម្មជាតិ និងទស្សនាថ្ងៃលិចលើផ្ទៃទឹក។",
     "descriptionEn": "Expansive reservoir lake surrounded by countryside vistas, popular for weekend getaways, wooden dining huts over the water, and fresh grilled river fish.",
-    "photoUrl": "/destinations/dest-74.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកំពង់ធំ",
     "provinceEn": "Kampong Thom",
     "addressKh": "ស្រុកស្ទឹងសែន ខេត្តកំពង់ធំ",
@@ -2899,9 +2891,7 @@ export const destPart1: TouristDestination[] = [
       "ខ្យល់ត្រជាក់បរិសុទ្ធ"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-74.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3044,7 +3034,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0114,105.4348",
     "latitude": 12.0114,
     "longitude": 105.4348,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 620,
     "highlightsKh": [
       "វត្តសម័យថ្មីកណ្តាលប្រាសាទបុរាណសតវត្សរ៍ទី ១១",
@@ -3081,7 +3071,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0258,105.4114",
     "latitude": 12.0258,
     "longitude": 105.4114,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 710,
     "highlightsKh": [
       "រឿងព្រេងប្រកួតគ្នាលើកភ្នំរវាងប្រុសនិងស្រី",
@@ -3184,7 +3174,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ចម្ការកៅស៊ូដំបូងបង្អស់ និងធំបំផុតនៅកម្ពុជា ដាំដុះតាំងពីសម័យបារាំងក្នុងទសវត្សរ៍ឆ្នាំ ១៩២០។ ដើមកៅស៊ូធំៗដុះត្រង់ជួររាប់ម៉ឺនដើម បង្កើតជាផ្លូវរូងម្លប់បៃតងយ៉ាងស្រស់ស្អាត។",
     "descriptionEn": "Cambodia oldest and largest rubber plantation established in the 1920s by Michelin. The cathedral-like avenues of towering rubber trees are a photographer dream.",
-    "photoUrl": "/destinations/dest-82.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តត្បូងឃ្មុំ",
     "provinceEn": "Tboung Khmum",
     "addressKh": "ស្រុកត្បូងឃ្មុំ ខេត្តត្បូងឃ្មុំ",
@@ -3204,9 +3194,7 @@ export const destPart1: TouristDestination[] = [
       "ថតរូបលើផ្លូវម្លប់កៅស៊ូរ៉ូមែនទិក"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-82.jpg"
-    ],
+    "galleryPhotos": [],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
@@ -3223,7 +3211,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ភូមិប្រពៃណីដែលជាប្រភពដើមនៃឈ្មោះ «កំពង់ឆ្នាំង»។ អ្នកភូមិបន្តផលិតកុលាលភាជន៍ ឆ្នាំងដី ចង្ក្រានដី និងក្អមដីបុរាណដោយដៃ និងដោយក្បាច់ឆ្លាក់ប្រពៃណីខ្មែរដូនតា។",
     "descriptionEn": "The traditional pottery heartland that gave Kampong Chhnang its name (Port of Pots), where skilled artisans shape handmade terracotta pots and stove ovens.",
-    "photoUrl": "/destinations/dest-83.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
     "provinceEn": "Kampong Chhnang",
     "addressKh": "ភូមិអណ្តូងឫស្សី ស្រុករលាប្អៀរ",
@@ -3243,9 +3231,7 @@ export const destPart1: TouristDestination[] = [
       "ទេសភាពភូមិស្រុកស្រែក្រោមម្លប់ត្នោត"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-83.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3391,7 +3377,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.1814,103.2589",
     "latitude": 12.1814,
     "longitude": 103.2589,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1580,
     "highlightsKh": [
       "ផ្លូវកោងបត់បែនស្អាតដូចគំនូរ",
@@ -3547,7 +3533,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0114,103.1814",
     "latitude": 12.0114,
     "longitude": 103.1814,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 290,
     "highlightsKh": [
       "ជម្រកសត្វក្រពើភ្នំសៀមដ៏កម្រ",
@@ -3586,7 +3572,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0358,104.1489",
     "latitude": 12.0358,
     "longitude": 104.1489,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 920,
     "highlightsKh": [
       "ឡើងកំពូលភ្នំខ្ពស់បំផុតនៅកម្ពុជា ១,៨១៣ ម៉ែត្រ",
@@ -3855,7 +3841,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "មជ្ឈមណ្ឌលសង្គ្រោះ និងថែរក្សាសត្វព្រៃធំបំផុតនៅកម្ពុជា លើផ្ទៃដីជាង ២,២០០ ហិកតា។ មានសត្វព្រៃជាង ១,២០០ ក្បាល រួមមានសត្វដំរី ខ្លាឃ្មុំ ខ្លាធំ និងសត្វកម្រជាច្រើនដែលបានសង្គ្រោះពីការជួញដូរ។",
     "descriptionEn": "The largest wildlife sanctuary and rescue center in Cambodia covering 2,200 hectares, home to over 1,200 rescued animals including Asian elephants and sun bears.",
-    "photoUrl": "/destinations/dest-99.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តតាកែវ",
     "provinceEn": "Takeo",
     "addressKh": "ស្រុកបាទី ចម្ងាយ ៤០ គ.ម ពីរាជធានីភ្នំពេញ",
@@ -3875,9 +3861,7 @@ export const destPart1: TouristDestination[] = [
       "សកម្មភាពអប់រំស្រឡាញ់សត្វព្រៃ"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-99.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4058,7 +4042,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5989,105.9872",
     "latitude": 12.5989,
     "longitude": 105.9872,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1350,
     "highlightsKh": [
       "ជួបសត្វផ្សោតក្បាលត្រឡោកទន្លេមេគង្គ",
@@ -4200,7 +4184,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "តំបន់ដីសើមអន្តរជាតិរ៉ាមសារប្រវែង ៣៧ គីឡូម៉ែត្រ សម្បូរដោយដើមឈើដុះឫសចម្លែកៗកណ្តាលទឹកទន្លេមេគង្គ ហ្វូងសត្វស្លាបកម្រ និងកោះថ្មធម្មជាតិស្អាតដូចគំនូរ។",
     "descriptionEn": "Internationally protected Ramsar wetland corridor stretching 37km, characterized by bizarrely sculpted flooded trees with exposed roots and rare river birds.",
-    "photoUrl": "/destinations/dest-108.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តស្ទឹងត្រែង",
     "provinceEn": "Stung Treng",
     "addressKh": "តាមដងទន្លេមេគង្គលើ ក្រុងស្ទឹងត្រែង ដល់ព្រំដែនឡាវ",
@@ -4220,9 +4204,7 @@ export const destPart1: TouristDestination[] = [
       "មើលសត្វស្លាបទេសន្តរប្រវេសន៍កម្រ"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-108.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4313,7 +4295,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "អាងស្តុកទឹកប្រវត្តិសាស្ត្របុរាណ ដែលត្រូវបានអភិរក្សជាដែនជម្រកសត្វក្រៀលកម្ពស់ខ្ពស់ (Sarus Crane) ដែលជាបក្សីហើរខ្ពស់ជាងគេលើលោក ព្រមទាំងសត្វស្លាបទឹកកម្រជាង ២០០ ប្រភេទ។",
     "descriptionEn": "Ancient Angkorian reservoir engineered into a world-famous wildlife sanctuary sheltering the endangered Sarus Crane—the world tallest flying bird.",
-    "photoUrl": "/destinations/dest-111.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
     "provinceEn": "Banteay Meanchey",
     "addressKh": "ស្រុកភ្នំស្រុក ខេត្តបន្ទាយមានជ័យ",
@@ -4333,9 +4315,7 @@ export const destPart1: TouristDestination[] = [
       "ជិះទូកកម្សាន្តលើអាងទឹកធំល្វឹងល្វើយ"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-111.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4352,7 +4332,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទថ្មភក់ និងថ្មបាយក្រៀមសតវត្សរ៍ទី ១១ លើជួរភ្នំដងរែក។ ជាចំណុចឆ្លងកាត់យុទ្ធសាស្ត្របុរាណតាមផ្លូវរាជវង្សពីអង្គរទៅកាន់ពិមាយ សម្បូរដោយក្បាច់ចម្លាក់ផ្តែរ និងសសរពេជ្របុរាណ។",
     "descriptionEn": "Spectacular 11th-century mountain pass fortress temple on the ancient royal road linking Angkor to Phimai across the high Dangrek escarpment.",
-    "photoUrl": "/destinations/dest-112.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តឧត្តរមានជ័យ",
     "provinceEn": "Oddar Meanchey",
     "addressKh": "ជួរភ្នំដងរែក ស្រុកបន្ទាយអំពិល",
@@ -4372,9 +4352,7 @@ export const destPart1: TouristDestination[] = [
       "ទេសភាពជួរភ្នំធម្មជាតិ"
     ],
     "isFeatured": true,
-    "galleryPhotos": [
-      "/destinations/dest-112.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4543,7 +4521,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "រមណីយដ្ឋានប្រវត្តិសាស្ត្រ និងវប្បធម៌ក្បែរដងទន្លេវ៉ៃកូ សម្បូរទៅដោយដើមឈើធំៗ និងព្រះវិហារបុរាណ។ ជាទីតាំងសក្ការបូជា និងសម្រាកលម្ហែកាយដ៏ពេញនិយមបំផុតរបស់ខេត្តស្វាយរៀង។",
     "descriptionEn": "Tranquil historical riverside park along the Waiko River with ancient trees, Buddhist pagodas, and lush picnic grounds.",
-    "photoUrl": "/destinations/dest-117.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តស្វាយរៀង",
     "provinceEn": "Svay Rieng",
     "addressKh": "ស្រុកស្វាយជ្រំ ចម្ងាយ ៨.៥ គ.ម ពីក្រុងស្វាយរៀង",
@@ -4563,9 +4541,7 @@ export const destPart1: TouristDestination[] = [
       "ទីសក្ការបូជាប្រពៃណី"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-117.jpg"
-    ],
+    "galleryPhotos": [],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
@@ -4672,7 +4648,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5642,104.9318",
     "latitude": 11.5642,
     "longitude": 104.9318,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 2450,
     "highlightsKh": [
       "អាហារតាមផ្លូវរាប់រយមុខ",
@@ -4827,7 +4803,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6194,104.3168",
     "latitude": 10.6194,
     "longitude": 104.3168,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 2890,
     "highlightsKh": [
       "ទស្សនាចម្ការម្រេចកំពត",
@@ -4894,7 +4870,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទបាពួនជាប្រាសាទភ្នំរាងពីរ៉ាមីតដ៏ធំស្កឹមស្កៃ ស្ថិតនៅខាងជើងប្រាសាទបាយ័នក្នុងក្រុងអង្គរធំ កសាងឡើងនៅពាក់កណ្តាលសតវត្សរ៍ទី១១ ឧទ្ទិសដល់ព្រហ្មញ្ញសាសនា និងមានព្រះពុទ្ធចូលនិព្វានថ្មភក់ធំសម្បើមនៅជញ្ជាំងខាងលិច។",
     "descriptionEn": "A majestic three-tiered temple mountain located in Angkor Thom built in the mid-11th century, famous for its elevated walkway and a massive 9-meter reclining Buddha on its western wall.",
-    "photoUrl": "/destinations/dest-126.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ខាងជើងប្រាសាទបាយ័ន ក្រុងអង្គរធំ",
@@ -4915,9 +4891,7 @@ export const destPart1: TouristDestination[] = [
       "ស្ថាបត្យកម្មរចនាបថបាពួនដ៏ល្បីល្បាញ"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-126.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4934,7 +4908,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទភិមានអាកាស ជាប្រាសាទរាជវាំងសាងឡើងពីថ្មបាយក្រៀមរាងពីរ៉ាមីត ៣ ជាន់ កសាងនៅចុងសតវត្សរ៍ទី១០ ដោយព្រះបាទរាជេន្ទ្រវរ្ម័ន និងបន្តដោយព្រះបាទសូរ្យវរ្ម័នទី១ ភ្ជាប់នឹងរឿងព្រេងនាគរាជ ៩ ក្បាល។",
     "descriptionEn": "A pyramid-shaped laterite temple located within the Royal Palace compound of Angkor Thom, associated with the mystical legend of the King and the nine-headed serpent spirit.",
-    "photoUrl": "/destinations/dest-127.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "បរិវេណព្រះបរមរាជវាំងចាស់ ក្រុងអង្គរធំ",
@@ -4955,9 +4929,7 @@ export const destPart1: TouristDestination[] = [
       "ទីតាំងកណ្តាលបរិវេណរាជវាំងចាស់អង្គរធំ"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-127.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -5134,7 +5106,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទក្រវ៉ាន់ជាប្រាសាទឥដ្ឋ ៥ ប៉មសាងឡើងក្នុងឆ្នាំ ៩២១ ឧទ្ទិសដល់ព្រះវិស្ណុ។ ប្រាសាទនេះមានភាពពិសេសអស្ចារ្យដោយសារមានចម្លាក់ព្រះវិស្ណុ និងព្រះនាងលក្ស្មីឆ្លាក់ផ្ទាល់លើឥដ្ឋក្រហមនៅខាងក្នុងតួប៉ម។",
     "descriptionEn": "A 10th-century Hindu temple consisting of five brick towers, uniquely famous for its rare bas-reliefs of Vishnu and Lakshmi carved directly into the interior red brick walls.",
-    "photoUrl": "/destinations/dest-132.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ខាងត្បូងស្រះស្រង់ ក្រុងសៀមរាប",
@@ -5155,9 +5127,7 @@ export const destPart1: TouristDestination[] = [
       "ពណ៌ឥដ្ឋក្រហមឆ្អៅត្រូវពន្លឺព្រះអាទិត្យពេលព្រឹក"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-132.jpg"
-    ],
+    "galleryPhotos": [],
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -5186,7 +5156,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4458,103.8781",
     "latitude": 13.4458,
     "longitude": 103.8781,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 980,
     "highlightsKh": [
       "ចម្លាក់ទេពធីតាអប្សរាលើជញ្ជាំងថ្មភក់",
@@ -5266,7 +5236,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4244,103.8586",
     "latitude": 13.4244,
     "longitude": 103.8586,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 1280,
     "highlightsKh": [
       "ប្រាសាទពីរ៉ាមីត ៤ ជាន់រាងខ្ពស់ស្រឡះ",
@@ -5294,7 +5264,7 @@ export const destPart1: TouristDestination[] = [
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទបឹងមាលាជាមហាប្រាសាទថ្មភក់កណ្តាលព្រៃជ្រៅ កសាងក្នុងសតវត្សរ៍ទី១២ តាមប្លង់ប្រហាក់ប្រហែលអង្គរវត្ត។ ប្រាសាទនេះនៅរក្សាភាពអាថ៌កំបាំងដែលរុំព័ទ្ធដោយដើមឈើយក្ស និងលិចកណ្តាលព្រៃធម្មជាតិ។",
     "descriptionEn": "A colossal 12th-century Hindu temple swallowed by the jungle, sharing the same grand layout as Angkor Wat. Famous for its moss-covered sandstone ruins and atmospheric elevated wooden walkways.",
-    "photoUrl": "/destinations/dest-136.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ស្រុកស្វាយលើ ចម្ងាយប្រមាណ ៦០ គ.ម ពីក្រុងសៀមរាប",
@@ -5315,9 +5285,7 @@ export const destPart1: TouristDestination[] = [
       "ប្លង់ប្រាសាទធំស្មើនឹងអង្គរវត្ត"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-136.jpg"
-    ],
+    "galleryPhotos": [],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-04-20T12:00:00Z",
     "isAdminEdited": true,
@@ -5666,7 +5634,7 @@ export const destPart1: TouristDestination[] = [
     "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6881,104.9753",
     "latitude": 11.6881,
     "longitude": 104.9753,
-    "rating": 5.0,
+    "rating": 5,
     "reviewCount": 3150,
     "highlightsKh": [
       "ស្ថាបត្យកម្មក្បាលសំពៅកម្ពស់ ៩៩ ម៉ែត្រ",

@@ -15622,13 +15622,14 @@ async function fetchTikwmJsonSingle(canonicalTikTokUrl: string): Promise<any> {
 }
 
 function enqueueTikwmApiCall(canonicalUrl: string, priority = false): Promise<any> {
+  // User-initiated tap (priority === true) bypasses the background prewarm queue for instant <0.7s playback!
+  if (priority) {
+    lastTikwmCallMs = Date.now();
+    return fetchTikwmJsonSingle(canonicalUrl);
+  }
   return new Promise((resolve) => {
     const job: TikwmQueueJob = { canonicalUrl, resolve };
-    if (priority) {
-      tikwmQueue.unshift(job);
-    } else {
-      tikwmQueue.push(job);
-    }
+    tikwmQueue.push(job);
     if (!isTikwmQueueProcessing) {
       isTikwmQueueProcessing = true;
       (async () => {
@@ -15740,7 +15741,8 @@ export async function resolvePlayableTikTokStreamUrl(
     const isNative = Boolean(Capacitor?.isNativePlatform?.());
 
     // Layer 2: Extract fresh playAddr from TikTok's public creator embed feed (/embed/@handle with Desktop UA)
-    if (tiktokVid && cleanHandle && !options?.forceFresh) {
+    // Skip on priority user taps so Layer 3 (tikwm direct MP4) starts at 0ms without waiting 2.8s!
+    if (tiktokVid && cleanHandle && !options?.forceFresh && !options?.priority) {
       try {
         const embedEndpoint = `https://www.tiktok.com/embed/@${cleanHandle}`;
         let html = '';
@@ -17279,6 +17281,24 @@ export function matchesExpandedYouTubeQuery(
  * 2. Merges with verified Facebook & YouTube food/travel videos.
  * 3. Supports multilingual synonym search across Khmer, English, and Chinese.
  */
+/**
+ * Synchronously returns the built-in 500+ verified TikTok, Facebook & YouTube videos (plus any cached discoveries)
+ * in 0ms so TrendingSocialModal opens and displays videos instantaneously without waiting 5s for network crawls.
+ */
+export function getInstantBaselineSocialFeed(
+  foods: FoodItem[] = initialFoods
+): OnlineFoodDiscoveryItem[] {
+  const cached = readCache(foods);
+  if (cached && cached.items.length > 0) {
+    return cached.items;
+  }
+  const ytItems = CURATED_YOUTUBE_VIDEOS.map((seed) => seedToDiscoveryItem(seed, foods, true));
+  return deduplicateAndRankDiscoveries([
+    ...CURATED_TIKTOK_FACEBOOK_REVIEWS,
+    ...ytItems,
+  ]);
+}
+
 export async function searchAndDiscoverSocialFood(
   options: SearchSocialOptions = {}
 ): Promise<SearchSocialResult> {

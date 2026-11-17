@@ -25,6 +25,7 @@ import {
   Navigation,
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
+import { DestinationTypeIcon2D } from './icons/DestinationTypeIcon2D';
 import { CambodiaChoiceBadge, isCambodiaChoiceEligible } from './common/CambodiaChoiceAndRatings';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { getDestinationCompleteTravelInfo } from '../utils/destinationTravelInfo';
@@ -72,47 +73,13 @@ function getDirectDestinationMapsUrl(destination: TouristDestination): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
-export const DefaultDestinationIcon: React.FC<{ categorySlug?: string; className?: string }> = ({
-  categorySlug,
-  className = 'w-12 h-12 rounded-xl',
-}) => {
-  const isHotel = categorySlug === 'hotel';
-  const IconComp =
-    isHotel
-      ? BedDouble
-      : categorySlug === 'temple' || categorySlug === 'cultural'
-      ? Landmark
-      : categorySlug === 'nature'
-      ? Trees
-      : categorySlug === 'beach'
-      ? Waves
-      : categorySlug === 'mountain'
-      ? Mountain
-      : Compass;
-
-  const bgGradient =
-    isHotel
-      ? 'linear-gradient(180deg, #F59E0B 0%, #D97706 100%)'
-      : categorySlug === 'temple' || categorySlug === 'cultural'
-      ? 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)'
-      : categorySlug === 'nature'
-      ? 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)'
-      : categorySlug === 'beach'
-      ? 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)'
-      : categorySlug === 'mountain'
-      ? 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)'
-      : 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)';
-
-  return (
-    <div
-      data-dest-avatar="default-dest-icon"
-      style={{ background: bgGradient }}
-      className={`relative overflow-hidden shadow-xs shrink-0 select-none flex items-center justify-center text-white ${className}`}
-    >
-      <IconComp className="w-6 h-6 text-white drop-shadow-xs" strokeWidth={2.2} />
-    </div>
-  );
-};
+export const DefaultDestinationIcon: React.FC<{
+  destination?: Partial<TouristDestination> | null;
+  categorySlug?: string;
+  className?: string;
+}> = ({ destination, categorySlug, className = 'w-12 h-12 rounded-xl' }) => (
+  <DestinationTypeIcon2D destination={destination} categorySlug={categorySlug} className={className} />
+);
 
 const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
   ({
@@ -163,8 +130,9 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     };
 
     const isCompactDirectoryRow =
-      (destination.id.startsWith('kft-site-') || destination.id.startsWith('rac-')) ||
-      (!hasClearPhoto && destination.dataSource === 'google_maps');
+      !hasClearPhoto ||
+      destination.id.startsWith('kft-site-') ||
+      destination.id.startsWith('rac-');
 
     // Compact Clean White Card Variant
     if (!hasClearPhoto && !isCompactDirectoryRow) return null;
@@ -189,6 +157,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
             </div>
           ) : (
             <DefaultDestinationIcon
+              destination={destination}
               categorySlug={destination.categorySlug}
               className="w-14 h-14 rounded-xl border border-white/40"
             />

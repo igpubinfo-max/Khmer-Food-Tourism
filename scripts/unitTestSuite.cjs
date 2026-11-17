@@ -1185,6 +1185,11 @@ test('17. TikTok & Facebook Video System Audit: 360+ Disjoint Playable Streams, 
   const tiktokItems = CURATED_TIKTOK_FACEBOOK_REVIEWS.filter((x) => x.platform === 'tiktok');
   const facebookItems = CURATED_TIKTOK_FACEBOOK_REVIEWS.filter((x) => x.platform === 'facebook');
 
+  const modalSrc = fs.readFileSync(path.join(ROOT, 'src/components/TrendingSocialModal.tsx'), 'utf8');
+  assert.ok(
+    modalSrc.includes('controlsList="nodownload noremoteplayback"') && modalSrc.includes('onContextMenu={(e) => e.preventDefault()}'),
+    'TrendingSocialModal <video> must disable download button via controlsList="nodownload noremoteplayback" and onContextMenu guard'
+  );
   assert.ok(
     tiktokItems.length >= 180,
     'Expected at least 180 unique verified TikTok videos, got ' + tiktokItems.length
@@ -1381,6 +1386,51 @@ test('19. Official Angkor Park Guide (4 Temple Circuits, APSARA Code of Conduct 
   assert.ok(ANGKOR_CODE_OF_CONDUCT.length >= 6, 'Must define official APSARA Code of Conduct rules');
   const categories = new Set(ANGKOR_PARK_FACILITIES.map((f) => f.category));
   assert.ok(categories.has('restroom') && categories.has('parking') && categories.has('firstaid_info'), 'Must include restrooms, parking, and first aid/info facilities');
+});
+
+test('20. Tourism Photo Quality Audit & 2D Illustrated Destination Type Icon Accuracy Guard', () => {
+  const crypto = require('crypto');
+  const { resolveDestinationIcon2DKind } = require(path.join(ROOT, 'src/utils/destinationIconClassifier.ts'));
+  const { destPart1 } = require(path.join(ROOT, 'src/data/seedDestPart1.ts'));
+  const { destPart2 } = require(path.join(ROOT, 'src/data/seedDestPart2.ts'));
+  const { sportsAndSouvenirsDestinations } = require(path.join(ROOT, 'src/data/seedSportsAndSouvenirs.ts'));
+
+  // 1. Verify accurate 2D icon classification for each destination type
+  assert.equal(resolveDestinationIcon2DKind({ nameEn: 'Angkor Wat Temple', categorySlug: 'temple' }), 'temple');
+  assert.equal(resolveDestinationIcon2DKind({ nameEn: 'Bousra Waterfall', categorySlug: 'nature' }), 'waterfall');
+  assert.equal(resolveDestinationIcon2DKind({ nameEn: 'Angkor Zipline Canopy Ride', categorySlug: 'nature' }), 'cable_car');
+  assert.equal(resolveDestinationIcon2DKind({ nameEn: 'Bokor Mountain Cable Car', categorySlug: 'mountain' }), 'cable_car');
+  assert.equal(resolveDestinationIcon2DKind({ nameEn: 'Koh Rong Long Beach', categorySlug: 'beach' }), 'beach');
+  assert.equal(resolveDestinationIcon2DKind({ nameEn: 'Phnom Khnong Phsar Mountain Peak', categorySlug: 'mountain' }), 'mountain');
+  assert.equal(resolveDestinationIcon2DKind({ nameEn: 'Wat Botum Pagoda', categorySlug: 'cultural' }), 'pagoda');
+  assert.equal(resolveDestinationIcon2DKind({ nameEn: 'Green Cathedral Kayaking', categorySlug: 'nature' }), 'kayak_river');
+  assert.equal(resolveDestinationIcon2DKind({ nameEn: 'Artisans Angkor Silk & Handicrafts', tourismTheme: 'local_souvenirs' }), 'souvenir_craft');
+  assert.equal(resolveDestinationIcon2DKind({ id: 'dest-adv-3', nameKh: 'មជ្ឈមណ្ឌលមុជទឹកមើលផ្កាថ្មកោះរ៉ុង', nameEn: 'Koh Rong Marine Scuba Diving & Coral Reef Center', tourismTheme: 'sports_adventure' }), 'diving_coral');
+  assert.equal(resolveDestinationIcon2DKind({ id: 'dest-adv-7', nameKh: 'ទីលានវាយកូនហ្គោល វឌ្ឍនៈ ហ្គោល រីសត', nameEn: 'Vattanac Golf Resort Championship Course', tourismTheme: 'sports_adventure' }), 'golf');
+  assert.equal(resolveDestinationIcon2DKind({ id: 'dest-adv-6', nameEn: 'Phnom Penh Kun Khmer Martial Arts Arena', tourismTheme: 'sports_adventure' }), 'martial_arts');
+  assert.equal(resolveDestinationIcon2DKind({ id: 'dest-adv-8', nameEn: 'Garden City Water Park', tourismTheme: 'sports_adventure' }), 'water_park');
+  assert.equal(resolveDestinationIcon2DKind({ id: 'dest-adv-9', nameEn: 'The Happy Ranch Horse Farm', tourismTheme: 'sports_adventure' }), 'horse_riding');
+  assert.equal(resolveDestinationIcon2DKind({ id: 'dest-adv-4', nameEn: 'Siem Reap Quad Bike ATV Trail', tourismTheme: 'sports_adventure' }), 'atv_offroad');
+  assert.equal(resolveDestinationIcon2DKind({ id: 'dest-adv-15', nameEn: 'Battambang Bamboo Train Ride', tourismTheme: 'sports_adventure' }), 'bamboo_train');
+
+  // 2. Verify zero duplicate photos or low-quality (<15KB) photos remain in tourism locations
+  const seenUrls = new Set();
+  const seenHashes = new Set();
+  for (const d of [...destPart1, ...destPart2, ...sportsAndSouvenirsDestinations]) {
+    const p = String(d.photoUrl || '').trim().split('?')[0];
+    if (!p) continue;
+    assert.ok(!seenUrls.has(p), 'Duplicate tourism photoUrl not allowed: ' + p + ' on ' + d.id);
+    seenUrls.add(p);
+    if (p.startsWith('/destinations/')) {
+      const fpath = path.join(ROOT, 'public', p.replace(/^\//, ''));
+      assert.ok(fs.existsSync(fpath), 'Missing photo file on disk: ' + p);
+      const buf = fs.readFileSync(fpath);
+      assert.ok(buf.length >= 15000, 'Low-quality (<15KB) tourism photo not allowed: ' + p + ' (' + buf.length + 'B)');
+      const h = crypto.createHash('md5').update(buf).digest('hex');
+      assert.ok(!seenHashes.has(h), 'Duplicate MD5 image content not allowed: ' + p + ' on ' + d.id);
+      seenHashes.add(h);
+    }
+  }
 });
 
 console.log('\nAll ' + passed + ' unit test suites passed successfully!');

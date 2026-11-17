@@ -573,6 +573,7 @@ export const TouristDetailModal: React.FC = () => {
               className="relative pb-5 px-4 sm:px-6 bg-gradient-to-br from-[#064E3B] via-[#093228] to-slate-900 border-b border-emerald-500/30 flex items-center gap-3.5"
             >
               <DefaultDestinationIcon
+                destination={selectedDestination}
                 categorySlug={selectedDestination.categorySlug}
                 className="w-14 h-14 rounded-2xl border border-emerald-400/40 shadow-md"
               />

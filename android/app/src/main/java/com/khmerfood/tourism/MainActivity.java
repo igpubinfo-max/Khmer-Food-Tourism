@@ -77,6 +77,9 @@ public class MainActivity extends BridgeActivity {
 
             webView.setHorizontalScrollBarEnabled(false);
             webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
+            webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+                // Block direct video/media file downloads from social video players
+            });
 
             CookieManager cookieManager = CookieManager.getInstance();
             cookieManager.setAcceptCookie(true);

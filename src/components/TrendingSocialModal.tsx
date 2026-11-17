@@ -45,6 +45,7 @@ import {
   openExternalPlaceInGoogleMaps,
 } from '../services/googlePlacesService';
 import {
+  getInstantBaselineSocialFeed,
   searchAndDiscoverSocialFood,
   extractEmbedPlayerInfo,
   extractYouTubeVideoId,
@@ -143,7 +144,7 @@ export const TrendingSocialModal: React.FC = () => {
   const [visibleVideoCount, setVisibleVideoCount] = useState<number>(VIDEO_BATCH_SIZE);
   const loadMoreVideosRef = useRef<HTMLDivElement | null>(null);
 
-  const [discoveryItems, setDiscoveryItems] = useState<OnlineFoodDiscoveryItem[]>([]);
+  const [discoveryItems, setDiscoveryItems] = useState<OnlineFoodDiscoveryItem[]>(() => getInstantBaselineSocialFeed(foods));
   const [lastCheckedAt, setLastCheckedAt] = useState<string>('');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
@@ -595,7 +596,7 @@ export const TrendingSocialModal: React.FC = () => {
   useEffect(() => {
     if (!isTrendingSocialModalOpen || displayedVideos.length === 0) return;
     let cancelled = false;
-    prewarmTikTokStreams(displayedVideos, 8)
+    prewarmTikTokStreams(displayedVideos, 3)
       .then((resolvedMap) => {
         if (cancelled || Object.keys(resolvedMap).length === 0) return;
         setResolvedDirectVideoUrls((prev) => {
@@ -1762,6 +1763,9 @@ export const TrendingSocialModal: React.FC = () => {
                               src={activeDirectVideoUrl}
                               poster={item.thumbnailUrl}
                               controls
+                              controlsList="nodownload noremoteplayback"
+                              onContextMenu={(e) => e.preventDefault()}
+                              draggable={false}
                               autoPlay
                               playsInline
                               muted={isVideoMuted}
