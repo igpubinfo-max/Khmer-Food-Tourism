@@ -731,7 +731,7 @@ export const FoodView: React.FC = () => {
                     className={`kft-food-tile relative w-full max-w-full min-w-0 min-h-0 aspect-[560/460] rounded-[14px] overflow-visible ${active ? 'kft-food-tile-active' : ''}`}
                   >
                     <img
-                      src={`${cat.imageSrc}?v=hq1623`}
+                      src={`${cat.imageSrc}?v=hq1629`}
                       alt={label}
                       style={{ transform: 'none' }}
                       className={`block w-full h-full max-w-full min-w-0 min-h-0 object-fill bg-transparent select-none pointer-events-none transition-all duration-150 ${
