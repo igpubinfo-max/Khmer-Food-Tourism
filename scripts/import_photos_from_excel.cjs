@@ -14,10 +14,12 @@ const ExcelJS = require('exceljs');
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const FOODS_DIR = path.join(PROJECT_ROOT, 'public/foods');
 const DESTS_DIR = path.join(PROJECT_ROOT, 'public/destinations');
+const RESTS_DIR = path.join(PROJECT_ROOT, 'public/restaurants');
 const TEMP_DIR = path.join(PROJECT_ROOT, 'templates/.tmp_extract');
 
 if (!fs.existsSync(FOODS_DIR)) fs.mkdirSync(FOODS_DIR, { recursive: true });
 if (!fs.existsSync(DESTS_DIR)) fs.mkdirSync(DESTS_DIR, { recursive: true });
+if (!fs.existsSync(RESTS_DIR)) fs.mkdirSync(RESTS_DIR, { recursive: true });
 if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
 
 function convertAndOptimizeToJpg(rawBuffer, targetJpgPath) {
@@ -144,14 +146,16 @@ async function importPhotosFromSingleWorkbook(excelPath) {
       const rawFilename = String(row.getCell(7).value || '').trim();
       if (!rawId) return;
 
-      const isFood = rawId.startsWith('food-');
-      const targetFilename = rawFilename || `${rawId}.jpg`;
+      const isFood = rawId.startsWith('food-') || rawId.startsWith('veg-') || rawId.startsWith('fp-');
+      const isRest = rawId.startsWith('rest-') || rawId.startsWith('cafe-');
+      const validFile = rawFilename && /\.(jpg|jpeg|png|webp)$/i.test(rawFilename) ? rawFilename : `${rawId}.jpg`;
+      const targetFilename = validFile;
       rowMap.set(rowNumber, {
         id: rawId,
         nameKh: rawNameKh,
         nameEn: rawNameEn,
         targetFilename,
-        targetDir: isFood ? FOODS_DIR : DESTS_DIR,
+        targetDir: isFood ? FOODS_DIR : isRest ? RESTS_DIR : DESTS_DIR,
       });
     });
 
@@ -279,6 +283,15 @@ async function run() {
   }
 
   const candidates = [
+    path.join(PROJECT_ROOT, 'Excel Teamplates/KhmerFoodTourism_Food_1_to_100_Photo_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'Excel Teamplates/KhmerFoodTourism_Photo_Insert_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'Excel Teamplates/Cambodian_Foodpanda_100_Dishes_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'Excel Teamplates/Cambodian_Vegetarian_30_Dishes_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'Excel Teamplates/KhmerFoodTourism_Shop_200_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'Excel Teamplates/Khmer_Youth_Branded_Cafes_30_Easy_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'Excel Teamplates/KhmerFoodTourism_Hotel_Photo_Insert_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'Excel Teamplates/KhmerFoodTourism_Travel_Photo_Insert_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'Excel Teamplates/KhmerFoodTourism_Travel_Data_Management_Template.xlsx'),
     path.join(PROJECT_ROOT, 'Khmer_Food_100_Dishes_With_Photos.xlsx'),
     path.join(PROJECT_ROOT, 'Khmer_Food_100_Dishes_Picture_Template.xlsx'),
     path.join(PROJECT_ROOT, 'KhmerFoodTourism_100_Foodpanda_Khmer_Foods_Photo_Template.xlsx'),

@@ -566,17 +566,17 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Star anise, garlic cloves, and black pepper',
   },
   {
-    nameKh: 'ឆាផ្សិតសាច់មាន់',
-    nameEn: 'Wok-Fried Mixed Mushrooms with Tender Sliced Chicken',
+    nameKh: 'ខត្រី',
+    nameEn: 'Cambodian Caramelized Braised Fish with Tomatoes (Khor Trei)',
     cat: 'stirfry',
-    catKh: 'ម្ហូបឆា / ឆាផ្សិតសាច់មាន់',
-    catEn: 'Stir-Fry / Mushroom & Chicken',
-    mainIngKh: 'សាច់ទ្រូងមាន់ហាន់បន្ទះ និងផ្សិតស្រស់គ្រប់មុខ (៤០០ ក្រាម)',
-    mainIngEn: 'Tender sliced chicken breast and fresh mixed mushrooms (400g)',
-    subIngKh: 'ខ្ទឹមសចិញ្ច្រាំ ប្រេងខ្យង ទឹកស៊ីអ៊ីវ និងស្ករត្នោតបន្តិច',
-    subIngEn: 'Minced garlic, oyster sauce, light soy sauce, and a touch of palm sugar',
-    herbKh: 'ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ និងម្ទេសក្រហម',
-    herbEn: 'Green scallions, cilantro, and sliced red chili',
+    catKh: 'ម្ហូបខ / ខត្រី',
+    catEn: 'Braised / Caramelized Fish Khor',
+    mainIngKh: 'ត្រីខៀបហាន់ជាកង់ៗ (១.៣ គីឡូក្រាម)',
+    mainIngEn: 'Fresh fish steaks cut into thick pieces (1.3kg)',
+    subIngKh: 'ប៉េងប៉ោះ ៤ ខាំ និងស្ករត្នោត ១.៣ ខាំ',
+    subIngEn: 'Ripe tomatoes (400g) and palm sugar (130g)',
+    herbKh: 'ខ្ទឹមសចិញ្ច្រាំ ១០ កំពឹស ស្លឹកខ្ទឹម និងម្ទេស',
+    herbEn: '10 cloves minced garlic, spring onions, and fresh chili',
   },
   {
     nameKh: 'ឆាជូរផ្អែមត្រីរ៉ស់បំពង',
@@ -1504,7 +1504,7 @@ function buildStepsForDish(
   item: RawNewDish,
   mainIngKh: string,
   mainIngEn: string
-): Array<{ stepNumber: number; instructionKh: string; instructionEn: string }> {
+): Array<{ stepNumber: number; instructionKh: string; instructionEn: string; instructionZh?: string }> {
   const { cat, nameKh, nameEn, subIngKh, herbKh } = item;
   const subIngEn = lowerInlineEn(item.subIngEn);
   const herbEn = lowerInlineEn(item.herbEn);
@@ -2277,6 +2277,66 @@ function buildStepsForDish(
           stepNumber: 4,
           instructionKh: `រោយ ${herbKh} ពីលើ រួចដួសទទួលទានក្តៅៗជាមួយបាយស និងអន្លក់ស្រស់។`,
           instructionEn: `Top with ${herbEn} and serve bubbling hot with steamed rice and fresh crudités.`,
+        },
+      ];
+    }
+
+    // Braised Fish with Tomatoes - Khor Trei (food-141)
+    if (id === 'food-141') {
+      return [
+        {
+          stepNumber: 1,
+          instructionKh: 'ហាន់ប៉េងប៉ោះជាចំណិតតូចៗល្មម។',
+          instructionEn: 'Cut the ripe tomatoes into medium wedges.',
+          instructionZh: '将成熟番茄切成适口的小块。',
+        },
+        {
+          stepNumber: 2,
+          instructionKh: 'ហាន់ត្រីជាកង់ៗ។',
+          instructionEn: 'Clean and cut the fish into thick steaks.',
+          instructionZh: '将鲜鱼洗净并切成厚段。',
+        },
+        {
+          stepNumber: 3,
+          instructionKh: 'យកប៉េងប៉ោះពាក់កណ្តាលទ្រាប់បាតឆ្នាំង បន្ទាប់មកដាក់ត្រីពីលើ រួចទុក ១ ឡែក។',
+          instructionEn: 'Line the bottom of the pot with half of the sliced tomatoes, arrange the fish pieces on top, and set aside.',
+          instructionZh: '取一半番茄铺在锅底，将鱼块码放在番茄上备用。',
+        },
+        {
+          stepNumber: 4,
+          instructionKh: 'ចាប់ផ្តើមធ្វើទឹកខ។ ជាដំបូងកូរស្ករត្នោតលើភ្លើងមធ្យមឱ្យឡើងក្រហមបន្តិច បន្ទាប់មកដាក់ខ្ទឹមស កូរឱ្យក្រៀមល្មម។',
+          instructionEn: 'Start making the caramel braising sauce: stir palm sugar over medium heat until slightly amber-red, then add minced garlic and stir until fragrant and golden.',
+          instructionZh: '制作红烧卤汁：先用中火将棕榈糖熬至微红琥珀色，再加入蒜末煸炒至金黄飘香。',
+        },
+        {
+          stepNumber: 5,
+          instructionKh: 'ដាក់ទឹកត្រី អំបិល ទឹកស៊ីអ៊ីវខាប់ ប៊ីចេង ម្រេចម៉ត់ កូរចូលគ្នាឱ្យសព្វ។',
+          instructionEn: 'Add fish sauce, salt, dark soy sauce, seasoning powder, and ground black pepper, stirring until well combined.',
+          instructionZh: '加入鱼露、食盐、老抽、味精与黑胡椒粉，充分搅拌均匀。',
+        },
+        {
+          stepNumber: 6,
+          instructionKh: 'យកទឹកខចាក់ពីលើត្រី រួចរំងាស់ត្រីលើភ្លើងមធ្យមរហូតត្រីផុយ។',
+          instructionEn: 'Pour the caramel braising sauce over the fish and simmer gently over medium heat until the fish is tender.',
+          instructionZh: '将调好的红烧汁淋在鱼块上，用中火慢炖至鱼肉软嫩入味。',
+        },
+        {
+          stepNumber: 7,
+          instructionKh: 'បន្ទាប់មកដាក់ប៉េងប៉ោះនៅសល់ រំងាស់បន្ថែម ១០ នាទីទៀត។',
+          instructionEn: 'Add the remaining tomatoes and simmer for another 10 minutes.',
+          instructionZh: '随后放入剩余的番茄，继续慢炖10分钟。',
+        },
+        {
+          stepNumber: 8,
+          instructionKh: 'ចុងក្រោយដាក់ស្លឹកខ្ទឹម និងម្ទេសចូល។',
+          instructionEn: 'Finally, add spring onions and fresh chilies.',
+          instructionZh: '最后撒入葱段与鲜辣椒。',
+        },
+        {
+          stepNumber: 9,
+          instructionKh: 'ពិសារជាមួយស្វាយខ្ចីកាន់តែឆ្ងាញ់។',
+          instructionEn: 'Serve hot with steamed rice and crisp green mango for the most delicious flavor.',
+          instructionZh: '搭配青芒果丝与热米饭一同享用，风味更佳。',
         },
       ];
     }
