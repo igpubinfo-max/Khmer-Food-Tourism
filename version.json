@@ -1,11 +1,11 @@
 {
   "version": "v2.7.0",
   "versionName": "2.7.0",
-  "buildCode": 1637,
-  "minRequiredBuildCode": 1637,
+  "buildCode": 1639,
+  "minRequiredBuildCode": 1639,
   "minRequiredVersion": "2.7.0",
   "forceUpdate": true,
-  "releasedAt": "2026-11-17T22:55:16.742Z",
+  "releasedAt": "2026-11-17T23:47:31.351Z",
   "releaseNotesKh": "កំណែអាប់ដេតសំខាន់ចាំបាច់៖ បង្កើនល្បឿនស្វែងរកហាងអាហារបួស ការពារសុវត្ថិភាពគណនី VIP និងកែលម្អប្រព័ន្ធផែនទី។ សូមអាប់ដេតឥឡូវនេះដើម្បីបន្តប្រើប្រាស់កម្មវិធី។",
   "releaseNotesEn": "Mandatory Update: Faster Vegetarian search, enhanced VIP account security, and improved map navigation. Please update now to continue using the app.",
   "playStoreUrl": "https://play.google.com/store/apps/details?id=com.khmerfood.tourism"
