@@ -51,3 +51,8 @@ android/key.properties
 Emergency_Recovery_Kit/
 APK/
 release_out/
+
+# Local Excel Templates folder
+Excel Teamplates/
+templates/*.xlsx
+*.xlsx

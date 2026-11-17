@@ -5,12 +5,12 @@ const ISSUER_ID = (process.env.APPSTORE_ISSUER_ID || '').trim();
 const KEY_ID = (process.env.APPSTORE_KEY_ID || '').trim();
 const PRIVATE_KEY = (process.env.APPSTORE_PRIVATE_KEY || '').trim();
 const APP_ID = '6826976670';
-const TARGET_VERSION_STRING = '2.7.1';
+const TARGET_VERSION_STRING = '2.7.2';
 const TARGET_APP_NAME = 'Cambodia Flavors & Tourism';
 
-const WHATS_NEW_TEXT = `• Updated official app name to Cambodia Flavors & Tourism.
-• Enhanced Cambodian food, restaurant, and travel video discovery across all 25 provinces.
-• Improved scenic destination shuffle and Google Maps location accuracy.`;
+const WHATS_NEW_TEXT = `• Added 30 new Sports & Adventure Tourism and Authentic Cambodian Souvenir & GI Product destinations across Cambodia.
+• Added UNESCO World Heritage, National Symbols & Rare Wildlife, Domestic Transport Routes, and Cambodia Fast Facts in the Travel Guide.
+• Enhanced 2D destination icons (including custom Khmer ancient temple artwork) and updated authentic Cambodian dish photos & recipes (including Khor Trei).`;
 
 function setGithubEnv(key, value) {
   try {
@@ -65,7 +65,7 @@ async function ascRequest(endpoint, method = 'GET', body = null) {
 
 const REVIEW_NOTES = `Hello Apple App Review Team,
 
-Thank you for reviewing Cambodia Flavors & Tourism (v2.7.1). This update rebrands our display title to "Cambodia Flavors & Tourism" and includes content & discovery improvements while preserving full compliance:
+Thank you for reviewing Cambodia Flavors & Tourism (v2.7.2). This update rebrands our display title to "Cambodia Flavors & Tourism" and includes content & discovery improvements while preserving full compliance:
 
 1. Guideline 4.8 - Login Services:
 - The iOS app offers only its own email-based account (name and email, no advertising tracking). No third-party or social login is offered inside the iOS app: Google sign-in is hidden on iOS and the earlier custom "Sign in with Apple" button has been removed, so an additional login service is not required.
@@ -268,7 +268,12 @@ async function main() {
     console.log('Successfully created App Store Review Notes for version ID:', versionId);
   }
 
-  // If --wait-for-build <buildNum> was passed (after xcrun altool upload), poll until Apple finishes processing the new build
+  if (!expectedBuildVersion) {
+    console.log('Pre-build metadata setup for v' + TARGET_VERSION_STRING + ' complete. Waiting for build-ios job to upload new IPA...');
+    return;
+  }
+
+  // Poll until Apple finishes processing the newly uploaded build
   if (expectedBuildVersion) {
     console.log(`Waiting for newly uploaded iOS build ${expectedBuildVersion} to finish Apple processing (VALID)...`);
     for (let attempt = 1; attempt <= 24; attempt++) {
@@ -325,7 +330,7 @@ async function main() {
   }
 
   if (!attachedBuildId) {
-    console.log('No valid processed build is attached to v2.7.1 yet; build-ios job will compile, upload, and attach the new v2.7.1 build.');
+    console.log('No valid processed build is attached to v2.7.2 yet; build-ios job will compile, upload, and attach the new v2.7.2 build.');
     return;
   }
 
