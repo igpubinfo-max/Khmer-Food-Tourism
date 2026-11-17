@@ -1,4 +1,4 @@
-﻿package com.khmerfood.tourism;
+package com.khmerfood.tourism;
 
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
