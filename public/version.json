@@ -1,8 +1,8 @@
 {
   "version": "v2.7.0",
   "versionName": "2.7.0",
-  "buildCode": 1625,
-  "minRequiredBuildCode": 1625,
+  "buildCode": 1627,
+  "minRequiredBuildCode": 1627,
   "minRequiredVersion": "2.7.0",
   "forceUpdate": true,
   "releasedAt": "2026-11-16T08:55:45.133Z",
