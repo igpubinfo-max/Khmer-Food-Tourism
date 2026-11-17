@@ -16,6 +16,7 @@ import {
   getRecentTopTourismIds,
   saveRecentTopTourismIds,
   shuffleTourismByRatingTiers,
+  shuffleWithSeed,
 } from '../utils/sessionShuffle';
 import { smoothScrollToElement } from '../utils/smoothScroll';
 import { DISH_PROVINCES } from '../utils/foodFilters';
@@ -374,7 +375,8 @@ export const TourismView: React.FC = () => {
       remaining.push(d);
     }
 
-    return [...shuffledPrimary, ...remaining];
+    const shuffledRemaining = shuffleWithSeed(remaining, shuffleSeed ^ 0x7f4a7c15);
+    return [...shuffledPrimary, ...shuffledRemaining];
   }, [destinations, shuffleSeed, avoidTopIds]);
 
   const nearbyMergedDestinations = useMemo(() => {
@@ -479,15 +481,26 @@ export const TourismView: React.FC = () => {
   // and randomized within each rating tier for the current open/refresh cycle.
   const orderedSessionDestinations = scenicDestinationsOnly;
 
-  // Persist the current top 8 displayed IDs so the next menu reopen or refresh rotates fresh 5-star places to the top
+  // Persist the current top displayed IDs so the next menu reopen or refresh rotates fresh places to the top
   useEffect(() => {
     if (orderedSessionDestinations.length > 0) {
-      saveRecentTopTourismIds(orderedSessionDestinations.slice(0, 8).map((d) => d.id));
+      saveRecentTopTourismIds(orderedSessionDestinations.slice(0, TOURISM_BATCH_SIZE).map((d) => d.id));
     }
   }, [orderedSessionDestinations]);
 
   const triggerTourismReshuffle = () => {
-    setAvoidTopIds(getRecentTopTourismIds());
+    const currentVisibleIds = displayedDestinationsRef.current.map((d) => d.id);
+    if (currentVisibleIds.length > 0) {
+      saveRecentTopTourismIds(currentVisibleIds);
+    }
+    const updatedAvoid = getRecentTopTourismIds();
+    for (const id of currentVisibleIds) {
+      updatedAvoid.add(id);
+    }
+    if (nearMeActive) {
+      setNearMeActive(false);
+    }
+    setAvoidTopIds(updatedAvoid);
     setShuffleSeed(generateFreshShuffleSeed());
     setVisibleCount(TOURISM_BATCH_SIZE);
   };
@@ -580,9 +593,10 @@ export const TourismView: React.FC = () => {
       }
     }
 
-    // Global Rule: Sort search and category results by actual GPS distance ascending (closest to farthest)
-    // when GPS is available; use rating/session order as fallback when GPS is unavailable or tied.
-    if (nearMeActive || trimmedQuery || selectedCategory !== 'all' || hasActiveUserGps) {
+    // Sort by GPS distance ONLY when Near Me mode is explicitly active or when the user is searching by keyword.
+    // During normal browsing (All Places, Category tabs, or Province filters), preserve the shuffled session order
+    // and push recently viewed top cards to the back so the ប្តូរថ្មី (Shuffle) button always works!
+    if (nearMeActive || trimmedQuery) {
       return [...results].sort((a, b) => {
         if (hasActiveUserGps || nearMeActive) {
           const distA = distanceMetersMap.get(a.id) ?? 9999999;
@@ -591,6 +605,16 @@ export const TourismView: React.FC = () => {
         }
         return (b.rating || 0) - (a.rating || 0);
       });
+    }
+
+    if (avoidTopIds.size > 0 && results.length > 1) {
+      const freshFirst = results.filter((d) => !avoidTopIds.has(d.id));
+      const rotatedBack = results.filter((d) => avoidTopIds.has(d.id));
+      if (freshFirst.length >= Math.min(6, results.length)) {
+        return [...freshFirst, ...rotatedBack];
+      }
+      // If almost all items in a small category/province were already shown, reshuffle the subset with shuffleSeed
+      return shuffleWithSeed(results, shuffleSeed ^ 0x3c6ef372);
     }
 
     return results;
@@ -604,12 +628,16 @@ export const TourismView: React.FC = () => {
     searchIndexById,
     distanceMetersMap,
     userCoords,
+    avoidTopIds,
+    shuffleSeed,
   ]);
 
   const displayedDestinations = useMemo(
     () => filteredDestinations.slice(0, visibleCount),
     [filteredDestinations, visibleCount]
   );
+  const displayedDestinationsRef = useRef<typeof displayedDestinations>([]);
+  displayedDestinationsRef.current = displayedDestinations;
 
   const hasActiveFilters =
     selectedCategory !== 'all' || Boolean(selectedProvince) || Boolean(searchQuery.trim()) || nearMeActive;

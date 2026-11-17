@@ -1560,8 +1560,7 @@ export const UpgradeVipModal: React.FC = () => {
                     title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកទៅក្នុង រូបភាពរបស់ខ្ញុំ', 'Tap QR code to save original image to My Photos', '点击二维码保存原图到我的照片')}
                     className="w-[42%] max-w-[162px] p-1.5 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 hover:border-emerald-500 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition"
                   >
-                    <img
-                      key={qrCodeDataUrl}
+                    <img loading="lazy" decoding="async" key={qrCodeDataUrl}
                       src={qrCodeDataUrl}
                       alt={`ABA KHQR Code — ${selectedPlan.priceUsd.toFixed(2)} USD (${selectedPlan.days} Days)`}
                       className="w-full aspect-[3/4] object-contain rounded-lg select-none"

@@ -356,8 +356,7 @@ export const AiSmartMissionsPanel: React.FC<Props> = ({
                   className="w-full p-2.5 rounded-xl bg-white border border-slate-200/90 hover:border-emerald-500 flex items-center justify-between gap-2.5 cursor-pointer text-left transition shadow-2xs active:scale-[0.99]"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <img
-                      src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)}
+                    <img src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)}
                       onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                       alt={loc.name}
                       loading="lazy"

@@ -460,6 +460,7 @@ export const TrendingSocialModal: React.FC = () => {
 
   // Unified Home Screen Search across Foods, Drinks, Restaurants, Tourist Attractions + Smart Cache
   const homeSearchResults = useMemo(() => {
+    if (!isTrendingSocialModalOpen) return null;
     const q = normalizeKhmerSearchText(searchQuery);
     if (!q) return null;
 
@@ -512,12 +513,14 @@ export const TrendingSocialModal: React.FC = () => {
     foods,
     restaurants,
     destinations,
+    isTrendingSocialModalOpen,
     smartCachePlaces,
     currentUser,
   ]);
 
   // Filter YouTube discovery videos using the exact same province, category, and multilingual token logic
   const filteredItems = useMemo(() => {
+    if (!isTrendingSocialModalOpen) return [];
     const matchesProvince = (item: OnlineFoodDiscoveryItem) => {
       if (provinceFilter === 'all') return true;
       if (
@@ -568,7 +571,7 @@ export const TrendingSocialModal: React.FC = () => {
     }
 
     return deduplicateSingleVideoList(strictMatches);
-  }, [discoveryItems, savedVideos, currentUser?.id, platformFilter, categoryFilter, provinceFilter, debouncedSearchQuery, rotationCycle]);
+  }, [isTrendingSocialModalOpen, discoveryItems, savedVideos, currentUser?.id, platformFilter, categoryFilter, provinceFilter, debouncedSearchQuery, rotationCycle]);
 
   useEffect(() => {
     setVisibleVideoCount(VIDEO_BATCH_SIZE);

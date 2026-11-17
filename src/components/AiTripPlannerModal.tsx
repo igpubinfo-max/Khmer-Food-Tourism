@@ -172,7 +172,7 @@ export const AiTripPlannerModal: React.FC = () => {
         language,
         canUseVip: hasRealVip,
       }),
-    [foods, restaurants, advisorPrompt, advisorSeed, language, hasRealVip]
+    [isAiTripPlannerModalOpen, foods, restaurants, advisorPrompt, advisorSeed, language, hasRealVip]
   );
 
   const handleAdvisorSearchSubmit = async (e?: React.FormEvent) => {

@@ -2259,8 +2259,7 @@ export const ManageMenuModal: React.FC = () => {
                         }}
                         className="w-28 h-36 p-1.5 rounded-xl bg-white border-2 border-emerald-500/50 shrink-0 cursor-pointer"
                       >
-                        <img
-                          key={activeShopQrUrl}
+                        <img loading="lazy" decoding="async" key={activeShopQrUrl}
                           src={activeShopQrUrl}
                           alt={`ABA KHQR — ${activeShopPlan.priceUsd.toFixed(2)} USD (${activeShopPlan.durationDays} Days)`}
                           className="w-full h-full object-contain"

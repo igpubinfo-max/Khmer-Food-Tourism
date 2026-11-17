@@ -424,6 +424,7 @@ export const NearMeModal: React.FC = () => {
 
   // Merge & deduplicate verified Supabase restaurants + Google Maps/Live nearby places within user's location
   const allVerifiedCityRestaurants = useMemo(() => {
+    if (!isNearMeModalOpen) return [];
     const mergedMap = new Map<string, Restaurant>();
     const mergedList: Restaurant[] = [];
     const mergedIdxById = new Map<string, number>();
@@ -476,7 +477,7 @@ export const NearMeModal: React.FC = () => {
       })
       .filter((r) => Number.isFinite(r.distanceMeters) && r.distanceMeters <= maxCitySearchRadius)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [restaurants, liveNearbyRestaurants, liveNearbyAttractions, activeNearMeCoords, selectedRadiusMeters, manualProvince, excludedShopsTick]);
+  }, [isNearMeModalOpen, restaurants, liveNearbyRestaurants, liveNearbyAttractions, activeNearMeCoords, selectedRadiusMeters, manualProvince, excludedShopsTick]);
 
   const nearbyRestaurants = useMemo(() => {
     return allVerifiedCityRestaurants
@@ -485,6 +486,7 @@ export const NearMeModal: React.FC = () => {
   }, [allVerifiedCityRestaurants, selectedRadiusMeters]);
 
   const nearbyDestinations = useMemo(() => {
+    if (!isNearMeModalOpen) return [];
     const mergedMap = new Map<string, TouristDestination>();
     const mergedList: TouristDestination[] = [];
 
@@ -521,7 +523,7 @@ export const NearMeModal: React.FC = () => {
       })
       .filter((d) => Number.isFinite(d.distanceMeters) && d.distanceMeters <= selectedRadiusMeters)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
-  }, [destinations, liveNearbyAttractions, activeNearMeCoords, selectedRadiusMeters, manualProvince]);
+  }, [isNearMeModalOpen, destinations, liveNearbyAttractions, activeNearMeCoords, selectedRadiusMeters, manualProvince]);
 
   const filteredNearbyRestaurants = useMemo(() => {
     const rawQuery = nearbyQuery.trim();

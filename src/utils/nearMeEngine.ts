@@ -119,20 +119,32 @@ export function isValidCambodiaGps(lat?: number, lng?: number): boolean {
   );
 }
 
+let inMemorySavedGpsCache: { coords: { lat: number; lng: number } | null; readAt: number } | null = null;
+
 export function readSavedUserGps(): { lat: number; lng: number } | null {
+  const now = Date.now();
+  if (inMemorySavedGpsCache && now - inMemorySavedGpsCache.readAt < 10_000) {
+    return inMemorySavedGpsCache.coords;
+  }
   try {
     if (typeof localStorage === 'undefined') return null;
     const raw = localStorage.getItem(LAST_KNOWN_GPS_STORAGE_KEY);
-    if (!raw) return null;
+    if (!raw) {
+      inMemorySavedGpsCache = { coords: null, readAt: now };
+      return null;
+    }
     const parsed = JSON.parse(raw);
     const lat = Number(parsed?.lat);
     const lng = Number(parsed?.lng);
     if (isValidCambodiaGps(lat, lng)) {
-      return { lat, lng };
+      const coords = { lat, lng };
+      inMemorySavedGpsCache = { coords, readAt: now };
+      return coords;
     }
   } catch {
     // ignore storage errors
   }
+  inMemorySavedGpsCache = { coords: null, readAt: now };
   return null;
 }
 
@@ -324,6 +336,7 @@ export function saveUserGps(coords: { lat: number; lng: number }): void {
   if (!isValidCambodiaGps(coords?.lat, coords?.lng)) return;
   try {
     if (typeof localStorage !== 'undefined') {
+      inMemorySavedGpsCache = { coords: { lat: coords.lat, lng: coords.lng }, readAt: Date.now() };
       localStorage.setItem(
         LAST_KNOWN_GPS_STORAGE_KEY,
         JSON.stringify({ lat: coords.lat, lng: coords.lng, updatedAt: Date.now() })

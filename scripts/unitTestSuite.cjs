@@ -1271,4 +1271,43 @@ test('17. TikTok & Facebook Video System Audit: 360+ Disjoint Playable Streams, 
   }
 });
 
+test('18. VipAddRestaurantModal Clean Receipt UI & Tourism Menu ប្តូរថ្មី (Shuffle) Regression Guard', () => {
+  const vipModalSrc = fs.readFileSync(path.join(ROOT, 'src/components/VipAddRestaurantModal.tsx'), 'utf8');
+  assert.ok(
+    !vipModalSrc.includes('លេខប្រតិបត្តិការ ABA (Trx ID - មិនបាច់ដាក់ក៏បានបើមានរូប)'),
+    'ABA Trx ID text input field must be removed from VipAddRestaurantModal.tsx'
+  );
+  assert.ok(
+    vipModalSrc.includes('📸 ជ្រើសរូបវិក្កយបត្រ ABA ពី រូបភាពរបស់ខ្ញុំ') &&
+      vipModalSrc.includes('✅ បញ្ជាក់ការបង់ប្រាក់បន្ថែមហាង'),
+    'Receipt upload button and confirm button must remain intact in VipAddRestaurantModal.tsx'
+  );
+
+  const tourismViewSrc = fs.readFileSync(path.join(ROOT, 'src/components/TourismView.tsx'), 'utf8');
+  assert.ok(
+    !tourismViewSrc.includes("if (nearMeActive || trimmedQuery || selectedCategory !== 'all' || hasActiveUserGps)"),
+    'TourismView must not override ប្តូរថ្មី shuffle with static hasActiveUserGps distance sorting during normal browsing'
+  );
+
+  const {
+    generateFreshShuffleSeed,
+    shuffleTourismByRatingTiers,
+  } = require(path.join(ROOT, 'src/utils/sessionShuffle.ts'));
+  const { initial100Destinations } = require(path.join(ROOT, 'src/data/seedDestinations.ts'));
+
+  const s1 = generateFreshShuffleSeed();
+  const batch1 = shuffleTourismByRatingTiers(initial100Destinations, s1, new Set());
+  const top18Ids = new Set(batch1.slice(0, 18).map((d) => d.id));
+
+  const s2 = (s1 ^ 0x5a5a5a5a) || 77777;
+  const batch2 = shuffleTourismByRatingTiers(initial100Destinations, s2, top18Ids);
+  const overlap = batch2.slice(0, 18).filter((d) => top18Ids.has(d.id));
+  assert.equal(
+    overlap.length,
+    0,
+    'Clicking ប្តូរថ្មី in Tourism Menu must replace all 18 top displayed attractions with a 100% fresh set'
+  );
+});
+
 console.log('\nAll ' + passed + ' unit test suites passed successfully!');
+

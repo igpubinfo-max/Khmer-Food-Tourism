@@ -117,8 +117,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
                 onClick={() => onPickFood?.(food)}
                 className="p-2.5 rounded-xl bg-white border border-slate-200/90 hover:border-emerald-500 flex items-start gap-2.5 cursor-pointer transition shadow-2xs"
               >
-                <img
-                  src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)}
+                <img src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)}
                   onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                   alt={loc.name}
                   loading="lazy"

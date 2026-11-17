@@ -341,11 +341,7 @@ const MainScreen: React.FC = () => {
       <Suspense fallback={null}>
         {isSmartHubOpen && hasVipAccess && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
         {isAddRestaurantModalOpen && <AddRestaurantModal />}
-        {(visitedModals.admin || isAdminOpen) && (
-          <div className={isAdminOpen ? 'contents' : 'hidden'} aria-hidden={!isAdminOpen}>
-            <AdminDashboard />
-          </div>
-        )}
+        {isAdminOpen && <AdminDashboard />}
         {isAdminLoginModalOpen && <AdminLoginModal />}
         {isSupportModalOpen && <SupportModal />}
         {isExitModalOpen && <ExitConfirmModal />}
@@ -366,46 +362,26 @@ const MainScreen: React.FC = () => {
             <DailyDiscoveriesModal />
           </div>
         )}
-        {(visitedModals.wishlists || isWishlistsModalOpen) && (
-          <div className={isWishlistsModalOpen ? 'contents' : 'hidden'} aria-hidden={!isWishlistsModalOpen}>
-            <WishlistsModal />
-          </div>
-        )}
+        {isWishlistsModalOpen && <WishlistsModal />}
         {(visitedModals.aiTripPlanner || isAiTripPlannerModalOpen) && (
           <div className={isAiTripPlannerModalOpen ? 'contents' : 'hidden'} aria-hidden={!isAiTripPlannerModalOpen}>
             <AiTripPlannerModal />
           </div>
         )}
-        {(visitedModals.notifications || isNotificationsModalOpen) && (
-          <div className={isNotificationsModalOpen ? 'contents' : 'hidden'} aria-hidden={!isNotificationsModalOpen}>
-            <NotificationsModal />
-          </div>
-        )}
+        {isNotificationsModalOpen && <NotificationsModal />}
         {isAiCheckInModalOpen && <AiCheckInModal />}
         {isRestaurantCheckInModalOpen && <RestaurantCheckInModal />}
         {isSupportTicketModalOpen && <PaymentSupportModal />}
         {isQrScannerModalOpen && <QrScannerModal />}
-        {(visitedModals.vipAddRestaurant || isVipAddRestaurantModalOpen) && (
-          <div className={isVipAddRestaurantModalOpen ? 'contents' : 'hidden'} aria-hidden={!isVipAddRestaurantModalOpen}>
-            <VipAddRestaurantModal />
-          </div>
-        )}
-        {(visitedModals.googleMapsSearch || isGoogleMapsSearchModalOpen) && (
-          <div className={isGoogleMapsSearchModalOpen ? 'contents' : 'hidden'} aria-hidden={!isGoogleMapsSearchModalOpen}>
-            <GoogleMapsPlaceSearchModal />
-          </div>
-        )}
+        {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
+        {isGoogleMapsSearchModalOpen && <GoogleMapsPlaceSearchModal />}
         {isManageMenuModalOpen && managingRestaurant && <ManageMenuModal />}
         {(visitedModals.trendingSocial || isTrendingSocialModalOpen) && (
           <div className={isTrendingSocialModalOpen ? 'contents' : 'hidden'} aria-hidden={!isTrendingSocialModalOpen}>
             <TrendingSocialModal />
           </div>
         )}
-        {(visitedModals.trendingFoodDetail || isTrendingFoodDetailModalOpen) && (
-          <div className={isTrendingFoodDetailModalOpen ? 'contents' : 'hidden'} aria-hidden={!isTrendingFoodDetailModalOpen}>
-            <TrendingFoodDetailModal />
-          </div>
-        )}
+        {isTrendingFoodDetailModalOpen && <TrendingFoodDetailModal />}
         {selectedFood && <FoodDetailModal />}
         {selectedRestaurant && <RestaurantDetailModal />}
         {selectedDestination && <TouristDetailModal />}

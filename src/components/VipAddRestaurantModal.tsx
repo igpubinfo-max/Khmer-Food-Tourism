@@ -2169,13 +2169,6 @@ export const VipAddRestaurantModal: React.FC = () => {
               </span>
             </button>
 
-            <input
-              type="text"
-              value={slotTrxRef}
-              onChange={(e) => setSlotTrxRef(e.target.value)}
-              placeholder={tr(language, 'លេខប្រតិបត្តិការ ABA (Trx ID - មិនបាច់ដាក់ក៏បានបើមានរូប)', 'ABA Transaction ID (Optional if receipt uploaded)', 'ABA 交易号（如已上传截图可不填）')}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono"
-            />
 
             <button
               type="submit"

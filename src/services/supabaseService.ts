@@ -1408,6 +1408,7 @@ export function wasPrefixPullComplete(prefix: string): boolean {
 }
 
 const cloudPullOkByKey = new Map<string, boolean>();
+const inFlightPullByKey = new Map<string, Promise<any>>();
 const prefixPullCompleteByPrefix = new Map<string, boolean>();
 
 // ============================================================================
@@ -4325,7 +4326,6 @@ export async function syncAllAppDataWithSupabase(localState: {
     void flushCloudOutbox().catch(() => {});
     const isAdminDevice = Boolean(
       localState.includeHeavyAdminVaults ||
-        isAdminServerAuthActive() ||
         (localState.currentUser &&
           (localState.currentUser.role === 'admin' ||
             localState.currentUser.id === 'admin-authorized-single' ||

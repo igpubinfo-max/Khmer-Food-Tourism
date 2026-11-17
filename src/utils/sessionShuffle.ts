@@ -85,7 +85,10 @@ export function getRecentTopTourismIds(): Set<string> {
  */
 export function saveRecentTopTourismIds(ids: readonly string[]): void {
   try {
-    const payload = JSON.stringify(ids.slice(0, 10));
+    const existing = Array.from(getRecentTopTourismIds());
+    const incoming = ids.filter((id): id is string => typeof id === 'string' && Boolean(id));
+    const merged = [...existing.filter((id) => !incoming.includes(id)), ...incoming].slice(-90);
+    const payload = JSON.stringify(merged);
     sessionStorage.setItem(RECENT_TOP_TOURISM_STORAGE_KEY, payload);
     localStorage.setItem(RECENT_TOP_TOURISM_STORAGE_KEY, payload);
   } catch {
@@ -144,49 +147,39 @@ export function shuffleTourismByRatingTiers<
     uniqueItems.push(item);
   }
 
-  // 2. Partition into rating priority tiers (5.0★ first, followed by 4.9★, 4.8★, 4.7★, and 4.6★/4.5★)
-  const tier50: T[] = [];
-  const tier49: T[] = [];
-  const tier48: T[] = [];
-  const tier47: T[] = [];
-  const tierRest: T[] = [];
+  // 2. Partition into flagship high-rated attractions (>= 4.65★) and secondary attractions
+  const flagshipPool: T[] = [];
+  const secondaryPool: T[] = [];
 
   for (const item of uniqueItems) {
     const r = typeof item.rating === 'number' && Number.isFinite(item.rating) ? item.rating : 4.5;
-    if (r >= 4.95) {
-      tier50.push(item);
-    } else if (r >= 4.85) {
-      tier49.push(item);
-    } else if (r >= 4.75) {
-      tier48.push(item);
-    } else if (r >= 4.65) {
-      tier47.push(item);
+    if (r >= 4.65) {
+      flagshipPool.push(item);
     } else {
-      tierRest.push(item);
+      secondaryPool.push(item);
     }
   }
 
-  // 3. Shuffle each tier independently with derived seeds
-  let shuffled50 = shuffleWithSeed(tier50, dynamicSeed ^ 0x13579bdf);
-  const shuffled49 = shuffleWithSeed(tier49, dynamicSeed ^ 0x2468ace0);
-  const shuffled48 = shuffleWithSeed(tier48, dynamicSeed ^ 0x369cf036);
-  const shuffled47 = shuffleWithSeed(tier47, dynamicSeed ^ 0x48ae159d);
-  const shuffledRest = shuffleWithSeed(tierRest, dynamicSeed ^ 0x5ad027b3);
+  // 3. Shuffle flagship pool and secondary pool using the dynamic seed
+  let shuffledFlagship = shuffleWithSeed(flagshipPool, dynamicSeed ^ 0x13579bdf);
+  const shuffledSecondary = shuffleWithSeed(secondaryPool, dynamicSeed ^ 0x5ad027b3);
 
-  // 4. Rotate any recently shown top cards to the back of Tier 1 so consecutive opens/refreshes
-  // never repeat the exact same lead cards at the top of the screen
-  if (avoidTopIds && avoidTopIds.size > 0 && shuffled50.length > avoidTopIds.size + 3) {
+  // 4. Rotate any recently shown top cards to the back of the flagship pool so every click of ប្តូរថ្មី
+  // immediately displays a 100% fresh set of attractions at the top of the screen
+  if (avoidTopIds && avoidTopIds.size > 0 && shuffledFlagship.length > 1) {
     const freshLead: T[] = [];
     const rotatedBack: T[] = [];
-    for (const d of shuffled50) {
+    for (const d of shuffledFlagship) {
       if (avoidTopIds.has(d.id)) {
         rotatedBack.push(d);
       } else {
         freshLead.push(d);
       }
     }
-    shuffled50 = [...freshLead, ...rotatedBack];
+    if (freshLead.length > 0) {
+      shuffledFlagship = [...freshLead, ...rotatedBack];
+    }
   }
 
-  return [...shuffled50, ...shuffled49, ...shuffled48, ...shuffled47, ...shuffledRest];
+  return [...shuffledFlagship, ...shuffledSecondary];
 }

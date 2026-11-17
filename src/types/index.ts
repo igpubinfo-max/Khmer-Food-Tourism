@@ -2250,6 +2250,7 @@ const MIN_VALID_AUTHORITATIVE_MS = Date.UTC(2025, 0, 1);
 const MAX_VALID_AUTHORITATIVE_MS = Date.UTC(2100, 0, 1);
 
 let authoritativeServerAnchor: { serverEpochMs: number; perfNowMs: number } | null = null;
+let cachedPersistedServerClock: { serverEpochMs: number; savedAtDeviceMs: number } | null | undefined = undefined;
 
 function getMonotonicPerfMs(): number {
   if (typeof performance !== 'undefined' && typeof performance.now === 'function') {

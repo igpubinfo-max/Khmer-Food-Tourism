@@ -45,6 +45,7 @@ export const AppUpdateBanner: React.FC = () => {
   const [downloadProgressPct, setDownloadProgressPct] = useState<number | null>(null);
 
   const checkingRef = useRef(false);
+  const lastAutoCheckAtRef = useRef(0);
   const pendingRecheckRef = useRef(false);
   const pendingManualRef = useRef(false);
   const latestContextRef = useRef({ language, appSettings, showToast });
@@ -82,6 +83,10 @@ export const AppUpdateBanner: React.FC = () => {
   }, [asyncStatus, syncStatus]);
 
   const runCheck = useCallback(async (isManual: boolean) => {
+    if (!isManual) {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      if (Date.now() - lastAutoCheckAtRef.current < 45_000) return;
+    }
     if (checkingRef.current) {
       pendingRecheckRef.current = true;
       if (isManual) pendingManualRef.current = true;
@@ -91,6 +96,7 @@ export const AppUpdateBanner: React.FC = () => {
     const { language: curLang, appSettings: curSettings, showToast: toastFn } = latestContextRef.current;
 
     checkingRef.current = true;
+    if (!isManual) lastAutoCheckAtRef.current = Date.now();
     if (isManual) setIsRechecking(true);
     try {
       const status = await checkLiveAppUpdate(curSettings);
@@ -159,8 +165,10 @@ export const AppUpdateBanner: React.FC = () => {
     }, 2200);
 
     const periodicTimer = window.setInterval(() => {
-      runCheck(false);
-    }, 60 * 1000);
+      if (typeof document === 'undefined' || !document.hidden) {
+        runCheck(false);
+      }
+    }, 5 * 60 * 1000);
 
     const onManualEvent = (evt: Event) => {
       const custom = evt as CustomEvent<{ manual?: boolean }>;

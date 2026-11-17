@@ -171,7 +171,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
         <article
           data-testid={`dest-row-${destination.id}`}
           onClick={() => setSelectedDestination(destination)}
-          className="group bg-white rounded-[20px] p-2.5 transition-all duration-150 cursor-pointer flex items-center gap-3 border border-slate-200/90 hover:border-emerald-500/60 shadow-[0_4px_14px_rgba(15,23,42,0.05)] active:scale-[0.99] font-khmer text-slate-900"
+          className="kft-cv-card group bg-white rounded-[20px] p-2.5 transition-all duration-150 cursor-pointer flex items-center gap-3 border border-slate-200/90 hover:border-emerald-500/60 shadow-[0_4px_14px_rgba(15,23,42,0.05)] active:scale-[0.99] font-khmer text-slate-900"
         >
           {/* Left: Thumbnail or Colorful Category Icon */}
           {hasClearPhoto ? (

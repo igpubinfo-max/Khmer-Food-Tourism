@@ -623,7 +623,7 @@ export const WhatToEatModal: React.FC = () => {
   const effectiveMealSlot = mealSlotFilter === 'auto' ? currentMealInfo.slug : mealSlotFilter;
 
   const aiCravingRecommendations = useMemo(() => {
-    if (!cravingQuery.trim()) return null;
+    if (!isWhatToEatModalOpen || !cravingQuery.trim()) return null;
     return getAiFoodAdvisorRecommendations({
       foods,
       restaurants,
@@ -633,7 +633,7 @@ export const WhatToEatModal: React.FC = () => {
       language,
       canUseVip,
     });
-  }, [foods, restaurants, cravingQuery, spinCount, language, canUseVip]);
+  }, [isWhatToEatModalOpen, foods, restaurants, cravingQuery, spinCount, language, canUseVip]);
 
   // Check if the latest conversation turn or current input is a medical/disease question
   const lastAssistantMsg = useMemo(() => {
@@ -726,7 +726,7 @@ export const WhatToEatModal: React.FC = () => {
 
   // Filter candidate dishes strictly across all 4 filter groups: Craving, Category, Mealtime, and Dietary/Health
   const matchingFoods = useMemo(() => {
-    if (isMedicalRefusalActive) return [];
+    if (!isWhatToEatModalOpen || isMedicalRefusalActive) return [];
     if (drinkMode && pairingRanked.length > 0) {
       return pairingRanked.map((r) => r.food);
     }

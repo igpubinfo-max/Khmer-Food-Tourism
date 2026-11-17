@@ -1914,6 +1914,12 @@ let smartCacheMemoResult: GooglePlaceCachedItem[] | null = null;
 let legacySmartCacheKeysPurged = false;
 
 export function getLocalSmartCache(): GooglePlaceCachedItem[] {
+  if (
+    smartCacheMemoResult &&
+    Date.now() - smartCacheMemoAt < SMART_CACHE_MEMO_MAX_AGE_MS
+  ) {
+    return smartCacheMemoResult;
+  }
   let raw: string | null = null;
   try {
     if (!legacySmartCacheKeysPurged) {
@@ -7534,8 +7540,9 @@ export function performUnifiedCambodiaSearch(
   const seenExternalIds = new Set<string>();
 
   const deletedRestsMap = loadDeletedRestaurantIdsMap();
+  const hasDeletedRests = Boolean(deletedRestsMap && Object.keys(deletedRestsMap).length > 0);
   const isExternalPlaceDeleted = (item: GooglePlaceCachedItem): boolean => {
-    if (!deletedRestsMap || Object.keys(deletedRestsMap).length === 0) return false;
+    if (!hasDeletedRests || !deletedRestsMap) return false;
     if (item.placeId && deletedRestsMap[item.placeId]) return true;
     if (item.googlePlaceId && (deletedRestsMap[`gplace:${item.googlePlaceId}`] || deletedRestsMap[item.googlePlaceId])) {
       return true;

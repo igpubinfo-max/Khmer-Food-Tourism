@@ -5,6 +5,7 @@ import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { sanitizeStartupCurrentUser } from './utils/securityIntegrityGuard.ts'
 import { installRuntimeAntiDebugGuard } from './utils/appCloneIntegrityGuard.ts'
+import { installSubpathAssetResolver } from './utils/subpathAssetResolver.ts'
 import {
   APP_VERSION_NAME,
   APP_BUILD_CODE,
@@ -750,6 +751,13 @@ try {
   runUserDataIntegrityCheck(Array.isArray(bootUsers) ? bootUsers.filter((u: any) => u && u.role !== 'admin') : []);
 } catch (e) {
   console.warn('Boot user-data integrity check warning:', e);
+}
+
+// 3b. Ensure public assets (/categories/, /welcome/, /foods/, /destinations/, /banners/, /logo-kft.png) resolve on GitHub Pages subpath (/Khmer-Food-Tourism/)
+try {
+  installSubpathAssetResolver();
+} catch (e) {
+  console.warn('Subpath asset resolver init warning:', e);
 }
 
 createRoot(document.getElementById('root')!).render(

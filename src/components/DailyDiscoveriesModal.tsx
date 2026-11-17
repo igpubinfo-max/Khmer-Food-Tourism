@@ -145,6 +145,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
 
   // Deduplicate and verify all dishes so no duplicate names or photos ever appear
   const verifiedDishes = useMemo(() => {
+    if (!isDailyDiscoveriesModalOpen) return [];
     try {
       const base = organizeAndDeduplicateFoods(Array.isArray(foods) ? foods : []);
       const seenIds = new Set<string>();
@@ -161,7 +162,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
     } catch {
       return [];
     }
-  }, [foods]);
+  }, [isDailyDiscoveriesModalOpen, foods]);
 
   // Count dishes per province across all 25 provinces & capital city
   // Pre-compute ranked trilingual search matches across verifiedDishes when query is active
@@ -294,13 +295,14 @@ export const DailyDiscoveriesModal: React.FC = () => {
 
   const matchedRestaurantsByDishId = useMemo(() => {
     const map = new Map<string, Restaurant[]>();
+    if (!isDailyDiscoveriesModalOpen) return map;
     for (const food of displayedDishes) {
       const pid = selectedProvinceId !== 'all' ? selectedProvinceId : detectDishProvince(food);
       const provMeta = getProvinceOptionById(pid);
       map.set(food.id, getMatchingRestaurantsForProvinceDish(food, provMeta, restaurants));
     }
     return map;
-  }, [displayedDishes, selectedProvinceId, restaurants]);
+  }, [isDailyDiscoveriesModalOpen, displayedDishes, selectedProvinceId, restaurants]);
 
   useEffect(() => {
     if (!isDailyDiscoveriesModalOpen) return;
