@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Automated Unit Test Suite (CHG-16)
  * Verifies:
  *   1. Seed Data Integrity (Foods, Restaurants, Hotels, Attractions — 0 duplicate IDs)
@@ -1306,6 +1306,56 @@ test('18. VipAddRestaurantModal Clean Receipt UI & Tourism Menu ប្តូរ�
     overlap.length,
     0,
     'Clicking ប្តូរថ្មី in Tourism Menu must replace all 18 top displayed attractions with a 100% fresh set'
+  );
+});
+
+test('19. Anti-APK-Unpack Seed Payload Cipher & Runtime Anti-Scraping Protection Guard', () => {
+  const {
+    encodeProtectedSeedPayload,
+    decodeProtectedSeedPayload,
+  } = require(path.join(ROOT, 'src/utils/seedPayloadCipher.ts'));
+
+  const sampleRecords = [
+    {
+      id: 'dest-test-1',
+      nameKh: 'ព្រះបរមរាជវាំង និងវត្តព្រះកែវមរកត',
+      nameEn: 'Royal Palace & Silver Pagoda',
+      nameZh: '金边皇宫与银阁寺',
+      latitude: 11.5625,
+      longitude: 104.9317,
+      googlePlaceId: 'ChIJ7RvwuqRRCTERMglJEDwKcRw',
+    },
+  ];
+
+  const encrypted = encodeProtectedSeedPayload(sampleRecords);
+  assert.ok(encrypted.startsWith('KFT_UC2:'), 'Ciphertext must start with KFT_UC2: prefix');
+  assert.ok(!encrypted.includes('Royal Palace'), 'Ciphertext must not expose plain English names');
+  assert.ok(!encrypted.includes('ព្រះបរមរាជវាំង'), 'Ciphertext must not expose plain Khmer names');
+  assert.ok(!encrypted.includes('11.5625'), 'Ciphertext must not expose plain GPS coordinates');
+  assert.ok(!encrypted.includes('ChIJ7RvwuqRRCTERMglJEDwKcRw'), 'Ciphertext must not expose plain Google Place IDs');
+
+  for (let i = 1; i <= 9; i++) {
+    const partSrc = fs.readFileSync(path.join(ROOT, 'src/data/seedRacPart' + i + '.ts'), 'utf8');
+    assert.ok(!partSrc.includes('"id": "rac-'), 'seedRacPart' + i + ' must not contain rac- IDs');
+    assert.ok(!partSrc.includes('/destinations/rac-'), 'seedRacPart' + i + ' must not contain RAC photo URLs');
+  }
+  const decrypted = decodeProtectedSeedPayload(encrypted);
+  assert.deepEqual(decrypted, sampleRecords, 'Decrypted payload must match original records 100%');
+
+  const viteCfg = fs.readFileSync(path.join(ROOT, 'vite.config.ts'), 'utf8');
+  assert.ok(viteCfg.includes('kftSeedPayloadProtectionPlugin()'), 'vite.config.ts must register kftSeedPayloadProtectionPlugin');
+
+  const guardSrc = fs.readFileSync(path.join(ROOT, 'src/utils/appCloneIntegrityGuard.ts'), 'utf8');
+  assert.ok(guardSrc.includes('isBulkSelectAll') && guardSrc.includes("window.addEventListener(\n      'copy'"), 'appCloneIntegrityGuard.ts must guard against bulk copy/select-all scraping');
+
+  const mainJava = fs.readFileSync(
+    path.join(ROOT, 'android/app/src/main/java/com/khmerfood/tourism/MainActivity.java'),
+    'utf8'
+  );
+  assert.ok(
+    mainJava.includes('settings.setAllowContentAccess(false);') &&
+      mainJava.includes('settings.setAllowUniversalAccessFromFileURLs(false);'),
+    'MainActivity.java must disable WebView content/universal file access'
   );
 });
 

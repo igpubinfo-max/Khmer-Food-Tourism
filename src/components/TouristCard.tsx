@@ -27,6 +27,7 @@ import {
 import { tr } from '../utils/i18n';
 import { CambodiaChoiceBadge, isCambodiaChoiceEligible } from './common/CambodiaChoiceAndRatings';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
+import { getDestinationCompleteTravelInfo } from '../utils/destinationTravelInfo';
 import type { Language } from '../types';
 
 export interface TouristCardProps {
@@ -125,6 +126,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
   }) => {
     const [imgError, setImgError] = useState(false);
     const loc = useMemo(() => getLocalizedDestination(destination, language), [destination, language]);
+    const travelInfo = useMemo(() => getDestinationCompleteTravelInfo(destination, language), [destination, language]);
 
     const rawPhoto = (destination.photoUrl || '').trim();
     const isRealPhoto =
@@ -161,7 +163,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     };
 
     const isCompactDirectoryRow =
-      (destination.id.startsWith('rac-') && !destination.isFeatured) ||
+      (destination.id.startsWith('kft-site-') || destination.id.startsWith('rac-')) ||
       (!hasClearPhoto && destination.dataSource === 'google_maps');
 
     // Compact Clean White Card Variant
@@ -223,6 +225,19 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
               {loc.category && (
                 <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-extrabold border border-emerald-200/80 truncate">
                   {loc.category}
+                </span>
+              )}
+              {destination.categorySlug !== 'hotel' && (
+                <span className="inline-flex items-center gap-1 shrink-0">
+                  <span className="px-1 py-0.2 rounded border border-emerald-700 text-emerald-800 font-extrabold text-[9.5px] leading-none bg-white">
+                    {travelInfo.tourismCode}
+                  </span>
+                  <span className="px-1 py-0.2 rounded border border-amber-500 text-amber-700 font-extrabold text-[9.5px] leading-none bg-white">
+                    {travelInfo.seasonCode}
+                  </span>
+                  <span className="px-1 py-0.2 rounded-full border border-blue-600 text-blue-700 font-extrabold text-[9.5px] leading-none bg-white">
+                    {travelInfo.roadCode}
+                  </span>
                 </span>
               )}
               {destination.phone && (
@@ -366,9 +381,33 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
             </div>
 
             {loc.description && (
-              <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-2.5">
+              <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-2">
                 {loc.description}
               </p>
+            )}
+            {destination.categorySlug !== 'hotel' && (
+              <div className="mb-2.5 flex items-center justify-between gap-1.5 flex-wrap text-[11px] bg-emerald-50/70 px-2.5 py-1.5 rounded-xl border border-emerald-200/70">
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                  <span className="px-1.5 py-0.5 rounded border border-emerald-700 text-emerald-800 font-extrabold text-[10px] leading-none bg-white">
+                    {travelInfo.tourismCode}
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded border border-amber-500 text-amber-700 font-extrabold text-[10px] leading-none bg-white">
+                    {travelInfo.seasonCode}
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded-full border border-blue-600 text-blue-700 font-extrabold text-[10px] leading-none bg-white">
+                    {travelInfo.roadCode}
+                  </span>
+                </div>
+                <span className="text-slate-700 font-bold truncate">
+                  {tr(
+                    language,
+                    `ភ្នំពេញ ${travelInfo.capitalDistanceKm}km • ខេត្ត ${travelInfo.cityDistanceKm}km`,
+                    `Capital ${travelInfo.capitalDistanceKm}km • City ${travelInfo.cityDistanceKm}km`,
+                    `金边 ${travelInfo.capitalDistanceKm}km • 省会 ${travelInfo.cityDistanceKm}km`
+                  )}
+                </span>
+              </div>
             )}
           </div>
 

@@ -53,6 +53,11 @@ import {
   pickTri,
 } from '../data/guideContent';
 import type { MealSlotId, TipCategory } from '../data/guideContent';
+import {
+  PROVINCIAL_ADMIN_HISTORY_HOSPITALS,
+  INTERNATIONAL_PORTS_DATA,
+  findProvinceAdminHistory,
+} from '../data/provincialAdminPortsEmergencyData';
 import { resolveFestivalFoods } from '../data/festivalFoods';
 import { FestivalDishRow } from './home/FestivalFoodSection';
 
@@ -293,6 +298,12 @@ export const GuideView: React.FC = () => {
     setTipFilterRaw(next);
   };
   const [bigPhraseId, setBigPhraseId] = useState<string | null>(null);
+  const [portCategoryFilter, setPortCategoryFilter] = useState<'all' | 'airport' | 'thailand' | 'vietnam' | 'laos_seaport'>('all');
+  const [showAll25History, setShowAll25History] = useState<boolean>(false);
+  const [showAll25Hospitals, setShowAll25Hospitals] = useState<boolean>(false);
+  const portsSectionRef = useRef<HTMLElement | null>(null);
+  const hospitalsSectionRef = useRef<HTMLElement | null>(null);
+  const provAdminSectionRef = useRef<HTMLDivElement | null>(null);
   const guideContentStartRef = useRef<HTMLDivElement | null>(null);
   const mealPicksSectionRef = useRef<HTMLElement | null>(null);
   const provinceResultsRef = useRef<HTMLDivElement | null>(null);
@@ -700,6 +711,80 @@ export const GuideView: React.FC = () => {
           </div>
         </div>
 
+      {/* 3 Quick-Access Guide Directories: Provincial History & Admin, International Border Ports, Hospitals & Emergency (Zero External Photos) */}
+        <div
+          data-testid="guide-rac-quick-links"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-2"
+        >
+          <button
+            type="button"
+            onClick={() => {
+              setTab('provinces');
+              setTimeout(() => scrollToGuideSection(provAdminSectionRef.current || guideContentStartRef.current), 40);
+            }}
+            className="p-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-900 border border-amber-400/40 text-left flex items-center gap-2.5 shadow-sm active:scale-[0.98] transition cursor-pointer"
+          >
+            <span className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/40 flex items-center justify-center text-lg shrink-0">
+              🏛️
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-xs font-extrabold text-amber-300 leading-snug truncate">
+                {tr(language, 'ប្រវត្តិខេត្ត និងរដ្ឋបាល', 'Provincial History & Admin', '各省历史与行政机构')}
+              </span>
+              <span className="block text-[10px] text-slate-300 truncate">
+                {tr(language, 'ប្រវត្តិសង្ខេប និងទីតាំងរដ្ឋបាលទាំង ២៥ ខេត្ត-រាជធានី', 'History & Provincial Halls (25 Provinces)', '柬埔寨25省市历史与政府驻地')}
+              </span>
+            </span>
+            <ChevronRight className="w-4 h-4 text-amber-300 shrink-0" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setTab('tips');
+              setTipFilter('all');
+              setTimeout(() => scrollToGuideSection(portsSectionRef.current || guideContentStartRef.current), 40);
+            }}
+            className="p-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-900 border border-emerald-400/40 text-left flex items-center gap-2.5 shadow-sm active:scale-[0.98] transition cursor-pointer"
+          >
+            <span className="w-9 h-9 rounded-xl bg-emerald-400/15 border border-emerald-400/40 flex items-center justify-center text-lg shrink-0">
+              🛂
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-xs font-extrabold text-emerald-300 leading-snug truncate">
+                {tr(language, 'ច្រកទ្វារព្រំដែនអន្តរជាតិ', 'International Border Ports', '国际口岸与机场指南')}
+              </span>
+              <span className="block text-[10px] text-slate-300 truncate">
+                {tr(language, 'អាកាសយានដ្ឋាន ព្រំដែនគោក និងកំពង់ផែអន្តរជាតិ', 'Airports, Land Borders & Seaports', '国际机场、陆路口岸与海港')}
+              </span>
+            </span>
+            <ChevronRight className="w-4 h-4 text-emerald-300 shrink-0" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setTab('tips');
+              setTipFilter('all');
+              setTimeout(() => scrollToGuideSection(hospitalsSectionRef.current || guideContentStartRef.current), 40);
+            }}
+            className="p-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-900 border border-rose-400/40 text-left flex items-center gap-2.5 shadow-sm active:scale-[0.98] transition cursor-pointer"
+          >
+            <span className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-400/40 flex items-center justify-center text-lg shrink-0">
+              🏥
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-xs font-extrabold text-rose-300 leading-snug truncate">
+                {tr(language, 'មន្ទីរពេទ្យ និងសង្គ្រោះបន្ទាន់', 'Hospitals & Emergency', '各省医院与紧急救援')}
+              </span>
+              <span className="block text-[10px] text-slate-300 truncate">
+                {tr(language, 'មន្ទីរពេទ្យបង្អែកខេត្ត និងលេខសង្គ្រោះបន្ទាន់ 24 ម៉ោង', 'Provincial Referral Hospitals & 24/7 Hotlines', '25省市转诊医院与24小时急救热线')}
+              </span>
+            </span>
+            <ChevronRight className="w-4 h-4 text-rose-300 shrink-0" />
+          </button>
+        </div>
+
       <div ref={guideContentStartRef} id="kft-guide-content-section" className="scroll-mt-2" />
 
       {/* ------------------------------------------------------------------ */}
@@ -945,6 +1030,134 @@ export const GuideView: React.FC = () => {
                       </p>
                     </div>
                   </div>
+
+                  {/* Provincial History, Administration & Referral Hospital Card (No External Copyrighted Photos) */}
+                  {(() => {
+                    const adminInfo = findProvinceAdminHistory(activeGroup.key);
+                    return (
+                      <div
+                        ref={provAdminSectionRef}
+                        id="kft-guide-prov-admin"
+                        data-testid="guide-province-history-admin"
+                        className="p-4 rounded-2xl bg-white border border-emerald-200/90 shadow-xs space-y-3"
+                      >
+                        <div className="flex items-center justify-between gap-2 flex-wrap border-b border-slate-100 pb-2.5">
+                          <div className="flex items-center gap-2">
+                            <span className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-base shrink-0">
+                              🏛️
+                            </span>
+                            <div>
+                              <h4 className="text-xs sm:text-sm font-extrabold text-[#064E3B]">
+                                {tr(language, 'ប្រវត្តិខេត្ត និងរដ្ឋបាលខេត្ត', 'Provincial History & Administration', '省份历史与行政概况')}
+                              </h4>
+                              <p className="text-[11px] text-slate-500 font-semibold">
+                                {pickTri(adminInfo.provinceName, lang)} • {pickTri(adminInfo.capitalCity, lang)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setShowAll25History((v) => !v)}
+                            className="px-2.5 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold cursor-pointer transition"
+                          >
+                            {showAll25History
+                              ? tr(language, 'បង្រួមបញ្ជី ២៥ ខេត្ត', 'Hide All 25 Provinces', '收起全部25省市')
+                              : tr(language, 'មើលប្រវត្តិទាំង ២៥ ខេត្ត-រាជធានី', 'View All 25 Provinces', '查看全部25省市历史')}
+                          </button>
+                        </div>
+
+                        {/* Historical Summary */}
+                        <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-100 space-y-1">
+                          <p className="text-[11px] font-extrabold text-emerald-900">
+                            📜 {tr(language, 'ប្រវត្តិសង្ខេប និងសក្ដានុពលទេសចរណ៍៖', 'Historical & Cultural Overview:', '历史背景与旅游特色：')}
+                          </p>
+                          <p className="text-xs text-slate-700 leading-relaxed">
+                            {pickTri(adminInfo.historySummary, lang)}
+                          </p>
+                        </div>
+
+                        {/* Administrative Hall & Districts */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-0.5">
+                            <p className="font-extrabold text-slate-900">
+                              📍 {tr(language, 'ទីតាំងរដ្ឋបាលខេត្ត៖', 'Administrative Location:', '省政府驻地：')}
+                            </p>
+                            <p className="text-slate-600 leading-relaxed">
+                              {pickTri(adminInfo.adminLocation, lang)}
+                            </p>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-0.5">
+                            <p className="font-extrabold text-slate-900">
+                              🗺️ {tr(language, 'រដ្ឋបាលក្រុង/ស្រុក/ខណ្ឌ៖', 'Municipalities & Districts:', '下辖市县行政区划：')}
+                            </p>
+                            <p className="text-slate-600 leading-relaxed">
+                              {pickTri(adminInfo.districtsSummary, lang)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Provincial Referral Hospital & Emergency Bar */}
+                        <div className="p-3 rounded-xl bg-rose-50/70 border border-rose-200/90 flex items-center justify-between gap-2.5 flex-wrap">
+                          <div className="min-w-0 flex-1 space-y-0.5">
+                            <p className="text-xs font-extrabold text-rose-900 flex items-center gap-1.5">
+                              <span>🏥</span>
+                              <span>{pickTri(adminInfo.hospitalName, lang)}</span>
+                            </p>
+                            <p className="text-[11px] text-rose-700 leading-snug">
+                              {pickTri(adminInfo.hospitalAddress, lang)}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <a
+                              href={`tel:${adminInfo.hospitalPhone}`}
+                              className="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-mono font-extrabold text-xs inline-flex items-center gap-1 shadow-xs"
+                            >
+                              <PhoneCall className="w-3.5 h-3.5" />
+                              <span>{adminInfo.hospitalPhone}</span>
+                            </a>
+                            <a
+                              href="tel:119"
+                              className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-mono font-extrabold text-xs inline-flex items-center gap-1 shadow-xs"
+                            >
+                              <span>🚑 119</span>
+                            </a>
+                          </div>
+                        </div>
+
+                        {/* Optional Expanded Directory of All 25 Provinces */}
+                        {showAll25History && (
+                          <div className="pt-2 border-t border-slate-200 space-y-2">
+                            <h5 className="text-xs font-extrabold text-slate-900">
+                              {tr(language, '📚 បញ្ជីប្រវត្តិសង្ខេប និងរដ្ឋបាលទាំង ២៥ ខេត្ត-រាជធានី', '📚 All 25 Provinces History & Administration Directory', '📚 柬埔寨全国25省市历史与行政名录')}
+                            </h5>
+                            <div className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
+                              {PROVINCIAL_ADMIN_HISTORY_HOSPITALS.map((item) => (
+                                <div key={item.key} className="p-3 rounded-xl bg-slate-50 border border-slate-200/90 space-y-1 text-xs">
+                                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                                    <span className="font-extrabold text-[#064E3B] text-xs sm:text-sm">
+                                      🏛️ {pickTri(item.provinceName, lang)} ({pickTri(item.capitalCity, lang)})
+                                    </span>
+                                    <a
+                                      href={`tel:${item.hospitalPhone}`}
+                                      className="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-800 font-mono font-bold text-[11px]"
+                                    >
+                                      🏥 {item.hospitalPhone}
+                                    </a>
+                                  </div>
+                                  <p className="text-slate-700 leading-relaxed">{pickTri(item.historySummary, lang)}</p>
+                                  <p className="text-[11px] text-slate-500">
+                                    <span className="font-bold text-slate-700">{tr(language, 'រដ្ឋបាល៖ ', 'Admin: ', '行政驻地：')}</span>
+                                    {pickTri(item.adminLocation, lang)} • {pickTri(item.districtsSummary, lang)}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {groupPlaces.length > 0 && (
                     <section className="space-y-2">
@@ -1198,6 +1411,193 @@ export const GuideView: React.FC = () => {
               </div>
             </section>
           )}
+
+          {/* Provincial Hospitals & Emergency Services Near Tourist Destinations (All 25 Provinces) */}
+          <section
+            ref={hospitalsSectionRef}
+            id="kft-guide-hospitals-section"
+            data-testid="guide-hospitals-emergency-section"
+            className="p-4 rounded-3xl bg-white border-2 border-rose-200/90 space-y-3 shadow-xs scroll-mt-2"
+          >
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <span className="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg shrink-0">
+                  🏥
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-moul text-xs sm:text-sm text-rose-900 leading-[1.7] py-0.5 break-words">
+                    {tr(
+                      language,
+                      '🏥 មន្ទីរពេទ្យបង្អែក និងសេវាសង្គ្រោះបន្ទាន់តាមខេត្ត-រាជធានី',
+                      '🏥 Provincial Referral Hospitals & Tourist Emergency Services',
+                      '🏥 各省转诊医院与景区周边紧急医疗救援'
+                    )}
+                  </h3>
+                  <p className="text-[11px] text-slate-600 leading-[1.55]">
+                    {tr(
+                      language,
+                      'ទីតាំងមន្ទីរពេទ្យបង្អែក និងលេខទូរស័ព្ទសង្គ្រោះបន្ទាន់នៅក្បែរតំបន់ទេសចរណ៍ទូទាំងប្រទេស',
+                      'Locations and direct emergency numbers of referral hospitals near major tourist hubs',
+                      '全国各省主要景区周边的省级转诊医院位置与一键拨号'
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowAll25Hospitals((v) => !v)}
+                className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 text-xs font-extrabold cursor-pointer transition shrink-0"
+              >
+                {showAll25Hospitals
+                  ? tr(language, 'បង្ហាញខេត្តសំខាន់ៗ', 'Show Major Hubs', '仅显示重点旅游省市')
+                  : tr(language, `មើលទាំង ${PROVINCIAL_ADMIN_HISTORY_HOSPITALS.length} ខេត្ត-រាជធានី`, `View All ${PROVINCIAL_ADMIN_HISTORY_HOSPITALS.length} Provinces`, `查看全部 ${PROVINCIAL_ADMIN_HISTORY_HOSPITALS.length} 省市医院`)}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {(showAll25Hospitals ? PROVINCIAL_ADMIN_HISTORY_HOSPITALS : PROVINCIAL_ADMIN_HISTORY_HOSPITALS.slice(0, 8)).map((h) => (
+                <div
+                  key={h.key}
+                  className="p-3 rounded-2xl bg-rose-50/40 border border-rose-200/80 flex flex-col justify-between gap-2"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-900 font-extrabold text-[10.5px]">
+                        📍 {pickTri(h.provinceName, lang)}
+                      </span>
+                      <span className="text-[10.5px] font-bold text-slate-500">
+                        🚑 119 • 🚓 {h.policePhone}
+                      </span>
+                    </div>
+                    <h4 className="text-xs font-extrabold text-slate-900 leading-snug">
+                      {pickTri(h.hospitalName, lang)}
+                    </h4>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      {pickTri(h.hospitalAddress, lang)}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-1.5 pt-1.5 border-t border-rose-100">
+                    <a
+                      href={`tel:${h.hospitalPhone}`}
+                      className="px-2.5 py-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-mono font-extrabold text-xs inline-flex items-center gap-1 shadow-xs"
+                    >
+                      <PhoneCall className="w-3 h-3" />
+                      <span>{h.hospitalPhone}</span>
+                    </a>
+                    <a
+                      href="tel:119"
+                      className="px-2.5 py-1 rounded-xl bg-slate-900 text-white font-mono font-extrabold text-xs inline-flex items-center gap-1"
+                    >
+                      <span>119</span>
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* International Border Checkpoints, Airports & Seaports Directory (Zero External Photos) */}
+          <section
+            ref={portsSectionRef}
+            id="kft-guide-international-ports"
+            data-testid="guide-international-ports-section"
+            className="p-4 rounded-3xl bg-white border-2 border-emerald-200/90 space-y-3 shadow-xs scroll-mt-2"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-lg shrink-0">
+                🛂
+              </span>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-moul text-xs sm:text-sm text-[#064E3B] leading-[1.7] py-0.5 break-words">
+                  {tr(
+                    language,
+                    '🛂 ច្រកទ្វារព្រំដែនអន្តរជាតិ និងអាកាសយានដ្ឋានអន្តរជាតិ',
+                    '🛂 International Border Ports, Airports & Seaports',
+                    '🛂 柬埔寨国际边境口岸、国际机场与海港指南'
+                  )}
+                </h3>
+                <p className="text-[11px] text-slate-600 leading-[1.55]">
+                  {tr(
+                    language,
+                    'ព័ត៌មានច្រកទ្វារព្រំដែនអន្តរជាតិ ម៉ោងធ្វើការ សេវាទិដ្ឋាការ (Visa) និងផ្លូវធ្វើដំណើរសម្រាប់ភ្ញៀវទេសចរជាតិ និងអន្តរជាតិ',
+                    'Official international entry/exit checkpoints, operating hours, Visa on Arrival / e-Visa & highway routes',
+                    '面向国内外游客的国际出入境口岸、开放时间、落地签/电子签及国道交通路线'
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* Category Filter Pills */}
+            <div className="kft-hscroll flex gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+              {[
+                { id: 'all' as const, label: tr(language, `ទាំងអស់ (${INTERNATIONAL_PORTS_DATA.length})`, `All Ports (${INTERNATIONAL_PORTS_DATA.length})`, `全部口岸 (${INTERNATIONAL_PORTS_DATA.length})`) },
+                { id: 'airport' as const, label: tr(language, '✈️ អាកាសយានដ្ឋានអន្តរជាតិ', '✈️ International Airports', '✈️ 国际机场') },
+                { id: 'thailand' as const, label: tr(language, '🇹🇭 ព្រំដែនកម្ពុជា–ថៃ', '🇹🇭 Cambodia–Thailand', '🇹🇭 柬泰边境口岸') },
+                { id: 'vietnam' as const, label: tr(language, '🇻🇳 ព្រំដែនកម្ពុជា–វៀតណាម', '🇻🇳 Cambodia–Vietnam', '🇻🇳 柬越边境口岸') },
+                { id: 'laos_seaport' as const, label: tr(language, '🇱🇦 ព្រំដែនឡាវ & កំពង់ផែសមុទ្រ', '🇱🇦 Laos Border & Seaports', '🇱🇦 柬老口岸与国际海港') },
+              ].map((catBtn) => {
+                const active = portCategoryFilter === catBtn.id;
+                return (
+                  <button
+                    key={catBtn.id}
+                    type="button"
+                    onClick={() => setPortCategoryFilter(catBtn.id)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-extrabold whitespace-nowrap border transition cursor-pointer ${
+                      active
+                        ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {catBtn.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Ports Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {INTERNATIONAL_PORTS_DATA.filter((p) => portCategoryFilter === 'all' || p.category === portCategoryFilter).map((port) => (
+                <div
+                  key={port.id}
+                  className="p-3 rounded-2xl bg-emerald-50/40 border border-emerald-200/80 space-y-1.5 text-xs"
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-md bg-[#064E3B] text-amber-300 font-extrabold text-[10.5px]">
+                      {port.badge}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-white border border-emerald-200 text-emerald-900 font-bold text-[10.5px]">
+                      🕒 {port.hours}
+                    </span>
+                  </div>
+
+                  <h4 className="font-extrabold text-slate-900 text-xs sm:text-sm leading-snug">
+                    {pickTri(port.name, lang)}
+                  </h4>
+
+                  <p className="text-[11px] text-emerald-800 font-bold">
+                    📍 {pickTri(port.province, lang)}
+                  </p>
+
+                  <div className="space-y-1 text-[11px] text-slate-700 pt-1 border-t border-emerald-200/60">
+                    <p>
+                      <span className="font-bold text-slate-900">{tr(language, 'តភ្ជាប់ទៅ៖ ', 'Connects to: ', '连接方向：')}</span>
+                      {pickTri(port.connectsTo, lang)}
+                    </p>
+                    <p>
+                      <span className="font-bold text-slate-900">{tr(language, 'ផ្លូវធ្វើដំណើរ៖ ', 'Route: ', '交通路线：')}</span>
+                      {pickTri(port.routeInfo, lang)}
+                    </p>
+                    <p className="text-emerald-900 bg-white/80 px-2 py-1 rounded-lg border border-emerald-200/70">
+                      ✅ {pickTri(port.visaAndServices, lang)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
 
           <section className="space-y-2.5">
             <SectionTitle

@@ -1,4 +1,4 @@
-# Discover Cambodia Food & Tourism — ProGuard / R8 Code Obfuscation & Anti-Reverse-Engineering Rules
+﻿# Discover Cambodia Food & Tourism — ProGuard / R8 Code Obfuscation & Anti-Reverse-Engineering Rules
 -optimizationpasses 5
 -allowaccessmodification
 -renamesourcefileattribute SourceFile
@@ -26,3 +26,10 @@
 # Capacitor Local Notifications (meal-time reminders): alarm receivers + plugin classes are looked up reflectively
 -keep class com.capacitorjs.plugins.localnotifications.** { *; }
 -dontwarn com.capacitorjs.plugins.localnotifications.**
+
+# Strip debug & verbose logs from release APK/AAB to prevent logcat inspection
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int d(...);
+}

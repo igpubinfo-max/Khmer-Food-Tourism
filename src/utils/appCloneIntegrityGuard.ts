@@ -1,4 +1,4 @@
-import { Capacitor, registerPlugin } from '@capacitor/core';
+﻿import { Capacitor, registerPlugin } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 
 export const OFFICIAL_APP_PACKAGE_ID = 'com.khmerfood.tourism';
@@ -147,9 +147,53 @@ export function installRuntimeAntiDebugGuard(): void {
         const isMacInspect = e.metaKey && e.altKey && (key === 'I' || key === 'J' || key === 'C' || key === 'U');
         const isViewSourceOrSave = ctrlOrCmd && !e.shiftKey && (key === 'U' || key === 'S');
 
-        if (isF12 || isDevToolsShortcut || isMacInspect || isViewSourceOrSave) {
+        const targetEl = e.target as HTMLElement | null;
+        const isEditableField =
+          Boolean(targetEl) &&
+          (targetEl!.tagName === 'INPUT' ||
+            targetEl!.tagName === 'TEXTAREA' ||
+            targetEl!.isContentEditable);
+        const isBulkSelectAll = ctrlOrCmd && !e.shiftKey && key === 'A' && !isEditableField;
+
+        if (isF12 || isDevToolsShortcut || isMacInspect || isViewSourceOrSave || isBulkSelectAll) {
           e.preventDefault();
           e.stopPropagation();
+        }
+      },
+      { capture: true }
+    );
+
+    // Block bulk DOM text scraping (copy/cut & non-input contextmenu) while keeping input fields & buttons normal
+    window.addEventListener(
+      'copy',
+      (e: ClipboardEvent) => {
+        const targetEl = e.target as HTMLElement | null;
+        const isEditableField =
+          Boolean(targetEl) &&
+          (targetEl!.tagName === 'INPUT' ||
+            targetEl!.tagName === 'TEXTAREA' ||
+            targetEl!.isContentEditable);
+        if (isEditableField) return;
+        const selectedText = String(window.getSelection?.()?.toString() || '');
+        if (selectedText.length > 140) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      { capture: true }
+    );
+
+    window.addEventListener(
+      'contextmenu',
+      (e: MouseEvent) => {
+        const targetEl = e.target as HTMLElement | null;
+        const isEditableField =
+          Boolean(targetEl) &&
+          (targetEl!.tagName === 'INPUT' ||
+            targetEl!.tagName === 'TEXTAREA' ||
+            targetEl!.isContentEditable);
+        if (!isEditableField) {
+          e.preventDefault();
         }
       },
       { capture: true }

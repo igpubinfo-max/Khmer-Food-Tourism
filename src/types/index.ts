@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? Math.max(__KFT_BUILD_CODE__, 1627) : 1627;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? Math.max(__KFT_BUILD_CODE__, 1628) : 1628;
 export const APP_RELEASE_DATE = '2026-11-17';
 
 /**
@@ -595,7 +595,8 @@ export const isEphemeralDeadImageUrl = (url?: string | null): boolean => {
     lower.includes('0x0.st/') ||
     lower.includes('tmpfiles.org/') ||
     lower.includes('uguu.se/') ||
-    lower.includes('file.io/')
+    lower.includes('file.io/') ||
+    lower.includes('/destinations/rac-')
   );
 };
 

@@ -27,6 +27,85 @@ function readPackageVersionName(): string {
   return '2.5.0';
 }
 
+const UC2_PREFIX = 'KFT_UC2:';
+const CIPHER_KEY_MATERIAL = 'KFT_CAMBODIA_FLAVORS_TOURISM_2026_V271_PROTECTED_SEED_KEY_9F4A7C2E';
+const KEY_CODES: number[] = Array.from(CIPHER_KEY_MATERIAL).map((ch) => ch.charCodeAt(0));
+const A_MIN = 0x0020;
+const A_MAX = 0x007e;
+const A_SPAN = A_MAX - A_MIN + 1;
+const B_MIN = 0x00a0;
+const B_MAX = 0xd7ff;
+const B_SPAN = B_MAX - B_MIN + 1;
+
+function encodeSeedPayloadForBundle(data: unknown): string {
+  const json = JSON.stringify(data);
+  const len = json.length;
+  const keyLen = KEY_CODES.length;
+  const out = new Array<string>(len);
+  for (let i = 0; i < len; i++) {
+    const c = json.charCodeAt(i);
+    const k = KEY_CODES[i % keyLen];
+    if (c >= A_MIN && c <= A_MAX) {
+      const offset = (k * 31 + i * 17 + 19) % A_SPAN;
+      out[i] = String.fromCharCode(A_MIN + ((c - A_MIN + offset) % A_SPAN));
+    } else if (c >= B_MIN && c <= B_MAX) {
+      const offset = (k * 257 + i * 43 + 0x0393) % B_SPAN;
+      out[i] = String.fromCharCode(B_MIN + ((c - B_MIN + offset) % B_SPAN));
+    } else {
+      out[i] = json[i];
+    }
+  }
+  return UC2_PREFIX + out.join('');
+}
+
+const PROTECTED_SEED_FILE_RE =
+  /\/src\/(data\/(seedDestPart[12]|seedRestPart[12]|seedHotelsPart[12]|seedRacPart[1-9]|seedYouthBrandedCafes|seedFoodpanda100Foods|seedTrendingFoods|seedVegetarian30Foods|seedAdditional100Foods|seedFoods)|services\/onlineFoodDiscoveryService)\.ts$/;
+
+const PROTECTED_SEED_ARRAY_GLOBAL_RE =
+  /((?:export\s+)?const\s+(?:destPart[12]|restPart[12]|hotelsPart[12]|racPart[1-9]|youthBrandedCafes30|foodpanda100Foods|initialTrendingFoods|RAW_30_VEGETARIAN_DISHES|RAW_100_NEW_DISHES|seedFoods|CURATED_YOUTUBE_VIDEOS|BACKUP_REPLACEMENT_YOUTUBE_VIDEOS|CURATED_TIKTOK_FACEBOOK_REVIEWS)\s*:\s*[^=]+?=\s*)(\[\s*(?:\/\*[\s\S]*?\*\/\s*|\/\/[^\n]*\n\s*)*\{[\s\S]*?\n\]);/g;
+
+function kftSeedPayloadProtectionPlugin(): Plugin {
+  return {
+    name: 'kft-seed-payload-protection',
+    apply: 'build',
+    enforce: 'pre',
+    transform(code, id) {
+      const normId = id.replace(/\\/g, '/');
+      if (!PROTECTED_SEED_FILE_RE.test(normId)) {
+        return null;
+      }
+      let replacedCount = 0;
+      const transformedBody = code.replace(
+        PROTECTED_SEED_ARRAY_GLOBAL_RE,
+        (fullMatch, prefix, arrayLiteral) => {
+          try {
+            const parsedArray = new Function('return ' + arrayLiteral)();
+            if (!Array.isArray(parsedArray) || parsedArray.length === 0) {
+              return fullMatch;
+            }
+            const encryptedPayload = encodeSeedPayloadForBundle(parsedArray);
+            const safeJsonLiteral = JSON.stringify(encryptedPayload)
+              .replace(/\u2028/g, '\\u2028')
+              .replace(/\u2029/g, '\\u2029');
+            replacedCount++;
+            return `${prefix}__kftDecodeSeed(${safeJsonLiteral});`;
+          } catch {
+            return fullMatch;
+          }
+        }
+      );
+      if (replacedCount === 0) {
+        return null;
+      }
+      const importStmt = `import { decodeProtectedSeedPayload as __kftDecodeSeed } from '../utils/seedPayloadCipher';\n`;
+      return {
+        code: importStmt + transformedBody,
+        map: null,
+      };
+    },
+  };
+}
+
 function kftVersionManifestPlugin(): Plugin {
   const buildManifestJson = () => {
     const versionName = readPackageVersionName();
@@ -125,7 +204,7 @@ function kftVersionManifestPlugin(): Plugin {
 }
 
 // https://vite.dev/config/
-// Auto-reloaded buildCode: 1627
+// Auto-reloaded buildCode: 1628
 export default defineConfig({
   base: './',
   define: {
@@ -133,6 +212,7 @@ export default defineConfig({
     __KFT_VERSION_NAME__: JSON.stringify(readPackageVersionName()),
   },
   plugins: [
+    kftSeedPayloadProtectionPlugin(),
     react(),
     tailwindcss(),
     kftVersionManifestPlugin(),
@@ -141,21 +221,22 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false,
     minify: true,
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         entryFileNames: 'assets/k-[hash].js',
         chunkFileNames: 'assets/c-[hash].js',
         assetFileNames: 'assets/a-[hash][extname]',
-        // Rolldown code-splitting groups: every emitted chunk is capped (maxSize) so NO chunk exceeds 600 KB.
+        // Rolldown code-splitting groups: every emitted chunk is capped (maxSize) for fast mobile loading.
         codeSplitting: {
           groups: [
-            { name: 'd-seed', test: /src[\\/]data[\\/]seed(Rac|Hotels|Dest|Rest)Part\d+/, maxSize: 480 * 1024 },
-            { name: 'f-seed', test: /src[\\/]data[\\/]seed(Foods|Additional|Foodpanda|Vegetarian)/, maxSize: 480 * 1024 },
+            { name: 'd-seed', test: /src[\\/]data[\\/]seed(Rac|Hotels|Dest|Rest)Part\d+/, maxSize: 420 * 1024 },
+            { name: 'f-seed', test: /src[\\/]data[\\/]seed(Foods|Additional|Foodpanda|Vegetarian)/, maxSize: 420 * 1024 },
             { name: 'v0', test: /node_modules[\\/](react|scheduler)/ },
             { name: 'v2', test: /node_modules[\\/]tesseract\.js/, maxSize: 480 * 1024 },
             { name: 'v3', test: /node_modules[\\/]lucide-react/, maxSize: 480 * 1024 },
             { name: 'k5', test: /src[\\/](data[\\/]zhCompleteTranslations|utils[\\/]zhDynamicTranslator)/, maxSize: 480 * 1024 },
+            { name: 'svc-soc', test: /src[\\/]services[\\/]onlineFoodDiscoveryService/, maxSize: 480 * 1024 },
             { name: 'svc', test: /src[\\/]services[\\/]/, maxSize: 480 * 1024 },
           ],
         },

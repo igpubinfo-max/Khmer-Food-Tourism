@@ -544,7 +544,7 @@ export function isStrictHotelDestination(d: Partial<TouristDestination> | null |
   const rawId = String(d.id || '').trim();
   // Reject any seed tourism destination ID (e.g. dest-145, gmap-dest-dest-145, gmap-seed-dest-dest-145, rac-k01006, gmap-kandal-kbal-koh-ecotourism)
   if (
-    /^(?:gmap-(?:seed-)?dest-(?!hotel-)|(?:dest|rac)-[a-z0-9_-]+|gmap-kandal-kbal-koh-ecotourism)/i.test(rawId) &&
+    /^(?:gmap-(?:seed-)?dest-(?!hotel-)|(?:dest|kft-site|rac)-[a-z0-9_-]+|gmap-kandal-kbal-koh-ecotourism)/i.test(rawId) &&
     !/^(?:dest-)?hotel-\d+$/i.test(rawId)
   ) {
     return false;
@@ -581,7 +581,7 @@ export function isHotelGooglePlace(gp: GooglePlaceCachedItem): boolean {
   const pid = String(gp.placeId || gp.googlePlaceId || '').trim();
   // Never classify a seed tourism attraction (dest-*, rac-*, gmap-dest-*, gmap-seed-dest-*) as a hotel
   if (
-    /^(?:gmap-(?:seed-)?dest-(?!hotel-)|(?:dest|rac)-[a-z0-9_-]+|gmap-kandal-kbal-koh-ecotourism)/i.test(pid) &&
+    /^(?:gmap-(?:seed-)?dest-(?!hotel-)|(?:dest|kft-site|rac)-[a-z0-9_-]+|gmap-kandal-kbal-koh-ecotourism)/i.test(pid) &&
     !/^(?:gmap-(?:seed-)?dest-)?(?:dest-)?hotel-\d+$/i.test(pid)
   ) {
     return false;
@@ -693,7 +693,7 @@ export function isTourismAttractionGooglePlace(gp: GooglePlaceCachedItem): boole
     ].includes(t)
   );
   const pid = String(gp.placeId || gp.googlePlaceId || '').trim();
-  const isCuratedSeedDest = /^(?:gmap-(?:seed-)?dest-(?!hotel-)|(?:dest|rac)-[a-z0-9_-]+)/i.test(pid);
+  const isCuratedSeedDest = /^(?:gmap-(?:seed-)?dest-(?!hotel-)|(?:dest|kft-site|rac)-[a-z0-9_-]+)/i.test(pid);
   return isCuratedSeedDest || hasTourismGoogleType || TOURISM_ONLY_KEYWORD_REGEX.test(cleanText);
 }
 

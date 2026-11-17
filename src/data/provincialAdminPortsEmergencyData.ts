@@ -1,0 +1,1411 @@
+import type { Tri } from './guideContent';
+
+export interface ProvinceAdminHistoryItem {
+  key: string;
+  provinceName: Tri;
+  capitalCity: Tri;
+  adminLocation: Tri;
+  districtsSummary: Tri;
+  historySummary: Tri;
+  hospitalName: Tri;
+  hospitalAddress: Tri;
+  hospitalPhone: string;
+  policePhone: string;
+}
+
+export interface InternationalPortItem {
+  id: string;
+  badge: string;
+  category: 'airport' | 'thailand' | 'vietnam' | 'laos_seaport';
+  name: Tri;
+  province: Tri;
+  connectsTo: Tri;
+  hours: string;
+  visaAndServices: Tri;
+  routeInfo: Tri;
+}
+
+export const INTERNATIONAL_PORTS_DATA: InternationalPortItem[] = [
+  // 1. International Airports
+  {
+    id: 'port-air-pnh',
+    badge: '✈️ PNH / KTI',
+    category: 'airport',
+    name: {
+      km: 'អាកាសយានដ្ឋានអន្តរជាតិភ្នំពេញ / តេជោក្រុងតាខ្មៅ',
+      en: 'Phnom Penh / Techo International Airport',
+      zh: '金边 / 德崇国际机场',
+    },
+    province: {
+      km: 'រាជធានីភ្នំពេញ និងខេត្តកណ្ដាល',
+      en: 'Phnom Penh & Kandal Province',
+      zh: '金边首都及干拉省',
+    },
+    connectsTo: {
+      km: 'ជើងហោះហើរអន្តរជាតិ និងក្នុងស្រុកគ្រប់ទិសដៅ',
+      en: 'Direct International & Domestic Flights Worldwide',
+      zh: '国际及国内全航线直飞航班',
+    },
+    hours: '24/7',
+    visaAndServices: {
+      km: 'មានសេវាទិដ្ឋាការពេលមកដល់ (Visa on Arrival), e-Visa, Cambodia e-Arrival (CeA), ប្ដូរប្រាក់ និងស៊ីមកាតទេសចរណ៍',
+      en: 'Visa on Arrival, e-Visa, Cambodia e-Arrival (CeA), Currency Exchange & Tourist SIM',
+      zh: '支持落地签、电子签（e-Visa）、电子入境卡（CeA）、外币兑换与旅游电话卡',
+    },
+    routeInfo: {
+      km: 'មហាវិថីសហព័ន្ធរុស្ស៊ី (ផ្លូវជាតិលេខ ៤) និងមហាវិថីសម្ដេចតេជោ ហ៊ុន សែន (៦០ម៉ែត្រ → ផ្លូវជាតិលេខ ២)',
+      en: 'Russian Confederation Blvd (NR4) & Samdech Techo Hun Sen Blvd (60m Road → NR2)',
+      zh: '俄罗斯大道（4号国道）及洪森大道（60米路 → 2号国道）',
+    },
+  },
+  {
+    id: 'port-air-sai',
+    badge: '✈️ SAI',
+    category: 'airport',
+    name: {
+      km: 'អាកាសយានដ្ឋានអន្តរជាតិសៀមរាប-អង្គរ (SAI)',
+      en: 'Siem Reap–Angkor International Airport (SAI)',
+      zh: '暹粒吴哥国际机场 (SAI)',
+    },
+    province: {
+      km: 'ស្រុកសូទ្រនិគម ខេត្តសៀមរាប',
+      en: 'Soutr Nikom District, Siem Reap Province',
+      zh: '暹粒省苏特尼贡县',
+    },
+    connectsTo: {
+      km: 'តភ្ជាប់ជើងហោះហើរអន្តរជាតិមកកាន់តំបន់អង្គរ និងភាគខាងជើងកម្ពុជា',
+      en: 'International & Domestic Gateway to Angkor Archaeological Park',
+      zh: '通往吴哥古迹群与柬埔寨北部的国际航空门户',
+    },
+    hours: '24/7',
+    visaAndServices: {
+      km: 'មានសេវា Visa on Arrival, e-Visa, Cambodia e-Arrival, រថយន្តក្រុងល្បឿនលឿនទៅក្រុងសៀមរាប',
+      en: 'Visa on Arrival, e-Visa, Cambodia e-Arrival & Airport Express Bus to Siem Reap City',
+      zh: '支持落地签、电子签、电子入境卡及往返暹粒市区的机场快线巴士',
+    },
+    routeInfo: {
+      km: 'ផ្លូវល្បឿនលឿនអាកាសយានដ្ឋាន (តភ្ជាប់ផ្លូវជាតិលេខ ៦ ចម្ងាយប្រហែល ៤៥ គ.ម ពីក្រុងសៀមរាប)',
+      en: 'Airport Dedicated Highway connected to National Road No. 6 (~45 km from Siem Reap City)',
+      zh: '机场专用高速连接6号国道（距暹粒市区约45公里）',
+    },
+  },
+  {
+    id: 'port-air-kos',
+    badge: '✈️ KOS',
+    category: 'airport',
+    name: {
+      km: 'អាកាសយានដ្ឋានអន្តរជាតិក្រុងព្រះសីហនុ (KOS)',
+      en: 'Sihanouk International Airport (KOS)',
+      zh: '西哈努克国际机场 (KOS)',
+    },
+    province: {
+      km: 'ស្រុកព្រៃនប់ ខេត្តព្រះសីហនុ',
+      en: 'Prey Nob District, Preah Sihanouk Province',
+      zh: '西哈努克省波雷诺县',
+    },
+    connectsTo: {
+      km: 'តភ្ជាប់ជើងហោះហើរទៅកាន់តំបន់ឆ្នេរសមុទ្រ និងកោះនានា',
+      en: 'Coastal & Island Tourism International Flights',
+      zh: '连接柬埔寨海滨与海岛旅游区的国际及国内航班',
+    },
+    hours: '06:00 – 24:00',
+    visaAndServices: {
+      km: 'មានសេវា Visa on Arrival, e-Visa និង Cambodia e-Arrival (CeA)',
+      en: 'Visa on Arrival, e-Visa & Cambodia e-Arrival (CeA)',
+      zh: '支持落地签、电子签（e-Visa）与电子入境卡',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៤ (រាម) ចម្ងាយប្រហែល ១៨ គ.ម ពីក្រុងព្រះសីហនុ និងតភ្ជាប់ផ្លូវល្បឿនលឿន E4',
+      en: 'National Road No. 4 (Ream), ~18 km from Sihanoukville Center & Expressway E4',
+      zh: '4号国道（云壤），距西哈努克市区约18公里，连接金港高速E4',
+    },
+  },
+
+  // 2. Cambodia - Thailand International Checkpoints
+  {
+    id: 'port-th-poipet',
+    badge: '🛂 KH–TH',
+    category: 'thailand',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិប៉ោយប៉ែត (Poipet)',
+      en: 'Poipet International Border Checkpoint',
+      zh: '波贝国际口岸 (Poipet)',
+    },
+    province: {
+      km: 'ក្រុងប៉ោយប៉ែត ខេត្តបន្ទាយមានជ័យ',
+      en: 'Poipet City, Banteay Meanchey Province',
+      zh: '卜迭棉芷省波贝市',
+    },
+    connectsTo: {
+      km: 'ច្រកខ្លងលឹក (Khlong Luek / Aranyaprathet) ខេត្តស្រះកែវ ប្រទេសថៃ',
+      en: 'Khlong Luek / Aranyaprathet, Sa Kaeo Province (Thailand)',
+      zh: '连接泰国沙缴府亚兰口岸 (Aranyaprathet)',
+    },
+    hours: '06:00 – 22:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (មាន Visa on Arrival និង e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa accepted)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签 e-Visa）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៥ (ពីភ្នំពេញ/បាត់ដំបង) និងផ្លូវជាតិលេខ ៦ (ពីសៀមរាប)',
+      en: 'National Road No. 5 (from Phnom Penh/Battambang) & NR6 (from Siem Reap)',
+      zh: '5号国道（自金边/马德望）及6号国道（自暹粒）直达',
+    },
+  },
+  {
+    id: 'port-th-chamyeam',
+    badge: '🛂 KH–TH',
+    category: 'thailand',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិចាំយាម (Cham Yeam)',
+      en: 'Cham Yeam International Border Checkpoint',
+      zh: '占延国际口岸（国公省 Cham Yeam）',
+    },
+    province: {
+      km: 'ស្រុកមណ្ឌលសីមា ខេត្តកោះកុង',
+      en: 'Mondol Seima District, Koh Kong Province',
+      zh: '国公省蒙多塞马县',
+    },
+    connectsTo: {
+      km: 'ច្រកហាតលិក (Hat Lek) ខេត្តត្រាត ប្រទេសថៃ',
+      en: 'Hat Lek Checkpoint, Trat Province (Thailand)',
+      zh: '连接泰国达叻府 Hat Lek 口岸',
+    },
+    hours: '06:00 – 22:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (មាន Visa on Arrival និង e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa accepted)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签 e-Visa）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៤៨ តភ្ជាប់ផ្លូវជាតិលេខ ៤ (ចម្ងាយប្រហែល ១០ គ.ម ពីក្រុងខេមរភូមិន្ទ)',
+      en: 'National Road No. 48 via NR4 (~10 km from Koh Kong City)',
+      zh: '经48号国道连接4号国道（距国公市区约10公里）',
+    },
+  },
+  {
+    id: 'port-th-osmach',
+    badge: '🛂 KH–TH',
+    category: 'thailand',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិអូរស្មាច់ (O\'Smach)',
+      en: 'O\'Smach International Border Checkpoint',
+      zh: '奥斯马国际口岸 (O\'Smach)',
+    },
+    province: {
+      km: 'ក្រុងសំរោង ខេត្តឧត្តរមានជ័យ',
+      en: 'Samraong City, Oddar Meanchey Province',
+      zh: '奥多棉芷省森隆市',
+    },
+    connectsTo: {
+      km: 'ច្រកចុងចម (Chong Chom) ខេត្តសុរិន្ទ ប្រទេសថៃ',
+      en: 'Chong Chom Checkpoint, Surin Province (Thailand)',
+      zh: '连接泰国素林府 Chong Chom 口岸',
+    },
+    hours: '06:00 – 22:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (មាន Visa on Arrival និង e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៦៨ (តភ្ជាប់ពីផ្លូវជាតិលេខ ៦ ស្រុកក្រឡាញ់ ខេត្តសៀមរាប → ក្រុងសំរោង → អូរស្មាច់)',
+      en: 'National Road No. 68 (from NR6 Kralanh, Siem Reap → Samraong → O\'Smach)',
+      zh: '68号国道（自暹粒格兰连接6号国道 → 森隆市 → 奥斯马）',
+    },
+  },
+  {
+    id: 'port-th-prom',
+    badge: '🛂 KH–TH',
+    category: 'thailand',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិព្រំ (Prom)',
+      en: 'Prom International Border Checkpoint',
+      zh: '普隆国际口岸（拜林省 Prom）',
+    },
+    province: {
+      km: 'ស្រុកសាលាក្រៅ ខេត្តប៉ៃលិន',
+      en: 'Sala Krau District, Pailin Province',
+      zh: '拜林省沙拉格劳县',
+    },
+    connectsTo: {
+      km: 'ច្រកបានផាកកាត (Ban Pakard) ខេត្តចន្ទបុរី ប្រទេសថៃ',
+      en: 'Ban Pakard Checkpoint, Chanthaburi Province (Thailand)',
+      zh: '连接泰国尖竹汶府 Ban Pakard 口岸',
+    },
+    hours: '06:00 – 22:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (មាន Visa on Arrival និង e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៥៧ (ក្រុងបាត់ដំបង → ក្រុងប៉ៃលិន → ច្រកព្រំ)',
+      en: 'National Road No. 57 (Battambang City → Pailin City → Prom Border)',
+      zh: '57号国道（马德望市 → 拜林市 → 普隆口岸）',
+    },
+  },
+  {
+    id: 'port-th-doung',
+    badge: '🛂 KH–TH',
+    category: 'thailand',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិដូង (Doung / Ban Laem)',
+      en: 'Doung (Ban Laem) International Border Checkpoint',
+      zh: '洞口岸 / 班兰国际口岸 (Doung)',
+    },
+    province: {
+      km: 'ស្រុកកំរៀង ខេត្តបាត់ដំបង',
+      en: 'Kamrieng District, Battambang Province',
+      zh: '马德望省甘连县',
+    },
+    connectsTo: {
+      km: 'ច្រកបានឡែម (Ban Laem) ខេត្តចន្ទបុរី ប្រទេសថៃ',
+      en: 'Ban Laem Checkpoint, Chanthaburi Province (Thailand)',
+      zh: '连接泰国尖竹汶府 Ban Laem 口岸',
+    },
+    hours: '06:00 – 22:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (Visa on Arrival)',
+      en: 'Open to National & International Travelers (Visa on Arrival)',
+      zh: '面向本国及国际旅客开放（支持落地签）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៥៩ និងផ្លូវជាតិលេខ ៥៧B (ពីបាត់ដំបង/ប៉ៃលិន ទៅស្រុកកំរៀង)',
+      en: 'National Road No. 59 & NR57B (from Battambang / Pailin to Kamrieng)',
+      zh: '59号及57B号国道（自马德望/拜林前往甘连县）',
+    },
+  },
+  {
+    id: 'port-th-choam',
+    badge: '🛂 KH–TH',
+    category: 'thailand',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិជាំ (Choam)',
+      en: 'Choam International Border Checkpoint',
+      zh: '专国际口岸（奥多棉芷省 Choam）',
+    },
+    province: {
+      km: 'ស្រុកអន្លង់វែង ខេត្តឧត្តរមានជ័យ',
+      en: 'Anlong Veng District, Oddar Meanchey Province',
+      zh: '奥多棉芷省安隆汶县',
+    },
+    connectsTo: {
+      km: 'ច្រកសាង៉ាំ (Chong Sa-Ngam) ខេត្តស៊ីសាកេត ប្រទេសថៃ',
+      en: 'Chong Sa-Ngam Checkpoint, Sisaket Province (Thailand)',
+      zh: '连接泰国四色菊府 Chong Sa-Ngam 口岸',
+    },
+    hours: '07:00 – 20:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (Visa on Arrival)',
+      en: 'Open to National & International Travelers (Visa on Arrival)',
+      zh: '面向本国及国际旅客开放（支持落地签）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៦៧ (សៀមរាប → អន្លង់វែង → ច្រកជាំ)',
+      en: 'National Road No. 67 (Siem Reap → Anlong Veng → Choam Border)',
+      zh: '67号国道（暹粒 → 安隆汶 → 专口岸）',
+    },
+  },
+
+  // 3. Cambodia - Vietnam International Checkpoints
+  {
+    id: 'port-vn-bavet',
+    badge: '🛂 KH–VN',
+    category: 'vietnam',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិបាវិត (Bavet)',
+      en: 'Bavet International Border Checkpoint',
+      zh: '巴域国际口岸 (Bavet)',
+    },
+    province: {
+      km: 'ក្រុងបាវិត ខេត្តស្វាយរៀង',
+      en: 'Bavet City, Svay Rieng Province',
+      zh: '柴桢省巴域市',
+    },
+    connectsTo: {
+      km: 'ច្រកម៉ុកបាយ (Moc Bai) ខេត្តតៃនិញ (ទៅទីក្រុងហូជីមិញ) ប្រទេសវៀតណាម',
+      en: 'Moc Bai Checkpoint, Tay Ninh Province (to Ho Chi Minh City, Vietnam)',
+      zh: '连接越南西宁省木排口岸（通往胡志明市）',
+    },
+    hours: '06:00 – 22:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (មាន Visa on Arrival និង e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa accepted)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签 e-Visa）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ១ (ភ្នំពេញ → ស្ពានអ្នកលឿង → ក្រុងស្វាយរៀង → ក្រុងបាវិត ១៦៥ គ.ម)',
+      en: 'National Road No. 1 (Phnom Penh → Tsubasa Bridge → Svay Rieng → Bavet, 165 km)',
+      zh: '1号国道（金边 → 乃良大桥 → 柴桢 → 巴域市，约165公里）',
+    },
+  },
+  {
+    id: 'port-vn-phnomden',
+    badge: '🛂 KH–VN',
+    category: 'vietnam',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិភ្នំឌិន (Phnom Den)',
+      en: 'Phnom Den International Border Checkpoint',
+      zh: '金边山国际口岸（茶胶省 Phnom Den）',
+    },
+    province: {
+      km: 'ស្រុកគិរីវង់ ខេត្តតាកែវ',
+      en: 'Kiri Vong District, Takeo Province',
+      zh: '茶胶省基里翁县',
+    },
+    connectsTo: {
+      km: 'ច្រកទិញបៀន (Tinh Bien) ខេត្តអានយ៉ាង ប្រទេសវៀតណាម',
+      en: 'Tinh Bien Checkpoint, An Giang Province (Vietnam)',
+      zh: '连接越南安江省静边口岸 (Tinh Bien)',
+    },
+    hours: '06:00 – 20:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (មាន Visa on Arrival និង e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ២ (ភ្នំពេញ → ក្រុងដូនកែវ → ស្រុកគិរីវង់ → ច្រកភ្នំឌិន ១២៥ គ.ម)',
+      en: 'National Road No. 2 (Phnom Penh → Doun Kaev → Kiri Vong → Phnom Den, 125 km)',
+      zh: '2号国道（金边 → 敦胶市 → 基里翁县 → 金边山口岸，约125公里）',
+    },
+  },
+  {
+    id: 'port-vn-prekchak',
+    badge: '🛂 KH–VN',
+    category: 'vietnam',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិព្រែកចាក (Prek Chak)',
+      en: 'Prek Chak (Lok) International Border Checkpoint',
+      zh: '白扎国际口岸（贡布省 Prek Chak）',
+    },
+    province: {
+      km: 'ស្រុកកំពង់ត្រាច ខេត្តកំពត',
+      en: 'Kampong Trach District, Kampot Province',
+      zh: '贡布省磅德拉县',
+    },
+    connectsTo: {
+      km: 'ច្រកហាទៀង (Ha Tien / Xa Xia) ខេត្តគៀនយ៉ាង (ទៅកោះត្រល់) ប្រទេសវៀតណាម',
+      en: 'Ha Tien (Xa Xia) Checkpoint, Kien Giang Province (Vietnam)',
+      zh: '连接越南坚江省河仙口岸 (Ha Tien)',
+    },
+    hours: '06:00 – 20:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (មាន Visa on Arrival និង e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៣ និងផ្លូវជាតិលេខ ៣៣ (កំពត → កែប → កំពង់ត្រាច → ច្រកព្រែកចាក)',
+      en: 'National Road No. 3 & NR33 (Kampot → Kep → Kampong Trach → Prek Chak)',
+      zh: '3号及33号国道（贡布 → 白马 → 磅德拉 → 白扎口岸）',
+    },
+  },
+  {
+    id: 'port-vn-kaamsamnor',
+    badge: '⛴️ KH–VN',
+    category: 'vietnam',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិក្អមសំណ (Ka\'am Samnor)',
+      en: 'Ka\'am Samnor International River & Land Checkpoint',
+      zh: '戈安桑诺水陆国际口岸 (Ka\'am Samnor)',
+    },
+    province: {
+      km: 'ស្រុកលើកដែក ខេត្តកណ្ដាល',
+      en: 'Lvea Aem / Leuk Daek District, Kandal Province',
+      zh: '干拉省勒德县',
+    },
+    connectsTo: {
+      km: 'ច្រកវិញសឿង (Vinh Xuong / Chau Doc) តាមដងទន្លេមេគង្គ ប្រទេសវៀតណាម',
+      en: 'Vinh Xuong / Chau Doc Mekong River Checkpoint (Vietnam)',
+      zh: '连接越南安江省永昌/朱笃湄公河口岸',
+    },
+    hours: '06:00 – 18:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវធ្វើដំណើរតាមទូកល្បឿនលឿនភ្នំពេញ–ចូវដុក និងផ្លូវគោក (Visa on Arrival & e-Visa)',
+      en: 'Mekong Speedboat (Phnom Penh–Chau Doc) & Land Travelers (Visa on Arrival & e-Visa)',
+      zh: '支持金边–朱笃湄公河快艇及陆路旅客（落地签与电子签）',
+    },
+    routeInfo: {
+      km: 'តាមដងទន្លេមេគង្គ ឬផ្លូវជាតិលេខ ១ និងផ្លូវខេត្តលេខ ១១០',
+      en: 'Mekong River Waterway or National Road No. 1',
+      zh: '湄公河航道或经1号国道前往',
+    },
+  },
+  {
+    id: 'port-vn-trapeangphlong',
+    badge: '🛂 KH–VN',
+    category: 'vietnam',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិត្រពាំងផ្លុង (Trapeang Phlong)',
+      en: 'Trapeang Phlong International Border Checkpoint',
+      zh: '达奔普隆国际口岸（特本克蒙省）',
+    },
+    province: {
+      km: 'ស្រុកពញាក្រែក ខេត្តត្បូងឃ្មុំ',
+      en: 'Ponhea Kraek District, Tboung Khmum Province',
+      zh: '特本克蒙省波耶局县',
+    },
+    connectsTo: {
+      km: 'ច្រកសាម៉ាត់ (Xa Mat) ខេត្តតៃនិញ ប្រទេសវៀតណាម',
+      en: 'Xa Mat Checkpoint, Tay Ninh Province (Vietnam)',
+      zh: '连接越南西宁省 Xa Mat 口岸',
+    },
+    hours: '06:00 – 20:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (មាន Visa on Arrival និង e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៧ (ភ្នំពេញ → កំពង់ចាម → ក្រុងសួង → ពញាក្រែក → ត្រពាំងផ្លុង)',
+      en: 'National Road No. 7 (Phnom Penh → Kampong Cham → Suong → Trapeang Phlong)',
+      zh: '7号国道（金边 → 磅湛 → 苏翁市 → 达奔普隆口岸）',
+    },
+  },
+  {
+    id: 'port-vn-trapeangsrae',
+    badge: '🛂 KH–VN',
+    category: 'vietnam',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិត្រពាំងស្រែ (Trapeang Srae)',
+      en: 'Trapeang Srae International Border Checkpoint',
+      zh: '达奔斯雷国际口岸（桔井省）',
+    },
+    province: {
+      km: 'ស្រុកស្នួល ខេត្តក្រចេះ',
+      en: 'Snuol District, Kratie Province',
+      zh: '桔井省斯努县',
+    },
+    connectsTo: {
+      km: 'ច្រកហួលឺ (Hoa Lu) ខេត្តប៊ិញភឿក ប្រទេសវៀតណាម',
+      en: 'Hoa Lu Checkpoint, Binh Phuoc Province (Vietnam)',
+      zh: '连接越南平福省 Hoa Lu 口岸',
+    },
+    hours: '06:00 – 20:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (Visa on Arrival & e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៧ (ឆ្លងកាត់ស្រុកស្នួល ខេត្តក្រចេះ ទៅព្រំដែនត្រពាំងស្រែ)',
+      en: 'National Road No. 7 (via Snuol District, Kratie Province)',
+      zh: '7号国道（经桔井省斯努县直达口岸）',
+    },
+  },
+  {
+    id: 'port-vn-oyadav',
+    badge: '🛂 KH–VN',
+    category: 'vietnam',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិអូរយ៉ាដាវ (O\'Yadav)',
+      en: 'O\'Yadav International Border Checkpoint',
+      zh: '奥亚道国际口岸（腊塔纳基里省）',
+    },
+    province: {
+      km: 'ស្រុកអូរយ៉ាដាវ ខេត្តរតនគិរី',
+      en: 'O\'Yadav District, Ratanakiri Province',
+      zh: '腊塔纳基里省奥亚道县',
+    },
+    connectsTo: {
+      km: 'ច្រកឡេថាញ់ (Le Thanh) ខេត្តយ៉ាឡាយ ប្រទេសវៀតណាម',
+      en: 'Le Thanh Checkpoint, Gia Lai Province (Vietnam)',
+      zh: '连接越南嘉莱省 Le Thanh 口岸',
+    },
+    hours: '06:00 – 20:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (Visa on Arrival & e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៧៨ (ក្រុងបានលុង ខេត្តរតនគិរី → ច្រកអូរយ៉ាដាវ ៧២ គ.ម)',
+      en: 'National Road No. 78 (Banlung City, Ratanakiri → O\'Yadav Border, 72 km)',
+      zh: '78号国道（邦隆市 → 奥亚道口岸，约72公里）',
+    },
+  },
+
+  // 4. Cambodia - Laos & International Seaports
+  {
+    id: 'port-la-trapeangkriel',
+    badge: '🛂 KH–LA',
+    category: 'laos_seaport',
+    name: {
+      km: 'ច្រកទ្វារព្រំដែនអន្តរជាតិត្រពាំងក្រៀល (Trapeang Kriel)',
+      en: 'Trapeang Kriel International Border Checkpoint (Cambodia–Laos)',
+      zh: '达奔格列国际口岸（柬老边境 Trapeang Kriel）',
+    },
+    province: {
+      km: 'ក្រុងស្ទឹងត្រែង ខេត្តស្ទឹងត្រែង',
+      en: 'Stung Treng Province',
+      zh: '上丁省',
+    },
+    connectsTo: {
+      km: 'ច្រកណងណុកឃៀន (Nong Nok Khiene) ខេត្តចម្ប៉ាសាក់ (តំបន់កោះ ៤០០០) ប្រទេសឡាវ',
+      en: 'Nong Nok Khiene Checkpoint, Champasak Province / 4000 Islands (Laos)',
+      zh: '连接老挝占巴塞省 Nong Nok Khiene 口岸（四千美岛方向）',
+    },
+    hours: '06:00 – 20:00',
+    visaAndServices: {
+      km: 'ទទួលភ្ញៀវជាតិ និងអន្តរជាតិ (មាន Visa on Arrival និង e-Visa)',
+      en: 'Open to National & International Travelers (Visa on Arrival & e-Visa)',
+      zh: '面向本国及国际旅客开放（支持落地签与电子签 e-Visa）',
+    },
+    routeInfo: {
+      km: 'ផ្លូវជាតិលេខ ៧ (ភ្នំពេញ → ក្រចេះ → ក្រុងស្ទឹងត្រែង → ច្រកត្រពាំងក្រៀល ៥៨ គ.ម ពីក្រុងស្ទឹងត្រែង)',
+      en: 'National Road No. 7 (Stung Treng City → Trapeang Kriel Border, 58 km)',
+      zh: '7号国道（上丁市区向北约58公里直达柬老口岸）',
+    },
+  },
+  {
+    id: 'port-sea-sihanouk',
+    badge: '🚢 SEAPORT',
+    category: 'laos_seaport',
+    name: {
+      km: 'កំពង់ផែស្វ័យតក្រុងព្រះសីហនុ និងកំពង់ផែទេសចរណ៍អន្តរជាតិកំពត',
+      en: 'Sihanoukville Autonomous Port & Kampot International Tourist Port',
+      zh: '西哈努克自治港与贡布国际旅游码头',
+    },
+    province: {
+      km: 'ខេត្តព្រះសីហនុ និងខេត្តកំពត',
+      en: 'Preah Sihanouk & Kampot Provinces',
+      zh: '西哈努克省与贡布省',
+    },
+    connectsTo: {
+      km: 'នាវាទេសចរណ៍អន្តរជាតិ និងទូកល្បឿនលឿនទៅកាន់កោះរ៉ុង កោះរ៉ុងសន្លឹម និងកោះនានា',
+      en: 'International Cruise Ships & High-Speed Ferries to Koh Rong & Islands',
+      zh: '接待国际邮轮及前往高龙岛、高龙撒冷岛的高速渡轮',
+    },
+    hours: '06:00 – 22:00',
+    visaAndServices: {
+      km: 'ទទួលនាវាទេសចរណ៍អន្តរជាតិ និងភ្ញៀវទេសចរទៅកាន់កោះក្នុងខេត្តព្រះសីហនុ/កំពត',
+      en: 'International Cruise Terminal & Island Ferry Passenger Services',
+      zh: '提供国际邮轮入境通关及海岛客运渡轮服务',
+    },
+    routeInfo: {
+      km: 'ផ្លូវល្បឿនលឿនភ្នំពេញ-ព្រះសីហនុ (E4) ផ្លូវជាតិលេខ ៣ និងផ្លូវជាតិលេខ ៤',
+      en: 'Phnom Penh–Sihanoukville Expressway (E4), National Road No. 3 & No. 4',
+      zh: '金港高速公路（E4）、3号国道及4号国道',
+    },
+  },
+];
+
+export const PROVINCIAL_ADMIN_HISTORY_HOSPITALS: ProvinceAdminHistoryItem[] = [
+  {
+    key: 'phnom penh',
+    provinceName: { km: 'រាជធានីភ្នំពេញ', en: 'Phnom Penh Capital', zh: '金边首都' },
+    capitalCity: { km: 'រាជធានីភ្នំពេញ (១៤ ខណ្ឌ)', en: 'Phnom Penh (14 Khans / Districts)', zh: '金边市（下辖14个区）' },
+    adminLocation: {
+      km: 'សាលារាជធានីភ្នំពេញ៖ មហាវិថីព្រះមុនីវង្ស សង្កាត់ស្រះចក ខណ្ឌដូនពេញ',
+      en: 'Phnom Penh Capital Hall: Preah Monivong Blvd, Sangkat Srah Chak, Khan Daun Penh',
+      zh: '金边市政厅：隆边区莫尼旺大道',
+    },
+    districtsSummary: {
+      km: 'មាន ១៤ ខណ្ឌ និង ១០៥ សង្កាត់ (ដូនពេញ, ចំការមន, ទួលគោក, ៧មករា, ច្បារអំពៅ, ជ្រោយចង្វារ, សែនសុខ, មានជ័យ, ពោធិ៍សែនជ័យ, ឫស្សីកែវ, ដង្កោ, ព្រែកព្នៅ, កំបូល, បឹងកេងកង)',
+      en: '14 Khans and 105 Sangkats (Daun Penh, Chamkar Mon, Tuol Kouk, 7 Makara, Chbar Ampov, Chroy Changvar, Sen Sok, Mean Chey, Por Senchey, Russey Keo, Dangkao, Prek Pnov, Kamboul, Boeng Keng Kang)',
+      zh: '共14个区（Khan）及105个分区（隆边、桑园、堆谷、玛卡拉、铁桥头、水净华、森速、棉芷、波森芷、雷西郊、朗哥、仙市、贡武、万景岗）',
+    },
+    historySummary: {
+      km: 'រាជធានីភ្នំពេញត្រូវបានកសាងឡើងក្នុងឆ្នាំ ១៤៣៤ ក្នុងរជ្ជកាលព្រះបាទពញាយ៉ាត បន្ទាប់ពីការយាងចាកចោលក្រុងអង្គរ ដោយយកឈ្មោះតាមរឿងព្រេងដូនពេញ និងវត្តភ្នំដូនពេញ។ ស្ថិតនៅចំណុចប្រសព្វនៃទន្លេចតុមុខ (ទន្លេមេគង្គលើ ទន្លេមេគង្គក្រោម ទន្លេសាប និងទន្លេបាសាក់) ភ្នំពេញគឺជាមជ្ឈមណ្ឌលនយោបាយ សេដ្ឋកិច្ច វប្បធម៌ និងទេសចរណ៍ដ៏សំខាន់បំផុតនៃព្រះរាជាណាចក្រកម្ពុជា។',
+      en: 'Founded in 1434 by King Ponhea Yat around Wat Phnom at the Chaktomuk ("Four Faces") confluence of the Mekong, Tonle Sap, and Bassac rivers, Phnom Penh serves as the political, cultural, and economic heart of Cambodia.',
+      zh: '金边始建于1434年奔哈亚国王时期，因塔山寺（Wat Phnom）传说而得名，坐落于湄公河、洞里萨河与巴萨河“四臂湾”交汇处，是柬埔寨政治、经济与文化中心。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យកាល់ម៉ែត / មន្ទីរពេទ្យមិត្តភាពខ្មែរ-សូវៀត / មន្ទីរពេទ្យព្រះកុសុមៈ',
+      en: 'Calmette Hospital / Khmer-Soviet Friendship Hospital / Preah Kossamak Hospital',
+      zh: '甘密医院 (Calmette) / 柬苏友谊医院 / 考斯玛医院',
+    },
+    hospitalAddress: {
+      km: 'មហាវិថីព្រះមុនីវង្ស ខណ្ឌដូនពេញ (កាល់ម៉ែត) និងមហាវិថីយោធពលខេមរភូមិន្ទ ផ្លូវ ២៧១',
+      en: 'Preah Monivong Blvd, Daun Penh (Calmette) & Street 271 (Khmer-Soviet Hospital)',
+      zh: '金边隆边区莫尼旺大道（甘密医院）及271号路（柬苏医院）',
+    },
+    hospitalPhone: '119',
+    policePhone: '117',
+  },
+  {
+    key: 'siem reap',
+    provinceName: { km: 'ខេត្តសៀមរាប', en: 'Siem Reap Province', zh: '暹粒省' },
+    capitalCity: { km: 'ក្រុងសៀមរាប និងក្រុងរុនតាឯកតេជោសែន', en: 'Siem Reap City & Run Ta Ek City', zh: '暹粒市与润达艾市' },
+    adminLocation: {
+      km: 'សាលាខេត្តសៀមរាប៖ ភូមិមណ្ឌល ៣ សង្កាត់ស្លក្រាម ក្រុងសៀមរាប',
+      en: 'Siem Reap Provincial Hall: Sangkat Sla Kram, Siem Reap City',
+      zh: '暹粒省政府：暹粒市斯拉克拉分区',
+    },
+    districtsSummary: {
+      km: 'មាន ២ ក្រុង និង ១១ ស្រុក (ក្រុងសៀមរាប, ក្រុងរុនតាឯកតេជោសែន, ស្រុកអង្គរជុំ, អង្គរធំ, បន្ទាយស្រី, ជីក្រែង, ក្រឡាញ់, ពួក, ប្រាសាទបាគង, សូទ្រនិគម, ស្រីស្នំ, ស្វាយលើ, វ៉ារិន)',
+      en: '2 Cities and 11 Districts (Siem Reap City, Run Ta Ek, Angkor Chum, Angkor Thom, Banteay Srei, Chi Kraeng, Kralanh, Puok, Prasat Bakong, Soutr Nikom, Srei Snam, Svay Leu, Varin)',
+      zh: '下辖2个市及11个县（暹粒市、润达艾市、吴哥通、女王宫、巴戎寺、噗县、苏特尼贡、荔枝山等）',
+    },
+    historySummary: {
+      km: 'ខេត្តសៀមរាបគឺជាអតីតរាជធានីនៃចក្រភពខ្មែរដ៏រុងរឿងនាសម័យអង្គរ (សតវត្សរ៍ទី ៩ ដល់ទី ១៥) ដែលជាទីតាំងនៃប្រាសាទអង្គរវត្ត អង្គរធំ បាយ័ន បន្ទាយស្រី និងភ្នំគូលែន។ ខេត្តនេះជាប៉ូលទេសចរណ៍វប្បធម៌ពិភពលោកដែលត្រូវបានចុះក្នុងបញ្ជីបេតិកភណ្ឌពិភពលោករបស់អង្គការ UNESCO ក្នុងឆ្នាំ ១៩៩២។',
+      en: 'Home to the ancient capital of the Khmer Empire (9th–15th centuries) and the UNESCO World Heritage Angkor Archaeological Park, including Angkor Wat, Angkor Thom, Bayon, Banteay Srei, and Phnom Kulen.',
+      zh: '暹粒曾是公元9至15世纪高棉帝国辉煌的都城所在地，拥有1992年列入联合国教科文组织世界遗产的吴哥古迹群（吴哥窟、大吴哥城、巴戎寺、女王宫及荔枝山）。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តសៀមរាប និងមន្ទីរពេទ្យគន្ធបុប្ផាទី ៣ (ជ័យវរ្ម័នទី ៧)',
+      en: 'Siem Reap Provincial Referral Hospital & Jayavarman VII Hospital',
+      zh: '暹粒省立转诊医院与坤塔帕花儿童医院（阇耶跋摩七世医院）',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវសivutha / មាត់ស្ទឹងសៀមរាប សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប (ជិតផ្សារចាស់ និងតំបន់អង្គរ)',
+      en: 'Central Siem Reap Riverfront, Sangkat Svay Dangkum, Siem Reap City (near Old Market & Angkor Road)',
+      zh: '暹粒市斯вай当贡分区（靠近老市场及通往吴哥大道）',
+    },
+    hospitalPhone: '063963111',
+    policePhone: '012402424',
+  },
+  {
+    key: 'kampong cham',
+    provinceName: { km: 'ខេត្តកំពង់ចាម', en: 'Kampong Cham Province', zh: '磅湛省' },
+    capitalCity: { km: 'ក្រុងកំពង់ចាម', en: 'Kampong Cham City', zh: '磅湛市' },
+    adminLocation: {
+      km: 'សាលាខេត្តកំពង់ចាម៖ សង្កាត់វាលវង់ ក្រុងកំពង់ចាម (តាមមាត់ទន្លេមេគង្គ)',
+      en: 'Kampong Cham Provincial Hall: Sangkat Veal Vong, Kampong Cham City',
+      zh: '磅湛省政府：磅湛市湄公河畔',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៩ ស្រុក (ក្រុងកំពង់ចាម, ស្រុកបាធាយ, ចំការលើ, ជើងព្រៃ, កំពង់សៀម, កងមាស, កោះសូទិន, ព្រៃឈរ, ស្រីសន្ធរ, ស្ទឹងត្រង់)',
+      en: '1 City and 9 Districts (Kampong Cham City, Batheay, Chamkar Leu, Cheung Prey, Kampong Siem, Kang Meas, Koh Sotin, Prey Chhor, Srei Santhor, Stueng Trang)',
+      zh: '下辖1个市及9个县（磅湛市、巴贴、上庄、庄波雷、磅暹、波雷乔等）',
+    },
+    historySummary: {
+      km: 'ខេត្តកំពង់ចាមស្ថិតនៅតាមដងទន្លេមេគង្គ មានប្រវត្តិសាស្ត្រតាំងពីសម័យមុនអង្គរ និងសម័យអង្គរ (ប្រាសាទនគរបាជ័យ ភ្នំប្រុស-ភ្នំស្រី ភ្នំហាន់ជ័យ) និងធ្លាប់ជារាជធានីទួលបាសាន (ស្រុកស្រីសន្ធរ) ក្នុងសតវត្សរ៍ទី ១៥។ ស្ពានគីហ្សូណាគឺជាស្ពានឆ្លងទន្លេមេគង្គដំបូងគេនៅកម្ពុជា។',
+      en: 'Located along the mighty Mekong River, Kampong Cham features pre-Angkorian and Angkorian temples (Wat Nokor Bachey, Phnom Pros–Phnom Srei, Phnom Hanchey), the historic 15th-century capital of Tuol Basan (Srei Santhor), and the iconic Koh Pen Bamboo Bridge.',
+      zh: '磅湛坐落于湄公河畔，拥有丰富的吴哥及前吴哥时期古迹（诺哥巴Chey寺、男人山女人山、韩Chey山）以及著名的竹桥与第一座跨湄公河大桥（日本桥）。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តកំពង់ចាម',
+      en: 'Kampong Cham Provincial Referral Hospital',
+      zh: '磅湛省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'មហាវិថីមាត់ទន្លេ សង្កាត់កំពង់ចាម ក្រុងកំពង់ចាម (ជិតស្ពានគីហ្សូណា)',
+      en: 'Riverfront Blvd, Sangkat Kampong Cham, Kampong Cham City (near Kizuna Bridge)',
+      zh: '磅湛市河滨大道（靠近日本桥 Kizuna Bridge）',
+    },
+    hospitalPhone: '042941236',
+    policePhone: '117',
+  },
+  {
+    key: 'battambang',
+    provinceName: { km: 'ខេត្តបាត់ដំបង', en: 'Battambang Province', zh: '马德望省' },
+    capitalCity: { km: 'ក្រុងបាត់ដំបង', en: 'Battambang City', zh: '马德望市' },
+    adminLocation: {
+      km: 'សាលាខេត្តបាត់ដំបង៖ ផ្លូវលេខ ១ មាត់ស្ទឹងសង្កែ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង',
+      en: 'Battambang Provincial Hall: Road No. 1 along Sangkae River, Battambang City',
+      zh: '马德望省政府：马德望市桑แก河畔1号路',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ១៣ ស្រុក (ក្រុងបាត់ដំបង, បាណន់, ថ្មគោល, បវេល, ឯកភ្នំ, មោងឫស្សី, រតនមណ្ឌល, សង្កែ, សំឡូត, សំពៅលូន, ភ្នំព្រឹក, កំរៀង, គាស់ក្រឡ, រុក្ខគិរី)',
+      en: '1 City and 13 Districts (Battambang City, Banan, Thma Koul, Bavel, Ek Phnom, Moung Ruessei, Rotonak Mondol, Sangkae, Samlout, Sampov Lun, Phnom Proek, Kamrieng, Koas Krala, Rukh Kiri)',
+      zh: '下辖1个市及13个县（马德望市、巴南、艾普农、三洛、甘连等）',
+    },
+    historySummary: {
+      km: 'ខេត្តបាត់ដំបងត្រូវបានគេស្គាល់ថាជា «ជង្រុកស្រូវនៃប្រទេសកម្ពុជា» និងជាទីក្រុងបេតិកភណ្ឌស្ថាបត្យកម្មសម័យអាណានិគមបារាំង និងប្រាសាទបុរាណ (ប្រាសាទបាណន់ ប្រាសាទឯកភ្នំ ប្រាសាទស្នឹង និងភ្នំសំពៅ) ព្រមទាំងជាប់ក្នុងបណ្ដាញទីក្រុងច្នៃប្រឌិតផ្នែកម្ហូបអាហាររបស់អង្គការ UNESCO។',
+      en: 'Known as the "Rice Bowl of Cambodia" and a UNESCO Creative City of Gastronomy, Battambang is famed for its preserved heritage architecture along the Sangkae River, Bamboo Train (Norry), Phnom Sampeau, and ancient temples (Wat Banan, Wat Ek Phnom).',
+      zh: '马德望素有“柬埔寨粮仓”美誉，并入选联合国教科文组织“美食之都”，以桑แก河畔历史建筑、竹火车、杀戮洞（森宝山）及巴南寺、艾普农寺等古迹闻名。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តបាត់ដំបង',
+      en: 'Battambang Provincial Referral Hospital',
+      zh: '马德望省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវលេខ ៣ មាត់ស្ទឹងសង្កែ សង្កាត់ព្រែកព្រះស្ដេច ក្រុងបាត់ដំបង',
+      en: 'Road No. 3 along Sangkae River, Sangkat Prek Preah Sdach, Battambang City',
+      zh: '马德望市桑แก河畔3号路',
+    },
+    hospitalPhone: '053952686',
+    policePhone: '117',
+  },
+  {
+    key: 'preah sihanouk',
+    provinceName: { km: 'ខេត្តព្រះសីហនុ', en: 'Preah Sihanouk Province', zh: '西哈努克省（西港）' },
+    capitalCity: { km: 'ក្រុងព្រះសីហនុ, ក្រុងកោះរ៉ុង និងក្រុងកំពង់សោម', en: 'Sihanoukville, Koh Rong & Kampong Som Cities', zh: '西哈努克市、高龙岛市及磅逊市' },
+    adminLocation: {
+      km: 'សាលាខេត្តព្រះសីហនុ៖ សង្កាត់លេខ ៣ ក្រុងព្រះសីហនុ',
+      en: 'Preah Sihanouk Provincial Hall: Sangkat 3, Sihanoukville City',
+      zh: '西哈努克省政府：西哈努克市第3分区',
+    },
+    districtsSummary: {
+      km: 'មាន ៣ ក្រុង និង ៣ ស្រុក (ក្រុងព្រះសីហនុ, ក្រុងកោះរ៉ុង, ក្រុងកំពង់សោម, ស្រុកព្រៃនប់, ស្រុកស្ទឹងហាវ, ស្រុកកំពង់សីលា)',
+      en: '3 Cities and 3 Districts (Sihanoukville, Koh Rong, Kampong Som, Prey Nob, Stueng Hav, Kampong Seila)',
+      zh: '下辖3个市及3个县（西哈努克市、高龙市、磅逊市、波雷诺县、斯登豪县、磅塞拉县）',
+    },
+    historySummary: {
+      km: 'ខេត្តព្រះសីហនុ (កំពង់សោម) ត្រូវបានបង្កើតឡើងក្រោយឯករាជ្យជាតិឆ្នាំ ១៩៥៥ ដើម្បីជាកំពង់ផែសមុទ្រទឹកជ្រៅអន្តរជាតិដំបូងគេរបស់កម្ពុជា។ ខេត្តនេះសម្បូរទៅដោយឆ្នេរខ្សាច់សក្បុស (ឆ្នេរអូរឈើទាល ឆ្នេរអូរត្រេះ ឆ្នេរសុខា) កោះរ៉ុង កោះរ៉ុងសន្លឹម និងឧទ្យានជាតិរាម។',
+      en: 'Established in 1955 as Cambodia\'s premier deep-water international seaport (Kampong Som), Preah Sihanouk is famous for its white-sand beaches (Ochheuteal, Otres, Sokha), tropical islands (Koh Rong, Koh Rong Sanloem), and Ream National Park.',
+      zh: '西哈努克省（原名磅逊）始建于1955年，是柬埔寨唯一的深水国际海港城市，拥有奥彻迭海滩、奥特斯海滩、高龙岛、高龙撒冷岛及云壤国家公园等著名海滨胜地。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តព្រះសីហនុ',
+      en: 'Preah Sihanouk Provincial Referral Hospital',
+      zh: '西哈努克省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវឯករាជ្យ សង្កាត់លេខ ៤ ក្រុងព្រះសីហនុ (ជិតរង្វង់មូលតោពីរ និងឆ្នេរអូរឈើទាល)',
+      en: 'Ekareach Street, Sangkat 4, Sihanoukville City (near Golden Lions Roundabout)',
+      zh: '西哈努克市第4分区独立大道（靠近双狮转盘）',
+    },
+    hospitalPhone: '034933722',
+    policePhone: '117',
+  },
+  {
+    key: 'kampot',
+    provinceName: { km: 'ខេត្តកំពត', en: 'Kampot Province', zh: '贡布省' },
+    capitalCity: { km: 'ក្រុងកំពត និងក្រុងបូកគោ', en: 'Kampot City & Bokor City', zh: '贡布市与波哥市' },
+    adminLocation: {
+      km: 'សាលាខេត្តកំពត៖ មាត់ព្រែកកំពង់បាយ សង្កាត់កំពង់បាយ ក្រុងកំពត',
+      en: 'Kampot Provincial Hall: Kampong Bay Riverfront, Kampot City',
+      zh: '贡布省政府：贡布市甘榜拜河畔',
+    },
+    districtsSummary: {
+      km: 'មាន ២ ក្រុង និង ៧ ស្រុក (ក្រុងកំពត, ក្រុងបូកគោ, ស្រុកអង្គរជ័យ, បន្ទាយមាស, ឈូក, ជុំគិរី, ដងទង់, កំពង់ត្រាច, ទឹកឈូ)',
+      en: '2 Cities and 7 Districts (Kampot City, Bokor City, Angkor Chey, Banteay Meas, Chhuk, Chum Kiri, Dang Tong, Kampong Trach, Tuek Chhou)',
+      zh: '下辖2个市及7个县（贡布市、波哥市、德楚县、磅德拉县、楚克县等）',
+    },
+    historySummary: {
+      km: 'ខេត្តកំពតជាខេត្តមាត់សមុទ្រដ៏ល្បីល្បាញខាងឧទ្យានជាតិព្រះមុនីវង្សភ្នំបូកគោ រមណីយដ្ឋានទឹកឈូ រូងភ្នំកំពង់ត្រាច សំណង់ស្ថាបត្យកម្មបុរាណមាត់ព្រែកកំពង់បាយ ព្រមទាំងផលិតផលសម្គាល់ភូមិសាស្ត្រពិភពលោកគឺ «ម្រេចកំពត» «ទុរេនកំពត» និងអំបិលធម្មជាតិ។',
+      en: 'Famous for Preah Monivong Bokor National Park, Teuk Chhou rapids, Kampong Trach limestone caves, riverfront colonial heritage, and world-renowned GI Kampot Pepper, Kampot Durian, and sea salt fields.',
+      zh: '贡布省坐拥莫尼旺波哥国家公园、德楚溪流、磅德拉溶洞及河畔历史街区，并盛产享誉全球的国家地理标志产品“贡布胡椒”、“贡布榴莲”与天然海盐。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តកំពត និងមន្ទីរពេទ្យអនុស្សាវរីយ៍ស៊ុនយ៉ាឃៀល',
+      en: 'Kampot Provincial Referral Hospital & Sonja Kill Memorial Hospital',
+      zh: '贡布省立转诊医院与 Sonja Kill 纪念医院',
+    },
+    hospitalAddress: {
+      km: 'មាត់ព្រែកកំពង់បាយ សង្កាត់កំពង់កណ្ដាល ក្រុងកំពត (និងផ្លូវជាតិលេខ ៣ ទៅភ្នំបូកគោ)',
+      en: 'Sangkat Kampong Kandal, Kampot City & National Road No. 3 towards Bokor',
+      zh: '贡布市中心河畔及3号国道（通往波哥山方向）',
+    },
+    hospitalPhone: '033932418',
+    policePhone: '117',
+  },
+  {
+    key: 'kep',
+    provinceName: { km: 'ខេត្តកែប', en: 'Kep Province', zh: '白马省' },
+    capitalCity: { km: 'ក្រុងកែប', en: 'Kep City', zh: '白马市' },
+    adminLocation: {
+      km: 'សាលាខេត្តកែប៖ សង្កាត់កែប ក្រុងកែប',
+      en: 'Kep Provincial Hall: Sangkat Kep, Kep City',
+      zh: '白马省政府：白马市白马分区',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ១ ស្រុក (ក្រុងកែប និងស្រុកដំណាក់ចង្អើរ)',
+      en: '1 City and 1 District (Kep City & Damnak Chang\'aeur District)',
+      zh: '下辖1个市及1个县（白马市与达纳昌欧县）',
+    },
+    historySummary: {
+      km: 'ខេត្តកែបត្រូវបានបង្កើតជាទីក្រុងលម្ហែកាយមាត់សមុទ្រតាំងពីឆ្នាំ ១៩០៨ ហើយល្បីល្បាញទូទាំងពិភពលោកដោយសារផ្សារក្ដាមកែប (ក្ដាមសេះឆាម្រេចកំពតខ្ចី) ឆ្នេរកែប ឧទ្យានជាតិកែប និងកោះទន្សាយ។',
+      en: 'Founded in 1908 as a prestigious seaside resort town, Kep is famous for the Kep Crab Market (fresh blue swimmer crab with green Kampot pepper), Kep Beach, Kep National Park, and Koh Tonsay (Rabbit Island).',
+      zh: '白马省自1908年起便是著名的海滨度假胜地，以白马螃蟹市场（青胡椒炒鲜蓝蟹）、白马海滩、白马国家公园及兔子岛（Koh Tonsay）闻名遐迩。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តកែប',
+      en: 'Kep Provincial Referral Hospital',
+      zh: '白马省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ៣៣A សង្កាត់កែប ក្រុងកែប (ជិតឆ្នេរកែប និងផ្សារក្ដាម)',
+      en: 'National Road No. 33A, Sangkat Kep, Kep City (near Kep Beach & Crab Market)',
+      zh: '白马市33A号国道（靠近白马海滩与螃蟹市场）',
+    },
+    hospitalPhone: '036935119',
+    policePhone: '117',
+  },
+  {
+    key: 'kampong thom',
+    provinceName: { km: 'ខេត្តកំពង់ធំ', en: 'Kampong Thom Province', zh: '磅同省' },
+    capitalCity: { km: 'ក្រុងស្ទឹងសែន', en: 'Stueng Saen City', zh: '森河市' },
+    adminLocation: {
+      km: 'សាលាខេត្តកំពង់ធំ៖ សង្កាត់ដំរីជាន់ខ្លា ក្រុងស្ទឹងសែន (តាមផ្លូវជាតិលេខ ៦)',
+      en: 'Kampong Thom Provincial Hall: Sangkat Damrei Choan Khla, Stueng Saen City',
+      zh: '磅同省政府：森河市6号国道旁',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៨ ស្រុក (ក្រុងស្ទឹងសែន, ស្រុកបារាយណ៍, កំពង់ស្វាយ, ប្រាសាទបល្ល័ង្ក, ប្រាសាទសំបូរ, សណ្ដាន់, សន្ទុក, ស្ទោង, តាំងគោក)',
+      en: '1 City and 8 Districts (Stueng Saen City, Baray, Kampong Svay, Prasat Balangk, Prasat Sambour, Sandan, Santuk, Stoung, Taing Kouk)',
+      zh: '下辖1个市及8个县（森河市、巴莱、磅斯вай、三波坡雷古、산단、桑图、斯东、当谷）',
+    },
+    historySummary: {
+      km: 'ខេត្តកំពង់ធំស្ថិតនៅចំកណ្ដាលនៃប្រទេសកម្ពុជា និងជាទីតាំងនៃរាជធានីឥសានបុរៈ (តំបន់ប្រាសាទសំបូរព្រៃគុក សតវត្សរ៍ទី ៦-៧) ដែលត្រូវបានចុះក្នុងបញ្ជីបេតិកភណ្ឌពិភពលោករបស់អង្គការ UNESCO ក្នុងឆ្នាំ ២០១៧ ព្រមទាំងភ្នំសន្ទុក និងស្ទឹងសែន។',
+      en: 'Situated at the geographic center of Cambodia, Kampong Thom is home to the 6th–7th century Chenla capital of Ishanapura — the UNESCO World Heritage site of Sambor Prei Kuk — as well as sacred Phnom Santuk.',
+      zh: '磅同省位于柬埔寨地理中心，拥有2017年列入联合国教科文组织世界遗产的公元6至7世纪真腊王国都城遗址“三波坡雷古寺群（Sambor Prei Kuk）”以及神圣的桑图山。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តកំពង់ធំ',
+      en: 'Kampong Thom Provincial Referral Hospital',
+      zh: '磅同省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ៦ សង្កាត់កំពង់ធំ ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ',
+      en: 'National Road No. 6, Sangkat Kampong Thom, Stueng Saen City',
+      zh: '磅同省森河市6号国道',
+    },
+    hospitalPhone: '062961245',
+    policePhone: '117',
+  },
+  {
+    key: 'kandal',
+    provinceName: { km: 'ខេត្តកណ្ដាល', en: 'Kandal Province', zh: '干拉省' },
+    capitalCity: { km: 'ក្រុងតាខ្មៅ, ក្រុងអរិយក្សត្រ និងក្រុងសំពៅពូន', en: 'Ta Khmau, Arey Ksat & Sampov Poun Cities', zh: '大金欧市、阿雷沙市与森宝奔市' },
+    adminLocation: {
+      km: 'សាលាខេត្តកណ្ដាល៖ ផ្លូវជាតិលេខ ២១ សង្កាត់តាខ្មៅ ក្រុងតាខ្មៅ',
+      en: 'Kandal Provincial Hall: National Road No. 21, Sangkat Ta Khmau, Ta Khmau City',
+      zh: '干拉省政府：大金欧市21号国道',
+    },
+    districtsSummary: {
+      km: 'មាន ៣ ក្រុង និង ១០ ស្រុក (ក្រុងតាខ្មៅ, ក្រុងអរិយក្សត្រ, ក្រុងសំពៅពូន, ស្រុកកណ្ដាលស្ទឹង, កៀនស្វាយ, ខ្សាច់កណ្ដាល, កោះធំ, លើកដែក, ល្វាឯម, មុខកំពូល, អង្គស្នួល, ពញាឮ, ស្អាង)',
+      en: '3 Cities and 10 Districts surrounding Phnom Penh (Ta Khmau, Arey Ksat, Sampov Poun, Kien Svay, Ponhea Lueu, Mukh Kampul, Khsach Kandal, etc.)',
+      zh: '环绕金边首都，下辖3个市及10个县（大金欧市、阿雷沙市、森宝奔市、见檖县、波耶吕县等）',
+    },
+    historySummary: {
+      km: 'ខេត្តកណ្ដាលព័ទ្ធជុំវិញរាជធានីភ្នំពេញ និងជាទីតាំងនៃអតីតរាជធានីឧដុង្គ (ភ្នំព្រះរាជទ្រព្យ សតវត្សរ៍ទី ១៧-១៩) រមណីយដ្ឋានកៀនស្វាយ កោះឧកញ៉ាតី (ភូមិកែឆ្នៃសូត្រខ្មែរ) និងភ្នំប្រសិទ្ធិ។',
+      en: 'Surrounding Phnom Penh along the Mekong, Tonle Sap, and Bassac rivers, Kandal hosts the former royal capital of Oudong Mountain (17th–19th centuries), Kien Svay riverside resorts, and Koh Dach Silk Island.',
+      zh: '干拉省环绕金边首都，拥有17至19世纪前皇家古都乌栋山（Oudong）、见檖河畔休闲区以及著名的丝绸岛（Koh Dach）。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកជ័យជំនះ (ខេត្តកណ្ដាល)',
+      en: 'Chey Chumneas Provincial Referral Hospital (Ta Khmau)',
+      zh: '干拉省立胜利转诊医院（大金欧市）',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ២ សង្កាត់តាខ្មៅ ក្រុងតាខ្មៅ ខេត្តកណ្ដាល',
+      en: 'National Road No. 2, Sangkat Ta Khmau, Ta Khmau City',
+      zh: '干拉省大金欧市2号国道',
+    },
+    hospitalPhone: '024920321',
+    policePhone: '117',
+  },
+  {
+    key: 'takeo',
+    provinceName: { km: 'ខេត្តតាកែវ', en: 'Takeo Province', zh: '茶胶省' },
+    capitalCity: { km: 'ក្រុងដូនកែវ', en: 'Doun Kaev City', zh: '敦胶市' },
+    adminLocation: {
+      km: 'សាលាខេត្តតាកែវ៖ សង្កាត់រកាក្នុង ក្រុងដូនកែវ (ជិតបឹងតាកែវ)',
+      en: 'Takeo Provincial Hall: Sangkat Roka Knong, Doun Kaev City',
+      zh: '茶胶省政府：敦胶市茶胶湖畔',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៩ ស្រុក (ក្រុងដូនកែវ, ស្រុកអង្គរបូរី, បាទី, បូរីជលសារ, គិរីវង់, កោះអណ្ដែត, ព្រៃកប្បាស, សំរោង, ត្រាំកក់, ទ្រាំង)',
+      en: '1 City and 9 Districts (Doun Kaev City, Angkor Borei, Bati, Borei Cholsar, Kiri Vong, Koh Andaet, Prey Kabbas, Samraong, Tram Kak, Treang)',
+      zh: '下辖1个市及9个县（敦胶市、吴哥博雷、巴地、基里翁、波雷卡巴等）',
+    },
+    historySummary: {
+      km: 'ខេត្តតាកែវត្រូវបានប្រសិទ្ធនាមថាជា «អង្រឹងនៃអារ្យធម៌ខ្មែរ» ព្រោះជាទីតាំងនៃរាជធានីវ្យាធបុរៈ (អង្គរបូរី និងភ្នំដា) នាសម័យនគរភ្នំ (ហ្វូណន) តាំងពីសតវត្សរ៍ទី ១ រួមទាំងប្រាសាទភ្នំជីសូរ ប្រាសាទតាព្រហ្មទន្លេបាទី និងប្រាសាទនាងខ្មៅ។',
+      en: 'Celebrated as the "Cradle of Khmer Civilization," Takeo encompasses the 1st-century Funan capital of Angkor Borei and Phnom Da, alongside the hilltop temple of Phnom Chisor and Ta Prohm Tonle Bati.',
+      zh: '茶胶省被誉为“高棉文明的摇篮”，拥有公元1世纪扶南王国古都吴哥博雷与达山寺（Phnom Da），以及著名的奇索山寺（Phnom Chisor）和巴地湖塔普伦寺。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តតាកែវ',
+      en: 'Takeo Provincial Referral Hospital',
+      zh: '茶胶省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'សង្កាត់រកាក្នុង ក្រុងដូនកែវ ខេត្តតាកែវ',
+      en: 'Sangkat Roka Knong, Doun Kaev City, Takeo Province',
+      zh: '茶胶省敦胶市罗卡克农分区',
+    },
+    hospitalPhone: '032931245',
+    policePhone: '117',
+  },
+  {
+    key: 'kampong speu',
+    provinceName: { km: 'ខេត្តកំពង់ស្ពឺ', en: 'Kampong Speu Province', zh: '磅士卑省' },
+    capitalCity: { km: 'ក្រុងច្បារមន និងក្រុងឧដុង្គម៉ែជ័យ', en: 'Chbar Mon & Oudong Mae Chey Cities', zh: '芝巴蒙市与乌栋棉芷市' },
+    adminLocation: {
+      km: 'សាលាខេត្តកំពង់ស្ពឺ៖ ផ្លូវជាតិលេខ ៤ សង្កាត់រកាធំ ក្រុងច្បារមន',
+      en: 'Kampong Speu Provincial Hall: National Road No. 4, Chbar Mon City',
+      zh: '磅士卑省政府：芝巴蒙市4号国道',
+    },
+    districtsSummary: {
+      km: 'មាន ២ ក្រុង និង ៧ ស្រុក (ក្រុងច្បារមន, ក្រុងឧដុង្គម៉ែជ័យ, ស្រុកបសេដ្ឋ, គងពិសី, ឱរ៉ាល់, ភ្នំស្រួច, សំរោងទង, ថ្ពង, សាមគ្គីមុនីជ័យ)',
+      en: '2 Cities and 7 Districts (Chbar Mon, Oudong Mae Chey, Basedth, Kong Pisei, Aoral, Phnom Sruoch, Samraong Tong, Thpong, Samakki Muni Chey)',
+      zh: '下辖2个市及7个县（芝巴蒙市、乌栋棉芷市、ភ្នំស្រួច县、奥拉县等）',
+    },
+    historySummary: {
+      km: 'ខេត្តកំពង់ស្ពឺល្បីល្បាញខាងតំបន់អេកូទេសចរណ៍ភ្នំ និងព្រៃឈើ រួមមានឧទ្យានជាតិព្រះសុរាម្រិត-កុសុមៈគិរីរម្យ ទឹកជ្រោះជ្រាវ សហគមន៍ចំបក់ និងកំពូលភ្នំឱរ៉ាល់ (ភ្នំខ្ពស់ជាងគេនៅកម្ពុជា កម្ពស់ ១,៨១៣ ម៉ែត្រ) ព្រមទាំងស្ករត្នោតកំពង់ស្ពឺ។',
+      en: 'Home to Kirirom National Park\'s pine forests, Chambok eco-community, Chreav Waterfall, Mount Aoral (Cambodia\'s highest peak at 1,813m), and Geographical Indication (GI) Kampong Speu Palm Sugar.',
+      zh: '磅士卑省以基里隆国家公园松林、占博生态社区、Chreav瀑布、柬埔寨最高峰奥拉山（海拔1813米）及国家地理标志产品“磅士卑棕糖”著称。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តកំពង់ស្ពឺ',
+      en: 'Kampong Speu Provincial Referral Hospital',
+      zh: '磅士卑省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ៤ សង្កាត់រកាធំ ក្រុងច្បារមន ខេត្តកំពង់ស្ពឺ',
+      en: 'National Road No. 4, Sangkat Roka Thum, Chbar Mon City',
+      zh: '磅士卑省芝巴蒙市4号国道',
+    },
+    hospitalPhone: '025987211',
+    policePhone: '117',
+  },
+  {
+    key: 'kampong chhnang',
+    provinceName: { km: 'ខេត្តកំពង់ឆ្នាំង', en: 'Kampong Chhnang Province', zh: '磅清扬省' },
+    capitalCity: { km: 'ក្រុងកំពង់ឆ្នាំង', en: 'Kampong Chhnang City', zh: '磅清扬市' },
+    adminLocation: {
+      km: 'សាលាខេត្តកំពង់ឆ្នាំង៖ សង្កាត់ប្អេរ ក្រុងកំពង់ឆ្នាំង',
+      en: 'Kampong Chhnang Provincial Hall: Sangkat B\'er, Kampong Chhnang City',
+      zh: '磅清扬省政府：磅清扬市区',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៧ ស្រុក (ក្រុងកំពង់ឆ្នាំង, ស្រុកបរិបូណ៌, ជលគិរី, កំពង់លែង, កំពង់ត្រឡាច, រលាប្អៀរ, សាមគ្គីមានជ័យ, ទឹកផុស)',
+      en: '1 City and 7 Districts (Kampong Chhnang City, Baribour, Chol Kiri, Kampong Leaeng, Kampong Tralach, Rolea B\'ier, Sameakki Mean Chey, Tuek Phos)',
+      zh: '下辖1个市及7个县（磅清扬市、磅德拉拉、磅良、德ផុស等）',
+    },
+    historySummary: {
+      km: 'ខេត្តកំពង់ឆ្នាំងមាននាមថា «កំពង់ផែក្អមឆ្នាំង» ដោយសារសិប្បកម្មស្មូនឆ្នាំងដីបុរាណនៅភូមិអណ្ដូងឫស្សី (ស្រុករលាប្អៀរ) ភូមិបណ្ដែតទឹកទន្លេសាប ភ្នំនាងកង្រី និងប្រាសាទបុរាណក្នុងស្រុកកំពង់លែង។',
+      en: 'Literally meaning "Port of Pottery," Kampong Chhnang is renowned for its traditional terracotta pottery villages (Andoung Russei), Tonle Sap floating villages, Mount Neang Kangrei, and ancient pre-Angkorian temples in Kampong Leaeng.',
+      zh: '磅清扬意为“陶器之港”，以安东竹村（Andoung Russei）传统红陶工艺、洞里萨湖水上村落、仙女山（Neang Kangrei）及磅良县古寺闻名。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តកំពង់ឆ្នាំង',
+      en: 'Kampong Chhnang Provincial Referral Hospital',
+      zh: '磅清扬省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ៥ សង្កាត់កំពង់ឆ្នាំង ក្រុងកំពង់ឆ្នាំង',
+      en: 'National Road No. 5, Sangkat Kampong Chhnang, Kampong Chhnang City',
+      zh: '磅清扬市5号国道',
+    },
+    hospitalPhone: '026988712',
+    policePhone: '117',
+  },
+  {
+    key: 'pursat',
+    provinceName: { km: 'ខេត្តពោធិ៍សាត់', en: 'Pursat Province', zh: '菩萨省' },
+    capitalCity: { km: 'ក្រុងពោធិ៍សាត់', en: 'Pursat City', zh: '菩萨市' },
+    adminLocation: {
+      km: 'សាលាខេត្តពោធិ៍សាត់៖ មាត់ស្ទឹងពោធិ៍សាត់ សង្កាត់ផ្ទះព្រៃ ក្រុងពោធិ៍សាត់',
+      en: 'Pursat Provincial Hall: Sangkat Phteah Prey, Pursat City',
+      zh: '菩萨省政府：菩萨市菩萨河畔',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៦ ស្រុក (ក្រុងពោធិ៍សាត់, ស្រុកបាកាន, កណ្ដៀង, ក្រគរ, ភ្នំក្រវាញ, វាលវែង, តាលោសែនជ័យ)',
+      en: '1 City and 6 Districts (Pursat City, Bakan, Kandieng, Krakor, Phnum Kravanh, Veal Veaeng, Ta Lou Senchey)',
+      zh: '下辖1个市及6个县（菩萨市、巴干、格គរ、豆蔻山、វាលវែង等）',
+    },
+    historySummary: {
+      km: 'ខេត្តពោធិ៍សាត់ល្បីល្បាញដោយបូជនីយដ្ឋានប្រវត្តិសាស្ត្រលោកឧកញ៉ា ឃ្លាំង មឿង ភូមិបណ្ដែតទឹកកំពង់ហ្លួង សិប្បកម្មចម្លាក់ថ្មម៉ាបពោធិ៍សាត់ ក្រូចពោធិ៍សាត់ និងតំបន់ទេសចរណ៍ធម្មជាតិភ្នំ ១៥០០ ក្នុងស្រុកវាលវែង។',
+      en: 'Famous for the historic shrine of national hero Oknha Khleang Moeung, Kampong Luong floating village on Tonle Sap Lake, Pursat marble carvings, sweet Pursat oranges, and the winding Mountain 1500 road in Veal Veaeng.',
+      zh: '菩萨省以民族英雄奥냐克良孟（Khleang Moeung）历史圣地、洞里萨湖磅隆水上村落、菩萨玉石雕刻、菩萨甜橙及1500山盘山公路闻名。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តពោធិ៍សាត់',
+      en: 'Pursat Provincial Referral Hospital',
+      zh: '菩萨省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ៥ សង្កាត់ផ្ទះព្រៃ ក្រុងពោធិ៍សាត់',
+      en: 'National Road No. 5, Sangkat Phteah Prey, Pursat City',
+      zh: '菩萨市5号国道',
+    },
+    hospitalPhone: '052951435',
+    policePhone: '117',
+  },
+  {
+    key: 'kratie',
+    provinceName: { km: 'ខេត្តក្រចេះ', en: 'Kratie Province', zh: '桔井省' },
+    capitalCity: { km: 'ក្រុងក្រចេះ', en: 'Kratie City', zh: '桔井市' },
+    adminLocation: {
+      km: 'សាលាខេត្តក្រចេះ៖ មហាវិថីមាត់ទន្លេមេគង្គ សង្កាត់ក្រចេះ ក្រុងក្រចេះ',
+      en: 'Kratie Provincial Hall: Mekong Riverfront Blvd, Kratie City',
+      zh: '桔井省政府：桔井市湄公河滨大道',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៦ ស្រុក (ក្រុងក្រចេះ, ស្រុកឆ្លូង, ព្រែកប្រសព្វ, សំបូរ, ស្នួល, ចិត្របុរី, អូរគ្រៀងសែនជ័យ)',
+      en: '1 City and 6 Districts (Kratie City, Chhloung, Prek Prasab, Sambour, Snuol, Chet Borei, O Kreang Senchey)',
+      zh: '下辖1个市及6个县（桔井市、川龙、三波、斯努、切博雷等）',
+    },
+    historySummary: {
+      km: 'ខេត្តក្រចេះជាដែនដីអន្លង់ផ្សោតទឹកសាបទន្លេមេគង្គ (ផ្សោតអ៊ីរ៉ាវ៉ាឌី នៅអន្លង់កាំពី) កោះទ្រង់ វត្តសរសរ ១០០ ក្នុងស្រុកសំបូរ (អតីតរាជធានីសម្ភុបុរៈ សតវត្សរ៍ទី ៨) និងក្រឡានថ្មគ្រែដ៏ឈ្ងុយឆ្ងាញ់។',
+      en: 'Home to the endangered Mekong Irrawaddy dolphins at Kampi pool, Koh Trong island, the historic 100-Pillar Pagoda in Sambour (8th-century Sambhupura), and famous Thma Krae bamboo sticky rice (Kralan).',
+      zh: '桔井省是湄公河伊洛瓦底江豚（甘比海豚池）的栖息地，并拥有笼岛（Koh Trong）、三波百柱寺及著名的竹筒饭（Kralan）。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តក្រចេះ',
+      en: 'Kratie Provincial Referral Hospital',
+      zh: '桔井省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'មាត់ទន្លេមេគង្គ សង្កាត់ក្រចេះ ក្រុងក្រចេះ',
+      en: 'Mekong Riverfront, Sangkat Kratie, Kratie City',
+      zh: '桔井市湄公河畔',
+    },
+    hospitalPhone: '072971256',
+    policePhone: '117',
+  },
+  {
+    key: 'mondulkiri',
+    provinceName: { km: 'ខេត្តមណ្ឌលគិរី', en: 'Mondulkiri Province', zh: '蒙多基里省' },
+    capitalCity: { km: 'ក្រុងសែនមនោរម្យ', en: 'Sen Monorom City', zh: '森莫诺隆市' },
+    adminLocation: {
+      km: 'សាលាខេត្តមណ្ឌលគិរី៖ សង្កាត់ស្ពានមានជ័យ ក្រុងសែនមនោរម្យ',
+      en: 'Mondulkiri Provincial Hall: Sangkat Spean Mean Chey, Sen Monorom City',
+      zh: '蒙多基里省政府：森莫诺隆市',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៤ ស្រុក (ក្រុងសែនមនោរម្យ, ស្រុកកែវសីមា, កោះញែក, អូររាំង, ពេជ្រាដា)',
+      en: '1 City and 4 Districts (Sen Monorom City, Keo Seima, Koh Nheaek, Ou Reang, Pech Chreada)',
+      zh: '下辖1个市及4个县（森莫诺隆市、高西马、高涅、奥良、佩奇里达）',
+    },
+    historySummary: {
+      km: 'ខេត្តមណ្ឌលគិរីស្ថិតនៅតំបន់ខ្ពង់រាបភាគឦសាន មានអាកាសធាតុត្រជាក់ពេញមួយឆ្នាំ ល្បីល្បាញដោយទឹកជ្រោះប៊ូស្រា សមុទ្រឈើ វាលស្មៅភ្នំដោះក្រមុំ ដែនជម្រកសត្វដំរី និងវប្បធម៌ជនជាតិដើមភាគតិចព្នង (Bunong) ព្រមទាំងកាហ្វេ និងផ្លែបឺរមណ្ឌលគិរី។',
+      en: 'Cambodia\'s largest and coolest highland province, famed for Bousra Waterfall, rolling pine hills ("Sea of Forest"), Phnom Doh Kramom, elephant sanctuaries, indigenous Bunong culture, and highland coffee & avocados.',
+      zh: '蒙多基里是柬埔寨面积最大的高原省份，气候凉爽，以布斯拉瀑布（Bousra）、林海景观、大象保护区、普农族原住民文化及高山咖啡与牛油果闻名。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តមណ្ឌលគិរី',
+      en: 'Mondulkiri Provincial Referral Hospital',
+      zh: '蒙多基里省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'សង្កាត់ស្ពានមានជ័យ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី',
+      en: 'Sangkat Spean Mean Chey, Sen Monorom City, Mondulkiri',
+      zh: '蒙多基里省森莫诺隆市中心',
+    },
+    hospitalPhone: '073942115',
+    policePhone: '117',
+  },
+  {
+    key: 'ratanakiri',
+    provinceName: { km: 'ខេត្តរតនគិរី', en: 'Ratanakiri Province', zh: '腊塔纳基里省' },
+    capitalCity: { km: 'ក្រុងបានលុង', en: 'Banlung City', zh: '邦隆市' },
+    adminLocation: {
+      km: 'សាលាខេត្តរតនគិរី៖ សង្កាត់ឡាបានសៀក ក្រុងបានលុង',
+      en: 'Ratanakiri Provincial Hall: Sangkat Labansiek, Banlung City',
+      zh: '腊塔纳基里省政府：邦隆市拉班西分区',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៨ ស្រុក (ក្រុងបានលុង, ស្រុកអណ្ដូងមាស, បរកែវ, កូនមុំ, លំផាត់, អូរជុំ, អូរយ៉ាដាវ, តាវែង, វើនសៃ)',
+      en: '1 City and 8 Districts (Banlung City, Andoung Meas, Bar Kaev, Koun Mom, Lumphat, Ou Chum, O\'Yadav, Ta Veng, Veun Sai)',
+      zh: '下辖1个市及8个县（邦隆市、博胶、隆发、奥ជុំ、奥亚道、云晒等）',
+    },
+    historySummary: {
+      km: 'ខេត្តរតនគិរីមាននាមថា «ភ្នំត្បូងមានតម្លៃ» ល្បីល្បាញដោយបឹងយក្សឡោម (បឹងមាត់ភ្នំភ្លើងបុរាណទឹកថ្លាឆ្វង់) ទឹកជ្រោះកាចាញ ទឹកជ្រោះចាអុង ទឹកជ្រោះកាទៀង និងឧទ្យានជាតិវីរជ័យ។',
+      en: 'Meaning "Mountain of Precious Gems," Ratanakiri is famous for the crystal-clear volcanic crater lake of Yeak Laom, Kachanh and Cha Ong waterfalls, gem mining in Bar Kaev, and Virachey National Park.',
+      zh: '腊塔纳基里意为“宝石之山”，以清澈见底的火山口湖——野龙湖（Yeak Laom）、卡昌瀑布、博胶蓝锆石及维拉奇国家公园著称。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តរតនគិរី',
+      en: 'Ratanakiri Provincial Referral Hospital',
+      zh: '腊塔纳基里省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'សង្កាត់ឡាបានសៀក ក្រុងបានលុង ខេត្តរតនគិរី (ជិតបឹងកន្សែង)',
+      en: 'Sangkat Labansiek, Banlung City (near Boeng Kansaeng Lake)',
+      zh: '腊塔纳基里省邦隆市中心（靠近甘森湖）',
+    },
+    hospitalPhone: '075974118',
+    policePhone: '117',
+  },
+  {
+    key: 'preah vihear',
+    provinceName: { km: 'ខេត្តព្រះវិហារ', en: 'Preah Vihear Province', zh: '柏威夏省' },
+    capitalCity: { km: 'ក្រុងព្រះវិហារ (ត្បែងមានជ័យ)', en: 'Preah Vihear City', zh: '柏威夏市' },
+    adminLocation: {
+      km: 'សាលាខេត្តព្រះវិហារ៖ សង្កាត់កំពង់ប្រណាក ក្រុងព្រះវិហារ',
+      en: 'Preah Vihear Provincial Hall: Sangkat Kampong Pranak, Preah Vihear City',
+      zh: '柏威夏省政府：柏威夏市磅普拉纳分区',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៧ ស្រុក (ក្រុងព្រះវិហារ, ស្រុកជ័យសែន, ឆែប, ជាំក្សាន្ត, គូលែន, រវៀង, សង្គមថ្មី, ត្បែងមានជ័យ)',
+      en: '1 City and 7 Districts (Preah Vihear City, Chey Saen, Chhaeb, Choam Khsant, Kuleaen, Rovieng, Sangkom Thmei, Tbaeng Mean Chey)',
+      zh: '下辖1个市及7个县（柏威夏市、专格산、库伦、罗文、特本棉芷等）',
+    },
+    historySummary: {
+      km: 'ខេត្តព្រះវិហារគឺជាខេត្តតែមួយគត់ដែលមានតំបន់បេតិកភណ្ឌពិភពលោក UNESCO ចំនួន ២ គឺ «ប្រាសាទព្រះវិហារ» លើកំពូលភ្នំដងរែក (ចុះបញ្ជីឆ្នាំ ២០០៨) និង «រមណីយដ្ឋានប្រាសាទកោះកេរ» អតីតរាជធានីឆោកគគីរ (ចុះបញ្ជីឆ្នាំ ២០២៣) រួមទាំងប្រាសាទព្រះខ័នកំពង់ស្វាយ។',
+      en: 'Home to TWO UNESCO World Heritage Sites: the cliff-top Temple of Preah Vihear atop the Dângrêk Mountains (inscribed 2008) and the 10th-century royal capital of Koh Ker (inscribed 2023), plus Preah Khan Kampong Svay.',
+      zh: '柏威夏省坐拥两处联合国教科文组织世界文化遗产：扁担山脉悬崖之巅的“柏威夏寺”（2008年列入）与10世纪古都“贡开金字塔寺群（Koh Ker）”（2023年列入）。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តព្រះវិហារ (១៦ មករា)',
+      en: '16 Makara Preah Vihear Provincial Referral Hospital',
+      zh: '柏威夏省立1月16日转诊医院',
+    },
+    hospitalAddress: {
+      km: 'សង្កាត់កំពង់ប្រណាក ក្រុងព្រះវិហារ ខេត្តព្រះវិហារ',
+      en: 'Sangkat Kampong Pranak, Preah Vihear City',
+      zh: '柏威夏省柏威夏市中心',
+    },
+    hospitalPhone: '064965119',
+    policePhone: '117',
+  },
+  {
+    key: 'koh kong',
+    provinceName: { km: 'ខេត្តកោះកុង', en: 'Koh Kong Province', zh: '国公省' },
+    capitalCity: { km: 'ក្រុងខេមរភូមិន្ទ', en: 'Khemarak Phoumin City', zh: '凯马拉普明市' },
+    adminLocation: {
+      km: 'សាលាខេត្តកោះកុង៖ សង្កាត់ស្មាច់មានជ័យ ក្រុងខេមរភូមិន្ទ',
+      en: 'Koh Kong Provincial Hall: Sangkat Smach Mean Chey, Khemarak Phoumin City',
+      zh: '国公省政府：凯马拉普明市斯玛棉芷分区',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៦ ស្រុក (ក្រុងខេមរភូមិន្ទ, ស្រុកបូទុមសាគរ, គិរីសាគរ, កោះកុង, មណ្ឌលសីមា, ស្រែអំបិល, ថ្មបាំង)',
+      en: '1 City and 6 Districts (Khemarak Phoumin City, Botum Sakor, Kiri Sakor, Koh Kong, Mondol Seima, Srae Ambel, Thma Bang)',
+      zh: '下辖1个市及6个县（凯马拉普明市、波东沙哥、基里沙哥、蒙多塞马、盐田、特玛邦）',
+    },
+    historySummary: {
+      km: 'ខេត្តកោះកុងស្ថិតនៅភាគនិរតី គ្របដណ្ដប់ដោយជួរភ្នំក្រវាញ ព្រៃកោងកាងពាមក្រសោប ទឹកជ្រោះតាតៃ ស្ទឹងអារ៉ែង កោះស្ដេច និងឆ្នេរសមុទ្រធម្មជាតិដ៏ស្រស់ត្រកាល។',
+      en: 'A lush eco-tourism paradise spanning the Cardamom Mountains, Peam Krasop mangrove forest, Tatai Waterfall, Areng Valley, and Koh Sdach archipelago.',
+      zh: '国公省坐拥豆蔻山脉原始雨林、宾格索红树林保护区、达岱瀑布（Tatai）、阿润河谷及国王岛（Koh Sdach）等生态旅游胜地。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តកោះកុង',
+      en: 'Koh Kong Provincial Referral Hospital',
+      zh: '国公省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'សង្កាត់ស្មាច់មានជ័យ ក្រុងខេមរភូមិន្ទ ខេត្តកោះកុង',
+      en: 'Sangkat Smach Mean Chey, Khemarak Phoumin City, Koh Kong',
+      zh: '国公省凯马拉普明市中心',
+    },
+    hospitalPhone: '035936119',
+    policePhone: '117',
+  },
+  {
+    key: 'banteay meanchey',
+    provinceName: { km: 'ខេត្តបន្ទាយមានជ័យ', en: 'Banteay Meanchey Province', zh: '卜迭棉芷省' },
+    capitalCity: { km: 'ក្រុងសិរីសោភ័ណ និងក្រុងប៉ោយប៉ែត', en: 'Serei Saophoan & Poipet Cities', zh: '诗梳风市与波贝市' },
+    adminLocation: {
+      km: 'សាលាខេត្តបន្ទាយមានជ័យ៖ សង្កាត់អូរអំបិល ក្រុងសិរីសោភ័ណ',
+      en: 'Banteay Meanchey Provincial Hall: Sangkat Ou Ambel, Serei Saophoan City',
+      zh: '卜迭棉芷省政府：诗梳风市奥安贝尔分区',
+    },
+    districtsSummary: {
+      km: 'មាន ២ ក្រុង និង ៧ ស្រុក (ក្រុងសិរីសោភ័ណ, ក្រុងប៉ោយប៉ែត, ស្រុកមង្គលបូរី, ភ្នំស្រុក, ព្រះនេត្រព្រះ, អូរជ្រៅ, ស្វាយចេក, ថ្មពួក, ម៉ាឡៃ)',
+      en: '2 Cities and 7 Districts (Serei Saophoan, Poipet, Mongkol Borei, Phnum Srok, Preah Netr Preah, Ou Chrov, Svay Chek, Thma Puok, Malai)',
+      zh: '下辖2个市及7个县（诗梳风市、波贝市、蒙哥博雷、特玛卫、马莱等）',
+    },
+    historySummary: {
+      km: 'ខេត្តបន្ទាយមានជ័យជាច្រកទ្វារពាណិជ្ជកម្ម និងទេសចរណ៍ភាគពាយ័ព្យ និងជាទីតាំងនៃមហាប្រាសាទបន្ទាយឆ្មារ (កសាងក្នុងរជ្ជកាលព្រះបាទជ័យវរ្ម័នទី ៧ សតវត្សរ៍ទី ១២) ប្រាសាទបន្ទាយទ័ព និងអាងទឹកត្រពាំងថ្ម។',
+      en: 'Northwestern gateway of Cambodia and home to the monumental 12th-century temple complex of Banteay Chhmar built by King Jayavarman VII, Banteay Torp temple, and Trapeang Thma crane sanctuary.',
+      zh: '卜迭棉芷省是柬埔寨西北门户，拥有阇耶跋摩七世时期兴建的宏伟古迹“班迭奇马寺（Banteay Chhmar）”、班迭托寺及达奔特玛鹤类保护区。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកមិត្តភាពកម្ពុជា-ជប៉ុន មង្គលបូរី និងមន្ទីរពេទ្យបង្អែកសិរីសោភ័ណ',
+      en: 'Cambodia–Japan Friendship Hospital (Mongkol Borei) & Serei Saophoan Hospital',
+      zh: '柬日友谊转诊医院（蒙哥博雷）与诗梳风转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ៥ និងផ្លូវជាតិលេខ ៦ ក្រុងសិរីសោភ័ណ ខេត្តបន្ទាយមានជ័យ',
+      en: 'National Road No. 5 & No. 6, Serei Saophoan City, Banteay Meanchey',
+      zh: '卜迭棉芷省诗梳风市5号与6号国道交汇处',
+    },
+    hospitalPhone: '054958819',
+    policePhone: '117',
+  },
+  {
+    key: 'pailin',
+    provinceName: { km: 'ខេត្តប៉ៃលិន', en: 'Pailin Province', zh: '拜林省' },
+    capitalCity: { km: 'ក្រុងប៉ៃលិន', en: 'Pailin City', zh: '拜林市' },
+    adminLocation: {
+      km: 'សាលាខេត្តប៉ៃលិន៖ សង្កាត់ប៉ៃលិន ក្រុងប៉ៃលិន',
+      en: 'Pailin Provincial Hall: Sangkat Pailin, Pailin City',
+      zh: '拜林省政府：拜林市中心',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ១ ស្រុក (ក្រុងប៉ៃលិន និងស្រុកសាលាក្រៅ)',
+      en: '1 City and 1 District (Pailin City & Sala Krau District)',
+      zh: '下辖1个市及1个县（拜林市与沙拉格劳县）',
+    },
+    historySummary: {
+      km: 'ខេត្តប៉ៃលិនស្ថិតនៅជើងភ្នំក្រវាញ ល្បីល្បាញខាងរ៉ែត្បូងទទឹម និងត្បូងកណ្ដៀង ភ្នំយ៉ាត ទឹកធ្លាក់ភ្នំខៀវ (អូរតាវ៉ៅ) វប្បធម៌របាំក្ងោកប៉ៃលិន និងផ្លែតាង៉ែនប៉ៃលិន។',
+      en: 'Nestled against the Cardamom Mountains, Pailin is famous for its ruby and sapphire heritage, Wat Phnom Yat, Phnom Khiev waterfall, Pailin Peacock Dance, and GI Pailin Longan orchards.',
+      zh: '拜林省坐落于豆蔻山脉脚下，以红蓝宝石历史、雅山寺（Phnom Yat）、青山田园瀑布、孔雀舞及拜林龙眼闻名。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តប៉ៃលិន',
+      en: 'Pailin Provincial Referral Hospital',
+      zh: '拜林省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ៥៧ សង្កាត់ប៉ៃលិន ក្រុងប៉ៃលិន',
+      en: 'National Road No. 57, Sangkat Pailin, Pailin City',
+      zh: '拜林市57号国道',
+    },
+    hospitalPhone: '055956119',
+    policePhone: '117',
+  },
+  {
+    key: 'oddar meanchey',
+    provinceName: { km: 'ខេត្តឧត្តរមានជ័យ', en: 'Oddar Meanchey Province', zh: '奥多棉芷省' },
+    capitalCity: { km: 'ក្រុងសំរោង', en: 'Samraong City', zh: '森隆市' },
+    adminLocation: {
+      km: 'សាលាខេត្តឧត្តរមានជ័យ៖ សង្កាត់សំរោង ក្រុងសំរោង',
+      en: 'Oddar Meanchey Provincial Hall: Sangkat Samraong, Samraong City',
+      zh: '奥多棉芷省政府：森隆市',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៤ ស្រុក (ក្រុងសំរោង, ស្រុកអន្លង់វែង, បន្ទាយអំពិល, ចុងកាល់, ត្រពាំងប្រាសាទ)',
+      en: '1 City and 4 Districts (Samraong City, Anlong Veng, Banteay Ampil, Chong Kal, Trapeang Prasat)',
+      zh: '下辖1个市及4个县（森隆市、安隆汶、班迭安比、宗卡、达奔巴萨）',
+    },
+    historySummary: {
+      km: 'ខេត្តឧត្តរមានជ័យស្ថិតនៅតាមជួរភ្នំដងរែក មានស្ពានទ័ពបុរាណសម័យអង្គរ (ស្ពានទ័ពឆ្លងស្ទឹងជីក្រែង/ចុងកាល់) ប្រាសាទតាក្របី ប្រាសាទតាមាន់ធំ និងតំបន់ប្រវត្តិសាស្ត្រអន្លង់វែង។',
+      en: 'Located along the Dângrêk mountain range, featuring the ancient Angkorian stone bridge of Spean Toap, Ta Krabey and Ta Moan Thom temples, and Anlong Veng historical sites.',
+      zh: '奥多棉芷省依傍扁担山脉，拥有吴哥时期大型石桥遗迹（Spean Toap）、达格拉贝寺、达门通寺及安隆汶历史遗址。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តឧត្តរមានជ័យ',
+      en: 'Oddar Meanchey Provincial Referral Hospital',
+      zh: '奥多棉芷省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ៦៨ សង្កាត់សំរោង ក្រុងសំរោង ខេត្តឧត្តរមានជ័យ',
+      en: 'National Road No. 68, Sangkat Samraong, Samraong City',
+      zh: '奥多棉芷省森隆市68号国道',
+    },
+    hospitalPhone: '065962119',
+    policePhone: '117',
+  },
+  {
+    key: 'stung treng',
+    provinceName: { km: 'ខេត្តស្ទឹងត្រែង', en: 'Stung Treng Province', zh: '上丁省' },
+    capitalCity: { km: 'ក្រុងស្ទឹងត្រែង', en: 'Stung Treng City', zh: '上丁市' },
+    adminLocation: {
+      km: 'សាលាខេត្តស្ទឹងត្រែង៖ សង្កាត់ស្ទឹងត្រែង ក្រុងស្ទឹងត្រែង',
+      en: 'Stung Treng Provincial Hall: Sangkat Stung Treng, Stung Treng City',
+      zh: '上丁省政府：上丁市湄公河与公河交汇处',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៥ ស្រុក (ក្រុងស្ទឹងត្រែង, ស្រុកសេសាន, សៀមបូក, សៀមប៉ាង, ថាឡាបរិវ៉ាត់, បុរីអូរស្វាយសែនជ័យ)',
+      en: '1 City and 5 Districts (Stung Treng City, Sesan, Siem Bouk, Siem Pang, Thala Barivat, Borei O\'Svay Senchey)',
+      zh: '下辖1个市及5个县（上丁市、塞桑、暹博、暹邦、塔拉巴里瓦、博雷奥斯вай）',
+    },
+    historySummary: {
+      km: 'ខេត្តស្ទឹងត្រែងស្ថិតនៅចំណុចប្រសព្វនៃទន្លេធំ ៤ (ទន្លេមេគង្គ ទន្លេសេកុង ទន្លេសេសាន និងទន្លេស្រែពក) ល្បីល្បាញដោយតំបន់រ៉ាមសារទន្លេមេគង្គ ទឹកជ្រោះសុភមិត្ត និងប្រាសាទព្រះគោ (ថាឡាបរិវ៉ាត់)។',
+      en: 'Positioned at the confluence of four rivers (Mekong, Sekong, Sesan, Srepok), Stung Treng is famed for the Mekong Ramsar wetland site, Sopheakmit Waterfall, and ancient Thala Barivat temples.',
+      zh: '上丁省位于湄公河、公河、塞桑河与斯雷博河四河交汇处，拥有国际重要湿地（Ramsar）、索帕米瀑布及塔拉巴里瓦古寺。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តស្ទឹងត្រែង',
+      en: 'Stung Treng Provincial Referral Hospital',
+      zh: '上丁省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'សង្កាត់ស្ទឹងត្រែង ក្រុងស្ទឹងត្រែង ខេត្តស្ទឹងត្រែង',
+      en: 'Sangkat Stung Treng, Stung Treng City',
+      zh: '上丁省上丁市中心',
+    },
+    hospitalPhone: '074973119',
+    policePhone: '117',
+  },
+  {
+    key: 'tboung khmum',
+    provinceName: { km: 'ខេត្តត្បូងឃ្មុំ', en: 'Tboung Khmum Province', zh: '特本克蒙省' },
+    capitalCity: { km: 'ក្រុងសួង', en: 'Suong City', zh: '苏翁市' },
+    adminLocation: {
+      km: 'សាលាខេត្តត្បូងឃ្មុំ៖ តំបន់រដ្ឋបាលប្រមូលផ្ដុំ ឃុំស្រឡប់ ស្រុកត្បូងឃ្មុំ / ក្រុងសួង',
+      en: 'Tboung Khmum Provincial Hall: Administrative Center near Suong City (NR7)',
+      zh: '特本克蒙省政府：苏翁市7号国道行政中心',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ៦ ស្រុក (ក្រុងសួង, ស្រុកតំបែរ, ក្រូចឆ្មារ, មេមត់, អូររាំងឪ, ពញាក្រែក, ត្បូងឃ្មុំ)',
+      en: '1 City and 6 Districts (Suong City, Dambae, Krouch Chhmar, Memot, Ou Reang Ov, Ponhea Kraek, Tboung Khmum)',
+      zh: '下辖1个市及6个县（苏翁市、丹拜、格罗奇马、梅莫、奥良欧、波耶局、特本克蒙）',
+    },
+    historySummary: {
+      km: 'ខេត្តត្បូងឃ្មុំជាដែនដីប្រវត្តិសាស្ត្របុរាណវិទ្យាភូមិមូលមេមត់ រមណីយដ្ឋានទឹកធ្លាក់ហោង ប្រាសាទព្រះធាតុបាស្រី និងចម្ការកៅស៊ូដ៏ធំល្វឹងល្វើយ។',
+      en: 'Rich in prehistoric Memot circular earthworks, Haong Waterfall, Preah Theat Basrei temple, and historic rubber plantations along National Road No. 7.',
+      zh: '特本克蒙省拥有史前梅莫环形土遗址、洪瀑布（Haong Waterfall）、巴斯雷古塔寺及广袤的橡胶园。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកមិត្តភាពកម្ពុជា-ចិន ត្បូងឃ្មុំ និងមន្ទីរពេទ្យបង្អែកសួង',
+      en: 'Cambodia–China Friendship Tboung Khmum Hospital & Suong Referral Hospital',
+      zh: '柬中友谊特本克蒙医院与苏翁转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ៧ ក្រុងសួង ខេត្តត្បូងឃ្មុំ',
+      en: 'National Road No. 7, Suong City, Tboung Khmum Province',
+      zh: '特本克蒙省苏翁市7号国道',
+    },
+    hospitalPhone: '042942119',
+    policePhone: '117',
+  },
+  {
+    key: 'prey veng',
+    provinceName: { km: 'ខេត្តព្រៃវែង', en: 'Prey Veng Province', zh: '波罗勉省' },
+    capitalCity: { km: 'ក្រុងព្រៃវែង', en: 'Prey Veng City', zh: '波罗勉市' },
+    adminLocation: {
+      km: 'សាលាខេត្តព្រៃវែង៖ សង្កាត់កំពង់លាវ ក្រុងព្រៃវែង',
+      en: 'Prey Veng Provincial Hall: Sangkat Kampong Leav, Prey Veng City',
+      zh: '波罗勉省政府：波罗勉市磅良分区',
+    },
+    districtsSummary: {
+      km: 'មាន ១ ក្រុង និង ១២ ស្រុក (ក្រុងព្រៃវែង, ស្រុកបាភ្នំ, កំចាយមារ, កំពង់ត្របែក, កanhchriech, មេសាង, ពាមជរ, ពាមរក៍, ពារាំង, ព្រះស្ដេច, ពោធិ៍រៀង, ស៊ីធរកណ្ដាល, ស្វាយអន្ទរ)',
+      en: '1 City and 12 Districts (Prey Veng City, Ba Phnum, Kamchay Mear, Kampong Trabaek, Peam Ro, Sithor Kandal, Svay Antor, etc.)',
+      zh: '下辖1个市及12个县（波罗勉市、巴ភ្នំ、甘再迷、乃良/เปាមរក៍等）',
+    },
+    historySummary: {
+      km: 'ខេត្តព្រៃវែងជាទីតាំងនៃអតីតរាជធានីនគរភ្នំនៅតំបន់បាភ្នំ (នគរវ្យាធបុរៈ) ស្ពានអ្នកលឿង (ស្ពានត្សឹបាសា) បឹងស្នេហ៍ (ដែនជម្រកសត្វស្លាបរាប់ម៉ឺនក្បាល) និងប្រាសាទព្រៃដើមស្រុក។',
+      en: 'Home to the ancient Funan heritage site of Ba Phnum, the iconic Tsubasa Bridge at Neak Loeung, and Tuol Porn Taley (Boeng Sne) bird sanctuary.',
+      zh: '波罗勉省拥有扶南时期巴ភ្នំ（Ba Phnum）古迹、宏伟的乃良大桥（Tsubasa Bridge）及爱情湖（Boeng Sne）万鸟栖息保护区。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តព្រៃវែង',
+      en: 'Prey Veng Provincial Referral Hospital',
+      zh: '波罗勉省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ១១ សង្កាត់កំពង់លាវ ក្រុងព្រៃវែង',
+      en: 'National Road No. 11, Sangkat Kampong Leav, Prey Veng City',
+      zh: '波罗勉市11号国道',
+    },
+    hospitalPhone: '043944119',
+    policePhone: '117',
+  },
+  {
+    key: 'svay rieng',
+    provinceName: { km: 'ខេត្តស្វាយរៀង', en: 'Svay Rieng Province', zh: '柴桢省' },
+    capitalCity: { km: 'ក្រុងស្វាយរៀង និងក្រុងបាវិត', en: 'Svay Rieng & Bavet Cities', zh: '柴桢市与巴域市' },
+    adminLocation: {
+      km: 'សាលាខេត្តស្វាយរៀង៖ សង្កាត់ស្វាយរៀង ក្រុងស្វាយរៀង (មាត់ទន្លេវ៉ៃគោ)',
+      en: 'Svay Rieng Provincial Hall: Waiko Riverfront, Svay Rieng City',
+      zh: '柴桢省政府：柴桢市怀戈河畔',
+    },
+    districtsSummary: {
+      km: 'មាន ២ ក្រុង និង ៦ ស្រុក (ក្រុងស្វាយរៀង, ក្រុងបាវិត, ស្រុកចន្ទ្រា, កំពង់រោទិ៍, រមាសហែក, រំដួល, ស្វាយជ្រំ, ស្វាយទាប)',
+      en: '2 Cities and 6 Districts (Svay Rieng City, Bavet City, Chantrea, Kampong Rou, Romeas Haek, Rumduol, Svay Chrum, Svay Teab)',
+      zh: '下辖2个市及6个县（柴桢市、巴域市、占特拉、磅罗、隆都、斯вайជ្រំ等）',
+    },
+    historySummary: {
+      km: 'ខេត្តស្វាយរៀងស្ថិតនៅភាគអាគ្នេយ៍តាមដងទន្លេវ៉ៃគោ មានប្រាសាទបាសាក់ រមណីយដ្ឋានព្រៃបាសាក់ និងច្រកទ្វារព្រំដែនអន្តរជាតិបាវិតដែលជាច្រកពាណិជ្ជកម្ម និងទេសចរណ៍ដ៏មមាញឹកបំផុតរវាងកម្ពុជា-វៀតណាម។',
+      en: 'Located along the Waiko River in southeastern Cambodia, featuring Prey Basak historical site and the major international border gateway of Bavet.',
+      zh: '柴桢省位于柬埔寨东南部怀戈河畔，拥有巴萨森林古迹及柬越最大陆路口岸——巴域国际口岸。',
+    },
+    hospitalName: {
+      km: 'មន្ទីរពេទ្យបង្អែកខេត្តស្វាយរៀង',
+      en: 'Svay Rieng Provincial Referral Hospital',
+      zh: '柴桢省立转诊医院',
+    },
+    hospitalAddress: {
+      km: 'ផ្លូវជាតិលេខ ១ សង្កាត់ស្វាយរៀង ក្រុងស្វាយរៀង',
+      en: 'National Road No. 1, Sangkat Svay Rieng, Svay Rieng City',
+      zh: '柴桢市1号国道',
+    },
+    hospitalPhone: '044945119',
+    policePhone: '117',
+  },
+];
+
+export function findProvinceAdminHistory(provinceRaw?: string): ProvinceAdminHistoryItem {
+  const s = (provinceRaw || '').toLowerCase();
+  for (const item of PROVINCIAL_ADMIN_HISTORY_HOSPITALS) {
+    if (
+      s.includes(item.key) ||
+      item.provinceName.km.includes(provinceRaw || '___') ||
+      (provinceRaw && item.provinceName.km.replace(/^រាជធានី|^ខេត្ត/g, '').trim() === provinceRaw.replace(/^រាជធានី|^ខេត្ត/g, '').trim())
+    ) {
+      return item;
+    }
+  }
+  return PROVINCIAL_ADMIN_HISTORY_HOSPITALS[0];
+}

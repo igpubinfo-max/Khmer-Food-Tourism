@@ -27,6 +27,8 @@ import { tr } from '../utils/i18n';
 import { DetailedFourPartRatingsCard } from './common/CambodiaChoiceAndRatings';
 import { NearbyEcosystemSection } from './common/NearbyEcosystemSection';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
+import { getDestinationCompleteTravelInfo } from '../utils/destinationTravelInfo';
+import { findProvinceAdminHistory } from '../data/provincialAdminPortsEmergencyData';
 import { resolveCoordinateVerifiedGooglePlace } from '../services/googlePlacesService';
 import {
   formatRichShareText,
@@ -718,6 +720,155 @@ export const TouristDetailModal: React.FC = () => {
                 )}
               </div>
             )}
+
+                        {/* Complete RAC Travel Distance, How to Go & Road/Season Info Card */}
+            {(() => {
+              const travelInfo = getDestinationCompleteTravelInfo(selectedDestination, language);
+              const provEmergency = findProvinceAdminHistory(selectedDestination.provinceEn || selectedDestination.provinceKh);
+              return (
+                <div
+                  data-testid="dest-complete-travel-info"
+                  className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/70 dark:from-slate-800/95 dark:via-slate-800 dark:to-emerald-950/30 border border-emerald-200/90 dark:border-emerald-700/50 space-y-3 shadow-xs font-khmer"
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap border-b border-emerald-200/70 dark:border-slate-700 pb-2.5">
+                    <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-400 font-extrabold text-xs sm:text-sm">
+                      <Compass className="w-4 h-4 text-[#059669] shrink-0" />
+                      <span>
+                        {tr(
+                          language,
+                          'ព័ត៌មានចម្ងាយផ្លូវ ការធ្វើដំណើរ និងស្ថានភាពផ្លូវ',
+                          'Travel Distance, How to Go & Road Info',
+                          '距离、交通路线与路况指南'
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Official RAC Style Code Badges: T.. / S1-S2 / R1-R2 */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
+                      <span
+                        title={travelInfo.tourismLabel}
+                        className="px-1.5 py-0.5 rounded-md border-2 border-emerald-700 dark:border-emerald-400 text-emerald-800 dark:text-emerald-300 font-extrabold text-[11px] leading-none bg-white dark:bg-slate-900"
+                      >
+                        {travelInfo.tourismCode}
+                      </span>
+                      <span
+                        title={travelInfo.seasonLabel}
+                        className="px-1.5 py-0.5 rounded-md border-2 border-amber-500 text-amber-700 dark:text-amber-300 font-extrabold text-[11px] leading-none bg-white dark:bg-slate-900"
+                      >
+                        {travelInfo.seasonCode}
+                      </span>
+                      <span
+                        title={travelInfo.roadLabel}
+                        className="w-6 h-6 rounded-full border-2 border-blue-600 dark:border-blue-400 text-blue-700 dark:text-blue-300 font-extrabold text-[11px] leading-none inline-flex items-center justify-center bg-white dark:bg-slate-900"
+                      >
+                        {travelInfo.roadCode}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 1 & 2: Distance from Capital, Provincial City, and User Point */}
+                  <div className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                    <div className="flex items-start gap-2">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">◉</span>
+                      <p className="leading-relaxed">
+                        <span className="font-bold">
+                          {tr(language, 'ចម្ងាយពីរាជធានីភ្នំពេញ៖ ', 'Distance from Capital: ', '距金边首都：')}
+                        </span>
+                        <span className="font-extrabold text-emerald-800 dark:text-emerald-300">
+                          {travelInfo.capitalDistanceKm} km
+                        </span>{' '}
+                        <span className="text-slate-600 dark:text-slate-300 font-semibold">
+                          ({travelInfo.capitalDriveText})
+                        </span>
+                      </p>
+                    </div>
+
+                    <div className="flex items-start gap-2">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">◉</span>
+                      <p className="leading-relaxed">
+                        <span className="font-bold">
+                          {tr(
+                            language,
+                            `ចម្ងាយពីទីរួមខេត្ត (${travelInfo.cityHubName})៖ `,
+                            `Distance from City (${travelInfo.cityHubName}): `,
+                            `距省会（${travelInfo.cityHubName}）：`
+                          )}
+                        </span>
+                        <span className="font-extrabold text-emerald-800 dark:text-emerald-300">
+                          {travelInfo.cityDistanceKm} km
+                        </span>{' '}
+                        <span className="text-slate-600 dark:text-slate-300 font-semibold">
+                          ({travelInfo.cityDriveText})
+                        </span>
+                      </p>
+                    </div>
+
+                    <div className="flex items-start gap-2">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">◉</span>
+                      <p className="leading-relaxed">
+                        <span className="font-bold">
+                          {tr(language, 'ចម្ងាយពីទីតាំងរបស់អ្នក៖ ', 'Distance from your point: ', '距您当前位置：')}
+                        </span>
+                        <span className="font-extrabold text-orange-600 dark:text-orange-400">
+                          {travelInfo.userDistanceKm} km
+                        </span>{' '}
+                        <span className="text-slate-600 dark:text-slate-300 font-semibold">
+                          ({travelInfo.userDriveText})
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 3: How to Go (របៀបធ្វើដំណើរ & ផ្លូវជាតិ) */}
+                  <div className="pt-2 border-t border-emerald-200/60 dark:border-slate-700 space-y-1">
+                    <p className="font-extrabold text-xs text-[#064E3B] dark:text-emerald-400">
+                      {tr(language, '🛣️ របៀបធ្វើដំណើរ (How to Go)', '🛣️ How to Go & Route', '🛣️ 交通路线指南 (How to Go)')}
+                    </p>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                      {travelInfo.howToGoText}
+                    </p>
+                  </div>
+
+                  {/* Nearby Provincial Referral Hospital & Emergency Service */}
+                  <div className="pt-2 border-t border-emerald-200/60 dark:border-slate-700 flex items-center justify-between gap-2 flex-wrap">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-extrabold text-xs text-rose-700 dark:text-rose-400">
+                        🏥 {tr(language, 'មន្ទីរពេទ្យបង្អែក និងសង្គ្រោះបន្ទាន់ក្បែរតំបន់នេះ', 'Nearby Referral Hospital & Emergency', '本省转诊医院与紧急救援')}
+                      </p>
+                      <p className="text-[11px] text-slate-700 dark:text-slate-300 font-semibold">
+                        {language === 'km' ? provEmergency.hospitalName.km : language === 'zh' ? provEmergency.hospitalName.zh : provEmergency.hospitalName.en} ({language === 'km' ? provEmergency.hospitalAddress.km : language === 'zh' ? provEmergency.hospitalAddress.zh : provEmergency.hospitalAddress.en})
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <a
+                        href={`tel:${provEmergency.hospitalPhone}`}
+                        className="px-2.5 py-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-mono font-extrabold text-[11px] inline-flex items-center gap-1 shadow-xs"
+                      >
+                        <Phone className="w-3 h-3" />
+                        <span>{provEmergency.hospitalPhone}</span>
+                      </a>
+                      <a
+                        href="tel:119"
+                        className="px-2 py-1 rounded-xl bg-amber-500 text-slate-950 font-mono font-extrabold text-[11px]"
+                      >
+                        🚑 119
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* 4: Road Condition & Season Legend */}
+                  <div className="pt-2 border-t border-emerald-200/60 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px]">
+                    <div className="px-2.5 py-1.5 rounded-xl bg-white/90 dark:bg-slate-900/70 border border-blue-200/80 dark:border-blue-800/50 text-slate-700 dark:text-slate-300 font-medium">
+                      🛣️ {travelInfo.roadLabel}
+                    </div>
+                    <div className="px-2.5 py-1.5 rounded-xl bg-white/90 dark:bg-slate-900/70 border border-amber-200/80 dark:border-amber-800/50 text-slate-700 dark:text-slate-300 font-medium">
+                      🌤️ {travelInfo.seasonLabel}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Quick Info Card: Best Time */}
             <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-1">

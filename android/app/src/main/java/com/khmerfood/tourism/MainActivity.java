@@ -1,4 +1,4 @@
-package com.khmerfood.tourism;
+﻿package com.khmerfood.tourism;
 
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
@@ -60,6 +60,9 @@ public class MainActivity extends BridgeActivity {
             settings.setDomStorageEnabled(true);
             settings.setDatabaseEnabled(true);
             settings.setAllowFileAccess(false);
+            settings.setAllowContentAccess(false);
+            settings.setAllowFileAccessFromFileURLs(false);
+            settings.setAllowUniversalAccessFromFileURLs(false);
             settings.setSaveFormData(false);
             settings.setMediaPlaybackRequiresUserGesture(false);
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);

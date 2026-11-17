@@ -347,7 +347,7 @@ export const TourismView: React.FC = () => {
       if (!d || d.categorySlug === 'hotel') continue;
       const hasPhoto = Boolean(d.photoUrl && d.photoUrl.trim());
       const isCustomAdmin = Boolean(d.isAdminEdited || d.isCustomPhoto);
-      if (hasPhoto && (!d.id.startsWith('rac-') || isCustomAdmin) && (d.isFeatured !== false || isCustomAdmin)) {
+      if (hasPhoto && ((!d.id.startsWith('kft-site-') && !d.id.startsWith('rac-')) || isCustomAdmin) && (d.isFeatured !== false || isCustomAdmin)) {
         if (!primaryIds.has(d.id)) {
           primaryIds.add(d.id);
           primary290.push(d);

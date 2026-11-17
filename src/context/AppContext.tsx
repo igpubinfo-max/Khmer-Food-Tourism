@@ -2248,7 +2248,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       !url ||
       url.includes('Huay_Kaew_waterfall_mu_yang.jpg') ||
       url.includes('Global_Forest_Change_tree-cover_loss_year') ||
-      url.includes('1569683795645');
+      url.includes('1569683795645') ||
+      url.includes('/destinations/rac-');
 
     try {
       const REMOVED_DUPLICATE_DEST_IDS = new Set(['dest-151', 'dest-171', 'dest-220', 'dest-262', 'dest-298']);
@@ -2276,7 +2277,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               d.id &&
               !REMOVED_DUPLICATE_DEST_IDS.has(d.id) &&
               !d.id.startsWith('kr-hotel-') &&
-              !((d.id.startsWith('hotel-') || d.id.startsWith('rac-')) && !d.isAdminEdited && !vault.destinations[d.id])
+              !((d.id.startsWith('hotel-') || d.id.startsWith('kft-site-') || d.id.startsWith('rac-')) && !d.isAdminEdited && !vault.destinations[d.id])
           );
           const upgraded = filteredParsed.map((d: TouristDestination) => {
             const seed = initialMap.get(d.id);
@@ -3661,7 +3662,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             (d) =>
               Boolean(d && d.id) &&
               (Boolean(d.isAdminEdited) ||
-                (!seedDestMap.has(d.id) && !d.id.startsWith('hotel-') && !d.id.startsWith('rac-')))
+                (!seedDestMap.has(d.id) && !d.id.startsWith('hotel-') && !d.id.startsWith('kft-site-') && !d.id.startsWith('rac-')))
           )
           .map(d => {
             if (
