@@ -39,7 +39,7 @@ jobs:
   build-ios:
     needs: submit-appstore-review
     if: (needs.submit-appstore-review.outputs.asc_review_state != 'WAITING_FOR_REVIEW' && needs.submit-appstore-review.outputs.asc_review_state != 'IN_REVIEW' && needs.submit-appstore-review.outputs.asc_review_state != 'PENDING_APPLE_RELEASE') || contains(github.event.head_commit.message, '[force-ios-build]')
-    runs-on: macos-latest
+    runs-on: macos-15-intel
     continue-on-error: true
 
     steps:
