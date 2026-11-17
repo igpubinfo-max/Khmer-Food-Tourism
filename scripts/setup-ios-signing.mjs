@@ -107,7 +107,7 @@ async function main() {
   const p12Path = path.join(workDir, 'dist.p12');
   fs.writeFileSync(cerDerPath, Buffer.from(certContentBase64, 'base64'));
   execSync(`openssl x509 -inform DER -in "${cerDerPath}" -out "${cerPemPath}"`);
-  execSync(`openssl pkcs12 -export -legacy -out "${p12Path}" -inkey "${keyPath}" -in "${cerPemPath}" -passout pass:kft1234`);
+  try { execSync(`openssl pkcs12 -export -legacy -out "${p12Path}" -inkey "${keyPath}" -in "${cerPemPath}" -passout pass:kft1234`, { stdio: "pipe" }); } catch { execSync(`openssl pkcs12 -export -out "${p12Path}" -inkey "${keyPath}" -in "${cerPemPath}" -passout pass:kft1234`); }
   console.log('   Created Distribution Certificate ID:', certId);
 
   console.log('5. Creating App Store Provisioning Profile via API...');
