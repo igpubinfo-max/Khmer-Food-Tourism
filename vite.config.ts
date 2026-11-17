@@ -59,10 +59,10 @@ function encodeSeedPayloadForBundle(data: unknown): string {
 }
 
 const PROTECTED_SEED_FILE_RE =
-  /\/src\/(data\/(seedDestPart[12]|seedRestPart[12]|seedHotelsPart[12]|seedRacPart[1-9]|seedYouthBrandedCafes|seedFoodpanda100Foods|seedTrendingFoods|seedVegetarian30Foods|seedAdditional100Foods|seedFoods)|services\/onlineFoodDiscoveryService)\.ts$/;
+  /\/src\/(data\/(seedDestPart[12]|seedSportsAndSouvenirs|cambodiaHeritageAndFactsData|seedRestPart[12]|seedHotelsPart[12]|seedRacPart[1-9]|seedYouthBrandedCafes|seedFoodpanda100Foods|seedTrendingFoods|seedVegetarian30Foods|seedAdditional100Foods|seedFoods)|services\/onlineFoodDiscoveryService)\.ts$/;
 
 const PROTECTED_SEED_ARRAY_GLOBAL_RE =
-  /((?:export\s+)?const\s+(?:destPart[12]|restPart[12]|hotelsPart[12]|racPart[1-9]|youthBrandedCafes30|foodpanda100Foods|initialTrendingFoods|RAW_30_VEGETARIAN_DISHES|RAW_100_NEW_DISHES|seedFoods|CURATED_YOUTUBE_VIDEOS|BACKUP_REPLACEMENT_YOUTUBE_VIDEOS|CURATED_TIKTOK_FACEBOOK_REVIEWS)\s*:\s*[^=]+?=\s*)(\[\s*(?:\/\*[\s\S]*?\*\/\s*|\/\/[^\n]*\n\s*)*\{[\s\S]*?\n\]);/g;
+  /((?:export\s+)?const\s+(?:destPart[12]|sportsAndSouvenirsDestinations|CAMBODIA_UNESCO_HERITAGE_LIST|CAMBODIA_NATIONAL_SYMBOLS_AND_WILDLIFE|CAMBODIA_DOMESTIC_TRANSPORT_ROUTES|CAMBODIA_FAST_FACTS|restPart[12]|hotelsPart[12]|racPart[1-9]|youthBrandedCafes30|foodpanda100Foods|initialTrendingFoods|RAW_30_VEGETARIAN_DISHES|RAW_100_NEW_DISHES|seedFoods|CURATED_YOUTUBE_VIDEOS|BACKUP_REPLACEMENT_YOUTUBE_VIDEOS|CURATED_TIKTOK_FACEBOOK_REVIEWS)\s*:\s*[^=]+?=\s*)(\[\s*(?:\/\*[\s\S]*?\*\/\s*|\/\/[^\n]*\n\s*)*\{[\s\S]*?\n\]);/g;
 
 function kftSeedPayloadProtectionPlugin(): Plugin {
   return {
@@ -204,7 +204,7 @@ function kftVersionManifestPlugin(): Plugin {
 }
 
 // https://vite.dev/config/
-// Auto-reloaded buildCode: 1629
+// Auto-reloaded buildCode: 1630
 export default defineConfig({
   base: './',
   define: {

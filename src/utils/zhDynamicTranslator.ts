@@ -2484,19 +2484,21 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
   }
 
   // Simplified Chinese ('zh')
-  const rawZhName = EXACT_DESTINATION_NAME_ZH_MAP[dest.nameEn] || translateDynamicTextToZh(dest.nameEn);
+  const rawZhName = dest.nameZh || EXACT_DESTINATION_NAME_ZH_MAP[dest.nameEn] || translateDynamicTextToZh(dest.nameEn);
   const zhName = sanitizeStrictLanguageText(rawZhName, 'zh');
   const zhProv = CAMBODIA_PROVINCE_ZH_MAP[dest.provinceKh] || CAMBODIA_PROVINCE_ZH_MAP[dest.provinceEn] || dest.provinceEn;
-  const rawZhCat = DEST_CATEGORY_ZH_MAP[dest.categoryEn] || translateDynamicTextToZh(dest.categoryEn);
+  const rawZhCat = dest.categoryZh || DEST_CATEGORY_ZH_MAP[dest.categoryEn] || translateDynamicTextToZh(dest.categoryEn);
   const zhCat = sanitizeStrictLanguageText(rawZhCat, 'zh');
-  const rawZhDesc = DEST_DESC_ZH_BY_ID[dest.id] || translateDynamicTextToZh(dest.descriptionEn);
+  const rawZhDesc = dest.descriptionZh || DEST_DESC_ZH_BY_ID[dest.id] || translateDynamicTextToZh(dest.descriptionEn);
   const zhDesc = sanitizeStrictLanguageText(toConciseSummary(rawZhDesc, 'zh'), 'zh');
   const zhFee = '';
   const rawTime = dest.bestTimeToVisitEn || 'All year round';
-  const zhTime = sanitizeStrictLanguageText(translateBestTimeToZh(rawTime), 'zh');
-  const zhAddress = cleanAddressDisplay(sanitizeStrictLanguageText(translateAddressToZh(dest.addressEn || '', zhProv), 'zh'), zhProv);
+  const zhTime = sanitizeStrictLanguageText(dest.bestTimeToVisitZh || translateBestTimeToZh(rawTime), 'zh');
+  const zhAddress = cleanAddressDisplay(sanitizeStrictLanguageText(dest.addressZh || translateAddressToZh(dest.addressEn || '', zhProv), 'zh'), zhProv);
 
-  const zhHighlights = (dest.highlightsKh && dest.highlightsKh.length > 0
+  const zhHighlights = Array.isArray(dest.highlightsZh) && dest.highlightsZh.length > 0
+    ? dest.highlightsZh.map((h: string) => sanitizeStrictLanguageText(h, 'zh'))
+    : (dest.highlightsKh && dest.highlightsKh.length > 0
     ? dest.highlightsKh.map((h: string) => sanitizeStrictLanguageText(translateDestinationHighlight(h, 'zh'), 'zh'))
     : (highlightsEnList || []).map((h: string) => sanitizeStrictLanguageText(translateDynamicTextToZh(h), 'zh')));
 

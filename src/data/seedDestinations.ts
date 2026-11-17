@@ -1,10 +1,11 @@
 import { TouristDestination } from '../types';
 import { destPart1 } from './seedDestPart1';
 import { destPart2 } from './seedDestPart2';
+import { sportsAndSouvenirsDestinations } from './seedSportsAndSouvenirs';
 import { loadRacCambodiaTourDestinations } from './seedRacCambodiaTourDestinations';
 import { loadSeedHotels100 } from './seedHotels100';
 
-const baseSeedDestinations: TouristDestination[] = [...destPart1, ...destPart2];
+const baseSeedDestinations: TouristDestination[] = [...destPart1, ...destPart2, ...sportsAndSouvenirsDestinations];
 
 export const initial100Destinations: TouristDestination[] = [
   ...baseSeedDestinations,

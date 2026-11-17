@@ -1312,8 +1312,8 @@ export const RestaurantView: React.FC = () => {
         </div>
 
         {/* Row 3: Compact Clean Shop Owner / Register Shop Bar */}
-        <div className="bg-white rounded-[20px] p-3 border border-slate-200/85 shadow-[0_4px_14px_rgba(15,23,42,0.04)] flex items-center justify-between gap-2.5 flex-wrap">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        <div className="bg-white rounded-[20px] p-3.5 border border-slate-200/85 shadow-[0_4px_14px_rgba(15,23,42,0.04)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+          <div className="flex items-start sm:items-center gap-2.5 w-full sm:w-auto min-w-0 flex-1">
             <span
               style={{
                 background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
@@ -1337,7 +1337,7 @@ export const RestaurantView: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center justify-end gap-1.5 flex-wrap w-full sm:w-auto shrink-0">
             {isAdmin && (
               <>
                 <button

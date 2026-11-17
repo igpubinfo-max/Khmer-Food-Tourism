@@ -1359,5 +1359,29 @@ test('19. Anti-APK-Unpack Seed Payload Cipher & Runtime Anti-Scraping Protection
   );
 });
 
+
+test('19. Official Angkor Park Guide (4 Temple Circuits, APSARA Code of Conduct & Park Facilities)', () => {
+  const {
+    ANGKOR_TEMPLE_CIRCUITS,
+    ANGKOR_CODE_OF_CONDUCT,
+    ANGKOR_PARK_FACILITIES,
+    buildCircuitGoogleMapsRouteUrl,
+  } = require(path.join(ROOT, 'src/data/angkorVisitGuideData.ts'));
+
+  assert.equal(ANGKOR_TEMPLE_CIRCUITS.length, 4, 'Must define all 4 official Angkor temple circuits');
+  const circuitIds = ANGKOR_TEMPLE_CIRCUITS.map((c) => c.id);
+  assert.deepEqual(circuitIds, ['small-circuit', 'grand-circuit', 'roluos-group', 'outer-circuit']);
+
+  for (const circuit of ANGKOR_TEMPLE_CIRCUITS) {
+    assert.ok(circuit.stops.length >= 3, 'Circuit ' + circuit.id + ' must have at least 3 ordered stops');
+    const routeUrl = buildCircuitGoogleMapsRouteUrl(circuit);
+    assert.ok(routeUrl.startsWith('https://www.google.com/maps/dir/?api=1&origin='), 'Must build valid multi-stop Google Maps route URL');
+  }
+
+  assert.ok(ANGKOR_CODE_OF_CONDUCT.length >= 6, 'Must define official APSARA Code of Conduct rules');
+  const categories = new Set(ANGKOR_PARK_FACILITIES.map((f) => f.category));
+  assert.ok(categories.has('restroom') && categories.has('parking') && categories.has('firstaid_info'), 'Must include restrooms, parking, and first aid/info facilities');
+});
+
 console.log('\nAll ' + passed + ' unit test suites passed successfully!');
 

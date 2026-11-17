@@ -810,7 +810,7 @@ export const NearMeModal: React.FC = () => {
         <div className="px-3.5 pt-2.5 pb-3 bg-[#1E293B] border-b border-slate-700/80 space-y-2.5">
           {/* Row 1: Essential GPS Location Status + Province Selector + Refresh GPS */}
           <div className="flex items-center justify-between gap-2 flex-wrap bg-white px-3 py-2 rounded-2xl border border-slate-200/85 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
-            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 min-w-[170px] flex-1">
               <span className="w-6 h-6 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
                 <LocateFixed className="w-3.5 h-3.5 text-emerald-600" />
               </span>

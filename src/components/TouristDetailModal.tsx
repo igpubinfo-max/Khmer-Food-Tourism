@@ -831,7 +831,7 @@ export const TouristDetailModal: React.FC = () => {
                   </div>
 
                   {/* Nearby Provincial Referral Hospital & Emergency Service */}
-                  <div className="pt-2 border-t border-emerald-200/60 dark:border-slate-700 flex items-center justify-between gap-2 flex-wrap">
+                  <div className="pt-2 border-t border-emerald-200/60 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <p className="font-extrabold text-xs text-rose-700 dark:text-rose-400">
                         🏥 {tr(language, 'មន្ទីរពេទ្យបង្អែក និងសង្គ្រោះបន្ទាន់ក្បែរតំបន់នេះ', 'Nearby Referral Hospital & Emergency', '本省转诊医院与紧急救援')}

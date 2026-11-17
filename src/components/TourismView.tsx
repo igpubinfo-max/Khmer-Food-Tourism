@@ -34,6 +34,7 @@ import {
   GooglePlaceCachedItem,
 } from '../services/googlePlacesService';
 import { NearMeControlBar } from './common/NearMeControlBar';
+import { AngkorParkQuickBar, AngkorVisitGuideModal, type AngkorGuideTab } from './AngkorVisitGuideModal';
 import {
   MAX_NEARBY_RADIUS_METERS,
   PROVINCE_CENTERS,
@@ -65,11 +66,14 @@ export const TourismView: React.FC = () => {
     language,
     selectedProvince,
     setSelectedProvince,
+    setSelectedDestination,
     showToast,
     pushNavigationStep,
     isRestoringHistoryRef,
   } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [angkorGuideOpen, setAngkorGuideOpen] = useState<boolean>(false);
+  const [angkorGuideTab, setAngkorGuideTab] = useState<AngkorGuideTab>('circuits');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [nearMeActive, setNearMeActive] = useState<boolean>(false);
@@ -419,6 +423,8 @@ export const TourismView: React.FC = () => {
   // Filter destinations by category first so province dropdown counts reflect the selected category
   const categoryMatchedDestinations = useMemo(() => {
     return scenicDestinationsOnly.filter((d) => {
+      if (selectedCategory === 'sports_adventure') return d.tourismTheme === 'sports_adventure' || d.id.startsWith('dest-adv-');
+      if (selectedCategory === 'local_souvenirs') return d.tourismTheme === 'local_souvenirs' || d.id.startsWith('dest-souv-');
       if (selectedCategory === 'trending_social') return Boolean(d.isTrendingSocial);
       if (selectedCategory === 'cultural') {
         return d.categorySlug === 'cultural' || d.categorySlug === 'resort' || Boolean(d.isTrendingSocial);
@@ -533,7 +539,11 @@ export const TourismView: React.FC = () => {
 
     const scoped = candidatePool.filter((d) => {
       if (!d || d.categorySlug === 'hotel') return false;
-      if (selectedCategory === 'trending_social') {
+      if (selectedCategory === 'sports_adventure') {
+        if (d.tourismTheme !== 'sports_adventure' && !d.id.startsWith('dest-adv-')) return false;
+      } else if (selectedCategory === 'local_souvenirs') {
+        if (d.tourismTheme !== 'local_souvenirs' && !d.id.startsWith('dest-souv-')) return false;
+      } else if (selectedCategory === 'trending_social') {
         if (!d.isTrendingSocial) return false;
       } else if (selectedCategory === 'cultural') {
         if (d.categorySlug !== 'cultural' && d.categorySlug !== 'resort' && !d.isTrendingSocial) return false;
@@ -846,6 +856,73 @@ export const TourismView: React.FC = () => {
             })}
           </div>
 
+          {/* Special Experience Quick-Filter Pills: Sports & Adventure + Local Brands & Souvenirs */}
+          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/10">
+            <button
+              id="kft-travel-cat-sports-adventure-btn"
+              type="button"
+              onClick={() => {
+                recordTourismStep('tourism-cat:sports_adventure');
+                const nextCat = selectedCategory === 'sports_adventure' ? 'all' : 'sports_adventure';
+                setSelectedCategory(nextCat);
+                scrollToTourismList(true);
+              }}
+              aria-pressed={selectedCategory === 'sports_adventure'}
+              style={
+                selectedCategory === 'sports_adventure'
+                  ? {
+                      background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
+                      boxShadow: '0 4px 14px rgba(245, 158, 11, 0.45)',
+                    }
+                  : {
+                      background: 'rgba(30, 41, 59, 0.85)',
+                    }
+              }
+              className={`min-h-[38px] px-2.5 py-1.5 rounded-xl font-khmer font-extrabold text-[11.5px] sm:text-xs flex items-center justify-center gap-1.5 border transition active:scale-95 cursor-pointer ${
+                selectedCategory === 'sports_adventure'
+                  ? 'text-slate-950 border-amber-200'
+                  : 'text-amber-200 border-amber-400/35 hover:border-amber-400/70'
+              }`}
+            >
+              <span>🏅</span>
+              <span className="truncate">
+                {tr(language, 'កីឡា & ផ្សងព្រេង', 'Sports & Adventure', '运动与户外探险')}
+              </span>
+            </button>
+
+            <button
+              id="kft-travel-cat-local-souvenirs-btn"
+              type="button"
+              onClick={() => {
+                recordTourismStep('tourism-cat:local_souvenirs');
+                const nextCat = selectedCategory === 'local_souvenirs' ? 'all' : 'local_souvenirs';
+                setSelectedCategory(nextCat);
+                scrollToTourismList(true);
+              }}
+              aria-pressed={selectedCategory === 'local_souvenirs'}
+              style={
+                selectedCategory === 'local_souvenirs'
+                  ? {
+                      background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
+                      boxShadow: '0 4px 14px rgba(245, 158, 11, 0.45)',
+                    }
+                  : {
+                      background: 'rgba(30, 41, 59, 0.85)',
+                    }
+              }
+              className={`min-h-[38px] px-2.5 py-1.5 rounded-xl font-khmer font-extrabold text-[11.5px] sm:text-xs flex items-center justify-center gap-1.5 border transition active:scale-95 cursor-pointer ${
+                selectedCategory === 'local_souvenirs'
+                  ? 'text-slate-950 border-amber-200'
+                  : 'text-amber-200 border-amber-400/35 hover:border-amber-400/70'
+              }`}
+            >
+              <span>🛍️</span>
+              <span className="truncate">
+                {tr(language, 'ផលិតផលខ្មែរ & កាដូ', 'Local Brands & Gifts', '本土品牌与伴手礼')}
+              </span>
+            </button>
+          </div>
+
           {/* Compact 25-Province Selector Bar inside the Card */}
           <div className="flex items-center gap-2 pt-1 border-t border-white/10">
             <div className="relative flex-1 min-w-0">
@@ -894,6 +971,15 @@ export const TourismView: React.FC = () => {
               </button>
             )}
           </div>
+
+          {/* Official Angkor Park Guide Quick Bar (4 Temple Circuits, Restrooms/Parking, APSARA Code of Conduct) */}
+          <AngkorParkQuickBar
+            language={language}
+            onOpenTab={(tab) => {
+              setAngkorGuideTab(tab);
+              setAngkorGuideOpen(true);
+            }}
+          />
         </div>
 
         {/* Row 3: Section Title Bar on Dark Slate (#1E293B) */}
@@ -1009,6 +1095,16 @@ export const TourismView: React.FC = () => {
           </div>
         )}
       </div>
+
+      <AngkorVisitGuideModal
+        isOpen={angkorGuideOpen}
+        initialTab={angkorGuideTab}
+        language={language}
+        destinations={destinations}
+        userCoords={userCoords}
+        onClose={() => setAngkorGuideOpen(false)}
+        onSelectDestination={(dest) => setSelectedDestination(dest)}
+      />
     </div>
   );
 };

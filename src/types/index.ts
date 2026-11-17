@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? Math.max(__KFT_BUILD_CODE__, 1629) : 1629;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? Math.max(__KFT_BUILD_CODE__, 1630) : 1630;
 export const APP_RELEASE_DATE = '2026-11-17';
 
 /**
@@ -4803,8 +4803,10 @@ export type DestinationCategorySlug =
 
 export interface TouristDestination {
   id: string;
+  tourismTheme?: 'sports_adventure' | 'local_souvenirs';
   nameKh: string;
   nameEn: string;
+  nameZh?: string;
   categorySlug: DestinationCategorySlug;
   category?: string;
   categoryKh: string;
@@ -4832,7 +4834,13 @@ export interface TouristDestination {
   longitude: number;
   rating: number;
   reviewCount: number;
+  categoryZh?: string;
+  descriptionZh?: string;
+  addressZh?: string;
+  bestTimeToVisitZh?: string;
   highlightsKh: string[];
+  highlightsEn?: string[];
+  highlightsZh?: string[];
   isFeatured?: boolean;
   isTrendingSocial?: boolean; // Viral on TikTok & Facebook
   socialPlatform?: 'tiktok' | 'facebook' | 'all';

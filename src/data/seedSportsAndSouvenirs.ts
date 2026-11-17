@@ -1,0 +1,1474 @@
+import { TouristDestination } from '../types';
+
+export const sportsAndSouvenirsDestinations: TouristDestination[] = [
+  {
+    "id": "dest-adv-1",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "ខ្សែរ៉កព្រៃអង្គរ (Angkor Zipline Eco-Adventure)",
+    "nameEn": "Angkor Zipline Canopy Eco-Adventure",
+    "nameZh": "吴哥丛林高空滑索生态探险",
+    "categorySlug": "nature",
+    "categoryKh": "កីឡា និងការផ្សងព្រេង",
+    "categoryEn": "Sports & Adventure",
+    "categoryZh": "运动与户外探险",
+    "descriptionKh": "បទពិសោធន៍ជិះខ្សែរ៉កលើចុងឈើខ្ពស់ៗក្នុងព្រៃធម្មជាតិនៃឧទ្យានអង្គរ ខេត្តសៀមរាប អមដោយស្ពានយោលលើអាកាស និងការណែនាំអំពីប្រព័ន្ធអេកូឡូស៊ីព្រៃឈើដោយគ្រូបង្ហាត់ជំនាញសុវត្ថិភាពអន្តរជាតិ។",
+    "descriptionEn": "Soar across ancient rainforest canopies on suspended sky bridges and high-wire ziplines inside the Angkor nature reserve with certified safety rangers.",
+    "descriptionZh": "在专业安全教练带领下，飞越暹粒原始森林树冠高空滑索与空中吊桥，体验刺激的生态探险之旅。",
+    "photoUrl": "/destinations/dest-15.jpg",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "addressKh": "ផ្លូវទៅប្រាសាទតាកែវ ភូមិក្រវ៉ាន់ សង្កាត់នគរធំ ក្រុងសៀមរាប",
+    "addressEn": "Near Ta Keo Temple Road, Sangkat Nokor Thom, Siem Reap",
+    "addressZh": "暹粒市吴哥通分区茶胶寺路生态林区",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៧:៣០ - ១១:៣០",
+    "bestTimeToVisitEn": "Morning 07:30 AM - 11:30 AM",
+    "bestTimeToVisitZh": "上午 07:30 - 11:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Angkor+Zipline+Siem+Reap+Cambodia",
+    "latitude": 13.4468,
+    "longitude": 103.8842,
+    "rating": 4.9,
+    "reviewCount": 640,
+    "highlightsKh": [
+      "ជិះខ្សែរ៉កលើចុងឈើ",
+      "ដើរលើស្ពានយោលអាកាស",
+      "ទស្សនាសត្វទោចព្រៃធម្មជាតិ"
+    ],
+    "highlightsEn": [
+      "Tree-top canopy ziplines",
+      "Suspended sky bridges",
+      "Wildlife & eco-ranger tour"
+    ],
+    "highlightsZh": [
+      "树冠高空滑索",
+      "森林空中吊桥",
+      "野生长臂猿生态导览"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-15.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-2",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "ជិះទូកកាយ៉ាក់ព្រៃកោងកាងព្រែកកំពត (Green Cathedral Kayaking)",
+    "nameEn": "Kampot Green Cathedral River Kayaking & SUP",
+    "nameZh": "贡布绿荫水道皮划艇与桨板探险",
+    "categorySlug": "nature",
+    "categoryKh": "កីឡាលើទឹក និងធម្មជាតិ",
+    "categoryEn": "Water Sports & Nature",
+    "categoryZh": "水上运动与生态",
+    "descriptionKh": "ផ្លូវជិះទូកកាយ៉ាក់ និងក្ដារឈរអុំ (SUP) ដ៏ល្បីល្បាញតាមដៃព្រែកកំពត ដែលមានដើមចាក និងព្រៃកោងកាងដុះប្រក់ពីលើដូចដំបូលធម្មជាតិពណ៌បៃតងត្រជាក់ភ្នែក គយគន់ទេសភាពជួរភ្នំបូកគោ។",
+    "descriptionEn": "Paddle kayaks or stand-up paddleboards through the tranquil nipa-palm waterways of the Kampot River loop with panoramic views of Bokor Mountain.",
+    "descriptionZh": "沿着贡布河水椰树环绕的翡翠水道划皮划艇或桨板，远眺波哥山脉迷人风光。",
+    "photoUrl": "/destinations/dest-22.jpg",
+    "provinceKh": "ខេត្តកំពត",
+    "provinceEn": "Kampot",
+    "addressKh": "ភូមិម៉ាក់ប្រាង្គ ស្រុកទឹកឈូ ខេត្តកំពត",
+    "addressEn": "Makprang River Loop, Teuk Chhou District, Kampot",
+    "addressZh": "贡布省德楚县贡布河绿荫水道",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ និងរសៀលម៉ោង ១៥:៣០",
+    "bestTimeToVisitEn": "Morning 08:00 AM & Sunset 03:30 PM",
+    "bestTimeToVisitZh": "上午 08:00 及傍晚 15:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Green+Cathedral+Kayaking+Kampot+Cambodia",
+    "latitude": 10.6485,
+    "longitude": 104.1642,
+    "rating": 4.9,
+    "reviewCount": 420,
+    "highlightsKh": [
+      "ជិះទូកកាយ៉ាក់តាមព្រែកដើមចាក",
+      "ជិះក្ដារឈរអុំ SUP ពេលថ្ងៃលិច",
+      "គយគន់ជួរភ្នំបូកគោ"
+    ],
+    "highlightsEn": [
+      "Nipa palm tunnel kayaking",
+      "Sunset stand-up paddleboarding",
+      "Bokor mountain river views"
+    ],
+    "highlightsZh": [
+      "水椰林隧道皮划艇",
+      "日落立式桨板体验",
+      "波哥山河畔美景"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-22.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-3",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "មជ្ឈមណ្ឌលមុជទឹកមើលផ្កាថ្មកោះរ៉ុង (Koh Rong Scuba Diving & Snorkeling)",
+    "nameEn": "Koh Rong Marine Scuba Diving & Coral Reef Center",
+    "nameZh": "高龙岛深潜与珊瑚礁浮潜中心",
+    "categorySlug": "beach",
+    "categoryKh": "កីឡាសមុទ្រ និងមុជទឹក",
+    "categoryEn": "Marine Sports & Diving",
+    "categoryZh": "海洋运动与潜水",
+    "descriptionKh": "សកម្មភាពមុជទឹកសមុទ្រ (Scuba Diving & Snorkeling) ទស្សនាផ្កាថ្មធម្មជាតិ ហ្វូងត្រីសមុទ្រចម្រុះពណ៌ និងបាតសមុទ្រភ្លឺផ្លេកពេលយប់ (Bioluminescent Plankton) នៅជុំវិញកោះរ៉ុង និងកោះរ៉ុងសន្លឹម។",
+    "descriptionEn": "Explore vibrant coral reefs, tropical marine life, and glowing night plankton around Koh Rong and Koh Rong Sanloem with certified PADI dive instructors.",
+    "descriptionZh": "在专业潜水教练陪同下探索高龙岛与高龙撒冷岛色彩斑斓的珊瑚礁、热带鱼群及夜间蓝眼泪奇观。",
+    "photoUrl": "/destinations/dest-18.jpg",
+    "provinceKh": "ខេត្តព្រះសីហនុ",
+    "provinceEn": "Preah Sihanouk",
+    "addressKh": "ឆ្នេរកោះតូច សង្កាត់កោះរ៉ុង ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ",
+    "addressEn": "Koh Touch Beach, Koh Rong Island, Preah Sihanouk",
+    "addressZh": "西哈努克省高龙岛海滩潜水中心",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ខែវិច្ឆិកា ដល់ ខែឧសភា (ទឹកសមុទ្រថ្លាបំផុត)",
+    "bestTimeToVisitEn": "November to May (clearest water visibility)",
+    "bestTimeToVisitZh": "11月至次年5月（海水能见度最佳）",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Koh+Rong+Dive+Center+Preah+Sihanouk+Cambodia",
+    "latitude": 10.6624,
+    "longitude": 103.3048,
+    "rating": 4.9,
+    "reviewCount": 510,
+    "highlightsKh": [
+      "មុជទឹកមើលផ្កាថ្មបាតសមុទ្រ",
+      "ហែលទឹកមើលប្លង់តុងភ្លឺពេលយប់",
+      "ជិះទូកស្ទូចត្រីសមុទ្រ"
+    ],
+    "highlightsEn": [
+      "PADI coral reef scuba diving",
+      "Night glowing plankton swim",
+      "Island boat snorkeling trips"
+    ],
+    "highlightsZh": [
+      "珊瑚礁深潜体验",
+      "夜间荧光海浮潜",
+      "海岛乘船出海游"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-18.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-4",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "ជិះម៉ូតូកង់បួនគយគន់ថ្ងៃលិចវាលស្រែសៀមរាប (Siem Reap Quad Bike ATV Trail)",
+    "nameEn": "Siem Reap Countryside Quad Bike (ATV) Sunset Trail",
+    "nameZh": "暹粒田园四轮越野车日落探险",
+    "categorySlug": "nature",
+    "categoryKh": "កីឡា និងការផ្សងព្រេង",
+    "categoryEn": "Sports & Adventure",
+    "categoryZh": "运动与户外探险",
+    "descriptionKh": "ដំណើរកម្សាន្តបើកម៉ូតូកង់បួន (ATV) ឆ្លងកាត់ផ្លូវដីក្រហម វាលស្រែបៃតង ភូមិអ្នកស្រុក និងប្រាសាទបុរាណស្ងប់ស្ងាត់នៅជាយក្រុងសៀមរាប រហូតដល់ពេលថ្ងៃលិចដ៏ស្រស់ត្រកាល។",
+    "descriptionEn": "Ride all-terrain quad bikes along scenic red-earth trails, emerald rice paddies, traditional stilt villages, and hidden rural temples at sunset.",
+    "descriptionZh": "驾驶四轮全地形越野车穿越暹粒郊外红土小径、翠绿稻田与古老村落，欣赏壮丽的田园日落。",
+    "photoUrl": "/destinations/dest-25.jpg",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "addressKh": "ភូមិស្វាយដង្គំ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
+    "addressEn": "Sangkat Svay Dangkum Countryside Trail, Siem Reap",
+    "addressZh": "暹粒市斯вай当坤分区田园越野基地",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "រសៀល ម៉ោង ១៦:០០ - ១៨:៣០ (ពេលថ្ងៃលិច)",
+    "bestTimeToVisitEn": "Afternoon Sunset 04:00 PM - 06:30 PM",
+    "bestTimeToVisitZh": "下午日落时段 16:00 - 18:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Quad+Adventure+Cambodia+Siem+Reap",
+    "latitude": 13.3489,
+    "longitude": 103.8415,
+    "rating": 4.8,
+    "reviewCount": 480,
+    "highlightsKh": [
+      "បើកម៉ូតូកង់បួនកាត់វាលស្រែ",
+      "ថតរូបថ្ងៃលិចលើវាលស្រែខ្មែរ",
+      "ទស្សនាភូមិជនបទពិតៗ"
+    ],
+    "highlightsEn": [
+      "Off-road rice paddy ATV trails",
+      "Golden hour countryside sunset",
+      "Authentic village cultural stops"
+    ],
+    "highlightsZh": [
+      "稻田越野车骑行",
+      "黄金日落摄影体验",
+      "探访原生态高棉村落"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-25.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-5",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "បោះតង់ និងដើរព្រៃភ្នំខ្នងផ្សារ (Khnong Phsar Mountain Trekking & Camping)",
+    "nameEn": "Phnom Khnong Phsar Cloud-Peak Trekking & Camping",
+    "nameZh": "磅士卑背市山徒步登山与云海露营",
+    "categorySlug": "mountain",
+    "categoryKh": "ដើរព្រៃ និងបោះតង់លើភ្នំ",
+    "categoryEn": "Mountain Trekking & Camping",
+    "categoryZh": "高山徒步与露营",
+    "descriptionKh": "គោលដៅដើរព្រៃឡើងភ្នំ និងបោះតង់ដ៏ល្បីបំផុតនៅកម្ពុជា ស្ថិតនៅចំណុចប្រសព្វខេត្តកំពង់ស្ពឺ កោះកុង និងពោធិ៍សាត់ ដែលមានវាលស្មៅបៃតងល្វឹងល្វើយ ព្រៃស្រល់ និងសមុទ្រពពកពេលព្រឹកព្រលឹម។",
+    "descriptionEn": "Cambodia’s premier mountain trekking and cloud-camping peak in Thma Bang / Oral range, featuring sweeping alpine meadows, pine ridges, and sunrise cloud seas.",
+    "descriptionZh": "柬埔寨最著名的徒步登山与云海露营圣地，拥有辽阔的高山草甸、松林山脊与日出云海奇观。",
+    "photoUrl": "/destinations/dest-28.jpg",
+    "provinceKh": "ខេត្តកំពង់ស្ពឺ",
+    "provinceEn": "Kampong Speu",
+    "addressKh": "សហគមន៍អេកូទេសចរណ៍តាសាល ស្រុកឱរ៉ាល់ ខេត្តកំពង់ស្ពឺ",
+    "addressEn": "Ta Sal Eco-Community, Oral District, Kampong Speu",
+    "addressZh": "磅士卑省奥拉县塔萨生态登山社区",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ខែតុលា ដល់ ខែកុម្ភៈ (រដូវធ្លាក់ខ្យល់ត្រជាក់ និងពពកច្រើន)",
+    "bestTimeToVisitEn": "October to February (cool mountain breeze & cloud sea)",
+    "bestTimeToVisitZh": "10月至次年2月（凉季云海最壮观）",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Khnong+Phsar+Mountain+Kampong+Speu+Cambodia",
+    "latitude": 11.7845,
+    "longitude": 103.9812,
+    "rating": 4.9,
+    "reviewCount": 730,
+    "highlightsKh": [
+      "ដើរព្រៃឡើងកំពូលភ្នំខ្នងផ្សារ",
+      "បោះតង់មើលសមុទ្រពពកពេលព្រឹក",
+      "គយគន់ថ្ងៃរះ និងថ្ងៃលិចលើខ្នងភ្នំ"
+    ],
+    "highlightsEn": [
+      "Guided mountain ridge trekking",
+      "Sunrise cloud-sea camping",
+      "360-degree Cardamom range views"
+    ],
+    "highlightsZh": [
+      "高山草甸徒步攀登",
+      "日出云海帐篷露营",
+      "360度豆蔻山脉全景"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-28.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-6",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "មជ្ឈមណ្ឌលហ្វឹកហាត់ និងទស្សនាប្រដាល់គុនខ្មែរ (Phnom Penh Kun Khmer Arena & Camp)",
+    "nameEn": "Phnom Penh Kun Khmer Martial Arts Arena & Training Experience",
+    "nameZh": "金边高棉古泰拳（Kun Khmer）擂台与体验营",
+    "categorySlug": "cultural",
+    "categoryKh": "កីឡាគុនខ្មែរ និងវប្បធម៌",
+    "categoryEn": "Kun Khmer & Martial Arts",
+    "categoryZh": "高棉武术与体育旅游",
+    "descriptionKh": "ទស្សនាការប្រកួតប្រដាល់គុនខ្មែរផ្ទាល់នៅសង្វៀនទូរទស្សន៍រៀងរាល់ចុងសប្ដាហ៍ និងសាកល្បងហាត់ក្បាច់គុនខ្មែរបុរាណជាមួយគ្រូបង្វឹកជើងឯក សម្រាប់ភ្ញៀវទេសចរដែលស្រឡាញ់កីឡាប្រពៃណីជាតិ។",
+    "descriptionEn": "Experience live weekend Kun Khmer championship bouts and introductory traditional martial arts training sessions with veteran Cambodian fighters.",
+    "descriptionZh": "现场观看周末高棉古拳（Kun Khmer）擂台争霸赛，并可跟随冠军教练体验正宗高棉传统武术训练。",
+    "photoUrl": "/destinations/dest-3.jpg",
+    "provinceKh": "រាជធានីភ្នំពេញ",
+    "provinceEn": "Phnom Penh",
+    "addressKh": "មហាវិថីព្រះមុនីវង្ស សង្កាត់បឹងកេងកង ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
+    "addressEn": "Preah Monivong Blvd, Boeung Keng Kang, Phnom Penh",
+    "addressZh": "金边市万景岗区莫尼旺大道高棉武术馆",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ថ្ងៃសុក្រ សៅរ៍ និងអាទិត្យ (ម៉ោង ១៤:០០ - ២១:០០)",
+    "bestTimeToVisitEn": "Friday to Sunday (02:00 PM - 09:00 PM)",
+    "bestTimeToVisitZh": "周五至周日 14:00 - 21:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kun+Khmer+Boxing+Club+Phnom+Penh+Cambodia",
+    "latitude": 11.5492,
+    "longitude": 104.9238,
+    "rating": 4.9,
+    "reviewCount": 390,
+    "highlightsKh": [
+      "ទស្សនាប្រដាល់គុនខ្មែរផ្ទាល់",
+      "ហាត់ក្បាច់គុនខ្មែរជាមួយគ្រូជំនាញ",
+      "ស្វែងយល់ពីភ្លេងប្រដាល់បុរាណខ្មែរ"
+    ],
+    "highlightsEn": [
+      "Live weekend Kun Khmer matches",
+      "Beginner-friendly boxing classes",
+      "Traditional Sralai-Skor ring music"
+    ],
+    "highlightsZh": [
+      "周末现场擂台赛观摩",
+      "零基础高棉拳体验课",
+      "传统高棉战鼓音乐文化"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-3.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-7",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "ទីលានវាយកូនហ្គោល វឌ្ឍនៈ ហ្គោល រីសត (Vattanac Golf Resort Phnom Penh)",
+    "nameEn": "Vattanac Golf Resort Championship Course",
+    "nameZh": "金边安达高尔夫度假村锦标赛球场",
+    "categorySlug": "cultural",
+    "categoryKh": "កីឡាវាយកូនហ្គោល និងកម្សាន្ត",
+    "categoryEn": "Golf & Sports Tourism",
+    "categoryZh": "高尔夫与休闲运动",
+    "descriptionKh": "ទីលានវាយកូនហ្គោលលំដាប់ពិភពលោក ៣៦ ឡូត៍ រចនាដោយ Sir Nick Faldo ដែលមានរូបសំណាកប្រាសាទបុរាណខ្មែរដូចជា អង្គរវត្ត បាយ័ន និងព្រះវិហារ អមដោយទីលានវាយកូនហ្គោលពេលយប់ (Night Golf)។",
+    "descriptionEn": "Award-winning 36-hole championship golf course designed by Sir Nick Faldo, featuring scale replicas of Angkor Wat, Bayon, and Preah Vihear plus floodlit night golf.",
+    "descriptionZh": "由名将尼克·佛度爵士设计的36洞国际锦标赛级高尔夫球场，融合微缩吴哥古迹景观并支持夜间灯光挥杆。",
+    "photoUrl": "/destinations/dest-6.jpg",
+    "provinceKh": "រាជធានីភ្នំពេញ",
+    "provinceEn": "Phnom Penh",
+    "addressKh": "មហាវិថីឈ្នះឈ្នះ សង្កាត់ព្រែកឯង ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ",
+    "addressEn": "Win-Win Blvd, Sangkat Prek Eng, Chbar Ampov, Phnom Penh",
+    "addressZh": "金边市铁桥头区双赢大道安达高尔夫球场",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៦:០០ និងពេលល្ងាច Night Golf ម៉ោង ១៧:០០",
+    "bestTimeToVisitEn": "Morning 06:00 AM & Floodlit Night Golf 05:00 PM",
+    "bestTimeToVisitZh": "清晨 06:00 及夜间灯光球场 17:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Vattanac+Golf+Resort+Phnom+Penh+Cambodia",
+    "latitude": 11.5118,
+    "longitude": 104.9964,
+    "rating": 4.9,
+    "reviewCount": 460,
+    "highlightsKh": [
+      "ទីលានវាយកូនហ្គោលលំដាប់អន្តរជាតិ",
+      "វាយកូនហ្គោលពេលយប់ (Night Golf)",
+      "ទេសភាពប្រាសាទខ្មែរជុំវិញទីលាន"
+    ],
+    "highlightsEn": [
+      "Sir Nick Faldo 36-hole design",
+      "Floodlit night golf experience",
+      "Khmer heritage monument fairways"
+    ],
+    "highlightsZh": [
+      "36洞国际标准球道",
+      "特色夜间灯光高尔夫",
+      "高棉古迹微缩景观球道"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-6.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-8",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "សួនទឹក ហ្គាដិន ស៊ីធី (Garden City Water Park Phnom Penh)",
+    "nameEn": "Garden City Water Park & Wave Pool Adventure",
+    "nameZh": "金边花园城市大型水上乐园",
+    "categorySlug": "cultural",
+    "categoryKh": "សួនទឹក និងកីឡាគ្រួសារ",
+    "categoryEn": "Water Park & Family Sports",
+    "categoryZh": "水上乐园与亲子运动",
+    "descriptionKh": "សួនទឹកកម្សាន្តដ៏ធំទំនើបបំផុតនៅកម្ពុជា ដែលមានអាងទឹករលកសមុទ្រសិប្បនិម្មិត ស្លាយទឹកខ្ពស់ៗ កន្លែងជិះក្ដាររលក (FlowRider Surfing) និងអាងហែលទឹកសម្រាប់គ្រួសារ។",
+    "descriptionEn": "Cambodia’s largest modern water park featuring giant water slides, a massive wave pool, FlowRider surf simulator, and lazy river rapids.",
+    "descriptionZh": "柬埔寨规模最大的现代化水上主题乐园，拥有巨型造浪池、高空滑水道、人工冲浪池及漂流河。",
+    "photoUrl": "/destinations/dest-9.jpg",
+    "provinceKh": "រាជធានីភ្នំពេញ",
+    "provinceEn": "Phnom Penh",
+    "addressKh": "មហាវិថីឈ្នះឈ្នះ សង្កាត់ព្រែកតាសេក ខណ្ឌជ្រោយចង្វារ រាជធានីភ្នំពេញ",
+    "addressEn": "Win-Win Blvd, Sangkat Prek Tasek, Chroy Changvar, Phnom Penh",
+    "addressZh": "金边市水净华区双赢大道花园城市水上乐园",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ១០:០០ ព្រឹក - ១៨:០០ ល្ងាច",
+    "bestTimeToVisitEn": "10:00 AM - 06:00 PM",
+    "bestTimeToVisitZh": "10:00 - 18:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Garden+City+Water+Park+Phnom+Penh+Cambodia",
+    "latitude": 11.6782,
+    "longitude": 104.8825,
+    "rating": 4.8,
+    "reviewCount": 820,
+    "highlightsKh": [
+      "ជិះក្ដាររលក FlowRider",
+      "អាងទឹករលកសមុទ្រយក្ស",
+      "ស្លាយទឹកខ្ពស់ៗសម្រាប់យុវវ័យ និងគ្រួសារ"
+    ],
+    "highlightsEn": [
+      "FlowRider surf simulator",
+      "Giant artificial wave pool",
+      "High-speed family water slides"
+    ],
+    "highlightsZh": [
+      "人工冲浪滑板池",
+      "巨型海浪泳池",
+      "高空极速滑水道"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-9.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-9",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "កសិដ្ឋានជិះសេះកម្សាន្តសៀមរាប (The Happy Ranch Horse Farm)",
+    "nameEn": "The Happy Ranch Countryside Horseback Riding Trail",
+    "nameZh": "暹粒快乐牧场田园马术骑行",
+    "categorySlug": "nature",
+    "categoryKh": "កីឡាជិះសេះ និងធម្មជាតិ",
+    "categoryEn": "Equestrian & Countryside Trail",
+    "categoryZh": "马术骑行与田园观光",
+    "descriptionKh": "កសិដ្ឋានបង្ហាត់ជិះសេះ និងនាំភ្ញៀវទេសចរជិះសេះដើរលេងកាត់វាលស្រែ ភូមិជនបទ និងប្រាសាទបុរាណស្ងប់ស្ងាត់ក្នុងខេត្តសៀមរាប ស័ក្តិសមសម្រាប់ទាំងអ្នកទើបចាប់ផ្ដើម និងអ្នកជំនាញ។",
+    "descriptionEn": "Guided horseback riding trails through peaceful rice fields, lotus ponds, and rural villages outside Siem Reap for both beginners and experienced riders.",
+    "descriptionZh": "提供专业马术指导与田园骑马之旅，骑马漫步于暹粒乡间稻田、莲花池与古朴村落之间。",
+    "photoUrl": "/destinations/dest-14.jpg",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "addressKh": "ភូមិស្វាយដង្គំ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
+    "addressEn": "Svay Dangkum Village, Siem Reap City, Siem Reap",
+    "addressZh": "暹粒市斯вай当坤村快乐马场",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៧:៣០ និងរសៀលម៉ោង ១៥:៣០",
+    "bestTimeToVisitEn": "Morning 07:30 AM & Late Afternoon 03:30 PM",
+    "bestTimeToVisitZh": "上午 07:30 及下午 15:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=The+Happy+Ranch+Horse+Farm+Siem+Reap+Cambodia",
+    "latitude": 13.3562,
+    "longitude": 103.8458,
+    "rating": 4.8,
+    "reviewCount": 340,
+    "highlightsKh": [
+      "ជិះសេះកាត់វាលស្រែ និងភូមិខ្មែរ",
+      "ថ្នាក់បង្ហាត់ជិះសេះសម្រាប់កុមារ និងមនុស្សធំ",
+      "ថតរូបពេលថ្ងៃលិចលើខ្នងសេះ"
+    ],
+    "highlightsEn": [
+      "Countryside horseback trail rides",
+      "Beginner & youth riding lessons",
+      "Sunset photography in rice fields"
+    ],
+    "highlightsZh": [
+      "乡间稻田骑马漫游",
+      "成人与儿童马术体验",
+      "田园日落骑行摄影"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-14.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-10",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "ផ្លូវជិះកង់ទេសចរណ៍ព្រៃអង្គរ (Angkor Heritage Cycling Trail)",
+    "nameEn": "Angkor Forest & Temple Heritage Cycling Trail",
+    "nameZh": "吴哥古迹森林自行车骑行绿道",
+    "categorySlug": "nature",
+    "categoryKh": "កីឡាជិះកង់ និងបេតិកភណ្ឌ",
+    "categoryEn": "Cycling & Eco-Heritage",
+    "categoryZh": "单车骑行与生态古迹",
+    "descriptionKh": "ផ្លូវជិះកង់មហាគ្រួសារ និងអ្នកស្រឡាញ់កីឡាជិះកង់ ឆ្លងកាត់ម្លប់ឈើត្រឈឹងត្រឈៃ ប្រឡាយទឹកបុរាណ និងកំពែងក្រុងអង្គរធំ ដែលជាផ្លូវជិះកង់ធម្មជាតិដ៏ស្អាតបំផុតនៅអាស៊ីអាគ្នេយ៍។",
+    "descriptionEn": "Dedicated shaded cycling network winding through ancient Angkorian forest canopies, moat embankments, and hidden temple ruins away from motor traffic.",
+    "descriptionZh": "专为骑行爱好者打造的吴哥森林自行车绿道，穿行于千年古树林荫、古护城河畔与静谧寺庙遗址之间。",
+    "photoUrl": "/destinations/dest-1.jpg",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "addressKh": "ផ្លូវជិះកង់ឧទ្យានអង្គរ សង្កាត់គោកចក ក្រុងសៀមរាប",
+    "addressEn": "Angkor Archaeological Park Cycling Path, Kok Chak, Siem Reap",
+    "addressZh": "暹粒市吴哥考古公园森林骑行专用道",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៦:០០ - ១០:៣០",
+    "bestTimeToVisitEn": "Early Morning 06:00 AM - 10:30 AM",
+    "bestTimeToVisitZh": "清晨 06:00 - 10:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Angkor+Cycling+Trail+Siem+Reap+Cambodia",
+    "latitude": 13.4312,
+    "longitude": 103.8594,
+    "rating": 4.9,
+    "reviewCount": 590,
+    "highlightsKh": [
+      "ផ្លូវជិះកង់ក្រោមម្លប់ឈើធំៗ",
+      "ជិះកង់លើខ្នងទំនប់កំពែងអង្គរធំ",
+      "ខ្យល់អាកាសបរិសុទ្ធពេលព្រឹក"
+    ],
+    "highlightsEn": [
+      "Shaded jungle bike lanes",
+      "Angkor Thom moat rampart ride",
+      "Car-free eco-trail experience"
+    ],
+    "highlightsZh": [
+      "千年古树林荫骑行道",
+      "大吴哥城护城河畔骑行",
+      "无机动车绿色生态步道"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-1.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-11",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "ជិះទូកកាយ៉ាក់ និងដើរព្រៃកោងកាងពាមក្រសោប (Peam Krasop Mangrove Kayaking)",
+    "nameEn": "Peam Krasop Mangrove Forest Kayaking & Suspension Bridge",
+    "nameZh": "国公省边格索红树林皮划艇与吊桥探险",
+    "categorySlug": "nature",
+    "categoryKh": "កីឡាលើទឹក និងអេកូទេសចរណ៍",
+    "categoryEn": "Kayaking & Eco-Adventure",
+    "categoryZh": "皮划艇与红树林探险",
+    "descriptionKh": "ជិះទូកកាយ៉ាក់កាត់ព្រៃកោងកាងធម្មជាតិដ៏ធំល្វឹងល្វើយ និងដើរឆ្លងស្ពានយោលកាត់ដៃសមុទ្រនៅសហគមន៍អេកូទេសចរណ៍ពាមក្រសោប ខេត្តកោះកុង។",
+    "descriptionEn": "Kayak through winding coastal mangrove tunnels and cross scenic elevated walkways and suspension bridges in Koh Kong’s protected sanctuary.",
+    "descriptionZh": "划皮划艇穿梭于国公省原始海岸红树林水道，漫步高空栈道与跨海吊桥，感受纯净自然生态。",
+    "photoUrl": "/destinations/dest-31.jpg",
+    "provinceKh": "ខេត្តកោះកុង",
+    "provinceEn": "Koh Kong",
+    "addressKh": "ឃុំពាមក្រសោប ស្រុកមណ្ឌលសីមា ខេត្តកោះកុង",
+    "addressEn": "Peam Krasop Commune, Mondol Seima District, Koh Kong",
+    "addressZh": "国公省蒙多塞马县边格索红树林保护区",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៧:៣០ ព្រឹក - ១៧:០០ ល្ងាច",
+    "bestTimeToVisitEn": "07:30 AM - 05:00 PM",
+    "bestTimeToVisitZh": "07:30 - 17:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Peam+Krasop+Wildlife+Sanctuary+Koh+Kong+Cambodia",
+    "latitude": 11.5514,
+    "longitude": 103.0156,
+    "rating": 4.8,
+    "reviewCount": 370,
+    "highlightsKh": [
+      "ជិះទូកកាយ៉ាក់ក្នុងព្រៃកោងកាង",
+      "ដើរឆ្លងស្ពានយោល និងប៉មមើលទេសភាព",
+      "ជិះទូកមើលដៃសមុទ្រកោះកុង"
+    ],
+    "highlightsEn": [
+      "Coastal mangrove kayaking",
+      "Canopy observation tower & bridge",
+      "Estuary boat eco-excursions"
+    ],
+    "highlightsZh": [
+      "红树林水道皮划艇",
+      "观景高塔与跨水吊桥",
+      "河口生态游船体验"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-31.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-12",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "ដើរព្រៃ និងហែលទឹកបឹងយក្សឡោម (Yeak Laom Crater Lake Swimming & Jungle Hike)",
+    "nameEn": "Yeak Laom Volcanic Lake Swimming & Forest Trail",
+    "nameZh": "腊塔纳基里野格洛火山湖畅游与环湖徒步",
+    "categorySlug": "nature",
+    "categoryKh": "កីឡាធម្មជាតិ និងដើរព្រៃ",
+    "categoryEn": "Outdoor Swimming & Hiking",
+    "categoryZh": "森林徒步与火山湖游泳",
+    "descriptionKh": "ហែលទឹកលេងក្នុងបឹងភ្នំភ្លើងបុរាណដែលមានទឹកថ្លាឈ្វេងដូចកញ្ចក់ និងដើរហាត់ប្រាណតាមផ្លូវព្រៃជុំវិញបឹងប្រវែង ៣ គីឡូម៉ែត្រ ក្នុងខេត្តរតនគិរី។",
+    "descriptionEn": "Swim in crystal-clear emerald waters of a 700,000-year-old volcanic crater lake and hike the 3 km shaded rainforest perimeter trail in Ratanakiri.",
+    "descriptionZh": "在清澈见底的七十万年古火山口湖中畅游，并沿3公里原始雨林环湖步道徒步吸氧。",
+    "photoUrl": "/destinations/dest-36.jpg",
+    "provinceKh": "ខេត្តរតនគិរី",
+    "provinceEn": "Ratanakiri",
+    "addressKh": "សង្កាត់យក្សឡោម ក្រុងបានលុង ខេត្តរតនគិរី",
+    "addressEn": "Sangkat Yeak Laom, Banlung City, Ratanakiri",
+    "addressZh": "腊塔纳基里省邦隆市野格洛火山湖保护区",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៨:០០ ព្រឹក - ១៧:០០ ល្ងាច",
+    "bestTimeToVisitEn": "08:00 AM - 05:00 PM",
+    "bestTimeToVisitZh": "08:00 - 17:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Yeak+Laom+Lake+Banlung+Ratanakiri+Cambodia",
+    "latitude": 13.7294,
+    "longitude": 107.0158,
+    "rating": 4.9,
+    "reviewCount": 490,
+    "highlightsKh": [
+      "ហែលទឹកបឹងភ្នំភ្លើងថ្លាឈ្វេង",
+      "ដើរព្រៃតាមផ្លូវជុំវិញបឹង",
+      "ស្វែងយល់ពីវប្បធម៌ជនជាតិដើមភាគតិចទំពួន"
+    ],
+    "highlightsEn": [
+      "Crystal volcanic crater swimming",
+      "3 km lakeside jungle hike",
+      "Indigenous Tampuan craft center"
+    ],
+    "highlightsZh": [
+      "清澈火山湖天然泳池",
+      "3公里环湖雨林徒步",
+      "探访本土少数民族文化"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-36.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-13",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "ដើរព្រៃជ្រលងភ្នំ និងទឹកធ្លាក់ប៊ូស្រា (Bousra Waterfall & Mondulkiri Valley Trek)",
+    "nameEn": "Mondulkiri Rolling Hills & Bousra Waterfall Trekking",
+    "nameZh": "蒙多基里高山草甸与布斯拉瀑布徒步探险",
+    "categorySlug": "mountain",
+    "categoryKh": "ដើរព្រៃភ្នំ និងទឹកធ្លាក់",
+    "categoryEn": "Highland Trekking & Falls",
+    "categoryZh": "高原徒步与瀑布探险",
+    "descriptionKh": "ដំណើរផ្សងព្រេងដើរឆ្លងកាត់ជ្រលងភ្នំវាលស្មៅ ព្រៃធម្មជាតិ និងទឹកធ្លាក់ប៊ូស្រា ៣ ដំណាក់ ព្រមទាំងការទស្សនាដែនជម្រកសត្វដំរីធម្មជាតិនៅខេត្តមណ្ឌលគិរី។",
+    "descriptionEn": "Trek across windswept grassy hills, deep jungle valleys, ethical elephant sanctuaries, and the roaring tiers of Bousra Waterfall in Mondulkiri.",
+    "descriptionZh": "徒步穿越蒙多基里连绵起伏的高山草甸、原始森林谷地、大象生态保护区与壮观的布斯拉三叠瀑布。",
+    "photoUrl": "/destinations/dest-34.jpg",
+    "provinceKh": "ខេត្តមណ្ឌលគិរី",
+    "provinceEn": "Mondulkiri",
+    "addressKh": "ឃុំពេជ្រាដា ស្រុកពេជ្រាដា ខេត្តមណ្ឌលគិរី",
+    "addressEn": "Pech Chreada District, Mondulkiri",
+    "addressZh": "蒙多基里省佩奇达县高原生态徒步区",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៧:៣០ ព្រឹក - ១៦:៣០ រសៀល",
+    "bestTimeToVisitEn": "07:30 AM - 04:30 PM",
+    "bestTimeToVisitZh": "07:30 - 16:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bousra+Waterfall+Mondulkiri+Cambodia",
+    "latitude": 12.5678,
+    "longitude": 107.4182,
+    "rating": 4.9,
+    "reviewCount": 530,
+    "highlightsKh": [
+      "ដើរព្រៃមើលសត្វដំរីក្នុងដែនជម្រកធម្មជាតិ",
+      "ទស្សនាទឹកធ្លាក់ប៊ូស្រាដ៏អស្ចារ្យ",
+      "បោះតង់លើភ្នំវាលស្មៅសមុទ្រឈើ"
+    ],
+    "highlightsEn": [
+      "Ethical valley elephant walks",
+      "Multi-tier Bousra waterfall trails",
+      "Highland pine & grassland camping"
+    ],
+    "highlightsZh": [
+      "森林谷地大象生态漫步",
+      "布斯拉多层瀑布徒步",
+      "高山草甸星空露营"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-34.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-14",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "ជិះទូកមើលផ្សោតទន្លេមេគង្គ និងជិះកង់កោះទ្រង់ (Kratie Dolphin Kayaking & Koh Trong Cycling)",
+    "nameEn": "Kratie Mekong Dolphin Kayaking & Koh Trong Island Cycling",
+    "nameZh": "桔井湄公河伊洛瓦底江豚皮划艇与笼岛骑行",
+    "categorySlug": "nature",
+    "categoryKh": "ជិះទូកកាយ៉ាក់ និងជិះកង់លើកោះ",
+    "categoryEn": "River Kayaking & Island Cycling",
+    "categoryZh": "河道皮划艇与生态岛骑行",
+    "descriptionKh": "ជិះទូកកាយ៉ាក់ដោយស្ងប់ស្ងាត់តាមដងទន្លេមេគង្គដើម្បីទស្សនាផ្សោតទឹកសាបកម្រនៅអន្លង់កាំពី និងជិះកង់ជុំវិញកោះទ្រង់ ៩ គីឡូម៉ែត្រ ទស្សនាចម្ការក្រូចថ្លុងធម្មជាតិ។",
+    "descriptionEn": "Paddle river kayaks across flooded Mekong forests to spot rare Irrawaddy dolphins at Kampi and cycle the 9 km car-free loop around Koh Trong pomelo island.",
+    "descriptionZh": "在湄公河甘比水域划皮划艇静观珍稀伊洛瓦底江豚，并乘渡轮登上笼岛享受9公里环岛单车骑行与柚子园风光。",
+    "photoUrl": "/destinations/dest-38.jpg",
+    "provinceKh": "ខេត្តក្រចេះ",
+    "provinceEn": "Kratie",
+    "addressKh": "ភូមិកាំពី ឃុំសំបុក ស្រុកចិត្របុរី ខេត្តក្រចេះ",
+    "addressEn": "Kampi Rapids & Koh Trong Island, Chet Borei, Kratie",
+    "addressZh": "桔井省湄公河甘比江豚保护区与笼岛",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៧:៣០ និងរសៀលម៉ោង ១៥:៣០",
+    "bestTimeToVisitEn": "Morning 07:30 AM & Late Afternoon 03:30 PM",
+    "bestTimeToVisitZh": "上午 07:30 及下午 15:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kampi+Dolphin+Pool+Kratie+Cambodia",
+    "latitude": 12.6042,
+    "longitude": 106.0186,
+    "rating": 4.9,
+    "reviewCount": 440,
+    "highlightsKh": [
+      "ជិះទូកមើលផ្សោតទឹកសាបទន្លេមេគង្គ",
+      "ជិះកង់ជុំវិញកោះទ្រង់គ្មានផ្សែងឡាន",
+      "ភ្លក្សក្រូចថ្លុងផ្អែមកោះទ្រង់"
+    ],
+    "highlightsEn": [
+      "Mekong Irrawaddy dolphin kayaking",
+      "9 km car-free Koh Trong bike loop",
+      "Sweet island pomelo orchards"
+    ],
+    "highlightsZh": [
+      "湄公河珍稀江豚观赏",
+      "笼岛9公里无车环岛骑行",
+      "品尝正宗桔井甜柚"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-38.jpg"
+    ]
+  },
+  {
+    "id": "dest-adv-15",
+    "tourismTheme": "sports_adventure",
+    "nameKh": "ជិះឡូរីបាត់ដំបង និងឡើងភ្នំសំពៅ (Battambang Bamboo Train & Phnom Sampov Hike)",
+    "nameEn": "Battambang Bamboo Train Ride & Phnom Sampov Cliff Hike",
+    "nameZh": "马德望竹火车体验与森宝山徒步探险",
+    "categorySlug": "cultural",
+    "categoryKh": "ការផ្សងព្រេង និងទេសចរណ៍វប្បធម៌",
+    "categoryEn": "Rail Adventure & Cliff Hiking",
+    "categoryZh": "特色铁道体验与登山徒步",
+    "descriptionKh": "ជិះឡូរីឫស្សីប្រពៃណីកាត់វាលស្រែបាត់ដំបង និងដើរឡើងភ្នំសំពៅគយគន់ទេសភាពវាលស្រែពីលើកំពូលភ្នំ ព្រមទាំងទស្សនាហ្វូងប្រចៀវរាប់លានក្បាលហើរចេញពីល្អាងភ្នំពេលថ្ងៃលិច។",
+    "descriptionEn": "Ride Battambang’s iconic open-air Bamboo Train (Norry) across rural tracks and hike Phnom Sampov limestone mountain to watch millions of bats emerge at dusk.",
+    "descriptionZh": "体验马德望著名的露天竹火车穿越田野，徒步登上森宝山俯瞰平原风光，傍晚观赏数百万只蝙蝠出洞奇观。",
+    "photoUrl": "/destinations/dest-20.jpg",
+    "provinceKh": "ខេត្តបាត់ដំបង",
+    "provinceEn": "Battambang",
+    "addressKh": "ឃុំអូរដំបង១ ស្រុកសង្កែ និងឃុំភ្នំសំពៅ ស្រុកបាណន់ ខេត្តបាត់ដំបង",
+    "addressEn": "O Dambang 1, Sangkae & Phnom Sampov, Banan, Battambang",
+    "addressZh": "马德望省桑岐县竹火车站与巴南县森宝山",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "រសៀល ម៉ោង ១៥:០០ - ១៨:១៥",
+    "bestTimeToVisitEn": "Afternoon 03:00 PM - 06:15 PM",
+    "bestTimeToVisitZh": "下午 15:00 - 18:15",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Original+Bamboo+Train+Battambang+Cambodia",
+    "latitude": 13.0685,
+    "longitude": 103.2412,
+    "rating": 4.8,
+    "reviewCount": 610,
+    "highlightsKh": [
+      "ជិះឡូរីឫស្សីកាត់វាលស្រែ",
+      "ដើរឡើងកំពូលភ្នំសំពៅ",
+      "មើលហ្វូងប្រចៀវហើរចេញពីល្អាងពេលល្ងាច"
+    ],
+    "highlightsEn": [
+      "Open-air Bamboo Train ride",
+      "Phnom Sampov summit hike",
+      "Sunset bat cave spectacle"
+    ],
+    "highlightsZh": [
+      "传统露天竹火车骑乘",
+      "森宝山山顶徒步观景",
+      "日落百万蝙蝠出洞奇观"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-20.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-1",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "មជ្ឈមណ្ឌលសិប្បកម្ម អרטיសង់ អង្គរ (Artisans Angkor Khmer Fine Crafts)",
+    "nameEn": "Artisans Angkor Fine Khmer Handicrafts & Silk Center",
+    "nameZh": "吴哥工匠（Artisans Angkor）高棉传统手工艺与丝绸中心",
+    "categorySlug": "cultural",
+    "categoryKh": "សិប្បកម្មខ្មែរ និងវត្ថុអនុស្សាវរីយ៍",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "មជ្ឈមណ្ឌលថែរក្សា និងផលិតសិប្បកម្មប្រណិតខ្មែរដ៏ល្បីល្បាញនៅសៀមរាប ដែលភ្ញៀវអាចទស្សនាការឆ្លាក់ថ្មភក់ ចម្លាក់ឈើ ម្រក្សណ៍ខ្មែរ គ្រឿងប្រាក់ និងតម្បាញសូត្រមាសដោយផ្ទាល់ ព្រមទាំងទិញជាវត្ថុអនុស្សាវរីយ៍ផ្លូវការ។",
+    "descriptionEn": "Renowned Cambodian social enterprise showcasing live master workshops in sandstone sculpture, wood carving, lacquerware, silver plating, and hand-woven golden silk.",
+    "descriptionZh": "柬埔寨最著名的高棉传统工艺复兴中心，游客可免费参观砂岩雕刻、木雕、漆器、银器及金丝绸手工织造工坊并选购正品伴手礼。",
+    "photoUrl": "/destinations/dest-12.jpg",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "addressKh": "ផ្លូវស្ទឹងថ្មី សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប (ក្បែរផ្សារចាស់)",
+    "addressEn": "Stung Thmey Street, Sangkat Svay Dangkum, Siem Reap",
+    "addressZh": "暹粒市老市场旁斯вай当坤分区吴哥工匠总部",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៧:៣០ ព្រឹក - ១៨:៣០ ល្ងាច",
+    "bestTimeToVisitEn": "07:30 AM - 06:30 PM",
+    "bestTimeToVisitZh": "07:30 - 18:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Artisans+Angkor+Siem+Reap+Cambodia",
+    "latitude": 13.3536,
+    "longitude": 103.8542,
+    "rating": 4.9,
+    "reviewCount": 920,
+    "highlightsKh": [
+      "ទស្សនាសិប្បករឆ្លាក់ថ្ម និងឈើផ្ទាល់",
+      "កន្សែងសូត្រខ្មែរប្រណិត ១០០%",
+      "វត្ថុអនុស្សាវរីយ៍ស្នាដៃកូនខ្មែរពិតៗ"
+    ],
+    "highlightsEn": [
+      "Live stone & wood carving studios",
+      "100% hand-woven Cambodian silk",
+      "Museum-grade heritage souvenirs"
+    ],
+    "highlightsZh": [
+      "现场观摩石雕与木雕大师工艺",
+      "100%纯手工高棉真丝围巾",
+      "博物馆级精致高棉纪念品"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-12.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-2",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "ចម្ការម្រេចកំពត ឡា ប្លង់តាស្យុង (La Plantation Kampot Pepper GI Farm)",
+    "nameEn": "La Plantation Certified Kampot Pepper GI Farm & Spice Shop",
+    "nameZh": "贡布拉普兰塔庄园（地理标志认证贡布胡椒园）",
+    "categorySlug": "cultural",
+    "categoryKh": "ផលិតផលខ្មែរ GI និងវត្ថុអនុស្សាវរីយ៍",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "ចម្ការម្រេចកំពតសរីរាង្គដែលទទួលស្គាល់សម្គាល់ភូមិសាស្ត្រ (GI) ពិភពលោក ផ្ដល់ជូនការដើរទស្សនាចម្ការម្រេចដោយឥតគិតថ្លៃ ការភ្លក្សម្រេចក្រហម ម្រេចខ្មៅ ម្រេចស និងទិញគ្រឿងទេសខ្មែរវេចខ្ចប់យ៉ាងស្អាតជាកាដូ។",
+    "descriptionEn": "World-famous organic Kampot Pepper estate offering complimentary guided plantation tours, guided spice tastings, and certified GI red, black, white, and salted Kampot pepper gifts.",
+    "descriptionZh": "享誉世界的有机地理标志（GI）贡布胡椒庄园，提供免费果园导览、多品种胡椒品鉴及精美包装的正宗贡布胡椒伴手礼。",
+    "photoUrl": "/destinations/dest-23.jpg",
+    "provinceKh": "ខេត្តកំពត",
+    "provinceEn": "Kampot",
+    "addressKh": "ភូមិបុស្សញិញ ឃុំកូនសត្វ ស្រុកទឹកឈូ ខេត្តកំពត (ជិតបឹងទំនប់ប្រទក្សក្រឡា)",
+    "addressEn": "Bosjheng Village, Koun Satv Commune, Teuk Chhou, Kampot",
+    "addressZh": "贡布省德楚县贡萨乡秘密湖畔拉普兰塔胡椒庄园",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៩:០០ ព្រឹក - ១៧:៣០ ល្ងាច",
+    "bestTimeToVisitEn": "09:00 AM - 05:30 PM",
+    "bestTimeToVisitZh": "09:00 - 17:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=La+Plantation+Kampot+Pepper+Farm+Cambodia",
+    "latitude": 10.6184,
+    "longitude": 104.3128,
+    "rating": 4.9,
+    "reviewCount": 1150,
+    "highlightsKh": [
+      "ភ្លក្សម្រេចកំពត GI ដោយឥតគិតថ្លៃ",
+      "ទិញម្រេចក្រហម ម្រេចស និងម្រេចប្រឡាក់អំបិល",
+      "ដើរមើលចម្ការម្រេចធម្មជាតិ"
+    ],
+    "highlightsEn": [
+      "Free guided pepper tasting session",
+      "Certified GI red, black & salted pepper",
+      "Scenic organic spice plantation walk"
+    ],
+    "highlightsZh": [
+      "免费专业胡椒品鉴体验",
+      "正宗GI认证红胡椒与盐渍鲜胡椒",
+      "有机香料庄园观光漫步"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-23.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-3",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "ភូមិតម្បាញសូត្រខ្មែរកោះឧកញ៉ាតី (Silk Island / Koh Dach Weaving Village)",
+    "nameEn": "Koh Oknha Tei (Silk Island) Traditional Khmer Silk Weaving Village",
+    "nameZh": "金边丝绸岛（Koh Dach）传统手工丝绸织造村",
+    "categorySlug": "cultural",
+    "categoryKh": "សិប្បកម្មសូត្រខ្មែរ និងហូលផាមួង",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "កោះតម្បាញសូត្រប្រពៃណីខ្មែរនៅកណ្ដាលទន្លេមេគង្គ ដែលភ្ញៀវអាចមើលដំណើរការចិញ្ចឹមដង្កូវនាង រវៃសូត្រ និងត្បាញហូលផាមួង ក្រមាសូត្រដោយកីតម្បាញឈើពីសិប្បករផ្ទាល់ក្នុងតម្លៃសមរម្យ។",
+    "descriptionEn": "Idyllic Mekong River island where families weave intricate Khmer Ikat silk (Hol, Phamoung, and Krama scarves) on traditional wooden handlooms beneath stilt houses.",
+    "descriptionZh": "位于湄公河畔的传统丝绸手工艺岛，游客可亲眼见证桑蚕养殖、抽丝染色与木织机手工织造高棉真丝水布（Krama）及传统礼服绸缎。",
+    "photoUrl": "/destinations/dest-4.jpg",
+    "provinceKh": "ខេត្តកណ្តាល",
+    "provinceEn": "Kandal",
+    "addressKh": "ឃុំកោះឧកញ៉ាតី ស្រុកខ្សាច់កណ្ដាល ខេត្តកណ្ដាល (ជិះទូកចម្លងពីជ្រោយចង្វារ)",
+    "addressEn": "Koh Oknha Tei Commune, Khsach Kandal District, Kandal",
+    "addressZh": "干拉省克萨干拉县湄公河丝绸岛社区",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៨:០០ ព្រឹក - ១៦:៣០ រសៀល",
+    "bestTimeToVisitEn": "08:00 AM - 04:30 PM",
+    "bestTimeToVisitZh": "08:00 - 16:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Silk+Island+Koh+Oknha+Tei+Cambodia",
+    "latitude": 11.6542,
+    "longitude": 104.9618,
+    "rating": 4.8,
+    "reviewCount": 410,
+    "highlightsKh": [
+      "ទិញក្រមាសូត្រ និងហូលផាមួងពីអ្នកត្បាញផ្ទាល់",
+      "មើលការរវៃសូត្រពីដង្កូវនាងធម្មជាតិ",
+      "ជិះកង់កម្សាន្តជុំវិញកោះឧកញ៉ាតី"
+    ],
+    "highlightsEn": [
+      "Buy authentic silk Krama directly from weavers",
+      "Live silkworm spinning & natural dyeing",
+      "Peaceful island cycling & river ferry ride"
+    ],
+    "highlightsZh": [
+      "向织工直购纯手工真丝水布",
+      "观摩传统蚕丝纺线与植物染色",
+      "惬意环岛骑行与湄公河渡轮体验"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-4.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-4",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "សិប្បកម្មគ្រឿងក្រអូប និងគ្រឿងទេសខ្មែរ សង់ទ័រ ដង្គរ (Senteurs d'Angkor Workshop)",
+    "nameEn": "Senteurs d'Angkor Botanical Gifts, Spices & Artisanal Workshop",
+    "nameZh": "吴哥馨香坊（Senteurs d'Angkor）本土香氛与香料手信工坊",
+    "categorySlug": "cultural",
+    "categoryKh": "ផលិតផលធម្មជាតិខ្មែរ និងកាដូ",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "សិប្បកម្មផលិតគ្រឿងក្រអូប និងអំណោយធម្មជាតិខ្មែរដ៏ល្បីនៅសៀមរាប មានដូចជា សាប៊ូប្រេងដូងធម្មជាតិ ប្រេងក្រអូបស្លឹកគ្រៃ ទៀនក្រអូប តែផ្កាម្លិះ កាហ្វេ និងគ្រឿងទេសខ្មែរវេចខ្ចប់ក្នុងប្រអប់ស្លឹកត្នោត។",
+    "descriptionEn": "Botanical workshop crafting natural coconut-oil soaps, lemongrass essential oils, scented candles, Khmer herbal teas, and spice gift boxes hand-woven from palm leaves.",
+    "descriptionZh": "暹粒知名天然植物手信工坊，手工制作椰油香皂、柠檬草精油、香薰蜡烛、高棉花草茶及棕榈叶编织礼盒装传统香料。",
+    "photoUrl": "/destinations/dest-16.jpg",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "addressKh": "ផ្លូវពោធិ៍កំបោរ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
+    "addressEn": "Pokambor Ave, Sangkat Svay Dangkum, Siem Reap",
+    "addressZh": "暹粒市波甘博大道吴哥馨香坊",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៨:០០ ព្រឹក - ២០:០០ យប់",
+    "bestTimeToVisitEn": "08:00 AM - 08:00 PM",
+    "bestTimeToVisitZh": "08:00 - 20:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Senteurs+d+Angkor+Siem+Reap+Cambodia",
+    "latitude": 13.3558,
+    "longitude": 103.8568,
+    "rating": 4.9,
+    "reviewCount": 540,
+    "highlightsKh": [
+      "ប្រអប់កាដូគ្រឿងទេសខ្មែរត្បាញពីស្លឹកត្នោត",
+      "សាប៊ូដូង និងប្រេងក្រអូបធម្មជាតិ",
+      "ទស្សនាការផលិតដោយដៃផ្ទាល់"
+    ],
+    "highlightsEn": [
+      "Hand-woven palm-leaf spice gift boxes",
+      "Pure coconut soaps & essential oils",
+      "Interactive botanical workshop tour"
+    ],
+    "highlightsZh": [
+      "手工棕榈叶编织香料礼盒",
+      "纯天然椰子油手工皂与精油",
+      "免费参观手工制作工坊"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-16.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-5",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "បូឌា ឱសថស្ថានធម្មជាតិខ្មែរ (Bodia Cambodian Apothecary Flagship)",
+    "nameEn": "Bodia Cambodian Apothecary Natural Skincare & Wellness Brand",
+    "nameZh": "Bodia 高棉草本护肤与精油本土品牌旗舰店",
+    "categorySlug": "cultural",
+    "categoryKh": "ម៉ាកផលិតផលខ្មែរ និងវត្ថុអនុស្សាវរីយ៍",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "ម៉ាកផលិតផលថែរក្សាស្បែក និងសុខភាពធម្មជាតិផលិតនៅកម្ពុជា (Made in Cambodia) ផ្សំពីរុក្ខជាតិឱសថខ្មែរដូចជា រមៀត ខ្ញី ម្រុំ ស្លឹកគ្រៃ និងអង្ករផ្ការំដួល ស័ក្តិសមបំផុតសម្រាប់ទិញជាកាដូជូនមនុស្សជាទីស្រឡាញ់។",
+    "descriptionEn": "Premier Made-in-Cambodia natural wellness brand formulating herbal balms, turmeric-rice scrubs, moringa oils, and aromatic diffusers from local botanicals.",
+    "descriptionZh": "柬埔寨高端本土草本护肤品牌，采用姜黄、柠檬草、辣木籽与茉莉香米等本土天然植物精制草本膏、精油与身体护理礼盒。",
+    "photoUrl": "/destinations/dest-2.jpg",
+    "provinceKh": "រាជធានីភ្នំពេញ",
+    "provinceEn": "Phnom Penh",
+    "addressKh": "ផ្លូវព្រះស៊ីសុវត្ថិ (មាត់ទន្លេ) សង្កាត់ផ្សារកណ្ដាល១ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
+    "addressEn": "Sisowath Quay Riverside, Daun Penh, Phnom Penh",
+    "addressZh": "金边市隆边区西索瓦码头河畔旗舰店",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៩:០០ ព្រឹក - ២១:០០ យប់",
+    "bestTimeToVisitEn": "09:00 AM - 09:00 PM",
+    "bestTimeToVisitZh": "09:00 - 21:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bodia+Apothecary+Phnom+Penh+Cambodia",
+    "latitude": 11.5688,
+    "longitude": 104.9308,
+    "rating": 4.9,
+    "reviewCount": 380,
+    "highlightsKh": [
+      "ប្រេងកូឡា និងប្រេងម៉ាស្សាឱសថបុរាណខ្មែរ",
+      "ផលិតផលថែរក្សាស្បែកពីរមៀត និងអង្ករខ្មែរ",
+      "ផលិតផលស្តង់ដារអន្តរជាតិផលិតនៅកម្ពុជា"
+    ],
+    "highlightsEn": [
+      "Traditional Khmer herbal massage balms",
+      "Turmeric & jasmine rice skincare gifts",
+      "100% Made-in-Cambodia botanical formulas"
+    ],
+    "highlightsZh": [
+      "高棉传统草本按摩膏与精油",
+      "姜黄与茉莉香米天然护肤品",
+      "100%柬埔寨本土研发制造伴手礼"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-2.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-6",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "សិប្បកម្មស្រាផ្លែឈើខ្មែរ សំបៃ (Sombai Cambodian Infused Rice Wine Workshop)",
+    "nameEn": "Sombai Artisanal Infused Khmer Rice Wine & Painted Bottle Studio",
+    "nameZh": "暹粒 Sombai 手绘瓶高棉水果香料浸酿米酒工坊",
+    "categorySlug": "cultural",
+    "categoryKh": "ផលិតផលខ្មែរ និងវត្ថុអនុស្សាវរីយ៍",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "សិប្បកម្មផលិតស្រាអង្ករខ្មែរត្រាំជាមួយផ្លែឈើ និងគ្រឿងទេសធម្មជាតិ (ដូចជា ស្វាយ-ម្ទេស, ដូង-ម្នាស់, កាហ្វេ-ក្រវាញ, ខ្ញី-ម្រេចក្រហម) ច្រកក្នុងដបគូរគំនូរដោយដៃដ៏ស្រស់ស្អាតសម្រាប់ធ្វើជាកាដូអនុស្សាវរីយ៍។",
+    "descriptionEn": "Boutique Siem Reap distillery crafting aromatic fruit-and-spice infused Cambodian rice wines presented in hand-painted artisan bottles with free tasting sessions.",
+    "descriptionZh": "暹粒特色手工酿造坊，将高棉米酒与芒果辣椒、椰子菠萝、贡布红胡椒等热带水果香料浸酿，装入纯手绘艺术酒瓶中，并提供免费品鉴。",
+    "photoUrl": "/destinations/dest-13.jpg",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "addressKh": "ផ្លូវសាលាកន្សែង សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
+    "addressEn": "Salakanseng Road, Sangkat Svay Dangkum, Siem Reap",
+    "addressZh": "暹粒市沙拉干森路 Sombai 艺术酒坊",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៨:៣០ ព្រឹក - ២១:៣០ យប់",
+    "bestTimeToVisitEn": "08:30 AM - 09:30 PM",
+    "bestTimeToVisitZh": "08:30 - 21:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sombai+Infused+Rice+Wine+Siem+Reap+Cambodia",
+    "latitude": 13.3614,
+    "longitude": 103.8524,
+    "rating": 4.9,
+    "reviewCount": 470,
+    "highlightsKh": [
+      "ភ្លក្សរសជាតិផ្លែឈើ និងគ្រឿងទេសខ្មែរ ៨ មុខ",
+      "ដបគូររូបប្រាសាទ និងទេសភាពខ្មែរដោយដៃ",
+      "កាដូអនុស្សាវរីយ៍ដ៏ពេញនិយមពីសៀមរាប"
+    ],
+    "highlightsEn": [
+      "Complimentary 8-flavor tasting flight",
+      "Hand-painted Cambodian art bottles",
+      "Travel-size souvenir gift sets"
+    ],
+    "highlightsZh": [
+      "免费品鉴8种热带水果香料风味",
+      "纯手绘高棉风情艺术酒瓶",
+      "便携式旅行伴手礼套装"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-13.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-7",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "ភូមិសិប្បកម្មប្រាក់ និងស្ពាន់កំពង់ហ្លួង (Kampong Luong Silverware Artisan Village)",
+    "nameEn": "Kampong Luong Royal Silverware & Copper Artisan Village",
+    "nameZh": "干拉省磅隆皇家银器与铜雕手工艺村",
+    "categorySlug": "cultural",
+    "categoryKh": "សិប្បកម្មប្រាក់ស្ពាន់ និងបេតិកភណ្ឌ",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "ភូមិសិប្បករឆ្លាក់ប្រាក់ និងស្ពាន់បុរាណតាំងពីសម័យរាជធានីឧត្តុង្គ ស្ថិតនៅតាមមាត់ទន្លេសាប ស្រុកពញាឮ ដែលល្បីល្បាញខាងផលិតប្រអប់ប្រាក់រូបផ្លែល្ពៅ ផ្តិលប្រាក់ និងគ្រឿងអលង្ការក្បាច់ខ្មែរ។",
+    "descriptionEn": "Historic riverside artisan village near Oudong where multi-generational silversmiths hand-hammer intricate Khmer silver betel boxes, bowls, and jewelry.",
+    "descriptionZh": "毗邻乌栋古都的百年银匠村，世代银匠手工锤揲雕琢精美的高棉传统银盒、银钵与复古首饰。",
+    "photoUrl": "/destinations/dest-27.jpg",
+    "provinceKh": "ខេត្តកណ្តាល",
+    "provinceEn": "Kandal",
+    "addressKh": "ឃុំកំពង់ហ្លួង ស្រុកពញាឮ ខេត្តកណ្ដាល (ជិតភ្នំព្រះរាជទ្រព្យ/ឧត្តុង្គ)",
+    "addressEn": "Kampong Luong Commune, Ponhea Lueu District, Kandal",
+    "addressZh": "干拉省波尼亚吕县磅隆银器村",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៨:០០ ព្រឹក - ១៧:០០ ល្ងាច",
+    "bestTimeToVisitEn": "08:00 AM - 05:00 PM",
+    "bestTimeToVisitZh": "08:00 - 17:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kampong+Luong+Silver+Village+Ponhea+Lueu+Kandal+Cambodia",
+    "latitude": 11.8246,
+    "longitude": 104.7485,
+    "rating": 4.8,
+    "reviewCount": 290,
+    "highlightsKh": [
+      "ទស្សនាសិប្បករឆ្លាក់ក្បាច់ប្រាក់ដោយដៃ",
+      "ផ្តិលប្រាក់ និងប្រអប់ប្រាក់ក្បាច់បុរាណខ្មែរ",
+      "ទិញផ្ទាល់ពីផ្ទះសិប្បករក្នុងតម្លៃដើម"
+    ],
+    "highlightsEn": [
+      "Live hand-chased silver engraving",
+      "Heirloom Khmer silver bowls & boxes",
+      "Direct-from-artisan workshop pricing"
+    ],
+    "highlightsZh": [
+      "现场观摩传统手工银器雕花",
+      "传世级高棉银钵与果实造型银盒",
+      "工坊源头直购价格"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-27.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-8",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "ភូមិស្មូនឆ្នាំងដីបុរាណអណ្ដូងឫស្សី (Andoung Russei Pottery Heritage Village)",
+    "nameEn": "Andoung Russei Traditional Terracotta Pottery Village",
+    "nameZh": "磅清扬安东芦苇传统红陶手作村",
+    "categorySlug": "cultural",
+    "categoryKh": "សិប្បកម្មស្មូនឆ្នាំងដី និងវត្ថុអនុស្សាវរីយ៍",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "ភូមិផលិតក្អមឆ្នាំងដី និងវត្ថុអនុស្សាវរីយ៍ពីដីឥដ្ឋដ៏ល្បីល្បាញប្រចាំខេត្តកំពង់ឆ្នាំង ដែលភ្ញៀវទេសចរអាចសាកល្បងសូនរូបដីឥដ្ឋដោយខ្លួនឯង និងទិញគ្រឿងសេរ៉ាមិចខ្មែរស្អាតៗត្រឡប់ទៅផ្ទះ។",
+    "descriptionEn": "Heartland of Kampong Chhnang (\"Port of Pottery\") where visitors can try shaping clay on pottery wheels and purchase authentic handmade terracotta vessels and decor.",
+    "descriptionZh": "磅清扬（意为“陶器之港”）最著名的传统制陶村，游客可亲自体验手工拉坯制陶并选购精致的高棉红陶工艺品。",
+    "photoUrl": "/destinations/dest-30.jpg",
+    "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
+    "provinceEn": "Kampong Chhnang",
+    "addressKh": "ភូមិអណ្ដូងឫស្សី ឃុំស្រែថ្មី ស្រុករលាប្អៀរ ខេត្តកំពង់ឆ្នាំង",
+    "addressEn": "Andoung Russei Village, Srae Thmei, Rolea B'ier, Kampong Chhnang",
+    "addressZh": "磅清扬省罗列比尔县安东芦苇制陶村",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៧:៣០ ព្រឹក - ១៧:០០ ល្ងាច",
+    "bestTimeToVisitEn": "07:30 AM - 05:00 PM",
+    "bestTimeToVisitZh": "07:30 - 17:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Andoung+Russei+Pottery+Village+Kampong+Chhnang+Cambodia",
+    "latitude": 12.2185,
+    "longitude": 104.6492,
+    "rating": 4.8,
+    "reviewCount": 330,
+    "highlightsKh": [
+      "សាកល្បងសូនក្អមឆ្នាំងដីដោយផ្ទាល់ដៃ",
+      "ទិញវត្ថុអនុស្សាវរីយ៍សេរ៉ាមិច និងដីឥដ្ឋខ្មែរ",
+      "ទេសភាពវាលស្រែ និងដើមត្នោតជុំវិញភូមិ"
+    ],
+    "highlightsEn": [
+      "Hands-on clay pottery wheel experience",
+      "Handmade terracotta & ceramic souvenirs",
+      "Scenic sugar-palm countryside setting"
+    ],
+    "highlightsZh": [
+      "亲手体验传统陶艺制作",
+      "选购手工红陶与陶瓷纪念品",
+      "糖棕树与稻田环绕的田园风光"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-30.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-9",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "សហគមន៍ស្ករត្នោតកំពង់ស្ពឺ GI (Kampong Speu Palm Sugar GI Cooperative)",
+    "nameEn": "Kampong Speu Certified GI Organic Palm Sugar Village",
+    "nameZh": "磅士卑地理标志（GI）认证有机棕糖手信社区",
+    "categorySlug": "cultural",
+    "categoryKh": "ផលិតផលខ្មែរ GI និងវត្ថុអនុស្សាវរីយ៍",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "សហគមន៍ផលិតស្ករត្នោតកំពង់ស្ពឺដែលទទួលស្គាល់សម្គាល់ភូមិសាស្ត្រ (GI) នៅសហភាពអឺរ៉ុប និងអន្តរជាតិ មានលក់ស្ករត្នោតម្សៅសរីរាង្គ ស្ករត្នោតផែន ស្ករត្នោតរុំស្លឹកត្នោត និងទឹកត្នោតផ្អែមធម្មជាតិ។",
+    "descriptionEn": "Protected Geographical Indication (GI) palm sugar community where artisans climb lofty sugar palms and simmer pure golden nectar into organic granulated and palm-leaf wrapped sugar.",
+    "descriptionZh": "荣获国际地理标志（GI）认证的磅士卑棕糖社区，现场展示传统棕糖熬制技艺，提供有机棕糖粉、棕叶糖块及新鲜甜棕汁。",
+    "photoUrl": "/destinations/dest-29.jpg",
+    "provinceKh": "ខេត្តកំពង់ស្ពឺ",
+    "provinceEn": "Kampong Speu",
+    "addressKh": "ឃុំរលាំងចក ស្រុកសំរោងទង ខេត្តកំពង់ស្ពឺ (តាមបណ្ដោយផ្លូវជាតិលេខ ៤)",
+    "addressEn": "Roleang Chak, Samraong Tong District, Kampong Speu",
+    "addressZh": "磅士卑省森隆东县4号公路棕糖社区",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ខែធ្នូ ដល់ ខែឧសភា (រដូវឡើងត្នោត និងរម្ងាស់ស្ករ)",
+    "bestTimeToVisitEn": "December to May (harvest & simmering season)",
+    "bestTimeToVisitZh": "12月至次年5月（采收与熬糖季）",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kampong+Speu+Palm+Sugar+Samraong+Tong+Cambodia",
+    "latitude": 11.4486,
+    "longitude": 104.5418,
+    "rating": 4.8,
+    "reviewCount": 310,
+    "highlightsKh": [
+      "ស្ករត្នោតម្សៅ និងស្ករផែន GI ឈ្ងុយធម្មជាតិ",
+      "មើលការរម្ងាស់ទឹកត្នោតលើចង្ក្រានបុរាណ",
+      "ទិញជាកាដូសុខភាពសម្រាប់គ្រួសារ"
+    ],
+    "highlightsEn": [
+      "Certified GI organic granulated palm sugar",
+      "Traditional wood-fired nectar simmering",
+      "Healthy low-GI natural sweetener gifts"
+    ],
+    "highlightsZh": [
+      "GI认证纯天然有机棕糖粉与糖块",
+      "传统柴火大锅熬制棕糖工艺",
+      "天然健康低升糖养生伴手礼"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-29.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-10",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "ផ្សារសិប្បកម្ម ផលិតនៅកម្ពុជា សៀមរាប (Made in Cambodia Market Siem Reap)",
+    "nameEn": "Made in Cambodia Artisan Market & Cultural Square",
+    "nameZh": "暹粒“柬埔寨制造”（Made in Cambodia）文创手工艺市集",
+    "categorySlug": "cultural",
+    "categoryKh": "ផ្សារសិប្បកម្ម និងផលិតផលខ្មែរ",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "ផ្សាររាត្រី និងសិប្បកម្មបែបច្នៃប្រឌិតដែលប្រមូលផ្ដុំផលិតផលធ្វើដោយដៃសិប្បករខ្មែរសុទ្ធសាធ រួមមាន កាបូបច្នៃ សម្លៀកបំពាក់សូត្រ និងកប្បាស គ្រឿងអលង្ការ គំនូរ និងគ្រឿងទេសខ្មែរ។",
+    "descriptionEn": "Vibrant open-air artisan market in Siem Reap dedicated exclusively to locally crafted Cambodian fashion, jewelry, eco-accessories, fine art, and gourmet food gifts.",
+    "descriptionZh": "暹粒极具人气的文创夜市，汇集100%柬埔寨本土设计师与工匠制作的丝棉服饰、手作首饰、环保包袋、艺术画作与特色美食伴手礼。",
+    "photoUrl": "/destinations/dest-11.jpg",
+    "provinceKh": "ខេត្តសៀមរាប",
+    "provinceEn": "Siem Reap",
+    "addressKh": "ផ្លូវអុំឃុន សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប (មាត់ស្ទឹងសៀមរាប)",
+    "addressEn": "Oum Khun Street, Riverside, Siem Reap City",
+    "addressZh": "暹粒市河畔乌坤街柬埔寨制造文创市集",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ១២:០០ ថ្ងៃត្រង់ - ២១:០០ យប់",
+    "bestTimeToVisitEn": "12:00 PM - 09:00 PM",
+    "bestTimeToVisitZh": "12:00 - 21:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Made+in+Cambodia+Market+Siem+Reap",
+    "latitude": 13.3568,
+    "longitude": 103.8584,
+    "rating": 4.8,
+    "reviewCount": 520,
+    "highlightsKh": [
+      "ផលិតផលស្នាដៃកូនខ្មែរសុទ្ធ ១០០%",
+      "គ្រឿងអលង្ការ កាបូប និងសម្លៀកបំពាក់ច្នៃប្រឌិត",
+      "ការសម្ដែងសិល្បៈ និងតន្ត្រីពេលល្ងាច"
+    ],
+    "highlightsEn": [
+      "100% locally crafted Khmer products",
+      "Boutique fashion, bags & artisan jewelry",
+      "Live evening cultural performances"
+    ],
+    "highlightsZh": [
+      "100%柬埔寨本土匠人原创手作",
+      "独立设计服饰、包袋与手工艺饰品",
+      "晚间现场文化与音乐表演"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-11.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-11",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "ផ្សារធំថ្មី និងផ្សារទួលទំពូង (Phnom Penh Central & Russian Souvenir Markets)",
+    "nameEn": "Phnom Penh Central Market (Phsar Thmei) & Russian Market Souvenir Hub",
+    "nameZh": "金边中央市场（新街市）与俄罗斯市场伴手礼中心",
+    "categorySlug": "cultural",
+    "categoryKh": "ផ្សារប្រវត្តិសាស្ត្រ និងវត្ថុអនុស្សាវរីយ៍",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "មជ្ឈមណ្ឌលទិញវត្ថុអនុស្សាវរីយ៍ដ៏ធំបំផុតនៅរាជធានីភ្នំពេញ ដែលមានលក់ក្រមាខ្មែរ គ្រឿងប្រាក់ គ្រឿងត្បូង ចម្លាក់ឈើ សម្លៀកបំពាក់ប្រពៃណី ត្រីងៀត សាច់ក្រក និងនំចំណីខ្មែរគ្រប់ប្រភេទ។",
+    "descriptionEn": "Iconic 1937 Art Deco dome market and bustling souvenir bazaars offering Khmer Krama scarves, silverwork, gems, wood carvings, dried seafood, and local delicacies.",
+    "descriptionZh": "金边最具代表性的1937年装饰艺术圆顶市场与伴手礼集散地，荟萃高棉水布、银饰宝石、木雕工艺品、干货特产与传统糕点。",
+    "photoUrl": "/destinations/dest-5.jpg",
+    "provinceKh": "រាជធានីភ្នំពេញ",
+    "provinceEn": "Phnom Penh",
+    "addressKh": "សង្កាត់ផ្សារថ្មី១ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
+    "addressEn": "Sangkat Phsar Thmei 1, Daun Penh, Phnom Penh",
+    "addressZh": "金边市隆边区中央市场广场",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៧:០០ ព្រឹក - ១៧:៣០ ល្ងាច",
+    "bestTimeToVisitEn": "07:00 AM - 05:30 PM",
+    "bestTimeToVisitZh": "07:00 - 17:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Central+Market+Phsar+Thmei+Phnom+Penh+Cambodia",
+    "latitude": 11.5694,
+    "longitude": 104.9212,
+    "rating": 4.8,
+    "reviewCount": 1280,
+    "highlightsKh": [
+      "ស្ថាបត្យកម្មដំបូលមូលប្រវត្តិសាស្ត្រឆ្នាំ ១៩៣៧",
+      "ក្រមាសូត្រ ចម្លាក់ និងគ្រឿងអលង្ការខ្មែរ",
+      "អាហារក្រៀម និងបង្អែមខ្មែរល្បីៗ"
+    ],
+    "highlightsEn": [
+      "Historic 1937 Art Deco yellow dome",
+      "Silk scarves, carvings & silver jewelry",
+      "Dried fish, Kampot spices & local sweets"
+    ],
+    "highlightsZh": [
+      "1937年历史地标黄色圆顶建筑",
+      "真丝水布、木雕与高棉银饰珠宝",
+      "精选柬埔寨干货特产与传统点心"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-5.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-12",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "ភូមិចម្លាក់ថ្មភក់ជើងភ្នំសន្ទុក (Phnom Santuk Stone Carving Artisan Village)",
+    "nameEn": "Phnom Santuk Traditional Sandstone Sculpture Village",
+    "nameZh": "磅同省三笃山砂岩雕刻艺术村",
+    "categorySlug": "cultural",
+    "categoryKh": "សិប្បកម្មចម្លាក់ថ្ម និងវត្ថុអនុស្សាវរីយ៍",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "ភូមិសិប្បករឆ្លាក់ថ្មភក់ដ៏ល្បីល្បាញនៅជើងភ្នំសន្ទុក ខេត្តកំពង់ធំ ដែលឆ្លាក់រូបបដិមា រូបអប្សរា តោថ្ម និងគ្រឿងតុបតែងគេហដ្ឋានតាមក្បាច់បុរាណសម័យអង្គរ និងសម័យសំបូរព្រៃគុក។",
+    "descriptionEn": "Master sandstone-carving community at the foot of sacred Phnom Santuk in Kampong Thom, sculpting classical Sambor Prei Kuk and Angkorian statues and home decor.",
+    "descriptionZh": "位于磅同省圣山三笃山脚下的传统砂岩雕刻村，匠人们世代传承三波坡雷古与吴哥风格石雕技艺，创作精美仙女浮雕与家居石艺品。",
+    "photoUrl": "/destinations/dest-32.jpg",
+    "provinceKh": "ខេត្តកំពង់ធំ",
+    "provinceEn": "Kampong Thom",
+    "addressKh": "ឃុំកកោះ ស្រុកសន្ទុក ខេត្តកំពង់ធំ (តាមផ្លូវជាតិលេខ ៦ ជើងភ្នំសន្ទុក)",
+    "addressEn": "Kakaoh Commune, Santuk District, Kampong Thom",
+    "addressZh": "磅同省三笃县6号公路三笃山石雕村",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៧:៣០ ព្រឹក - ១៧:៣០ ល្ងាច",
+    "bestTimeToVisitEn": "07:30 AM - 05:30 PM",
+    "bestTimeToVisitZh": "07:30 - 17:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Phnom+Santuk+Kampong+Thom+Cambodia",
+    "latitude": 12.6128,
+    "longitude": 104.9894,
+    "rating": 4.8,
+    "reviewCount": 260,
+    "highlightsKh": [
+      "ចម្លាក់ថ្មភក់ក្បាច់សំបូរព្រៃគុក និងអង្គរ",
+      "ទិញវត្ថុអនុស្សាវរីយ៍ថ្មភក់ឆ្លាក់ដោយដៃ",
+      "ទស្សនាសិប្បករឆ្លាក់ថ្មតាមដងផ្លូវជាតិលេខ ៦"
+    ],
+    "highlightsEn": [
+      "Hand-carved sandstone Apsara reliefs",
+      "Authentic Sambor Prei Kuk style art",
+      "Direct workshop visits along NR6"
+    ],
+    "highlightsZh": [
+      "纯手工砂岩仙女浮雕与石雕小品",
+      "正宗三波坡雷古与吴哥艺术风格",
+      "6号公路沿线工坊现场观摩选购"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-32.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-13",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "ចម្ការកាហ្វេ និងទឹកឃ្មុំព្រៃមណ្ឌលគិរី (Mondulkiri Highland Coffee & Wild Honey Roastery)",
+    "nameEn": "Mondulkiri Highland Coffee Plantation & Wild Forest Honey Center",
+    "nameZh": "蒙多基里高山咖啡庄园与野生森林蜂蜜特产中心",
+    "categorySlug": "cultural",
+    "categoryKh": "ផលិតផលធម្មជាតិ និងកាដូប្រចាំខេត្ត",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "កន្លែងភ្លក្ស និងទិញកាហ្វេភ្នំមណ្ឌលគិរីលីងថ្មីៗ ទឹកឃ្មុំព្រៃធម្មជាតិសុទ្ធ ១០០% ផ្លែបឺរមណ្ឌលគិរី គ្រាប់ម៉ាកាដាមៀ និងតែផ្កាឈើភ្នំ ដែលជាកាដូដ៏ពេញនិយមបំផុតពីតំបន់ភូមិភាគឦសាន។",
+    "descriptionEn": "Highland agro-tourism plantation in Sen Monorom offering freshly roasted Mondulkiri coffee beans, pure wild forest honey, macadamia nuts, and mountain herbal teas.",
+    "descriptionZh": "位于森莫诺隆的高原生态农庄，盛产现烘蒙多基里高山咖啡豆、100%纯天然野生森林蜂蜜、夏威夷果与高山花草茶伴手礼。",
+    "photoUrl": "/destinations/dest-35.jpg",
+    "provinceKh": "ខេត្តមណ្ឌលគិរី",
+    "provinceEn": "Mondulkiri",
+    "addressKh": "សង្កាត់ស្ពានមានជ័យ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
+    "addressEn": "Sangkat Spean Meanchey, Sen Monorom City, Mondulkiri",
+    "addressZh": "蒙多基里省森莫诺隆市高山咖啡庄园",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៧:០០ ព្រឹក - ១៨:០០ ល្ងាច",
+    "bestTimeToVisitEn": "07:00 AM - 06:00 PM",
+    "bestTimeToVisitZh": "07:00 - 18:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mondulkiri+Coffee+Plantation+Sen+Monorom+Cambodia",
+    "latitude": 12.4562,
+    "longitude": 107.1924,
+    "rating": 4.9,
+    "reviewCount": 410,
+    "highlightsKh": [
+      "កាហ្វេមណ្ឌលគិរីលីងថ្មីៗឈ្ងុយឈ្ងប់",
+      "ទឹកឃ្មុំព្រៃធម្មជាតិសុទ្ធ ១០០%",
+      "គ្រាប់ម៉ាកាដាមៀ និងផ្លែឈើភ្នំស្រស់ៗ"
+    ],
+    "highlightsEn": [
+      "Freshly roasted highland coffee beans",
+      "100% pure wild forest honey jars",
+      "Local macadamia nuts & passionfruit gifts"
+    ],
+    "highlightsZh": [
+      "现烘醇香蒙多基里高山咖啡豆",
+      "100%纯正野生森林百花蜜",
+      "本土夏威夷果与百香果特产礼盒"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-35.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-14",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "ចម្ការទំពាំងបាយជូរ និងស្រាទំពាំងបាយជូរភ្នំបាណន់ (Phnom Banan Vineyard & Winery)",
+    "nameEn": "Phnom Banan Vineyard, Grape Juice & Artisanal Winery",
+    "nameZh": "马德望巴南山葡萄庄园与本土红酒酿造坊",
+    "categorySlug": "cultural",
+    "categoryKh": "កសិ-ទេសចរណ៍ និងផលិតផលខ្មែរ",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "ចម្ការទំពាំងបាយជូរតែមួយគត់នៅខេត្តបាត់ដំបង ស្ថិតនៅតាមដងស្ទឹងសង្កែក្បែរប្រាសាទភ្នំបាណន់ ដែលផលិតស្រាទំពាំងបាយជូរ ទឹកទំពាំងបាយជូរស្រស់ ស្រាខ្ញី និងដំណាប់ផ្លែឈើសម្រាប់ទិញជាកាដូ។",
+    "descriptionEn": "Cambodia’s pioneering riverside vineyard near Phnom Banan temple producing local grape wines, brandy, fresh grape juice, and organic ginger cordials.",
+    "descriptionZh": "马德望桑岐河畔著名的巴南山葡萄园，酿造柬埔寨本土葡萄酒、鲜榨葡萄汁、生姜甜酒与果脯伴手礼。",
+    "photoUrl": "/destinations/dest-21.jpg",
+    "provinceKh": "ខេត្តបាត់ដំបង",
+    "provinceEn": "Battambang",
+    "addressKh": "ឃុំកន្ទឺ២ ស្រុកបាណន់ ខេត្តបាត់ដំបង (ផ្លូវទៅប្រាសាទភ្នំបាណន់)",
+    "addressEn": "Kanteu 2 Commune, Banan District, Battambang",
+    "addressZh": "马德望省巴南县巴南山葡萄庄园",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៨:០០ ព្រឹក - ១៧:៣០ ល្ងាច",
+    "bestTimeToVisitEn": "08:00 AM - 05:30 PM",
+    "bestTimeToVisitZh": "08:00 - 17:30",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Banan+Winery+Vineyard+Battambang+Cambodia",
+    "latitude": 12.9764,
+    "longitude": 103.1618,
+    "rating": 4.7,
+    "reviewCount": 295,
+    "highlightsKh": [
+      "ដើរថតរូបក្នុងចម្ការទំពាំងបាយជូរ",
+      "ភ្លក្សស្រាទំពាំងបាយជូរ និងទឹកទំពាំងបាយជូរស្រស់",
+      "ទិញក្រឡាន និងណែមបាត់ដំបងតាមដងផ្លូវ"
+    ],
+    "highlightsEn": [
+      "Vineyard walk & photo spots",
+      "Local wine & fresh grape juice tasting",
+      "Bottled cordials & Battambang souvenirs"
+    ],
+    "highlightsZh": [
+      "葡萄园观光拍照打卡",
+      "品尝本土酿造红酒与鲜榨葡萄汁",
+      "选购姜汁甜酒与马德望特产伴手礼"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-21.jpg"
+    ]
+  },
+  {
+    "id": "dest-souv-15",
+    "tourismTheme": "local_souvenirs",
+    "nameKh": "ផ្សារក្ដាមកែប និងកន្លែងលក់គ្រឿងសមុទ្រក្រៀម (Kep Crab Market & Coastal Souvenir Hub)",
+    "nameEn": "Kep Crab Market & Artisanal Dried Seafood / Fish Sauce Market",
+    "nameZh": "白马螃蟹市场与海味干货伴手礼中心",
+    "categorySlug": "beach",
+    "categoryKh": "អាហារសមុទ្រ និងវត្ថុអនុស្សាវរីយ៍ឆ្នេរ",
+    "categoryEn": "Local Brands & Souvenirs",
+    "categoryZh": "本土品牌与传统伴手礼",
+    "descriptionKh": "ផ្សារគ្រឿងសមុទ្រដ៏ល្បីល្បាញនៅមាត់សមុទ្រខេត្តកែប ដែលក្រៅពីក្ដាមសេះឆាម្រេចខ្ចី ភ្ញៀវទេសចរនិយមទិញបង្គាក្រៀម មឹកក្រៀម ត្រីងៀតសមុទ្រ ទឹកត្រីកំពត និងម្រេចកំពតវេចខ្ចប់យកទៅផ្ញើគ្រួសារ។",
+    "descriptionEn": "Bustling seaside market where travelers savor fresh blue swimmer crabs and shop for premium sun-dried prawns, dried squid, Kampot fish sauce, and sea salt souvenirs.",
+    "descriptionZh": "白马省最热闹的海滨市集，除品尝鲜活青胡椒炒蟹外，更是选购优质虾干、鱿鱼干、贡布传统鱼露与海盐伴手礼的最佳地点。",
+    "photoUrl": "/destinations/dest-24.jpg",
+    "provinceKh": "ខេត្តកែប",
+    "provinceEn": "Kep",
+    "addressKh": "ផ្លូវមាត់សមុទ្រ សង្កាត់កែប ក្រុងកែប ខេត្តកែប",
+    "addressEn": "Coastal Road, Sangkat Kep, Kep City, Kep",
+    "addressZh": "白马省白马市海滨大道螃蟹市场",
+    "entranceFeeKh": "",
+    "entranceFeeEn": "",
+    "bestTimeToVisitKh": "ម៉ោង ០៧:០០ ព្រឹក - ២០:០០ យប់",
+    "bestTimeToVisitEn": "07:00 AM - 08:00 PM",
+    "bestTimeToVisitZh": "07:00 - 20:00",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kep+Crab+Market+Kep+Cambodia",
+    "latitude": 10.4806,
+    "longitude": 104.2942,
+    "rating": 4.9,
+    "reviewCount": 890,
+    "highlightsKh": [
+      "ទិញបង្គាក្រៀម មឹកក្រៀម និងត្រីងៀតសមុទ្រថ្មីៗ",
+      "ទឹកត្រីកំពត និងអំបិលធម្មជាតិ",
+      "ក្ដាមសេះស្រស់ៗឆាម្រេចកំពត"
+    ],
+    "highlightsEn": [
+      "Premium sun-dried shrimp & squid gifts",
+      "Traditional Kampot fish sauce & sea salt",
+      "Fresh blue crab with green Kampot pepper"
+    ],
+    "highlightsZh": [
+      "精选天然日晒虾干与鱿鱼干礼盒",
+      "古法酿造贡布鱼露与天然海盐",
+      "现捕梭子蟹炒鲜青胡椒"
+    ],
+    "isFeatured": true,
+    "galleryPhotos": [
+      "/destinations/dest-24.jpg"
+    ]
+  }
+];

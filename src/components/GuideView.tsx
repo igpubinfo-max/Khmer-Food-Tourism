@@ -17,6 +17,8 @@ import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant, toCo
 import { copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
+import { AngkorParkQuickBar, AngkorVisitGuideModal, type AngkorGuideTab } from './AngkorVisitGuideModal';
+import { ANGKOR_CODE_OF_CONDUCT } from '../data/angkorVisitGuideData';
 import {
   BookOpen,
   Award,
@@ -58,6 +60,12 @@ import {
   INTERNATIONAL_PORTS_DATA,
   findProvinceAdminHistory,
 } from '../data/provincialAdminPortsEmergencyData';
+import {
+  CAMBODIA_UNESCO_HERITAGE_LIST,
+  CAMBODIA_NATIONAL_SYMBOLS_AND_WILDLIFE,
+  CAMBODIA_DOMESTIC_TRANSPORT_ROUTES,
+  CAMBODIA_FAST_FACTS,
+} from '../data/cambodiaHeritageAndFactsData';
 import { resolveFestivalFoods } from '../data/festivalFoods';
 import { FestivalDishRow } from './home/FestivalFoodSection';
 
@@ -298,6 +306,8 @@ export const GuideView: React.FC = () => {
     setTipFilterRaw(next);
   };
   const [bigPhraseId, setBigPhraseId] = useState<string | null>(null);
+  const [angkorGuideOpen, setAngkorGuideOpen] = useState<boolean>(false);
+  const [angkorGuideTab, setAngkorGuideTab] = useState<AngkorGuideTab>('conduct');
   const [portCategoryFilter, setPortCategoryFilter] = useState<'all' | 'airport' | 'thailand' | 'vietnam' | 'laos_seaport'>('all');
   const [showAll25History, setShowAll25History] = useState<boolean>(false);
   const [showAll25Hospitals, setShowAll25Hospitals] = useState<boolean>(false);
@@ -1098,7 +1108,7 @@ export const GuideView: React.FC = () => {
                         </div>
 
                         {/* Provincial Referral Hospital & Emergency Bar */}
-                        <div className="p-3 rounded-xl bg-rose-50/70 border border-rose-200/90 flex items-center justify-between gap-2.5 flex-wrap">
+                        <div className="p-3 rounded-xl bg-rose-50/70 border border-rose-200/90 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
                           <div className="min-w-0 flex-1 space-y-0.5">
                             <p className="text-xs font-extrabold text-rose-900 flex items-center gap-1.5">
                               <span>🏥</span>
@@ -1361,6 +1371,43 @@ export const GuideView: React.FC = () => {
       {/* ------------------------------------------------------------------ */}
       {tab === 'tips' && (
         <div className="space-y-5">
+          {/* Official APSARA Visitor Code of Conduct & Angkor Park Guide */}
+          <section className="p-4 rounded-3xl bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-900 border-2 border-amber-400/40 space-y-3 shadow-md">
+            <AngkorParkQuickBar
+              language={language}
+              onOpenTab={(t) => {
+                setAngkorGuideTab(t);
+                setAngkorGuideOpen(true);
+              }}
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              {ANGKOR_CODE_OF_CONDUCT.map((rule) => {
+                const isDo = rule.type === 'do';
+                return (
+                  <div
+                    key={rule.id}
+                    className={`p-2.5 rounded-2xl border flex items-start gap-2.5 ${
+                      isDo
+                        ? 'bg-emerald-900/45 border-emerald-400/35'
+                        : 'bg-rose-950/55 border-rose-400/35'
+                    }`}
+                  >
+                    <span className="w-8 h-8 rounded-xl bg-black/30 flex items-center justify-center text-base shrink-0">
+                      {rule.emoji}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-khmer font-extrabold text-xs text-white leading-[1.55] break-words">
+                        {tr(language, rule.titleKh, rule.titleEn, rule.titleZh)}
+                      </h4>
+                      <p className="text-[11px] font-khmer text-slate-200 leading-[1.55] mt-0.5 break-words">
+                        {tr(language, rule.detailKh, rule.detailEn, rule.detailZh)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
           {/* Dedicated Police & Emergency Contacts Section */}
           {(tipFilter === 'all' || tipFilter === 'safety') && (
             <section className="p-4 rounded-3xl bg-gradient-to-br from-rose-50 via-amber-50/70 to-white border-2 border-rose-300 space-y-3 shadow-xs">
@@ -1419,8 +1466,8 @@ export const GuideView: React.FC = () => {
             data-testid="guide-hospitals-emergency-section"
             className="p-4 rounded-3xl bg-white border-2 border-rose-200/90 space-y-3 shadow-xs scroll-mt-2"
           >
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+              <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
                 <span className="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg shrink-0">
                   🏥
                 </span>
@@ -1688,6 +1735,150 @@ export const GuideView: React.FC = () => {
               ))}
             </ul>
           </section>
+
+          {/* 1. UNESCO World Heritage & Intangible Heritage of Cambodia */}
+          <section className="space-y-2.5">
+            <SectionTitle
+              icon={<span className="text-sm">🏛️</span>}
+              title={tr(language, 'បេតិកភណ្ឌពិភពលោក UNESCO របស់កម្ពុជា', 'Cambodia UNESCO World Heritage', '柬埔寨联合国教科文组织世界遗产')}
+              subtitle={tr(
+                language,
+                'សម្បត្តិបេតិកភណ្ឌរូបី និងអរូបីនៃមនុស្សជាតិដែលពិភពលោកទទួលស្គាល់',
+                'Inscribed World Heritage monuments & Intangible Cultural Masterpieces',
+                '列入世界遗产名录的古迹遗址与人类非物质文化遗产代表作'
+              )}
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {CAMBODIA_UNESCO_HERITAGE_LIST.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-1.5 text-slate-900"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300/70">
+                      {item.badge}
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700">
+                      {item.kind === 'tangible'
+                        ? tr(language, 'បេតិកភណ្ឌរូបី', 'World Heritage Site', '世界文化遗产')
+                        : tr(language, 'បេតិកភណ្ឌអរូបី', 'Intangible Heritage', '人类非物质文化遗产')}
+                    </span>
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug">
+                    {pickTri(item.title, lang)}
+                  </h4>
+                  <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+                    {pickTri(item.summary, lang)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 2. National Symbols, Flora & Rare Wildlife of Cambodia */}
+          <section className="space-y-2.5">
+            <SectionTitle
+              icon={<span className="text-sm">🦌</span>}
+              title={tr(language, 'និមិត្តរូបជាតិ រុក្ខជាតិ និងសត្វព្រៃកម្រនៅកម្ពុជា', 'National Symbols, Flora & Wildlife', '柬埔寨国家象征与珍稀动植物')}
+              subtitle={tr(
+                language,
+                'អត្តសញ្ញាណធម្មជាតិជាតិ និងសត្វកម្រដែលភ្ញៀវទេសចរគួរស្វែងយល់',
+                'Official national flora, fauna, and iconic Mekong wildlife',
+                '官方认定的国花、国树、国兽与湄公河珍稀生态物种'
+              )}
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {CAMBODIA_NATIONAL_SYMBOLS_AND_WILDLIFE.map((sym) => (
+                <div
+                  key={sym.id}
+                  className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-start gap-2.5 text-slate-900"
+                >
+                  <span className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-xl shrink-0">
+                    {sym.emoji}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wide">
+                      {pickTri(sym.category, lang)}
+                    </span>
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug">
+                      {pickTri(sym.name, lang)}
+                    </h4>
+                    <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed mt-0.5">
+                      {pickTri(sym.desc, lang)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 3. Domestic Travel Routes: Expressway, Railways, Speed Ferries & Flights */}
+          <section className="space-y-2.5">
+            <SectionTitle
+              icon={<span className="text-sm">🚂</span>}
+              title={tr(language, 'មធ្យោបាយធ្វើដំណើរក្នុងស្រុក (ផ្លូវល្បឿនលឿន រថភ្លើង និងទូក)', 'Domestic Travel Routes (Expressway, Rail & Ferry)', '柬埔寨境内交通指南（高速、火车与快艇）')}
+              subtitle={tr(
+                language,
+                'ផ្លូវធ្វើដំណើរសំខាន់ៗសម្រាប់ភ្ញៀវទេសចរឆ្លងរាជធានី-ខេត្ត និងទៅកាន់កោះ',
+                'Key inter-provincial highways, passenger trains, island speedboats & flights',
+                '连接各省市与海岛的高速公路、客运铁路、快艇及国内航线'
+              )}
+            />
+            <ul className="space-y-2">
+              {CAMBODIA_DOMESTIC_TRANSPORT_ROUTES.map((rt) => (
+                <li
+                  key={rt.id}
+                  className="p-3 rounded-2xl bg-white border border-slate-200/90 flex items-start gap-2.5 text-slate-900"
+                >
+                  <span className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-lg shrink-0">
+                    {rt.emoji}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug">
+                      {pickTri(rt.title, lang)}
+                    </h4>
+                    <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed mt-0.5">
+                      {pickTri(rt.detail, lang)}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* 4. Cambodia Fast Facts ("Did You Know?") */}
+          <section className="space-y-2.5">
+            <SectionTitle
+              icon={<span className="text-sm">💡</span>}
+              title={tr(language, 'តើអ្នកដឹងទេ? កំណត់ត្រាពិភពលោក និងការពិតអំពីកម្ពុជា', 'Did You Know? Amazing Facts About Cambodia', '趣味百科：关于柬埔寨的世界纪录与冷知识')}
+              subtitle={tr(
+                language,
+                'ចំណេះដឹងគួរឱ្យស្ញប់ស្ញែងអំពីប្រទេសកម្ពុជាដែលភ្ញៀវទេសចរទូទាំងពិភពលោកចាប់អារម្មណ៍',
+                'World records and remarkable natural & historical facts of the Kingdom of Wonder',
+                '令全球游客赞叹的高棉历史奇迹与自然奇观'
+              )}
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {CAMBODIA_FAST_FACTS.map((f) => (
+                <div
+                  key={f.id}
+                  className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-start gap-2.5 text-slate-900"
+                >
+                  <span className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-lg shrink-0">
+                    {f.emoji}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug">
+                      {pickTri(f.title, lang)}
+                    </h4>
+                    <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed mt-0.5">
+                      {pickTri(f.fact, lang)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       )}
 
@@ -1713,6 +1904,15 @@ export const GuideView: React.FC = () => {
         </div>
       )}
       </div>
+
+      <AngkorVisitGuideModal
+        isOpen={angkorGuideOpen}
+        initialTab={angkorGuideTab}
+        language={language}
+        destinations={destinations}
+        onClose={() => setAngkorGuideOpen(false)}
+        onSelectDestination={(dest) => setSelectedDestination(dest)}
+      />
     </div>
   );
 };
