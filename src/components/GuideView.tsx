@@ -230,6 +230,49 @@ const SectionTitle: React.FC<{
   </div>
 );
 
+
+/** Clean collapsible info card: flat icon tile, clear title, simple chevron. */
+const AccordionCard: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  open?: boolean;
+  onToggle: () => void;
+  children?: React.ReactNode;
+}> = ({ icon, title, subtitle, open, onToggle, children }) => (
+  <section
+    className={`rounded-2xl overflow-hidden border bg-slate-800/70 transition-colors ${
+      open ? 'border-emerald-500/50' : 'border-white/10'
+    }`}
+  >
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={!!open}
+      className="w-full flex items-center gap-3 p-3.5 text-left cursor-pointer select-none focus:outline-none"
+    >
+      <span className="w-10 h-10 rounded-xl bg-emerald-700/25 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-300">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-khmer font-extrabold text-[15px] leading-[1.6] text-white break-words">{title}</span>
+        {subtitle && (
+          <span className="block mt-0.5 font-khmer text-[12px] leading-[1.6] text-slate-300 break-words">{subtitle}</span>
+        )}
+      </span>
+      <ChevronDown className={`w-5 h-5 shrink-0 text-slate-300 transition-transform ${open ? 'rotate-180' : ''}`} strokeWidth={1.75} />
+    </button>
+    {open && <div className="px-3 pb-3.5 space-y-2.5 border-t border-white/10 pt-3">{children}</div>}
+  </section>
+);
+
+const TIP_CAT_STYLES: Record<string, { bar: string; tagBg: string; tagText: string }> = {
+  dining: { bar: '#EA580C', tagBg: '#FFEDD5', tagText: '#9A3412' },
+  money: { bar: '#059669', tagBg: '#D1FAE5', tagText: '#065F46' },
+  culture: { bar: '#D97706', tagBg: '#FEF3C7', tagText: '#92400E' },
+  safety: { bar: '#0369A1', tagBg: '#E0F2FE', tagText: '#075985' },
+};
+
 const HScroll: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="kft-hscroll -mx-3.5 px-3.5 sm:-mx-4 sm:px-4 flex gap-3 overflow-x-auto no-scrollbar snap-x scroll-pl-3.5 sm:scroll-pl-4 pb-1">{children}</div>
 );
@@ -1680,13 +1723,11 @@ export const GuideView: React.FC = () => {
           </section>
 
 
-          <section className="space-y-2.5">
-            <SectionTitle open={!!openSecs.tips} onToggle={() => toggleSec('tips')}
-              icon={<Lightbulb className="w-4 h-4" />}
+          <AccordionCard open={!!openSecs.tips} onToggle={() => toggleSec('tips')} icon={<Compass className="w-5 h-5" strokeWidth={1.75} />}
               title={tr(language, `គន្លឹះដំណើរកម្សាន្ត & ញ៉ាំអាហារ (${GUIDE_TIPS.length} គន្លឹះ)`, `Travel & dining tips (${GUIDE_TIPS.length} tips)`, `旅行与用餐实用贴士（共 ${GUIDE_TIPS.length} 条）`)}
-            />
-{openSecs.tips && (<>
-            <div className="kft-hscroll flex gap-1.5 overflow-x-auto no-scrollbar -mx-3.5 px-3.5 sm:-mx-4 sm:px-4 py-0.5">
+            >
+
+            <div className="kft-hscroll flex gap-2 overflow-x-auto no-scrollbar -mx-3 px-3 py-1">
               {TIP_CATEGORIES.map((c) => {
                 const active = tipFilter === c.id;
                 return (
@@ -1697,39 +1738,63 @@ export const GuideView: React.FC = () => {
                       setTipFilter(c.id);
                       scrollToGuideSection(tipResultsRef.current || guideContentStartRef.current);
                     }}
-                    className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
+                    style={
                       active
-                        ? 'bg-emerald-700 text-white border-emerald-600 shadow-xs'
-                        : 'bg-white text-slate-700 border-slate-200'
+                        ? { background: '#F59E0B' }
+                        : { background: 'rgba(255,255,255,0.08)' }
+                    }
+                    className={`shrink-0 min-h-[38px] px-3.5 py-1.5 rounded-full font-khmer text-[12.5px] font-extrabold whitespace-nowrap border transition active:scale-95 cursor-pointer ${
+                      active ? 'text-slate-950 border-amber-200' : 'text-slate-100 border-white/15 hover:border-amber-300/60'
                     }`}
                   >
-                    {c.emoji} {pickTri(c.label, lang)}
+                    {pickTri(c.label, lang)}
                   </button>
                 );
               })}
             </div>
-            <ul ref={tipResultsRef} className="space-y-2 min-h-[75vh] scroll-mt-2">
-              {visibleTips.map((t) => (
-                <li
-                  key={t.id}
-                  className="p-3 rounded-2xl bg-white border border-slate-200/90 flex items-start gap-3"
-                >
-                  <span className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-xl shrink-0">
-                    {t.emoji}
-                  </span>
-                  <div className="min-w-0">
-                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">{pickTri(t.title, lang)}</h4>
-                    <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed mt-0.5">{toConciseSummary(pickTri(t.body, lang), lang)}</p>
-                  </div>
-                </li>
-              ))}
+            <ul ref={tipResultsRef} className="space-y-2.5 min-h-[60vh] scroll-mt-2">
+              {visibleTips.map((t) => {
+                const isEmergency = t.id === 'emergency-police-hotlines';
+                const cs = TIP_CAT_STYLES[t.category] || TIP_CAT_STYLES.culture;
+                const cat = TIP_CATEGORIES.find((c) => c.id === t.category);
+                return (
+                  <li
+                    key={t.id}
+                    className="relative rounded-2xl overflow-hidden flex items-start gap-3 py-3 pr-3 pl-4 border"
+                    style={
+                      isEmergency
+                        ? { background: '#FFF1F2', borderColor: '#FDA4AF' }
+                        : { background: '#FFFFFF', borderColor: 'rgba(226,232,240,0.9)' }
+                    }
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="absolute left-0 top-0 bottom-0 w-1.5"
+                      style={{ background: isEmergency ? '#BE123C' : cs.bar }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      {cat && (
+                        <span
+                          className="inline-block mb-1 px-2 py-0.5 rounded-full text-[10.5px] font-extrabold font-khmer leading-[1.5]"
+                          style={{ background: isEmergency ? '#FFE4E6' : cs.tagBg, color: isEmergency ? '#9F1239' : cs.tagText }}
+                        >
+                          {pickTri(cat.label, lang)}
+                        </span>
+                      )}
+                      <h4 className={`font-khmer text-[14px] sm:text-[15px] font-extrabold leading-[1.6] break-words ${isEmergency ? 'text-rose-900' : 'text-slate-900'}`}>
+                        {pickTri(t.title, lang)}
+                      </h4>
+                      <p className={`font-khmer text-[12.5px] sm:text-[13px] leading-[1.7] mt-0.5 break-words ${isEmergency ? 'text-rose-800' : 'text-slate-600'}`}>
+                        {toConciseSummary(pickTri(t.body, lang), lang)}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
-</>)}
-          </section>
+            </AccordionCard>
 
-          <section className="space-y-2.5">
-            <SectionTitle open={!!openSecs.phrases} onToggle={() => toggleSec('phrases')}
-              icon={<span className="text-sm">🗣️</span>}
+          <AccordionCard open={!!openSecs.phrases} onToggle={() => toggleSec('phrases')} icon={<BookOpen className="w-5 h-5" strokeWidth={1.75} />}
               title={tr(language, 'ឃ្លាខ្មែរចាំបាច់', 'Khmer phrasebook', '高棉语常用语')}
               subtitle={tr(
                 language,
@@ -1737,8 +1802,8 @@ export const GuideView: React.FC = () => {
                 'Copy a phrase or show it in big text to the vendor',
                 '可复制短语，或放大文字展示给店家'
               )}
-            />
-{openSecs.phrases && (<>
+            >
+
             <ul className="space-y-2">
               {PHRASES.map((p) => (
                 <li
@@ -1771,13 +1836,10 @@ export const GuideView: React.FC = () => {
                 </li>
               ))}
             </ul>
-</>)}
-          </section>
+            </AccordionCard>
 
           {/* 1. UNESCO World Heritage & Intangible Heritage of Cambodia */}
-          <section className="space-y-2.5">
-            <SectionTitle open={!!openSecs.unesco} onToggle={() => toggleSec('unesco')}
-              icon={<span className="text-sm">🏛️</span>}
+          <AccordionCard open={!!openSecs.unesco} onToggle={() => toggleSec('unesco')} icon={<Award className="w-5 h-5" strokeWidth={1.75} />}
               title={tr(language, 'បេតិកភណ្ឌពិភពលោក UNESCO របស់កម្ពុជា', 'Cambodia UNESCO World Heritage', '柬埔寨联合国教科文组织世界遗产')}
               subtitle={tr(
                 language,
@@ -1785,8 +1847,8 @@ export const GuideView: React.FC = () => {
                 'Inscribed World Heritage monuments & Intangible Cultural Masterpieces',
                 '列入世界遗产名录的古迹遗址与人类非物质文化遗产代表作'
               )}
-            />
-{openSecs.unesco && (<>
+            >
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {CAMBODIA_UNESCO_HERITAGE_LIST.map((item) => (
                 <div
@@ -1812,13 +1874,10 @@ export const GuideView: React.FC = () => {
                 </div>
               ))}
             </div>
-</>)}
-          </section>
+            </AccordionCard>
 
           {/* 2. National Symbols, Flora & Rare Wildlife of Cambodia */}
-          <section className="space-y-2.5">
-            <SectionTitle open={!!openSecs.symbols} onToggle={() => toggleSec('symbols')}
-              icon={<span className="text-sm">🦌</span>}
+          <AccordionCard open={!!openSecs.symbols} onToggle={() => toggleSec('symbols')} icon={<MapPinned className="w-5 h-5" strokeWidth={1.75} />}
               title={tr(language, 'និមិត្តរូបជាតិ រុក្ខជាតិ និងសត្វព្រៃកម្រនៅកម្ពុជា', 'National Symbols, Flora & Wildlife', '柬埔寨国家象征与珍稀动植物')}
               subtitle={tr(
                 language,
@@ -1826,17 +1885,14 @@ export const GuideView: React.FC = () => {
                 'Official national flora, fauna, and iconic Mekong wildlife',
                 '官方认定的国花、国树、国兽与湄公河珍稀生态物种'
               )}
-            />
-{openSecs.symbols && (<>
+            >
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {CAMBODIA_NATIONAL_SYMBOLS_AND_WILDLIFE.map((sym) => (
                 <div
                   key={sym.id}
                   className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-start gap-2.5 text-slate-900"
                 >
-                  <span className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-xl shrink-0">
-                    {sym.emoji}
-                  </span>
                   <div className="min-w-0 flex-1">
                     <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wide">
                       {pickTri(sym.category, lang)}
@@ -1851,13 +1907,10 @@ export const GuideView: React.FC = () => {
                 </div>
               ))}
             </div>
-</>)}
-          </section>
+            </AccordionCard>
 
           {/* 3. Domestic Travel Routes: Expressway, Railways, Speed Ferries & Flights */}
-          <section className="space-y-2.5">
-            <SectionTitle open={!!openSecs.transport} onToggle={() => toggleSec('transport')}
-              icon={<span className="text-sm">🚂</span>}
+          <AccordionCard open={!!openSecs.transport} onToggle={() => toggleSec('transport')} icon={<Route className="w-5 h-5" strokeWidth={1.75} />}
               title={tr(language, 'មធ្យោបាយធ្វើដំណើរក្នុងស្រុក (ផ្លូវល្បឿនលឿន រថភ្លើង និងទូក)', 'Domestic Travel Routes (Expressway, Rail & Ferry)', '柬埔寨境内交通指南（高速、火车与快艇）')}
               subtitle={tr(
                 language,
@@ -1865,17 +1918,14 @@ export const GuideView: React.FC = () => {
                 'Key inter-provincial highways, passenger trains, island speedboats & flights',
                 '连接各省市与海岛的高速公路、客运铁路、快艇及国内航线'
               )}
-            />
-{openSecs.transport && (<>
+            >
+
             <ul className="space-y-2">
               {CAMBODIA_DOMESTIC_TRANSPORT_ROUTES.map((rt) => (
                 <li
                   key={rt.id}
                   className="p-3 rounded-2xl bg-white border border-slate-200/90 flex items-start gap-2.5 text-slate-900"
                 >
-                  <span className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-lg shrink-0">
-                    {rt.emoji}
-                  </span>
                   <div className="min-w-0 flex-1">
                     <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug">
                       {pickTri(rt.title, lang)}
@@ -1887,13 +1937,10 @@ export const GuideView: React.FC = () => {
                 </li>
               ))}
             </ul>
-</>)}
-          </section>
+            </AccordionCard>
 
           {/* 4. Cambodia Fast Facts ("Did You Know?") */}
-          <section className="space-y-2.5">
-            <SectionTitle open={!!openSecs.facts} onToggle={() => toggleSec('facts')}
-              icon={<span className="text-sm">💡</span>}
+          <AccordionCard open={!!openSecs.facts} onToggle={() => toggleSec('facts')} icon={<Star className="w-5 h-5" strokeWidth={1.75} />}
               title={tr(language, 'តើអ្នកដឹងទេ? កំណត់ត្រាពិភពលោក និងការពិតអំពីកម្ពុជា', 'Did You Know? Amazing Facts About Cambodia', '趣味百科：关于柬埔寨的世界纪录与冷知识')}
               subtitle={tr(
                 language,
@@ -1901,17 +1948,14 @@ export const GuideView: React.FC = () => {
                 'World records and remarkable natural & historical facts of the Kingdom of Wonder',
                 '令全球游客赞叹的高棉历史奇迹与自然奇观'
               )}
-            />
-{openSecs.facts && (<>
+            >
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {CAMBODIA_FAST_FACTS.map((f) => (
                 <div
                   key={f.id}
                   className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-start gap-2.5 text-slate-900"
                 >
-                  <span className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-lg shrink-0">
-                    {f.emoji}
-                  </span>
                   <div className="min-w-0 flex-1">
                     <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug">
                       {pickTri(f.title, lang)}
@@ -1923,8 +1967,7 @@ export const GuideView: React.FC = () => {
                 </div>
               ))}
             </div>
-</>)}
-          </section>
+            </AccordionCard>
         </div>
       )}
 

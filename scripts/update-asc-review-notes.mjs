@@ -205,11 +205,45 @@ async function main() {
   const currentVerStr = versionObj.attributes?.versionString;
   console.log('Active iOS App Store Version ID:', versionId, 'Version:', currentVerStr, 'State:', currentState);
 
-  // IMPORTANT: Never cancel an active WAITING_FOR_REVIEW or IN_REVIEW submission!
-  if (currentState === 'WAITING_FOR_REVIEW' || currentState === 'IN_REVIEW' || currentState === 'PENDING_APPLE_RELEASE') {
+  // If no new build is being uploaded, preserve active review state
+  if (!expectedBuildVersion && (currentState === 'WAITING_FOR_REVIEW' || currentState === 'IN_REVIEW' || currentState === 'PENDING_APPLE_RELEASE')) {
     console.log(`Version ${currentVerStr} is already in active review state (${currentState}). Preserving submission without modification.`);
     setGithubEnv('ASC_REVIEW_STATE', currentState);
     return;
+  }
+
+  // If a new build WAS just uploaded (--wait-for-build) and version is WAITING_FOR_REVIEW, wait for the new build to become VALID first, then cancel the old WAITING_FOR_REVIEW submission so we can attach the new build!
+  if (expectedBuildVersion && currentState === 'WAITING_FOR_REVIEW') {
+    console.log(`Waiting for newly uploaded iOS build ${expectedBuildVersion} to become VALID before replacing WAITING_FOR_REVIEW build...`);
+    for (let attempt = 1; attempt <= 24; attempt++) {
+      const checkResp = await ascRequest(
+        `/builds?filter[app]=${APP_ID}&filter[version]=${encodeURIComponent(expectedBuildVersion)}&limit=5`
+      );
+      const matchingBuilds = checkResp?.data || [];
+      if (matchingBuilds.length > 0) {
+        const bState = matchingBuilds[0].attributes?.processingState;
+        console.log(`  [Attempt ${attempt}/24] Build ${expectedBuildVersion} processingState: ${bState}`);
+        if (bState === 'VALID') break;
+        if (bState === 'FAILED' || bState === 'INVALID') break;
+      } else {
+        console.log(`  [Attempt ${attempt}/24] Build ${expectedBuildVersion} not yet visible in ASC builds list...`);
+      }
+      await sleep(20000);
+    }
+
+    console.log('Canceling previous WAITING_FOR_REVIEW submission to swap in newly uploaded build ' + expectedBuildVersion + '...');
+    const activeSubs = await ascRequest(`/apps/${APP_ID}/reviewSubmissions?filter[platform]=IOS&filter[state]=WAITING_FOR_REVIEW,SUBMITTED`);
+    for (const sub of activeSubs?.data || []) {
+      await ascRequest(`/reviewSubmissions/${sub.id}`, 'PATCH', {
+        data: {
+          type: 'reviewSubmissions',
+          id: sub.id,
+          attributes: { canceled: true },
+        },
+      });
+      console.log('  Canceled previous reviewSubmission ID:', sub.id);
+    }
+    await sleep(5000);
   }
 
   if (currentVerStr !== TARGET_VERSION_STRING && currentState !== 'READY_FOR_SALE') {

@@ -895,7 +895,7 @@ export const GUIDE_TIPS: GuideTip[] = [
   },
   {
     id: 'iced-tea-refills',
-    emoji: '🧋',
+    emoji: '🥤',
     category: 'dining',
     title: { km: 'តែទឹកកកក្រូចឆ្មារ & ទឹកតែឥតគិតថ្លៃ', en: 'Iced jasmine tea & lime iced tea', zh: '茉莉冰茶与青柠红茶' },
     body: {
