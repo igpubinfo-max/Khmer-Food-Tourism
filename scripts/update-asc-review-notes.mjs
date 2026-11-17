@@ -60,7 +60,7 @@ async function ascRequest(endpoint, method = 'GET', body = null) {
     console.warn(`ASC API ${method} ${endpoint} warning (${res.status}): ${text}`);
     return null;
   }
-  return json;
+  return json ?? { ok: true };
 }
 
 const REVIEW_NOTES = `Hello Apple App Review Team,
@@ -268,10 +268,7 @@ async function main() {
     console.log('Successfully created App Store Review Notes for version ID:', versionId);
   }
 
-  if (!expectedBuildVersion) {
-    console.log('Pre-build metadata setup for v' + TARGET_VERSION_STRING + ' complete. Waiting for build-ios job to upload new IPA...');
-    return;
-  }
+
 
   // Poll until Apple finishes processing the newly uploaded build
   if (expectedBuildVersion) {
@@ -307,7 +304,7 @@ async function main() {
   const validBuildsResp = await ascRequest(
     `/builds?filter[app]=${APP_ID}&filter[processingState]=VALID&sort=-uploadedDate&limit=10`
   );
-  const validBuilds = validBuildsResp?.data || [];
+  const validBuilds = (validBuildsResp?.data || []).filter((b) => Number(b.attributes?.version || 0) >= 648);
   if (validBuilds.length > 0) {
     const preferredBuild =
       (expectedBuildVersion && validBuilds.find((b) => String(b.attributes?.version) === expectedBuildVersion)) ||
