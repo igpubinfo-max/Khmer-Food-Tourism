@@ -133,7 +133,7 @@ jobs:
               -configuration Release \
               -destination "generic/platform=iOS" \
               -archivePath build/App.xcarchive \
-              MARKETING_VERSION="2.7.0" \
+              MARKETING_VERSION="2.7.1" \
               CURRENT_PROJECT_VERSION="$IOS_BUILD_NUM" \
               DEVELOPMENT_TEAM=79L24WMX4R \
               CODE_SIGN_STYLE=Manual \
@@ -196,7 +196,8 @@ jobs:
               --apiKey "$APPSTORE_KEY_ID" \
               --apiIssuer "$APPSTORE_ISSUER_ID"
           fi
-          node scripts/update-asc-review-notes.mjs || true
+          IOS_BUILD_NUM=$((200 + ${{ github.run_number }}))
+          node scripts/update-asc-review-notes.mjs --wait-for-build "$IOS_BUILD_NUM" || true
 
       - name: 10. Upload iOS Release Packages Artifact
         uses: actions/upload-artifact@v4
