@@ -1433,5 +1433,62 @@ test('20. Tourism Photo Quality Audit & 2D Illustrated Destination Type Icon Acc
   }
 });
 
+
+test('21. Offline Road Map, Tile Downloader & A* Road-Following Router Guard', () => {
+  const {
+    CAMBODIA_ROAD_SEGMENTS,
+    CAMBODIA_WATER_FEATURES,
+    CAMBODIA_PARKS,
+    generateLocalStreetSegmentsAroundPin,
+    computeOfflineRoadRoute,
+  } = require(path.join(ROOT, 'src/utils/offlineCambodiaRoadEngine.ts'));
+
+  assert.ok(Array.isArray(CAMBODIA_ROAD_SEGMENTS) && CAMBODIA_ROAD_SEGMENTS.length >= 25, 'Must include comprehensive Cambodia & city road segments');
+  assert.ok(Array.isArray(CAMBODIA_WATER_FEATURES) && CAMBODIA_WATER_FEATURES.length >= 3, 'Must include Mekong, Tonle Sap, and Bassac rivers');
+  assert.ok(Array.isArray(CAMBODIA_PARKS) && CAMBODIA_PARKS.length >= 5, 'Must include major parks');
+
+  // Verify local street grid synthesizer extracts street numbers (e.g. St 288)
+  const localSt288 = generateLocalStreetSegmentsAroundPin(11.5496, 104.9255, '#20A, st 288, Phnom Penh', 'មីគសិកាហ្វេ');
+  assert.ok(localSt288.length >= 10, 'Must synthesize local street grid around target pin');
+  assert.ok(localSt288.some((s) => s.nameKh.includes('288') || s.nameEn.includes('288')), 'Must label Street 288 on synthesized street segment');
+
+  // Verify A* road-following route within Phnom Penh (not a 2-point straight line!)
+  const cityRoute = computeOfflineRoadRoute(
+    11.5685,
+    104.9205,
+    11.5496,
+    104.9255,
+    'មីគសិកាហ្វេ',
+    'Mekong Cafe',
+    '#20A, st 288, Phnom Penh'
+  );
+  assert.ok(cityRoute.path.length >= 4, 'City route must follow multi-point street intersections, not a single straight line');
+  assert.ok(cityRoute.steps.length >= 2, 'City route must generate turn-by-turn navigation steps');
+  assert.ok(cityRoute.totalDistanceKm > 1.5 && cityRoute.totalDistanceKm < 10, 'City route distance must be realistic');
+
+  // Verify A* road-following route across provinces (Phnom Penh -> Siem Reap via National Road 6)
+  const interprovRoute = computeOfflineRoadRoute(
+    11.5564,
+    104.9282,
+    13.3633,
+    103.8564,
+    'ប្រាសាទអង្គរវត្ត',
+    'Angkor Wat',
+    'ក្រុងសៀមរាប'
+  );
+  assert.ok(interprovRoute.path.length >= 6, 'Interprovincial route must follow National Highway waypoints');
+  assert.ok(interprovRoute.mainRoadsSummaryKh.includes('ផ្លូវជាតិលេខ ៦') || interprovRoute.steps.some((s) => s.roadNameKh.includes('៦')), 'Phnom Penh to Siem Reap route must use National Road 6');
+
+  // Verify OfflineCambodiaMapModal has canvas renderer, tile downloader, and live navigation controls
+  const modalSrc = fs.readFileSync(path.join(ROOT, 'src/components/OfflineCambodiaMapModal.tsx'), 'utf8');
+  assert.ok(modalSrc.includes('<canvas ref={canvasRef}'), 'OfflineCambodiaMapModal must use High-DPI road canvas renderer');
+  assert.ok(modalSrc.includes('handleDownloadOfflineMap'), 'OfflineCambodiaMapModal must provide working offline map download button');
+  assert.ok(modalSrc.includes('computeOfflineRoadRoute'), 'OfflineCambodiaMapModal must use A* road-following route engine');
+
+  // Verify types/index.ts intercepts offline mode in all 3 Google Maps openers
+  const typesSrc = fs.readFileSync(path.join(ROOT, 'src/types/index.ts'), 'utf8');
+  assert.equal((typesSrc.match(/kft:open-offline-cambodia-map/g) || []).length, 3, 'All 3 open*GoogleExternal helpers must dispatch kft:open-offline-cambodia-map when offline');
+});
+
 console.log('\nAll ' + passed + ' unit test suites passed successfully!');
 
