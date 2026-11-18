@@ -3313,7 +3313,7 @@ export const WhatToEatModal: React.FC = () => {
                         }`}
                       >
                         <img
-                          src={`${g.imageSrc}?v=hq1623`}
+                          src={`${g.imageSrc}?v=hq1640`}
                           alt={displayText}
                           decoding="async"
                           style={{
@@ -3358,7 +3358,7 @@ export const WhatToEatModal: React.FC = () => {
                         }`}
                       >
                         <img
-                          src="/categories/ai_cat_drinks.png?v=hq1623"
+                          src="/categories/ai_cat_drinks.png?v=hq1640"
                           alt={drinkLabel}
                           decoding="async"
                           style={{
@@ -3394,7 +3394,7 @@ export const WhatToEatModal: React.FC = () => {
                     >
                       <div className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-opacity duration-150 rounded-[14px] opacity-95 group-hover:opacity-100">
                         <img
-                          src="/categories/home_cat_nearby_food.png?v=hq1623"
+                          src="/categories/home_cat_nearby_food.png?v=hq1640"
                           alt={nearLabel}
                           decoding="async"
                           style={{

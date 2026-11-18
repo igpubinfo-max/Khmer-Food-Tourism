@@ -923,7 +923,7 @@ img[src^="data:image"],
   max-width: 100%;
   font-family: var(--kft-font-khmer);
   font-size: var(--kft-food-cat-label-size) !important;
-  font-size: clamp(6.2px, 11.4cqw, 12.8px) !important;
+  font-size: clamp(9.6px, 11.6cqw, 13.4px) !important;
   font-weight: 800 !important;
   line-height: 1.38 !important;
   letter-spacing: -0.015em;

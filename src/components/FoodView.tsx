@@ -731,7 +731,7 @@ export const FoodView: React.FC = () => {
                     className={`kft-food-tile relative w-full max-w-full min-w-0 min-h-0 aspect-[560/460] rounded-[14px] overflow-visible ${active ? 'kft-food-tile-active' : ''}`}
                   >
                     <img
-                      src={`${cat.imageSrc}?v=hq1629`}
+                      src={`${cat.imageSrc}?v=hq1630`}
                       alt={label}
                       style={{ transform: 'none' }}
                       className={`block w-full h-full max-w-full min-w-0 min-h-0 object-fill bg-transparent select-none pointer-events-none transition-all duration-150 ${
@@ -741,7 +741,7 @@ export const FoodView: React.FC = () => {
                       decoding="async"
                     />
                     {/* Centered Large Bold Label Inside Button Directly Below the Food Illustration */}
-                    <div className="pointer-events-none absolute inset-x-[2%] top-[68.5%] bottom-[6.5%] flex items-center justify-center px-[1px] overflow-visible">
+                    <div className="pointer-events-none absolute inset-x-[2%] top-[73.5%] bottom-[6.5%] flex items-center justify-center px-[1px] overflow-visible">
                       <span
                         className={`kft-food-cat-label ${
                           ''
