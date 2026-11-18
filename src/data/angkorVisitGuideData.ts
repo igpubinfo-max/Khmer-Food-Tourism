@@ -605,6 +605,21 @@ export const ANGKOR_CODE_OF_CONDUCT: AngkorCodeOfConductItem[] = [
     detailZh:
       '在佛殿内请脱帽并保持安静；拍摄僧侣前请先征得同意，女性切勿触碰僧侣及其袈裟。',
   },
+  {
+    id: 'no-giving-money-candy-children',
+    category: 'prohibition',
+    type: 'dont',
+    emoji: '🍬',
+    titleKh: 'ហាមឱ្យប្រាក់ ឬស្ករគ្រាប់ដល់ក្មេងៗ',
+    titleEn: 'Do Not Give Money or Candy to Children',
+    titleZh: '请勿向儿童施舍金钱或糖果',
+    detailKh:
+      'ហាមឱ្យប្រាក់ ឬស្ករគ្រាប់ដល់ក្មេងៗ ព្រោះវាលើកទឹកចិត្តឱ្យកុមារបោះបង់ការសិក្សាមកសុំទាន ឬលក់ដូរក្នុងម៉ោងរៀន។',
+    detailEn:
+      'Do not give money or candy to children at temples, as it encourages them to drop out of school to beg or peddle items during school hours.',
+    detailZh:
+      '请勿向景区内的儿童施舍金钱或糖果，以免变相促使孩子辍学乞讨或在课时贩卖商品；建议通过支持正规教育或儿童慈善机构提供帮助。',
+  },
 ];
 
 export const ANGKOR_PARK_FACILITIES: AngkorParkFacility[] = [

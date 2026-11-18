@@ -209,8 +209,8 @@ export const OfflineCambodiaMapModal: React.FC = () => {
     lat: 11.553,
     lng: 104.925,
   });
-  const [zoom, setZoom] = useState<number>(14);
-  const [mapTheme, setMapTheme] = useState<'google-day' | 'night'>('google-day');
+  const [zoom, setZoom] = useState<number>(15);
+  const [mapTheme, setMapTheme] = useState<'google-day' | 'night'>('night');
   const [showStepsPanel, setShowStepsPanel] = useState<boolean>(false);
   const [isNavigatingLive, setIsNavigatingLive] = useState<boolean>(false);
 
@@ -1114,23 +1114,34 @@ export const OfflineCambodiaMapModal: React.FC = () => {
     ctx.fill();
     ctx.stroke();
 
-    // 10. Render Active Destination / Shop Pin (Google Maps Red Drop Pin + Callout Box)
+    // 10. Render Active Destination / Shop Pin (TripAdvisor Signature Yellow Star Teardrop Pin ⭐ + Callout Box)
     if (activePin) {
       const tPt = toScreen(activePin.lat, activePin.lng);
-      // Pin shadow
-      ctx.fillStyle = 'rgba(225, 29, 72, 0.28)';
+      // Drop shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
       ctx.beginPath();
-      ctx.arc(tPt.x, tPt.y, 16, 0, Math.PI * 2);
+      ctx.ellipse(tPt.x, tPt.y + 14, 9, 4, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Red Pin Circle
-      ctx.fillStyle = '#E11D48';
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 2.5;
+      // Yellow teardrop body (#EAB308)
+      ctx.fillStyle = '#EAB308';
+      ctx.strokeStyle = '#1E293B';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(tPt.x, tPt.y, 8.5, 0, Math.PI * 2);
+      ctx.arc(tPt.x, tPt.y - 4, 14, Math.PI * 0.82, Math.PI * 0.18, false);
+      ctx.lineTo(tPt.x, tPt.y + 14);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
+
+      // Dark Star inside Yellow Pin
+      ctx.save();
+      ctx.fillStyle = '#1E293B';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('★', tPt.x, tPt.y - 4);
+      ctx.restore();
 
       // Callout Banner above Pin
       const title = (language === 'en' ? activePin.nameEn : activePin.nameKh).slice(0, 28);

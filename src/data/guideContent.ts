@@ -1004,6 +1004,21 @@ export const GUIDE_TIPS: GuideTip[] = [
     },
   },
   {
+    id: 'child-protection-no-money-candy',
+    emoji: '🍬',
+    category: 'culture',
+    title: {
+      km: 'ហាមឱ្យប្រាក់ ឬស្ករគ្រាប់ដល់ក្មេងៗ',
+      en: 'Do not give money or candy to children',
+      zh: '请勿向儿童施舍金钱或糖果',
+    },
+    body: {
+      km: 'ហាមឱ្យប្រាក់ ឬស្ករគ្រាប់ដល់ក្មេងៗ ព្រោះវាលើកទឹកចិត្តឱ្យកុមារបោះបង់ការសិក្សាមកសុំទាន ឬលក់ដូរក្នុងម៉ោងរៀន។',
+      en: 'Avoid giving money or candy to children at tourist spots — it encourages school dropout and child labor. Support accredited child welfare and school programs instead.',
+      zh: '请勿向景区内的儿童施舍零钱或糖果，避免促使其逃学乞讨或从事童工贩卖；建议通过支持正规教育与慈善机构予以帮助。',
+    },
+  },
+  {
     id: 'angkor-official-ticket',
     emoji: '🎟️',
     category: 'culture',

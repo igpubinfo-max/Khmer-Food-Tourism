@@ -26,6 +26,7 @@ import {
 import { tr } from '../utils/i18n';
 import { DetailedFourPartRatingsCard } from './common/CambodiaChoiceAndRatings';
 import { NearbyEcosystemSection } from './common/NearbyEcosystemSection';
+import { TripAdvisorAreaMapCard } from './common/TripAdvisorAreaMapCard';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { getDestinationCompleteTravelInfo } from '../utils/destinationTravelInfo';
 import { findProvinceAdminHistory } from '../data/provincialAdminPortsEmergencyData';
@@ -956,6 +957,24 @@ export const TouristDetailModal: React.FC = () => {
             )}
 
             {/* Nearby Food, Stays & Attractions (GPS Haversine) */}
+            <TripAdvisorAreaMapCard
+              language={language}
+              nameKh={selectedDestination.nameKh}
+              nameEn={selectedDestination.nameEn}
+              addressKh={selectedDestination.addressKh}
+              provinceKh={selectedDestination.provinceKh}
+              provinceEn={selectedDestination.provinceEn}
+              lat={selectedDestination.latitude}
+              lng={selectedDestination.longitude}
+              onOpenFullMap={(mode) => {
+                window.dispatchEvent(
+                  new CustomEvent('kft:open-offline-cambodia-map', {
+                    detail: { kind: 'destination', destination: selectedDestination, mode },
+                  })
+                );
+              }}
+            />
+
             <NearbyEcosystemSection
               language={language}
               origin={{

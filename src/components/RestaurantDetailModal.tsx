@@ -33,6 +33,7 @@ import { tr } from '../utils/i18n';
 import { isHotelBusinessRecord } from '../types';
 import { DetailedFourPartRatingsCard } from './common/CambodiaChoiceAndRatings';
 import { NearbyEcosystemSection } from './common/NearbyEcosystemSection';
+import { TripAdvisorAreaMapCard } from './common/TripAdvisorAreaMapCard';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import {
   sanitizeDialablePhone,
@@ -531,6 +532,24 @@ export const RestaurantDetailModal: React.FC = () => {
                 </div>
               </div>
             )}
+
+            <TripAdvisorAreaMapCard
+              language={language}
+              nameKh={selectedRestaurant.nameKh}
+              nameEn={selectedRestaurant.nameEn}
+              addressKh={selectedRestaurant.addressKh}
+              provinceKh={selectedRestaurant.provinceKh}
+              provinceEn={selectedRestaurant.provinceEn}
+              lat={selectedRestaurant.latitude}
+              lng={selectedRestaurant.longitude}
+              onOpenFullMap={(mode) => {
+                window.dispatchEvent(
+                  new CustomEvent('kft:open-offline-cambodia-map', {
+                    detail: { kind: 'restaurant', restaurant: selectedRestaurant, mode },
+                  })
+                );
+              }}
+            />
 
             <NearbyEcosystemSection
               language={language}
