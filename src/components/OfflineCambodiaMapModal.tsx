@@ -184,11 +184,25 @@ export const OfflineCambodiaMapModal: React.FC = () => {
   const [filterKind, setFilterKind] = useState<'all' | 'destination' | 'restaurant' | 'hotel' | 'hospital'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activePinId, setActivePinId] = useState<string | null>(null);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; isRealGps: boolean }>({
-    lat: 11.5564,
-    lng: 104.9182,
-    isRealGps: false,
+  const LAST_GPS_KEY = 'kft_offline_map_last_gps';
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; isRealGps: boolean }>(() => {
+    try {
+      const stored = typeof localStorage !== 'undefined' ? localStorage.getItem(LAST_GPS_KEY) : null;
+      if (stored) {
+        const p = JSON.parse(stored);
+        if (typeof p.lat === 'number' && typeof p.lng === 'number') {
+          return { lat: p.lat, lng: p.lng, isRealGps: false };
+        }
+      }
+    } catch {
+      /* ignore corrupt cache */
+    }
+    return { lat: 11.5564, lng: 104.9182, isRealGps: false };
   });
+  const [gpsStatus, setGpsStatus] = useState<'searching' | 'fixed' | 'error' | 'denied'>('searching');
+  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
+  const [gpsRetryTick, setGpsRetryTick] = useState(0);
+  const lastFixRef = useRef<{ lat: number; lng: number; acc: number; at: number } | null>(null);
 
   // Slippy Map Center & Zoom (zoom 7 = whole Cambodia, zoom 14..16 = Google Maps street level!)
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({
@@ -329,45 +343,67 @@ export const OfflineCambodiaMapModal: React.FC = () => {
     return list;
   }, [destinations, restaurants]);
 
-  const requestDeviceGps = () => {
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserLocation({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-            isRealGps: true,
-          });
-        },
-        () => {},
-        { enableHighAccuracy: true, timeout: 6000, maximumAge: 30000 }
-      );
+  const applyGpsFix = (pos: GeolocationPosition) => {
+    const { latitude, longitude, accuracy } = pos.coords;
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+    if (accuracy > 5000) return;
+    const now = Date.now();
+    const prev = lastFixRef.current;
+    if (prev) {
+      // Ignore a worse (coarse) fix that arrives right after a better one
+      if (accuracy > prev.acc && now - prev.at < 10000) return;
+      const movedM = haversineKm(prev.lat, prev.lng, latitude, longitude) * 1000;
+      if (movedM < 4 && Math.abs(accuracy - prev.acc) < 5) return;
+    }
+    lastFixRef.current = { lat: latitude, lng: longitude, acc: accuracy, at: now };
+    setUserLocation({ lat: latitude, lng: longitude, isRealGps: true });
+    setGpsAccuracy(Math.round(accuracy));
+    setGpsStatus('fixed');
+    try {
+      localStorage.setItem(LAST_GPS_KEY, JSON.stringify({ lat: latitude, lng: longitude, at: now }));
+    } catch {
+      /* storage full / unavailable */
     }
   };
 
-  // Live GPS tracking during active turn-by-turn navigation
+  const requestDeviceGps = () => {
+    setGpsStatus('searching');
+    setGpsRetryTick((t) => t + 1);
+  };
+
+  // Continuous real-GPS tracking while the map is open (works offline; paused during simulated drive)
   useEffect(() => {
-    if (!isOpen || !isNavigatingLive) return;
-    let watchId: number | null = null;
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          setUserLocation({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-            isRealGps: true,
-          });
-        },
-        () => {},
-        { enableHighAccuracy: true, maximumAge: 5000, timeout: 8000 }
-      );
+    if (!isOpen || isNavigatingLive) return;
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGpsStatus('error');
+      return;
     }
-    return () => {
-      if (watchId !== null && typeof navigator !== 'undefined' && navigator.geolocation) {
-        navigator.geolocation.clearWatch(watchId);
-      }
+    let cancelled = false;
+    const onFix = (pos: GeolocationPosition) => {
+      if (!cancelled) applyGpsFix(pos);
     };
-  }, [isOpen, isNavigatingLive]);
+    const onError = (err: GeolocationPositionError) => {
+      if (cancelled) return;
+      if (err.code === 1) setGpsStatus('denied');
+      else if (!lastFixRef.current) setGpsStatus('error');
+    };
+    // 1) Fast coarse fix (Wi-Fi / cell) so the dot moves within seconds
+    navigator.geolocation.getCurrentPosition(onFix, () => {}, {
+      enableHighAccuracy: false,
+      timeout: 8000,
+      maximumAge: 0,
+    });
+    // 2) Continuous high-accuracy GPS fixes
+    const watchId = navigator.geolocation.watchPosition(onFix, onError, {
+      enableHighAccuracy: true,
+      timeout: 20000,
+      maximumAge: 0,
+    });
+    return () => {
+      cancelled = true;
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [isOpen, isNavigatingLive, gpsRetryTick]);
 
   const focusMapOnPlaceAndRoute = (targetLat: number, targetLng: number, startLat: number, startLng: number) => {
     const distKm = haversineKm(startLat, startLng, targetLat, targetLng);
@@ -590,6 +626,7 @@ export const OfflineCambodiaMapModal: React.FC = () => {
   // ============================================================================
   useEffect(() => {
     if (!isOpen) return;
+    const rafId = requestAnimationFrame(() => {
     const canvas = canvasRef.current;
     const container = viewportRef.current;
     if (!canvas || !container) return;
@@ -898,7 +935,8 @@ export const OfflineCambodiaMapModal: React.FC = () => {
       }
     }
 
-    // 5. Render Road Names & Highway Shields along road segments
+    // 5. Render Road Names & Highway Shields along road segments (skip overlapping labels)
+    const placedLabels: Array<[number, number, number, number]> = [];
     for (const seg of allRoads) {
       if (seg.tier === 'street' && intZoom < 13) continue;
       if (seg.tier === 'boulevard' && intZoom < 11) continue;
@@ -917,6 +955,12 @@ export const OfflineCambodiaMapModal: React.FC = () => {
       if (!labelText) continue;
       ctx.font = seg.tier === 'street' ? 'bold 9.5px sans-serif' : 'bold 10.5px sans-serif';
       const textW = Math.min(180, ctx.measureText(labelText).width + 10);
+      const lx1 = pt.x - textW / 2 - 2;
+      const lx2 = pt.x + textW / 2 + 2;
+      const ly1 = pt.y - 10;
+      const ly2 = pt.y + 9;
+      if (placedLabels.some(([ax1, ay1, ax2, ay2]) => lx1 < ax2 && lx2 > ax1 && ly1 < ay2 && ly2 > ay1)) continue;
+      placedLabels.push([lx1, ly1, lx2, ly2]);
 
       ctx.fillStyle =
         seg.tier === 'national' || seg.tier === 'expressway'
@@ -1043,12 +1087,26 @@ export const OfflineCambodiaMapModal: React.FC = () => {
 
     // 9. Render User GPS Blue Dot
     const uPt = toScreen(userLocation.lat, userLocation.lng);
-    ctx.fillStyle = 'rgba(26, 115, 232, 0.25)';
+    const gpsLive = gpsStatus === 'fixed' || isNavigatingLive;
+    if (gpsLive && gpsAccuracy && gpsAccuracy > 15) {
+      const metersPerPx = (156543.03392 * Math.cos((userLocation.lat * Math.PI) / 180)) / Math.pow(2, intZoom);
+      const accPx = Math.min(160, gpsAccuracy / metersPerPx);
+      if (accPx > 9) {
+        ctx.fillStyle = 'rgba(26, 115, 232, 0.12)';
+        ctx.strokeStyle = 'rgba(26, 115, 232, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(uPt.x, uPt.y, accPx, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+    ctx.fillStyle = gpsLive ? 'rgba(26, 115, 232, 0.25)' : 'rgba(100, 116, 139, 0.28)';
     ctx.beginPath();
     ctx.arc(uPt.x, uPt.y, 14, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#1A73E8';
+    ctx.fillStyle = gpsLive ? '#1A73E8' : '#94A3B8';
     ctx.strokeStyle = '#FFFFFF';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
@@ -1095,8 +1153,13 @@ export const OfflineCambodiaMapModal: React.FC = () => {
     }
 
     ctx.restore();
+    });
+    return () => cancelAnimationFrame(rafId);
   }, [
     isOpen,
+    gpsAccuracy,
+    gpsStatus,
+    isNavigatingLive,
     mapCenter,
     zoom,
     mapTheme,
@@ -1428,6 +1491,28 @@ export const OfflineCambodiaMapModal: React.FC = () => {
             <LocateFixed className="w-4 h-4 text-amber-300" />
           </button>
         </div>
+
+        {/* Live GPS status (tap to retry) */}
+        <button
+          type="button"
+          onClick={requestDeviceGps}
+          className={`absolute left-3 bottom-11 px-2.5 py-1 rounded-xl text-[10px] font-bold font-khmer shadow border cursor-pointer flex items-center gap-1.5 ${
+            gpsStatus === 'fixed'
+              ? 'bg-emerald-700/95 text-white border-emerald-300/50'
+              : gpsStatus === 'searching'
+              ? 'bg-amber-600/95 text-white border-amber-300/50'
+              : 'bg-red-700/95 text-white border-red-300/50'
+          }`}
+        >
+          <LocateFixed className="w-3 h-3" />
+          {gpsStatus === 'fixed'
+            ? tr(language, `GPS ត្រឹមត្រូវ ±${gpsAccuracy ?? '?'} ម`, `GPS ±${gpsAccuracy ?? '?'} m`, `GPS ±${gpsAccuracy ?? '?'} 米`)
+            : gpsStatus === 'searching'
+            ? tr(language, 'កំពុងស្វែងរក GPS...', 'Locating GPS...', '正在定位...')
+            : gpsStatus === 'denied'
+            ? tr(language, 'សូមអនុញ្ញាតទីតាំង (ចុចសាកម្តងទៀត)', 'Allow location (tap to retry)', '请允许定位（点击重试）')
+            : tr(language, 'មិនទាន់ចាប់ GPS (ចុចសាកម្តងទៀត)', 'No GPS yet (tap to retry)', '暂无GPS（点击重试）')}
+        </button>
 
         {/* Floating Zoom Level & Road Legend Pill */}
         <div className="absolute left-3 bottom-2.5 px-2.5 py-1 rounded-xl bg-slate-900/90 border border-slate-700/80 text-[10px] text-slate-200 flex items-center gap-2.5 font-khmer pointer-events-none">
