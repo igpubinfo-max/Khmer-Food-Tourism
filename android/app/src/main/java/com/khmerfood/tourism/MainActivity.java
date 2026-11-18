@@ -59,6 +59,7 @@ public class MainActivity extends BridgeActivity {
             settings.setJavaScriptEnabled(true);
             settings.setDomStorageEnabled(true);
             settings.setDatabaseEnabled(true);
+            settings.setGeolocationEnabled(true);
             settings.setAllowFileAccess(false);
             settings.setAllowContentAccess(false);
             settings.setAllowFileAccessFromFileURLs(false);

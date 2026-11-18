@@ -121,28 +121,60 @@ export function isValidCambodiaGps(lat?: number, lng?: number): boolean {
 
 let inMemorySavedGpsCache: { coords: { lat: number; lng: number } | null; readAt: number } | null = null;
 
-export function readSavedUserGps(): { lat: number; lng: number } | null {
-  const now = Date.now();
-  if (inMemorySavedGpsCache && now - inMemorySavedGpsCache.readAt < 10_000) {
-    return inMemorySavedGpsCache.coords;
-  }
+export interface DetailedSavedGps {
+  lat: number;
+  lng: number;
+  accuracy: number | null;
+  heading: number | null;
+  speed: number | null;
+  isRealGps: boolean;
+  updatedAt: number;
+}
+
+export function isHardcodedDefaultFallbackCoord(lat: number, lng: number): boolean {
+  return (
+    Math.abs(lat - 11.5564) < 0.00005 &&
+    (Math.abs(lng - 104.9282) < 0.00005 || Math.abs(lng - 104.9182) < 0.00005)
+  );
+}
+
+export function readSavedUserGpsDetailed(): DetailedSavedGps | null {
   try {
     if (typeof localStorage === 'undefined') return null;
     const raw = localStorage.getItem(LAST_KNOWN_GPS_STORAGE_KEY);
-    if (!raw) {
-      inMemorySavedGpsCache = { coords: null, readAt: now };
-      return null;
-    }
+    if (!raw) return null;
     const parsed = JSON.parse(raw);
     const lat = Number(parsed?.lat);
     const lng = Number(parsed?.lng);
-    if (isValidCambodiaGps(lat, lng)) {
-      const coords = { lat, lng };
-      inMemorySavedGpsCache = { coords, readAt: now };
-      return coords;
+    if (!isValidCambodiaGps(lat, lng)) return null;
+    if (parsed?.isRealGps === false) return null;
+    if (parsed?.isRealGps !== true && isHardcodedDefaultFallbackCoord(lat, lng)) {
+      return null;
     }
+    return {
+      lat,
+      lng,
+      accuracy: typeof parsed?.accuracy === 'number' && Number.isFinite(parsed.accuracy) ? parsed.accuracy : null,
+      heading: typeof parsed?.heading === 'number' && Number.isFinite(parsed.heading) ? parsed.heading : null,
+      speed: typeof parsed?.speed === 'number' && Number.isFinite(parsed.speed) ? parsed.speed : null,
+      isRealGps: true,
+      updatedAt: Number(parsed?.updatedAt || Date.now()),
+    };
   } catch {
-    // ignore storage errors
+    return null;
+  }
+}
+
+export function readSavedUserGps(): { lat: number; lng: number } | null {
+  const now = Date.now();
+  if (inMemorySavedGpsCache && now - inMemorySavedGpsCache.readAt < 5_000) {
+    return inMemorySavedGpsCache.coords;
+  }
+  const detailed = readSavedUserGpsDetailed();
+  if (detailed) {
+    const coords = { lat: detailed.lat, lng: detailed.lng };
+    inMemorySavedGpsCache = { coords, readAt: now };
+    return coords;
   }
   inMemorySavedGpsCache = { coords: null, readAt: now };
   return null;
@@ -307,11 +339,20 @@ export async function detectUserGpsCoordinate(
   }
   return new Promise((resolve) => {
     let resolved = false;
-    const finish = (lat?: number, lng?: number, error?: string) => {
+    const finish = (pos?: GeolocationPosition, error?: string) => {
       if (resolved) return;
       resolved = true;
+      const lat = pos?.coords?.latitude;
+      const lng = pos?.coords?.longitude;
       if (typeof lat === 'number' && typeof lng === 'number' && isValidCambodiaGps(lat, lng)) {
-        saveUserGps({ lat, lng });
+        saveUserGps({
+          lat,
+          lng,
+          accuracy: pos?.coords?.accuracy,
+          heading: pos?.coords?.heading,
+          speed: pos?.coords?.speed,
+          isRealGps: true,
+        });
         resolve({ coord: { lat, lng } });
       } else {
         resolve({ coord: readSavedUserGps(), error });
@@ -319,31 +360,46 @@ export async function detectUserGpsCoordinate(
     };
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => finish(pos.coords.latitude, pos.coords.longitude),
+      (pos) => finish(pos),
       () => {
         navigator.geolocation.getCurrentPosition(
-          (pos) => finish(pos.coords.latitude, pos.coords.longitude),
-          (err) => finish(undefined, undefined, err.message),
-          { enableHighAccuracy: false, timeout: 3500, maximumAge: 180000 }
+          (pos) => finish(pos),
+          (err) => finish(undefined, err.message),
+          { enableHighAccuracy: false, timeout: 6000, maximumAge: 120000 }
         );
       },
-      { enableHighAccuracy: forceHighAccuracy, timeout: 4000, maximumAge: forceHighAccuracy ? 0 : 60000 }
+      { enableHighAccuracy: forceHighAccuracy, timeout: 8000, maximumAge: forceHighAccuracy ? 0 : 45000 }
     );
   });
 }
 
-export function saveUserGps(coords: { lat: number; lng: number }): void {
+export function saveUserGps(coords: {
+  lat: number;
+  lng: number;
+  accuracy?: number | null;
+  heading?: number | null;
+  speed?: number | null;
+  isRealGps?: boolean;
+}): void {
   if (!isValidCambodiaGps(coords?.lat, coords?.lng)) return;
   try {
+    const now = Date.now();
+    const payload = {
+      lat: coords.lat,
+      lng: coords.lng,
+      accuracy: typeof coords.accuracy === 'number' && Number.isFinite(coords.accuracy) ? Math.round(coords.accuracy) : null,
+      heading: typeof coords.heading === 'number' && Number.isFinite(coords.heading) ? coords.heading : null,
+      speed: typeof coords.speed === 'number' && Number.isFinite(coords.speed) ? coords.speed : null,
+      isRealGps: coords.isRealGps !== false,
+      updatedAt: now,
+    };
     if (typeof localStorage !== 'undefined') {
-      inMemorySavedGpsCache = { coords: { lat: coords.lat, lng: coords.lng }, readAt: Date.now() };
-      localStorage.setItem(
-        LAST_KNOWN_GPS_STORAGE_KEY,
-        JSON.stringify({ lat: coords.lat, lng: coords.lng, updatedAt: Date.now() })
-      );
+      inMemorySavedGpsCache = { coords: { lat: coords.lat, lng: coords.lng }, readAt: now };
+      localStorage.setItem(LAST_KNOWN_GPS_STORAGE_KEY, JSON.stringify(payload));
+      localStorage.setItem('kft_offline_map_last_gps', JSON.stringify(payload));
     }
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('kft:gps-updated', { detail: coords }));
+      window.dispatchEvent(new CustomEvent('kft:gps-updated', { detail: payload }));
     }
   } catch {
     // ignore storage errors
@@ -468,11 +524,17 @@ export function requestCambodiaGpsLocation(options: {
       const rawLng = position.coords.longitude;
       if (isValidCambodiaGps(rawLat, rawLng)) {
         const nextCoords = { lat: rawLat, lng: rawLng };
-        saveUserGps(nextCoords);
+        saveUserGps({
+          lat: rawLat,
+          lng: rawLng,
+          accuracy: position.coords.accuracy,
+          heading: position.coords.heading,
+          speed: position.coords.speed,
+          isRealGps: true,
+        });
         onGranted(nextCoords, detectClosestProvinceFromCoords(nextCoords));
       } else {
         const fallback = savedGps || defaultCenter;
-        saveUserGps(fallback);
         onFallback(fallback, detectClosestProvinceFromCoords(fallback));
       }
     };
@@ -480,7 +542,6 @@ export function requestCambodiaGpsLocation(options: {
     const handleFinalFallback = () => {
       if (!isCurrentReq()) return;
       const fallback = savedGps || defaultCenter;
-      saveUserGps(fallback);
       onFallback(fallback, detectClosestProvinceFromCoords(fallback));
     };
 
@@ -491,14 +552,13 @@ export function requestCambodiaGpsLocation(options: {
         navigator.geolocation.getCurrentPosition(
           handleSuccess,
           handleFinalFallback,
-          { enableHighAccuracy: false, timeout: 4000, maximumAge: 180000 }
+          { enableHighAccuracy: false, timeout: 7000, maximumAge: 180000 }
         );
       },
-      { enableHighAccuracy: Boolean(forceRefresh), timeout: 4500, maximumAge: forceRefresh ? 0 : 120000 }
+      { enableHighAccuracy: true, timeout: 9000, maximumAge: forceRefresh ? 0 : 60000 }
     );
   } else {
     const fallback = savedGps || defaultCenter;
-    saveUserGps(fallback);
     onFallback(fallback, detectClosestProvinceFromCoords(fallback));
   }
 }
