@@ -332,7 +332,7 @@ async function main() {
       validBuilds[0];
 
     // If expectedBuildVersion was requested or no build is attached yet, attach the newest valid build
-    if (!attachedBuildId || (expectedBuildVersion && String(preferredBuild.attributes?.version) === expectedBuildVersion && attachedBuildId !== preferredBuild.id)) {
+    if (!attachedBuildId || attachedBuildId !== preferredBuild.id) {
       console.log(`Attaching build ${preferredBuild.attributes?.version} (${preferredBuild.id}) to version ${TARGET_VERSION_STRING}...`);
       const attachRes = await ascRequest(`/appStoreVersions/${versionId}/relationships/build`, 'PATCH', {
         data: {
