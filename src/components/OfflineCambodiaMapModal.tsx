@@ -236,29 +236,6 @@ export const OfflineCambodiaMapModal: React.FC = () => {
     };
   }, []);
 
-  // Load initial offline tile count from IndexedDB & auto-cache current area for instant offline readiness
-  useEffect(() => {
-    if (!isOpen) return;
-    getOfflinePackStatus().then((st) => {
-      setDownloadedTilesCount(st.downloadedTilesCount);
-      if (st.downloadedTilesCount === 0) {
-        const targetLat = activePin ? activePin.lat : mapCenter.lat;
-        const targetLng = activePin ? activePin.lng : mapCenter.lng;
-        downloadOfflineMapPack(
-          targetLat,
-          targetLng,
-          'auto-init-pack',
-          activePin?.addressKh,
-          activePin?.nameKh
-        ).then(() => {
-          getOfflinePackStatus().then((updated) => {
-            setDownloadedTilesCount(updated.downloadedTilesCount);
-          });
-        });
-      }
-    });
-  }, [isOpen, activePin, mapCenter.lat, mapCenter.lng]);
-
   // Build unified pins list (Tourism + Hotels + Restaurants/Shops + 25 Referral Hospitals)
   const allPins = useMemo<MapPinEntry[]>(() => {
     const list: MapPinEntry[] = [];
@@ -470,6 +447,29 @@ export const OfflineCambodiaMapModal: React.FC = () => {
     if (!activePinId) return allPins[0] || null;
     return allPins.find((p) => p.id === activePinId) || allPins[0] || null;
   }, [allPins, activePinId]);
+
+  // Load initial offline tile count from IndexedDB & auto-cache current area for instant offline readiness
+  useEffect(() => {
+    if (!isOpen) return;
+    getOfflinePackStatus().then((st) => {
+      setDownloadedTilesCount(st.downloadedTilesCount);
+      if (st.downloadedTilesCount === 0) {
+        const targetLat = activePin ? activePin.lat : mapCenter.lat;
+        const targetLng = activePin ? activePin.lng : mapCenter.lng;
+        downloadOfflineMapPack(
+          targetLat,
+          targetLng,
+          'auto-init-pack',
+          activePin?.addressKh,
+          activePin?.nameKh
+        ).then(() => {
+          getOfflinePackStatus().then((updated) => {
+            setDownloadedTilesCount(updated.downloadedTilesCount);
+          });
+        });
+      }
+    });
+  }, [isOpen, activePin, mapCenter.lat, mapCenter.lng]);
 
   const visiblePins = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -932,7 +932,7 @@ export const OfflineCambodiaMapModal: React.FC = () => {
           : '#334155';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.roundRect(pt.x - textW / 2, pt.y - 8, textW, 15, 4);
+      if (typeof ctx.roundRect === "function") ctx.roundRect(pt.x - textW / 2, pt.y - 8, textW, 15, 4); else ctx.rect(pt.x - textW / 2, pt.y - 8, textW, 15);
       ctx.fill();
       ctx.stroke();
 
@@ -1085,7 +1085,7 @@ export const OfflineCambodiaMapModal: React.FC = () => {
       ctx.strokeStyle = '#FACC15';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.roundRect(boxX, boxY, boxW, 22, 6);
+      if (typeof ctx.roundRect === "function") ctx.roundRect(boxX, boxY, boxW, 22, 6); else ctx.rect(boxX, boxY, boxW, 22);
       ctx.fill();
       ctx.stroke();
 

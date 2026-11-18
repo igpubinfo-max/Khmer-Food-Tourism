@@ -1482,6 +1482,10 @@ test('21. Offline Road Map, Tile Downloader & A* Road-Following Router Guard', (
   // Verify OfflineCambodiaMapModal has canvas renderer, tile downloader, and live navigation controls
   const modalSrc = fs.readFileSync(path.join(ROOT, 'src/components/OfflineCambodiaMapModal.tsx'), 'utf8');
   assert.ok(modalSrc.includes('<canvas ref={canvasRef}'), 'OfflineCambodiaMapModal must use High-DPI road canvas renderer');
+  assert.ok(
+    modalSrc.indexOf('const activePin = useMemo') < modalSrc.indexOf('[isOpen, activePin,'),
+    'const activePin must be declared before any useEffect dependency array references it (prevents TDZ ReferenceError)'
+  );
   assert.ok(modalSrc.includes('handleDownloadOfflineMap'), 'OfflineCambodiaMapModal must provide working offline map download button');
   assert.ok(modalSrc.includes('computeOfflineRoadRoute'), 'OfflineCambodiaMapModal must use A* road-following route engine');
 
