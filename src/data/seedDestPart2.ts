@@ -5242,7 +5242,7 @@ export const destPart2: TouristDestination[] = [
     "categoryEn": "Cultural & Historical Resort",
     "descriptionKh": "សួនច្បារឯករាជ្យមាត់បឹងព្រៃវែង ជាបេះដូងកម្សាន្តនៃក្រុងព្រៃវែង មានវិមានឯករាជ្យ ផ្លូវដើរលម្អដោយផ្កាចម្រុះពណ៌ ភ្លើងរាត្រី និងជាកន្លែងជួបជុំដ៏រស់រវើករបស់ប្រជាពលរដ្ឋ។",
     "descriptionEn": "The central civic promenade of Krong Prey Veng along the lakeside, crowned by the Independence Monument, illuminated fountains, and evening recreational paths.",
-    "photoUrl": "/destinations/dest-288.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តព្រៃវែង",
     "provinceEn": "Prey Veng",
     "addressKh": "កណ្តាលក្រុងព្រៃវែង ខេត្តព្រៃវែង",

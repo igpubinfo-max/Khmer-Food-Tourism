@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? Math.max(__KFT_BUILD_CODE__, 1643) : 1643;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? Math.max(__KFT_BUILD_CODE__, 1644) : 1644;
 export const APP_RELEASE_DATE = '2026-11-18';
 
 /**
@@ -3084,6 +3084,14 @@ export const openRestaurantGoogleExternal = (
   mode: 'search' | 'maps' | 'directions' = 'maps',
   origin?: { lat: number; lng: number } | null
 ): boolean => {
+  if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.onLine === false) {
+    window.dispatchEvent(
+      new CustomEvent('kft:open-offline-cambodia-map', {
+        detail: { kind: 'restaurant', restaurant, mode, origin },
+      })
+    );
+    return true;
+  }
   const url = getRestaurantGoogleExternalUrl(restaurant, mode, origin);
   if (!url) {
     notifyUnverifiedLocationBlocked(restaurant.nameKh || restaurant.nameEn);
@@ -3157,6 +3165,14 @@ export const openDestinationGoogleExternal = (
   mode: 'maps' | 'directions' = 'maps',
   origin?: { lat: number; lng: number } | null
 ): boolean => {
+  if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.onLine === false) {
+    window.dispatchEvent(
+      new CustomEvent('kft:open-offline-cambodia-map', {
+        detail: { kind: 'destination', destination, mode, origin },
+      })
+    );
+    return true;
+  }
   const url = getDestinationGoogleExternalUrl(destination, mode, origin);
   if (!url) {
     notifyUnverifiedLocationBlocked(destination.nameKh || destination.nameEn);
@@ -3200,6 +3216,14 @@ export const openTrendingFoodGoogleExternal = (
   mode: 'maps' | 'directions' = 'maps',
   origin?: { lat: number; lng: number } | null
 ): boolean => {
+  if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.onLine === false) {
+    window.dispatchEvent(
+      new CustomEvent('kft:open-offline-cambodia-map', {
+        detail: { kind: 'trending', trending: item, mode, origin },
+      })
+    );
+    return true;
+  }
   const url = getTrendingFoodGoogleExternalUrl(item, mode, origin);
   if (!url) {
     notifyUnverifiedLocationBlocked(item.restaurantNameKh || item.foodNameKh);

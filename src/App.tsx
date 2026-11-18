@@ -44,6 +44,7 @@ import { RatePrompt } from './components/RatePrompt';
 import { MealReminderBootstrap } from './components/MealReminderBootstrap';
 import { TrialWinbackBootstrap } from './components/TrialWinbackBootstrap';
 import { OfflineBanner } from './components/OfflineBanner';
+import { OfflineCambodiaMapModal } from './components/OfflineCambodiaMapModal';
 import { AppUpdateBanner } from './components/AppUpdateBanner';
 import { SMART_HUB_EVENT } from './utils/smartHub';
 import { useBodyScrollLock } from './utils/useBodyScrollLock';
@@ -395,6 +396,9 @@ const MainScreen: React.FC = () => {
           />
         )}
       </Suspense>
+
+      {/* Global In-App Offline Cambodia Map & Route Modal */}
+      <OfflineCambodiaMapModal />
 
       {/* Notifications */}
       {toast && <Toast />}

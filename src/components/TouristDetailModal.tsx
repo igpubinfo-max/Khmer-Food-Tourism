@@ -695,6 +695,27 @@ export const TouristDetailModal: React.FC = () => {
                 <Compass className="w-4 h-4 shrink-0" />
                 <span>{tr(language, 'នាំផ្លូវទៅកាន់ទីតាំង', 'Navigate / Directions', '开始路线导航')}</span>
               </button>
+              <button
+                type="button"
+                onClick={() =>
+                  window.dispatchEvent(
+                    new CustomEvent('kft:open-offline-cambodia-map', {
+                      detail: { kind: 'destination', destination: selectedDestination, mode: 'directions' },
+                    })
+                  )
+                }
+                className="sm:col-span-2 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-800 via-[#064E3B] to-slate-900 hover:from-emerald-700 hover:to-slate-800 text-amber-200 border border-amber-400/40 text-xs sm:text-sm font-bold shadow transition active:scale-98 cursor-pointer font-khmer"
+              >
+                <span>🗺️</span>
+                <span>
+                  {tr(
+                    language,
+                    'បើកផែនទីកម្ពុជា Offline & មើលផ្លូវជាតិ (មិនប្រើអ៊ីនធឺណិត)',
+                    'Open In-App Offline Cambodia Map & Route',
+                    '打开应用内柬埔寨离线地图与路线'
+                  )}
+                </span>
+              </button>
             </div>
 
             {/* Viral TikTok & Facebook Trending Card */}
