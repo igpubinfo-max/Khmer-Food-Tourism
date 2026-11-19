@@ -193,18 +193,12 @@ function kftVersionManifestPlugin(): Plugin {
         fileName: 'version.json',
         source: buildManifestJson(),
       });
-      // Strip residual block comments in emitted JS chunks for extra code obfuscation
-      for (const item of Object.values(bundle)) {
-        if (item.type === 'chunk' && typeof item.code === 'string') {
-          item.code = item.code.replace(/\/\*![\s\S]*?\*\//g, '');
-        }
-      }
     },
   };
 }
 
 // https://vite.dev/config/
-// Auto-reloaded buildCode: 1656
+// Auto-reloaded buildCode: 1657
 export default defineConfig({
   base: './',
   define: {

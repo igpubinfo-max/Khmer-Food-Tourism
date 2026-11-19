@@ -100,5 +100,10 @@ export function decodeProtectedSeedPayload<T = unknown>(payload: string | T): T 
     }
   }
 
-  return JSON.parse(out.join('')) as T;
+  try {
+    return JSON.parse(out.join('')) as T;
+  } catch (err) {
+    console.error('[KFT Seed Cipher] Fallback empty array on malformed payload:', err);
+    return [] as unknown as T;
+  }
 }
