@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { Navigation, Maximize2, Minimize2, Compass, WifiOff, Map as MapIcon } from 'lucide-react';
 import { Language } from '../../types';
 import { openExternalUrlNativeSafe } from '../../types';
@@ -38,6 +38,28 @@ export const OnlineAreaMapCard: React.FC<OnlineAreaMapCardProps> = ({
   );
   const [expanded, setExpanded] = useState(false);
   const [interactive, setInteractive] = useState(false);
+  const [isVisibleInViewport, setIsVisibleInViewport] = useState(false);
+  const cardContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (isVisibleInViewport) return;
+    const el = cardContainerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setIsVisibleInViewport(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setIsVisibleInViewport(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: '280px' }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [isVisibleInViewport]);
 
   useEffect(() => {
     const on = () => setIsOnline(true);
@@ -113,7 +135,7 @@ export const OnlineAreaMapCard: React.FC<OnlineAreaMapCardProps> = ({
     : 'relative w-full h-52 sm:h-60 overflow-hidden border-t border-slate-800';
 
   return (
-    <div className="rounded-2xl overflow-hidden bg-[#12161F] border border-slate-700/80 shadow-lg text-white font-khmer">
+    <div ref={cardContainerRef} className="rounded-2xl overflow-hidden bg-[#12161F] border border-slate-700/80 shadow-lg text-white font-khmer">
       <div className="p-4 space-y-3">
         <h3 className="text-base sm:text-lg font-extrabold text-white">
           {tr(language, 'ផែនទីតំបន់ជុំវិញទីតាំងនេះ (The Area)', 'The area', '周边街区地图 (The Area)')}
@@ -158,6 +180,7 @@ export const OnlineAreaMapCard: React.FC<OnlineAreaMapCardProps> = ({
         <div className={expanded ? 'relative flex-1 min-h-0' : 'absolute inset-0'}>
           {isOnline ? (
             <>
+              {(isVisibleInViewport || interactive || expanded) && (
               <iframe
                 key={embedUrl}
                 title={`Online map — ${placeName}`}
@@ -168,6 +191,7 @@ export const OnlineAreaMapCard: React.FC<OnlineAreaMapCardProps> = ({
                 referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen
               />
+              )}
               {!interactive && !expanded && (
                 <button
                   type="button"

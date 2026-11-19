@@ -37,6 +37,7 @@ export const FoodView: React.FC = () => {
     pushNavigationStep,
     registerModalBackHandler,
     isRestoringHistoryRef,
+    activeTab,
   } = useApp();
   const isAdmin = Boolean(
     currentUser?.role === 'admin' ||
@@ -500,6 +501,8 @@ export const FoodView: React.FC = () => {
         );
     }
   };
+
+  if (activeTab !== 'food') return null;
 
   return (
     <div className="w-full max-w-6xl min-w-0 mx-auto bg-[#1E293B] text-[#1E293B] min-h-full font-khmer pb-20">

@@ -393,12 +393,18 @@ export function saveUserGps(coords: {
       isRealGps: coords.isRealGps !== false,
       updatedAt: now,
     };
+    const prevCoords = inMemorySavedGpsCache?.coords;
+    const movedMeters = prevCoords
+      ? calculateDistanceMeters(prevCoords.lat, prevCoords.lng, coords.lat, coords.lng)
+      : Infinity;
     if (typeof localStorage !== 'undefined') {
       inMemorySavedGpsCache = { coords: { lat: coords.lat, lng: coords.lng }, readAt: now };
-      localStorage.setItem(LAST_KNOWN_GPS_STORAGE_KEY, JSON.stringify(payload));
-      localStorage.setItem('kft_offline_map_last_gps', JSON.stringify(payload));
+      if (movedMeters >= 10) {
+        localStorage.setItem(LAST_KNOWN_GPS_STORAGE_KEY, JSON.stringify(payload));
+        localStorage.setItem('kft_offline_map_last_gps', JSON.stringify(payload));
+      }
     }
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && movedMeters >= 15) {
       window.dispatchEvent(new CustomEvent('kft:gps-updated', { detail: payload }));
     }
   } catch {

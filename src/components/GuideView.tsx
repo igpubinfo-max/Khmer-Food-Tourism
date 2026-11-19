@@ -326,6 +326,7 @@ export const GuideView: React.FC = () => {
     setIsAiTripPlannerModalOpen, setIsNearMeModalOpen,
     pushNavigationStep,
     isRestoringHistoryRef,
+    activeTab,
   } = useApp();
 
   const lang = language as Language;
@@ -636,6 +637,8 @@ export const GuideView: React.FC = () => {
       window.removeEventListener('kft:close-guide-overlay', close);
     };
   }, [bigPhraseId]);
+
+  if (activeTab !== 'guide') return null;
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-slate-900 min-h-full font-khmer pb-12">

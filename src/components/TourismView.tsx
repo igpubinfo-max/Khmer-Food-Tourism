@@ -70,6 +70,7 @@ export const TourismView: React.FC = () => {
     showToast,
     pushNavigationStep,
     isRestoringHistoryRef,
+    activeTab,
   } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [angkorGuideOpen, setAngkorGuideOpen] = useState<boolean>(false);
@@ -678,6 +679,8 @@ export const TourismView: React.FC = () => {
     observer.observe(node);
     return () => observer.disconnect();
   }, [visibleCount, filteredDestinations.length]);
+
+  if (activeTab !== 'tourism') return null;
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-20">

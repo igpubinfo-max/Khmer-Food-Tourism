@@ -104,6 +104,7 @@ export const RestaurantView: React.FC = () => {
     setIsNotificationsModalOpen,
     unreadNotificationsCount,
     setActiveTab,
+    activeTab,
     showToast,
     pushNavigationStep,
     registerModalBackHandler,
@@ -1045,6 +1046,8 @@ export const RestaurantView: React.FC = () => {
     }
     return '0.8 km';
   }, [featuredRestaurants, distanceMap]);
+
+  if (activeTab !== 'restaurants') return null;
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-20">

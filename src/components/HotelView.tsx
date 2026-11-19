@@ -358,6 +358,7 @@ export const HotelView: React.FC = () => {
     openManageMyVipStore,
     setIsAdminOpen,
     setActiveTab,
+    activeTab,
     unreadNotificationsCount,
     setIsNotificationsModalOpen,
     showToast,
@@ -1627,6 +1628,8 @@ export const HotelView: React.FC = () => {
     setSortMode('newest');
     scrollToHotelList();
   };
+
+  if (activeTab !== 'hotels') return null;
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-20">

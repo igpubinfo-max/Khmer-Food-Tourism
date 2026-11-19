@@ -4331,7 +4331,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } finally {
         isMigratingCloudImagesRef.current = false;
       }
-    }, 1200);
+    }, 10000);
 
     return () => {
       window.clearTimeout(timer);
@@ -5996,9 +5996,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 anyCustomChanged = true;
                 continue;
               }
+              const isSeedRest = isSeedRestaurantId(String(r.id));
               if (
-                (isSeedRestaurantId(String(r.id)) || !r.ownerId || !deletedIdSet.has(r.ownerId)) &&
-                isStrictVerifiedCambodiaRestaurant(r)
+                isSeedRest ||
+                ((!r.ownerId || !deletedIdSet.has(r.ownerId)) && isStrictVerifiedCambodiaRestaurant(r))
               ) {
                 map.set(r.id, r);
               } else {
@@ -6039,10 +6040,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
             const sorted = sortRestaurantsChronologically(Array.from(map.values()));
             latestSyncStateRef.current.restaurants = sorted;
-            try {
-              const compacted = compactDataForBulkLocalStorage('kft_restaurants_real_v13', sorted);
-              localStorage.setItem('kft_restaurants_real_v13', JSON.stringify(compacted));
-            } catch {}
+            scheduleStorageWrite('kft_restaurants_real_v13', sorted, 800);
             return sorted;
           });
         }

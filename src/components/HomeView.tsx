@@ -70,7 +70,8 @@ export const HomeView: React.FC = () => {
     getOwnedRestaurantsForUser, getCurrentUserStoreQuota, openManageMyVipStore, activeManagedShopId,
     openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal, setIsAdminOpen,
     transactions, supportTickets, triggerCloudSyncNow, bookmarks, toggleBookmark,
-    pushNavigationStep, isRestoringHistoryRef
+    pushNavigationStep, isRestoringHistoryRef,
+    activeTab,
   } = useApp();
 
   const isVip = isUserVipActive(currentUser);
@@ -468,6 +469,8 @@ export const HomeView: React.FC = () => {
     },
     [setIsTrendingSocialModalOpen]
   );
+
+  if (activeTab !== 'home') return null;
 
   return (
     <div className="w-full max-w-6xl min-w-0 mx-auto bg-[#FBF9F5] text-slate-900 min-h-full font-khmer">

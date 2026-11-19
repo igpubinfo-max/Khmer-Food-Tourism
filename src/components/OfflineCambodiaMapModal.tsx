@@ -434,16 +434,28 @@ export const OfflineCambodiaMapModal: React.FC = () => {
     setGpsRetryTick((t) => t + 1);
   };
 
-  // Device compass orientation listener (for rotating directional beam on blue dot)
+  // Device compass orientation listener (throttled to <= 4Hz & >= 5deg change to prevent 120Hz Canvas CPU/GPU overheating)
   useEffect(() => {
     if (!isOpen || !isPageVisible) return;
+    let lastUpdateMs = 0;
+    let lastHeadingDeg = -999;
     const handleOrientation = (e: DeviceOrientationEvent) => {
+      const now = Date.now();
+      if (now - lastUpdateMs < 250) return;
       const anyEv = e as any;
+      let nextDeg: number | null = null;
       if (typeof anyEv.webkitCompassHeading === 'number' && Number.isFinite(anyEv.webkitCompassHeading)) {
-        setCompassHeading(Math.round(anyEv.webkitCompassHeading));
+        nextDeg = Math.round(anyEv.webkitCompassHeading);
       } else if (typeof e.alpha === 'number' && Number.isFinite(e.alpha)) {
-        setCompassHeading(Math.round((360 - e.alpha) % 360));
+        nextDeg = Math.round((360 - e.alpha) % 360);
       }
+      if (nextDeg === null) return;
+      const diff = Math.abs(nextDeg - lastHeadingDeg);
+      const wrappedDiff = diff > 180 ? 360 - diff : diff;
+      if (wrappedDiff < 5) return;
+      lastUpdateMs = now;
+      lastHeadingDeg = nextDeg;
+      setCompassHeading(nextDeg);
     };
     window.addEventListener('deviceorientationabsolute' as any, handleOrientation, true);
     window.addEventListener('deviceorientation', handleOrientation, true);
