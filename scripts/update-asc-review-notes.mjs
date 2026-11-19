@@ -5,7 +5,7 @@ const ISSUER_ID = (process.env.APPSTORE_ISSUER_ID || '').trim();
 const KEY_ID = (process.env.APPSTORE_KEY_ID || '').trim();
 const PRIVATE_KEY = (process.env.APPSTORE_PRIVATE_KEY || '').trim();
 const APP_ID = '6826976670';
-const TARGET_VERSION_STRING = '2.7.2';
+const TARGET_VERSION_STRING = '2.7.3';
 const TARGET_APP_NAME = 'Cambodia Flavors & Tourism';
 
 const WHATS_NEW_TEXT = `• Added In-App Offline Cambodia Map & Route Guide covering all 25 provinces, national highways, and 1,980+ verified attractions, shops, hotels, and hospitals when offline.
@@ -65,7 +65,7 @@ async function ascRequest(endpoint, method = 'GET', body = null) {
 
 const REVIEW_NOTES = `Hello Apple App Review Team,
 
-Thank you for reviewing Cambodia Flavors & Tourism (v2.7.2). This update rebrands our display title to "Cambodia Flavors & Tourism", adds an in-app offline Cambodia map & route guide, and includes content & discovery improvements while preserving full compliance:
+Thank you for reviewing Cambodia Flavors & Tourism (v2.7.3). This update rebrands our display title to "Cambodia Flavors & Tourism", adds an in-app offline Cambodia map & route guide, and includes content & discovery improvements while preserving full compliance:
 
 1. Guideline 4.8 - Login Services:
 - The iOS app offers only its own email-based account (name and email, no advertising tracking). No third-party or social login is offered inside the iOS app: Google sign-in is hidden on iOS and the earlier custom "Sign in with Apple" button has been removed, so an additional login service is not required.
@@ -342,7 +342,7 @@ async function main() {
   }
 
   if (!attachedBuildId) {
-    console.log('No valid processed build is attached to v2.7.2 yet; build-ios job will compile, upload, and attach the new v2.7.2 build.');
+    console.log('No valid processed build is attached to v2.7.3 yet; build-ios job will compile, upload, and attach the new v2.7.3 build.');
     return;
   }
 

@@ -139,7 +139,7 @@ jobs:
               -configuration Release \
               -destination "generic/platform=iOS" \
               -archivePath build/App.xcarchive \
-              MARKETING_VERSION="2.7.2" \
+              MARKETING_VERSION="2.7.3" \
               CURRENT_PROJECT_VERSION="$IOS_BUILD_NUM" \
               DEVELOPMENT_TEAM=79L24WMX4R \
               CODE_SIGN_STYLE=Manual \
