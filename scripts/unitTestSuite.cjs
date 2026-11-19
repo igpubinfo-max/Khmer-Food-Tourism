@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Automated Unit Test Suite (CHG-16)
  * Verifies:
  *   1. Seed Data Integrity (Foods, Restaurants, Hotels, Attractions — 0 duplicate IDs)
@@ -912,7 +912,7 @@ test('RestaurantView (ហាងអាហារ) 6 Category Buttons, Event Exclus
     'Restored Google Maps listing must be unhidden when restored by Admin'
   );
   assert.ok(rvSrc.includes("nameKh: 'កម្សាន្ត និងជួបជុំ'"), 'Button 4 must be named កម្សាន្ត និងជួបជុំ');
-  assert.ok(rvSrc.includes("imageSrc: '/categories/shop_cat_pub_nightlife.png'"), 'Button 4 must use shop_cat_pub_nightlife.png');
+  assert.ok(rvSrc.includes("imageSrc: './categories/shop_cat_pub_nightlife.png'"), 'Button 4 must use shop_cat_pub_nightlife.png');
   assert.ok(rvSrc.includes("nameKh: 'កាហ្វេ/ភេសជ្ជៈ'"), 'Button 3 must be named កាហ្វេ/ភេសជ្ជៈ');
   const { getLocalSmartCache, convertGooglePlaceToRestaurant } = require(path.join(ROOT, 'src/services/googlePlacesService.ts'));
   const cachedConverted = getLocalSmartCache().map(convertGooglePlaceToRestaurant);
@@ -1495,7 +1495,7 @@ test('21. Offline Road Map, Tile Downloader & A* Road-Following Router Guard', (
   // 6. Verify GPS fallback non-poisoning guard & UI components free of fake pixel grids
   assert.equal(isHardcodedDefaultFallbackCoord(11.5564, 104.9282), true, 'Must detect hardcoded default fallback coordinate');
   const modalSrc = fs.readFileSync(path.join(ROOT, 'src/components/OfflineCambodiaMapModal.tsx'), 'utf8');
-  const areaCardSrc = fs.readFileSync(path.join(ROOT, 'src/components/common/TripAdvisorAreaMapCard.tsx'), 'utf8');
+  const areaCardSrc = fs.readFileSync(path.join(ROOT, 'src/components/common/OnlineAreaMapCard.tsx'), 'utf8');
   assert.ok(!modalSrc.includes('gridStep') && !areaCardSrc.includes('blockStep'), 'Map components must never paint fake screen-pixel chessboard grids');
   assert.ok(modalSrc.includes('<canvas ref={canvasRef}'), 'OfflineCambodiaMapModal must use High-DPI road canvas renderer');
   assert.ok(

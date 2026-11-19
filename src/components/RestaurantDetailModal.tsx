@@ -33,7 +33,8 @@ import { tr } from '../utils/i18n';
 import { isHotelBusinessRecord } from '../types';
 import { DetailedFourPartRatingsCard } from './common/CambodiaChoiceAndRatings';
 import { NearbyEcosystemSection } from './common/NearbyEcosystemSection';
-import { TripAdvisorAreaMapCard } from './common/TripAdvisorAreaMapCard';
+import { OnlineAreaMapCard } from './common/OnlineAreaMapCard';
+import { DetailActionBar } from './common/DetailActionBar';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import {
   sanitizeDialablePhone,
@@ -388,56 +389,6 @@ export const RestaurantDetailModal: React.FC = () => {
 
               <button
                 type="button"
-                onClick={handleCallRestaurant}
-                className="kft-btn-call sm:col-span-2 w-full !py-3 !px-4 !rounded-2xl !text-xs sm:!text-sm"
-              >
-                <Phone className="w-4 h-4 fill-white shrink-0" />
-                <span>
-                  {displayPhone
-                    ? tr(
-                        language,
-                        `ហៅទូរស័ព្ទទំនាក់ទំនង (${displayPhone})`,
-                        `Call to Order / Contact (${displayPhone})`,
-                        `致电联系 / 订餐 (${displayPhone})`
-                      )
-                    : tr(
-                        language,
-                        'ហៅទូរស័ព្ទទំនាក់ទំនងហាង',
-                        'Call / Contact Shop',
-                        '致电联系店铺'
-                      )}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (openRestaurantGoogleExternal(selectedRestaurant, 'maps')) {
-                    trackRestaurantMap(selectedRestaurant.id);
-                  }
-                }}
-                className="kft-btn-map w-full !py-3 !px-4 !rounded-2xl"
-              >
-                <MapPin className="w-4 h-4 shrink-0" />
-                <span>{tr(language, 'បើកមើលលើ Google Maps', 'Open in Google Maps', '在 Google 地图中查看')}</span>
-                <ExternalLink className="w-3.5 h-3.5 opacity-80 shrink-0" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (openRestaurantGoogleExternal(selectedRestaurant, 'directions')) {
-                    trackRestaurantMap(selectedRestaurant.id);
-                  }
-                }}
-                className="kft-btn-map w-full !py-3 !px-4 !rounded-2xl"
-              >
-                <Compass className="w-4 h-4 shrink-0" />
-                <span>{tr(language, 'នាំផ្លូវទៅកាន់ទីតាំង', 'Navigate / Directions', '开始路线导航')}</span>
-              </button>
-
-              <button
-                type="button"
                 onClick={() =>
                   window.dispatchEvent(
                     new CustomEvent('kft:open-offline-cambodia-map', {
@@ -445,7 +396,7 @@ export const RestaurantDetailModal: React.FC = () => {
                     })
                   )
                 }
-                className="sm:col-span-2 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-800 via-[#064E3B] to-slate-900 hover:from-emerald-700 hover:to-slate-800 text-amber-200 border border-amber-400/40 text-xs sm:text-sm font-bold shadow transition active:scale-98 cursor-pointer font-khmer"
+                className="sm:col-span-2 w-full flex items-center justify-center gap-1.5 py-1.5 text-[11.5px] font-bold text-emerald-700 dark:text-emerald-300 hover:text-emerald-600 underline underline-offset-4 decoration-emerald-500/50 cursor-pointer font-khmer"
               >
                 <span>🗺️</span>
                 <span>
@@ -533,7 +484,7 @@ export const RestaurantDetailModal: React.FC = () => {
               </div>
             )}
 
-            <TripAdvisorAreaMapCard
+            <OnlineAreaMapCard
               language={language}
               nameKh={selectedRestaurant.nameKh}
               nameEn={selectedRestaurant.nameEn}
@@ -920,6 +871,22 @@ export const RestaurantDetailModal: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <DetailActionBar
+          language={language}
+          hasPhone={Boolean(displayPhone)}
+          onCall={handleCallRestaurant}
+          onDirections={() => {
+            if (openRestaurantGoogleExternal(selectedRestaurant, 'directions')) {
+              trackRestaurantMap(selectedRestaurant.id);
+            }
+          }}
+          onMaps={() => {
+            if (openRestaurantGoogleExternal(selectedRestaurant, 'maps')) {
+              trackRestaurantMap(selectedRestaurant.id);
+            }
+          }}
+        />
       </div>
 
       {/* Quick Image Replacement Modal */}

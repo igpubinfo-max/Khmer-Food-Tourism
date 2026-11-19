@@ -109,7 +109,7 @@ export const NearbyEcosystemSection: React.FC<NearbyEcosystemProps> = ({ languag
     if (!entries.length) return null;
     return (
       <div data-testid={testId} className="space-y-2">
-        <h5 className="flex items-center gap-1.5 font-extrabold text-[13px] leading-[1.6] text-slate-900 font-khmer">
+        <h5 className="flex items-center gap-1.5 font-extrabold text-[13px] leading-[1.6] text-slate-900 dark:text-white font-khmer">
           {icon}
           {title}
         </h5>
@@ -122,24 +122,28 @@ export const NearbyEcosystemSection: React.FC<NearbyEcosystemProps> = ({ languag
               <article
                 key={`${e.type}-${e.id}`}
                 onClick={() => open(e)}
-                className="flex items-center gap-2.5 rounded-2xl bg-white border border-slate-200 p-2 cursor-pointer active:scale-[0.99] hover:border-emerald-400 transition"
+                className="flex items-center gap-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2 cursor-pointer active:scale-[0.99] hover:border-emerald-400 transition"
               >
-                <div className="w-14 h-12 rounded-xl overflow-hidden bg-slate-100 shrink-0">
+                <div className="w-14 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 flex items-center justify-center">
                   {photo && !photo.startsWith('data:image/svg') ? (
                     <img src={photo} alt={loc.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
-                  ) : null}
+                  ) : e.type === 'restaurant' ? (
+                      <Utensils className="w-5 h-5 text-orange-500" />
+                    ) : (
+                      <Landmark className="w-5 h-5 text-emerald-500" />
+                    )}
                 </div>
                 <div className="flex-1 min-w-0 font-khmer">
-                  <div className="font-extrabold text-[13px] leading-[1.6] text-slate-900 line-clamp-1">{loc.name}</div>
+                  <div className="font-extrabold text-[13px] leading-[1.6] text-slate-900 dark:text-white line-clamp-1">{loc.name}</div>
                   <div className="flex items-center gap-2 flex-wrap text-[11.5px] leading-[1.6]">
                     {rating > 0 && (
-                      <span className="inline-flex items-center gap-0.5 font-extrabold text-slate-800">
+                      <span className="inline-flex items-center gap-0.5 font-extrabold text-slate-800 dark:text-slate-100">
                         <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                         {rating.toFixed(1)}
                       </span>
                     )}
                     {Number.isFinite(e.km) && (
-                      <span className="inline-flex items-center gap-0.5 font-extrabold text-emerald-700">
+                      <span className="inline-flex items-center gap-0.5 font-extrabold text-emerald-700 dark:text-emerald-300">
                         <MapPin className="w-3 h-3" />
                         {formatDistance(e.km, language)}
                       </span>
@@ -166,12 +170,12 @@ export const NearbyEcosystemSection: React.FC<NearbyEcosystemProps> = ({ languag
   if (!groups.food.length && !groups.stays.length && !groups.attractions.length) return null;
 
   return (
-    <section data-testid="nearby-ecosystem" className="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-3.5 space-y-3.5">
+    <section data-testid="nearby-ecosystem" className="rounded-2xl border border-emerald-200 bg-emerald-50 dark:border-emerald-400/25 dark:bg-slate-800 p-3.5 space-y-3.5">
       <div className="font-khmer">
-        <h4 className="font-extrabold text-sm leading-[1.6] text-slate-900">
+        <h4 className="font-extrabold text-sm leading-[1.6] text-slate-900 dark:text-white">
           {tr(language, 'នៅជិតតំបន់នេះ', 'Nearby Food, Stays & Attractions', '附近的美食、住宿与景点')}
         </h4>
-        <p className="text-[11.5px] leading-[1.6] text-slate-600 font-semibold">
+        <p className="text-[11.5px] leading-[1.6] text-slate-600 dark:text-slate-300 font-semibold">
           {tr(
             language,
             'ទៅលេងទីនេះ គួរញ៉ាំអីនៅជិតនោះ? និងគេងនៅសណ្ឋាគារណា?',

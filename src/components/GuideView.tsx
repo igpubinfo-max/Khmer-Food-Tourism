@@ -716,22 +716,22 @@ export const GuideView: React.FC = () => {
             {[
               {
                 id: 'foryou' as GuideTab,
-                imageSrc: '/categories/guide_cat_foryou.png',
+                imageSrc: './categories/guide_cat_foryou.png',
                 label: tr(language, 'សម្រាប់អ្នក', 'For You', '为你推荐'),
               },
               {
                 id: 'provinces' as GuideTab,
-                imageSrc: '/categories/guide_cat_provinces.png',
+                imageSrc: './categories/guide_cat_provinces.png',
                 label: tr(language, 'ខេត្ត', 'Provinces', '省份'),
               },
               {
                 id: 'calendar' as GuideTab,
-                imageSrc: '/categories/guide_cat_calendar.png',
+                imageSrc: './categories/guide_cat_calendar.png',
                 label: tr(language, 'ប្រតិទិន', 'Calendar', '日历'),
               },
               {
                 id: 'tips' as GuideTab,
-                imageSrc: '/categories/guide_cat_tips.png',
+                imageSrc: './categories/guide_cat_tips.png',
                 label: tr(language, 'គន្លឹះ', 'Tips', '实用'),
               },
             ].map((t) => {

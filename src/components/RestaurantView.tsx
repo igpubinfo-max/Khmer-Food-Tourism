@@ -512,7 +512,7 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'All Shops',
       nameZh: '全部店铺',
       icon: LayoutGrid,
-      imageSrc: '/categories/shop_cat_all.png',
+      imageSrc: './categories/shop_cat_all.png',
       accentColor: '#F59E0B',
     },
     {
@@ -521,7 +521,7 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'Restaurants',
       nameZh: '餐厅',
       icon: Utensils,
-      imageSrc: '/categories/shop_cat_restaurant.png',
+      imageSrc: './categories/shop_cat_restaurant.png',
       accentColor: '#22C55E',
     },
     {
@@ -530,7 +530,7 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'Café & Drinks',
       nameZh: '咖啡与饮品',
       icon: Coffee,
-      imageSrc: '/categories/shop_cat_cafe.png',
+      imageSrc: './categories/shop_cat_cafe.png',
       accentColor: '#F43F5E',
     },
     {
@@ -539,7 +539,7 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'Pub & Nightlife',
       nameZh: '娱乐与聚会',
       icon: CupSoda,
-      imageSrc: '/categories/shop_cat_pub_nightlife.png',
+      imageSrc: './categories/shop_cat_pub_nightlife.png',
       accentColor: '#9333EA',
     },
     {
@@ -548,7 +548,7 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'Fast Food',
       nameZh: '快餐小吃',
       icon: Sandwich,
-      imageSrc: '/categories/shop_cat_fastfood.png',
+      imageSrc: './categories/shop_cat_fastfood.png',
       accentColor: '#EAB308',
     },
     {
@@ -557,7 +557,7 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'Vegetarian',
       nameZh: '素食',
       icon: Utensils,
-      imageSrc: '/categories/shop_cat_vegetarian.png',
+      imageSrc: './categories/shop_cat_vegetarian.png',
       accentColor: '#22C55E',
     },
   ];

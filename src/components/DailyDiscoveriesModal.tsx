@@ -431,7 +431,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
     {
       id: 'all',
       label: tr(language, 'គ្រប់មុខម្ហូប', 'All Dishes', '全部名菜'),
-      imageSrc: '/categories/prov_cat_all.png',
+      imageSrc: './categories/prov_cat_all.png',
       gradient: 'linear-gradient(180deg, #FB923C 0%, #F97316 50%, #EA580C 100%)',
       shadow: '0 6px 14px rgba(234, 88, 12, 0.28), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
       activeRing: '0 8px 18px rgba(234, 88, 12, 0.42), 0 0 0 2.5px #16A34A, inset 0 1.5px 1px rgba(255, 255, 255, 0.85)',
@@ -440,7 +440,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
     {
       id: 'soup_kroeung',
       label: tr(language, 'សម្ល & ទឹកគ្រឿង', 'Soups & Kroeung', '浓汤与鱼酱'),
-      imageSrc: '/categories/prov_cat_soup.png',
+      imageSrc: './categories/prov_cat_soup.png',
       gradient: 'linear-gradient(180deg, #22C55E 0%, #16A34A 50%, #15803D 100%)',
       shadow: '0 6px 14px rgba(21, 128, 61, 0.28), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
       activeRing: '0 8px 18px rgba(21, 128, 61, 0.42), 0 0 0 2.5px #F59E0B, inset 0 1.5px 1px rgba(255, 255, 255, 0.85)',
@@ -449,7 +449,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
     {
       id: 'grill_seafood',
       label: tr(language, 'អាំង ឆា & សមុទ្រ', 'Grills & Seafood', '烧烤与海鲜'),
-      imageSrc: '/categories/prov_cat_grill.png',
+      imageSrc: './categories/prov_cat_grill.png',
       gradient: 'linear-gradient(180deg, #F472B6 0%, #EC4899 50%, #DB2777 100%)',
       shadow: '0 6px 14px rgba(219, 39, 119, 0.28), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
       activeRing: '0 8px 18px rgba(219, 39, 119, 0.42), 0 0 0 2.5px #16A34A, inset 0 1.5px 1px rgba(255, 255, 255, 0.85)',
@@ -458,7 +458,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
     {
       id: 'street_dessert',
       label: tr(language, 'គុយទាវ & បង្អែម', 'Noodles & Sweets', '汤粉与甜品'),
-      imageSrc: '/categories/prov_cat_noodles.png',
+      imageSrc: './categories/prov_cat_noodles.png',
       gradient: 'linear-gradient(180deg, #60A5FA 0%, #3B82F6 50%, #2563EB 100%)',
       shadow: '0 6px 14px rgba(37, 99, 235, 0.28), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
       activeRing: '0 8px 18px rgba(37, 99, 235, 0.42), 0 0 0 2.5px #16A34A, inset 0 1.5px 1px rgba(255, 255, 255, 0.85)',

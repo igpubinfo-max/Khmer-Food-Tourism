@@ -3231,7 +3231,7 @@ export const WhatToEatModal: React.FC = () => {
                   {
                     id: 'time' as const,
                     testId: 'wte-tab-time',
-                    imageSrc: '/categories/ai_cat_time.png',
+                    imageSrc: './categories/ai_cat_time.png',
                     label: tr(language, 'ពេលវេលា', 'Time', '时段'),
                     value:
                       mealSlotFilter !== 'auto' && activeSlot
@@ -3243,7 +3243,7 @@ export const WhatToEatModal: React.FC = () => {
                   {
                     id: 'type' as const,
                     testId: 'wte-tab-type',
-                    imageSrc: '/categories/ai_cat_category.png',
+                    imageSrc: './categories/ai_cat_category.png',
                     label: tr(language, 'ប្រភេទម្ហូប', 'Category', '菜品分类'),
                     value:
                       categoryFilter !== 'all' && activeCategory
@@ -3255,7 +3255,7 @@ export const WhatToEatModal: React.FC = () => {
                   {
                     id: 'craving' as const,
                     testId: 'wte-tab-craving',
-                    imageSrc: '/categories/ai_cat_taste.png',
+                    imageSrc: './categories/ai_cat_taste.png',
                     label: tr(language, 'ចំណង់រសជាតិ', 'Taste', '口味偏好'),
                     value: (() => {
                       const matchedChip = QUICK_CRAVING_CHIPS.find(
@@ -3274,7 +3274,7 @@ export const WhatToEatModal: React.FC = () => {
                   {
                     id: 'health' as const,
                     testId: 'wte-tab-health',
-                    imageSrc: '/categories/ai_cat_healthy.png',
+                    imageSrc: './categories/ai_cat_healthy.png',
                     label: tr(language, 'ម្ហូបសុខភាព', 'Healthy', '健康饮食'),
                     value:
                       vipDietFilter !== 'none' && activeHealth

@@ -87,15 +87,15 @@ export const DetailedFourPartRatingsCard: React.FC<{
   return (
     <section
       data-testid="four-part-ratings"
-      className="rounded-2xl border border-amber-200/80 bg-amber-50/60 p-3.5 font-khmer"
+      className="rounded-2xl border border-amber-300 bg-amber-50 dark:border-amber-400/30 dark:bg-slate-800 p-3.5 font-khmer"
     >
       <div className="flex items-center justify-between gap-2 flex-wrap mb-2.5">
-        <h4 className="font-extrabold text-[13.5px] leading-[1.6] text-slate-900 flex items-center gap-1.5">
+        <h4 className="font-extrabold text-[13.5px] leading-[1.6] text-slate-900 dark:text-white flex items-center gap-1.5">
           <Star className="w-4 h-4 fill-amber-400 text-amber-400 shrink-0" />
           {tr(language, 'ប្រព័ន្ធពិន្ទុលម្អិត ៤ ផ្នែក', '4-Part Detailed Rating', '四项详细评分')}
-          <span className="text-amber-700">{overall.toFixed(1)}</span>
+          <span className="text-amber-700 dark:text-amber-300">{overall.toFixed(1)}</span>
           {typeof reviewCount === 'number' && reviewCount > 0 && (
-            <span className="text-slate-500 font-semibold text-xs">({reviewCount})</span>
+            <span className="text-slate-500 dark:text-slate-400 font-semibold text-xs">({reviewCount})</span>
           )}
         </h4>
         {isCambodiaChoiceEligible({ rating: overall }) && <CambodiaChoiceBadge language={language} size="md" />}
@@ -103,16 +103,16 @@ export const DetailedFourPartRatingsCard: React.FC<{
       <div className="space-y-2">
         {LABELS[kind].map(([km, en, zh], i) => (
           <div key={en} className="flex items-center gap-2.5">
-            <span className="text-[12px] leading-[1.6] font-bold text-slate-700 w-[44%] sm:w-[38%]">
+            <span className="text-[12px] leading-[1.6] font-bold text-slate-700 dark:text-slate-200 w-[44%] sm:w-[38%]">
               {tr(language, km, en, zh)}
             </span>
-            <div className="flex-1 h-2 rounded-full bg-amber-100 overflow-hidden">
+            <div className="flex-1 h-2 rounded-full bg-amber-100 dark:bg-slate-700 overflow-hidden">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-amber-400 to-yellow-500"
                 style={{ width: `${(scores[i] / 5) * 100}%` }}
               />
             </div>
-            <span className="text-[12px] font-extrabold text-slate-900 w-7 text-right">{scores[i].toFixed(1)}</span>
+            <span className="text-[12px] font-extrabold text-slate-900 dark:text-white w-7 text-right">{scores[i].toFixed(1)}</span>
           </div>
         ))}
       </div>

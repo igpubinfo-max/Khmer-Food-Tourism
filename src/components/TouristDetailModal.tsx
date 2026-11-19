@@ -26,7 +26,14 @@ import {
 import { tr } from '../utils/i18n';
 import { DetailedFourPartRatingsCard } from './common/CambodiaChoiceAndRatings';
 import { NearbyEcosystemSection } from './common/NearbyEcosystemSection';
-import { TripAdvisorAreaMapCard } from './common/TripAdvisorAreaMapCard';
+import { OnlineAreaMapCard } from './common/OnlineAreaMapCard';
+import { DetailActionBar } from './common/DetailActionBar';
+
+/** Generated SVG "no photo" placeholders contain baked-in text, so they must never be used as a hero photo. */
+const isRealHeroPhoto = (u?: string): boolean => {
+  const s = (u || '').trim();
+  return !!s && !s.startsWith('data:image/svg');
+};
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { getDestinationCompleteTravelInfo } from '../utils/destinationTravelInfo';
 import { findProvinceAdminHistory } from '../data/provincialAdminPortsEmergencyData';
@@ -541,7 +548,7 @@ export const TouristDetailModal: React.FC = () => {
           ) : (
           <>
           {/* Hero Image or Clean Destination Icon Banner */}
-          {(activeHeroPhoto || selectedDestination.photoUrl || '').trim() ? (
+          {isRealHeroPhoto(activeHeroPhoto || selectedDestination.photoUrl) ? (
             <div className="relative h-64 sm:h-72 w-full bg-slate-800">
               <img loading="lazy" decoding="async" 
                 key={activeHeroPhoto || selectedDestination.photoUrl}
@@ -663,39 +670,6 @@ export const TouristDetailModal: React.FC = () => {
                   <ExternalLink className="w-3.5 h-3.5 opacity-85 shrink-0" />
                 </a>
               )}
-              {selectedDestination.phone && (
-                <a
-                  href={`tel:${selectedDestination.phone.replace(/\s+/g, '')}`}
-                  className="kft-btn-call sm:col-span-2 w-full !py-3 !px-4 !rounded-2xl !text-xs sm:!text-sm"
-                >
-                  <Phone className="w-4 h-4 fill-white shrink-0" />
-                  <span>
-                    {tr(
-                      language,
-                      `ហៅទូរស័ព្ទកក់បន្ទប់ / ទំនាក់ទំនង (${selectedDestination.phone})`,
-                      `Call to Book / Contact (${selectedDestination.phone})`,
-                      `致电预订 / 联系电话 (${selectedDestination.phone})`
-                    )}
-                  </span>
-                </a>
-              )}
-              <button
-                type="button"
-                onClick={() => openDestinationGoogleExternal(selectedDestination, 'maps')}
-                className="kft-btn-map w-full !py-3 !px-4 !rounded-2xl"
-              >
-                <MapPin className="w-4 h-4 shrink-0" />
-                <span>{tr(language, 'បើកមើលលើ Google Maps', 'Open in Google Maps', '在 Google 地图中查看')}</span>
-                <ExternalLink className="w-3.5 h-3.5 opacity-80 shrink-0" />
-              </button>
-              <button
-                type="button"
-                onClick={() => openDestinationGoogleExternal(selectedDestination, 'directions')}
-                className="kft-btn-map w-full !py-3 !px-4 !rounded-2xl"
-              >
-                <Compass className="w-4 h-4 shrink-0" />
-                <span>{tr(language, 'នាំផ្លូវទៅកាន់ទីតាំង', 'Navigate / Directions', '开始路线导航')}</span>
-              </button>
               <button
                 type="button"
                 onClick={() =>
@@ -705,7 +679,7 @@ export const TouristDetailModal: React.FC = () => {
                     })
                   )
                 }
-                className="sm:col-span-2 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-800 via-[#064E3B] to-slate-900 hover:from-emerald-700 hover:to-slate-800 text-amber-200 border border-amber-400/40 text-xs sm:text-sm font-bold shadow transition active:scale-98 cursor-pointer font-khmer"
+                className="sm:col-span-2 w-full flex items-center justify-center gap-1.5 py-1.5 text-[11.5px] font-bold text-emerald-700 dark:text-emerald-300 hover:text-emerald-600 underline underline-offset-4 decoration-emerald-500/50 cursor-pointer font-khmer"
               >
                 <span>🗺️</span>
                 <span>
@@ -957,7 +931,7 @@ export const TouristDetailModal: React.FC = () => {
             )}
 
             {/* Nearby Food, Stays & Attractions (GPS Haversine) */}
-            <TripAdvisorAreaMapCard
+            <OnlineAreaMapCard
               language={language}
               nameKh={selectedDestination.nameKh}
               nameEn={selectedDestination.nameEn}
@@ -989,6 +963,18 @@ export const TouristDetailModal: React.FC = () => {
           </>
           )}
         </div>
+
+        {!isEditingAdminDest && (
+          <DetailActionBar
+            language={language}
+            hasPhone={Boolean(selectedDestination.phone)}
+            onCall={() => {
+              window.location.href = `tel:${String(selectedDestination.phone || '').replace(/\s+/g, '')}`;
+            }}
+            onDirections={() => openDestinationGoogleExternal(selectedDestination, 'directions')}
+            onMaps={() => openDestinationGoogleExternal(selectedDestination, 'maps')}
+          />
+        )}
       </div>
 
       {/* Destination Photo Upload / Replace Modal for Admin */}

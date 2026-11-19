@@ -1,4 +1,4 @@
-﻿name: Build iOS App & Apple App Store Package
+name: Build iOS App & Apple App Store Package
 
 on:
   push:
@@ -205,12 +205,30 @@ jobs:
           IOS_BUILD_NUM=$((200 + ${{ github.run_number }}))
           node scripts/update-asc-review-notes.mjs --wait-for-build "$IOS_BUILD_NUM" || true
 
-      - name: 10. Upload iOS Release Packages Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Cambodia-Flavors-Tourism-iOS-v2.7.0-Package
-          path: |
-            ios/App/build/CambodiaFlavorsTourism-v2.7.0.ipa
+      - name: 10. Clean Old GitHub Actions Artifacts (Keep Storage Quota Free)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node -e '
+            async function clean() {
+              const token = process.env.GH_TOKEN;
+              if (!token) return;
+              const res = await fetch("https://api.github.com/repos/igpubinfo-max/Khmer-Food-Tourism/actions/artifacts?per_page=100", {
+                headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }
+              });
+              const data = await res.json();
+              const active = (data.artifacts || []).filter(a => !a.expired);
+              for (const a of active) {
+                await fetch("https://api.github.com/repos/igpubinfo-max/Khmer-Food-Tourism/actions/artifacts/" + a.id, {
+                  method: "DELETE",
+                  headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }
+                });
+              }
+              console.log("Cleaned " + active.length + " old Actions artifacts.");
+            }
+            clean().catch(() => {});
+          '
 
       - name: 11. Attach iOS IPA to GitHub Release v2.5.0
         uses: softprops/action-gh-release@v2
