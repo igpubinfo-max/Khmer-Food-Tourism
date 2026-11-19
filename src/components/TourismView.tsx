@@ -972,6 +972,43 @@ export const TourismView: React.FC = () => {
             )}
           </div>
 
+          {/* Popular province quick chips (one tap; full 25-province list stays in the dropdown above) */}
+          <div data-testid="tourism-province-chips" className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-0.5 px-0.5">
+            {(() => {
+              const POPULAR = ['phnom penh', 'siem reap', 'sihanouk', 'kampot', 'kep', 'battambang', 'mondulkiri', 'ratanakiri', 'koh kong'];
+              const rank = (en: string) => {
+                const i = POPULAR.findIndex((k) => (en || '').toLowerCase().includes(k));
+                return i < 0 ? 99 : i;
+              };
+              return provinceOptions
+                .filter((p) => rank(p.en) < 99)
+                .sort((a, b) => rank(a.en) - rank(b.en))
+                .map((p) => {
+                  const active = selectedProvince === p.value;
+                  return (
+                    <button
+                      key={`chip-${p.id}`}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => {
+                        const val = active ? '' : p.value;
+                        recordTourismStep('tourism-prov:' + val);
+                        setSelectedProvince(val);
+                        scrollToTourismList();
+                      }}
+                      className={`shrink-0 px-3 py-1 rounded-full text-[11.5px] font-khmer font-extrabold border transition active:scale-95 cursor-pointer ${
+                        active
+                          ? 'bg-amber-400 text-slate-950 border-amber-200 shadow'
+                          : 'bg-slate-800/80 text-amber-200 border-amber-400/30 hover:border-amber-400/70'
+                      }`}
+                    >
+                      {tr(language, p.kh, p.en, p.zh)}
+                    </button>
+                  );
+                });
+            })()}
+          </div>
+
           {/* Official Angkor Park Guide Quick Bar (4 Temple Circuits, Restrooms/Parking, APSARA Code of Conduct) */}
           <AngkorParkQuickBar
             language={language}

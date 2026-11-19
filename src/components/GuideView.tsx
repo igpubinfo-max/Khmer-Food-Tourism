@@ -785,80 +785,90 @@ export const GuideView: React.FC = () => {
           </div>
         </div>
 
-      {/* 3 Quick-Access Guide Directories: Provincial History & Admin, International Border Ports, Hospitals & Emergency (Zero External Photos) */}
+      {/* Quick-Access Guide Directories: vertical tiles so every title is fully readable on phones */}
+        <div data-testid="guide-rac-quick-links" className="grid grid-cols-3 gap-2">
+          {[
+            {
+              key: 'prov',
+              emoji: '🏛️',
+              title: tr(language, 'ប្រវត្តិខេត្ត និងរដ្ឋបាល', 'Provincial History & Admin', '各省历史与行政机构'),
+              sub: tr(language, '២៥ ខេត្ត-រាជធានី', '25 Provinces', '25省市'),
+              tone: 'border-amber-400/40 text-amber-200 bg-amber-400/15',
+              onClick: () => {
+                setTab('provinces');
+                setTimeout(() => scrollToGuideSection(provAdminSectionRef.current || guideContentStartRef.current), 40);
+              },
+            },
+            {
+              key: 'ports',
+              emoji: '🛂',
+              title: tr(language, 'ច្រកទ្វារព្រំដែនអន្តរជាតិ', 'International Border Ports', '国际口岸与机场指南'),
+              sub: tr(language, 'ព្រំដែន អាកាស កំពង់ផែ', 'Borders, Air & Sea', '口岸·机场·海港'),
+              tone: 'border-emerald-400/40 text-emerald-200 bg-emerald-400/15',
+              onClick: () => {
+                setTab('tips');
+                setTipFilter('all');
+                setOpenSecs((p) => ({ ...p, ports: true }));
+                setTimeout(() => scrollToGuideSection(portsSectionRef.current || guideContentStartRef.current), 40);
+              },
+            },
+            {
+              key: 'hosp',
+              emoji: '🏥',
+              title: tr(language, 'មន្ទីរពេទ្យ និងសង្គ្រោះបន្ទាន់', 'Hospitals & Emergency', '各省医院与紧急救援'),
+              sub: tr(language, 'បន្ទាន់ ២៤ ម៉ោង', '24/7 Hotlines', '24小时热线'),
+              tone: 'border-rose-400/40 text-rose-200 bg-rose-500/20',
+              onClick: () => {
+                setTab('tips');
+                setTipFilter('all');
+                setOpenSecs((p) => ({ ...p, hosp: true }));
+                setTimeout(() => scrollToGuideSection(hospitalsSectionRef.current || guideContentStartRef.current), 40);
+              },
+            },
+          ].map((q) => (
+            <button
+              key={q.key}
+              type="button"
+              onClick={q.onClick}
+              className={`min-w-0 px-1.5 py-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-900 border ${q.tone.split(' ')[0]} flex flex-col items-center text-center gap-1.5 shadow-sm active:scale-[0.97] transition cursor-pointer`}
+            >
+              <span className={`w-10 h-10 rounded-xl border flex items-center justify-center text-xl shrink-0 ${q.tone}`}>
+                {q.emoji}
+              </span>
+              <span className="block w-full text-[11px] font-extrabold text-white leading-snug line-clamp-2 min-h-[2.4em] break-words">
+                {q.title}
+              </span>
+              <span className="block w-full text-[9.5px] font-semibold text-slate-300 leading-tight line-clamp-1">
+                {q.sub}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Emergency numbers: always one tap away */}
         <div
-          data-testid="guide-rac-quick-links"
-          className="grid grid-cols-1 sm:grid-cols-3 gap-2"
+          data-testid="guide-emergency-strip"
+          className="rounded-2xl border border-rose-400/35 bg-rose-950/40 p-2.5 flex items-center gap-2"
         >
-          <button
-            type="button"
-            onClick={() => {
-              setTab('provinces');
-              setTimeout(() => scrollToGuideSection(provAdminSectionRef.current || guideContentStartRef.current), 40);
-            }}
-            className="p-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-900 border border-amber-400/40 text-left flex items-center gap-2.5 shadow-sm active:scale-[0.98] transition cursor-pointer"
-          >
-            <span className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/40 flex items-center justify-center text-lg shrink-0">
-              🏛️
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-xs font-extrabold text-amber-300 leading-snug truncate">
-                {tr(language, 'ប្រវត្តិខេត្ត និងរដ្ឋបាល', 'Provincial History & Admin', '各省历史与行政机构')}
-              </span>
-              <span className="block text-[10px] text-slate-300 truncate">
-                {tr(language, 'ប្រវត្តិសង្ខេប និងទីតាំងរដ្ឋបាលទាំង ២៥ ខេត្ត-រាជធានី', 'History & Provincial Halls (25 Provinces)', '柬埔寨25省市历史与政府驻地')}
-              </span>
-            </span>
-            <ChevronRight className="w-4 h-4 text-amber-300 shrink-0" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setTab('tips');
-              setTipFilter('all');
-              setOpenSecs((p) => ({ ...p, ports: true }));
-              setTimeout(() => scrollToGuideSection(portsSectionRef.current || guideContentStartRef.current), 40);
-            }}
-            className="p-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-900 border border-emerald-400/40 text-left flex items-center gap-2.5 shadow-sm active:scale-[0.98] transition cursor-pointer"
-          >
-            <span className="w-9 h-9 rounded-xl bg-emerald-400/15 border border-emerald-400/40 flex items-center justify-center text-lg shrink-0">
-              🛂
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-xs font-extrabold text-emerald-300 leading-snug truncate">
-                {tr(language, 'ច្រកទ្វារព្រំដែនអន្តរជាតិ', 'International Border Ports', '国际口岸与机场指南')}
-              </span>
-              <span className="block text-[10px] text-slate-300 truncate">
-                {tr(language, 'អាកាសយានដ្ឋាន ព្រំដែនគោក និងកំពង់ផែអន្តរជាតិ', 'Airports, Land Borders & Seaports', '国际机场、陆路口岸与海港')}
-              </span>
-            </span>
-            <ChevronRight className="w-4 h-4 text-emerald-300 shrink-0" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setTab('tips');
-              setTipFilter('all');
-              setOpenSecs((p) => ({ ...p, hosp: true }));
-              setTimeout(() => scrollToGuideSection(hospitalsSectionRef.current || guideContentStartRef.current), 40);
-            }}
-            className="p-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-900 border border-rose-400/40 text-left flex items-center gap-2.5 shadow-sm active:scale-[0.98] transition cursor-pointer"
-          >
-            <span className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-400/40 flex items-center justify-center text-lg shrink-0">
-              🏥
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-xs font-extrabold text-rose-300 leading-snug truncate">
-                {tr(language, 'មន្ទីរពេទ្យ និងសង្គ្រោះបន្ទាន់', 'Hospitals & Emergency', '各省医院与紧急救援')}
-              </span>
-              <span className="block text-[10px] text-slate-300 truncate">
-                {tr(language, 'មន្ទីរពេទ្យបង្អែកខេត្ត និងលេខសង្គ្រោះបន្ទាន់ 24 ម៉ោង', 'Provincial Referral Hospitals & 24/7 Hotlines', '25省市转诊医院与24小时急救热线')}
-              </span>
-            </span>
-            <ChevronRight className="w-4 h-4 text-rose-300 shrink-0" />
-          </button>
+          <span className="text-[11px] font-extrabold text-rose-200 leading-snug shrink-0 max-w-[30%]">
+            🚨 {tr(language, 'លេខបន្ទាន់', 'Emergency', '紧急电话')}
+          </span>
+          <div className="flex-1 grid grid-cols-3 gap-1.5">
+            {[
+              { n: '117', l: tr(language, 'ប៉ូលិស', 'Police', '警察'), cls: 'bg-blue-600 text-white' },
+              { n: '118', l: tr(language, 'អគ្គិភ័យ', 'Fire', '消防'), cls: 'bg-orange-500 text-slate-950' },
+              { n: '119', l: tr(language, 'ពេទ្យ', 'Ambulance', '急救'), cls: 'bg-rose-600 text-white' },
+            ].map((x) => (
+              <a
+                key={x.n}
+                href={`tel:${x.n}`}
+                className={`h-10 rounded-xl flex flex-col items-center justify-center leading-none shadow active:scale-95 transition ${x.cls}`}
+              >
+                <span className="font-mono font-extrabold text-[14px]">{x.n}</span>
+                <span className="text-[9px] font-bold mt-0.5">{x.l}</span>
+              </a>
+            ))}
+          </div>
         </div>
 
       <div ref={guideContentStartRef} id="kft-guide-content-section" className="scroll-mt-2" />
@@ -995,7 +1005,7 @@ export const GuideView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('food')}
-                    className="text-[11px] font-bold text-emerald-700 shrink-0 cursor-pointer"
+                    className="px-2.5 py-1 rounded-full bg-amber-400/15 border border-amber-300/40 text-[11px] font-extrabold text-amber-200 hover:bg-amber-400/25 shrink-0 cursor-pointer transition"
                   >
                     {tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                   </button>
@@ -1020,7 +1030,7 @@ export const GuideView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('tourism')}
-                    className="text-[11px] font-bold text-emerald-700 shrink-0 cursor-pointer"
+                    className="px-2.5 py-1 rounded-full bg-amber-400/15 border border-amber-300/40 text-[11px] font-extrabold text-amber-200 hover:bg-amber-400/25 shrink-0 cursor-pointer transition"
                   >
                     {tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                   </button>
@@ -1041,7 +1051,7 @@ export const GuideView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('restaurants')}
-                    className="text-[11px] font-bold text-emerald-700 shrink-0 cursor-pointer"
+                    className="px-2.5 py-1 rounded-full bg-amber-400/15 border border-amber-300/40 text-[11px] font-extrabold text-amber-200 hover:bg-amber-400/25 shrink-0 cursor-pointer transition"
                   >
                     {tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                   </button>
@@ -1244,7 +1254,7 @@ export const GuideView: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => goToProvince(activeGroup.key, 'tourism')}
-                            className="text-[11px] font-bold text-emerald-700 shrink-0 cursor-pointer"
+                            className="px-2.5 py-1 rounded-full bg-amber-400/15 border border-amber-300/40 text-[11px] font-extrabold text-amber-200 hover:bg-amber-400/25 shrink-0 cursor-pointer transition"
                           >
                             {tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                           </button>
@@ -1277,7 +1287,7 @@ export const GuideView: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => goToProvince(activeGroup.key, 'restaurants')}
-                            className="text-[11px] font-bold text-emerald-700 shrink-0 cursor-pointer"
+                            className="px-2.5 py-1 rounded-full bg-amber-400/15 border border-amber-300/40 text-[11px] font-extrabold text-amber-200 hover:bg-amber-400/25 shrink-0 cursor-pointer transition"
                           >
                             {tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                           </button>

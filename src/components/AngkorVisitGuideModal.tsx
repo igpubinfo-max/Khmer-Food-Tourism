@@ -566,6 +566,7 @@ export const AngkorParkQuickBar: React.FC<{
   language: Language;
   onOpenTab: (tab: AngkorGuideTab) => void;
 }> = ({ language, onOpenTab }) => {
+  const [expanded, setExpanded] = React.useState(false);
   return (
     <div
       style={{
@@ -574,10 +575,15 @@ export const AngkorParkQuickBar: React.FC<{
       }}
       className="w-full rounded-[20px] p-2.5 border border-amber-400/40 space-y-2"
     >
-      <div className="flex items-center justify-between gap-2 px-1">
+      <button
+        type="button"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-center justify-between gap-2 px-1 text-left cursor-pointer"
+      >
         <div className="flex items-center gap-1.5 min-w-0">
           <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
-          <span className="font-khmer font-extrabold text-xs sm:text-[13px] text-amber-200 truncate">
+          <span className="font-khmer font-extrabold text-xs sm:text-[13px] text-amber-200 leading-snug line-clamp-2">
             {tr(
               language,
               'មគ្គុទ្ទេសក៍ផ្លូវទស្សនាអង្គរផ្លូវការ (Visit Angkor Guide)',
@@ -586,10 +592,10 @@ export const AngkorParkQuickBar: React.FC<{
             )}
           </span>
         </div>
-        <ChevronRight className="w-4 h-4 text-amber-300 shrink-0" />
-      </div>
+        <ChevronRight className={`w-4 h-4 text-amber-300 shrink-0 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`} />
+      </button>
 
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className={`grid grid-cols-3 gap-1.5 ${expanded ? '' : 'hidden'}`}>
         <button
           type="button"
           onClick={() => onOpenTab('circuits')}

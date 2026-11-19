@@ -283,21 +283,10 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
             onError={() => setImgError(true)}
           />
 
-          {/* Top-Left: Province Badge & GPS Distance Pill */}
-          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap z-10">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-[#064E3B]/95 text-white border border-emerald-400/30 shadow-xs">
+          {/* Top-Left: Province Badge (kept clear of the heart / admin buttons) */}
+          <div className={`absolute top-2.5 left-2.5 ${isAdmin ? 'right-24' : 'right-12'} flex items-center gap-1.5 flex-wrap z-10`}>
+            <span className="max-w-full truncate px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-[#064E3B]/95 text-white border border-emerald-400/30 shadow-xs">
               {loc.province}
-            </span>
-            <span
-              style={{
-                background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
-              }}
-              className="px-2.5 py-0.5 rounded-full text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-xs"
-            >
-              <MapPin className="w-3 h-3 text-white fill-white/25 shrink-0" />
-              <span>
-                {distanceStr} {tr(language, 'km', 'km', '公里')}
-              </span>
             </span>
             {isCambodiaChoiceEligible(destination) && <CambodiaChoiceBadge language={language} size="sm" />}
           </div>
@@ -332,8 +321,16 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
           </button>
 
           {/* Bottom-Left: Category Pill */}
-          <div className="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-white/95 text-emerald-900 text-xs font-extrabold border border-emerald-200 shadow-xs">
+          <div className="absolute bottom-2.5 left-2.5 max-w-[58%] truncate px-2.5 py-0.5 rounded-full bg-white/95 text-emerald-900 text-xs font-extrabold border border-emerald-200 shadow-xs">
             {loc.category}
+          </div>
+
+          {/* Bottom-Right: small distance pill (no longer covers the category label) */}
+          <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-xs">
+            <MapPin className="w-3 h-3 text-orange-300 shrink-0" />
+            <span>
+              {distanceStr} {tr(language, 'km', 'km', '公里')}
+            </span>
           </div>
         </div>
 

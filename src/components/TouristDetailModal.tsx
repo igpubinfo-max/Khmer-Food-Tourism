@@ -597,6 +597,38 @@ export const TouristDetailModal: React.FC = () => {
           )}
 
           <div className="p-4 sm:p-6 space-y-5">
+            {/* Quick info chips: rating · distance · drive time · price */}
+            {(() => {
+              const ti = getDestinationCompleteTravelInfo(selectedDestination, language);
+              const rating = Number(selectedDestination.rating);
+              const chip =
+                'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11.5px] font-extrabold font-khmer border';
+              return (
+                <div data-testid="detail-quick-chips" className="flex items-center gap-1.5 flex-wrap">
+                  {rating > 0 && (
+                    <span className={`${chip} bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-400/15 dark:text-amber-300 dark:border-amber-400/30`}>
+                      ⭐ {rating.toFixed(1)}
+                    </span>
+                  )}
+                  {ti.userDistanceKm ? (
+                    <span className={`${chip} bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-400/15 dark:text-emerald-300 dark:border-emerald-400/30`}>
+                      📍 {ti.userDistanceKm} km
+                    </span>
+                  ) : null}
+                  {ti.userDriveText ? (
+                    <span className={`${chip} bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-400/15 dark:text-sky-300 dark:border-sky-400/30`}>
+                      ⏱ {ti.userDriveText}
+                    </span>
+                  ) : null}
+                  {selectedDestination.priceRange ? (
+                    <span className={`${chip} bg-slate-100 text-slate-800 border-slate-300 dark:bg-white/10 dark:text-slate-200 dark:border-white/15`}>
+                      💰 {selectedDestination.priceRange}
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })()}
+
             {/* Interactive Room / Place Photo Gallery Strip */}
             {selectedDestination.galleryPhotos && selectedDestination.galleryPhotos.length > 1 && (
               <div className="space-y-1.5">
@@ -723,11 +755,11 @@ export const TouristDetailModal: React.FC = () => {
               const travelInfo = getDestinationCompleteTravelInfo(selectedDestination, language);
               const provEmergency = findProvinceAdminHistory(selectedDestination.provinceEn || selectedDestination.provinceKh);
               return (
-                <div
+                <details
                   data-testid="dest-complete-travel-info"
-                  className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/70 dark:from-slate-800/95 dark:via-slate-800 dark:to-emerald-950/30 border border-emerald-200/90 dark:border-emerald-700/50 space-y-3 shadow-xs font-khmer"
+                  className="group p-4 rounded-2xl bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/70 dark:from-slate-800/95 dark:via-slate-800 dark:to-emerald-950/30 border border-emerald-200/90 dark:border-emerald-700/50 shadow-xs font-khmer"
                 >
-                  <div className="flex items-center justify-between gap-2 flex-wrap border-b border-emerald-200/70 dark:border-slate-700 pb-2.5">
+                  <summary className="flex items-center justify-between gap-2 flex-wrap cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                     <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-400 font-extrabold text-xs sm:text-sm">
                       <Compass className="w-4 h-4 text-[#059669] shrink-0" />
                       <span>
@@ -762,8 +794,18 @@ export const TouristDetailModal: React.FC = () => {
                         {travelInfo.roadCode}
                       </span>
                     </div>
-                  </div>
+                    <div className="basis-full flex items-center justify-between gap-2 text-[11.5px] font-semibold text-slate-600 dark:text-slate-300">
+                      <span>
+                        📍 {travelInfo.userDistanceKm} km · {travelInfo.userDriveText}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300 font-extrabold">
+                        {tr(language, 'មើលលម្អិត', 'Details', '详情')}
+                        <span className="transition-transform duration-200 group-open:rotate-180">▾</span>
+                      </span>
+                    </div>
+                  </summary>
 
+                  <div className="space-y-3 pt-3 mt-2.5 border-t border-emerald-200/70 dark:border-slate-700">
                   {/* 1 & 2: Distance from Capital, Provincial City, and User Point */}
                   <div className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
                     <div className="flex items-start gap-2">
@@ -863,7 +905,8 @@ export const TouristDetailModal: React.FC = () => {
                       🌤️ {travelInfo.seasonLabel}
                     </div>
                   </div>
-                </div>
+                  </div>
+                </details>
               );
             })()}
 
