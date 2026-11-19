@@ -4836,7 +4836,12 @@ export function extractTikTokVideoId(input?: string | null): string | null {
   if (!input || typeof input !== 'string') return null;
   const trimmed = input.trim();
   if (/^\d{15,22}$/.test(trimmed)) return trimmed;
-  const match = trimmed.match(/\/video\/(\d{15,22})/) || trimmed.match(/player\/v1\/(\d{15,22})/) || trimmed.match(/embed\/v2\/(\d{15,22})/);
+  const match =
+    trimmed.match(/\/videos?\/(\d{15,22})/) ||
+    trimmed.match(/\/reel\/(\d{15,22})/) ||
+    trimmed.match(/player\/v1\/(\d{15,22})/) ||
+    trimmed.match(/embed\/v2\/(\d{15,22})/) ||
+    trimmed.match(/(?:tt|fb)-[a-z0-9_.-]+-(\d{15,22})/i);
   return match && match[1] ? match[1] : null;
 }
 
@@ -15527,23 +15532,46 @@ export function isDirectVideoUrlFreshAndPlayable(url?: string | null): boolean {
   return true;
 }
 
-// Seed in-memory stream cache from CURATED_TIKTOK_FACEBOOK_REVIEWS on module load
-for (const seededItem of CURATED_TIKTOK_FACEBOOK_REVIEWS) {
-  if (seededItem.platform === 'tiktok' || seededItem.platform === 'facebook') {
-    const vid = extractTikTokVideoId(seededItem.inlineVideoId || seededItem.sourceUrl || seededItem.id);
-    if (vid && isDirectVideoUrlFreshAndPlayable(seededItem.directVideoUrl)) {
-      tiktokStreamCacheByVid.set(vid, {
-        primaryUrl: seededItem.directVideoUrl!,
-        coverUrl: seededItem.thumbnailUrl,
-        resolvedAt: Date.now(),
-      });
-    }
+/**
+ * Returns true ONLY if the stream URL is a genuinely resolved live CDN stream (NOT one of the static
+ * /70dbd880/ or x-expires=1893456000 seed placeholders which return HTTP 403 on TikTok CDN).
+ */
+export function isLivePlayableDirectStreamUrl(url?: string | null): boolean {
+  if (!isDirectVideoUrlFreshAndPlayable(url)) return false;
+  const clean = String(url || '').trim();
+  if (/\/70dbd880\/|x-expires=1893456000/i.test(clean)) {
+    return false;
   }
+  return true;
 }
 
 /**
- * Synchronously returns a cached, verified CORS-enabled TikTok MP4 stream if already pre-warmed or valid on the item.
- * Allows <video autoPlay playsInline> to mount synchronously inside the user's tap gesture on Android, iOS & Web!
+ * Returns true if a thumbnail URL is a static seed TikTok CDN URL with the expired x-expires=1893456000
+ * signature (which always returns HTTP 403), so UI cards and <video poster> can immediately use the
+ * cached live coverUrl or local Cambodian dish photo without firing 20+ failing 403 requests on open.
+ */
+export function isExpiredStaticTikTokThumbnail(url?: string | null): boolean {
+  const clean = String(url || '').trim();
+  if (!clean) return true;
+  return /tiktokcdn\.com/i.test(clean) && (/x-expires=1893456000|\/70dbd880\//i.test(clean));
+}
+
+/**
+ * Returns a live resolved cover image URL if cached in memory for this TikTok/Facebook video ID.
+ */
+export function getCachedTikTokCoverUrl(item: Partial<OnlineFoodDiscoveryItem>): string | null {
+  const tiktokVid = extractTikTokVideoId(item.inlineVideoId || item.sourceUrl || item.id);
+  if (!tiktokVid) return null;
+  const cached = tiktokStreamCacheByVid.get(tiktokVid);
+  if (cached?.coverUrl && !isExpiredStaticTikTokThumbnail(cached.coverUrl)) {
+    return cached.coverUrl;
+  }
+  return null;
+}
+
+/**
+ * Synchronously returns a cached, verified CORS-enabled TikTok/Facebook MP4 stream if already resolved in memory.
+ * Never returns static /70dbd880/ seed placeholders so <video> never mounts with a dead 403 URL.
  */
 export function getCachedTikTokStreamUrl(
   item: Partial<OnlineFoodDiscoveryItem>
@@ -15554,20 +15582,20 @@ export function getCachedTikTokStreamUrl(
     if (
       cached &&
       Date.now() - cached.resolvedAt < TIKTOK_STREAM_CACHE_TTL_MS &&
-      isDirectVideoUrlFreshAndPlayable(cached.primaryUrl)
+      isLivePlayableDirectStreamUrl(cached.primaryUrl)
     ) {
       return {
         primaryUrl: cached.primaryUrl,
-        backupUrl: isDirectVideoUrlFreshAndPlayable(cached.backupUrl) ? cached.backupUrl : undefined,
+        backupUrl: isLivePlayableDirectStreamUrl(cached.backupUrl) ? cached.backupUrl : undefined,
         coverUrl: cached.coverUrl,
       };
     }
   }
-  if (isDirectVideoUrlFreshAndPlayable(item.directVideoUrl)) {
+  if (isLivePlayableDirectStreamUrl(item.directVideoUrl)) {
     if (tiktokVid) {
       tiktokStreamCacheByVid.set(tiktokVid, {
         primaryUrl: item.directVideoUrl!,
-        coverUrl: item.thumbnailUrl,
+        coverUrl: !isExpiredStaticTikTokThumbnail(item.thumbnailUrl) ? item.thumbnailUrl : undefined,
         resolvedAt: Date.now(),
       });
     }
@@ -15578,7 +15606,7 @@ export function getCachedTikTokStreamUrl(
   return null;
 }
 
-// Serialized rate-limited queue for tikwm API (1 request per 1.15s) so concurrent calls never hit code: -1 rate limits
+// Serialized rate-limited queue for tikwm API (1 request per 1.08s) so concurrent calls never hit code: -1 rate limits
 interface TikwmQueueJob {
   canonicalUrl: string;
   resolve: (val: any) => void;
@@ -15591,7 +15619,7 @@ async function fetchTikwmJsonSingle(canonicalTikTokUrl: string): Promise<any> {
   const apiEndpoint = `https://www.tikwm.com/api/?url=${encodeURIComponent(canonicalTikTokUrl)}`;
   const isNative = Boolean(Capacitor?.isNativePlatform?.());
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 3200);
+  const timer = setTimeout(() => controller.abort(), 7500);
   try {
     const res = await fetch(apiEndpoint, {
       method: 'GET',
@@ -15600,7 +15628,9 @@ async function fetchTikwmJsonSingle(canonicalTikTokUrl: string): Promise<any> {
     });
     clearTimeout(timer);
     if (res.ok) {
-      return await res.json();
+      const j = await res.json();
+      lastTikwmCallMs = Date.now();
+      return j;
     }
   } catch {
     clearTimeout(timer);
@@ -15609,8 +15639,8 @@ async function fetchTikwmJsonSingle(canonicalTikTokUrl: string): Promise<any> {
         const resp = await CapacitorHttp.get({
           url: apiEndpoint,
           headers: { Accept: 'application/json' },
-          connectTimeout: 3200,
-          readTimeout: 3200,
+          connectTimeout: 4200,
+          readTimeout: 4200,
         });
         if (resp && resp.status >= 200 && resp.status < 300) {
           return typeof resp.data === 'string' ? JSON.parse(resp.data) : resp.data;
@@ -15622,29 +15652,35 @@ async function fetchTikwmJsonSingle(canonicalTikTokUrl: string): Promise<any> {
 }
 
 function enqueueTikwmApiCall(canonicalUrl: string, priority = false): Promise<any> {
-  // User-initiated tap (priority === true) bypasses the background prewarm queue for instant <0.7s playback!
-  if (priority) {
-    lastTikwmCallMs = Date.now();
-    return fetchTikwmJsonSingle(canonicalUrl);
-  }
   return new Promise((resolve) => {
     const job: TikwmQueueJob = { canonicalUrl, resolve };
-    tikwmQueue.push(job);
+    if (priority) {
+      tikwmQueue.unshift(job);
+    } else {
+      tikwmQueue.push(job);
+    }
     if (!isTikwmQueueProcessing) {
       isTikwmQueueProcessing = true;
       (async () => {
         while (tikwmQueue.length > 0) {
           const nextJob = tikwmQueue.shift()!;
+          const qVid = extractTikTokVideoId(nextJob.canonicalUrl);
+          if (qVid && tiktokStreamCacheByVid.has(qVid) && isLivePlayableDirectStreamUrl(tiktokStreamCacheByVid.get(qVid)?.primaryUrl)) {
+            nextJob.resolve(null);
+            continue;
+          }
           const waitMs = Math.max(0, 1150 - (Date.now() - lastTikwmCallMs));
           if (waitMs > 0) {
             await new Promise((r) => setTimeout(r, waitMs));
           }
           lastTikwmCallMs = Date.now();
           let json = await fetchTikwmJsonSingle(nextJob.canonicalUrl);
-          if (json && json.code === -1) {
-            await new Promise((r) => setTimeout(r, 1180));
+          lastTikwmCallMs = Date.now();
+          if (!json || json.code === -1) {
+            await new Promise((r) => setTimeout(r, 1250));
             lastTikwmCallMs = Date.now();
             json = await fetchTikwmJsonSingle(nextJob.canonicalUrl);
+            lastTikwmCallMs = Date.now();
           }
           nextJob.resolve(json);
         }
@@ -15660,7 +15696,7 @@ function enqueueTikwmApiCall(canonicalUrl: string, priority = false): Promise<an
  */
 export async function prewarmTikTokStreams(
   items: ReadonlyArray<Partial<OnlineFoodDiscoveryItem>>,
-  maxCount = 8
+  maxCount = 4
 ): Promise<Record<string, { primaryUrl: string; backupUrl?: string }>> {
   const resolvedMap: Record<string, { primaryUrl: string; backupUrl?: string }> = {};
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
@@ -15681,7 +15717,7 @@ export async function prewarmTikTokStreams(
     }
   }
 
-  const uncached = tiktokItems.filter((it) => it.id && !resolvedMap[it.id]).slice(0, 4);
+  const uncached = tiktokItems.filter((it) => it.id && !resolvedMap[it.id]).slice(0, 2);
   for (const it of uncached) {
     try {
       const res = await resolvePlayableTikTokStreamUrl(it, { priority: false });
@@ -15698,12 +15734,12 @@ export async function prewarmTikTokStreams(
 }
 
 /**
- * Resolves a direct, unique, playable MP4 stream URL for a TikTok video so it plays smoothly inside a native
- * HTML5 <video> element on Android WebView, iOS WKWebView, and Web without ever repeating fake fallback videos.
+ * Resolves a direct, unique, playable MP4 stream URL for a TikTok or Facebook video so it plays smoothly
+ * inside a native HTML5 <video> element on Android WebView, iOS WKWebView, and Web.
  *
- * Layer 1: Fresh in-memory or item-level signed TikTok CDN stream (0ms latency).
- * Layer 2: Official TikTok creator embed feed (/embed/@handle with Desktop UA) caching all 10-13 creator videos at once.
- * Layer 3: Rate-limited CORS-enabled tikwm API queue returning fresh H.264/AAC MP4 streams (play + wmplay with ACAO: *).
+ * Layer 1: Fresh in-memory live resolved TikTok CDN stream (0ms latency).
+ * Layer 2: Rate-limited CORS-enabled tikwm API returning fresh H.264/AAC MP4 streams (wmplay + play).
+ * Layer 3: Official TikTok creator embed feed (/embed/@handle with Desktop UA) caching all 10-13 creator videos at once.
  */
 export async function resolvePlayableTikTokStreamUrl(
   item: Partial<OnlineFoodDiscoveryItem>,
@@ -15714,7 +15750,9 @@ export async function resolvePlayableTikTokStreamUrl(
     String(item.authorHandle || '')
       .replace(/^@+/, '')
       .trim() ||
-    (item.sourceUrl?.match(/tiktok\.com\/@([^/?#]+)/i)?.[1] ?? 'eatame.eater');
+    (item.sourceUrl?.match(/tiktok\.com\/@([^/?#]+)/i)?.[1] ??
+      item.sourceUrl?.match(/facebook\.com\/([^/?#]+)/i)?.[1] ??
+      'eatame.eater');
 
   if (!options?.forceFresh) {
     const syncCached = getCachedTikTokStreamUrl(item);
@@ -15740,9 +15778,9 @@ export async function resolvePlayableTikTokStreamUrl(
 
     const isNative = Boolean(Capacitor?.isNativePlatform?.());
 
-    // Layer 2: Extract fresh playAddr from TikTok's public creator embed feed (/embed/@handle with Desktop UA)
-    // Skip on priority user taps so Layer 3 (tikwm direct MP4) starts at 0ms without waiting 2.8s!
-    if (tiktokVid && cleanHandle && !options?.forceFresh && !options?.priority) {
+    // Helper for Creator Embed Feed (/embed/@handle) which returns Singapore edge (v16.tiktokcdn.com) streams
+    const tryCreatorEmbedFeed = async (): Promise<{ primaryUrl: string | null; backupUrl: string | null; coverUrl?: string } | null> => {
+      if (!tiktokVid || !cleanHandle) return null;
       try {
         const embedEndpoint = `https://www.tiktok.com/embed/@${cleanHandle}`;
         let html = '';
@@ -15753,16 +15791,16 @@ export async function resolvePlayableTikTokStreamUrl(
               Accept: 'text/html,application/xhtml+xml',
               'User-Agent': TIKTOK_DESKTOP_USER_AGENT,
             },
-            connectTimeout: 2800,
-            readTimeout: 2800,
+            connectTimeout: 3200,
+            readTimeout: 3200,
           });
           if (resp && resp.status >= 200 && resp.status < 300 && typeof resp.data === 'string') {
             html = resp.data;
           }
         } else {
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 2400);
-          const res = await fetch(embedEndpoint, { signal: controller.signal });
+          const timer = setTimeout(() => controller.abort(), 2800);
+          const res = await fetch(embedEndpoint, { headers: { 'User-Agent': TIKTOK_DESKTOP_USER_AGENT }, signal: controller.signal });
           clearTimeout(timer);
           if (res.ok) {
             html = await res.text();
@@ -15783,7 +15821,7 @@ export async function resolvePlayableTikTokStreamUrl(
               const vId = extractTikTokVideoId(String(v?.id || ''));
               const vPlayAddr = String(v?.playAddr || '').trim();
               const vCover = String(v?.coverUrl || v?.originCoverUrl || '').trim() || undefined;
-              if (vId && isDirectVideoUrlFreshAndPlayable(vPlayAddr)) {
+              if (vId && isLivePlayableDirectStreamUrl(vPlayAddr) && !tiktokStreamCacheByVid.has(vId)) {
                 tiktokStreamCacheByVid.set(vId, {
                   primaryUrl: vPlayAddr,
                   backupUrl: undefined,
@@ -15793,44 +15831,45 @@ export async function resolvePlayableTikTokStreamUrl(
               }
             }
             const matched = tiktokStreamCacheByVid.get(tiktokVid);
-            if (matched?.primaryUrl) {
+            if (matched?.primaryUrl && isLivePlayableDirectStreamUrl(matched.primaryUrl)) {
               return {
                 primaryUrl: matched.primaryUrl,
-                backupUrl: null,
+                backupUrl: matched.backupUrl || null,
                 coverUrl: matched.coverUrl,
               };
             }
           }
         }
       } catch {
-        // Fall through to Layer 3 (tikwm)
+        // Ignore embed error
       }
-    }
+      return null;
+    };
 
-    // Layer 3: Query rate-limited CORS-enabled tikwm API for fresh H.264/AAC CDN MP4 stream (play + wmplay with ACAO: *)
-    if (canonicalTikTokUrl && /^https?:\/\//i.test(canonicalTikTokUrl)) {
+    // Helper for rate-limited CORS-enabled tikwm API (wmplay + play)
+    const tryTikwmApi = async (): Promise<{ primaryUrl: string | null; backupUrl: string | null; coverUrl?: string } | null> => {
+      if (!canonicalTikTokUrl || !/^https?:\/\//i.test(canonicalTikTokUrl)) return null;
       try {
         const json = await enqueueTikwmApiCall(canonicalTikTokUrl, Boolean(options?.priority));
         const playUrl = String(json?.data?.play || '').trim();
         const wmPlayUrl = String(json?.data?.wmplay || '').trim();
         const coverUrl = String(json?.data?.cover || json?.data?.origin_cover || '').trim() || undefined;
-        const validPrimary = isDirectVideoUrlFreshAndPlayable(playUrl)
-          ? playUrl
-          : isDirectVideoUrlFreshAndPlayable(wmPlayUrl)
-          ? wmPlayUrl
-          : '';
+        const hasValidWm = isLivePlayableDirectStreamUrl(wmPlayUrl);
+        const hasValidPlay = isLivePlayableDirectStreamUrl(playUrl);
+        const validPrimary = hasValidWm ? wmPlayUrl : hasValidPlay ? playUrl : '';
         if (validPrimary) {
+          const existingCached = tiktokVid ? tiktokStreamCacheByVid.get(tiktokVid) : undefined;
           const backup =
-            isDirectVideoUrlFreshAndPlayable(wmPlayUrl) && wmPlayUrl !== validPrimary
-              ? wmPlayUrl
-              : !options?.forceFresh && isDirectVideoUrlFreshAndPlayable(item.directVideoUrl)
-              ? item.directVideoUrl
+            hasValidPlay && playUrl !== validPrimary
+              ? playUrl
+              : existingCached?.primaryUrl && existingCached.primaryUrl !== validPrimary
+              ? existingCached.primaryUrl
               : undefined;
           if (tiktokVid) {
             tiktokStreamCacheByVid.set(tiktokVid, {
               primaryUrl: validPrimary,
               backupUrl: backup,
-              coverUrl,
+              coverUrl: coverUrl || existingCached?.coverUrl,
               resolvedAt: Date.now(),
             });
           }
@@ -15841,18 +15880,33 @@ export async function resolvePlayableTikTokStreamUrl(
           };
         }
       } catch {
-        // Ignore network error
+        // Ignore tikwm error
       }
-    }
+      return null;
+    };
 
-    if (!options?.forceFresh && isDirectVideoUrlFreshAndPlayable(item.directVideoUrl)) {
-      return {
-        primaryUrl: item.directVideoUrl!,
-        backupUrl: null,
+    // Run creator embed feed (/embed/@handle) and tikwm API in parallel: whichever resolves a live stream first wins immediately!
+    const embedPromise = tryCreatorEmbedFeed();
+    const tikwmPromise = tryTikwmApi();
+
+    return await new Promise<{ primaryUrl: string | null; backupUrl: string | null; coverUrl?: string }>((resolve) => {
+      let settled = false;
+      let pending = 2;
+      const onResult = (res: { primaryUrl: string | null; backupUrl: string | null; coverUrl?: string } | null) => {
+        pending--;
+        if (!settled && res?.primaryUrl) {
+          settled = true;
+          resolve(res);
+          return;
+        }
+        if (!settled && pending <= 0) {
+          settled = true;
+          resolve({ primaryUrl: null, backupUrl: null });
+        }
       };
-    }
-
-    return { primaryUrl: null, backupUrl: null };
+      embedPromise.then(onResult).catch(() => onResult(null));
+      tikwmPromise.then(onResult).catch(() => onResult(null));
+    });
   })();
 
   if (tiktokVid) {

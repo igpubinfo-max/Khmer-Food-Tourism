@@ -61,6 +61,9 @@ import {
   resolveOriginalSocialAccountUrl,
   resolvePlayableTikTokStreamUrl,
   getCachedTikTokStreamUrl,
+  getCachedTikTokCoverUrl,
+  isLivePlayableDirectStreamUrl,
+  isExpiredStaticTikTokThumbnail,
   prewarmTikTokStreams,
   recordPlayedSocialVideo,
   fetchNextTikTokDiscoveryPage,
@@ -144,7 +147,7 @@ export const TrendingSocialModal: React.FC = () => {
   const [visibleVideoCount, setVisibleVideoCount] = useState<number>(VIDEO_BATCH_SIZE);
   const loadMoreVideosRef = useRef<HTMLDivElement | null>(null);
 
-  const [discoveryItems, setDiscoveryItems] = useState<OnlineFoodDiscoveryItem[]>(() => getInstantBaselineSocialFeed(foods));
+  const [discoveryItems, setDiscoveryItems] = useState<OnlineFoodDiscoveryItem[]>([]);
   const [lastCheckedAt, setLastCheckedAt] = useState<string>('');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
@@ -409,18 +412,35 @@ export const TrendingSocialModal: React.FC = () => {
   loadFeedRef.current = loadFeed;
   useEffect(() => {
     if (!isTrendingSocialModalOpen) return;
+    if (discoveryItems.length === 0) {
+      setDiscoveryItems(getInstantBaselineSocialFeed(foods));
+    }
     // Rotate existing in-memory videos instantaneously (0 network calls, 0 CPU heat)
     setRotationCycle(advanceVideoRotationCycle());
     if (!lastCheckedAt) {
       setLastCheckedAt(new Date().toISOString());
     }
-  }, [isTrendingSocialModalOpen]);
+  }, [isTrendingSocialModalOpen, discoveryItems.length, foods, lastCheckedAt]);
 
-  // Stop inline video when modal closes
+  // Stop inline video & release hardware MediaCodec buffers when modal closes or active video changes
+  useEffect(() => {
+    const vidEl = activeVideoRef.current;
+    return () => {
+      if (vidEl) {
+        try {
+          vidEl.pause();
+          vidEl.removeAttribute('src');
+          vidEl.load();
+        } catch {}
+      }
+    };
+  }, [activePlayerItemId, isTrendingSocialModalOpen]);
+
   useEffect(() => {
     if (!isTrendingSocialModalOpen) {
       setActivePlayerItemId(null);
       setVerifyingPlayItemId(null);
+      setIsVideoBuffering(false);
     }
   }, [isTrendingSocialModalOpen]);
 
@@ -605,23 +625,42 @@ export const TrendingSocialModal: React.FC = () => {
     }
   }, [foods]);
 
-  // Stall watchdog: if a direct MP4 stream hangs at 0:00 for > 6.5s, try backup MP4 or fetch a fresh stream via tikwm before iframe fallback
+  // Stall watchdog & iframe buffering guard: prevents spinner from ever hanging at 0:00
   useEffect(() => {
     if (!activePlayerItemId || !isTrendingSocialModalOpen) return;
     const currentEntry = resolvedDirectVideoUrls[activePlayerItemId];
-    if (currentEntry?.failedAllDirect) return;
+
+    // If playing inside iframe (YouTube or TikTok player/v1 fallback), auto-clear buffering overlay within 1.8s
+    if (currentEntry?.failedAllDirect || (!currentEntry?.primaryUrl && verifyingPlayItemId !== activePlayerItemId)) {
+      const iframeTimer = setTimeout(() => {
+        setIsVideoBuffering(false);
+      }, 1800);
+      return () => clearTimeout(iframeTimer);
+    }
 
     const timer = setTimeout(() => {
       const vidEl = activeVideoRef.current;
       if (!vidEl) return;
       if (vidEl.currentTime === 0 && vidEl.readyState < 2) {
         const activeItem = discoveryItems.find((x) => x.id === activePlayerItemId);
+        if (
+          currentEntry &&
+          !currentEntry.usingBackup &&
+          currentEntry.backupUrl &&
+          currentEntry.backupUrl !== currentEntry.primaryUrl
+        ) {
+          setResolvedDirectVideoUrls((prev) => ({
+            ...prev,
+            [activePlayerItemId]: { ...prev[activePlayerItemId], usingBackup: true },
+          }));
+          return;
+        }
         if ((activeItem?.platform === 'tiktok' || activeItem?.platform === 'facebook') && !currentEntry?.triedForceFresh) {
           setResolvedDirectVideoUrls((prev) => ({
             ...prev,
             [activePlayerItemId]: {
-              primaryUrl: prev[activePlayerItemId]?.primaryUrl || '',
-              backupUrl: prev[activePlayerItemId]?.backupUrl,
+              primaryUrl: '',
+              backupUrl: undefined,
               usingBackup: false,
               triedForceFresh: true,
               failedAllDirect: false,
@@ -631,7 +670,7 @@ export const TrendingSocialModal: React.FC = () => {
           resolvePlayableTikTokStreamUrl(activeItem, { priority: true, forceFresh: true })
             .then((res) => {
               setVerifyingPlayItemId((c) => (c === activePlayerItemId ? null : c));
-              if (res?.primaryUrl) {
+              if (res?.primaryUrl && res.primaryUrl !== currentEntry?.primaryUrl) {
                 setResolvedDirectVideoUrls((prev) => ({
                   ...prev,
                   [activePlayerItemId]: {
@@ -643,11 +682,12 @@ export const TrendingSocialModal: React.FC = () => {
                   },
                 }));
               } else {
+                setIsVideoBuffering(false);
                 setResolvedDirectVideoUrls((prev) => ({
                   ...prev,
                   [activePlayerItemId]: {
-                    primaryUrl: prev[activePlayerItemId]?.primaryUrl || '',
-                    backupUrl: prev[activePlayerItemId]?.backupUrl,
+                    primaryUrl: '',
+                    backupUrl: undefined,
                     usingBackup: true,
                     triedForceFresh: true,
                     failedAllDirect: true,
@@ -657,34 +697,37 @@ export const TrendingSocialModal: React.FC = () => {
             })
             .catch(() => {
               setVerifyingPlayItemId((c) => (c === activePlayerItemId ? null : c));
+              setIsVideoBuffering(false);
+              setResolvedDirectVideoUrls((prev) => ({
+                ...prev,
+                [activePlayerItemId]: {
+                  primaryUrl: '',
+                  backupUrl: undefined,
+                  usingBackup: true,
+                  triedForceFresh: true,
+                  failedAllDirect: true,
+                },
+              }));
             });
           return;
         }
 
-        setResolvedDirectVideoUrls((prev) => {
-          const curr = prev[activePlayerItemId];
-          if (curr && !curr.usingBackup && curr.backupUrl && curr.backupUrl !== curr.primaryUrl) {
-            return {
-              ...prev,
-              [activePlayerItemId]: { ...curr, usingBackup: true },
-            };
-          }
-          return {
-            ...prev,
-            [activePlayerItemId]: {
-              primaryUrl: curr?.primaryUrl || '',
-              backupUrl: curr?.backupUrl,
-              usingBackup: true,
-              triedForceFresh: true,
-              failedAllDirect: true,
-            },
-          };
-        });
+        setIsVideoBuffering(false);
+        setResolvedDirectVideoUrls((prev) => ({
+          ...prev,
+          [activePlayerItemId]: {
+            primaryUrl: '',
+            backupUrl: undefined,
+            usingBackup: true,
+            triedForceFresh: true,
+            failedAllDirect: true,
+          },
+        }));
       }
-    }, 6500);
+    }, 3800);
 
     return () => clearTimeout(timer);
-  }, [activePlayerItemId, isTrendingSocialModalOpen, resolvedDirectVideoUrls, playerReloadKey, discoveryItems]);
+  }, [activePlayerItemId, isTrendingSocialModalOpen, resolvedDirectVideoUrls, verifyingPlayItemId, playerReloadKey, discoveryItems]);
 
   useEffect(() => {
     const node = loadMoreVideosRef.current;
@@ -913,14 +956,24 @@ export const TrendingSocialModal: React.FC = () => {
         return;
       }
 
-      // Mount player container and resolve fresh TikTok stream with high priority
+      // Clear any stale entry so <video> does not mount with a dead URL while resolving fresh live stream
+      setResolvedDirectVideoUrls((prev) => ({
+        ...prev,
+        [item.id]: {
+          primaryUrl: '',
+          backupUrl: undefined,
+          usingBackup: false,
+          triedForceFresh: false,
+          failedAllDirect: false,
+        },
+      }));
       setActivePlayerItemId(item.id);
       setVerifyingPlayItemId(item.id);
 
       const streamRes = await Promise.race([
         resolvePlayableTikTokStreamUrl(item, { priority: true }).catch(() => ({ primaryUrl: null, backupUrl: null })),
         new Promise<{ primaryUrl: null; backupUrl: null }>((resolve) =>
-          setTimeout(() => resolve({ primaryUrl: null, backupUrl: null }), 4500)
+          setTimeout(() => resolve({ primaryUrl: null, backupUrl: null }), 6500)
         ),
       ]);
 
@@ -933,8 +986,21 @@ export const TrendingSocialModal: React.FC = () => {
             primaryUrl: streamRes.primaryUrl!,
             backupUrl: streamRes.backupUrl || undefined,
             usingBackup: false,
-            triedForceFresh: false,
+            triedForceFresh: true,
             failedAllDirect: false,
+          },
+        }));
+      } else {
+        // Fallback immediately to official TikTok player/v1 embed iframe so video never hangs at 0:00
+        setIsVideoBuffering(false);
+        setResolvedDirectVideoUrls((prev) => ({
+          ...prev,
+          [item.id]: {
+            primaryUrl: '',
+            backupUrl: undefined,
+            usingBackup: true,
+            triedForceFresh: true,
+            failedAllDirect: true,
           },
         }));
       }
@@ -1579,14 +1645,37 @@ export const TrendingSocialModal: React.FC = () => {
                 const isEmbedFallback = Boolean(embedFallbackItemIds[item.id] || !playerInfo.canInlineEmbed);
                 const isVerifyingThis = verifyingPlayItemId === item.id;
                 const directEntry = resolvedDirectVideoUrls[item.id];
+                const liveSeedDirectUrl = isLivePlayableDirectStreamUrl(playerInfo.directVideoUrl)
+                  ? playerInfo.directVideoUrl || null
+                  : null;
                 const activeDirectVideoUrl =
                   directEntry && !directEntry.failedAllDirect
-                    ? directEntry.usingBackup && directEntry.backupUrl
-                      ? directEntry.backupUrl
-                      : directEntry.primaryUrl
+                    ? (directEntry.usingBackup && directEntry.backupUrl
+                        ? directEntry.backupUrl
+                        : directEntry.primaryUrl) || null
                     : !directEntry?.failedAllDirect
-                    ? playerInfo.directVideoUrl || null
+                    ? liveSeedDirectUrl
                     : null;
+                const cachedCover =
+                  item.platform === 'tiktok' || item.platform === 'facebook'
+                    ? getCachedTikTokCoverUrl(item)
+                    : null;
+                const fallbackFoodForThumb = item.matchedFoodId
+                  ? foods.find((x) => x.id === item.matchedFoodId)
+                  : undefined;
+                const fallbackLocalThumb = fallbackFoodForThumb
+                  ? resolveFoodPhotoUrl(
+                      fallbackFoodForThumb.photoUrl,
+                      fallbackFoodForThumb.photoUpdatedAt,
+                      640,
+                      fallbackFoodForThumb.id
+                    )
+                  : '/foods/food-1.jpg';
+                const safeThumbUrl =
+                  cachedCover ||
+                  (!isExpiredStaticTikTokThumbnail(item.thumbnailUrl)
+                    ? item.thumbnailUrl
+                    : fallbackLocalThumb);
 
                 return (
                   <div
@@ -1600,7 +1689,7 @@ export const TrendingSocialModal: React.FC = () => {
                         <div className="relative aspect-16/9 w-full bg-slate-950 overflow-hidden flex flex-col items-center justify-center p-4 text-center">
                           {/* Keep original video thumbnail visible when offline */}
                           <img loading="lazy" decoding="async"
-                            src={item.thumbnailUrl}
+                            src={safeThumbUrl}
                             alt={displayTitle}
                             className="absolute inset-0 w-full h-full object-cover opacity-45 pointer-events-none"
                             onError={(e) => {
@@ -1675,7 +1764,7 @@ export const TrendingSocialModal: React.FC = () => {
                       ) : isEmbedFallback || !playerInfo.embedUrl ? (
                         <div className="relative aspect-16/9 w-full bg-slate-950 flex flex-col items-center justify-center p-4 text-center space-y-2.5">
                           <img loading="lazy" decoding="async"
-                            src={item.thumbnailUrl}
+                            src={safeThumbUrl}
                             alt=""
                             className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
                           />
@@ -1730,7 +1819,7 @@ export const TrendingSocialModal: React.FC = () => {
                               ref={activeVideoRef}
                               key={`${item.id}-${activeDirectVideoUrl}-${playerReloadKey}`}
                               src={activeDirectVideoUrl}
-                              poster={item.thumbnailUrl}
+                              poster={safeThumbUrl}
                               controls
                               controlsList="nodownload noremoteplayback"
                               onContextMenu={(e) => e.preventDefault()}
@@ -1739,8 +1828,6 @@ export const TrendingSocialModal: React.FC = () => {
                               playsInline
                               muted={isVideoMuted}
                               preload="auto"
-                              // @ts-expect-error referrerPolicy is supported on HTMLVideoElement in Chromium/WebKit
-                              referrerPolicy="no-referrer"
                               className="w-full h-full object-contain bg-black"
                               onLoadStart={() => setIsVideoBuffering(true)}
                               onLoadedMetadata={(e) => {
@@ -1784,11 +1871,12 @@ export const TrendingSocialModal: React.FC = () => {
                                   return;
                                 }
                                 if ((item.platform === 'tiktok' || item.platform === 'facebook') && !currEntry?.triedForceFresh) {
+                                  const failedUrl = activeDirectVideoUrl;
                                   setResolvedDirectVideoUrls((prev) => ({
                                     ...prev,
                                     [item.id]: {
-                                      primaryUrl: currEntry?.primaryUrl || activeDirectVideoUrl || '',
-                                      backupUrl: currEntry?.backupUrl,
+                                      primaryUrl: '',
+                                      backupUrl: undefined,
                                       usingBackup: false,
                                       triedForceFresh: true,
                                       failedAllDirect: false,
@@ -1798,7 +1886,7 @@ export const TrendingSocialModal: React.FC = () => {
                                   resolvePlayableTikTokStreamUrl(item, { priority: true, forceFresh: true })
                                     .then((res) => {
                                       setVerifyingPlayItemId((c) => (c === item.id ? null : c));
-                                      if (res?.primaryUrl) {
+                                      if (res?.primaryUrl && res.primaryUrl !== failedUrl) {
                                         setResolvedDirectVideoUrls((prev) => ({
                                           ...prev,
                                           [item.id]: {
@@ -1810,11 +1898,12 @@ export const TrendingSocialModal: React.FC = () => {
                                           },
                                         }));
                                       } else {
+                                        setIsVideoBuffering(false);
                                         setResolvedDirectVideoUrls((prev) => ({
                                           ...prev,
                                           [item.id]: {
-                                            primaryUrl: currEntry?.primaryUrl || '',
-                                            backupUrl: currEntry?.backupUrl,
+                                            primaryUrl: '',
+                                            backupUrl: undefined,
                                             usingBackup: true,
                                             triedForceFresh: true,
                                             failedAllDirect: true,
@@ -1824,14 +1913,26 @@ export const TrendingSocialModal: React.FC = () => {
                                     })
                                     .catch(() => {
                                       setVerifyingPlayItemId((c) => (c === item.id ? null : c));
+                                      setIsVideoBuffering(false);
+                                      setResolvedDirectVideoUrls((prev) => ({
+                                        ...prev,
+                                        [item.id]: {
+                                          primaryUrl: '',
+                                          backupUrl: undefined,
+                                          usingBackup: true,
+                                          triedForceFresh: true,
+                                          failedAllDirect: true,
+                                        },
+                                      }));
                                     });
                                   return;
                                 }
+                                setIsVideoBuffering(false);
                                 setResolvedDirectVideoUrls((prev) => ({
                                   ...prev,
                                   [item.id]: {
-                                    primaryUrl: currEntry?.primaryUrl || activeDirectVideoUrl || '',
-                                    backupUrl: currEntry?.backupUrl,
+                                    primaryUrl: '',
+                                    backupUrl: undefined,
                                     usingBackup: true,
                                     triedForceFresh: true,
                                     failedAllDirect: true,
@@ -1839,12 +1940,12 @@ export const TrendingSocialModal: React.FC = () => {
                                 }));
                               }}
                             />
-                          ) : isVerifyingThis && (item.platform === 'tiktok' || item.platform === 'facebook') ? (
+                                                    ) : isVerifyingThis && (item.platform === 'tiktok' || item.platform === 'facebook') ? (
                             <div className="relative w-full h-full bg-slate-950 flex items-center justify-center">
                               <img
                                 loading="lazy"
                                 decoding="async"
-                                src={item.thumbnailUrl}
+                                src={safeThumbUrl}
                                 alt={displayTitle}
                                 className="w-full h-full object-cover opacity-50"
                               />
@@ -1955,7 +2056,7 @@ export const TrendingSocialModal: React.FC = () => {
                         className="group relative aspect-16/9 w-full overflow-hidden bg-slate-900 cursor-pointer"
                       >
                         <img
-                          src={item.thumbnailUrl}
+                          src={safeThumbUrl}
                           alt={displayTitle}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                           loading="lazy"
