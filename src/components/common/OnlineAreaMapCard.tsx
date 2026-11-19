@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useRef, useState } from 'react';
 import { Navigation, Maximize2, Minimize2, Compass, WifiOff, Map as MapIcon } from 'lucide-react';
 import { Language } from '../../types';
-import { openExternalUrlNativeSafe } from '../../types';
+import { openExternalUrlNativeSafe, buildSpecificPlaceSearchQuery } from '../../types';
 import { tr } from '../../utils/i18n';
 import { haversineKm } from '../../utils/offlineCambodiaRoadEngine';
 
@@ -10,10 +10,13 @@ interface OnlineAreaMapCardProps {
   nameKh: string;
   nameEn: string;
   addressKh?: string;
+  addressEn?: string;
   provinceKh?: string;
   provinceEn?: string;
   lat?: number;
   lng?: number;
+  locationVerified?: boolean;
+  onOpenExternalMaps?: (mode: 'maps' | 'directions') => void;
   /** Fallback only: opens the separate Offline Map when the device has no internet. */
   onOpenFullMap: (mode: 'maps' | 'directions') => void;
 }
@@ -27,10 +30,13 @@ export const OnlineAreaMapCard: React.FC<OnlineAreaMapCardProps> = ({
   nameKh,
   nameEn,
   addressKh,
+  addressEn,
   provinceKh,
   provinceEn,
   lat,
   lng,
+  locationVerified = true,
+  onOpenExternalMaps,
   onOpenFullMap,
 }) => {
   const [isOnline, setIsOnline] = useState<boolean>(() =>
@@ -106,28 +112,42 @@ export const OnlineAreaMapCard: React.FC<OnlineAreaMapCardProps> = ({
     addressKh && addressKh.trim() ? `${addressKh}, ${provinceLabel}` : `${nameKh}, ${provinceLabel}`;
 
   const placeName = language === 'en' ? nameEn || nameKh : nameKh || nameEn;
-  const query = hasCoords
-    ? `${validLat},${validLng}(${placeName})`
-    : `${placeName} ${provinceEn || provinceKh || 'Cambodia'}`;
+  const specificPlaceQuery = buildSpecificPlaceSearchQuery({
+    nameEn,
+    nameKh,
+    addressEn,
+    addressKh,
+    provinceEn,
+    provinceKh,
+  });
+  const query =
+    hasCoords && locationVerified !== false
+      ? `${validLat},${validLng}(${placeName})`
+      : specificPlaceQuery;
   const hl = language === 'en' ? 'en' : language === 'zh' ? 'zh-CN' : 'km';
   const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=17&hl=${hl}&output=embed`;
-  const placeUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    hasCoords ? `${validLat},${validLng}` : `${placeName} ${provinceEn || provinceKh || 'Cambodia'}`
-  )}`;
-  const directionsUrl = hasCoords
-    ? `https://www.google.com/maps/dir/?api=1&destination=${validLat},${validLng}&travelmode=driving`
-    : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-        `${placeName} ${provinceEn || provinceKh || 'Cambodia'}`
-      )}&travelmode=driving`;
+  const placeUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(specificPlaceQuery)}`;
+  const directionsUrl =
+    hasCoords && locationVerified !== false
+      ? `https://www.google.com/maps/dir/?api=1&destination=${validLat},${validLng}&travelmode=driving`
+      : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(specificPlaceQuery)}&travelmode=driving`;
 
   const handleDirections = () => {
-    if (isOnline) openExternalUrlNativeSafe(directionsUrl);
-    else onOpenFullMap('directions');
+    if (isOnline) {
+      if (onOpenExternalMaps) onOpenExternalMaps('directions');
+      else openExternalUrlNativeSafe(directionsUrl);
+    } else {
+      onOpenFullMap('directions');
+    }
   };
 
   const handleAddress = () => {
-    if (isOnline) openExternalUrlNativeSafe(placeUrl);
-    else onOpenFullMap('maps');
+    if (isOnline) {
+      if (onOpenExternalMaps) onOpenExternalMaps('maps');
+      else openExternalUrlNativeSafe(placeUrl);
+    } else {
+      onOpenFullMap('maps');
+    }
   };
 
   const mapBoxClass = expanded
@@ -137,9 +157,16 @@ export const OnlineAreaMapCard: React.FC<OnlineAreaMapCardProps> = ({
   return (
     <div ref={cardContainerRef} className="rounded-2xl overflow-hidden bg-[#12161F] border border-slate-700/80 shadow-lg text-white font-khmer">
       <div className="p-4 space-y-3">
-        <h3 className="text-base sm:text-lg font-extrabold text-white">
-          {tr(language, 'ផែនទីតំបន់ជុំវិញទីតាំងនេះ (The Area)', 'The area', '周边街区地图 (The Area)')}
-        </h3>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-base sm:text-lg font-extrabold text-white">
+            {tr(language, 'ផែនទីតំបន់ជុំវិញទីតាំងនេះ (The Area)', 'The area', '周边街区地图 (The Area)')}
+          </h3>
+          {locationVerified === false && (
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200 text-[10px] font-bold">
+              {tr(language, '📍 ទីតាំងកំពុងរង់ចាំការផ្ទៀងផ្ទាត់', '📍 Location flagged for verification', '📍 位置待核验')}
+            </span>
+          )}
+        </div>
 
         <div className="space-y-0.5">
           <div className="text-xs font-bold text-slate-300">{tr(language, 'អាសយដ្ឋាន (Address)', 'Address', '地址')}</div>

@@ -1214,6 +1214,9 @@ export const HotelView: React.FC = () => {
   const { distanceMap, distanceMetersMap } = useMemo(() => {
     const kmMap = new Map<string, number>();
     const mMap = new Map<string, number>();
+    if (activeTab !== 'hotels') {
+      return { distanceMap: kmMap, distanceMetersMap: mMap };
+    }
     const refLat = sortMode === 'nearest' ? activeNearMeCoords.lat : baseCoords.lat;
     const refLng = sortMode === 'nearest' ? activeNearMeCoords.lng : baseCoords.lng;
 
@@ -1229,9 +1232,10 @@ export const HotelView: React.FC = () => {
       kmMap.set(h.id, h.distanceKm);
     }
     return { distanceMap: kmMap, distanceMetersMap: mMap };
-  }, [orderedHotels, nearbyMergedHotels, sortMode, activeNearMeCoords, baseCoords]);
+  }, [activeTab, orderedHotels, nearbyMergedHotels, sortMode, activeNearMeCoords, baseCoords]);
 
   const filteredHotels = useMemo(() => {
+    if (activeTab !== 'hotels') return [];
     const isNearMe = sortMode === 'nearest';
     const trimmedQ = (hotelSearchQuery.trim() || debouncedSearchQuery.trim());
     const smartIntent = trimmedQ ? parseSmartSearchIntent(trimmedQ) : null;
@@ -1391,6 +1395,7 @@ export const HotelView: React.FC = () => {
     addedHotelTimestampMap,
     language,
     userCoords,
+    activeTab,
   ]);
 
   // Split into Section 1: TOP 1 Earliest Approved Hotel (Featured Card matching Reference Image 3)

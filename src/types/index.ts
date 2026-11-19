@@ -6,7 +6,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? Math.max(__KFT_BUILD_CODE__, 1655) : 1655;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? Math.max(__KFT_BUILD_CODE__, 1656) : 1656;
 export const APP_RELEASE_DATE = '2026-11-19';
 
 /**
@@ -4826,6 +4826,7 @@ export type DestinationCategorySlug =
   | 'hotel';
 
 export interface TouristDestination {
+  googleMapsUrl?: string;
   id: string;
   tourismTheme?: 'sports_adventure' | 'local_souvenirs';
   nameKh: string;

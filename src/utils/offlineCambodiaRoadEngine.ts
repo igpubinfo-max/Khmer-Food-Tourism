@@ -443,23 +443,25 @@ function getTierWeightMultiplier(tier: RoadSegment['tier'], mode: TravelMode): n
   return 1.0;
 }
 
-function buildTrueIntersectionRoadGraph(
-  segments: RoadSegment[],
-  startLat: number,
-  startLng: number,
-  endLat: number,
-  endLng: number,
-  endAddressKh: string | undefined,
-  mode: TravelMode
-): { nodes: Map<string, GraphNode>; startNodeId: string; endNodeId: string } {
-  interface SubSeg {
-    segIndex: number;
-    a: [number, number];
-    b: [number, number];
-    splits: number[];
-  }
+interface PrecomputedSubSeg {
+  segIndex: number;
+  a: [number, number];
+  b: [number, number];
+  splits: number[];
+}
 
-  const subSegs: SubSeg[] = [];
+let cachedStaticSubSegs: PrecomputedSubSeg[] | null = null;
+
+function getPrecomputedSubSegs(segments: RoadSegment[]): PrecomputedSubSeg[] {
+  if (segments === CAMBODIA_ROAD_SEGMENTS && cachedStaticSubSegs) {
+    return cachedStaticSubSegs.map((s) => ({
+      segIndex: s.segIndex,
+      a: s.a,
+      b: s.b,
+      splits: s.splits.slice(),
+    }));
+  }
+  const subSegs: PrecomputedSubSeg[] = [];
   segments.forEach((seg, segIndex) => {
     for (let i = 0; i < seg.points.length - 1; i++) {
       subSegs.push({
@@ -495,6 +497,28 @@ function buildTrueIntersectionRoadGraph(
       }
     }
   }
+
+  if (segments === CAMBODIA_ROAD_SEGMENTS) {
+    cachedStaticSubSegs = subSegs.map((s) => ({
+      segIndex: s.segIndex,
+      a: s.a,
+      b: s.b,
+      splits: s.splits.slice(),
+    }));
+  }
+  return subSegs;
+}
+
+function buildTrueIntersectionRoadGraph(
+  segments: RoadSegment[],
+  startLat: number,
+  startLng: number,
+  endLat: number,
+  endLng: number,
+  endAddressKh: string | undefined,
+  mode: TravelMode
+): { nodes: Map<string, GraphNode>; startNodeId: string; endNodeId: string } {
+  const subSegs = getPrecomputedSubSegs(segments);
 
   const endStreetCode = extractStreetCodeFromAddress(endAddressKh);
   let bestStartIdx = 0;
@@ -727,6 +751,8 @@ export function computeModeTravelMinutes(totalKm: number, mode: TravelMode): num
   return Math.max(1, Math.round((totalKm / avgSpeedKmh) * 60));
 }
 
+const inMemoryOfflineRouteCache = new Map<string, ComputedRoadRoute>();
+
 export function computeOfflineRoadRoute(
   startLat: number,
   startLng: number,
@@ -737,6 +763,10 @@ export function computeOfflineRoadRoute(
   targetAddressKh?: string,
   mode: TravelMode = 'driving'
 ): ComputedRoadRoute {
+  const memoKey = `${mode}:${startLat.toFixed(4)},${startLng.toFixed(4)}->${endLat.toFixed(4)},${endLng.toFixed(4)}:${targetAddressKh || ''}:${targetNameKh}:${targetNameEn}`;
+  const cachedMemo = inMemoryOfflineRouteCache.get(memoKey);
+  if (cachedMemo) return cachedMemo;
+
   const { nodes, startNodeId, endNodeId } = buildTrueIntersectionRoadGraph(
     CAMBODIA_ROAD_SEGMENTS,
     startLat,
@@ -906,7 +936,7 @@ export function computeOfflineRoadRoute(
     )
   ).slice(0, 4);
 
-  return {
+  const finalResult: ComputedRoadRoute = {
     path: rawPath,
     totalDistanceKm: Number(totalKm.toFixed(1)),
     estimatedMinutes: estMinutes,
@@ -917,6 +947,12 @@ export function computeOfflineRoadRoute(
     mode,
     engineSource: 'offline-astar',
   };
+  if (inMemoryOfflineRouteCache.size >= 48) {
+    const oldestKey = inMemoryOfflineRouteCache.keys().next().value;
+    if (oldestKey) inMemoryOfflineRouteCache.delete(oldestKey);
+  }
+  inMemoryOfflineRouteCache.set(memoKey, finalResult);
+  return finalResult;
 }
 
 export function snapUserGpsToActiveRoute(
@@ -1023,10 +1059,13 @@ function purgeLegacyPoisonedTileDb(): void {
   }
 }
 
+let cachedTileDbPromise: Promise<IDBDatabase | null> | null = null;
+
 function openTileDb(): Promise<IDBDatabase | null> {
   if (typeof indexedDB === 'undefined') return Promise.resolve(null);
   purgeLegacyPoisonedTileDb();
-  return new Promise((resolve) => {
+  if (cachedTileDbPromise) return cachedTileDbPromise;
+  cachedTileDbPromise = new Promise((resolve) => {
     try {
       const req = indexedDB.open(DB_NAME, 1);
       req.onupgradeneeded = () => {
@@ -1041,12 +1080,27 @@ function openTileDb(): Promise<IDBDatabase | null> {
           db.createObjectStore(STORE_ROUTES);
         }
       };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => resolve(null);
+      req.onsuccess = () => {
+        const db = req.result;
+        db.onclose = () => {
+          cachedTileDbPromise = null;
+        };
+        db.onversionchange = () => {
+          db.close();
+          cachedTileDbPromise = null;
+        };
+        resolve(db);
+      };
+      req.onerror = () => {
+        cachedTileDbPromise = null;
+        resolve(null);
+      };
     } catch {
+      cachedTileDbPromise = null;
       resolve(null);
     }
   });
+  return cachedTileDbPromise;
 }
 
 export async function getCachedTileBlobUrl(

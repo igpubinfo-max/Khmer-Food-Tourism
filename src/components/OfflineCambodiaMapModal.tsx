@@ -251,10 +251,17 @@ export const OfflineCambodiaMapModal: React.FC = () => {
   // Hybrid OSRM / Offline A* Route State
   const [hybridRoute, setHybridRoute] = useState<ComputedRoadRoute | null>(null);
 
-  // LRU Tile Image Cache for 60fps canvas rendering without memory leaks
-  const tileImageCacheRef = useRef<Map<string, { img: HTMLImageElement; blobUrl?: string }>>(
-    new Map()
-  );
+  // LRU Tile Image Cache for 60fps canvas rendering without memory leaks (with pre-baked dark tile bitmap)
+  const tileImageCacheRef = useRef<
+    Map<string, { img: HTMLImageElement; darkCanvas?: HTMLCanvasElement; blobUrl?: string }>
+  >(new Map());
+  const routeOriginRef = useRef<{
+    lat: number;
+    lng: number;
+    isRealGps: boolean;
+    rerouteCount: number;
+    pinId: string | null;
+  } | null>(null);
   const [tileRenderTick, setTileRenderTick] = useState(0);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -288,8 +295,9 @@ export const OfflineCambodiaMapModal: React.FC = () => {
     };
   }, []);
 
-  // Build unified pins list
+  // Build unified pins list only when modal is open so background app navigation does zero work
   const allPins = useMemo<MapPinEntry[]>(() => {
+    if (!isOpen) return [];
     const list: MapPinEntry[] = [];
 
     for (const d of destinations) {
@@ -380,7 +388,7 @@ export const OfflineCambodiaMapModal: React.FC = () => {
     }
 
     return list;
-  }, [destinations, restaurants]);
+  }, [isOpen, destinations, restaurants]);
 
   // Apply real GPS fix with outlier/jitter filtering & compass heading extraction
   const applyGpsFix = (pos: GeolocationPosition) => {
@@ -550,19 +558,34 @@ export const OfflineCambodiaMapModal: React.FC = () => {
         }
       } else if (payload.kind === 'trending' && payload.trending) {
         const t = payload.trending;
-        const match = allPins.find(
-          (p) =>
-            p.id === t.id ||
+        const matchedRest = restaurants.find(
+          (r) =>
+            r.id === t.id ||
             (typeof t.latitude === 'number' &&
               typeof t.longitude === 'number' &&
-              Math.abs(p.lat - t.latitude) < 0.002 &&
-              Math.abs(p.lng - t.longitude) < 0.002)
+              typeof r.latitude === 'number' &&
+              typeof r.longitude === 'number' &&
+              Math.abs(r.latitude - t.latitude) < 0.002 &&
+              Math.abs(r.longitude - t.longitude) < 0.002)
         );
-        if (match) {
-          setActivePinId(match.id);
-          focusMapOnPlaceAndRoute(match.lat, match.lng, payload.mode);
-        } else if (typeof t.latitude === 'number' && typeof t.longitude === 'number') {
-          focusMapOnPlaceAndRoute(t.latitude, t.longitude, payload.mode);
+        const matchedDest = !matchedRest
+          ? destinations.find(
+              (d) =>
+                d.id === t.id ||
+                (typeof t.latitude === 'number' &&
+                  typeof t.longitude === 'number' &&
+                  typeof d.latitude === 'number' &&
+                  typeof d.longitude === 'number' &&
+                  Math.abs(d.latitude - t.latitude) < 0.002 &&
+                  Math.abs(d.longitude - t.longitude) < 0.002)
+            )
+          : undefined;
+        const targetId = matchedRest?.id || matchedDest?.id || t.id || null;
+        const targetLat = matchedRest?.latitude ?? matchedDest?.latitude ?? t.latitude;
+        const targetLng = matchedRest?.longitude ?? matchedDest?.longitude ?? t.longitude;
+        if (targetId) setActivePinId(targetId);
+        if (typeof targetLat === 'number' && typeof targetLng === 'number') {
+          focusMapOnPlaceAndRoute(targetLat, targetLng, payload.mode);
         }
       }
 
@@ -571,22 +594,24 @@ export const OfflineCambodiaMapModal: React.FC = () => {
 
     window.addEventListener(OFFLINE_CAMBODIA_MAP_EVENT, handler);
     return () => window.removeEventListener(OFFLINE_CAMBODIA_MAP_EVENT, handler);
-  }, [allPins]);
+  }, [restaurants, destinations]);
 
   const activePin = useMemo<MapPinEntry | null>(() => {
+    if (!isOpen || allPins.length === 0) return null;
     if (!activePinId) return allPins[0] || null;
     return allPins.find((p) => p.id === activePinId) || allPins[0] || null;
-  }, [allPins, activePinId]);
+  }, [isOpen, allPins, activePinId]);
 
-  // Refresh offline tile count from IndexedDB v3
+  // Refresh offline tile count from IndexedDB v4 only when modal opens (not on every tileRenderTick)
   useEffect(() => {
     if (!isOpen) return;
     getOfflinePackStatus().then((st) => {
       setDownloadedTilesCount(st.downloadedTilesCount);
     });
-  }, [isOpen, activePin, tileRenderTick]);
+  }, [isOpen]);
 
   const visiblePins = useMemo(() => {
+    if (!isOpen || allPins.length === 0) return [];
     const q = searchQuery.trim().toLowerCase();
     return allPins.filter((p) => {
       if (p.id === activePinId) return true;
@@ -600,14 +625,39 @@ export const OfflineCambodiaMapModal: React.FC = () => {
         (p.addressKh || '').toLowerCase().includes(q)
       );
     });
-  }, [allPins, filterKind, searchQuery, activePinId]);
+  }, [isOpen, allPins, filterKind, searchQuery, activePinId]);
+
+  // Anchor route calculation origin so minor 2.5m GPS ticks do not spam OSRM network or rebuild A* graph;
+  // route only recalculates when destination changes, first real GPS fix locks, off-route deviation (>65m) fires, or user moves >= 80m while not navigating.
+  const routeOrigin = useMemo(() => {
+    const prev = routeOriginRef.current;
+    const pinId = activePin?.id || null;
+    if (
+      !prev ||
+      prev.pinId !== pinId ||
+      prev.isRealGps !== userLocation.isRealGps ||
+      prev.rerouteCount !== rerouteCount ||
+      (!isNavigatingLive && haversineKm(prev.lat, prev.lng, userLocation.lat, userLocation.lng) >= 0.08)
+    ) {
+      const next = {
+        lat: userLocation.lat,
+        lng: userLocation.lng,
+        isRealGps: userLocation.isRealGps,
+        rerouteCount,
+        pinId,
+      };
+      routeOriginRef.current = next;
+      return next;
+    }
+    return prev;
+  }, [activePin?.id, userLocation.lat, userLocation.lng, userLocation.isRealGps, rerouteCount, isNavigatingLive]);
 
   // Immediate synchronous offline A* road-following route (zero latency!)
   const instantAstarRoute = useMemo<ComputedRoadRoute | null>(() => {
-    if (!activePin) return null;
+    if (!isOpen || !activePin) return null;
     return computeOfflineRoadRoute(
-      userLocation.lat,
-      userLocation.lng,
+      routeOrigin.lat,
+      routeOrigin.lng,
       activePin.lat,
       activePin.lng,
       activePin.nameKh,
@@ -615,15 +665,15 @@ export const OfflineCambodiaMapModal: React.FC = () => {
       activePin.addressKh,
       travelMode
     );
-  }, [activePin, userLocation.lat, userLocation.lng, travelMode, rerouteCount]);
+  }, [isOpen, activePin, routeOrigin.lat, routeOrigin.lng, travelMode, rerouteCount]);
 
   // Upgrade route asynchronously with real OSRM geometry (online or IndexedDB cached)
   useEffect(() => {
     if (!isOpen || !activePin) return;
     let cancelled = false;
     fetchOrComputeHybridRoadRoute(
-      userLocation.lat,
-      userLocation.lng,
+      routeOrigin.lat,
+      routeOrigin.lng,
       activePin.lat,
       activePin.lng,
       activePin.nameKh,
@@ -636,15 +686,15 @@ export const OfflineCambodiaMapModal: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [isOpen, activePin, userLocation.lat, userLocation.lng, travelMode, isOnline, rerouteCount]);
+  }, [isOpen, activePin, routeOrigin.lat, routeOrigin.lng, travelMode, isOnline, rerouteCount]);
 
   const roadRoute = hybridRoute || instantAstarRoute;
 
   // Live Road Snapping & Automatic Route Deviation Recalculation
   const activeRouteSnap = useMemo(() => {
-    if (!roadRoute) return null;
+    if (!isOpen || !roadRoute) return null;
     return snapUserGpsToActiveRoute(userLocation.lat, userLocation.lng, roadRoute);
-  }, [userLocation.lat, userLocation.lng, roadRoute]);
+  }, [isOpen, userLocation.lat, userLocation.lng, roadRoute]);
 
   useEffect(() => {
     if (!isOpen || !activeRouteSnap || !userLocation.isRealGps) return;
@@ -686,19 +736,19 @@ export const OfflineCambodiaMapModal: React.FC = () => {
   ]);
 
   const localStreets = useMemo(() => {
-    if (!activePin) return [];
+    if (!isOpen || !activePin) return [];
     const targetSegs = generateLocalStreetSegmentsAroundPin(
       activePin.lat,
       activePin.lng,
       activePin.addressKh,
       activePin.nameKh
     );
-    const startSegs = generateLocalStreetSegmentsAroundPin(userLocation.lat, userLocation.lng);
+    const startSegs = generateLocalStreetSegmentsAroundPin(routeOrigin.lat, routeOrigin.lng);
     return [...targetSegs, ...startSegs];
-  }, [activePin, userLocation.lat, userLocation.lng]);
+  }, [isOpen, activePin, routeOrigin.lat, routeOrigin.lng]);
 
   const nearbyAroundActive = useMemo(() => {
-    if (!activePin) return [];
+    if (!isOpen || !activePin) return [];
     return allPins
       .filter((p) => p.id !== activePin.id)
       .map((p) => ({
@@ -707,7 +757,32 @@ export const OfflineCambodiaMapModal: React.FC = () => {
       }))
       .sort((a, b) => a.distKm - b.distKm)
       .slice(0, 8);
-  }, [allPins, activePin]);
+  }, [isOpen, allPins, activePin]);
+
+  // Pre-bake dark-mode tile bitmap once on first draw to eliminate per-frame 60fps ctx.filter CPU/GPU overheating
+  const getOrCreateDarkTileSource = (entry: {
+    img: HTMLImageElement;
+    darkCanvas?: HTMLCanvasElement;
+  }): HTMLImageElement | HTMLCanvasElement => {
+    if (entry.darkCanvas) return entry.darkCanvas;
+    if (typeof document === 'undefined') return entry.img;
+    try {
+      const off = document.createElement('canvas');
+      off.width = 256;
+      off.height = 256;
+      const offCtx = off.getContext('2d');
+      if (offCtx) {
+        offCtx.filter = 'invert(90%) hue-rotate(185deg) saturate(82%) brightness(92%) contrast(96%)';
+        offCtx.drawImage(entry.img, 0, 0, 256, 256);
+        entry.darkCanvas = off;
+        return off;
+      }
+    } catch {
+      /* fallback to raw image */
+    }
+    return entry.img;
+  };
+
   // LRU memory guard for tile images
   const cacheTileInMemory = (key: string, img: HTMLImageElement, blobUrl?: string) => {
     const map = tileImageCacheRef.current;
@@ -725,7 +800,8 @@ export const OfflineCambodiaMapModal: React.FC = () => {
         map.delete(oldestKey);
       }
     }
-    map.set(key, { img, blobUrl });
+    const existing = map.get(key);
+    map.set(key, { img, darkCanvas: existing?.darkCanvas, blobUrl });
   };
 
   // Handle Offline Map Download Button
@@ -843,12 +919,8 @@ export const OfflineCambodiaMapModal: React.FC = () => {
 
           const cachedEntry = tileImageCacheRef.current.get(key);
           if (cachedEntry && cachedEntry.img.complete && cachedEntry.img.naturalWidth > 0) {
-            ctx.save();
-            if (!isDay) {
-              ctx.filter = 'invert(90%) hue-rotate(185deg) saturate(82%) brightness(92%) contrast(96%)';
-            }
-            ctx.drawImage(cachedEntry.img, screenX, screenY, 256, 256);
-            ctx.restore();
+            const drawSrc = isDay ? cachedEntry.img : getOrCreateDarkTileSource(cachedEntry);
+            ctx.drawImage(drawSrc, screenX, screenY, 256, 256);
             realTileCellsDrawn++;
             continue;
           }
@@ -867,12 +939,8 @@ export const OfflineCambodiaMapModal: React.FC = () => {
               const subSize = 256 / scale;
               const sx = (tx % scale) * subSize;
               const sy = (ty % scale) * subSize;
-              ctx.save();
-              if (!isDay) {
-                ctx.filter = 'invert(90%) hue-rotate(185deg) saturate(82%) brightness(92%) contrast(96%)';
-              }
-              ctx.drawImage(pEntry.img, sx, sy, subSize, subSize, screenX, screenY, 256, 256);
-              ctx.restore();
+              const drawParentSrc = isDay ? pEntry.img : getOrCreateDarkTileSource(pEntry);
+              ctx.drawImage(drawParentSrc, sx, sy, subSize, subSize, screenX, screenY, 256, 256);
               drewOverzoomParent = true;
               realTileCellsDrawn++;
               break;

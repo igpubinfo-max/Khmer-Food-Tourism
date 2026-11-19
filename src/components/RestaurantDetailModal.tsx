@@ -489,10 +489,13 @@ export const RestaurantDetailModal: React.FC = () => {
               nameKh={selectedRestaurant.nameKh}
               nameEn={selectedRestaurant.nameEn}
               addressKh={selectedRestaurant.addressKh}
+              addressEn={selectedRestaurant.addressEn}
               provinceKh={selectedRestaurant.provinceKh}
               provinceEn={selectedRestaurant.provinceEn}
               lat={selectedRestaurant.latitude}
               lng={selectedRestaurant.longitude}
+              locationVerified={isPlaceLocationVerified(selectedRestaurant)}
+              onOpenExternalMaps={(mode) => openRestaurantGoogleExternal(selectedRestaurant, mode)}
               onOpenFullMap={(mode) => {
                 window.dispatchEvent(
                   new CustomEvent('kft:open-offline-cambodia-map', {

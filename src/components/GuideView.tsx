@@ -502,6 +502,7 @@ export const GuideView: React.FC = () => {
 
   // Province groups (live: built from destinations + approved shops)
   const provinceGroups = useMemo(() => {
+    if (activeTab !== 'guide') return [];
     const map = new Map<string, { key: string; km: string; en: string; places: TouristDestination[]; shops: Restaurant[] }>();
     const ensure = (kh?: string, en?: string) => {
       const key = stripProvincePrefix(kh) || (en || '').trim();
@@ -518,7 +519,7 @@ export const GuideView: React.FC = () => {
     }
     for (const r of directoryShops) ensure(r.provinceKh, r.provinceEn)?.shops.push(r);
     return Array.from(map.values()).sort((a, b) => b.places.length + b.shops.length - (a.places.length + a.shops.length));
-  }, [destinations, directoryShops]);
+  }, [activeTab, destinations, directoryShops]);
 
   const activeGroup = provinceGroups.find((g) => g.key === provinceKey) || provinceGroups[0];
   const provinceName = (g: { km: string; en: string }) =>

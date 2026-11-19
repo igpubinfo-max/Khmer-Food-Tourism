@@ -81,10 +81,10 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Culantro and crispy fried garlic',
   },
   {
-    nameKh: 'កំពិសលីង',
+    nameKh: 'កំពឹសលីង',
     nameEn: 'Cambodian Wok-Roasted Crispy River Shrimp with Scallions & Chili (Kampis Ling)',
     cat: 'stirfry',
-    catKh: 'ម្ហូបឆា និង លីង / កំពិសលីង',
+    catKh: 'ម្ហូបឆា និង លីង / កំពឹសលីង',
     catEn: 'Stir-Fry / Roasted Freshwater Shrimp',
     mainIngKh: 'កំពិសទន្លេស្រស់លាងស្អាត (៤០០ ក្រាម)',
     mainIngEn: 'Fresh tiny freshwater river shrimp, cleaned and drained (400g)',
@@ -449,7 +449,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Red holy basil leaves and kaffir lime leaves',
   },
   {
-    nameKh: 'ឆាគ្រឿងសាច់គោសណ្តែកគួរ',
+    nameKh: 'ឆាគ្រឿងសាច់គោសណ្តែកកួរ',
     nameEn: 'Yellow Kroeung Beef Stir-Fry with Yardlong Beans',
     cat: 'stirfry',
     catKh: 'ម្ហូបឆា / ឆាគ្រឿង',
@@ -571,12 +571,12 @@ const RAW_100_NEW_DISHES: Array<{
     cat: 'stirfry',
     catKh: 'ម្ហូបខ / ខត្រី',
     catEn: 'Braised / Caramelized Fish Khor',
-    mainIngKh: 'ត្រីខៀបហាន់ជាកង់ៗ (១.៣ គីឡូក្រាម)',
+    mainIngKh: 'ត្រីឆ្ពិន ឬត្រីរ៉ស់ស្រស់ហាន់ជាកង់ៗ (១.៣ គីឡូក្រាម)',
     mainIngEn: 'Fresh fish steaks cut into thick pieces (1.3kg)',
     subIngKh: 'ប៉េងប៉ោះ ៤ ខាំ និងស្ករត្នោត ១.៣ ខាំ',
     subIngEn: 'Ripe tomatoes (400g) and palm sugar (130g)',
-    herbKh: 'ខ្ទឹមសចិញ្ច្រាំ ១០ កំពឹស ស្លឹកខ្ទឹម និងម្ទេស',
-    herbEn: '10 cloves minced garlic, spring onions, and fresh chili',
+    herbKh: 'ខ្ញីខ្ចីហាន់សរសៃ ខ្ទឹមសចិញ្ច្រាំ ស្លឹកខ្ទឹម និងម្ទេសក្រហម',
+    herbEn: 'Julienned young ginger, minced garlic, spring onions, and sliced red chili',
   },
   {
     nameKh: 'ឆាជូរផ្អែមត្រីរ៉ស់បំពង',
@@ -2328,9 +2328,9 @@ function buildStepsForDish(
         },
         {
           stepNumber: 8,
-          instructionKh: 'ចុងក្រោយដាក់ស្លឹកខ្ទឹម និងម្ទេសចូល។',
-          instructionEn: 'Finally, add spring onions and fresh chilies.',
-          instructionZh: '最后撒入葱段与鲜辣椒。',
+          instructionKh: 'ចុងក្រោយរោយខ្ញីខ្ចីហាន់សរសៃ ស្លឹកខ្ទឹម និងម្ទេសក្រហមពីលើ។',
+          instructionEn: 'Finally, top with julienned young ginger, spring onions, and sliced red chilies.',
+          instructionZh: '最后在鱼块上铺满嫩姜丝、葱段与红辣椒圈。',
         },
         {
           stepNumber: 9,
@@ -2691,7 +2691,7 @@ function buildStepsForDish(
         },
         {
           stepNumber: 2,
-          instructionKh: 'ដាក់ខ្ទះឱ្យក្តៅ ចាក់ប្រេងបំពងខ្ទឹមសឱ្យឈ្ងុយ ដាក់គ្រឿងសាច់ ឬក្តាម និងគ្រឿងសមុទ្រចូលឆាដោយភ្លើងខ្លាំងឱ្យឆ្អិនល្មម។',
+          instructionKh: `ដាក់ខ្ទះឱ្យក្តៅ ចាក់ប្រេងបំពងខ្ទឹមសឱ្យឈ្ងុយ រួចដាក់គ្រឿងសាច់ (${mainIngKh}) ចូលឆាដោយភ្លើងខ្លាំងឱ្យឆ្អិនល្មម។`,
           instructionEn: `Heat a wok over high flame, sauté minced garlic until fragrant, and stir-fry the protein (${mainIngEn}) until aromatic.`,
         },
         {
@@ -3236,8 +3236,8 @@ function buildStepsForDish(
     return [
       {
         stepNumber: 1,
-        instructionKh: `រៀបចំគ្រឿងផ្សំចម្បង (${mainIngKh}) ឱ្យស្អាត (ស្ងោរគ្រាប់សាគូ ឬលុញម្សៅបាញ់ចានឿក ឬចំហុយត្រាវទុកជាមុន)។`,
-        instructionEn: `Prepare ${mainIngEn} (cook sago pearls translucent, roll stuffed rice balls, or steam taro chunks).`,
+        instructionKh: `លាងសម្អាត និងរៀបចំចម្អិនគ្រឿងផ្សំចម្បង (${mainIngKh}) ឱ្យឆ្អិនទន់ល្មមទុកជាមុន។`,
+        instructionEn: `Clean and pre-cook ${mainIngEn} until tender and ready to simmer in coconut cream.`,
       },
       {
         stepNumber: 2,

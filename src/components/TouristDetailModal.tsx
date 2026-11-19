@@ -979,10 +979,13 @@ export const TouristDetailModal: React.FC = () => {
               nameKh={selectedDestination.nameKh}
               nameEn={selectedDestination.nameEn}
               addressKh={selectedDestination.addressKh}
+              addressEn={selectedDestination.addressEn}
               provinceKh={selectedDestination.provinceKh}
               provinceEn={selectedDestination.provinceEn}
               lat={selectedDestination.latitude}
               lng={selectedDestination.longitude}
+              locationVerified={isPlaceLocationVerified(selectedDestination)}
+              onOpenExternalMaps={(mode) => openDestinationGoogleExternal(selectedDestination, mode)}
               onOpenFullMap={(mode) => {
                 window.dispatchEvent(
                   new CustomEvent('kft:open-offline-cambodia-map', {

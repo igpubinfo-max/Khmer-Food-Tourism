@@ -526,6 +526,7 @@ export const NearMeModal: React.FC = () => {
   }, [isNearMeModalOpen, destinations, liveNearbyAttractions, activeNearMeCoords, selectedRadiusMeters, manualProvince]);
 
   const filteredNearbyRestaurants = useMemo(() => {
+    if (!isNearMeModalOpen) return [];
     const rawQuery = nearbyQuery.trim();
     const passesQuickFilter = (r: Restaurant): boolean => matchesNearMeQuickCategory(r, quickFilterId);
 
@@ -604,9 +605,10 @@ export const NearMeModal: React.FC = () => {
     }
 
     return evaluateCandidates(allVerifiedCityRestaurants);
-  }, [nearbyRestaurants, allVerifiedCityRestaurants, nearbyQuery, targetFood, quickFilterId, selectedRadiusMeters, language, activeNearMeCoords]);
+  }, [isNearMeModalOpen, nearbyRestaurants, allVerifiedCityRestaurants, nearbyQuery, targetFood, quickFilterId, selectedRadiusMeters, language, activeNearMeCoords]);
 
   const filteredNearbyDestinations = useMemo(() => {
+    if (!isNearMeModalOpen) return [];
     const q = nearbyQuery.trim().toLowerCase();
     const needZh = language === 'zh' || /[\u4e00-\u9fff]/.test(q);
     return nearbyDestinations.filter((d) => {
@@ -645,7 +647,7 @@ export const NearMeModal: React.FC = () => {
         return false;
       return true;
     }).sort((a, b) => compareByGpsDistanceAscending(a, b, activeNearMeCoords));
-  }, [nearbyDestinations, nearbyQuery, quickFilterId, language, activeNearMeCoords]);
+  }, [isNearMeModalOpen, nearbyDestinations, nearbyQuery, quickFilterId, language, activeNearMeCoords]);
 
   // Keep mounted once visited so GPS results persist, but unmount DOM when closed
   if (!isNearMeModalOpen) return null;

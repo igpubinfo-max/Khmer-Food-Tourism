@@ -669,6 +669,9 @@ export const RestaurantView: React.FC = () => {
   const { distanceMap, distanceMetersMap } = useMemo(() => {
     const kmMap = new Map<string, number>();
     const mMap = new Map<string, number>();
+    if (activeTab !== 'restaurants') {
+      return { distanceMap: kmMap, distanceMetersMap: mMap };
+    }
     const refLat = nearMeActive ? activeNearMeCoords.lat : baseCoords.lat;
     const refLng = nearMeActive ? activeNearMeCoords.lng : baseCoords.lng;
 
@@ -684,9 +687,10 @@ export const RestaurantView: React.FC = () => {
       kmMap.set(r.id, r.distanceKm);
     }
     return { distanceMap: kmMap, distanceMetersMap: mMap };
-  }, [preRotatedRestaurants, nearbyMergedShops, nearMeActive, activeNearMeCoords, baseCoords]);
+  }, [activeTab, preRotatedRestaurants, nearbyMergedShops, nearMeActive, activeNearMeCoords, baseCoords]);
 
   const sortedRestaurants = useMemo(() => {
+    if (activeTab !== 'restaurants') return [];
     const rawTrimmed = (shopSearchQuery.trim() || debouncedShopSearchQuery.trim());
     const smartIntent = rawTrimmed ? parseSmartSearchIntent(rawTrimmed) : null;
     const queryProvince = (smartIntent?.detectedProvinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim();
@@ -938,6 +942,7 @@ export const RestaurantView: React.FC = () => {
     shopSearchQuery,
     debouncedShopSearchQuery,
     userCoords,
+    activeTab,
   ]);
 
   const rotationState = useMemo(

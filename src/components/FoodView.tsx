@@ -210,6 +210,7 @@ export const FoodView: React.FC = () => {
   }, [organizedFoods]);
 
   const filteredFoods = useMemo(() => {
+    if (activeTab !== 'food') return [];
     const rawQuery = foodSearchQuery.trim();
     const matchesActiveFilters = (food: FoodItem): boolean => {
       if (!matchesFoodScreenCategoryTab(food, selectedCategory)) return false;
@@ -355,7 +356,7 @@ export const FoodView: React.FC = () => {
 
     currentRenderedOrderIdsRef.current = candidate.map((f) => f.id);
     return candidate;
-  }, [uniqueOrganizedFoods, selectedCategory, categoryShuffleNonce, restoredOrderIds, provinceFilter, tagFilter, foodSearchQuery]);
+  }, [activeTab, uniqueOrganizedFoods, selectedCategory, categoryShuffleNonce, restoredOrderIds, provinceFilter, tagFilter, foodSearchQuery]);
 
   const displayedFoods = useMemo(
     () => filteredFoods.slice(0, visibleCount),

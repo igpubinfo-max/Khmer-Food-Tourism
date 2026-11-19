@@ -148,6 +148,9 @@ export const AiTripPlannerModal: React.FC = () => {
     const found =
       ALL_25_CAMBODIA_PROVINCES.find((p) => p.id === selectedProvince) ||
       ALL_25_CAMBODIA_PROVINCES[0];
+    if (!isAiTripPlannerModalOpen) {
+      return { ...found, destCount: 0, restCount: 0 };
+    }
     const core = found.shortKh.replace(/ណ្ដ/g, 'ណ្ត').trim();
     const destCount = destinations.filter((d) =>
       (d.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(core)
@@ -156,22 +159,38 @@ export const AiTripPlannerModal: React.FC = () => {
       (r.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(core)
     ).length;
     return { ...found, destCount, restCount };
-  }, [selectedProvince, destinations, restaurants]);
+  }, [isAiTripPlannerModalOpen, selectedProvince, destinations, restaurants]);
 
   const hasSearchPrompt = advisorPrompt.trim().length > 0;
 
   // AI Food & Craving Advisor matched dishes & shops for typed/chip search queries
   const aiAdvisorResults = useMemo(
     () =>
-      getAiFoodAdvisorRecommendations({
-        foods,
-        restaurants,
-        query: advisorPrompt,
-        goal: 'any',
-        seed: advisorSeed,
-        language,
-        canUseVip: hasRealVip,
-      }),
+      !isAiTripPlannerModalOpen
+        ? ({
+            dishes: [],
+            allMatchedDishes: [],
+            restaurants: [],
+            titleKh: '',
+            titleEn: '',
+            titleZh: '',
+            subtitleKh: '',
+            subtitleEn: '',
+            subtitleZh: '',
+            totalMatchedCount: 0,
+            shops: [],
+            hasActiveQuery: false,
+            aiSummaryText: '',
+          } as unknown as ReturnType<typeof getAiFoodAdvisorRecommendations>)
+        : getAiFoodAdvisorRecommendations({
+            foods,
+            restaurants,
+            query: advisorPrompt,
+            goal: 'any',
+            seed: advisorSeed,
+            language,
+            canUseVip: hasRealVip,
+          }),
     [isAiTripPlannerModalOpen, foods, restaurants, advisorPrompt, advisorSeed, language, hasRealVip]
   );
 

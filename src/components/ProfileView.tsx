@@ -101,7 +101,7 @@ export const ProfileView: React.FC = () => {
     cancelVipAutoRenew,
     retryFailedVipAutoRenew,
     supportTickets, openSupportTicketModal, transactions,
-    setActiveTab, setIsRestaurantCheckInModalOpen,
+    activeTab, setActiveTab, setIsRestaurantCheckInModalOpen,
     openGoogleMapsSearchModal,
     appSettings, updateAppSettings, getCurrentUserStoreQuota, triggerCloudSyncNow
   , registerModalBackHandler } = useApp();
@@ -1182,7 +1182,9 @@ export const ProfileView: React.FC = () => {
     </div>
   ) : null;
 
-    return (
+  if (activeTab !== 'profile') return null;
+
+  return (
     <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto w-full min-h-full px-3 sm:px-5 py-3.5 space-y-3.5 pb-8 bg-[#1E293B] text-slate-900">
       {/* User Header Profile Card */}
       <div className="shrink-0 p-4 rounded-[24px] bg-white border border-slate-200/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">

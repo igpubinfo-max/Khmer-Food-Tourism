@@ -404,9 +404,12 @@ export const TourismView: React.FC = () => {
 
   // Compute GPS distance (in km and meters) for each destination
   const { distanceMap, distanceMetersMap } = useMemo(() => {
-    const origin = nearMeActive ? activeNearMeCoords : baseCoords;
     const kmMap = new Map<string, number>();
     const mMap = new Map<string, number>();
+    if (activeTab !== 'tourism') {
+      return { distanceMap: kmMap, distanceMetersMap: mMap };
+    }
+    const origin = nearMeActive ? activeNearMeCoords : baseCoords;
     for (const d of [...scenicDestinationsOnly, ...nearbyMergedDestinations]) {
       const m = calculateDistanceMeters(origin.lat, origin.lng, d.latitude, d.longitude);
       if (Number.isFinite(m)) {
@@ -419,7 +422,7 @@ export const TourismView: React.FC = () => {
       kmMap.set(d.id, d.distanceKm);
     }
     return { distanceMap: kmMap, distanceMetersMap: mMap };
-  }, [scenicDestinationsOnly, nearbyMergedDestinations, nearMeActive, activeNearMeCoords, baseCoords]);
+  }, [activeTab, scenicDestinationsOnly, nearbyMergedDestinations, nearMeActive, activeNearMeCoords, baseCoords]);
 
   // Filter destinations by category first so province dropdown counts reflect the selected category
   const categoryMatchedDestinations = useMemo(() => {
@@ -521,6 +524,7 @@ export const TourismView: React.FC = () => {
   }, []);
 
   const filteredDestinations = useMemo(() => {
+    if (activeTab !== 'tourism') return [];
     const trimmedQuery = deferredSearchQuery.trim();
     const smartIntent = trimmedQuery ? parseSmartSearchIntent(trimmedQuery) : null;
     const effectiveProvRaw = selectedProvince || smartIntent?.detectedProvinceKh || '';
@@ -641,6 +645,7 @@ export const TourismView: React.FC = () => {
     userCoords,
     avoidTopIds,
     shuffleSeed,
+    activeTab,
   ]);
 
   const displayedDestinations = useMemo(

@@ -1,4 +1,4 @@
-import {
+﻿import {
   FoodItem,
   SEED_FOOD_PHOTO_BASELINE_ISO,
   SEED_FOOD_PHOTO_BASELINE_MS,
@@ -165,8 +165,8 @@ export const seedFoods: FoodItem[] = [
     categorySlug: 'soup',
     categoryKh: 'ម្ហូបសម្ល / ធម្មជាតិ',
     categoryEn: 'Soup / Herbal',
-    descriptionKh: 'សម្លប្រហើរ ជាសម្លធម្មជាតិពិតៗដែលគ្មានខ្លាញ់ ប្រើតែត្រីរ៉ស់ស្រស់ បុកជាមួយគ្រឿងស្លឹកគ្រៃខ្ជាយ និងបន្លែចម្រុះស្រុកស្រែ (ននោង ល្ពៅ ត្រួយបាស ស្លឹកម្រុំ) ជំនួយសុខភាពយ៉ាងល្អ។',
-    descriptionEn: 'Healthy, oil-free rustic Cambodian herbal broth packed with crushed fish, fingerroot, luffa gourd, pumpkin, and wild green shoots.',
+    descriptionKh: 'សម្លប្រហើរត្រីរ៉ស់ ជាសម្លធម្មជាតិពិតៗដែលគ្មានខ្លាញ់ ចម្អិនពីសាច់ត្រីរ៉ស់ស្រស់កាត់ដុំធំល្មម ជាមួយទឹកស៊ុបគ្រឿងគល់ស្លឹកគ្រៃខ្ជាយ ប្រហុកបន្តិច និងបន្លែចម្រុះស្រុកស្រែ (ល្ពៅ ននោង ផ្សិតចំបើង ស្ពៃតឿ និងត្រួយបន្លែបៃតង) ជំនួយសុខភាពយ៉ាងល្អ។',
+    descriptionEn: 'Healthy, oil-free rustic Cambodian herbal soup simmered with fresh snakehead fish fillets, lemongrass-fingerroot kroeung, pumpkin chunks, luffa gourd, straw mushrooms, and tender country greens.',
     photoUrl: '/foods/food-5.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
@@ -181,16 +181,16 @@ export const seedFoods: FoodItem[] = [
     rating: 4.7,
     reviewCount: 65,
     ingredients: [
-      { nameKh: 'សាច់ត្រីរ៉ស់ស្ងោរបុកម៉ត់', nameEn: 'Boiled pounded snakehead fish', amount: '៣០០ ក្រាម' },
+      { nameKh: 'សាច់ត្រីរ៉ស់ស្រស់ហាន់ដុំល្មម', nameEn: 'Fresh snakehead fish fillets cut into chunks', amount: '៣៥០ ក្រាម' },
       { nameKh: 'គ្រឿងបុកលាយខ្ជាយ', nameEn: 'Kroeung with extra fingerroot', amount: '២ ស្លាបព្រាបាយ' },
       { nameKh: 'ននោង ល្ពៅ ផ្សិតចំបើង', nameEn: 'Luffa gourd, pumpkin, straw mushrooms', amount: '៣០០ ក្រាម' },
-      { nameKh: 'ស្លឹកបាស ស្លឹកម្រុំ ស្លឹកផ្អែម', nameEn: 'Wild ivy gourd and moringa leaves', amount: '១ ចាន' },
+      { nameKh: 'ស្លឹកបាស ស្លឹកម្រុំ និងស្ពៃតឿ', nameEn: 'Wild ivy gourd, moringa leaves, and bok choy', amount: '១ ចាន' },
       { nameKh: 'ប្រហុកខ្មែរ', nameEn: 'Prahok paste', amount: '១ ស្លាបព្រាកាហ្វេ' },
     ],
     steps: [
-      { stepNumber: 1, instructionKh: 'ដាំទឹកឱ្យពុះ រំលាយប្រហុក និងគ្រឿងបុកខ្ជាយចូល។', instructionEn: 'Boil water, dissolve prahok and fingerroot kroeung.' },
-      { stepNumber: 2, instructionKh: 'ដាក់សាច់ត្រីបុកចូល និងដាក់បន្លែល្ពៅ ននោង ផ្សិត រម្ងាស់ឱ្យឆ្អិន។', instructionEn: 'Add pounded fish meat, pumpkin, luffa gourd, and mushrooms.' },
-      { stepNumber: 3, instructionKh: 'បង់ស្លឹកបាស ស្លឹកម្រុំ ភ្លក្សរសជាតិផ្អែមបែបបន្លែធម្មជាតិ រួចលើកចុះ។', instructionEn: 'Stir in leafy greens, season lightly with fish sauce, and serve.' },
+      { stepNumber: 1, instructionKh: 'ដាំទឹកឱ្យពុះ រំលាយប្រហុក និងគ្រឿងបុកខ្ជាយចូលឱ្យឈ្ងុយប្រហើរ។', instructionEn: 'Boil water, dissolve prahok and fingerroot kroeung.' },
+      { stepNumber: 2, instructionKh: 'ដាក់បន្លែល្ពៅ សាច់ត្រីរ៉ស់ស្រស់ហាន់ដុំ ននោង និងផ្សិតចំបើងចូល រម្ងាស់ឱ្យឆ្អិនផ្អែមទឹក។', instructionEn: 'Add pounded fish meat, pumpkin, luffa gourd, and mushrooms.' },
+      { stepNumber: 3, instructionKh: 'បង់ស្លឹកបាស ស្លឹកម្រុំ និងស្ពៃតឿ ភ្លក្សរសជាតិផ្អែមបែបបន្លែធម្មជាតិ រួចលើកចុះ។', instructionEn: 'Stir in leafy greens, season lightly with fish sauce, and serve.' },
     ],
   },
   {
@@ -831,38 +831,40 @@ export const seedFoods: FoodItem[] = [
   },
   {
     id: 'food-24',
-    nameKh: 'សាច់ជ្រូកបីជាន់អាំងទឹកឃ្មុំ',
-    nameEn: 'Honey Pepper Roasted Pork Belly',
+    nameKh: 'ពោះវៀនជ្រូកអាំងទឹកឃ្មុំ',
+    nameEn: 'Crispy Honey-Glazed Charcoal-Grilled Pork Intestines (Pouh Vien Chrouk Ang)',
+     nameZh: '蜜汁贡布黑胡椒炭烤脆皮猪大肠',
     categorySlug: 'grilled',
     categoryKh: 'ម្ហូបអាំង / អាហារសម្រន់',
     categoryEn: 'Grilled / Pork',
-    descriptionKh: 'សាច់ជ្រូកបីជាន់ប្រឡាក់ទឹកឃ្មុំព្រៃ ខ្ទឹមស និងម្រេចកំពត អាំងលើធ្យូងឱ្យស្រួយស្បែក ខ្លាញ់ស្រក់ឈ្ងុយៗ ទទួលទានជាមួយជ្រក់ត្រសក់។',
-    descriptionEn: 'Crispy charcoal-roasted pork belly glazed with wild honey and cracked Kampot black pepper, served alongside quick pickled cucumbers.',
+    descriptionKh: 'ពោះវៀនជ្រូកអាំងទឹកឃ្មុំ ប្រើពោះវៀនជ្រូកស្រស់លាងសម្អាតស្ងោរជាមួយគល់ស្លឹកគ្រៃ និងស្លឹកក្រូចសើចឱ្យបាត់ក្លិន រួចប្រឡាក់ទឹកឃ្មុំព្រៃ ខ្ទឹមស ទឹកស៊ីអ៊ីវ និងម្រេចកំពត អាំងលើរងើកភ្លើងធ្យូងឱ្យឡើងពណ៌ក្រហមមាសស្រួយក្រៅទន់ក្នុង ទទួលទានជាមួយត្រសក់ស្រស់ ជីរគ្រប់មុខ និងទឹកជ្រលក់ជូរហឹរ។',
+    descriptionEn: 'Fresh pork intestines thoroughly cleaned and parboiled with lemongrass and kaffir lime leaves, glazed with wild honey, garlic, soy sauce, and cracked Kampot black pepper, then charcoal-grilled until golden-brown and crispy outside yet tender inside, served with fresh cucumber, herbs, and spicy dipping sauce.',
+    descriptionZh: '精选新鲜猪肠洗净后与香茅、柠檬叶焯水去腥，刷上野生蜂蜜、蒜蓉、生抽与现磨贡布黑胡椒置于炭火上慢烤至外皮金黄酥脆、内里软嫩弹牙，佐以鲜黄瓜片、香草与酸辣蘸汁享用。',
     photoUrl: '/foods/food-24.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
     originalPhotoUrl: '/foods/food-24.jpg',
-    prepTime: '២០ នាទី',
+    prepTime: '២៥ នាទី',
     cookTime: '៣០ នាទី',
     servings: '៣ នាក់',
-    calories: 490,
+    calories: 460,
     difficulty: 'medium',
     priceRiel: 20000,
     priceUsd: 5.0,
     rating: 4.8,
     reviewCount: 142,
     ingredients: [
-      { nameKh: 'សាច់ជ្រូកបីជាន់ស្បែកស្ដើង', nameEn: 'Fresh pork belly strip with thin skin', amount: '៥០០ ក្រាម' },
-      { nameKh: 'ទឹកឃ្មុំព្រៃសុទ្ធ និងទឹកស៊ីអ៊ីវ', nameEn: 'Pure wild forest honey and light soy sauce', amount: '២ ស្លាបព្រាបាយ' },
-      { nameKh: 'ម្រេចខ្មៅកំពតបុក និងខ្ទឹមសចិញ្ច្រាំ', nameEn: 'Cracked Kampot black pepper and minced garlic', amount: '១.៥ ស្លាបព្រាបាយ' },
-      { nameKh: 'ប្រេងខ្យង និងអំបិលម៉ត់បន្តិច', nameEn: 'Oyster sauce and a pinch of fine sea salt', amount: '១ ស្លាបព្រាបាយ' },
-      { nameKh: 'ជ្រក់ត្រសក់ ការ៉ុត និងជីរស្រស់', nameEn: 'Quick pickled cucumber, carrot, and fresh herbs', amount: '១ ចានតូច' },
+      { nameKh: 'ពោះវៀនជ្រូកស្រស់ធ្វើស្អាត', nameEn: 'Fresh cleaned pork intestines', nameZh: '洗净新鲜猪肠', amount: '៥០០ ក្រាម' },
+      { nameKh: 'គល់ស្លឹកគ្រៃ រំដេង និងស្លឹកក្រូចសើច', nameEn: 'Lemongrass, galangal, and kaffir lime leaves', nameZh: '香茅、南姜与柠檬叶', amount: '១ ក្តាប់តូច' },
+      { nameKh: 'ទឹកឃ្មុំព្រៃសុទ្ធ និងទឹកស៊ីអ៊ីវ', nameEn: 'Pure wild forest honey and light soy sauce', nameZh: '纯正森林野蜂蜜与生抽', amount: '២ ស្លាបព្រាបាយ' },
+      { nameKh: 'ម្រេចខ្មៅកំពតបុក និងខ្ទឹមសចិញ្ច្រាំ', nameEn: 'Cracked Kampot black pepper and minced garlic', nameZh: '现磨贡布黑胡椒碎与蒜末', amount: '១.៥ ស្លាបព្រាបាយ' },
+      { nameKh: 'ត្រសក់ស្រស់ ជីរគ្រប់មុខ និងទឹកជ្រលក់ម្ទេស', nameEn: 'Fresh cucumber slices, mixed herbs, and spicy chili dip', nameZh: '鲜黄瓜片、什锦香草与酸辣蘸汁', amount: '១ ចានតូច' },
     ],
     steps: [
-      { stepNumber: 1, instructionKh: 'លាងសម្អាតសាច់ជ្រូកបីជាន់ ជូតឱ្យស្ងួត រួចយកសមចាក់ទម្លុះស្បែកជ្រូកឱ្យសព្វដើម្បីឱ្យពេលអាំងឡើងស្រួយល្អ។', instructionEn: 'Wash and pat dry the pork belly, then prick the skin all over so it renders crisp over the coals.' },
-      { stepNumber: 2, instructionKh: 'ប្រឡាក់សាច់ជាមួយទឹកឃ្មុំព្រៃ ទឹកស៊ីអ៊ីវ ប្រេងខ្យង ខ្ទឹមសចិញ្ច្រាំ និងម្រេចខ្មៅកំពត ផ្អាប់ទុករយៈពេល ៣០ នាទីឱ្យចូលជាតិ។', instructionEn: 'Marinate the pork belly thoroughly with wild honey, soy sauce, oyster sauce, garlic, and cracked Kampot pepper for 30 minutes.' },
-      { stepNumber: 3, instructionKh: 'អាំងលើរងើកភ្លើងធ្យូងកម្តៅមធ្យម ឧស្សាហ៍ប្រែសងខាង និងលាបទឹកឃ្មុំបន្ថែមរហូតដល់ស្បែកឡើងពណ៌មាសស្រួយ ឯសាច់ខាងក្នុងផុយឈ្ងុយ។', instructionEn: 'Grill over medium charcoal embers, turning regularly and basting with honey glaze until the skin crackles golden-brown and the meat is juicy.' },
-      { stepNumber: 4, instructionKh: 'ហាន់សាច់ជ្រូកបីជាន់អាំងជាចំណិតស្តើងៗ រៀបដាក់ចានទទួលទានក្តៅៗផ្ទាប់ជាមួយជ្រក់ត្រសក់ការ៉ុត និងទឹកជ្រលក់ម្ទេស។', instructionEn: 'Slice the honey-roasted pork belly neatly and serve hot alongside crisp pickled cucumber and chili dip.' },
+      { stepNumber: 1, instructionKh: 'លាងសម្អាតពោះវៀនជ្រូកជាមួយអំបិល និងទឹកក្រូចឆ្មារឱ្យស្អាតអស់ក្លិន រួចស្ងោរជាមួយគល់ស្លឹកគ្រៃ រំដេង និងស្លឹកក្រូចសើចប្រហែល ១៥ នាទីឱ្យឆ្អិនទន់ល្មម ស្រង់ទុកឱ្យស្ងួត។', instructionEn: 'Thoroughly clean the pork intestines with sea salt and lime juice, then parboil with lemongrass, galangal, and kaffir lime leaves for 15 minutes until tender and drain dry.', instructionZh: '用海盐与青柠汁将猪肠反复搓洗干净，加入香茅、南姜与柠檬叶焯煮15分钟至软嫩去腥，捞出沥干。' },
+      { stepNumber: 2, instructionKh: 'ប្រឡាក់ពោះវៀនជ្រូកជាមួយទឹកឃ្មុំព្រៃ ទឹកស៊ីអ៊ីវ ប្រេងខ្យង ខ្ទឹមសចិញ្ច្រាំ និងម្រេចខ្មៅកំពត ផ្អាប់ទុករយៈពេល ២០-៣០ នាទីឱ្យចូលជាតិសព្វល្អ។', instructionEn: 'Marinate the parboiled pork intestines with wild honey, soy sauce, oyster sauce, minced garlic, and cracked Kampot black pepper for 20-30 minutes.', instructionZh: '将焯好水的猪肠用野生蜂蜜、生抽、蚝油、蒜末及现磨贡布黑胡椒抓匀，腌制20至30分钟使其充分入味。' },
+      { stepNumber: 3, instructionKh: 'ដាក់អាំងលើរងើកភ្លើងធ្យូងកម្តៅមធ្យម ឧស្សាហ៍ប្រែសងខាង និងលាបទឹកឃ្មុំបន្ថែមរហូតដល់សំបកពោះវៀនឡើងពណ៌ក្រហមមាសស្រួយឈ្ងុយ។', instructionEn: 'Grill over medium glowing charcoal embers, turning regularly and basting with honey glaze until the exterior turns golden-brown, blistered, and crispy.', instructionZh: '置于中火炭火上慢烤，期间不断翻面并刷上蜂蜜酱汁，烤至外皮金黄焦脆、香气四溢。' },
+      { stepNumber: 4, instructionKh: 'រៀបពោះវៀនជ្រូកអាំងទឹកឃ្មុំលើស្លឹកចេក ឬកាត់ជាកង់ល្មម ទទួលទានក្តៅៗផ្ទាប់ជាមួយត្រសក់ស្រស់ ជីរគ្រប់មុខ និងទឹកជ្រលក់ជូរហឹរ។', instructionEn: 'Arrange the crispy honey-grilled pork intestines on banana leaf or slice into bite-sized pieces, and serve hot with fresh cucumber, herbs, and spicy dipping sauce.', instructionZh: '将烤好的蜜汁脆皮猪肠码放在芭蕉叶上或切段，趁热搭配鲜黄瓜片、香草与酸辣蘸汁享用。' },
     ],
   },
   {
@@ -1762,7 +1764,7 @@ export const seedFoods: FoodItem[] = [
   },
   {
     id: 'food-50',
-    nameKh: 'ពងទាកូនទឹកម្រេចក្រូចឆ្មា',
+    nameKh: 'ពងទាកូនទឹកម្រេចក្រូចឆ្មារ',
     nameEn: 'Balut with Kampot Lime & Pepper (Pong Tea Kon)',
     categorySlug: 'specialty',
     categoryKh: 'អាហារសម្រន់ / ពេញនិយម',
@@ -4166,8 +4168,8 @@ export const AUTHENTIC_FOOD_RECIPES = {
     "cat": "soup",
     "catKh": "ស៊ុប និង បបរ",
     "catEn": "Porridge & Congee",
-    "descKh": "បបរត្រីរ៉ស់ខ្ញីស្រស់ រម្ងាស់អង្ករជាមួយទឹកស៊ុបត្រីថ្លា សាច់ត្រីរ៉ស់ស្រស់ហាន់បន្ទះស្ដើងទន់ផ្អែម ខ្ញីខ្ចីហាន់សរសៃជួយកម្តៅរាងកាយ និងបំបាត់ក្លិនឆ្អាប ឈ្ងុយឆ្ងាញ់ពិសា។",
-    "descEn": "Traditional delicate rice porridge with tender fresh river snakehead fish fillets, shredded young ginger, scallions, and golden fried garlic.",
+    "descKh": "បបរត្រីរ៉ស់ខ្ញីស្រស់ រម្ងាស់អង្ករជាមួយទឹកស៊ុបត្រីថ្លា សាច់ត្រីរ៉ស់ស្រស់ហាន់បន្ទះទន់ផ្អែម ប្រហិតត្រី ចាខ្វៃហាន់កង់ សណ្តែកបណ្តុះ សណ្តែកសៀងប្រៃ ខ្ញីខ្ចីហាន់សរសៃ ខ្ទឹមបំពង ជីរវ៉ាន់ស៊ុយ និងក្រូចឆ្មារ ឈ្ងុយឆ្ងាញ់ពិសា។",
+    "descEn": "Traditional delicate rice porridge topped with tender fresh river snakehead fish fillets, fish balls, crispy fried dough sticks, bean sprouts, salted soybeans, shredded young ginger, scallions, and golden fried garlic.",
     "prepTime": "១៥ នាទី",
     "cookTime": "២៥ នាទី",
     "servings": "៣-៤ នាក់",
@@ -4180,22 +4182,22 @@ export const AUTHENTIC_FOOD_RECIPES = {
         "amount": "១៨០ ក្រាម"
       },
       {
-        "nameKh": "សាច់ត្រីរ៉ស់ស្រស់ហាន់ស្ដើង",
+        "nameKh": "សាច់ត្រីរ៉ស់ស្រស់ហាន់ស្ដើង និងប្រហិតត្រី",
         "nameEn": "Fresh snakehead fish fillet slices",
         "amount": "៣០០ ក្រាម"
       },
       {
-        "nameKh": "ខ្ញីខ្ចីហាន់សរសៃល្អិត",
+        "nameKh": "ខ្ញីខ្ចីហាន់សរសៃល្អិត សណ្តែកបណ្តុះ និងចាខ្វៃស្រួយ",
         "nameEn": "Finely julienned young ginger",
         "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
-        "nameKh": "ស្លឹកខ្ទឹម ស្លឹកជីរវ៉ាន់ស៊ុយ",
+        "nameKh": "ស្លឹកខ្ទឹម ស្លឹកជីរវ៉ាន់ស៊ុយ និងសណ្តែកសៀងប្រៃ",
         "nameEn": "Scallions and fresh cilantro",
         "amount": "២ ស្លាបព្រាបាយ"
       },
       {
-        "nameKh": "ទឹកត្រី ម្រេចកំពត ខ្ទឹមបំពង",
+        "nameKh": "ទឹកត្រី ម្រេចកំពត ខ្ទឹមបំពង និងក្រូចឆ្មារ",
         "nameEn": "Fish sauce, Kampot pepper, crispy garlic",
         "amount": "១ ស្លាបព្រាបាយ"
       }
@@ -4213,12 +4215,12 @@ export const AUTHENTIC_FOOD_RECIPES = {
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ពេលបបរពុះ ដាក់សាច់ត្រីរ៉ស់ស្រស់ចូលកុំកូរខ្លាំង ត្រីឆ្អិនលឿនក្នុង ២ នាទី។",
+        "instructionKh": "ពេលបបរពុះ ដាក់សាច់ត្រីរ៉ស់ស្រស់ និងប្រហិតត្រីចូលកុំកូរខ្លាំង ត្រីឆ្អិនលឿនក្នុង ២ នាទី។",
         "instructionEn": "Gently slip fish slices into simmering congee, cooking for 2 minutes without breaking."
       },
       {
         "stepNumber": 4,
-        "instructionKh": "ដួសដាក់ចាន រោយខ្ទឹមបំពង ស្លឹកខ្ទឹម និងម្រេចកំពត ទទួលទានពេលព្រឹក។",
+        "instructionKh": "ដួសដាក់ចាន រៀបចាខ្វៃ សណ្តែកបណ្តុះ សណ្តែកសៀងប្រៃ រោយខ្ទឹមបំពង ស្លឹកខ្ទឹម ម្រេចកំពត និងក្រូចឆ្មារ ទទួលទានពេលព្រឹក។",
         "instructionEn": "Ladle into bowls, sprinkle with fried garlic, scallions, and pepper."
       }
     ]

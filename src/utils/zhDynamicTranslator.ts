@@ -635,7 +635,7 @@ export const EXACT_FOOD_NAME_ZH_MAP: Record<string, string> = {
   'Pomelo Salad with Fresh Prawns': '烤椰丝鲜虾甜柚沙拉',
   'Phnom Penh Kuyteav (Pork Noodle Soup)': '金边经典猪肉鲜汤粿条 (Kuy Teav)',
   'Nom Banh Chok (Khmer Rice Noodle Curry)': '高棉鱼汤黄咖喱米线 (Nom Banh Chok)',
-  'Mee Kola (Steamed Noodles with Dried Shrimp & Egg)': '拜林哥拉族虾米花生拌米粉 (Mee Kola)',
+  'Mee Kola (Steamed Noodles with Dried Shrimp & Egg)': '上丁哥拉族虾米花生拌米粉 (Mee Kola)',
   'Kuyteav Khor Ko (Braised Beef Stew Noodles)': '高棉五香红烧牛腩河粉 (Kuyteav Khor Ko)',
   'Khmer Stir-Fried Noodles with Beef & Egg (Mee Cha)': '高棉煎蛋牛肉炒黄面 (Mee Cha)',
   'Bai Sach Chrouk (Grilled Pork with Broken Rice)': '高棉炭烤椰香猪肉碎米饭 (Bai Sach Chrouk)',

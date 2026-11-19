@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Permanent Media & Admin Override Vault Service
  *
  * Guarantees that any image, photo URL, gallery photo, or item detail updated by Admin

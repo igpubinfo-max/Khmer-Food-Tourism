@@ -673,8 +673,8 @@ export const WhatToEatModal: React.FC = () => {
 
   // VIP special menu: Beverage Pairings
   const pairingRanked = useMemo(
-    () => (drinkMode ? rankDrinkPairingDishes(foods, drinkKind) : []),
-    [drinkMode, canUseVip, foods, drinkKind]
+    () => (isWhatToEatModalOpen && drinkMode ? rankDrinkPairingDishes(foods, drinkKind) : []),
+    [isWhatToEatModalOpen, drinkMode, canUseVip, foods, drinkKind]
   );
 
   // Beverage Pairings are presented as randomized sets of 4 different dishes every time
@@ -981,7 +981,7 @@ export const WhatToEatModal: React.FC = () => {
   ]);
 
   const currentDish: FoodItem | null = useMemo(() => {
-    if (isMedicalRefusalActive) return null;
+    if (!isWhatToEatModalOpen || isMedicalRefusalActive) return null;
     const attachOnlinePhoto = (item: FoodItem | null): FoodItem | null => {
       if (!item) return null;
       const fetched = onlinePhotoByDishId[item.id];
@@ -1013,7 +1013,7 @@ export const WhatToEatModal: React.FC = () => {
       (cravingQuery.trim() ? null : foods[0]) ||
         null
     );
-  }, [activeDishList, currentDishId, foods, isMedicalRefusalActive, chatMessages, liveOutOfCatalogDish, onlinePhotoByDishId, cravingQuery, forceBigCard]);
+  }, [isWhatToEatModalOpen, activeDishList, currentDishId, foods, isMedicalRefusalActive, chatMessages, liveOutOfCatalogDish, onlinePhotoByDishId, cravingQuery, forceBigCard]);
 
   const currentLoc = useMemo(
     () => (currentDish ? getLocalizedFood(currentDish, language) : null),
@@ -1033,7 +1033,7 @@ export const WhatToEatModal: React.FC = () => {
   // Top 4 Recommended Dishes per batch for the 2-column RESULTS section
   const recommendedTenDishes = useMemo<FoodItem[]>(() => {
     try {
-      if (isMedicalRefusalActive) return [];
+      if (!isWhatToEatModalOpen || isMedicalRefusalActive) return [];
       const BATCH_SIZE = 4;
       const verifiedFoods = foods.filter((f) => !isGeneratedDishId(f.id));
       // A selected dietary chip / dish type is a HARD rule: when nothing matches, show the empty state,
@@ -1084,7 +1084,7 @@ export const WhatToEatModal: React.FC = () => {
     } catch {
       return [];
     }
-  }, [activeDishList, foods, isMedicalRefusalActive, spinCount, vipDietFilter, categoryFilter, mealSlotFilter, effectiveMealSlot, cravingQuery, hasStructuredFilter]);
+  }, [isWhatToEatModalOpen, activeDishList, foods, isMedicalRefusalActive, spinCount, vipDietFilter, categoryFilter, mealSlotFilter, effectiveMealSlot, cravingQuery, hasStructuredFilter]);
 
   const alternativeDishes = useMemo(() => {
     if (isMedicalRefusalActive || recommendedTenDishes.length <= 1) return [];
@@ -1092,9 +1092,9 @@ export const WhatToEatModal: React.FC = () => {
   }, [recommendedTenDishes, isMedicalRefusalActive]);
 
   const servingRestaurants = useMemo(() => {
-    if (!currentDish) return [];
+    if (!isWhatToEatModalOpen || !currentDish) return [];
     return getMatchingRestaurantsForDish(currentDish, restaurants, 2);
-  }, [restaurants, currentDish]);
+  }, [isWhatToEatModalOpen, restaurants, currentDish]);
 
   // Keep mounted once visited so chat/wheel state persists, but unmount DOM when closed
   if (!isWhatToEatModalOpen) return null;

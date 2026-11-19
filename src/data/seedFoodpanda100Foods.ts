@@ -80,7 +80,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-232",
-    "nameKh": "ស្ងោរស្ពៃឆ្អឹងជំនីជ្រូក",
+    "nameKh": "ស្ងោរស្ពៃឆ្អឹងជំនីរជ្រូក",
     "nameEn": "Braised Pork Spare Ribs & Chinese Cabbage Clear Soup (Sngor Spey Chhaeng Chumnir Chrouk)",
     "nameZh": "高棉白菜排骨清汤",
     "categorySlug": "soup",
@@ -956,7 +956,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-244",
-    "nameKh": "ស៊ុបឆ្អឹងជំនីជ្រូកជូរហឹរ",
+    "nameKh": "ស៊ុបឆ្អឹងជំនីរជ្រូកជូរហឹរ",
     "nameEn": "Cambodian Hot & Sour Lemongrass Pork Spare Rib Soup",
     "nameZh": "高棉香茅酸辣猪肋排浓汤",
     "categorySlug": "soup",
@@ -2428,7 +2428,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-264",
-    "nameKh": "ត្រីសាលម៉ុនត្រាំទឹកស៊ីអីវ",
+    "nameKh": "ត្រីសាលម៉ុនត្រាំទឹកស៊ីអ៊ីវ",
     "nameEn": "Soy-Marinated Raw Salmon Slices with Garlic, Chili & Lime",
     "nameZh": "秘制酱油渍鲜三文鱼刺身",
     "categorySlug": "salad",
@@ -3676,8 +3676,8 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryKh": "អាំង និង បំពង",
     "categoryEn": "Grilled & Fried",
     "categoryZh": "烧烤与油炸",
-    "descriptionKh": "ពោះវៀនធំនិងពោះវៀនតូចជ្រូកខផាក់ឡូវរួចយកទៅបំពងឱ្យស្រួយក្រៅទន់ក្នុង ញ៉ាំជាមួយទឹកជ្រលក់ជូរហឹរ។",
-    "descriptionEn": "Five-spice braised pork large and small intestines flash-fried until crispy on the outside and tender inside, served with tangy chili dip.",
+    "descriptionKh": "ពោះវៀនធំនិងពោះវៀនតូចជ្រូកខផាក់ឡូវជាមួយស្ករត្នោតនិងគ្រឿងទេសឱ្យផុយទន់ចូលជាតិ រៀបលើស្ពៃជ្រក់ស្រោចទឹកខ ញ៉ាំជាមួយទឹកជ្រលក់ម្ទេសក្រូចឆ្មារ។",
+    "descriptionEn": "Five-spice braised pork large and small intestines slow-simmered until tender and served in rich caramelized braising gravy over pickled mustard greens with spicy chili-lime dip.",
     "descriptionZh": "五香卤制的猪大肠与猪小肠下锅炸至外酥里嫩，配酸辣蘸水与腌菜享用。",
     "photoUrl": "/foods/food-281.jpg",
     "prepTime": "១៥ នាទី",
@@ -3749,8 +3749,8 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryKh": "សម្ល និង ស៊ុប",
     "categoryEn": "Soups & Stews",
     "categoryZh": "汤羹与炖菜",
-    "descriptionKh": "ខួរជ្រូកស្រស់ខក្នុងឆ្នាំងដីជាមួយទឹកស៊ីអ៊ីវ ស្ករត្នោត ខ្ញី ស្លឹកខ្ទឹម និងម្រេចខ្មៅ ទន់រលោងឈ្ងុយឆ្ងាញ់។",
-    "descriptionEn": "Delicate fresh pork brain gently braised in a claypot with palm sugar caramel, soy sauce, julienned ginger, scallions, and Kampot pepper.",
+    "descriptionKh": "ខួរជ្រូកស្រស់ខជាមួយស្ពៃជ្រក់ ទឹកស៊ីអ៊ីវ ស្ករត្នោត ខ្ញី និងម្រេចខ្មៅ រហូតដល់ទន់រលោងចូលជាតិ រោយជីរវ៉ាន់ស៊ុយ និងញ៉ាំផ្ទាប់ទឹកត្រីម្ទេស។",
+    "descriptionEn": "Delicate pork brain rolls gently braised with tangy pickled mustard greens in palm sugar caramel, soy sauce, ginger, and Kampot pepper, garnished with cilantro and served with chili fish sauce.",
     "descriptionZh": "鲜嫩猪脑在砂锅中配棕榈糖、酱油、姜丝、葱段与贡布黑胡椒小火慢煨，绵密香醇。",
     "photoUrl": "/foods/food-282.jpg",
     "prepTime": "១៥ នាទី",
@@ -3895,8 +3895,8 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryKh": "ឆា",
     "categoryEn": "Stir-Fry",
     "categoryZh": "小炒",
-    "descriptionKh": "អណ្ដាតជ្រូកធ្វើស្អាតខជាមួយស្ករត្នោត ទឹកត្រី ខ្ទឹមស និងម្រេច រហូតដល់ផុយស្រួយ ហាន់បន្ទះស្រោចទឹកខ។",
-    "descriptionEn": "Tender pork tongue slow-braised in caramelized palm sugar, garlic, fish sauce, and black pepper, sliced thin and drizzled with glaze.",
+    "descriptionKh": "អណ្ដាតជ្រូកធ្វើស្អាតខជាមួយស្ករត្នោត ទឹកត្រី ខ្ទឹមស និងម្រេច រហូតដល់ផុយទន់ ហាន់បន្ទះរៀបលើស្ពៃជ្រក់ ស្រោចទឹកខ និងរោយជីរវ៉ាន់ស៊ុយ។",
+    "descriptionEn": "Tender pork tongue slow-braised in caramelized palm sugar, garlic, fish sauce, and black pepper, sliced over braised pickled mustard greens and topped with glaze and fresh cilantro.",
     "descriptionZh": "猪舌刮洗干净，以棕榈糖、蒜瓣、鱼露与黑胡椒慢卤入味，切片淋浓汁。",
     "photoUrl": "/foods/food-284.jpg",
     "prepTime": "១៥ នាទី",
@@ -3926,9 +3926,9 @@ export const foodpanda100Foods: FoodItem[] = [
         "amount": "តាមចំណូលចិត្ត"
       },
       {
-        "nameKh": "ខ្ទឹមសដំ និងទឹកដូងស្រស់ ១ កូនចាន",
-        "nameEn": "Crushed garlic & fresh coconut water 1 small bowl",
-        "nameZh": "拍蒜与鲜椰子水 1小碗",
+        "nameKh": "ស្ពៃជ្រក់ ខ្ទឹមសដំ ទឹកដូងស្រស់ និងជីរវ៉ាន់ស៊ុយ ១ ចានតូច",
+        "nameEn": "Pickled mustard greens, crushed garlic, fresh coconut water & cilantro 1 small bowl",
+        "nameZh": "酸菜、拍蒜、鲜椰子水与香菜 1小碗",
         "amount": "តាមចំណូលចិត្ត"
       }
     ],
@@ -3968,8 +3968,8 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryKh": "ឆា",
     "categoryEn": "Stir-Fry",
     "categoryZh": "小炒",
-    "descriptionKh": "ក្រពះជ្រូកខជាមួយស្ករត្នោត ទឹកស៊ីអ៊ីវ ខ្ទឹមស និងម្រេចខ្មៅ រហូតដល់ផុយស្វិតល្មម ឈ្ងុយឆ្ងាញ់។",
-    "descriptionEn": "Clean pork stomach braised in palm sugar caramel, garlic, soy sauce, and aromatic black pepper until tender with a pleasant bite.",
+    "descriptionKh": "ក្រពះជ្រូកខជាមួយស្ករត្នោត ទឹកស៊ីអ៊ីវ ខ្ទឹមស និងម្រេចខ្មៅ រហូតដល់ផុយស្វិតល្មម ហាន់រៀបលើស្ពៃជ្រក់ ស្រោចទឹកខ និងរោយជីរវ៉ាន់ស៊ុយ។",
+    "descriptionEn": "Clean pork stomach braised in palm sugar caramel, garlic, soy sauce, and black pepper until tender, sliced over braised pickled mustard greens and garnished with cilantro.",
     "descriptionZh": "猪肚洗净后以棕榈糖、蒜头、酱油和黑胡椒慢火卤至软韧适口，切片装盘。",
     "photoUrl": "/foods/food-285.jpg",
     "prepTime": "១៥ នាទី",
@@ -4552,8 +4552,8 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryKh": "ភ្លា និង ញាំ",
     "categoryEn": "Salads & Dips",
     "categoryZh": "凉拌与蘸酱",
-    "descriptionKh": "បង្គាស្រស់លាយជាមួយឆៃប៉ូវផ្អែមហាន់សរសៃ ខ្ទឹមក្រហម ខ្ទឹមស ម្ទេស និងទឹកក្រូចឆ្មារ ក្រឡុកឱ្យចូលជាតិស្រួយឆ្ងាញ់។",
-    "descriptionEn": "Succulent prawns shaken with crunchy sweet preserved radish strips, shallots, garlic, bird-eye chilies, and zesty lime dressing.",
+    "descriptionKh": "ឆៃប៉ូវផ្អែមហាន់បន្ទះស្រួយ បង្គាក្រៀម សាច់ជ្រូកផាត់ ខ្ទឹមសជ្រក់ និងសណ្តែកដីលីង រៀបជុំវិញទឹកជ្រលក់ទឹកត្រីក្រូចឆ្មារខ្ទឹមក្រហមម្ទេស ជូរផ្អែមហឹរស្រួយឆ្ងាញ់។",
+    "descriptionEn": "Cambodian savory snack platter of crunchy sliced sweet preserved radish, dried shrimp, fluffy pork floss, pickled garlic bulbs, and roasted peanuts served with a spicy shallot-chili-lime fish sauce dressing.",
     "descriptionZh": "鲜嫩虾仁配爽脆甜菜脯丝、红葱头、蒜片、指天椒与青柠汁摇匀入味。",
     "photoUrl": "/foods/food-293.jpg",
     "prepTime": "១៥ នាទី",
@@ -4565,27 +4565,27 @@ export const foodpanda100Foods: FoodItem[] = [
     "priceUsd": 9,
     "ingredients": [
       {
-        "nameKh": "បង្គាស្រស់បកសំបកស្រុសឬឆៅតាមចំណូលចិត្ត ៣០០ ក្រាម",
-        "nameEn": "Fresh peeled prawns (poached or chilled raw) 300 g",
-        "nameZh": "去壳鲜虾仁（白灼或冰镇）300克",
+        "nameKh": "បង្គាក្រៀមលេខ១ (ហៃប៊ី) ១៥០ ក្រាម និងសាច់ជ្រូកផាត់ ១០០ ក្រាម",
+        "nameEn": "Premium sun-dried shrimp 150 g & fluffy pork floss 100 g",
+        "nameZh": "特级干虾米 150克 与 香酥猪肉松 100克",
         "amount": "តាមចំណូលចិត្ត"
       },
       {
-        "nameKh": "ឆៃប៉ូវផ្អែមហាន់សរសៃ ១៥០ ក្រាម",
-        "nameEn": "Sweet preserved radish julienned 150 g",
-        "nameZh": "甜菜脯切丝 150克",
+        "nameKh": "ឆៃប៉ូវផ្អែមហាន់បន្ទះស្ដើង ២០០ ក្រាម",
+        "nameEn": "Sweet preserved radish thinly sliced 200 g",
+        "nameZh": "甜菜脯薄片 200克",
         "amount": "តាមចំណូលចិត្ត"
       },
       {
-        "nameKh": "ខ្ទឹមក្រហម ខ្ទឹមស និងម្ទេសអាចម៍សត្វ ៣ ស្លាបព្រាបាយ",
-        "nameEn": "Sliced shallots, garlic & bird-eye chilies 3 tbsp",
-        "nameZh": "红葱头片、蒜片与小米辣 3汤匙",
+        "nameKh": "ខ្ទឹមសជ្រក់ និងសណ្តែកដីលីងស្រួយ ១ កូនចាន",
+        "nameEn": "Pickled garlic bulbs & crispy roasted peanuts 1 small bowl",
+        "nameZh": "糖醋脆蒜头与香脆烤花生 1小碗",
         "amount": "តាមចំណូលចិត្ត"
       },
       {
-        "nameKh": "ទឹកត្រី ទឹកក្រូចឆ្មារ ស្ករត្នោត និងជីរណា ៣ ស្លាបព្រាបាយ",
-        "nameEn": "Fish sauce, lime juice, palm sugar & culantro 3 tbsp",
-        "nameZh": "鱼露、青柠汁、棕榈糖与刺芫荽 3汤匙",
+        "nameKh": "ទឹកត្រី ទឹកក្រូចឆ្មារ ស្ករត្នោត ខ្ទឹមក្រហមហាន់ និងម្ទេស ៣ ស្លាបព្រាបាយ",
+        "nameEn": "Fish sauce, lime juice, palm sugar, sliced shallots & chilies 3 tbsp",
+        "nameZh": "鱼露、青柠汁、棕榈糖、红葱头片与辣椒 3汤匙",
         "amount": "តាមចំណូលចិត្ត"
       }
     ],
@@ -5421,7 +5421,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-305",
-    "nameKh": "ប្រហុកឆៅកញ្ច្រាំ",
+    "nameKh": "ប្រហុកឆៅចិញ្ច្រាំ",
     "nameEn": "Traditional Minced Raw Prahok Relish with Lemongrass, Lime & Chili (Prahok Chhao Kanhchram)",
     "nameZh": "香茅青柠剁生臭鱼酱（Prahok Chhao Kanhchram）",
     "categorySlug": "salad",
@@ -5567,7 +5567,7 @@ export const foodpanda100Foods: FoodItem[] = [
   },
   {
     "id": "food-307",
-    "nameKh": "ត្រីតុកកែចំហុយទឹកស៊ីអីវ",
+    "nameKh": "ត្រីតុកកែចំហុយទឹកស៊ីអ៊ីវ",
     "nameEn": "Steamed Spotted Scat Fish with Ginger, Scallions & Soy Sauce (Trei Tokkae Chamhoy)",
     "nameZh": "姜葱豉油清蒸金钱鱼（Trei Tokkae Chamhoy）",
     "categorySlug": "specialty",

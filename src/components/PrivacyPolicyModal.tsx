@@ -165,7 +165,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
                 {tr(
                   language,
                   '«យើង» «របស់យើង» និង «យើងខ្ញុំ» (we, our, us) សំដៅលើកម្មវិធី «រសជាតិ និងទេសចរណ៍កម្ពុជា» (Cambodia Flavors & Tourism) និងក្រុមការងារគ្រប់គ្រងប្រព័ន្ធផ្លូវការ។',
-                  '“we”, “our” and “us” means Cambodia Flavors & Tourism (រសជាតិ និងទេសចរណ៍កម្ពុជា) and its official platform administration.',
+                  '“we”, “our” and “us” means Cambodia Flavors & Tourism and its official platform administration.',
                   '“我们” (we, our, us) 指“柬埔寨风味与旅游” (Cambodia Flavors & Tourism) 及其官方平台管理团队。'
                 )}
               </li>
