@@ -29,8 +29,8 @@ export const WELCOME_SLIDES: WelcomeSlide[] = [
     imageHeight: WELCOME_IMAGES.hero.height,
     objectPosition: 'center center',
     headline: {
-      km: 'រសជាតិ និងទេសចរណ៍កម្ពុជា',
-      en: 'Cambodia Flavors & Tourism',
+      km: 'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា',
+      en: 'Cambodia Travel Guide',
       zh: '柬埔寨风味与旅游',
     },
     tagline: {
@@ -51,8 +51,8 @@ export const WELCOME_LABELS = {
   next: { km: 'បន្ទាប់', en: 'Next', zh: '下一步' },
   start: { km: 'ចាប់ផ្តើមប្រើប្រាស់', en: 'Get Started', zh: '开始使用' },
   appName: {
-    km: 'រសជាតិ និងទេសចរណ៍កម្ពុជា',
-    en: 'Cambodia Flavors & Tourism',
+    km: 'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា',
+    en: 'Cambodia Travel Guide',
     zh: '柬埔寨风味与旅游',
   },
   offlineBadge: {

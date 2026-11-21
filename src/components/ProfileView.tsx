@@ -3065,7 +3065,7 @@ export const ProfileView: React.FC = () => {
           onClick={handleVersionFooterTap}
           className="inline-block px-3 py-1 font-mono text-[10px] text-slate-400 dark:text-slate-500 select-none"
         >
-          Cambodia Flavors & Tourism {APP_VERSION} • Build {APP_BUILD_CODE}
+          Cambodia Travel Guide {APP_VERSION} • Build {APP_BUILD_CODE}
         </span>
       </div>
 

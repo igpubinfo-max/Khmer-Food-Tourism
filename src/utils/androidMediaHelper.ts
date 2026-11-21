@@ -724,7 +724,7 @@ export function formatRichShareText(options: RichShareOptions): {
 
   // Short bilingual recommendation line + Play Store link (placeholder id until the app is published)
   lines.push('');
-  lines.push('🇰🇭 រសជាតិ និងទេសចរណ៍កម្ពុជា — Cambodia Flavors & Tourism');
+  lines.push('🇰🇭 មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា — Cambodia Travel Guide');
   lines.push(`📲 Google Play: ${PLAY_STORE_URL}`);
 
   return {
@@ -737,7 +737,7 @@ export function formatRichShareText(options: RichShareOptions): {
 /**
  * Copies text reliably on both Android native (via ClipboardManager) and Web browsers.
  */
-export async function copyTextNativeOrWeb(text: string, label: string = 'Cambodia Flavors & Tourism'): Promise<boolean> {
+export async function copyTextNativeOrWeb(text: string, label: string = 'Cambodia Travel Guide'): Promise<boolean> {
   if (Capacitor.isNativePlatform()) {
     try {
       const res = await NativeMediaLauncher.copyToClipboard({ text, label });

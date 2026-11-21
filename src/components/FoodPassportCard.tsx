@@ -31,7 +31,7 @@ export const FoodPassportCard: React.FC<{ compact?: boolean }> = ({ compact = fa
         </div>
         <div className="min-w-0 flex-1">
           <h4 className={`font-moul text-sm text-[#064E3B] dark:text-emerald-300 ${compact ? 'hidden' : ''}`}>
-            {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
+            {tr(language, 'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា', 'Cambodia Travel Guide', '柬埔寨风味与旅游')}
           </h4>
           <p className="text-sm font-bold text-slate-800 dark:text-white flex items-center justify-between gap-2">
             <span className="truncate">{levelTitle(level, language)}</span>

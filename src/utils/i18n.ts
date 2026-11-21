@@ -406,7 +406,7 @@ export const EXACT_EN_TO_ZH_MAP: Record<string, string> = {
   'English': '英语',
   'Simplified Chinese': '简体中文',
 
-  'Cambodia Flavors & Tourism': '柬埔寨风味与旅游',
+  'Cambodia Travel Guide': '柬埔寨风味与旅游',
   'Discover Food • Places • Experiences': '探索美食 • 景点 • 体验',
   'Smart AI Assistant': '智能 AI 助手',
   'Food Picks': '美食推荐',
@@ -454,7 +454,7 @@ export const EXACT_EN_TO_ZH_MAP: Record<string, string> = {
  * Exact English -> Khmer UI fallback dictionary for strict Khmer-only mode
  */
 const EXACT_EN_TO_KM_MAP: Record<string, string> = {
-  'Cambodia Flavors & Tourism': 'រសជាតិ និងទេសចរណ៍កម្ពុជា',
+  'Cambodia Travel Guide': 'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា',
   'Discover Food • Places • Experiences': 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍',
   'Free User': 'គណនីឥតគិតថ្លៃ',
   'Free Account': 'គណនីឥតគិតថ្លៃ',
@@ -569,7 +569,7 @@ const PHRASE_REPLACEMENTS_EN_TO_ZH: Array<[RegExp, string]> = [
   [/Sample \((\d+)\)/i, '示例 ($1)'],
   [/Listed \((\d+)\)/i, '收录 ($1)'],
   [/Showing (\d+) of (\d+) dishes/i, '显示 $1 / $2 道菜品'],
-  [/Cambodia Flavors & Tourism v([0-9.]+) \(Build (\d+)\)/i, '柬埔寨风味与旅游 v$1 (构建号 $2)'],
+  [/Cambodia Travel Guide v([0-9.]+) \(Build (\d+)\)/i, '柬埔寨风味与旅游 v$1 (构建号 $2)'],
   [/(\d+) dishes/i, '$1 道菜品'],
   [/(\d+) items/i, '$1 道菜'],
   [/Category #(\d+)/i, '第 $1 类'],

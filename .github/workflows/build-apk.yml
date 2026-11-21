@@ -270,7 +270,7 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
         with:
           tag_name: v${{ env.VERSION_NAME }}
-          name: "Cambodia Flavors & Tourism v${{ env.VERSION_NAME }}"
+          name: "Cambodia Travel Guide v${{ env.VERSION_NAME }}"
           make_latest: true
           draft: false
           prerelease: false

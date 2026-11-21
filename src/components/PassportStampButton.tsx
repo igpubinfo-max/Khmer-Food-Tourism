@@ -37,7 +37,7 @@ const PassportStampButtonInner: React.FC<Props> = ({ foodId, language, showToast
             `New level unlocked: ${levelTitle(after, language)}`,
             `已升级：${levelTitle(after, language)}`
           )
-        : tr(language, 'បានបន្ថែមទៅ រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Added to Cambodia Flavors & Tourism', '已加入柬埔寨风味与旅游');
+        : tr(language, 'បានបន្ថែមទៅ មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា', 'Added to Cambodia Travel Guide', '已加入柬埔寨风味与旅游');
 
     showToast?.(base, 'success');
   };

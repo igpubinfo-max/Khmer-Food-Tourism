@@ -530,7 +530,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
           {/* Clean Artwork Template Background (935x1024) — No Logo or Program Title overlay */}
           <img
             src="/welcome/auth-login-bg.jpg?v=hq1623"
-            alt="Cambodia Flavors & Tourism Sign In"
+            alt="Cambodia Travel Guide Sign In"
             width={935}
             height={1024}
             fetchPriority="high"
@@ -747,7 +747,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
               <Utensils className="w-6 h-6 text-emerald-300" />
             </div>
             <h2 className="text-lg font-bold font-moul tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.75)]">
-              {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
+              {tr(language, 'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា', 'Cambodia Travel Guide', '柬埔寨风味与旅游')}
             </h2>
             <p className="text-[11px] text-white font-khmer mt-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]">
               {tr(

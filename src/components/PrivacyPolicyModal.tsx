@@ -56,7 +56,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
             </button>
             <div className="min-w-0">
               <h3 className="font-moul text-xs sm:text-sm text-white truncate">
-                {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
+                {tr(language, 'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា', 'Cambodia Travel Guide', '柬埔寨风味与旅游')}
               </h3>
               <p className="text-[10px] text-emerald-200 font-khmer truncate">
                 {tr(
@@ -105,7 +105,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-700 p-[2px] shadow-md">
                 <img loading="lazy" decoding="async"
                   src="/icon-192.png?v=2.5.4"
-                  alt="Cambodia Flavors & Tourism"
+                  alt="Cambodia Travel Guide"
                   className="w-full h-full rounded-[14px] object-cover bg-[#064E3B]"
                   onError={(e) => {
                     const img = e.currentTarget as HTMLImageElement;
@@ -130,8 +130,8 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 {tr(
                   language,
-                  'រសជាតិ និងទេសចរណ៍កម្ពុជា • Cambodia Flavors & Tourism',
-                  'Cambodia Flavors & Tourism • Official Mobile & Web Application',
+                  'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា • Cambodia Travel Guide',
+                  'Cambodia Travel Guide • Official Mobile & Web Application',
                   '柬埔寨风味与旅游 • 官方移动与网页应用'
                 )}
               </p>
@@ -164,9 +164,9 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
               <li>
                 {tr(
                   language,
-                  '«យើង» «របស់យើង» និង «យើងខ្ញុំ» (we, our, us) សំដៅលើកម្មវិធី «រសជាតិ និងទេសចរណ៍កម្ពុជា» (Cambodia Flavors & Tourism) និងក្រុមការងារគ្រប់គ្រងប្រព័ន្ធផ្លូវការ។',
-                  '“we”, “our” and “us” means Cambodia Flavors & Tourism and its official platform administration.',
-                  '“我们” (we, our, us) 指“柬埔寨风味与旅游” (Cambodia Flavors & Tourism) 及其官方平台管理团队。'
+                  '«យើង» «របស់យើង» និង «យើងខ្ញុំ» (we, our, us) សំដៅលើកម្មវិធី «មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា» (Cambodia Travel Guide) និងក្រុមការងារគ្រប់គ្រងប្រព័ន្ធផ្លូវការ។',
+                  '“we”, “our” and “us” means Cambodia Travel Guide and its official platform administration.',
+                  '“我们” (we, our, us) 指“柬埔寨风味与旅游” (Cambodia Travel Guide) 及其官方平台管理团队。'
                 )}
               </li>
             </ul>
@@ -374,7 +374,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
         {/* Footer */}
         <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
           <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-            Cambodia Flavors &amp; Tourism • Ver. {APP_VERSION_NAME}
+            Cambodia Travel Guide • Ver. {APP_VERSION_NAME}
           </span>
           <button
             type="button"

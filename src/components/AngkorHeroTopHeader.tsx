@@ -155,7 +155,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
           >
             <img loading="lazy"
               src="/logo-kft.png"
-              alt="រសជាតិ និងទេសចរណ៍កម្ពុជា"
+              alt="មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា"
               decoding="async"
               className="w-full h-full rounded-[10px] min-[380px]:rounded-[11px] object-cover bg-[#064E3B]"
               onError={(e) => {
@@ -179,7 +179,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
                 textShadow: '0 1.5px 4px rgba(0, 0, 0, 0.78), 0 0 10px rgba(0, 0, 0, 0.4)',
               }}
             >
-              រសជាតិ និងទេសចរណ៍កម្ពុជា
+              មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា
             </h1>
             <p
               className="font-extrabold text-white/95 tracking-tight leading-snug break-words"
@@ -188,7 +188,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
                 textShadow: '0 1px 3px rgba(0, 0, 0, 0.85)',
               }}
             >
-              Cambodia Flavors &amp; Tourism
+              Cambodia Travel Guide
             </p>
           </div>
         </div>

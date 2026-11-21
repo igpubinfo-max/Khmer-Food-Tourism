@@ -100,7 +100,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
           <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-700 p-[1.5px] flex items-center justify-center shadow-md group-hover:scale-105 transition shrink-0">
             <img loading="lazy" decoding="async"
               src="/logo-kft.png"
-              alt="រសជាតិ និងទេសចរណ៍កម្ពុជា"
+              alt="មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា"
               className="w-full h-full rounded-[10px] object-cover bg-[#064E3B]"
               onError={(e) => {
                 const img = e.currentTarget as HTMLImageElement;
@@ -117,7 +117,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
                 tr(language, 'font-moul text-[11px] min-[360px]:text-[11.5px] sm:text-[13px] leading-[1.65]', 'font-khmer font-extrabold text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] leading-[1.28]', 'font-khmer font-extrabold text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] leading-[1.28]')
               } tracking-tight text-white pt-0.5 pb-0.5 line-clamp-2 break-words`}
             >
-              {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
+              {tr(language, 'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា', 'Cambodia Travel Guide', '柬埔寨风味与旅游')}
             </h1>
             <p className="text-[9.5px] min-[360px]:text-[10px] text-amber-300 font-semibold leading-[1.35] pt-0.5 pb-0.5 line-clamp-1">
               {tr(

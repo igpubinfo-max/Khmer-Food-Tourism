@@ -920,7 +920,7 @@ export const ZH_UI_EXTRA: Record<string, string> = {
   "Refreshed AI Agent telemetry!": "已刷新 AI 助手监控数据！",
   "AI telemetry reset complete.": "AI 监控数据已重置完成。",
   "$0.00 Forever Mode • Hybrid MCP AI Agent Active": "$0.00 永久免费模式 • 混合 MCP 智能助手已启用",
-  "Cambodia Flavors & Tourism — AI Agent Monitoring Dashboard": "柬埔寨风味与旅游 — AI 智能助手监控面板",
+  "Cambodia Travel Guide — AI Agent Monitoring Dashboard": "柬埔寨风味与旅游 — AI 智能助手监控面板",
   "Powered by Local Smart MCP Engine ($0/mo) + LRU Cache + Rate Limiter (25 req/min) + 3-Tier Role Security supporting 10,000+ users.": "由本地智能 MCP 引擎（$0/月）+ LRU 缓存 + 速率限制器（25次/分）+ 三级角色安全架构驱动，支持 10,000+ 用户。",
   "Total AI Requests": "AI 请求总数",
   "Est. API Cost": "预估接口费用",

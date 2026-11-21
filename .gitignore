@@ -58,3 +58,7 @@ templates/*.xlsx
 *.xlsx
 
 PlayStore-Assets/Food Buttons/
+
+PhotoReview/
+PlayStore-Assets/*copy*
+

@@ -1,8 +1,8 @@
 /**
- * Cambodia Flavors & Tourism — Professional Food Image Watermark Utility
+ * Cambodia Travel Guide — Professional Food Image Watermark Utility
  *
  * Requirements enforced:
- * 1. Exact Khmer title text: "រសជាតិ និងទេសចរណ៍កម្ពុជា"
+ * 1. Exact Khmer title text: "មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា"
  * 2. Small, elegant, semi-transparent watermark in the bottom-right corner (~30% reduced refined font size).
  * 3. Does not cover the food or important visual details.
  * 4. Preserves original food images, colors, brightness, composition, and image quality.
@@ -10,7 +10,7 @@
  * 6. Applied strictly once: prevents duplicate watermarks when images are uploaded, updated, or displayed.
  */
 
-export const FOOD_WATERMARK_TEXT = 'រសជាតិ និងទេសចរណ៍កម្ពុជា';
+export const FOOD_WATERMARK_TEXT = 'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា';
 export const FOOD_WATERMARK_MARKER = 'KFT_WM_V2_KH';
 export const FOOD_WATERMARK_LEDGER_KEY = 'kft_watermarked_food_hashes_v2';
 
@@ -164,7 +164,7 @@ export function isUrlWatermarkedAtPixelLevel(url?: string | null): boolean {
 
 /**
  * Draws the refined, ~30% smaller, semi-transparent Khmer watermark
- * ("រសជាតិ និងទេសចរណ៍កម្ពុជា") in the bottom-right corner of a 2D canvas
+ * ("មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា") in the bottom-right corner of a 2D canvas
  * without modifying any original food colors, brightness, composition, or details.
  */
 export function drawFoodWatermarkOnCanvas(
@@ -277,7 +277,7 @@ async function readBlobAsDataUrl(blob: Blob): Promise<string> {
 }
 
 /**
- * Applies the "រសជាតិ និងទេសចរណ៍កម្ពុជា" watermark to a File, Blob, or Data URL/Image URL
+ * Applies the "មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា" watermark to a File, Blob, or Data URL/Image URL
  * strictly ONCE, preserving original resolution and original food appearance.
  */
 export async function applyFoodWatermarkOnce(

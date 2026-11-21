@@ -1438,7 +1438,7 @@
     "categoryEn": "Mountains & National Parks",
     "descriptionKh": "ឧទ្យានជាតិព្រៃភ្នំជាប់មាត់សមុទ្រ មានផ្លូវលំជុំវិញភ្នំប្រវែង ៨ គីឡូម៉ែត្រ។ ទេសចរអាចដើរហាត់ប្រាណ ជិះកង់ភ្នំ គយគន់ហ្វូងសត្វស្វា សត្វស្លាបកម្រ និងមើលទេសភាពកោះនានាក្នុងសមុទ្រពីចំណុចខ្ពស់ Sunset Rock។",
     "descriptionEn": "Lush coastal jungle park encircled by an 8km scenic loop trail. Excellent for hiking, spotting wild monkeys and hornbills, and enjoying panoramic ocean viewpoints at Sunset Rock.",
-    "photoUrl": "/destinations/dest-58.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
     "addressKh": "ខ្នងភ្នំកែប ក្រុងកែប",
@@ -1458,9 +1458,7 @@
       "ទេសភាពកោះនានាក្នុងសមុទ្រ"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-58.jpg"
-    ],
+    "galleryPhotos": [],
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -2718,7 +2716,7 @@
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "អាងស្តុកទឹកធារាសាស្ត្រដ៏ធំល្វឹងល្វើយ ដែលបានក្លាយជារមណីយដ្ឋានកម្សាន្តមាត់ទឹកដ៏ពេញនិយម។ មានខ្យល់ត្រជាក់បរិសុទ្ធ ក្យូសអង្គុយញ៉ាំត្រីបឹងធម្មជាតិ និងទស្សនាថ្ងៃលិចលើផ្ទៃទឹក។",
     "descriptionEn": "Expansive reservoir lake surrounded by countryside vistas, popular for weekend getaways, wooden dining huts over the water, and fresh grilled river fish.",
-    "photoUrl": "/destinations/dest-30.jpg",
+    "photoUrl": "/destinations/dest-74.jpg",
     "provinceKh": "ខេត្តកំពង់ធំ",
     "provinceEn": "Kampong Thom",
     "addressKh": "ស្រុកស្ទឹងសែន ខេត្តកំពង់ធំ",
@@ -2739,7 +2737,7 @@
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "/destinations/dest-30.jpg"
+      "/destinations/dest-74.jpg"
     ],
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3042,7 +3040,7 @@
     "categoryEn": "Resorts & Cultural Heritage",
     "descriptionKh": "ភូមិប្រពៃណីដែលជាប្រភពដើមនៃឈ្មោះ «កំពង់ឆ្នាំង»។ អ្នកភូមិបន្តផលិតកុលាលភាជន៍ ឆ្នាំងដី ចង្ក្រានដី និងក្អមដីបុរាណដោយដៃ និងដោយក្បាច់ឆ្លាក់ប្រពៃណីខ្មែរដូនតា។",
     "descriptionEn": "The traditional pottery heartland that gave Kampong Chhnang its name (Port of Pots), where skilled artisans shape handmade terracotta pots and stove ovens.",
-    "photoUrl": "/destinations/dest-82.jpg",
+    "photoUrl": "/destinations/dest-83.jpg",
     "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
     "provinceEn": "Kampong Chhnang",
     "addressKh": "ភូមិអណ្តូងឫស្សី ស្រុករលាប្អៀរ",
@@ -3063,7 +3061,7 @@
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "/destinations/dest-82.jpg"
+      "/destinations/dest-83.jpg"
     ],
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -3628,7 +3626,7 @@
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "មជ្ឈមណ្ឌលសង្គ្រោះ និងថែរក្សាសត្វព្រៃធំបំផុតនៅកម្ពុជា លើផ្ទៃដីជាង ២,២០០ ហិកតា។ មានសត្វព្រៃជាង ១,២០០ ក្បាល រួមមានសត្វដំរី ខ្លាឃ្មុំ ខ្លាធំ និងសត្វកម្រជាច្រើនដែលបានសង្គ្រោះពីការជួញដូរ។",
     "descriptionEn": "The largest wildlife sanctuary and rescue center in Cambodia covering 2,200 hectares, home to over 1,200 rescued animals including Asian elephants and sun bears.",
-    "photoUrl": "/destinations/dest-173.jpg",
+    "photoUrl": "/destinations/dest-99.jpg",
     "provinceKh": "ខេត្តតាកែវ",
     "provinceEn": "Takeo",
     "addressKh": "ស្រុកបាទី ចម្ងាយ ៤០ គ.ម ពីរាជធានីភ្នំពេញ",
@@ -3649,7 +3647,7 @@
     ],
     "isFeatured": true,
     "galleryPhotos": [
-      "/destinations/dest-173.jpg"
+      "/destinations/dest-99.jpg"
     ],
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4060,7 +4058,7 @@
     "categoryEn": "Nature & Waterfalls",
     "descriptionKh": "អាងស្តុកទឹកប្រវត្តិសាស្ត្របុរាណ ដែលត្រូវបានអភិរក្សជាដែនជម្រកសត្វក្រៀលកម្ពស់ខ្ពស់ (Sarus Crane) ដែលជាបក្សីហើរខ្ពស់ជាងគេលើលោក ព្រមទាំងសត្វស្លាបទឹកកម្រជាង ២០០ ប្រភេទ។",
     "descriptionEn": "Ancient Angkorian reservoir engineered into a world-famous wildlife sanctuary sheltering the endangered Sarus Crane—the world tallest flying bird.",
-    "photoUrl": "/destinations/dest-95.jpg",
+    "photoUrl": "/destinations/dest-111.jpg",
     "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
     "provinceEn": "Banteay Meanchey",
     "addressKh": "ស្រុកភ្នំស្រុក ខេត្តបន្ទាយមានជ័យ",
@@ -4081,7 +4079,7 @@
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "/destinations/dest-95.jpg"
+      "/destinations/dest-111.jpg"
     ],
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4645,7 +4643,7 @@
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទភិមានអាកាស ជាប្រាសាទរាជវាំងសាងឡើងពីថ្មបាយក្រៀមរាងពីរ៉ាមីត ៣ ជាន់ កសាងនៅចុងសតវត្សរ៍ទី១០ ដោយព្រះបាទរាជេន្ទ្រវរ្ម័ន និងបន្តដោយព្រះបាទសូរ្យវរ្ម័នទី១ ភ្ជាប់នឹងរឿងព្រេងនាគរាជ ៩ ក្បាល។",
     "descriptionEn": "A pyramid-shaped laterite temple located within the Royal Palace compound of Angkor Thom, associated with the mystical legend of the King and the nine-headed serpent spirit.",
-    "photoUrl": "/destinations/dest-136.jpg",
+    "photoUrl": "/destinations/dest-127.jpg",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "បរិវេណព្រះបរមរាជវាំងចាស់ ក្រុងអង្គរធំ",
@@ -4667,7 +4665,7 @@
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "/destinations/dest-136.jpg"
+      "/destinations/dest-127.jpg"
     ],
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -4830,7 +4828,7 @@
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "ប្រាសាទក្រវ៉ាន់ជាប្រាសាទឥដ្ឋ ៥ ប៉មសាងឡើងក្នុងឆ្នាំ ៩២១ ឧទ្ទិសដល់ព្រះវិស្ណុ។ ប្រាសាទនេះមានភាពពិសេសអស្ចារ្យដោយសារមានចម្លាក់ព្រះវិស្ណុ និងព្រះនាងលក្ស្មីឆ្លាក់ផ្ទាល់លើឥដ្ឋក្រហមនៅខាងក្នុងតួប៉ម។",
     "descriptionEn": "A 10th-century Hindu temple consisting of five brick towers, uniquely famous for its rare bas-reliefs of Vishnu and Lakshmi carved directly into the interior red brick walls.",
-    "photoUrl": "/destinations/dest-216.jpg",
+    "photoUrl": "/destinations/dest-132.jpg",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "addressKh": "ខាងត្បូងស្រះស្រង់ ក្រុងសៀមរាប",
@@ -4852,7 +4850,7 @@
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "/destinations/dest-216.jpg"
+      "/destinations/dest-132.jpg"
     ],
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -5644,7 +5642,7 @@
     "categoryEn": "Historical Temple / Heritage",
     "descriptionKh": "វត្តលើ (វត្តស្ទឹងហាវ) ស្ថិតនៅលើកំពូលភ្នំកម្ពស់ប្រមាណ ៣០០ ម៉ែត្រ អាចមើលឃើញទេសភាពក្រុងព្រះសីហនុ ឆ្នេរសមុទ្រ និងកោះនានាទាំងមូល។ វត្តនេះមានរូបចម្លាក់ដំរីក្បាលបី និងព្រះវិហារពណ៌មាសយ៉ាងប្រណិត។",
     "descriptionEn": "A tranquil hilltop Buddhist sanctuary perched on Sihanoukville Mountain, famous for its 3-headed stone elephant statues, golden murals, and breathtaking 360-degree panoramic ocean views.",
-    "photoUrl": "/destinations/dest-136.jpg",
+    "photoUrl": "/destinations/dest-155.jpg",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "addressKh": "លើកំពូលភ្នំក្រុងព្រះសីហនុ សង្កាត់លេខ ៣",
@@ -5666,7 +5664,7 @@
     ],
     "isFeatured": false,
     "galleryPhotos": [
-      "/destinations/dest-136.jpg"
+      "/destinations/dest-155.jpg"
     ],
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
@@ -8498,7 +8496,7 @@
     "categoryEn": "Mountains & Caves",
     "descriptionKh": "ភ្នំខ្នងក្រពើជាខ្នងភ្នំជាប់នឹងភ្នំខ្នងផ្សារ មានរាងដូចខ្នងសត្វក្រពើយក្ស សម្បូរដោយវាលស្មៅបៃតងស្រស់ស្អាត ផ្កាព្រៃចម្រុះពណ៌ និងចំណុចគយគន់ទេសភាពជួរភ្នំក្រវាញ ៣៦០ ដឺក្រេ។",
     "descriptionEn": "A majestic high-altitude ridge adjacent to Knong Phsar resembling a giant crocodile back, covered in undulating grasslands, wild orchids, and 360-degree mountain vistas.",
-    "photoUrl": "/destinations/dest-58.jpg",
+    "photoUrl": "",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
     "addressKh": "ជួរភ្នំក្រវាញ ស្រុកឱរ៉ាល់ ខេត្តកំពង់ស្ពឺ",
@@ -8519,9 +8517,7 @@
       "បទពិសោធន៍ដើរភ្នំផ្សងព្រេងបែបធម្មជាតិ"
     ],
     "isFeatured": false,
-    "galleryPhotos": [
-      "/destinations/dest-58.jpg"
-    ],
+    "galleryPhotos": [],
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"

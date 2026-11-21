@@ -33,7 +33,7 @@ interface FoodImageModalProps {
   isKm: boolean;
 }
 
-// Preserve original resolution & quality and apply the "Cambodia Flavors & Tourism" watermark once
+// Preserve original resolution & quality and apply the "Cambodia Travel Guide" watermark once
 const compressImageFile = async (
   file: File,
   maxWidth = 2400,

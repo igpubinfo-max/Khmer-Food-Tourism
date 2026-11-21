@@ -284,10 +284,10 @@ export const AiTripPlannerModal: React.FC = () => {
     const provLabel = translateProvince(generatedPlan.provinceKh, language);
     const text =
       language === 'km'
-        ? `ផែនការដើរលេង AI នៅ${generatedPlan.provinceKh} (${generatedPlan.durationDays} ថ្ងៃ)\nដំណើរកម្សាន្ត៖ ${generatedPlan.companion}\nរសជាតិ និងទេសចរណ៍កម្ពុជា — Cambodia Flavors & Tourism`
+        ? `ផែនការដើរលេង AI នៅ${generatedPlan.provinceKh} (${generatedPlan.durationDays} ថ្ងៃ)\nដំណើរកម្សាន្ត៖ ${generatedPlan.companion}\nមគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា — Cambodia Travel Guide`
         : language === 'zh'
-        ? `AI 智能行程规划：${provLabel}（${generatedPlan.durationDays}天）\n出行方式：${generatedPlan.companion}\n柬埔寨风味与旅游 — Cambodia Flavors & Tourism`
-        : `AI Trip Plan in ${provLabel} (${generatedPlan.durationDays} Days)\nCompanion: ${generatedPlan.companion}\nPlanned with Cambodia Flavors & Tourism`;
+        ? `AI 智能行程规划：${provLabel}（${generatedPlan.durationDays}天）\n出行方式：${generatedPlan.companion}\n柬埔寨风味与旅游 — Cambodia Travel Guide`
+        : `AI Trip Plan in ${provLabel} (${generatedPlan.durationDays} Days)\nCompanion: ${generatedPlan.companion}\nPlanned with Cambodia Travel Guide`;
 
     if (navigator.share) {
       navigator.share({ title: 'AI Trip Plan', text }).catch(() => {});

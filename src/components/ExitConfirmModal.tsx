@@ -24,14 +24,14 @@ export const ExitConfirmModal: React.FC = () => {
         </div>
 
         <h3 className="text-lg font-bold font-khmer text-[#0F172A] dark:text-white mb-1 leading-snug">
-          {tr(language, 'តើអ្នកចង់ចាកចេញពីកម្មវិធីមែនទេ?', 'Exit Cambodia Flavors & Tourism?', '确认退出探索柬埔寨？')}
+          {tr(language, 'តើអ្នកចង់ចាកចេញពីកម្មវិធីមែនទេ?', 'Exit Cambodia Travel Guide?', '确认退出探索柬埔寨？')}
         </h3>
 
         <p className="text-xs text-slate-500 dark:text-slate-400 font-khmer mb-6">
           {tr(
             language,
-            'សូមជ្រើសរើស "បាទ/ចាស" ដើម្បីចាកចេញ ឬ "បន្តប្រើប្រាស់" ដើម្បីបន្តរសជាតិ និងទេសចរណ៍កម្ពុជា។',
-            'Are you sure you want to close Cambodia Flavors & Tourism?',
+            'សូមជ្រើសរើស "បាទ/ចាស" ដើម្បីចាកចេញ ឬ "បន្តប្រើប្រាស់" ដើម្បីបន្តមគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា។',
+            'Are you sure you want to close Cambodia Travel Guide?',
             '点击“退出”关闭应用，或点击“继续浏览”继续柬埔寨风味与旅游。'
           )}
         </p>

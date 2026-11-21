@@ -6,7 +6,7 @@ export interface IconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 /**
- * Handcrafted UI/UX Designer Icon System for Cambodia Flavors & Tourism
+ * Handcrafted UI/UX Designer Icon System for Cambodia Travel Guide
  * Designed on a precision 24x24 optical grid with 1.85px rounded strokes
  * and subtle layered duotone accents (0.16 opacity) for visual depth.
  */

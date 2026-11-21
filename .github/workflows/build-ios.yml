@@ -235,7 +235,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           tag_name: v2.7.0
-          name: "Cambodia Flavors & Tourism v2.7.0"
+          name: "Cambodia Travel Guide v2.7.0"
           make_latest: true
           draft: false
           prerelease: false

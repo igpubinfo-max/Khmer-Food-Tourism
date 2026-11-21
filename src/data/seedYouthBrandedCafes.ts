@@ -1,4 +1,4 @@
-// Cambodia Flavors & Tourism - 30 Curated Branded Cafes, Boba Tea Houses & Viral Youth Hangouts
+// Cambodia Travel Guide - 30 Curated Branded Cafes, Boba Tea Houses & Viral Youth Hangouts
 // Verified Cambodia Locations & Official Google Maps Place IDs (Zero Fake Ratings/Reviews)
 import { Restaurant } from '../types';
 

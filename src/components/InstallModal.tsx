@@ -58,8 +58,8 @@ export const InstallModal: React.FC = () => {
           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
             {tr(
               language,
-              'ដើម្បីសុវត្ថិភាពគណនី និងទទួលបានកំណែអាប់ដេតផ្លូវការ សូមទាញយក និងដំឡើងកម្មវិធី «រសជាតិ និងទេសចរណ៍កម្ពុជា» ពី Google Play Store។',
-              'For your security and automatic updates, please download and install Cambodia Flavors & Tourism from the official Google Play Store.',
+              'ដើម្បីសុវត្ថិភាពគណនី និងទទួលបានកំណែអាប់ដេតផ្លូវការ សូមទាញយក និងដំឡើងកម្មវិធី «មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា» ពី Google Play Store។',
+              'For your security and automatic updates, please download and install Cambodia Travel Guide from the official Google Play Store.',
               '为保障账户安全并获取官方自动更新，请通过 Google Play 官方商店下载并安装“柬埔寨风味与旅游”。'
             )}
           </p>

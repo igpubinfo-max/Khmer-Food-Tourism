@@ -41,7 +41,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
         {/* Clean artwork background (768x1024 = 3:4) */}
         <img
           src={WELCOME_IMAGES.hero.src}
-          alt="Cambodia Flavors & Tourism Welcome"
+          alt="Cambodia Travel Guide Welcome"
           width={WELCOME_IMAGES.hero.width}
           height={WELCOME_IMAGES.hero.height}
           fetchPriority="high"
@@ -64,7 +64,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
         >
           <img
             src={WELCOME_IMAGES.logo}
-            alt="Cambodia Flavors & Tourism Logo"
+            alt="Cambodia Travel Guide Logo"
             className="w-full h-full object-contain drop-shadow-[0_0_16px_rgba(250,204,21,0.75)]"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = WELCOME_IMAGES.logoFallback;
@@ -98,7 +98,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
               textShadow: '0 2px 8px rgba(0, 15, 40, 0.95)',
             }}
           >
-            {language === 'en' ? 'រសជាតិ និងទេសចរណ៍កម្ពុជា' : 'Cambodia Flavors & Tourism'}
+            {language === 'en' ? 'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា' : 'Cambodia Travel Guide'}
           </p>
         </div>
 

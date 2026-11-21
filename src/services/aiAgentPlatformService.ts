@@ -1384,9 +1384,9 @@ export function tryExecuteAiAgentTurn(params: {
             )
           : tr(
               language,
-              `🏨 បង្ហាញសណ្ឋាគារ និងរីសតពេញនិយមក្នុងប្រព័ន្ធ Cambodia Flavors & Tourism (អាចចុចមើលទីតាំងលើផែនទីផ្ទាល់)៖`,
-              `🏨 Top verified hotels & resorts in Cambodia Flavors & Tourism (tap any hotel for details or Google Maps):`,
-              `🏨 为您推荐 Cambodia Flavors & Tourism 热门核实酒店与度假村：`
+              `🏨 បង្ហាញសណ្ឋាគារ និងរីសតពេញនិយមក្នុងប្រព័ន្ធ Cambodia Travel Guide (អាចចុចមើលទីតាំងលើផែនទីផ្ទាល់)៖`,
+              `🏨 Top verified hotels & resorts in Cambodia Travel Guide (tap any hotel for details or Google Maps):`,
+              `🏨 为您推荐 Cambodia Travel Guide 热门核实酒店与度假村：`
             ),
       followUpChips: [
         {

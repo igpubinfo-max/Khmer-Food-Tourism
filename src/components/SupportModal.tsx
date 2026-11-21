@@ -96,7 +96,7 @@ export const SupportModal: React.FC = () => {
             </div>
             <div>
               <h2 className="text-xl font-bold font-khmer text-white">
-                {tr(language, 'គាំទ្រការអភិវឌ្ឍន៍កម្មវិធី', 'Support Cambodia Flavors & Tourism', '支持应用开发')}
+                {tr(language, 'គាំទ្រការអភិវឌ្ឍន៍កម្មវិធី', 'Support Cambodia Travel Guide', '支持应用开发')}
               </h2>
               <p className="text-xs text-emerald-200 font-khmer">
                 {tr(language, 'ការចូលរួមគាំទ្រដោយស្ម័គ្រចិត្តតាមរយៈ Bakong KHQR', 'Voluntary contribution via Bakong KHQR', '通过 Bakong KHQR 自愿支持')}
@@ -116,8 +116,8 @@ export const SupportModal: React.FC = () => {
               <p className="text-[#0F172A]/80 mt-0.5 leading-relaxed">
                 {tr(
                   language,
-                  'នេះជា QR Code សម្រាប់ការចូលរួមគាំទ្រដោយស្ម័គ្រចិត្តដល់កម្មវិធី «រសជាតិ និងទេសចរណ៍កម្ពុជា» ប៉ុណ្ណោះ ដោយដាច់ដោយឡែកពី QR Code ទាញយកកម្មវិធី។',
-                  'This QR code is strictly for voluntary contributions to support Cambodia Flavors & Tourism, separate from the app download QR code.',
+                  'នេះជា QR Code សម្រាប់ការចូលរួមគាំទ្រដោយស្ម័គ្រចិត្តដល់កម្មវិធី «មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា» ប៉ុណ្ណោះ ដោយដាច់ដោយឡែកពី QR Code ទាញយកកម្មវិធី។',
+                  'This QR code is strictly for voluntary contributions to support Cambodia Travel Guide, separate from the app download QR code.',
                   '此二维码仅用于自愿支持“柬埔寨风味与旅游”的持续开发与维护，与应用下载二维码完全独立。'
                 )}
               </p>

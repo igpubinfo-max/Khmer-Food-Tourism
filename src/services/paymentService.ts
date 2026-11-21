@@ -1,4 +1,4 @@
-// Cambodia Flavors & Tourism — Secure Payment & Subscription Verification Service
+// Cambodia Travel Guide — Secure Payment & Subscription Verification Service
 // Google Play Billing + KHQR/Bakong + Credit Card Integration with Server-Side Verification Proofs
 
 import {

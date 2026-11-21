@@ -242,9 +242,9 @@ export function buildWelcomeAssistantMessage(
     intent: 'welcome',
     text: tr(
       language,
-      `សួស្តី! ខ្ញុំជាជំនួយការឆ្លាតវៃ AI Agent នៃកម្មវិធី «រសជាតិ និងទេសចរណ៍កម្ពុជា» (Cambodia Flavors & Tourism)។ សួរខ្ញុំជាភាសាខ្មែរ អង់គ្លេស ឬចិនបានគ្រប់ពេល៖\n• 🍽️ ណែនាំម្ហូបខ្មែរ (${foodCount}+ មុខ) រូបមន្ត វិធីចម្អិន និងថតរូបម្ហូបដើម្បីសម្គាល់ឈ្មោះ\n• 🏪 ស្វែងរកហាងអាហារ ហាងកាហ្វេ (${shopCount}+ ហាង) សណ្ឋាគារ និងផ្លូវទៅលើ Google Maps\n• 🗺️ រៀបចំផែនការដើរលេង (${placeTotal}+ តំបន់) គណនាថវិកា • 🥗 វិភាគកាឡូរី និងអាហារូបត្ថម្ភ • 🔥 វីដេអូម្ហូបកំពុងល្បី`,
-      `Hello! I am your Cambodia Flavors & Tourism Smart AI Agent. Ask me in Khmer, English, or Chinese:\n• 🍽️ Cambodian & regional dish recommendations (${foodCount}+ dishes), recipes & photo identification\n• 🏪 Verified restaurants, coffee shops (${shopCount}+ listings), hotels & Google Maps directions\n• 🗺️ Custom travel itineraries (${placeTotal}+ places) & budgets • 🥗 Calorie & nutrition analysis • 🔥 Trending food videos`,
-      `您好！我是「柬埔寨风味与旅游」(Cambodia Flavors & Tourism) 智能 AI 助手，支持高棉语、英语与中文：\n• 🍽️ 美食推荐（${foodCount}+ 道核实菜品）、食谱做法与拍照识菜\n• 🏪 查找核实餐厅、咖啡馆（${shopCount}+ 家）、酒店住宿与 Google 地图导航\n• 🗺️ 智能旅行行程与预算规划（${placeTotal}+ 个景点）• 🥗 热量与营养估算 • 🔥 热门探店视频`
+      `សួស្តី! ខ្ញុំជាជំនួយការឆ្លាតវៃ AI Agent នៃកម្មវិធី «មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា» (Cambodia Travel Guide)។ សួរខ្ញុំជាភាសាខ្មែរ អង់គ្លេស ឬចិនបានគ្រប់ពេល៖\n• 🍽️ ណែនាំម្ហូបខ្មែរ (${foodCount}+ មុខ) រូបមន្ត វិធីចម្អិន និងថតរូបម្ហូបដើម្បីសម្គាល់ឈ្មោះ\n• 🏪 ស្វែងរកហាងអាហារ ហាងកាហ្វេ (${shopCount}+ ហាង) សណ្ឋាគារ និងផ្លូវទៅលើ Google Maps\n• 🗺️ រៀបចំផែនការដើរលេង (${placeTotal}+ តំបន់) គណនាថវិកា • 🥗 វិភាគកាឡូរី និងអាហារូបត្ថម្ភ • 🔥 វីដេអូម្ហូបកំពុងល្បី`,
+      `Hello! I am your Cambodia Travel Guide Smart AI Agent. Ask me in Khmer, English, or Chinese:\n• 🍽️ Cambodian & regional dish recommendations (${foodCount}+ dishes), recipes & photo identification\n• 🏪 Verified restaurants, coffee shops (${shopCount}+ listings), hotels & Google Maps directions\n• 🗺️ Custom travel itineraries (${placeTotal}+ places) & budgets • 🥗 Calorie & nutrition analysis • 🔥 Trending food videos`,
+      `您好！我是「柬埔寨风味与旅游」(Cambodia Travel Guide) 智能 AI 助手，支持高棉语、英语与中文：\n• 🍽️ 美食推荐（${foodCount}+ 道核实菜品）、食谱做法与拍照识菜\n• 🏪 查找核实餐厅、咖啡馆（${shopCount}+ 家）、酒店住宿与 Google 地图导航\n• 🗺️ 智能旅行行程与预算规划（${placeTotal}+ 个景点）• 🥗 热量与营养估算 • 🔥 热门探店视频`
     ),
     followUpChips: mergedChips,
   };

@@ -5442,7 +5442,7 @@ export async function syncAllAppDataWithSupabase(localState: {
  * SQL Script for 1-Click Setup in Supabase SQL Editor (Free Tier)
  */
 export const SUPABASE_SETUP_SQL = `-- ============================================================================
--- Cambodia Flavors & Tourism (v2.7.0) — Hardened Supabase Cloud Database Setup
+-- Cambodia Travel Guide (v2.7.0) — Hardened Supabase Cloud Database Setup
 -- Copy and Run this in your Supabase Dashboard -> SQL Editor -> New Query
 -- (See supabase/migrations/ for the full multi-layer trigger & RLS migrations)
 -- ============================================================================

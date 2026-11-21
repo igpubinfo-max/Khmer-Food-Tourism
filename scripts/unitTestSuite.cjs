@@ -28,7 +28,7 @@ function test(name, fn) {
   }
 }
 
-console.log('=== Cambodia Flavors & Tourism — Unit Test Suite (CHG-16) ===');
+console.log('=== Cambodia Travel Guide — Unit Test Suite (CHG-16) ===');
 
 test('1. Centralized appConstants.ts exports official Supabase & ABA constants (CHG-19)', () => {
   const content = fs.readFileSync(path.join(ROOT, 'src/config/appConstants.ts'), 'utf8');

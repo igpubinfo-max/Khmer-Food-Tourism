@@ -2,7 +2,7 @@
 
 const config: CapacitorConfig = {
   appId: 'com.khmerfood.tourism',
-  appName: 'Cambodia Flavors & Tourism',
+  appName: 'Cambodia Travel Guide',
   webDir: 'dist',
   ios: {
     contentInset: 'automatic',

@@ -1787,7 +1787,7 @@ export const UpgradeVipModal: React.FC = () => {
         {/* Modal Footer / Prominent App Version Bar */}
         <div className="px-4 py-1.5 bg-[#1E293B] border-t border-slate-700/80 flex items-center justify-between text-[11px] text-slate-300 font-mono shrink-0">
           <span className="font-semibold text-slate-300">
-            {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨美食与旅游')} {APP_VERSION} ({APP_BUILD_CODE})
+            {tr(language, 'មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា', 'Cambodia Travel Guide', '柬埔寨美食与旅游')} {APP_VERSION} ({APP_BUILD_CODE})
           </span>
           <a
             href="/privacy-policy.html"

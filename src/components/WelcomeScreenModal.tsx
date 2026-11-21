@@ -27,7 +27,7 @@ interface WelcomeScreenModalProps {
 /**
  * Angkor Wat & AI Robot Welcome Screen shown once per app session:
  * - Language selection (ខ្មែរ | EN | 中文)
- * - App Logo & Title (រសជាតិ និងទេសចរណ៍កម្ពុជា / Cambodia Flavors & Tourism)
+ * - App Logo & Title (មគ្គុទ្ទេសក៍ទេសចរណ៍កម្ពុជា / Cambodia Travel Guide)
  * - 4 Feature Tiles (ម្ហូបខ្មែរ, ទេសចរណ៍, ចំណូលចិត្ត, ផែនទី)
  * - AI Food & Travel Assistant bar + 3 Quick Actions (សុខភាព និងអាហារូបត្ថម្ភ, មុខម្ហូបគួរឱ្យចង់ញ៉ាំថ្ងៃនេះ, ស្វែងរកទីកន្លែងដើរលេងសម្រាប់ថ្ងៃនេះ)
  * - "ចាប់ផ្តើមប្រើប្រាស់ >" CTA button + "ប្រើបានទោះគ្មានអ៊ីនធឺណិត" offline badge
