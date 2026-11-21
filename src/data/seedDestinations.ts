@@ -4,8 +4,13 @@ import { destPart2 } from './seedDestPart2';
 import { sportsAndSouvenirsDestinations } from './seedSportsAndSouvenirs';
 import { loadRacCambodiaTourDestinations } from './seedRacCambodiaTourDestinations';
 import { loadSeedHotels100 } from './seedHotels100';
+import { dedupeSharedSeedPhotos } from '../utils/dedupeSharedSeedPhotos';
 
-const baseSeedDestinations: TouristDestination[] = [...destPart1, ...destPart2, ...sportsAndSouvenirsDestinations];
+const baseSeedDestinations: TouristDestination[] = dedupeSharedSeedPhotos([
+  ...destPart1,
+  ...destPart2,
+  ...sportsAndSouvenirsDestinations,
+]);
 
 export const initial100Destinations: TouristDestination[] = [
   ...baseSeedDestinations,
