@@ -24,11 +24,11 @@ const BottomNavInner: React.FC = () => {
     icon: React.ComponentType<{ className?: string }>;
   }> = [
     { id: 'home', labelKh: 'ទំព័រដើម', labelEn: 'Home', labelZh: '首页', icon: IconNavHome },
+    { id: 'tourism', labelKh: 'ទេសចរណ៍', labelEn: 'Tourism', labelZh: '景点', icon: IconNavTourism },
     { id: 'food', labelKh: 'មុខម្ហូប', labelEn: 'Food', labelZh: '美食', icon: IconNavFood },
+    { id: 'guide', labelKh: 'ដំណើរកម្ពុជា', labelEn: 'Travel guide', labelZh: '旅行指南', icon: IconNavGuide },
     { id: 'restaurants', labelKh: 'ហាងអាហារ', labelEn: 'Shop', labelZh: '餐厅', icon: IconNavShop },
     { id: 'hotels', labelKh: 'សណ្ឋាគារ', labelEn: 'Hotel', labelZh: '酒店', icon: IconNavHotel },
-    { id: 'tourism', labelKh: 'ទេសចរណ៍', labelEn: 'Tourism', labelZh: '景点', icon: IconNavTourism },
-    { id: 'guide', labelKh: 'មគ្គុទ្ទេសក៍', labelEn: 'Guide', labelZh: '指南', icon: IconNavGuide },
   ];
 
   const activeIndex = navItems.findIndex((item) => item.id === activeTab);

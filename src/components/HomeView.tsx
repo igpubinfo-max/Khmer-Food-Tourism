@@ -19,6 +19,7 @@ import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } fro
 import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import { HomeSkeleton } from './home/HomeStates';
 import { FeatureGrid } from './home/FeatureGrid';
+import { HomeTravelGuideCard } from './HomeTravelGuideCard';
 import { HomePopularAndSocialSection } from './home/HomePopularAndSocialSection';
 import { IconNavFood, IconNavShop, IconNavTourism, IconMapRoute } from './icons/HandcraftedIcons';
 import { ShopAvatar } from './icons/DefaultShopIcon';
@@ -430,6 +431,7 @@ export const HomeView: React.FC = () => {
   }, [setActiveTab]);
   const handleSeeAllRestaurants = useCallback(() => setActiveTab('restaurants'), [setActiveTab]);
   const handleSeeAllTourism = useCallback(() => setActiveTab('tourism'), [setActiveTab]);
+  const handleOpenTravelGuide = useCallback(() => setActiveTab('guide'), [setActiveTab]);
   const handleExploreAllTrending = useCallback(() => setIsTrendingSocialModalOpen(true), [setIsTrendingSocialModalOpen]);
 
   const handleHomeAskAi = useCallback(
@@ -993,6 +995,8 @@ export const HomeView: React.FC = () => {
                   onSmartAiAssistant={handleSmartAiAssistant}
                 />
 
+                <HomeTravelGuideCard language={language} onOpen={handleOpenTravelGuide} />
+
                 {/* 2. Popular Dishes + 2 Feature Banners + [TikTok] [Facebook] [YouTube] Reviews */}
                 <HomePopularAndSocialSection
                   language={language}
@@ -1203,6 +1207,8 @@ export const HomeView: React.FC = () => {
                 onMapNavigation={handleMapNavigation}
                 onSmartAiAssistant={handleSmartAiAssistant}
               />
+
+              <HomeTravelGuideCard language={language} onOpen={handleOpenTravelGuide} />
 
               {/* 2. Popular Dishes + 2 Feature Banners + [TikTok] [Facebook] [YouTube] Reviews */}
               <HomePopularAndSocialSection

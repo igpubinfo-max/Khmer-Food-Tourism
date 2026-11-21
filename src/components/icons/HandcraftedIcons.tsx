@@ -208,11 +208,12 @@ export const IconNavTourism: React.FC<IconProps> = ({ className = 'w-5 h-5', ...
   </svg>
 );
 
-/** Bottom Nav 5: Guide & Safety — Travel handbook with shield emblem */
+/** Bottom Nav: Travel guide — open book with a small compass-style pin (reads as a guidebook, not security) */
 export const IconNavGuide: React.FC<IconProps> = ({ className = 'w-5 h-5', ...props }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.85} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
-    <path d="M12 3.5 19 6.5v5.5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6.5l7-3Z" fill="currentColor" fillOpacity={0.15} />
-    <path d="m9.5 12 1.8 1.8 3.5-3.6" />
+    <path d="M3.5 5.5c2.9-.9 5.6-.7 8.5 1v13c-2.9-1.7-5.6-1.9-8.5-1v-13Z" fill="currentColor" fillOpacity={0.15} />
+    <path d="M20.5 5.5c-2.9-.9-5.6-.7-8.5 1v13c2.9-1.7 5.6-1.9 8.5-1v-13Z" fill="currentColor" fillOpacity={0.15} />
+    <path d="M12 6.5v13" />
   </svg>
 );
 
